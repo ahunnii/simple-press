@@ -141,8 +141,8 @@ export function ProductsTable({ products }: Props) {
     <div className="space-y-2">
       {/* ── Bulk action toolbar ── */}
       {selectedCount > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-2 shadow-sm">
-          <span className="text-sm font-medium text-foreground">
+        <div className="bg-card flex items-center gap-3 rounded-lg border px-4 py-2 shadow-sm">
+          <span className="text-foreground text-sm font-medium">
             {selectedCount} selected
           </span>
           <div className="ml-auto flex items-center gap-2">
@@ -204,24 +204,39 @@ export function ProductsTable({ products }: Props) {
                     aria-label="Select all products on this page"
                   />
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                <th
+                  scope="col"
+                  className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                >
                   Product
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                <th
+                  scope="col"
+                  className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                >
                   Status
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                <th
+                  scope="col"
+                  className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                >
                   Price
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                <th
+                  scope="col"
+                  className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                >
                   Variants
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                <th
+                  scope="col"
+                  className="text-muted-foreground px-6 py-3 text-right text-xs font-medium tracking-wider uppercase"
+                >
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border bg-card">
+            <tbody className="divide-border bg-card divide-y">
               {products.map((product) => {
                 let displayPrice = "N/A";
                 if (
@@ -259,7 +274,7 @@ export function ProductsTable({ products }: Props) {
                       <Link href={`/admin/products/${product.id}`}>
                         <div className="flex items-center">
                           {product.images[0] ? (
-                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
+                            <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
                               <Image
                                 src={product.images[0].url}
                                 alt={product.images[0].altText ?? product.name}
@@ -269,17 +284,17 @@ export function ProductsTable({ products }: Props) {
                               />
                             </div>
                           ) : (
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted">
-                              <span className="text-xs text-muted-foreground">
+                            <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded">
+                              <span className="text-muted-foreground text-xs">
                                 No img
                               </span>
                             </div>
                           )}
                           <div className="ml-4">
-                            <div className="font-medium text-foreground">
+                            <div className="text-foreground font-medium">
                               {product.name}
                             </div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="text-muted-foreground text-sm">
                               {product.slug}
                             </div>
                           </div>
@@ -293,10 +308,10 @@ export function ProductsTable({ products }: Props) {
                         <Badge variant="secondary">Draft</Badge>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
+                    <td className="text-foreground px-6 py-4 text-sm whitespace-nowrap">
                       {displayPrice}
                     </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+                    <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                       {product._count.variants > 0
                         ? `${product._count.variants} variant${product._count.variants !== 1 ? "s" : ""}`
                         : "No variants"}
@@ -306,7 +321,9 @@ export function ProductsTable({ products }: Props) {
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
                             <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Actions for {product.name}</span>
+                            <span className="sr-only">
+                              Actions for {product.name}
+                            </span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -377,7 +394,9 @@ export function ProductsTable({ products }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDelete.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkDelete.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={bulkDelete.isPending}

@@ -53,6 +53,7 @@ export type CreateOrderParams = {
   fullSession: Stripe.Checkout.Session;
   verifiedDiscountCodeId: string | null;
   discountAmount: number;
+  deliveryMethod?: "ship" | "pickup";
 };
 
 /**
@@ -77,6 +78,7 @@ export async function createOrderFromCheckout(
     fullSession,
     verifiedDiscountCodeId,
     discountAmount,
+    deliveryMethod = "ship",
   } = params;
 
   // Generate order number and create order. Retry up to 3 times on a
@@ -121,6 +123,8 @@ export async function createOrderFromCheckout(
             status: "open",
             paymentStatus: session.payment_status ?? "paid",
             fulfillmentStatus: "unfulfilled",
+
+            deliveryMethod,
 
             // Stripe reference
             stripeSessionId: session.id,

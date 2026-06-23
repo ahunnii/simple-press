@@ -2,35 +2,26 @@
 
 import Link from "next/link";
 
-import { api } from "~/trpc/react";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { BannerConfig } from "~/lib/validators/site-banner";
+import {
+  BannerDismissButton,
+  DismissibleBanner,
+} from "~/components/site-banner/dismissible-banner";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-/**
- * ViiAnnouncementBar
- *
- * Two-tier approach:
- *  1. If an active discount banner exists, show it (same pattern as NoiseAnnouncementBar).
- *  2. Otherwise, show the owner-configured announcement text + link that was
- *     pre-resolved server-side in ViiLayout and passed as props.
- *
- * The `announcementText`, `announcementLinkText`, and `announcementLinkHref`
- * props let the layout pass already-resolved field values rather than making
- * an additional client-side tRPC call.
- */
 type ViiAnnouncementBarProps = {
-  businessId: string;
-  announcementText?: string;
-  announcementLinkText?: string;
-  announcementLinkHref?: string;
+  banner: BannerConfig;
 };
 
-const barStyle: React.CSSProperties = {
+const barBaseStyle: React.CSSProperties = {
   background: "var(--vii-navy)",
   color: "var(--vii-cream)",
-  display: "flex",
+  display: "grid",
+  gridTemplateColumns: "1fr auto auto",
   alignItems: "center",
-  justifyContent: "center",
   gap: "12px",
-  padding: "10px 16px",
+  padding: "10px 12px 10px 16px",
   minHeight: "38px",
   fontFamily: "var(--font-sans)",
   fontSize: "12px",
@@ -45,88 +36,72 @@ const linkStyle: React.CSSProperties = {
   fontSize: "11px",
   letterSpacing: "0.14em",
   transition: "opacity 0.2s",
+  flexShrink: 0,
+  whiteSpace: "nowrap",
 };
 
-export function ViiAnnouncementBar({
-  businessId: _,
-  announcementText,
-  announcementLinkText = "Learn More",
-  announcementLinkHref = "/contact",
-}: ViiAnnouncementBarProps) {
-  const { data: discountBanner, isLoading } =
-    api.discount.getActiveBanner.useQuery(undefined, { staleTime: 60_000 });
+export function ViiAnnouncementBar({ banner }: ViiAnnouncementBarProps) {
+  const isExternal = banner.linkUrl
+    ? /^https?:\/\//i.test(banner.linkUrl)
+    : false;
 
-  // While discount query resolves, render nothing to avoid flash.
-  // (If there's announcement text we could show it immediately, but waiting a
-  // tick avoids layout shift from the discount banner potentially replacing it.)
-  if (isLoading) return null;
+  const inlineStyle: React.CSSProperties = {
+    ...barBaseStyle,
+    ...(banner.bgColor ? { background: banner.bgColor } : {}),
+    ...(banner.textColor ? { color: banner.textColor } : {}),
+  };
 
-  // ── Priority 1: active discount banner ─────────────────────────────────────
-  if (discountBanner) {
-    const rawHref = discountBanner.bannerLinkUrl?.trim();
-    const href = rawHref && rawHref.length > 0 ? rawHref : "/shop";
-    const isExternal = /^https?:\/\//i.test(href);
-
-    return (
-      <div
-        className="vii-announcement-bar"
-        role="region"
-        aria-label="Promotion"
-        data-announcement-bar
-        style={barStyle}
-      >
-        <span>
-          {discountBanner.bannerText}
-          {" · Code: "}
-          <strong>{discountBanner.code}</strong>
-        </span>
-        {isExternal ? (
-          <a
-            href={href}
-            style={linkStyle}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Shop →<span className="sr-only">(opens in new tab)</span>
-          </a>
-        ) : (
-          <Link href={href} style={linkStyle}>
-            Shop →
-          </Link>
-        )}
-      </div>
-    );
-  }
-
-  // ── Priority 2: owner-configured announcement text ─────────────────────────
-  if (!announcementText) return null;
-
-  const isExternal = /^https?:\/\//i.test(announcementLinkHref);
+  const resolvedLinkStyle: React.CSSProperties = {
+    ...linkStyle,
+    ...(banner.textColor ? { color: banner.textColor } : {}),
+  };
 
   return (
-    <div
-      className="vii-announcement-bar"
-      role="region"
-      aria-label="Announcement"
-      data-announcement-bar
-      style={barStyle}
-    >
-      <span>{announcementText}</span>
-      {isExternal ? (
-        <a
-          href={announcementLinkHref}
-          style={linkStyle}
-          target="_blank"
-          rel="noopener noreferrer"
+    <DismissibleBanner version={banner.version}>
+      {(dismiss) => (
+        <div
+          className="vii-announcement-bar"
+          data-announcement-bar
+          style={inlineStyle}
         >
-          {announcementLinkText} →
-          <span className="sr-only">(opens in new tab)</span>
-        </a>
-      ) : (
-        <Link href={announcementLinkHref} style={linkStyle}>
-          {announcementLinkText} →
-        </Link>
+          {/* Rich-text message — center column spans leftward */}
+          <div className="text-center">
+            {banner.content !== null && (
+              <TiptapRenderer
+                content={banner.content as TiptapJSON}
+                className="[&_p]:m-0"
+              />
+            )}
+          </div>
+
+          {/* Optional link */}
+          {banner.linkUrl ? (
+            isExternal ? (
+              <a
+                href={banner.linkUrl}
+                style={resolvedLinkStyle}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {banner.linkLabel ?? "Learn More"} →
+                <span className="sr-only"> (opens in new tab)</span>
+              </a>
+            ) : (
+              <Link href={banner.linkUrl} style={resolvedLinkStyle}>
+                {banner.linkLabel ?? "Learn More"} →
+              </Link>
+            )
+          ) : (
+            <span />
+          )}
+
+          {/* Dismiss button — right edge */}
+          <BannerDismissButton
+            dismiss={dismiss}
+            className="flex items-center justify-center rounded p-1.5 opacity-60 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-current focus-visible:outline-none"
+          />
+        </div>
       )}
-    </div>
+    </DismissibleBanner>
   );
 }

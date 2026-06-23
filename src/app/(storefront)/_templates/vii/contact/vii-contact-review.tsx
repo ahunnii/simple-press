@@ -56,7 +56,7 @@ export function ViiContactReview({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 680, margin: "0 auto" }}
       >
         <h2

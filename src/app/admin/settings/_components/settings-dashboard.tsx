@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { getHubCards } from "~/app/admin/_lib/admin-nav";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 
 const settingsCards = getHubCards("settings");
 
@@ -44,11 +45,20 @@ const borderMap: Record<string, string> = {
   red: "hover:border-red-500",
 };
 
-export function SettingsDashboard() {
+export function SettingsDashboard({
+  flags,
+}: {
+  flags: Record<string, boolean>;
+}) {
+  const { isEnabled } = useFeatureFlags({ flags });
+  const visibleCards = settingsCards.filter(
+    (card) => !card.featureKey || isEnabled(card.featureKey),
+  );
+
   return (
     <>
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {settingsCards.map((card) => {
+        {visibleCards.map((card) => {
           const bg = bgMap[card.color] ?? "bg-slate-100";
           const text = textMap[card.color] ?? "text-slate-600";
           const border = borderMap[card.color] ?? "hover:border-slate-500";
@@ -71,7 +81,7 @@ export function SettingsDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{card.body}</p>
+                  <p className="text-muted-foreground text-sm">{card.body}</p>
                 </CardContent>
               </Card>
             </Link>

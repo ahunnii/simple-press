@@ -108,6 +108,9 @@ export async function POST(req: NextRequest) {
             domainStatus: true,
             name: true,
             ownerEmail: true,
+            pickupLocation: true,
+            pickupInstructions: true,
+            businessAddress: true,
             siteContent: {
               select: {
                 logoUrl: true,
@@ -273,6 +276,9 @@ export async function POST(req: NextRequest) {
           verifiedDiscountCodeId = dc?.id ?? null;
         }
 
+        const deliveryMethod =
+          session.metadata?.deliveryMethod === "pickup" ? "pickup" : "ship";
+
         const order = await createOrderFromCheckout(db, {
           business,
           customer,
@@ -282,6 +288,7 @@ export async function POST(req: NextRequest) {
           fullSession,
           verifiedDiscountCodeId,
           discountAmount,
+          deliveryMethod,
         });
 
         // orderNumber is used by the inventory-deduction block below for log
@@ -871,6 +878,17 @@ export async function POST(req: NextRequest) {
               discount: order.discount,
               total: order.total,
               shippingAddress: shippingAddressForEmail,
+              deliveryMethod: order.deliveryMethod as "ship" | "pickup",
+              ...(order.deliveryMethod === "pickup"
+                ? {
+                    pickupLocation:
+                      business.pickupLocation ??
+                      business.businessAddress ??
+                      undefined,
+                    pickupInstructions:
+                      business.pickupInstructions ?? undefined,
+                  }
+                : {}),
               business: {
                 name: business.name,
                 ownerEmail: business.ownerEmail,
@@ -916,6 +934,7 @@ export async function POST(req: NextRequest) {
             tax: order.tax,
             discount: order.discount,
             total: order.total,
+            deliveryMethod: order.deliveryMethod as "ship" | "pickup",
             business: {
               name: business.name,
               siteContent: business.siteContent,

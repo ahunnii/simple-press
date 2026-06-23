@@ -11,7 +11,10 @@ export function ElegantAddressBookPage({
 }: AccountAddressBookPageProps) {
   return (
     <ElegantAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+      <AddressBookContent
+        customer={customer}
+        salesCountries={business.salesCountries}
+      />
     </ElegantAccountLayout>
   );
 }

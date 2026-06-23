@@ -403,7 +403,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Images ({images.length})</CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Drag and drop to reorder images
                   </p>
                 </CardHeader>
@@ -432,7 +432,7 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
                   </DndContext>
 
                   {images.length === 0 && (
-                    <div className="py-12 text-center text-muted-foreground">
+                    <div className="text-muted-foreground py-12 text-center">
                       <p>No images yet. Upload some to get started.</p>
                     </div>
                   )}

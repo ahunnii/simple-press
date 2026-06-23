@@ -59,14 +59,14 @@ export function SetupChecklist({
               {completedSteps} of {totalSteps} steps completed
             </CardDescription>
           </div>
-          <div className="text-2xl font-bold text-primary">
+          <div className="text-primary text-2xl font-bold">
             {Math.round(progress)}%
           </div>
         </div>
         {/* Progress Bar */}
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+        <div className="bg-muted mt-4 h-2 overflow-hidden rounded-full">
           <div
-            className="h-full bg-primary transition-all duration-500"
+            className="bg-primary h-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>

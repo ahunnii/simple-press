@@ -7,6 +7,7 @@ import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
@@ -65,6 +66,57 @@ export function EmailPreview({ business, sampleOrder }: Props) {
         businessName: business.name,
         businessLogoUrl: business.siteContent?.logoUrl ?? "",
         businessUrl: `https://${business.subdomain}.yourdomain.com`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOrderConfirmationPickup = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OrderConfirmationEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "Jane Smith",
+        items: sampleOrder?.items ?? [
+          {
+            productName: "Sample Product",
+            variantName: "Medium / Blue",
+            quantity: 1,
+            price: 4500,
+            total: 4500,
+          },
+        ],
+        subtotal: 4500,
+        shipping: 0,
+        tax: 405,
+        discount: 0,
+        total: 4905,
+        deliveryMethod: "pickup",
+        pickupLocation: "123 Main St, Detroit, MI 48201",
+        pickupInstructions:
+          "Please bring your order confirmation email.\nPickup hours: Mon–Fri 10am–6pm, Sat 11am–4pm.",
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        businessUrl: `https://${business.subdomain}.yourdomain.com`,
+      }),
+    );
+    setHtml(rendered);
+    setIsLoading(false);
+  };
+
+  const previewOrderReadyForPickup = async () => {
+    setIsLoading(true);
+    const rendered = await renderEmail(
+      OrderReadyForPickupEmail({
+        orderNumber: sampleOrder?.orderNumber ?? 1001,
+        customerName: "Jane Smith",
+        businessName: business.name,
+        businessLogoUrl: business.siteContent?.logoUrl ?? "",
+        businessUrl: `https://${business.subdomain}.yourdomain.com`,
+        pickupLocation: "123 Main St, Detroit, MI 48201",
+        pickupInstructions:
+          "Please bring your order confirmation email.\nPickup hours: Mon–Fri 10am–6pm, Sat 11am–4pm.",
       }),
     );
     setHtml(rendered);
@@ -296,6 +348,22 @@ export function EmailPreview({ business, sampleOrder }: Props) {
               Order Confirmation
             </Button>
             <Button
+              onClick={previewOrderConfirmationPickup}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Order Confirmation (pickup)
+            </Button>
+            <Button
+              onClick={previewOrderReadyForPickup}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              Ready for Pickup
+            </Button>
+            <Button
               onClick={previewOrderShipped}
               disabled={isLoading}
               variant="outline"
@@ -406,7 +474,7 @@ export function EmailPreview({ business, sampleOrder }: Props) {
                 title="Email Preview"
               />
             ) : (
-              <div className="py-12 text-center text-muted-foreground">
+              <div className="text-muted-foreground py-12 text-center">
                 <p>Select a template to preview</p>
               </div>
             )}

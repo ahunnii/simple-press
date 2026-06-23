@@ -63,7 +63,9 @@ export function SledgeCartSummary({ shippingConfig }: Props) {
           </span>
           <span className="font-sans text-sm tracking-[0.04em] text-[var(--sl-ink)]">
             {isZoneWeight ? (
-              <span className="text-[var(--sl-ink-soft)]">Calculated at checkout</span>
+              <span className="text-[var(--sl-ink-soft)]">
+                Calculated at checkout
+              </span>
             ) : shipping === 0 ? (
               <span className="text-[var(--sl-ink-soft)]">Free</span>
             ) : (

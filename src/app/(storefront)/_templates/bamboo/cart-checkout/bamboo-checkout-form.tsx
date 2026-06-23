@@ -6,9 +6,11 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -21,7 +23,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -258,6 +259,21 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 ? "No shipping charge. You'll pick up your order at the store."
                 : "Shipping cost is based on your store's shipping settings."}
             </p>
+            {deliveryMethod === "pickup" && (
+              <div className="bg-muted/40 rounded-md border p-3 text-sm">
+                <p className="text-foreground font-medium">Pickup location</p>
+                <p className="text-muted-foreground mt-0.5">
+                  {shippingConfig.pickupLocation ??
+                    business.businessAddress ??
+                    "Pickup details will be confirmed by the store."}
+                </p>
+                {shippingConfig.pickupInstructions ? (
+                  <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                    {shippingConfig.pickupInstructions}
+                  </p>
+                ) : null}
+              </div>
+            )}
           </fieldset>
         )}
 
@@ -461,7 +477,10 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                       className="text-muted-foreground inline-flex items-center gap-1.5"
                       aria-live="polite"
                     >
-                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                      <Loader2
+                        className="size-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
                       Calculating…
                     </span>
                   ) : shippingPending ? (

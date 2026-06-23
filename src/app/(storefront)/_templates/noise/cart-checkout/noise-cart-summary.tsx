@@ -95,7 +95,9 @@ export function NoiseCartSummary({ shippingConfig }: Props) {
           </span>
           <span className="font-mono text-[12px] tracking-[0.06em]">
             {isZoneWeight ? (
-              <span style={{ color: "var(--vn-steel-mist)" }}>Calculated at checkout</span>
+              <span style={{ color: "var(--vn-steel-mist)" }}>
+                Calculated at checkout
+              </span>
             ) : shipping === 0 ? (
               <span style={{ color: "var(--vn-steel-mist)" }}>Free</span>
             ) : (

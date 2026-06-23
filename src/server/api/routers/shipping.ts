@@ -7,8 +7,8 @@ import {
   calculateShipping,
   calculateZoneWeightShipping,
   normalizeWeightToLb,
-  shippingConfigFromBusiness,
   SHIPPING_TYPES,
+  shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 

@@ -28,14 +28,14 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
 
   if (layout === "carousel") {
     return (
-      <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
+      <div className="bg-muted relative aspect-video overflow-hidden rounded-lg">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-full w-full bg-muted" />
+          <div className="bg-muted h-full w-full" />
         </div>
-        <div className="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-foreground/50 p-1 text-xs text-background">
+        <div className="bg-foreground/50 text-background absolute top-1/2 left-3 -translate-y-1/2 rounded-full p-1 text-xs">
           ‹
         </div>
-        <div className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-foreground/50 p-1 text-xs text-background">
+        <div className="bg-foreground/50 text-background absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-xs">
           ›
         </div>
         <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
@@ -67,7 +67,7 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
               height: i % 3 === 0 ? "100px" : i % 3 === 1 ? "70px" : "55px",
             }}
           >
-            <div className="h-full w-full rounded bg-muted" />
+            <div className="bg-muted h-full w-full rounded" />
           </div>
         ))}
       </div>
@@ -86,7 +86,7 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
         {placeholders.map((i) => (
           <div
             key={i}
-            className="rounded bg-muted"
+            className="bg-muted rounded"
             style={
               i === 0
                 ? { gridColumn: "span 2", gridRow: "span 2", aspectRatio: "1" }
@@ -104,7 +104,7 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
         {placeholders.map((i) => (
           <div
             key={i}
-            className="rounded bg-muted"
+            className="bg-muted rounded"
             style={{
               height: "60px",
               flexGrow: 1,
@@ -129,7 +129,7 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
       {placeholders.map((i) => (
         <div
           key={i}
-          className={`rounded bg-muted ${aspectClass(aspectRatio)}`}
+          className={`bg-muted rounded ${aspectClass(aspectRatio)}`}
         />
       ))}
     </div>

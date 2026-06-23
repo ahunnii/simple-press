@@ -20,7 +20,10 @@ export function HappyBambooAddressBookPage({
           { label: "Address Book" },
         ]}
       >
-        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+        <AddressBookContent
+          customer={customer}
+          salesCountries={business.salesCountries}
+        />
       </HappyBambooAccountLayout>
     </PageTransition>
   );

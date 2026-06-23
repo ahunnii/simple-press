@@ -1,16 +1,5 @@
-import type { LucideIcon } from "lucide-react";
 import type { Icon as TablerIcon } from "@tabler/icons-react";
-import {
-  FileText,
-  Globe,
-  Home,
-  Menu,
-  Package,
-  PowerOff,
-  Search,
-  Shield,
-  Wrench,
-} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   IconChartBar,
   IconCreditCard,
@@ -27,8 +16,21 @@ import {
   IconShoppingCart,
   IconSparkles,
   IconStar,
+  IconTransfer,
   IconUsers,
 } from "@tabler/icons-react";
+import {
+  FileText,
+  Globe,
+  Home,
+  Megaphone,
+  Menu,
+  Package,
+  PowerOff,
+  Search,
+  Shield,
+  Wrench,
+} from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,6 +64,8 @@ export interface HubCard {
   /** Tailwind color token suffix, e.g. "slate", "emerald". */
   color: string;
   icon: LucideIcon | TablerIcon;
+  /** Feature flag key — when set and disabled, the card is hidden from its hub. */
+  featureKey?: string;
 }
 
 export const NAV_SECTION_LABELS: Record<NavSection, string> = {
@@ -277,6 +281,17 @@ export const HUB_CARDS: HubCard[] = [
     color: "red",
     icon: PowerOff,
   },
+  {
+    key: "settings-store-transfer",
+    title: "Store Transfer",
+    description: "Export and import store content",
+    body: "Export your store's content to a ZIP file and import it into another store",
+    href: "/admin/settings/store-transfer",
+    hub: "settings",
+    color: "emerald",
+    icon: IconTransfer,
+    featureKey: "storeTransfer",
+  },
 
   // Content hub
   {
@@ -340,6 +355,16 @@ export const HUB_CARDS: HubCard[] = [
     icon: Search,
   },
   {
+    key: "content-faq",
+    title: "FAQ",
+    description: "Frequently asked questions",
+    body: "Add and manage FAQ items for your storefront",
+    href: "/admin/content/faq",
+    hub: "content",
+    color: "teal",
+    icon: FileText,
+  },
+  {
     key: "content-template",
     title: "Template Fields",
     description: "Custom content",
@@ -348,6 +373,16 @@ export const HUB_CARDS: HubCard[] = [
     hub: "content",
     color: "indigo",
     icon: Globe,
+  },
+  {
+    key: "content-announcements",
+    title: "Banner & Popup",
+    description: "Site-wide announcements",
+    body: "Manage your announcement banner and homepage popup",
+    href: "/admin/content/announcements",
+    hub: "content",
+    color: "amber",
+    icon: Megaphone,
   },
 ];
 

@@ -359,6 +359,188 @@ export function buildCollectionSchema(
 }
 
 // ---------------------------------------------------------------------------
+// Builder: LocalBusiness
+// ---------------------------------------------------------------------------
+
+interface BusinessForLocalBusiness extends CanonicalBusiness {
+  name: string;
+  businessAddress?: string | null;
+  phoneNumber?: string | null;
+  supportEmail?: string | null;
+  siteContent?: {
+    logoUrl?: string | null;
+    socialLinks?: unknown;
+  } | null;
+}
+
+/**
+ * Build a schema.org Store (LocalBusiness subtype) object for the homepage.
+ *
+ * Only emits optional fields when they are non-empty.
+ * Callers are responsible for gating on `business.localBusinessEnabled` and
+ * only rendering this schema when the business opts in.
+ */
+export function buildLocalBusinessSchema(
+  business: BusinessForLocalBusiness,
+): Record<string, unknown> {
+  const baseUrl = getCanonicalBaseUrl(business);
+
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    name: business.name,
+    url: baseUrl,
+  };
+
+  if (business.phoneNumber) {
+    schema.telephone = business.phoneNumber;
+  }
+
+  if (business.supportEmail) {
+    schema.email = business.supportEmail;
+  }
+
+  if (business.businessAddress) {
+    schema.address = business.businessAddress;
+  }
+
+  const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
+  if (logoUrl) {
+    schema.image = logoUrl;
+    schema.logo = logoUrl;
+  }
+
+  const sameAs = parseSameAs(business.siteContent?.socialLinks);
+  if (sameAs) {
+    schema.sameAs = sameAs;
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
+// Builder: FAQPage
+// ---------------------------------------------------------------------------
+
+interface FaqItemInput {
+  question: string;
+  answer: string;
+}
+
+/**
+ * Build a schema.org FAQPage object for the /faq storefront page.
+ *
+ * Returns the schema regardless of items.length — callers should skip
+ * rendering if there are no items.
+ */
+export function buildFaqSchema(items: FaqItemInput[]): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Builder: Service
+// ---------------------------------------------------------------------------
+
+interface ServiceForSchema {
+  name: string;
+  slug: string;
+  description?: string | null;
+  image?: string | null;
+  ogImage?: string | null;
+}
+
+/**
+ * Build a schema.org Service object for a service detail page.
+ *
+ * Includes name, url (canonical `/services/:slug`), provider (Organization),
+ * and conditionally description and image.
+ */
+export function buildServiceSchema(
+  service: ServiceForSchema,
+  business: CanonicalBusiness & { name: string },
+): Record<string, unknown> {
+  const canonicalUrl = getCanonicalUrl(business, `/services/${service.slug}`);
+
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.name,
+    url: canonicalUrl,
+    provider: {
+      "@type": "Organization",
+      name: business.name,
+    },
+  };
+
+  if (service.description) {
+    schema.description = service.description;
+  }
+
+  // Prefer the dedicated image; fall back to the SEO ogImage
+  const imageUrl = toAbsoluteUrl(service.image ?? service.ogImage);
+  if (imageUrl) {
+    schema.image = imageUrl;
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
+// Builder: WebPage (parametric — covers WebPage, AboutPage, ContactPage, etc.)
+// ---------------------------------------------------------------------------
+
+interface WebPageOptions {
+  /** schema.org @type string, e.g. "WebPage", "AboutPage", "ContactPage" */
+  type: string;
+  /** Human-readable page name / title */
+  name: string;
+  /** Path starting with "/" — used to build the canonical URL */
+  path: string;
+  description?: string | null;
+}
+
+/**
+ * Build a generic schema.org WebPage (or subtype) object.
+ *
+ * Pass `type` as any valid schema.org page type:
+ * - "WebPage"     — generic CMS / slug pages
+ * - "AboutPage"   — /about
+ * - "ContactPage" — /contact
+ *
+ * Canonical URL is derived from `path` using `getCanonicalUrl`.
+ */
+export function buildWebPageSchema(
+  business: CanonicalBusiness,
+  { type, name, path, description }: WebPageOptions,
+): Record<string, unknown> {
+  const canonicalUrl = getCanonicalUrl(business, path);
+
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": type,
+    name,
+    url: canonicalUrl,
+  };
+
+  if (description) {
+    schema.description = description;
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
 // Builder: BlogPosting
 // ---------------------------------------------------------------------------
 

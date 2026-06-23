@@ -25,10 +25,15 @@ import {
 import { Form } from "~/components/ui/form";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
-  business: { id: string };
+  business: {
+    id: string;
+    localBusinessEnabled: boolean;
+    allowAiCrawlers: boolean;
+  };
   siteContent: {
     metaTitle: string | null;
     metaDescription: string | null;
@@ -46,11 +51,13 @@ const seoFormSchema = z.object({
   faviconUrl: z.string().nullable().optional(),
   ogImageFile: z.instanceof(File).optional().nullable(),
   faviconFile: z.instanceof(File).optional().nullable(),
+  localBusinessEnabled: z.boolean(),
+  allowAiCrawlers: z.boolean(),
 });
 
 type SeoFormValues = z.infer<typeof seoFormSchema>;
 
-export function SEOEditor({ siteContent }: Props) {
+export function SEOEditor({ business, siteContent }: Props) {
   const router = useRouter();
 
   // Refs
@@ -69,6 +76,8 @@ export function SEOEditor({ siteContent }: Props) {
       faviconUrl: siteContent.faviconUrl ?? "",
       ogImageFile: null,
       faviconFile: null,
+      localBusinessEnabled: business.localBusinessEnabled,
+      allowAiCrawlers: business.allowAiCrawlers,
     },
   });
 
@@ -88,6 +97,8 @@ export function SEOEditor({ siteContent }: Props) {
       toast.success("SEO settings updated");
       form.reset({
         ...data.siteContent,
+        localBusinessEnabled: data.localBusinessEnabled,
+        allowAiCrawlers: data.allowAiCrawlers,
         ogImageFile: null,
         faviconFile: null,
       });
@@ -114,6 +125,8 @@ export function SEOEditor({ siteContent }: Props) {
       faviconUrl: siteContent.faviconUrl ?? "",
       ogImageFile: null,
       faviconFile: null,
+      localBusinessEnabled: business.localBusinessEnabled,
+      allowAiCrawlers: business.allowAiCrawlers,
     });
     if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
     if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
@@ -141,6 +154,8 @@ export function SEOEditor({ siteContent }: Props) {
       metaDescription: data.metaDescription ?? undefined,
       metaKeywords: data.metaKeywords ?? undefined,
       ogImage: ogImageUrl,
+      localBusinessEnabled: data.localBusinessEnabled,
+      allowAiCrawlers: data.allowAiCrawlers,
     });
   };
 
@@ -156,7 +171,7 @@ export function SEOEditor({ siteContent }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
-        className="min-h-screen bg-muted/40"
+        className="bg-muted/40 min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -266,6 +281,31 @@ export function SEOEditor({ siteContent }: Props) {
               </CardContent>
             </Card>
 
+            {/* Search & AI Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Search &amp; AI Settings</CardTitle>
+                <CardDescription>
+                  Control how search engines and AI answer engines interact with
+                  your store
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <SwitchFormField
+                  form={form}
+                  name="localBusinessEnabled"
+                  label="Show as a local business in search & AI results"
+                  description="Emits LocalBusiness structured data (schema.org Store) using your store's address and phone number. Enable this only if your business has a physical or local presence — online-only stores should leave it off to avoid misleading search engines."
+                />
+                <SwitchFormField
+                  form={form}
+                  name="allowAiCrawlers"
+                  label="Allow AI answer engines to crawl this store"
+                  description="Controls whether AI bots such as ChatGPT (GPTBot), Perplexity (PerplexityBot), and Google AI (Google-Extended) can read your storefront to generate answers. Turning this off adds those crawlers to your robots.txt disallow list. Most stores benefit from leaving this on."
+                />
+              </CardContent>
+            </Card>
+
             {/* Preview */}
             {(form.watch("metaTitle") ?? form.watch("metaDescription")) && (
               <Card>
@@ -276,14 +316,14 @@ export function SEOEditor({ siteContent }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="mb-1 text-sm text-primary">
+                  <div className="bg-card rounded-lg border p-4">
+                    <div className="text-primary mb-1 text-sm">
                       {form.watch("metaTitle") ?? "Your Store Name"}
                     </div>
                     <div className="mb-2 text-xs text-green-700">
                       https://yourstore.com
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       {form.watch("metaDescription") ??
                         "Your store description will appear here..."}
                     </div>

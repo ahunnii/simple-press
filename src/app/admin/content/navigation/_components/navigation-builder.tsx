@@ -176,7 +176,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
   const isDirty = navItems.length !== initialNavItems.length || !isSameOrder;
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="bg-muted/40 min-h-screen">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
@@ -244,7 +244,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {navItems.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground">
+                  <div className="text-muted-foreground py-8 text-center">
                     <p>
                       No menu items. Click &quot;Add Item&quot; to get started.
                     </p>
@@ -262,7 +262,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                             >
                               ▲
                             </button>
-                            <GripVertical className="h-4 w-4 text-muted-foreground" />
+                            <GripVertical className="text-muted-foreground h-4 w-4" />
                             <button
                               onClick={() => moveItem(index, "down")}
                               disabled={index === navItems.length - 1}
@@ -323,14 +323,14 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                             {/* Sub-items */}
                             {(item.children?.length ?? 0) > 0 && (
                               <div className="border-t pt-3">
-                                <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
                                   Sub-items
                                 </p>
                                 <div className="space-y-3">
                                   {item.children!.map((child, ci) => (
                                     <div
                                       key={ci}
-                                      className="flex items-start gap-3 rounded-md border border-border bg-muted p-3"
+                                      className="border-border bg-muted flex items-start gap-3 rounded-md border p-3"
                                     >
                                       <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
                                         <div>
@@ -372,7 +372,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                                         onClick={() =>
                                           deleteChildItem(index, ci)
                                         }
-                                        className="mt-5 text-muted-foreground transition-colors hover:text-destructive"
+                                        className="text-muted-foreground hover:text-destructive mt-5 transition-colors"
                                         title="Remove sub-item"
                                       >
                                         <Trash2 className="h-3.5 w-3.5" />
@@ -399,7 +399,7 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                             size="sm"
                             onClick={() => deleteNavItem(index)}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="text-destructive h-4 w-4" />
                           </Button>
                         </div>
                       </div>

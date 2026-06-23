@@ -95,7 +95,7 @@ export function AvailabilityEditor({
               >
                 Enable maintenance mode for my storefront
               </Label>
-              <p className="mt-0.5 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-sm">
                 Only affects the public storefront — your admin dashboard stays
                 accessible.
               </p>
@@ -129,7 +129,7 @@ export function AvailabilityEditor({
                       className="cursor-pointer font-normal"
                     >
                       Under maintenance
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground ml-2 text-xs">
                         — site is temporarily unavailable for updates
                       </span>
                     </Label>
@@ -144,7 +144,7 @@ export function AvailabilityEditor({
                       className="cursor-pointer font-normal"
                     >
                       Coming soon
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="text-muted-foreground ml-2 text-xs">
                         — store is launching soon
                       </span>
                     </Label>
@@ -159,7 +159,9 @@ export function AvailabilityEditor({
                   className="text-sm font-medium"
                 >
                   Custom message{" "}
-                  <span className="font-normal text-muted-foreground">(optional)</span>
+                  <span className="text-muted-foreground font-normal">
+                    (optional)
+                  </span>
                 </Label>
                 <Textarea
                   id="maintenance-message"
@@ -170,7 +172,7 @@ export function AvailabilityEditor({
                   rows={3}
                   disabled={updateMutation.isPending}
                 />
-                <p className="text-right text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-right text-xs">
                   {charCount} / 500
                 </p>
               </div>

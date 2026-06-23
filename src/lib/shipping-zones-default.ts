@@ -98,54 +98,12 @@ export const STATE_REGION_MAP: Record<string, UsRegion> = {
 // ──────────────────────────────────────────────────────────────────────────────
 
 const REGION_ORDER_FROM: Record<UsRegion, UsRegion[]> = {
-  Midwest: [
-    "Midwest",
-    "Plains",
-    "South",
-    "Northeast",
-    "Mountain",
-    "West",
-  ],
-  Northeast: [
-    "Northeast",
-    "South",
-    "Midwest",
-    "Plains",
-    "Mountain",
-    "West",
-  ],
-  South: [
-    "South",
-    "Midwest",
-    "Northeast",
-    "Plains",
-    "Mountain",
-    "West",
-  ],
-  Plains: [
-    "Plains",
-    "Midwest",
-    "South",
-    "Mountain",
-    "Northeast",
-    "West",
-  ],
-  Mountain: [
-    "Mountain",
-    "Plains",
-    "West",
-    "Midwest",
-    "South",
-    "Northeast",
-  ],
-  West: [
-    "West",
-    "Mountain",
-    "Plains",
-    "Midwest",
-    "South",
-    "Northeast",
-  ],
+  Midwest: ["Midwest", "Plains", "South", "Northeast", "Mountain", "West"],
+  Northeast: ["Northeast", "South", "Midwest", "Plains", "Mountain", "West"],
+  South: ["South", "Midwest", "Northeast", "Plains", "Mountain", "West"],
+  Plains: ["Plains", "Midwest", "South", "Mountain", "Northeast", "West"],
+  Mountain: ["Mountain", "Plains", "West", "Midwest", "South", "Northeast"],
+  West: ["West", "Mountain", "Plains", "Midwest", "South", "Northeast"],
 };
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -153,10 +111,10 @@ const REGION_ORDER_FROM: Record<UsRegion, UsRegion[]> = {
 // ──────────────────────────────────────────────────────────────────────────────
 
 export const DEFAULT_WEIGHT_TIERS: WeightTier[] = [
-  { label: "0 – 5 lb",  minLb: 0,  maxLb: 5  },
-  { label: "5 – 15 lb", minLb: 5,  maxLb: 15 },
-  { label: "15 – 40 lb",minLb: 15, maxLb: 40 },
-  { label: "40 lb+",    minLb: 40, maxLb: null },
+  { label: "0 – 5 lb", minLb: 0, maxLb: 5 },
+  { label: "5 – 15 lb", minLb: 5, maxLb: 15 },
+  { label: "15 – 40 lb", minLb: 15, maxLb: 40 },
+  { label: "40 lb+", minLb: 40, maxLb: null },
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -170,11 +128,11 @@ export const DEFAULT_WEIGHT_TIERS: WeightTier[] = [
 /** seedPrices[zoneIndex 0..4][tierIndex 0..3] — all values in cents */
 const SEED_PRICES: readonly (readonly number[])[] = [
   //  0–5 lb   5–15 lb  15–40 lb  40 lb+
-  [    599,    999,    1799,    3499 ],  // Zone 1 (origin region)
-  [    799,   1299,    2399,    4499 ],  // Zone 2
-  [   1099,   1799,    3199,    5999 ],  // Zone 3
-  [   1399,   2299,    4199,    7499 ],  // Zone 4
-  [   1799,   2999,    5499,    9999 ],  // Zone 5 (farthest)
+  [599, 999, 1799, 3499], // Zone 1 (origin region)
+  [799, 1299, 2399, 4499], // Zone 2
+  [1099, 1799, 3199, 5999], // Zone 3
+  [1399, 2299, 4199, 7499], // Zone 4
+  [1799, 2999, 5499, 9999], // Zone 5 (farthest)
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────

@@ -108,7 +108,7 @@ export function FulfillmentForm({ orderId, customerEmail }: Props) {
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex items-start gap-3 rounded-lg border border-border p-4">
+          <div className="border-border flex items-start gap-3 rounded-lg border p-4">
             <Checkbox
               id="hasTracking"
               checked={hasTracking}
@@ -211,10 +211,10 @@ function PackageEntry({
   const errors = form.formState.errors.packages?.[index];
 
   return (
-    <div className="space-y-3 rounded-lg border border-border p-4">
+    <div className="border-border space-y-3 rounded-lg border p-4">
       {index > 0 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-foreground text-sm font-medium">
             Package {index + 1}
           </p>
           {showRemove && (
@@ -223,7 +223,7 @@ function PackageEntry({
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive h-7 w-7 p-0"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -255,7 +255,9 @@ function PackageEntry({
           </SelectContent>
         </Select>
         {errors?.carrier && (
-          <p className="mt-1 text-sm text-destructive">{errors.carrier.message}</p>
+          <p className="text-destructive mt-1 text-sm">
+            {errors.carrier.message}
+          </p>
         )}
       </div>
 
@@ -270,7 +272,7 @@ function PackageEntry({
           className="mt-2"
         />
         {errors?.trackingNumber && (
-          <p className="mt-1 text-sm text-destructive">
+          <p className="text-destructive mt-1 text-sm">
             {errors.trackingNumber.message}
           </p>
         )}
@@ -286,7 +288,7 @@ function PackageEntry({
             className="mt-2"
           />
           {errors?.trackingUrl && (
-            <p className="mt-1 text-sm text-destructive">
+            <p className="text-destructive mt-1 text-sm">
               {errors.trackingUrl.message}
             </p>
           )}

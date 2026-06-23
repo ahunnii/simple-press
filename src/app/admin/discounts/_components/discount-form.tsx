@@ -48,7 +48,6 @@ import { DateTimeFormField } from "~/components/inputs/date-time-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
-import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
   initialDiscount?: DiscountCode;
@@ -75,9 +74,6 @@ export function DiscountForm({ initialDiscount }: Props) {
     maxDiscount: initialDiscount?.maxDiscount
       ? initialDiscount?.maxDiscount / 100
       : undefined,
-    showAsBanner: initialDiscount?.showAsBanner ?? false,
-    bannerText: initialDiscount?.bannerText ?? "",
-    bannerLinkUrl: initialDiscount?.bannerLinkUrl ?? "",
   };
 
   const form = useForm<DiscountFormSchema>({
@@ -212,7 +208,7 @@ export function DiscountForm({ initialDiscount }: Props) {
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-muted/40"
+          className="bg-muted/40 min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -362,7 +358,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormControl>
                             <div className="relative">
                               {type === "fixed" && (
-                                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                   $
                                 </span>
                               )}
@@ -379,7 +375,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                                 {...field}
                               />
                               {type === "percentage" && (
-                                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground">
+                                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
                                   %
                                 </span>
                               )}
@@ -440,7 +436,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormLabel> Minimum purchase (USD)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <NumberInput
@@ -468,7 +464,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormLabel> Maximum discount (USD)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <NumberInput
@@ -506,44 +502,6 @@ export function DiscountForm({ initialDiscount }: Props) {
                       label="Active"
                       description="Customers can use this discount code"
                     />
-                  </CardContent>
-                </Card>
-                {/* Banner */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Storefront banner</CardTitle>
-                    <CardDescription>
-                      Show a short message and link at the top of your shop
-                      (optional)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <SwitchFormField
-                      form={form}
-                      name="showAsBanner"
-                      label="Advertise on storefront"
-                      description="Display a banner when this code is active and valid"
-                    />
-
-                    {form.watch("showAsBanner") && (
-                      <>
-                        <TextareaFormField
-                          form={form}
-                          name="bannerText"
-                          label="Banner message"
-                          placeholder="Summer sale: use code SUMMER20 at checkout"
-                          rows={3}
-                          description="Display a banner when this code is active and valid"
-                        />
-                        <InputFormField
-                          form={form}
-                          name="bannerLinkUrl"
-                          label="Link (optional)"
-                          placeholder="/shop"
-                          description="Relative path (e.g. /shop) or full URL. Defaults to /shop if empty."
-                        />
-                      </>
-                    )}
                   </CardContent>
                 </Card>
               </div>

@@ -35,7 +35,7 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
         {/* Header row */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
           style={{
             display: "flex",
             alignItems: "flex-end",
@@ -90,7 +90,7 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
         {/* Post grid */}
         <div
           ref={gridRef}
-          className={`vii-reveal${gridVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${gridVisible ? "is-visible" : ""}`}
           style={{
             display: "flex",
             flexWrap: "wrap",

@@ -55,7 +55,7 @@ export function ProductFeaturesField({ form, className }: Props) {
       {fields.map((field, index) => (
         <div
           key={field.id}
-          className="flex flex-col gap-3 rounded-lg border border-border bg-muted/80 p-4 sm:flex-row sm:items-end"
+          className="border-border bg-muted/80 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-end"
         >
           <FormField
             control={form.control}
@@ -64,7 +64,9 @@ export function ProductFeaturesField({ form, className }: Props) {
               const Preview = getLucideTemplateIcon(iconField.value ?? "");
               return (
                 <FormItem className="flex-1 space-y-2">
-                  <FormLabel className="text-xs text-muted-foreground">Icon</FormLabel>
+                  <FormLabel className="text-muted-foreground text-xs">
+                    Icon
+                  </FormLabel>
                   <div className="flex items-center gap-2">
                     {Preview ? (
                       <Preview className="text-muted-foreground h-5 w-5 shrink-0" />
@@ -106,7 +108,9 @@ export function ProductFeaturesField({ form, className }: Props) {
             name={`additionalFields.productFeatures.${index}.text`}
             render={({ field: textField }) => (
               <FormItem className="min-w-0 flex-[2] space-y-2">
-                <FormLabel className="text-xs text-muted-foreground">Label</FormLabel>
+                <FormLabel className="text-muted-foreground text-xs">
+                  Label
+                </FormLabel>
                 <FormControl>
                   <Input placeholder="e.g. Septic Safe" {...textField} />
                 </FormControl>
@@ -119,7 +123,7 @@ export function ProductFeaturesField({ form, className }: Props) {
             type="button"
             variant="ghost"
             size="icon"
-            className="shrink-0 text-destructive hover:text-destructive/80"
+            className="text-destructive hover:text-destructive/80 shrink-0"
             aria-label="Remove feature"
             onClick={() => remove(index)}
           >

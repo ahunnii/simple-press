@@ -1,4 +1,5 @@
 import { Skeleton } from "~/components/ui/skeleton";
+
 import { TrailHeader } from "../_components/trail-header";
 
 export default function DashboardLoading() {
@@ -7,7 +8,7 @@ export default function DashboardLoading() {
       <TrailHeader breadcrumbs={[]} />
 
       <div
-        className="min-h-screen bg-muted"
+        className="bg-muted min-h-screen"
         aria-busy="true"
         aria-label="Loading dashboard"
       >
@@ -23,10 +24,7 @@ export default function DashboardLoading() {
           {/* Stat cards — 4 columns on large, 2 on medium, 1 on small */}
           <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-xl border bg-card p-6 shadow-sm"
-              >
+              <div key={i} className="bg-card rounded-xl border p-6 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-4 rounded-full" />
@@ -40,7 +38,7 @@ export default function DashboardLoading() {
           {/* Two-column: recent orders + low stock alerts */}
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Recent orders card */}
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="bg-card rounded-xl border p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <Skeleton className="h-5 w-32" />
                 <Skeleton className="h-8 w-20 rounded-md" />
@@ -66,7 +64,7 @@ export default function DashboardLoading() {
             </div>
 
             {/* Low stock alerts card */}
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="bg-card rounded-xl border p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <Skeleton className="h-5 w-36" />
                 <Skeleton className="h-8 w-28 rounded-md" />
@@ -92,13 +90,13 @@ export default function DashboardLoading() {
           </div>
 
           {/* Revenue chart */}
-          <div className="mb-8 rounded-xl border bg-card p-6 shadow-sm">
+          <div className="bg-card mb-8 rounded-xl border p-6 shadow-sm">
             <Skeleton className="mb-4 h-5 w-48" />
             <Skeleton className="h-[300px] w-full rounded-md" />
           </div>
 
           {/* Top products */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <Skeleton className="mb-4 h-5 w-52" />
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (

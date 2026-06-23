@@ -7,6 +7,9 @@ export async function middleware(req: NextRequest) {
 
   // Build a mutable headers copy; set x-sp-preview when ?__preview=1 is present.
   const requestHeaders = new Headers(req.headers);
+  // Always expose the current path (incl. query string) to server components via
+  // a header, so canonical-host redirects can preserve search params.
+  requestHeaders.set("x-pathname", `${pathname}${req.nextUrl.search}`);
   if (req.nextUrl.searchParams.get("__preview") === "1") {
     requestHeaders.set("x-sp-preview", "1");
   }

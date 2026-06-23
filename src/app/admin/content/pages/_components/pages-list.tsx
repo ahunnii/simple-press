@@ -85,7 +85,7 @@ export function PagesList({ business }: PagesListProps) {
         : `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="bg-muted/40 min-h-screen">
       <div className="admin-form-toolbar">
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
@@ -114,7 +114,7 @@ export function PagesList({ business }: PagesListProps) {
         {/* Search */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -133,7 +133,7 @@ export function PagesList({ business }: PagesListProps) {
           <CardContent>
             {filteredPages.length === 0 ? (
               <div className="py-12 text-center">
-                <p className="mb-4 text-muted-foreground">
+                <p className="text-muted-foreground mb-4">
                   {searchQuery ? "No pages found" : "No pages yet"}
                 </p>
                 {!searchQuery && (
@@ -191,7 +191,9 @@ export function PagesList({ business }: PagesListProps) {
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Actions for {page.title}</span>
+                              <span className="sr-only">
+                                Actions for {page.title}
+                              </span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

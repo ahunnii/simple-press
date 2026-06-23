@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
+import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { db } from "~/server/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -13,14 +14,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       OR: [{ customDomain: domain }, { subdomain: domain.split(".")[0] }],
       status: "active",
     },
-    select: { id: true },
+    select: {
+      id: true,
+      subdomain: true,
+      customDomain: true,
+      domainStatus: true,
+    },
   });
 
   if (!business) return [];
 
-  const baseUrl = `https://${host}`;
+  const baseUrl = getCanonicalBaseUrl(business);
 
-  const [products, collections, pages] = await Promise.all([
+  const [products, collections, pages, services, faqCount] = await Promise.all([
     db.product.findMany({
       where: { businessId: business.id, published: true },
       select: { slug: true, updatedAt: true },
@@ -33,49 +39,66 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { businessId: business.id, published: true },
       select: { slug: true, updatedAt: true, type: true },
     }),
+    db.service.findMany({
+      where: { businessId: business.id, published: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.faqItem.count({
+      where: { businessId: business.id, published: true },
+    }),
   ]);
 
-  const now = new Date();
-
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: baseUrl, changeFrequency: "daily", priority: 1 },
     {
       url: `${baseUrl}/shop`,
-      lastModified: now,
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/collections`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/blog`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/about`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
       url: `${baseUrl}/testimonials`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.5,
     },
   ];
+
+  // Services static index page — only when there are published services
+  if (services.length > 0) {
+    staticRoutes.push({
+      url: `${baseUrl}/services`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
+
+  // FAQ page — only when there are published FAQ items
+  if (faqCount > 0) {
+    staticRoutes.push({
+      url: `${baseUrl}/faq`,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    });
+  }
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${baseUrl}/shop/${p.slug}`,
@@ -110,11 +133,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
+  const serviceRoutes: MetadataRoute.Sitemap = services.map((s) => ({
+    url: `${baseUrl}/services/${s.slug}`,
+    lastModified: s.updatedAt,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  }));
+
   return [
     ...staticRoutes,
     ...productRoutes,
     ...collectionRoutes,
     ...blogRoutes,
     ...pageRoutes,
+    ...serviceRoutes,
   ];
 }

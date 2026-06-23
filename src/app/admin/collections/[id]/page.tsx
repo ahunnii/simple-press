@@ -24,7 +24,7 @@ export default async function EditCollectionPage({ params }: PageProps) {
     .catch(rethrowTrpcForErrorBoundary);
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="bg-muted/40 min-h-screen">
       <TrailHeader
         breadcrumbs={[
           { label: "Collections", href: "/admin/collections" },

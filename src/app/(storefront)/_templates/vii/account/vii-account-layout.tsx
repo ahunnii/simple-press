@@ -7,6 +7,7 @@ import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
+
 import { ViiOverline } from "../shared/vii-overline";
 
 const NAV_ITEMS = [
@@ -59,10 +60,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
               {heading}
             </h1>
             {breadcrumb && (
-              <nav
-                aria-label="Breadcrumb"
-                style={{ marginTop: 12 }}
-              >
+              <nav aria-label="Breadcrumb" style={{ marginTop: 12 }}>
                 <ol
                   style={{
                     display: "flex",
@@ -197,16 +195,13 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
 
         {/* Desktop: sidebar + content */}
         <div
-          className={cn(
-            "grid grid-cols-1 gap-8",
-            "md:grid-cols-[220px_1fr]",
-          )}
+          className={cn("grid grid-cols-1 gap-8", "md:grid-cols-[220px_1fr]")}
         >
-          <nav
-            aria-label="Account navigation"
-            className="hidden md:block"
-          >
-            <ul role="list" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+          <nav aria-label="Account navigation" className="hidden md:block">
+            <ul
+              role="list"
+              style={{ listStyle: "none", margin: 0, padding: 0 }}
+            >
               {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
                 const active =
                   pathname === href || pathname.startsWith(href + "/");
@@ -227,9 +222,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                         letterSpacing: "0.02em",
                         textDecoration: "none",
                         transition: "background 0.15s, color 0.15s",
-                        background: active
-                          ? "var(--vii-tan)"
-                          : "transparent",
+                        background: active ? "var(--vii-tan)" : "transparent",
                         color: active
                           ? "var(--vii-copper-deep)"
                           : "var(--vii-ink-soft)",

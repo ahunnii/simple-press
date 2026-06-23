@@ -30,7 +30,7 @@ export function ViiAboutMission({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline
@@ -63,7 +63,7 @@ export function ViiAboutMission({
         {body && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             <p

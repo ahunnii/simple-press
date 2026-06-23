@@ -10,6 +10,13 @@ import {
   siteContentSchema,
 } from "~/lib/validators/content";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
+import {
+  bannerConfigSchema,
+  newVersion,
+  popupConfigSchema,
+  updateBannerConfigSchema,
+  updatePopupConfigSchema,
+} from "~/lib/validators/site-banner";
 
 import {
   createTRPCRouter,
@@ -386,5 +393,75 @@ export const contentRouter = createTRPCRouter({
       );
 
       return { success: true };
+    }),
+
+  // ==========================================
+  // BANNER & POPUP CONFIG
+  // ==========================================
+
+  getBannerConfig: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    const siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId },
+      select: { bannerConfig: true },
+    });
+    const parsed = bannerConfigSchema.safeParse(siteContent?.bannerConfig);
+    return parsed.success ? parsed.data : null;
+  }),
+
+  getPopupConfig: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    const siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId },
+      select: { popupConfig: true },
+    });
+    const parsed = popupConfigSchema.safeParse(siteContent?.popupConfig);
+    return parsed.success ? parsed.data : null;
+  }),
+
+  updateBannerConfig: ownerAdminProcedure
+    .input(updateBannerConfigSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const bannerConfig = {
+        ...input,
+        version: newVersion(),
+      } satisfies Record<string, unknown>;
+
+      await ctx.db.siteContent.upsert({
+        where: { businessId },
+        create: {
+          businessId,
+          bannerConfig: bannerConfig as Prisma.InputJsonValue,
+        },
+        update: {
+          bannerConfig: bannerConfig as Prisma.InputJsonValue,
+        },
+      });
+
+      return { ok: true };
+    }),
+
+  updatePopupConfig: ownerAdminProcedure
+    .input(updatePopupConfigSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const popupConfig = {
+        ...input,
+        version: newVersion(),
+      } satisfies Record<string, unknown>;
+
+      await ctx.db.siteContent.upsert({
+        where: { businessId },
+        create: {
+          businessId,
+          popupConfig: popupConfig as Prisma.InputJsonValue,
+        },
+        update: {
+          popupConfig: popupConfig as Prisma.InputJsonValue,
+        },
+      });
+
+      return { ok: true };
     }),
 });

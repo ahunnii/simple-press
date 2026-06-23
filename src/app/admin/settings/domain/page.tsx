@@ -1,7 +1,7 @@
 import { env } from "~/env";
 import { api } from "~/trpc/server";
-
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
+
 import { TrailHeader } from "../../_components/trail-header";
 import { DomainSettings } from "./_components/domain-settings";
 

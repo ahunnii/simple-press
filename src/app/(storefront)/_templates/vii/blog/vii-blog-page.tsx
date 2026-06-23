@@ -52,8 +52,7 @@ export function ViiBlogPage({ pages, business, customFields }: Props) {
           aria-label="No stories yet"
           style={{
             background: "var(--vii-cream)",
-            padding:
-              "clamp(80px, 14vw, 160px) clamp(24px, 6vw, 96px)",
+            padding: "clamp(80px, 14vw, 160px) clamp(24px, 6vw, 96px)",
             textAlign: "center",
           }}
         >

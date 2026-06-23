@@ -22,6 +22,7 @@ type NewOrderNotificationEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   adminOrderUrl: string;
+  deliveryMethod?: "ship" | "pickup";
 };
 
 export default function NewOrderNotificationEmail({
@@ -37,6 +38,7 @@ export default function NewOrderNotificationEmail({
   businessName,
   businessLogoUrl,
   adminOrderUrl,
+  deliveryMethod,
 }: NewOrderNotificationEmailProps) {
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -64,6 +66,9 @@ export default function NewOrderNotificationEmail({
           <br />
           {customerEmail}
         </Text>
+        {deliveryMethod === "pickup" && (
+          <Text style={fulfillmentBadge}>Fulfillment: In-store pickup</Text>
+        )}
       </Section>
 
       <Section style={itemsSection}>
@@ -274,4 +279,15 @@ const note = {
   lineHeight: "20px",
   color: "#6b7280",
   textAlign: "center" as const,
+};
+
+const fulfillmentBadge = {
+  fontSize: "13px",
+  fontWeight: "600" as const,
+  color: "#1d4ed8",
+  backgroundColor: "#eff6ff",
+  borderRadius: "4px",
+  padding: "4px 10px",
+  marginTop: "8px",
+  display: "inline-block" as const,
 };

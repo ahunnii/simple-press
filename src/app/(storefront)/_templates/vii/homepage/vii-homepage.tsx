@@ -1,4 +1,6 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import {
   parseTemplateIframeValue,
   parseTemplateListRows,
@@ -18,13 +20,19 @@ import { ViiDetroitSection } from "./vii-detroit-section";
 import { ViiHeroSection } from "./vii-hero-section";
 import { ViiImageBand } from "./vii-image-band";
 import { ViiInstagramStrip } from "./vii-instagram-strip";
+import { ViiPopup } from "./vii-popup";
 import { ViiProductRail } from "./vii-product-rail";
 import { ViiStorySection } from "./vii-story-section";
 import { ViiTestimonialQuote } from "./vii-testimonial-quote";
 import { ViiVideoFeature } from "./vii-video-feature";
 
-export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
-  const homepage = await api.business.getHomepage();
+export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
+  const [homepage, { isEnabled }] = await Promise.all([
+    api.business.getHomepage(),
+    getBusinessFlags(),
+  ]);
+
+  const popup = resolvePopup(props?.business?.siteContent, isEnabled("popups"));
 
   // Blog posts for the journal section. `getBlogPages` is gated behind the
   // "blog" feature flag, so when it's disabled the catch yields an empty array
@@ -169,6 +177,7 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
+      {popup && <ViiPopup popup={popup} />}
       <PageTransition>
         {/* 1. Hero */}
         <ViiHeroSection

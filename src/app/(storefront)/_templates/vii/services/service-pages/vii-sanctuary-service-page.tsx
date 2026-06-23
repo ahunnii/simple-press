@@ -247,7 +247,8 @@ function SanctuaryHero({
             width: 44,
             height: 44,
             borderRadius: "50%",
-            border: "1px solid color-mix(in srgb, var(--vii-paper) 50%, transparent)",
+            border:
+              "1px solid color-mix(in srgb, var(--vii-paper) 50%, transparent)",
             background: "color-mix(in srgb, var(--vii-navy) 55%, transparent)",
             color: "var(--vii-paper)",
             cursor: "pointer",
@@ -294,7 +295,7 @@ function SanctuaryIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <p
@@ -336,7 +337,7 @@ function SanctuaryIntro({
         {(bodyJson ?? bodyFallback) && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             {bodyJson ? (
@@ -385,7 +386,7 @@ function BenefitsStrip({ benefits }: { benefits: string[] }) {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{
           maxWidth: 1100,
           margin: "0 auto",
@@ -448,7 +449,7 @@ function TreatmentCard({
   return (
     <article
       ref={ref}
-      className={`vii-reveal${visible ? " is-visible" : ""}`}
+      className={`vii-reveal${visible ? "is-visible" : ""}`}
       style={{
         transitionDelay: `${index * 0.07}s`,
         background: "var(--vii-paper)",
@@ -730,7 +731,7 @@ function TreatmentMenu({
         {/* Section heading */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
           style={{ marginBottom: "clamp(40px, 6vw, 64px)" }}
         >
           <p

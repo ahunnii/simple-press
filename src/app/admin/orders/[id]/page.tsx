@@ -13,8 +13,10 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
+import { CopyAddressButton } from "../_components/copy-address-button";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
+import { MarkReadyForPickup } from "../_components/mark-ready-for-pickup";
 import { OrderMoreOptions } from "../_components/order-more-options";
 import { OrderNotes } from "../_components/order-notes";
 import { RefundHandler } from "../_components/refund-handler";
@@ -110,6 +112,15 @@ export default async function OrderDetailPage({ params }: Props) {
               Fulfillment: {order.fulfillmentStatus}
             </Badge>
 
+            {order.deliveryMethod === "pickup" && (
+              <Badge
+                variant="outline"
+                className="border-amber-300 bg-amber-50 text-amber-700"
+              >
+                Pickup
+              </Badge>
+            )}
+
             {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
           </div>
         </div>
@@ -137,25 +148,25 @@ export default async function OrderDetailPage({ params }: Props) {
                         className="flex items-center justify-between border-b py-4 last:border-0"
                       >
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="text-foreground font-medium">
                             {item.productName}
                           </p>
                           {item.variantName && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                               {item.variantName}
                             </p>
                           )}
                           {item.sku && (
-                            <p className="mt-1 text-xs text-muted-foreground">
+                            <p className="text-muted-foreground mt-1 text-xs">
                               SKU: {item.sku}
                             </p>
                           )}
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground mt-1 text-sm">
                             Qty: {item.quantity} × {formatPrice(item.price)}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-foreground">
+                          <p className="text-foreground font-semibold">
                             {formatPrice(item.total)}
                           </p>
                         </div>
@@ -163,7 +174,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <p className="py-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground py-2 text-sm">
                     No item breakdown was recorded for this order.
                   </p>
                 )}
@@ -182,7 +193,7 @@ export default async function OrderDetailPage({ params }: Props) {
                       <span className="text-muted-foreground">
                         Discount
                         {order.discountCode && (
-                          <span className="ml-2 rounded bg-muted px-2 py-0.5 font-mono text-xs">
+                          <span className="bg-muted ml-2 rounded px-2 py-0.5 font-mono text-xs">
                             {order.discountCode.code}
                           </span>
                         )}
@@ -242,10 +253,27 @@ export default async function OrderDetailPage({ params }: Props) {
               </Alert>
             )}
 
-            {/* Fulfillment Form — show when payment is confirmed and order not yet fulfilled.
-                Keyed on paymentStatus rather than order.status so the form reappears
+            {/* Fulfillment controls — branched by delivery method.
+                Keyed on paymentStatus rather than order.status so controls reappear
                 if fulfillmentStatus is manually reset to unfulfilled via the override. */}
-            {order.paymentStatus === "paid" &&
+            {order.deliveryMethod === "pickup" ? (
+              order.paymentStatus === "paid" &&
+              order.fulfillmentStatus !== "fulfilled" ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ready for Pickup</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4 text-sm">
+                      Notify the customer that their order is ready to collect
+                      in store. This will send them a pickup confirmation email.
+                    </p>
+                    <MarkReadyForPickup orderId={order.id} />
+                  </CardContent>
+                </Card>
+              ) : order.fulfillmentStatus === "fulfilled" ? null : null
+            ) : (
+              order.paymentStatus === "paid" &&
               order.fulfillmentStatus !== "fulfilled" && (
                 <FulfillmentForm
                   orderId={order.id}
@@ -253,7 +281,8 @@ export default async function OrderDetailPage({ params }: Props) {
                   customerEmail={order.customerEmail}
                   customerName={order.customerName ?? ""}
                 />
-              )}
+              )
+            )}
           </div>
 
           {/* Right Column - Actions */}
@@ -272,17 +301,22 @@ export default async function OrderDetailPage({ params }: Props) {
 
                 {order.paymentStatus === "paid" &&
                   order.fulfillmentStatus !== "fulfilled" && (
-                    <p className="mt-4 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mt-4 text-sm">
                       Payment received. Ready to fulfill.
                     </p>
                   )}
 
-                {order.fulfillmentStatus === "fulfilled" && (
-                  <ShipmentsPanel
-                    orderId={order.id}
-                    shipments={order.shipments}
-                  />
-                )}
+                {order.fulfillmentStatus === "fulfilled" &&
+                  (order.deliveryMethod === "pickup" ? (
+                    <p className="text-muted-foreground mt-4 text-sm">
+                      Customer notified — ready for pickup.
+                    </p>
+                  ) : (
+                    <ShipmentsPanel
+                      orderId={order.id}
+                      shipments={order.shipments}
+                    />
+                  ))}
               </CardContent>
             </Card>
 
@@ -293,63 +327,93 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
+                  <p className="text-muted-foreground text-sm">Name</p>
                   <p className="font-medium">{order.customerName}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-muted-foreground text-sm">Email</p>
                   <p className="font-medium">{order.customerEmail}</p>
                 </div>
 
                 {order.customerPhone && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="text-muted-foreground text-sm">Phone</p>
                     <p className="font-medium">{order.customerPhone}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Shipping Address */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle>Shipping Address</CardTitle>
-                <EditShippingAddressDialog
-                  orderId={order.id}
-                  address={order.shippingAddress ?? null}
-                  canAdd={!!order.customerId}
-                  allowedCountries={getAllowedCountries(
-                    business?.salesCountries ?? [],
+            {/* Shipping Address / Pickup Location */}
+            {order.deliveryMethod === "pickup" ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pickup Location</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {(business?.pickupLocation ?? business?.businessAddress) ? (
+                    <p className="text-foreground text-sm font-medium">
+                      {business?.pickupLocation ?? business?.businessAddress}
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No pickup location configured.
+                    </p>
                   )}
-                />
-              </CardHeader>
-              <CardContent>
-                {order.shippingAddress ? (
-                  <address className="text-foreground not-italic">
-                    {order.shippingAddress.firstName}{" "}
-                    {order.shippingAddress.lastName}
-                    <br />
-                    {order.shippingAddress.address1}
-                    <br />
-                    {order.shippingAddress.address2 && (
-                      <>
-                        {order.shippingAddress.address2}
-                        <br />
-                      </>
+                  {business?.pickupInstructions && (
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">
+                      {business.pickupInstructions}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle>Shipping Address</CardTitle>
+                  <div className="flex items-center gap-2">
+                    {order.shippingAddress && (
+                      <CopyAddressButton address={order.shippingAddress} />
                     )}
-                    {order.shippingAddress.city},{" "}
-                    {order.shippingAddress.province} {order.shippingAddress.zip}
-                    <br />
-                    {order.shippingAddress.country}
-                  </address>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No shipping address on file.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                    <EditShippingAddressDialog
+                      orderId={order.id}
+                      address={order.shippingAddress ?? null}
+                      canAdd={!!order.customerId}
+                      allowedCountries={getAllowedCountries(
+                        business?.salesCountries ?? [],
+                      )}
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {order.shippingAddress ? (
+                    <address className="text-foreground not-italic">
+                      {order.shippingAddress.firstName}{" "}
+                      {order.shippingAddress.lastName}
+                      <br />
+                      {order.shippingAddress.address1}
+                      <br />
+                      {order.shippingAddress.address2 && (
+                        <>
+                          {order.shippingAddress.address2}
+                          <br />
+                        </>
+                      )}
+                      {order.shippingAddress.city},{" "}
+                      {order.shippingAddress.province}{" "}
+                      {order.shippingAddress.zip}
+                      <br />
+                      {order.shippingAddress.country}
+                    </address>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No shipping address on file.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Notes — always visible and editable */}
             <OrderNotes
@@ -365,26 +429,28 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-muted-foreground text-sm">Status</p>
                   <p className="font-medium capitalize">
                     {order.paymentStatus}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Method</p>
+                  <p className="text-muted-foreground text-sm">Method</p>
                   <p className="font-medium">
                     {paymentMethodLabel(order.paymentMethod)}
                   </p>
                 </div>
                 {order.refundReason && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Refund Reason</p>
+                    <p className="text-muted-foreground text-sm">
+                      Refund Reason
+                    </p>
                     <p className="text-sm font-medium">{order.refundReason}</p>
                   </div>
                 )}
                 {order.stripePaymentIntentId && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Payment ID</p>
+                    <p className="text-muted-foreground text-sm">Payment ID</p>
                     <p className="font-mono text-xs">
                       {order.stripePaymentIntentId}
                     </p>

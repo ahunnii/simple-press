@@ -225,15 +225,14 @@ import { SledgeTestimonialsPage } from "./sledge/testimonials/sledge-testimonial
 // Vii (Skinbar VII)
 // ---------------------------------------------------------------------------
 import { ViiAboutPage } from "./vii/about/vii-about-page";
-import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
-import { ViiBlogPage } from "./vii/blog/vii-blog-page";
-import { ViiBlogPostPage } from "./vii/blog/vii-blog-post-page";
 import { ViiAccountSecurityPage } from "./vii/account/vii-account-security-page";
 import { ViiAccountSettingsPage } from "./vii/account/vii-account-settings-page";
 import { ViiAddressBookPage } from "./vii/account/vii-address-book-page";
 import { ViiOrderDetailPage } from "./vii/account/vii-order-detail-page";
 import { ViiOrdersPage } from "./vii/account/vii-orders-page";
 import { ViiPreferencesPage } from "./vii/account/vii-preferences-page";
+import { ViiBlogPage } from "./vii/blog/vii-blog-page";
+import { ViiBlogPostPage } from "./vii/blog/vii-blog-post-page";
 import { ViiCartPage } from "./vii/cart-checkout/vii-cart-page";
 import { ViiCheckoutPage } from "./vii/cart-checkout/vii-checkout-page";
 import { ViiCheckoutUnavailable } from "./vii/cart-checkout/vii-checkout-unavailable";
@@ -244,6 +243,7 @@ import { ViiContactPage } from "./vii/contact/vii-contact-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
+import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
 
 // ---------------------------------------------------------------------------
 // Types

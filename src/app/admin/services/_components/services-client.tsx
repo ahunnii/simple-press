@@ -122,8 +122,7 @@ export function ServicesClient({ services }: Props) {
         await bulkDeleteMutation.mutateAsync(id);
         succeeded++;
       } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Unknown error";
+        const msg = err instanceof Error ? err.message : "Unknown error";
         failures.push(msg);
       }
     }
@@ -254,8 +253,8 @@ export function ServicesClient({ services }: Props) {
       {!hasServices ? (
         <Card>
           <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <LayoutList className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
+              <LayoutList className="text-muted-foreground h-6 w-6" />
             </div>
             <CardTitle>No services yet</CardTitle>
             <CardDescription>
@@ -273,317 +272,315 @@ export function ServicesClient({ services }: Props) {
           </CardContent>
         </Card>
       ) : (
-          <>
-            {/* Search + Filter bar */}
-            <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-card p-4 shadow-sm">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                <div className="relative flex-1">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search services..."
-                    aria-label="Search services"
-                    value={search}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="w-full md:w-44">
-                  <Select
-                    value={filter}
-                    onValueChange={(v) => handleFilterChange(v as FilterValue)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All services" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Services</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="draft">Drafts</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {isFiltering && (
-                  <span className="text-muted-foreground text-sm">
-                    {filtered.length}{" "}
-                    {filtered.length === 1 ? "result" : "results"}
-                  </span>
-                )}
+        <>
+          {/* Search + Filter bar */}
+          <div className="bg-card sticky top-0 z-20 mb-6 rounded-lg border p-4 shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+              <div className="relative flex-1">
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  type="text"
+                  placeholder="Search services..."
+                  aria-label="Search services"
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </div>
-
-            {/* Bulk action bar */}
-            {hasSelection && (
-              <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-                <span className="text-sm font-medium text-blue-800">
-                  {selectedIds.size}{" "}
-                  {selectedIds.size === 1 ? "service" : "services"} selected
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setBulkDeleteOpen(true)}
-                    className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Delete</span>
-                  </Button>
-                </div>
-                <button
-                  className="ml-auto text-sm text-primary underline-offset-2 hover:underline"
-                  onClick={() => setSelectedIds(new Set())}
+              <div className="w-full md:w-44">
+                <Select
+                  value={filter}
+                  onValueChange={(v) => handleFilterChange(v as FilterValue)}
                 >
-                  Clear
-                </button>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="All services" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="draft">Drafts</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+              {isFiltering && (
+                <span className="text-muted-foreground text-sm">
+                  {filtered.length}{" "}
+                  {filtered.length === 1 ? "result" : "results"}
+                </span>
+              )}
+            </div>
+          </div>
 
-            {!hasResults ? (
+          {/* Bulk action bar */}
+          {hasSelection && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+              <span className="text-sm font-medium text-blue-800">
+                {selectedIds.size}{" "}
+                {selectedIds.size === 1 ? "service" : "services"} selected
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Delete</span>
+                </Button>
+              </div>
+              <button
+                className="text-primary ml-auto text-sm underline-offset-2 hover:underline"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          {!hasResults ? (
+            <Card>
+              <CardHeader className="items-center text-center">
+                <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
+                  <Search className="text-muted-foreground h-6 w-6" />
+                </div>
+                <CardTitle>No services match your filters</CardTitle>
+                <CardDescription>
+                  Try adjusting your search or status filter to find what
+                  you&apos;re looking for.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center pb-8">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearch("");
+                    setFilter("all");
+                    setPage(1);
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
               <Card>
-                <CardHeader className="items-center text-center">
-                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <Search className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <CardTitle>No services match your filters</CardTitle>
-                  <CardDescription>
-                    Try adjusting your search or status filter to find what
-                    you&apos;re looking for.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center pb-8">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSearch("");
-                      setFilter("all");
-                      setPage(1);
-                    }}
-                  >
-                    Clear filters
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                <Card>
-                  <Table>
-                    <TableCaption className="sr-only">Services</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead scope="col" className="w-10">
-                          <Checkbox
-                            id="select-all-services"
-                            checked={
-                              allFilteredSelected
-                                ? true
-                                : someFilteredSelected
-                                  ? "indeterminate"
-                                  : false
-                            }
-                            onCheckedChange={handleSelectAll}
-                            aria-label="Select all services"
-                            disabled={!hasResults}
-                          />
-                        </TableHead>
-                        <TableHead scope="col">Service</TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Items
-                        </TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Template
-                        </TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Status
-                        </TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Storefront
-                        </TableHead>
-                        <TableHead scope="col">
-                          <span className="sr-only">Actions</span>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paginated.map((service) => {
-                        const isSelected = selectedIds.has(service.id);
-                        return (
-                          <TableRow
-                            key={service.id}
-                            data-state={isSelected ? "selected" : undefined}
-                            onClick={() =>
-                              router.push(`/admin/services/${service.id}`)
-                            }
-                            className="cursor-pointer"
-                          >
-                            <TableCell onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => toggleCard(service.id)}
-                                aria-label={`Select ${service.name}`}
-                              />
-                            </TableCell>
+                <Table>
+                  <TableCaption className="sr-only">Services</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead scope="col" className="w-10">
+                        <Checkbox
+                          id="select-all-services"
+                          checked={
+                            allFilteredSelected
+                              ? true
+                              : someFilteredSelected
+                                ? "indeterminate"
+                                : false
+                          }
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all services"
+                          disabled={!hasResults}
+                        />
+                      </TableHead>
+                      <TableHead scope="col">Service</TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Items
+                      </TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Template
+                      </TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Status
+                      </TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Storefront
+                      </TableHead>
+                      <TableHead scope="col">
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginated.map((service) => {
+                      const isSelected = selectedIds.has(service.id);
+                      return (
+                        <TableRow
+                          key={service.id}
+                          data-state={isSelected ? "selected" : undefined}
+                          onClick={() =>
+                            router.push(`/admin/services/${service.id}`)
+                          }
+                          className="cursor-pointer"
+                        >
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleCard(service.id)}
+                              aria-label={`Select ${service.name}`}
+                            />
+                          </TableCell>
 
-                            <TableCell className="whitespace-normal">
-                              <div className="flex items-center gap-3">
-                                {service.image ? (
-                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                      src={service.image}
-                                      alt=""
-                                      loading="lazy"
-                                      className="h-full w-full object-cover"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="h-10 w-10 shrink-0 rounded bg-muted" />
-                                )}
-                                <div className="min-w-0">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <Link
-                                      href={`/admin/services/${service.id}`}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="font-medium hover:underline"
+                          <TableCell className="whitespace-normal">
+                            <div className="flex items-center gap-3">
+                              {service.image ? (
+                                <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={service.image}
+                                    alt=""
+                                    loading="lazy"
+                                    className="h-full w-full object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="bg-muted h-10 w-10 shrink-0 rounded" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Link
+                                    href={`/admin/services/${service.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="font-medium hover:underline"
+                                  >
+                                    {service.name}
+                                  </Link>
+                                  {!service.published && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="md:hidden"
                                     >
-                                      {service.name}
-                                    </Link>
-                                    {!service.published && (
-                                      <Badge
-                                        variant="secondary"
-                                        className="md:hidden"
-                                      >
-                                        Draft
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  {service.description && (
-                                    <p className="text-muted-foreground line-clamp-1 text-sm">
-                                      {service.description}
-                                    </p>
+                                      Draft
+                                    </Badge>
                                   )}
                                 </div>
-                              </div>
-                            </TableCell>
-
-                            <TableCell className="hidden md:table-cell">
-                              {service.items.length}
-                            </TableCell>
-
-                            <TableCell className="hidden md:table-cell">
-                              <Badge variant="outline" className="capitalize">
-                                {service.serviceTemplateId.replace(
-                                  "service-",
-                                  "Template ",
+                                {service.description && (
+                                  <p className="text-muted-foreground line-clamp-1 text-sm">
+                                    {service.description}
+                                  </p>
                                 )}
-                              </Badge>
-                            </TableCell>
+                              </div>
+                            </div>
+                          </TableCell>
 
-                            <TableCell className="hidden md:table-cell">
-                              {service.published ? (
-                                <Badge variant="default">Published</Badge>
-                              ) : (
-                                <Badge variant="secondary">Draft</Badge>
+                          <TableCell className="hidden md:table-cell">
+                            {service.items.length}
+                          </TableCell>
+
+                          <TableCell className="hidden md:table-cell">
+                            <Badge variant="outline" className="capitalize">
+                              {service.serviceTemplateId.replace(
+                                "service-",
+                                "Template ",
                               )}
-                            </TableCell>
+                            </Badge>
+                          </TableCell>
 
-                            <TableCell
-                              className="hidden md:table-cell"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {service.published && service.slug ? (
-                                <a
-                                  href={`/services/${service.slug}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-                                  aria-label={`View ${service.name} on storefront (opens in new tab)`}
+                          <TableCell className="hidden md:table-cell">
+                            {service.published ? (
+                              <Badge variant="default">Published</Badge>
+                            ) : (
+                              <Badge variant="secondary">Draft</Badge>
+                            )}
+                          </TableCell>
+
+                          <TableCell
+                            className="hidden md:table-cell"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {service.published && service.slug ? (
+                              <a
+                                href={`/services/${service.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+                                aria-label={`View ${service.name} on storefront (opens in new tab)`}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                <span>View</span>
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                  <span className="sr-only">
+                                    Actions for {service.name}
+                                  </span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/admin/services/${service.id}`}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setDeleteId(service.id)}
                                 >
-                                  <ExternalLink className="h-4 w-4" />
-                                  <span>View</span>
-                                </a>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </TableCell>
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Card>
 
-                            <TableCell onClick={(e) => e.stopPropagation()}>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="h-4 w-4" />
-                                    <span className="sr-only">
-                                      Actions for {service.name}
-                                    </span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link
-                                      href={`/admin/services/${service.id}`}
-                                    >
-                                      <Pencil className="mr-2 h-4 w-4" />
-                                      Edit
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive"
-                                    onClick={() => setDeleteId(service.id)}
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </Card>
-
-                {totalPages > 1 && (
-                  <div className="mt-8 flex flex-col items-center gap-2">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            aria-disabled={safePage <= 1}
-                            className={
-                              safePage <= 1
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-                        <PaginationItem>
-                          <span className="text-muted-foreground px-4 text-sm">
-                            Page {safePage} of {totalPages}
-                          </span>
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              setPage((p) => Math.min(totalPages, p + 1))
-                            }
-                            aria-disabled={safePage >= totalPages}
-                            className={
-                              safePage >= totalPages
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          aria-disabled={safePage <= 1}
+                          className={
+                            safePage <= 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                      <PaginationItem>
+                        <span className="text-muted-foreground px-4 text-sm">
+                          Page {safePage} of {totalPages}
+                        </span>
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setPage((p) => Math.min(totalPages, p + 1))
+                          }
+                          aria-disabled={safePage >= totalPages}
+                          className={
+                            safePage >= totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
 
       {/* Single Delete Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

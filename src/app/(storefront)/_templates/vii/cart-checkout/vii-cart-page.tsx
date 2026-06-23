@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { DefaultCartPageTemplateProps } from "../../types";
-import { resolveFields } from "..";
 
+import { resolveFields } from "..";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiCartContents } from "./vii-cart-contents";
 
@@ -37,10 +37,7 @@ export async function ViiCartPage({ business }: DefaultCartPageTemplateProps) {
       >
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           {/* Breadcrumb */}
-          <nav
-            aria-label="Breadcrumb"
-            style={{ marginBottom: 20 }}
-          >
+          <nav aria-label="Breadcrumb" style={{ marginBottom: 20 }}>
             <ol
               style={{
                 display: "flex",

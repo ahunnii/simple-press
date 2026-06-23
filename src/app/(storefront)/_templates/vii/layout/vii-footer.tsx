@@ -301,7 +301,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
         className="mx-auto flex flex-col gap-3 px-8 py-5 sm:flex-row sm:items-center sm:justify-between"
         style={{
           maxWidth: "1320px",
-          borderTop: "1px solid color-mix(in srgb, var(--vii-navy) 12%, transparent)",
+          borderTop:
+            "1px solid color-mix(in srgb, var(--vii-navy) 12%, transparent)",
         }}
       >
         <span

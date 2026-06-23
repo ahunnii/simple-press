@@ -108,13 +108,13 @@ export function ProductExporter() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
+    <div className="bg-muted/30 min-h-screen py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-foreground text-3xl font-bold">
             Export to WordPress
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Select products to export to WooCommerce
           </p>
         </div>
@@ -156,7 +156,7 @@ export function ProductExporter() {
             {/* Filters */}
             <div className="flex gap-4">
               <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   placeholder="Search products..."
                   aria-label="Search products"
@@ -198,14 +198,19 @@ export function ProductExporter() {
             {/* Products Table */}
             {isLoading ? (
               <div className="py-12 text-center" role="status">
-                <Loader2 aria-hidden="true" className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2
+                  aria-hidden="true"
+                  className="text-muted-foreground mx-auto h-8 w-8 animate-spin"
+                />
                 <span className="sr-only">Loading…</span>
-                <p className="mt-4 text-muted-foreground" aria-hidden="true">Loading products...</p>
+                <p className="text-muted-foreground mt-4" aria-hidden="true">
+                  Loading products...
+                </p>
               </div>
             ) : !products || products.length === 0 ? (
               <div className="py-12 text-center">
-                <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-                <p className="mt-4 text-muted-foreground">No products found</p>
+                <Package className="text-muted-foreground mx-auto h-12 w-12" />
+                <p className="text-muted-foreground mt-4">No products found</p>
                 {search && (
                   <Button
                     variant="link"
@@ -219,7 +224,9 @@ export function ProductExporter() {
             ) : (
               <div className="overflow-hidden rounded-lg border">
                 <Table>
-                  <caption className="sr-only">Products available for export</caption>
+                  <caption className="sr-only">
+                    Products available for export
+                  </caption>
                   <TableHeader>
                     <TableRow>
                       <TableHead scope="col" className="w-12">
@@ -258,8 +265,8 @@ export function ProductExporter() {
                                 className="h-10 w-10 rounded object-cover"
                               />
                             ) : (
-                              <div className="flex h-10 w-10 items-center justify-center rounded bg-muted">
-                                <Package className="h-5 w-5 text-muted-foreground" />
+                              <div className="bg-muted flex h-10 w-10 items-center justify-center rounded">
+                                <Package className="text-muted-foreground h-5 w-5" />
                               </div>
                             )}
                             <div>
@@ -273,7 +280,7 @@ export function ProductExporter() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="font-mono text-sm text-muted-foreground">
+                          <span className="text-muted-foreground font-mono text-sm">
                             {product.sku ?? "—"}
                           </span>
                         </TableCell>
@@ -284,7 +291,9 @@ export function ProductExporter() {
                               {product.inventoryQty} in stock
                             </span>
                           ) : (
-                            <span className="text-muted-foreground">Out of stock</span>
+                            <span className="text-muted-foreground">
+                              Out of stock
+                            </span>
                           )}
                         </TableCell>
                         <TableCell>

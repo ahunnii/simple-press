@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 
@@ -50,7 +50,8 @@ function FlowBlock({ testimonial }: { testimonial: Testimonial }) {
         breakInside: "avoid",
         marginBottom: "clamp(24px, 3.5vw, 44px)",
         paddingTop: "clamp(20px, 2.5vw, 28px)",
-        borderTop: "1px solid var(--vii-hairline, color-mix(in srgb, var(--vii-navy) 10%, transparent))",
+        borderTop:
+          "1px solid var(--vii-hairline, color-mix(in srgb, var(--vii-navy) 10%, transparent))",
       }}
     >
       {/* Opening quotation mark */}
@@ -220,7 +221,7 @@ export function ViiTestimonialsClient({
       >
         <div
           ref={heroRef}
-          className={`vii-reveal${heroVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${heroVisible ? "is-visible" : ""}`}
           style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}
         >
           {overline && (
@@ -290,13 +291,12 @@ export function ViiTestimonialsClient({
           aria-label="Featured testimonial"
           style={{
             background: "var(--vii-navy)",
-            padding:
-              "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
+            padding: "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
           }}
         >
           <div
             ref={featuredRef}
-            className={`vii-reveal${featuredVisible ? " is-visible" : ""}`}
+            className={`vii-reveal${featuredVisible ? "is-visible" : ""}`}
             style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}
           >
             {/* Optional photo */}
@@ -379,8 +379,7 @@ export function ViiTestimonialsClient({
         <section
           style={{
             background: "var(--vii-paper)",
-            padding:
-              "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
+            padding: "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
           }}
         >
           <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
@@ -410,7 +409,7 @@ export function ViiTestimonialsClient({
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div
               ref={flowRef}
-              className={`vii-reveal${flowVisible ? " is-visible" : ""}`}
+              className={`vii-reveal${flowVisible ? "is-visible" : ""}`}
               style={{
                 columns: "320px auto",
                 columnGap: "clamp(24px, 3.5vw, 44px)",
@@ -429,13 +428,12 @@ export function ViiTestimonialsClient({
         aria-labelledby="vii-testimonials-cta-heading"
         style={{
           background: "var(--vii-cream)",
-          padding:
-            "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
+          padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
         }}
       >
         <div
           ref={ctaRef}
-          className={`vii-reveal${ctaVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${ctaVisible ? "is-visible" : ""}`}
           style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}
         >
           <h2

@@ -1,7 +1,10 @@
 import { Inter, Poppins } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveBanner } from "~/lib/site-banner/resolve";
 
+import { DefaultAnnouncementBar } from "./default-announcement-bar";
 import { DefaultFooter } from "./default-footer";
 import { DefaultHeader } from "./default-header";
 
@@ -22,6 +25,9 @@ export async function DefaultLayout({
   business,
   children,
 }: DefaultLayoutTemplateProps) {
+  const { isEnabled } = await getBusinessFlags();
+  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+
   return (
     <div
       className={`${inter.variable} ${poppins.variable} default-template flex min-h-screen flex-col`}
@@ -33,6 +39,7 @@ export async function DefaultLayout({
       >
         Skip to main content
       </a>
+      {banner && <DefaultAnnouncementBar banner={banner} />}
       <DefaultHeader business={business} />
       <main id="main-content" className="flex-1">
         {children}

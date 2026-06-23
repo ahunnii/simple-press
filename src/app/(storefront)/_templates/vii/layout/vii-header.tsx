@@ -9,6 +9,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Menu, Phone, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
@@ -26,7 +27,11 @@ type NavLink = {
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function ViiHeader({
+  business,
+  session,
+  banner,
+}: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -184,17 +189,11 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     "vii.global.book-cta-text",
     "vii.global.book-cta-link",
     "vii.global.location-tag",
-    "vii.global.announcement-text",
-    "vii.global.announcement-link-text",
-    "vii.global.announcement-link",
     "vii.homepage.contact-phone",
   ]);
   const bookCtaText = g["vii.global.book-cta-text"] ?? "Book Now";
   const bookCtaLink = g["vii.global.book-cta-link"] ?? "/contact";
   const locationTag = g["vii.global.location-tag"] ?? "";
-  const announcementText = g["vii.global.announcement-text"] ?? "";
-  const announcementLinkText = g["vii.global.announcement-link-text"] ?? "";
-  const announcementLinkHref = g["vii.global.announcement-link"] ?? "/contact";
   const phone = g["vii.homepage.contact-phone"] ?? "";
 
   const businessName = business?.name ?? "";
@@ -247,7 +246,9 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
               letterSpacing: "0.32em",
               fontWeight: 400,
               textTransform: "uppercase",
-              color: dark ? "var(--vii-ink-soft)" : "color-mix(in srgb, var(--vii-paper) 70%, transparent)",
+              color: dark
+                ? "var(--vii-ink-soft)"
+                : "color-mix(in srgb, var(--vii-paper) 70%, transparent)",
               marginTop: "4px",
               transition: `color 0.4s ${ease}`,
             }}
@@ -281,7 +282,9 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     whiteSpace: "nowrap",
   });
 
-  const iconColor = solid ? "var(--vii-ink-soft)" : "color-mix(in srgb, var(--vii-paper) 85%, transparent)";
+  const iconColor = solid
+    ? "var(--vii-ink-soft)"
+    : "color-mix(in srgb, var(--vii-paper) 85%, transparent)";
 
   // ── Dropdown helpers ────────────────────────────────────────────────────────
   const dropdownKey = (side: "left" | "right", index: number) =>
@@ -359,9 +362,11 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 style={{
                   minWidth: "200px",
                   background: "var(--vii-paper)",
-                  border: "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)",
+                  border:
+                    "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)",
                   borderRadius: "var(--radius)",
-                  boxShadow: "0 12px 32px color-mix(in srgb, var(--vii-navy) 12%, transparent)",
+                  boxShadow:
+                    "0 12px 32px color-mix(in srgb, var(--vii-navy) 12%, transparent)",
                   padding: "6px 0",
                 }}
               >
@@ -539,14 +544,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     <>
       <header className="fixed top-0 right-0 left-0 z-50 w-full">
         {/* ── Announcement bar — top row, hides on scroll ── */}
-        {!scrolled && (
-          <ViiAnnouncementBar
-            businessId={business.id}
-            announcementText={announcementText}
-            announcementLinkText={announcementLinkText}
-            announcementLinkHref={announcementLinkHref}
-          />
-        )}
+        {!scrolled && banner && <ViiAnnouncementBar banner={banner} />}
 
         {/* ── Nav row ── */}
         <div
@@ -801,7 +799,10 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
           {/* Bottom: phone + Book CTA + account */}
           <div
             className="shrink-0 px-6 py-6"
-            style={{ borderTop: "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)" }}
+            style={{
+              borderTop:
+                "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)",
+            }}
           >
             <div className="flex items-center justify-between gap-4">
               {phone ? (
@@ -856,7 +857,8 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
                 fontWeight: 400,
                 padding: "14px",
                 background: "transparent",
-                border: "1px solid color-mix(in srgb, var(--vii-navy) 20%, transparent)",
+                border:
+                  "1px solid color-mix(in srgb, var(--vii-navy) 20%, transparent)",
                 color: "var(--vii-navy)",
                 textDecoration: "none",
                 borderRadius: "var(--radius)",

@@ -8,8 +8,8 @@ import {
   getPlatformMaintenance,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
-import { dollarsToCents } from "~/lib/prices";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
@@ -40,10 +40,13 @@ export const businessRouter = createTRPCRouter({
         customDomain: true,
         domainStatus: true,
         subdomain: true,
+        localBusinessEnabled: true,
         shippingType: true,
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        pickupLocation: true,
+        pickupInstructions: true,
         originState: true,
         shippingWeightTiers: true,
         shippingFallbackRate: true,
@@ -68,6 +71,8 @@ export const businessRouter = createTRPCRouter({
             metaDescription: true,
             metaKeywords: true,
             ogImage: true,
+            bannerConfig: true,
+            popupConfig: true,
           },
         },
       },
@@ -123,10 +128,13 @@ export const businessRouter = createTRPCRouter({
         subdomain: true,
         customDomain: true,
         domainStatus: true,
+        localBusinessEnabled: true,
         shippingType: true,
         shippingFlatRate: true,
         freeShippingThreshold: true,
         offersInStorePickup: true,
+        pickupLocation: true,
+        pickupInstructions: true,
         originState: true,
         shippingWeightTiers: true,
         shippingFallbackRate: true,
@@ -154,6 +162,8 @@ export const businessRouter = createTRPCRouter({
             socialLinks: true,
             customFields: true,
             previewCustomFields: true,
+            bannerConfig: true,
+            popupConfig: true,
           },
         },
       },
@@ -798,6 +808,8 @@ export const businessRouter = createTRPCRouter({
         freeShippingThreshold: z.number().int().min(0).nullable().optional(),
         offersInStorePickup: z.boolean(),
         salesCountries: z.array(z.enum(["CA", "MX"])).default([]),
+        pickupLocation: z.string().optional(),
+        pickupInstructions: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -808,7 +820,12 @@ export const businessRouter = createTRPCRouter({
         freeShippingThreshold,
         offersInStorePickup,
         salesCountries,
+        pickupLocation,
+        pickupInstructions,
       } = input;
+
+      const trimmedPickupLocation = pickupLocation?.trim();
+      const trimmedPickupInstructions = pickupInstructions?.trim();
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -822,6 +839,14 @@ export const businessRouter = createTRPCRouter({
               : null,
           offersInStorePickup,
           salesCountries,
+          pickupLocation:
+            offersInStorePickup && trimmedPickupLocation
+              ? trimmedPickupLocation
+              : null,
+          pickupInstructions:
+            offersInStorePickup && trimmedPickupInstructions
+              ? trimmedPickupInstructions
+              : null,
         },
       });
       return {
@@ -837,15 +862,26 @@ export const businessRouter = createTRPCRouter({
         metaDescription: z.string().optional(),
         metaKeywords: z.string().optional(),
         ogImage: z.string().optional(),
+        localBusinessEnabled: z.boolean().optional(),
+        allowAiCrawlers: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { metaTitle, metaDescription, metaKeywords, ogImage } = input;
+      const {
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        ogImage,
+        localBusinessEnabled,
+        allowAiCrawlers,
+      } = input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
         data: {
+          ...(localBusinessEnabled !== undefined && { localBusinessEnabled }),
+          ...(allowAiCrawlers !== undefined && { allowAiCrawlers }),
           siteContent: {
             upsert: {
               create: {
@@ -886,6 +922,8 @@ export const businessRouter = createTRPCRouter({
         defaultItemWeightLb,
         offersInStorePickup,
         salesCountries,
+        pickupLocation,
+        pickupInstructions,
       } = input;
 
       // Convert dollar strings → cents.
@@ -893,6 +931,8 @@ export const businessRouter = createTRPCRouter({
       const thresholdRaw = freeShippingThresholdDollars?.trim() ?? "";
       const freeShippingThresholdCents =
         thresholdRaw !== "" ? dollarsToCents(thresholdRaw) : null;
+      const trimmedPickupLocation = pickupLocation?.trim();
+      const trimmedPickupInstructions = pickupInstructions?.trim();
 
       await ctx.db.$transaction(async (tx) => {
         // Update Business fields.
@@ -907,6 +947,14 @@ export const businessRouter = createTRPCRouter({
             freeShippingThreshold: freeShippingThresholdCents,
             offersInStorePickup,
             salesCountries,
+            pickupLocation:
+              offersInStorePickup && trimmedPickupLocation
+                ? trimmedPickupLocation
+                : null,
+            pickupInstructions:
+              offersInStorePickup && trimmedPickupInstructions
+                ? trimmedPickupInstructions
+                : null,
           },
         });
 

@@ -33,6 +33,7 @@ export async function generateMetadata() {
     "/placeholder.svg";
 
   return {
+    metadataBase: new URL(canonicalBase),
     title: {
       template: `%s | ${business.name}`,
       default: business.siteContent?.metaTitle ?? business.name,

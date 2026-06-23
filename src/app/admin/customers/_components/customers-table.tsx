@@ -24,32 +24,53 @@ export function CustomersTable({ customers }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full">
           <caption className="sr-only">Customers</caption>
-          <thead className="border-b bg-muted">
+          <thead className="bg-muted border-b">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Name
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Email
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Orders
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Total Spent
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Marketing
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Joined
               </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-right text-xs font-medium tracking-wider uppercase"
+              >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border bg-card">
+          <tbody className="divide-border bg-card divide-y">
             {customers.map((customer) => {
               const name =
                 [customer.firstName, customer.lastName]
@@ -59,17 +80,17 @@ export function CustomersTable({ customers }: Props) {
               return (
                 <tr key={customer.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-foreground">
+                    <span className="text-foreground text-sm font-medium">
                       {name ?? <span className="text-muted-foreground">—</span>}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  <td className="text-muted-foreground px-6 py-4 text-sm">
                     {customer.email}
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  <td className="text-muted-foreground px-6 py-4 text-sm">
                     {customer.orderCount}
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-foreground">
+                  <td className="text-foreground px-6 py-4 text-sm font-medium">
                     {formatPrice(customer.totalSpent)}
                   </td>
                   <td className="px-6 py-4">
@@ -81,7 +102,7 @@ export function CustomersTable({ customers }: Props) {
                       {customer.acceptsMarketing ? "Yes" : "No"}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  <td className="text-muted-foreground px-6 py-4 text-sm">
                     {formatDate(customer.createdAt)}
                   </td>
                   <td className="px-6 py-4 text-right">

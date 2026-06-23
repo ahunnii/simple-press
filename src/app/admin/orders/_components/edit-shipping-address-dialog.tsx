@@ -61,7 +61,12 @@ const EMPTY: ShippingAddress = {
   phone: "",
 };
 
-export function EditShippingAddressDialog({ orderId, address, canAdd, allowedCountries }: Props) {
+export function EditShippingAddressDialog({
+  orderId,
+  address,
+  canAdd,
+  allowedCountries,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);

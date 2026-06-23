@@ -119,7 +119,9 @@ export function getRegionOptions(country: SupportedCountry): RegionOption[] {
   return MX_STATES;
 }
 
-export function getAllowedCountries(salesCountries: string[]): SupportedCountry[] {
+export function getAllowedCountries(
+  salesCountries: string[],
+): SupportedCountry[] {
   const extras: SupportedCountry[] = [];
   if (salesCountries.includes("CA")) extras.push("CA");
   if (salesCountries.includes("MX")) extras.push("MX");

@@ -293,8 +293,8 @@ export function CollectionsClient({ collections }: Props) {
       {!hasCollections ? (
         <Card>
           <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <FolderOpen className="h-6 w-6 text-muted-foreground" />
+            <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
+              <FolderOpen className="text-muted-foreground h-6 w-6" />
             </div>
             <CardTitle>No collections yet</CardTitle>
             <CardDescription>
@@ -312,354 +312,349 @@ export function CollectionsClient({ collections }: Props) {
           </CardContent>
         </Card>
       ) : (
-          <>
-            {/* Search + Filter bar (sticky so it stays reachable while scrolling) */}
-            <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-card p-4 shadow-sm">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                {/* Search */}
-                <div className="relative flex-1">
-                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search collections..."
-                    aria-label="Search collections"
-                    value={search}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-
-                {/* Published / Draft filter */}
-                <div className="w-full md:w-44">
-                  <Select
-                    value={filter}
-                    onValueChange={(v) => handleFilterChange(v as FilterValue)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All collections" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Collections</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="draft">Drafts</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Result count */}
-                {isFiltering && (
-                  <div className="flex items-center">
-                    <span className="text-muted-foreground text-sm">
-                      {filtered.length}{" "}
-                      {filtered.length === 1 ? "result" : "results"}
-                    </span>
-                  </div>
-                )}
+        <>
+          {/* Search + Filter bar (sticky so it stays reachable while scrolling) */}
+          <div className="bg-card sticky top-0 z-20 mb-6 rounded-lg border p-4 shadow-sm">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  type="text"
+                  placeholder="Search collections..."
+                  aria-label="Search collections"
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            </div>
 
-            {/* Bulk action bar */}
-            {hasSelection && (
-              <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-                <span className="text-sm font-medium text-blue-800">
-                  {selectedIds.size}{" "}
-                  {selectedIds.size === 1 ? "collection" : "collections"}{" "}
-                  selected
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleBulkPublish(true)}
-                    disabled={isBulkPending}
-                    className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
-                  >
-                    <Eye className="mr-1.5 h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Publish</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleBulkPublish(false)}
-                    disabled={isBulkPending}
-                    className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
-                  >
-                    <EyeOff className="mr-1.5 h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Unpublish</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setBulkDeleteOpen(true)}
-                    disabled={isBulkPending}
-                    className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Delete</span>
-                  </Button>
-                </div>
-                <button
-                  className="ml-auto text-sm text-primary underline-offset-2 hover:underline"
-                  onClick={() => setSelectedIds(new Set())}
+              {/* Published / Draft filter */}
+              <div className="w-full md:w-44">
+                <Select
+                  value={filter}
+                  onValueChange={(v) => handleFilterChange(v as FilterValue)}
                 >
-                  Clear
-                </button>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="All collections" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Collections</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="draft">Drafts</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            {/* No-match empty state */}
-            {!hasResults ? (
+              {/* Result count */}
+              {isFiltering && (
+                <div className="flex items-center">
+                  <span className="text-muted-foreground text-sm">
+                    {filtered.length}{" "}
+                    {filtered.length === 1 ? "result" : "results"}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Bulk action bar */}
+          {hasSelection && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+              <span className="text-sm font-medium text-blue-800">
+                {selectedIds.size}{" "}
+                {selectedIds.size === 1 ? "collection" : "collections"} selected
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkPublish(true)}
+                  disabled={isBulkPending}
+                  className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
+                >
+                  <Eye className="mr-1.5 h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Publish</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleBulkPublish(false)}
+                  disabled={isBulkPending}
+                  className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
+                >
+                  <EyeOff className="mr-1.5 h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Unpublish</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setBulkDeleteOpen(true)}
+                  disabled={isBulkPending}
+                  className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Delete</span>
+                </Button>
+              </div>
+              <button
+                className="text-primary ml-auto text-sm underline-offset-2 hover:underline"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          {/* No-match empty state */}
+          {!hasResults ? (
+            <Card>
+              <CardHeader className="items-center text-center">
+                <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
+                  <Search className="text-muted-foreground h-6 w-6" />
+                </div>
+                <CardTitle>No collections match your filters</CardTitle>
+                <CardDescription>
+                  Try adjusting your search or status filter to find what
+                  you&apos;re looking for.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center pb-8">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearch("");
+                    setFilter("all");
+                    setPage(1);
+                  }}
+                >
+                  Clear filters
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* Collections Table */}
               <Card>
-                <CardHeader className="items-center text-center">
-                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <Search className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <CardTitle>No collections match your filters</CardTitle>
-                  <CardDescription>
-                    Try adjusting your search or status filter to find what
-                    you&apos;re looking for.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-center pb-8">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSearch("");
-                      setFilter("all");
-                      setPage(1);
-                    }}
-                  >
-                    Clear filters
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-                {/* Collections Table */}
-                <Card>
-                  <Table>
-                    <TableCaption className="sr-only">Collections</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        {/* Select-all */}
-                        <TableHead scope="col" className="w-10">
-                          <Checkbox
-                            id="select-all-collections"
-                            checked={
-                              allFilteredSelected
-                                ? true
-                                : someFilteredSelected
-                                  ? "indeterminate"
-                                  : false
-                            }
-                            onCheckedChange={handleSelectAll}
-                            aria-label="Select all collections"
-                            disabled={!hasResults}
-                          />
-                        </TableHead>
-                        <TableHead scope="col">Collection</TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Products
-                        </TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Status
-                        </TableHead>
-                        <TableHead scope="col" className="hidden md:table-cell">
-                          Storefront
-                        </TableHead>
-                        <TableHead scope="col">
-                          <span className="sr-only">Actions</span>
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paginated.map((collection) => {
-                        const isSelected = selectedIds.has(collection.id);
-                        return (
-                          <TableRow
-                            key={collection.id}
-                            data-state={isSelected ? "selected" : undefined}
-                            onClick={() =>
-                              router.push(`/admin/collections/${collection.id}`)
-                            }
-                            className="cursor-pointer"
-                          >
-                            {/* Select */}
-                            <TableCell onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() =>
-                                  toggleCard(collection.id)
-                                }
-                                aria-label={`Select ${collection.name}`}
-                              />
-                            </TableCell>
+                <Table>
+                  <TableCaption className="sr-only">Collections</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      {/* Select-all */}
+                      <TableHead scope="col" className="w-10">
+                        <Checkbox
+                          id="select-all-collections"
+                          checked={
+                            allFilteredSelected
+                              ? true
+                              : someFilteredSelected
+                                ? "indeterminate"
+                                : false
+                          }
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all collections"
+                          disabled={!hasResults}
+                        />
+                      </TableHead>
+                      <TableHead scope="col">Collection</TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Products
+                      </TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Status
+                      </TableHead>
+                      <TableHead scope="col" className="hidden md:table-cell">
+                        Storefront
+                      </TableHead>
+                      <TableHead scope="col">
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginated.map((collection) => {
+                      const isSelected = selectedIds.has(collection.id);
+                      return (
+                        <TableRow
+                          key={collection.id}
+                          data-state={isSelected ? "selected" : undefined}
+                          onClick={() =>
+                            router.push(`/admin/collections/${collection.id}`)
+                          }
+                          className="cursor-pointer"
+                        >
+                          {/* Select */}
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => toggleCard(collection.id)}
+                              aria-label={`Select ${collection.name}`}
+                            />
+                          </TableCell>
 
-                            {/* Collection name + thumbnail */}
-                            <TableCell className="whitespace-normal">
-                              <div className="flex items-center gap-3">
-                                {collection.imageUrl ? (
-                                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
-                                    <Image
-                                      src={collection.imageUrl}
-                                      alt=""
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="h-10 w-10 shrink-0 rounded bg-muted" />
-                                )}
-                                <div className="min-w-0">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <Link
-                                      href={`/admin/collections/${collection.id}`}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="font-medium hover:underline"
+                          {/* Collection name + thumbnail */}
+                          <TableCell className="whitespace-normal">
+                            <div className="flex items-center gap-3">
+                              {collection.imageUrl ? (
+                                <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
+                                  <Image
+                                    src={collection.imageUrl}
+                                    alt=""
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="bg-muted h-10 w-10 shrink-0 rounded" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Link
+                                    href={`/admin/collections/${collection.id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="font-medium hover:underline"
+                                  >
+                                    {collection.name}
+                                  </Link>
+                                  {!collection.published && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="md:hidden"
                                     >
-                                      {collection.name}
-                                    </Link>
-                                    {!collection.published && (
-                                      <Badge
-                                        variant="secondary"
-                                        className="md:hidden"
-                                      >
-                                        Draft
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  {collection.description && (
-                                    <p className="text-muted-foreground line-clamp-1 text-sm">
-                                      {collection.description}
-                                    </p>
+                                      Draft
+                                    </Badge>
                                   )}
                                 </div>
+                                {collection.description && (
+                                  <p className="text-muted-foreground line-clamp-1 text-sm">
+                                    {collection.description}
+                                  </p>
+                                )}
                               </div>
-                            </TableCell>
+                            </div>
+                          </TableCell>
 
-                            {/* Products count */}
-                            <TableCell className="hidden md:table-cell">
-                              {collection._count.collectionProducts}
-                            </TableCell>
+                          {/* Products count */}
+                          <TableCell className="hidden md:table-cell">
+                            {collection._count.collectionProducts}
+                          </TableCell>
 
-                            {/* Status */}
-                            <TableCell className="hidden md:table-cell">
-                              {collection.published ? (
-                                <Badge variant="default">Published</Badge>
-                              ) : (
-                                <Badge variant="secondary">Draft</Badge>
-                              )}
-                            </TableCell>
+                          {/* Status */}
+                          <TableCell className="hidden md:table-cell">
+                            {collection.published ? (
+                              <Badge variant="default">Published</Badge>
+                            ) : (
+                              <Badge variant="secondary">Draft</Badge>
+                            )}
+                          </TableCell>
 
-                            {/* Storefront link */}
-                            <TableCell
-                              className="hidden md:table-cell"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {collection.published && collection.slug ? (
-                                <a
-                                  href={`/collections/${collection.slug}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-                                  aria-label={`View ${collection.name} on storefront (opens in new tab)`}
+                          {/* Storefront link */}
+                          <TableCell
+                            className="hidden md:table-cell"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {collection.published && collection.slug ? (
+                              <a
+                                href={`/collections/${collection.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
+                                aria-label={`View ${collection.name} on storefront (opens in new tab)`}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                <span>View</span>
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+
+                          {/* Actions */}
+                          <TableCell onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                  <span className="sr-only">
+                                    Actions for {collection.name}
+                                  </span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href={`/admin/collections/${collection.id}`}
+                                  >
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDuplicate(collection.id)}
+                                  disabled={duplicateMutation.isPending}
                                 >
-                                  <ExternalLink className="h-4 w-4" />
-                                  <span>View</span>
-                                </a>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </TableCell>
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  Duplicate
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setDeleteId(collection.id)}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Card>
 
-                            {/* Actions */}
-                            <TableCell onClick={(e) => e.stopPropagation()}>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="h-4 w-4" />
-                                    <span className="sr-only">
-                                      Actions for {collection.name}
-                                    </span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
-                                    <Link
-                                      href={`/admin/collections/${collection.id}`}
-                                    >
-                                      <Pencil className="mr-2 h-4 w-4" />
-                                      Edit
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleDuplicate(collection.id)
-                                    }
-                                    disabled={duplicateMutation.isPending}
-                                  >
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    Duplicate
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive"
-                                    onClick={() => setDeleteId(collection.id)}
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </Card>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-8 flex flex-col items-center gap-2">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            aria-disabled={safePage <= 1}
-                            className={
-                              safePage <= 1
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-                        <PaginationItem>
-                          <span className="text-muted-foreground px-4 text-sm">
-                            Page {safePage} of {totalPages}
-                          </span>
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              setPage((p) => Math.min(totalPages, p + 1))
-                            }
-                            aria-disabled={safePage >= totalPages}
-                            className={
-                              safePage >= totalPages
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setPage((p) => Math.max(1, p - 1))}
+                          aria-disabled={safePage <= 1}
+                          className={
+                            safePage <= 1
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                      <PaginationItem>
+                        <span className="text-muted-foreground px-4 text-sm">
+                          Page {safePage} of {totalPages}
+                        </span>
+                      </PaginationItem>
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() =>
+                            setPage((p) => Math.min(totalPages, p + 1))
+                          }
+                          aria-disabled={safePage >= totalPages}
+                          className={
+                            safePage >= totalPages
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
 
       {/* Single Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

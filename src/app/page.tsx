@@ -1,4 +1,9 @@
+import { headers } from "next/headers";
+import { permanentRedirect } from "next/navigation";
+
+import { enforceCanonicalHost } from "~/lib/canonical";
 import {
+  buildLocalBusinessSchema,
   buildOrganizationSchema,
   buildWebSiteSchema,
 } from "~/lib/structured-data";
@@ -45,6 +50,17 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
     return <PlatformLandingPageComponent />;
   }
 
+  // Canonical-host guard: redirect platform-subdomain requests to the active
+  // custom domain (308 permanent). enforceCanonicalHost returns null when no
+  // redirect is needed, making this loop-safe.
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "";
+  const pathname = headersList.get("x-pathname") ?? "/";
+  const canonicalRedirect = enforceCanonicalHost(business, host, pathname);
+  if (canonicalRedirect) {
+    permanentRedirect(canonicalRedirect);
+  }
+
   if (business.maintenance?.active) {
     return (
       <MaintenanceScreen
@@ -86,7 +102,13 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
   return (
     <HydrateClient>
       <JsonLd
-        data={[buildOrganizationSchema(business), buildWebSiteSchema(business)]}
+        data={[
+          buildOrganizationSchema(business),
+          buildWebSiteSchema(business),
+          ...(business.localBusinessEnabled
+            ? [buildLocalBusinessSchema(business)]
+            : []),
+        ]}
       />
       <TemplateLayout business={business}>
         <TemplateComponent business={business} />

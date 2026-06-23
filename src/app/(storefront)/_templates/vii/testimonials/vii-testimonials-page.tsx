@@ -1,6 +1,6 @@
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { PageTransition } from "~/components/page-animations";
 import { api } from "~/trpc/server";
+import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { ViiTestimonialsClient } from "./vii-testimonials-client";

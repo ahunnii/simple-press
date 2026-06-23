@@ -16,7 +16,7 @@ export function SetupStep({
   action,
 }: Props) {
   return (
-    <div className="flex items-start gap-4 rounded-lg border bg-card p-4">
+    <div className="bg-card flex items-start gap-4 rounded-lg border p-4">
       <div
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
           completed
@@ -28,8 +28,8 @@ export function SetupStep({
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-foreground">{title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <h3 className="text-foreground font-semibold">{title}</h3>
+        <p className="text-muted-foreground mt-1 text-sm">{description}</p>
         {action && <div className="mt-3">{action}</div>}
       </div>
 

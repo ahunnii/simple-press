@@ -6,8 +6,10 @@ import Link from "next/link";
 import { CreditCard, Loader2, Tag } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
-import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -21,7 +23,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -38,7 +39,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
-    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+    f.deliveryMethod === "ship" &&
+    f.state.trim().length > 0 &&
+    f.shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -182,6 +185,23 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
+                {f.deliveryMethod === "pickup" && (
+                  <div className="rounded-[var(--radius)] border border-gray-200 bg-[#f6f6f6] p-3 text-sm">
+                    <p className="font-medium text-[#0a0a0a]">
+                      Pickup location
+                    </p>
+                    <p className="mt-0.5 text-[#6b6b6b]">
+                      {f.shippingConfig.pickupLocation ??
+                        business.businessAddress ??
+                        "Pickup details will be confirmed by the store."}
+                    </p>
+                    {f.shippingConfig.pickupInstructions ? (
+                      <p className="mt-1 whitespace-pre-line text-[#6b6b6b]">
+                        {f.shippingConfig.pickupInstructions}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -195,7 +215,8 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     Shipping Address
                   </legend>
                   <p className="text-sm text-[#6b6b6b]">
-                    {f.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
+                    {f.shippingConfig.shippingType ===
+                    SHIPPING_TYPES.ZONE_WEIGHT
                       ? "We price shipping from this address. Make changes here before continuing to payment."
                       : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                   </p>
@@ -303,7 +324,9 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       </Label>
                       <Select
                         value={f.country}
-                        onValueChange={(v) => f.setCountry(v as SupportedCountry)}
+                        onValueChange={(v) =>
+                          f.setCountry(v as SupportedCountry)
+                        }
                       >
                         <SelectTrigger
                           id="country"
@@ -478,7 +501,10 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                         className="inline-flex items-center gap-1.5 text-[#6b6b6b]"
                         aria-live="polite"
                       >
-                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        <Loader2
+                          className="size-3.5 animate-spin"
+                          aria-hidden="true"
+                        />
                         Calculating…
                       </span>
                     ) : f.shippingPending ? (

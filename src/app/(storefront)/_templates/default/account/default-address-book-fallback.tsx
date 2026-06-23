@@ -11,7 +11,10 @@ export function DefaultAddressBookFallback({
 }: AccountAddressBookPageProps) {
   return (
     <DefaultAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+      <AddressBookContent
+        customer={customer}
+        salesCountries={business.salesCountries}
+      />
     </DefaultAccountLayout>
   );
 }

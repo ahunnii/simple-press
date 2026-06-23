@@ -6,9 +6,10 @@ import Link from "next/link";
 import { CreditCard, Loader2, Tag } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
-import { useCheckoutForm } from "~/hooks/use-checkout-form";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
-import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
   Select,
   SelectContent,
@@ -16,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { PhoneInput } from "~/components/inputs/phone-form-field";
 
 import { ViiOverline } from "../shared/vii-overline";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -60,7 +61,9 @@ export function ViiCheckoutForm({
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
-    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+    f.deliveryMethod === "ship" &&
+    f.state.trim().length > 0 &&
+    f.shippingPending;
 
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
@@ -183,9 +186,7 @@ export function ViiCheckoutForm({
                   placeholder="you@example.com"
                   required
                   aria-required="true"
-                  aria-invalid={
-                    submitAttempted && !f.email ? true : undefined
-                  }
+                  aria-invalid={submitAttempted && !f.email ? true : undefined}
                 />
               </div>
 
@@ -265,9 +266,7 @@ export function ViiCheckoutForm({
                 </h2>
               </div>
 
-              <div
-                style={{ padding: "clamp(24px, 3vw, 36px)" }}
-              >
+              <div style={{ padding: "clamp(24px, 3vw, 36px)" }}>
                 <div
                   role="group"
                   aria-label="Delivery method"
@@ -290,7 +289,8 @@ export function ViiCheckoutForm({
                           : "transparent",
                       cursor: "pointer",
                       textAlign: "left",
-                      transition: "border-color 0.15s ease, background 0.15s ease",
+                      transition:
+                        "border-color 0.15s ease, background 0.15s ease",
                     }}
                   >
                     <span
@@ -343,7 +343,8 @@ export function ViiCheckoutForm({
                           : "transparent",
                       cursor: "pointer",
                       textAlign: "left",
-                      transition: "border-color 0.15s ease, background 0.15s ease",
+                      transition:
+                        "border-color 0.15s ease, background 0.15s ease",
                     }}
                   >
                     <span
@@ -393,6 +394,61 @@ export function ViiCheckoutForm({
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
+                {f.deliveryMethod === "pickup" && (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      padding: "12px 14px",
+                      border: "1px solid var(--vii-hairline)",
+                      borderRadius: "var(--radius)",
+                      background: "var(--vii-cream)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--vii-navy)",
+                        margin: 0,
+                      }}
+                    >
+                      Pickup location
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 13,
+                        color: "var(--vii-ink-soft)",
+                        lineHeight: 1.5,
+                        margin: 0,
+                      }}
+                    >
+                      {f.shippingConfig.pickupLocation ??
+                        business.businessAddress ??
+                        "Pickup details will be confirmed by the store."}
+                    </p>
+                    {f.shippingConfig.pickupInstructions ? (
+                      <p
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 13,
+                          color: "var(--vii-ink-soft)",
+                          lineHeight: 1.5,
+                          whiteSpace: "pre-line",
+                          margin: 0,
+                        }}
+                      >
+                        {f.shippingConfig.pickupInstructions}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -683,11 +739,14 @@ export function ViiCheckoutForm({
             {/* Summary header */}
             <div
               style={{
-                padding: "clamp(20px, 2.5vw, 28px) clamp(20px, 2.5vw, 28px) 16px",
+                padding:
+                  "clamp(20px, 2.5vw, 28px) clamp(20px, 2.5vw, 28px) 16px",
                 borderBottom: "1px solid var(--vii-hairline)",
               }}
             >
-              <ViiOverline style={{ marginBottom: 8 }}>{summaryOverline}</ViiOverline>
+              <ViiOverline style={{ marginBottom: 8 }}>
+                {summaryOverline}
+              </ViiOverline>
               <h2
                 style={{
                   fontFamily: "var(--font-serif)",
@@ -722,7 +781,11 @@ export function ViiCheckoutForm({
                 {f.items.map((item) => (
                   <div
                     key={`${item.productId}-${item.variantId}`}
-                    style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      alignItems: "flex-start",
+                    }}
                   >
                     {/* Product image */}
                     <div
@@ -881,9 +944,7 @@ export function ViiCheckoutForm({
                       }}
                       aria-invalid={!!f.discountFieldError}
                       aria-describedby={
-                        f.discountFieldError
-                          ? "vii-discount-error"
-                          : undefined
+                        f.discountFieldError ? "vii-discount-error" : undefined
                       }
                       autoComplete="off"
                       style={{ paddingLeft: 22 }}
@@ -969,9 +1030,8 @@ export function ViiCheckoutForm({
                       margin: 0,
                     }}
                   >
-                    Discount applied:{" "}
-                    <strong>{f.discountCodeLabel}</strong> — you saved{" "}
-                    {formatPrice(f.discountAmount)}
+                    Discount applied: <strong>{f.discountCodeLabel}</strong> —
+                    you saved {formatPrice(f.discountAmount)}
                   </p>
                 )}
               </div>
@@ -1073,7 +1133,10 @@ export function ViiCheckoutForm({
                         style={{ color: "var(--vii-ink-soft)" }}
                         aria-live="polite"
                       >
-                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        <Loader2
+                          className="size-3.5 animate-spin"
+                          aria-hidden="true"
+                        />
                         Calculating…
                       </span>
                     ) : f.shippingPending ? (
@@ -1173,7 +1236,10 @@ export function ViiCheckoutForm({
                   textTransform: "uppercase",
                   borderRadius: "var(--radius)",
                   border: "none",
-                  cursor: f.isProcessing || shippingCalculating ? "not-allowed" : "pointer",
+                  cursor:
+                    f.isProcessing || shippingCalculating
+                      ? "not-allowed"
+                      : "pointer",
                   transition: "background 0.2s ease, opacity 0.2s ease",
                   opacity: f.isProcessing || shippingCalculating ? 0.7 : 1,
                 }}

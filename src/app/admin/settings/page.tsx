@@ -1,7 +1,11 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+
 import { TrailHeader } from "../_components/trail-header";
 import { SettingsDashboard } from "./_components/settings-dashboard";
 
 export default async function SettingsPage() {
+  const { flags } = await getBusinessFlags();
+
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Settings" }]} />
@@ -14,7 +18,7 @@ export default async function SettingsPage() {
           </div>
         </div>
 
-        <SettingsDashboard />
+        <SettingsDashboard flags={flags} />
       </div>
     </>
   );

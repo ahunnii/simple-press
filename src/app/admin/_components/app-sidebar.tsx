@@ -3,9 +3,15 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { IconHelp, IconMail, IconSettings, IconTerminal } from "@tabler/icons-react";
+import {
+  IconHelp,
+  IconMail,
+  IconSettings,
+  IconTerminal,
+} from "@tabler/icons-react";
 import { Building2, Globe, Users } from "lucide-react";
 
+import type { NavSection } from "~/app/admin/_lib/admin-nav";
 import type { Session } from "~/server/better-auth/config";
 import { env } from "~/env";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
@@ -18,14 +24,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import {
-  NAV_ITEMS,
-  NAV_SECTION_LABELS,
-  type NavSection,
-} from "~/app/admin/_lib/admin-nav";
 import { NavMain } from "~/app/admin/_components/nav-main";
 import { NavSecondary } from "~/app/admin/_components/nav-secondary";
 import { NavUser } from "~/app/admin/_components/nav-user";
+import { NAV_ITEMS, NAV_SECTION_LABELS } from "~/app/admin/_lib/admin-nav";
 
 import WelcomeNotification from "./welcome-notification";
 
@@ -110,7 +112,9 @@ export function AppSidebar({
       const items = NAV_ITEMS.filter((item) => {
         if (item.section !== section) return false;
         if (!item.featureKey) return true;
-        return isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey);
+        return (
+          isEnabled(item.featureKey) && !isDisabledByDependency(item.featureKey)
+        );
       }).map((item) => ({
         title: item.title,
         url: item.href,
@@ -135,7 +139,7 @@ export function AppSidebar({
                   <IconTerminal className="size-8" />
                   simple_press
                 </span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {businessName ?? "Business"}
                 </span>
               </Link>
@@ -145,7 +149,11 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         {groupedNav.map((group) => (
-          <NavMain key={group.section} items={group.items} label={group.label} />
+          <NavMain
+            key={group.section}
+            items={group.items}
+            label={group.label}
+          />
         ))}
         {navData.navPlatformAdmin.length > 0 && (
           <NavMain items={navData.navPlatformAdmin} label="Platform" />

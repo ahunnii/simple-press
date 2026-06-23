@@ -106,18 +106,18 @@ function SortableProductRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 rounded border bg-card p-3"
+      className="bg-card flex items-center gap-3 rounded border p-3"
     >
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="focus-visible:ring-ring flex h-9 w-9 cursor-move items-center justify-center text-muted-foreground hover:text-foreground focus-visible:ring-1 focus-visible:outline-none"
+        className="focus-visible:ring-ring text-muted-foreground hover:text-foreground flex h-9 w-9 cursor-move items-center justify-center focus-visible:ring-1 focus-visible:outline-none"
         {...attributes}
         {...listeners}
       >
         <GripVertical className="h-4 w-4" />
       </button>
-      <div className="relative h-10 w-10 shrink-0 rounded bg-muted">
+      <div className="bg-muted relative h-10 w-10 shrink-0 rounded">
         <Image
           src={product.images[0]?.url ?? "/placeholder.svg"}
           alt={product.name}
@@ -127,14 +127,14 @@ function SortableProductRow({
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{product.name}</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           ${(product.price / 100).toFixed(2)}
         </p>
       </div>
       <button
         type="button"
         aria-label={`Remove ${product.name}`}
-        className="focus-visible:ring-ring flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-1 focus-visible:outline-none"
+        className="focus-visible:ring-ring text-muted-foreground hover:bg-muted hover:text-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-full focus-visible:ring-1 focus-visible:outline-none"
         onClick={onRemove}
       >
         <X className="h-4 w-4" />
@@ -466,7 +466,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-muted/30"
+          className="bg-muted/30 min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -846,7 +846,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                             {/* Sortable ordered list of selected products */}
                             {ids.length > 0 && (
                               <div className="mb-4">
-                                <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
                                   Selected — drag to reorder
                                 </p>
                                 <DndContext
@@ -877,7 +877,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
 
                             {/* Search + checkbox list for adding/removing */}
                             <div className="relative mb-3">
-                              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                               <Input
                                 type="search"
                                 placeholder="Search products..."
@@ -892,7 +892,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                             <ScrollArea className="h-72 min-h-0 overflow-hidden">
                               <div className="space-y-2">
                                 {filteredProducts.length === 0 ? (
-                                  <p className="py-6 text-center text-sm text-muted-foreground">
+                                  <p className="text-muted-foreground py-6 text-center text-sm">
                                     No products match &ldquo;{productSearch}
                                     &rdquo;
                                   </p>
@@ -900,7 +900,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                                   filteredProducts.map((product) => (
                                     <div
                                       key={product.id}
-                                      className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-muted/50"
+                                      className="hover:bg-muted/50 flex cursor-pointer items-center gap-3 rounded border p-3"
                                       onClick={() => toggleProduct(product.id)}
                                     >
                                       <span
@@ -917,7 +917,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                                           }}
                                         />
                                       </span>
-                                      <div className="relative h-12 w-12 shrink-0 rounded bg-muted">
+                                      <div className="bg-muted relative h-12 w-12 shrink-0 rounded">
                                         <Image
                                           src={
                                             product.images[0]?.url ??
@@ -932,7 +932,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                                         <p className="font-medium">
                                           {product.name}
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-muted-foreground text-sm">
                                           ${(product.price / 100).toFixed(2)}
                                         </p>
                                       </div>
@@ -942,7 +942,7 @@ export function CollectionForm({ collection, allProducts }: Props) {
                               </div>
                             </ScrollArea>
 
-                            <p className="mt-4 text-sm text-muted-foreground">
+                            <p className="text-muted-foreground mt-4 text-sm">
                               {ids.length} product
                               {ids.length !== 1 ? "s" : ""} selected
                               {productSearch &&

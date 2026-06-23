@@ -477,7 +477,7 @@ export function PoliciesManager({ business }: Props) {
   const isDirty = allForms.some((form) => form.formState.isDirty);
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="bg-muted/40 min-h-screen">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">

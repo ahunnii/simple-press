@@ -33,8 +33,8 @@ function StepRow({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-step-row${reversed ? " is-reversed" : ""}${
-        visible ? " is-visible" : ""
+      className={`vii-reveal vii-step-row${reversed ? "is-reversed" : ""}${
+        visible ? "is-visible" : ""
       }`}
       style={{
         display: "grid",
@@ -146,7 +146,7 @@ export function ViiAboutSteps({
         {/* Header */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
           style={{
             textAlign: "center",
             maxWidth: 680,

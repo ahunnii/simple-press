@@ -85,11 +85,12 @@ export function PoolAdjustInventory({ pool, open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle>Adjust: {pool.name}</DialogTitle>
           <DialogDescription>
-            Set a new absolute quantity for this inventory pool and record a reason for the change.
+            Set a new absolute quantity for this inventory pool and record a
+            reason for the change.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mb-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground mb-2 text-sm">
           Current quantity: <strong>{pool.inventoryQty}</strong>
         </div>
 

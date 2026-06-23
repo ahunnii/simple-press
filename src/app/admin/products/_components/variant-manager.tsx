@@ -342,7 +342,7 @@ export function VariantManager({
       <CardContent className="space-y-4">
         {/* Options Editor */}
         {showOptionsEditor && (
-          <div className="space-y-4 rounded-lg border bg-muted p-4">
+          <div className="bg-muted space-y-4 rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <h4 className="font-medium">Variant Options</h4>
               <Button
@@ -415,7 +415,7 @@ export function VariantManager({
                 onCheckedChange={toggleSelectAll}
                 aria-label="Select all variants"
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {selectedIndices.size > 0
                   ? `${selectedIndices.size} of ${variants.length} selected`
                   : `${variants.length} variant${variants.length !== 1 ? "s" : ""}`}
@@ -491,7 +491,7 @@ export function VariantManager({
               {variants.map((variant, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 rounded-lg border bg-card p-3"
+                  className="bg-card flex items-center gap-3 rounded-lg border p-3"
                 >
                   <Checkbox
                     checked={selectedIndices.has(index)}
@@ -513,7 +513,7 @@ export function VariantManager({
                               ? "Change variant image"
                               : "Assign a gallery image"
                         }
-                        className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                        className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {variant.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -524,13 +524,13 @@ export function VariantManager({
                             className="h-12 w-12 rounded object-cover"
                           />
                         ) : (
-                          <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                          <ImageIcon className="text-muted-foreground h-5 w-5" />
                         )}
                       </button>
                     </PopoverTrigger>
                     {images.length > 0 && (
                       <PopoverContent className="w-56 p-2" align="start">
-                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                        <p className="text-muted-foreground mb-2 text-xs font-medium">
                           Pick a gallery image
                         </p>
                         <div className="grid grid-cols-4 gap-1">
@@ -541,7 +541,7 @@ export function VariantManager({
                             onClick={() =>
                               updateVariant(index, "imageUrl", null)
                             }
-                            className={`flex h-10 w-10 items-center justify-center rounded border text-xs text-muted-foreground hover:border-border ${
+                            className={`text-muted-foreground hover:border-border flex h-10 w-10 items-center justify-center rounded border text-xs ${
                               !variant.imageUrl
                                 ? "border-blue-500 ring-1 ring-blue-500"
                                 : "border-border"
@@ -557,7 +557,7 @@ export function VariantManager({
                               onClick={() =>
                                 updateVariant(index, "imageUrl", img.url)
                               }
-                              className={`overflow-hidden rounded border hover:border-border ${
+                              className={`hover:border-border overflow-hidden rounded border ${
                                 variant.imageUrl === img.url
                                   ? "border-blue-500 ring-1 ring-blue-500"
                                   : "border-border"
@@ -580,14 +580,16 @@ export function VariantManager({
 
                   <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-5">
                     <div>
-                      <Label className="text-xs text-muted-foreground">Name</Label>
+                      <Label className="text-muted-foreground text-xs">
+                        Name
+                      </Label>
                       <p className="text-sm font-medium">{variant.name}</p>
                     </div>
 
                     <div>
                       <Label
                         htmlFor={`sku-${index}`}
-                        className="text-xs text-muted-foreground"
+                        className="text-muted-foreground text-xs"
                       >
                         SKU
                       </Label>
@@ -606,7 +608,7 @@ export function VariantManager({
                     <div>
                       <Label
                         htmlFor={`price-${index}`}
-                        className="text-xs text-muted-foreground"
+                        className="text-muted-foreground text-xs"
                       >
                         Price ($)
                       </Label>
@@ -629,7 +631,7 @@ export function VariantManager({
                     <div>
                       <Label
                         htmlFor={`compare-at-price-${index}`}
-                        className="text-xs text-muted-foreground"
+                        className="text-muted-foreground text-xs"
                       >
                         Compare At ($)
                       </Label>
@@ -657,7 +659,7 @@ export function VariantManager({
                       <div>
                         <Label
                           htmlFor={`qty-${index}`}
-                          className="text-xs text-muted-foreground"
+                          className="text-muted-foreground text-xs"
                         >
                           Stock
                         </Label>
@@ -691,7 +693,7 @@ export function VariantManager({
         )}
 
         {variants.length === 0 && !showOptionsEditor && (
-          <p className="py-4 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground py-4 text-center text-sm">
             No variants added. This product has a single variant.
           </p>
         )}

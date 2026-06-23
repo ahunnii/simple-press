@@ -77,7 +77,7 @@ export function ImageEditModal({
 
           <div className="space-y-4 py-4">
             {/* Image Preview */}
-            <div className="aspect-video overflow-hidden rounded-lg bg-muted">
+            <div className="bg-muted aspect-video overflow-hidden rounded-lg">
               <img
                 src={image.url}
                 alt={altText ?? ""}
@@ -98,10 +98,10 @@ export function ImageEditModal({
                 maxLength={ALT_MAX}
               />
               <div className="mt-1 flex items-start justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Used by screen readers and when image can&apos;t load
                 </p>
-                <span className="shrink-0 text-xs text-muted-foreground">
+                <span className="text-muted-foreground shrink-0 text-xs">
                   {altText.length}/{ALT_MAX}
                 </span>
               </div>
@@ -120,10 +120,10 @@ export function ImageEditModal({
                 maxLength={CAPTION_MAX}
               />
               <div className="mt-1 flex items-start justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Displayed below or over the image if captions are enabled
                 </p>
-                <span className="shrink-0 text-xs text-muted-foreground">
+                <span className="text-muted-foreground shrink-0 text-xs">
                   {caption.length}/{CAPTION_MAX}
                 </span>
               </div>

@@ -242,7 +242,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
-        className="min-h-screen bg-muted"
+        className="bg-muted min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -369,7 +369,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
                 <div>
                   <div className="space-y-2 pb-4">
                     <Label className="block">Social Links</Label>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Want to promote your social media accounts? Add your
                       social media links here and they will be displayed in the
                       footer.

@@ -2,17 +2,23 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { viiAboutData, viiAboutFieldGroups } from "./about";
-import { viiTestimonialsData, viiTestimonialsFieldGroups } from "./testimonials";
-import { viiBlogFields, viiBlogFieldGroup } from "./blog";
+import { viiBlogFieldGroup, viiBlogFields } from "./blog";
 import { viiCartData, viiCartFieldGroups } from "./cart-checkout/cart-fields";
 import {
   viiCheckoutData,
   viiCheckoutFieldGroups,
 } from "./cart-checkout/checkout-fields";
-import { viiOrderData, viiOrderFieldGroups } from "./cart-checkout/order-fields";
+import {
+  viiOrderData,
+  viiOrderFieldGroups,
+} from "./cart-checkout/order-fields";
 import { viiContactData, viiContactFieldGroups } from "./contact";
 import { viiHomepageData, viiHomepageFieldGroups } from "./homepage";
 import { viiShopData, viiShopFieldGroups } from "./shop";
+import {
+  viiTestimonialsData,
+  viiTestimonialsFieldGroups,
+} from "./testimonials";
 
 // ─── Global: Branding ─────────────────────────────────────────────────────────
 

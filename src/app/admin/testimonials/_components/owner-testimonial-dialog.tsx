@@ -172,7 +172,7 @@ export function OwnerTestimonialDialog({
 
           <div className="space-y-5 py-4">
             {/* Attribution row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="customerName">
                   Customer Name <span className="text-destructive">*</span>
@@ -200,7 +200,7 @@ export function OwnerTestimonialDialog({
             </div>
 
             {/* Title & Date */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="customerTitle">Customer Title (Optional)</Label>
                 <Input
@@ -226,7 +226,7 @@ export function OwnerTestimonialDialog({
             </div>
 
             {/* Testimonial headline & date */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="title">Headline / Title (Optional)</Label>
                 <Input
@@ -246,7 +246,7 @@ export function OwnerTestimonialDialog({
                   onChange={(e) => setTestimonialDate(e.target.value)}
                   className="mt-2"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Backdate if importing
                 </p>
               </div>
@@ -271,7 +271,7 @@ export function OwnerTestimonialDialog({
             {/* Photos (Optional, max 5) — upload */}
             <div>
               <Label>Photos (Optional, max 5)</Label>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Upload images to include with this testimonial
               </p>
               <div className="mt-2 space-y-3">
@@ -280,7 +280,7 @@ export function OwnerTestimonialDialog({
                     {photoUrls.map((url, i) => (
                       <div
                         key={url}
-                        className="relative h-24 w-24 overflow-hidden rounded-lg border bg-muted"
+                        className="bg-muted relative h-24 w-24 overflow-hidden rounded-lg border"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element -- thumbnails from upload URLs */}
                         <img
@@ -360,7 +360,7 @@ export function OwnerTestimonialDialog({
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
                 <Label htmlFor="isApproved">Approve Immediately</Label>
-                <p className="mt-0.5 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-0.5 text-sm">
                   Publish this testimonial right away (owner-added testimonials
                   can be approved on creation)
                 </p>

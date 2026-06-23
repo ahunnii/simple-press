@@ -310,11 +310,11 @@ export function TestimonialsList({
   const filterBar = (resultCount: number) => {
     const isFiltering = search.trim() !== "" || sourceFilter !== "all";
     return (
-      <div className="sticky top-0 z-20 mb-4 rounded-lg border bg-card p-4 shadow-sm">
+      <div className="bg-card sticky top-0 z-20 mb-4 rounded-lg border p-4 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               type="text"
               value={search}
@@ -498,7 +498,7 @@ export function TestimonialsList({
     if (totalPages <= 1) return null;
     const safePage = Math.min(page, totalPages);
     return (
-      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+      <div className="text-muted-foreground mt-4 flex items-center justify-between text-sm">
         <span>
           Showing {(safePage - 1) * PAGE_SIZE + 1}–
           {Math.min(safePage * PAGE_SIZE, totalItems)} of {totalItems}
@@ -590,7 +590,7 @@ export function TestimonialsList({
                 </p>
               )}
 
-              <p className="mb-3 line-clamp-3 text-sm text-foreground">
+              <p className="text-foreground mb-3 line-clamp-3 text-sm">
                 {testimonial.text}
               </p>
 
@@ -608,13 +608,13 @@ export function TestimonialsList({
                   </span>
                 )}
                 {testimonial.customerEmail && (
-                  <span className="ml-2 text-xs text-muted-foreground">
+                  <span className="text-muted-foreground ml-2 text-xs">
                     ({testimonial.customerEmail})
                   </span>
                 )}
               </div>
 
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 {testimonial.source === "owner"
                   ? format(new Date(testimonial.testimonialDate), "MMM d, yyyy")
                   : formatDistanceToNow(new Date(testimonial.createdAt), {
@@ -743,7 +743,7 @@ export function TestimonialsList({
 
   const emptyState = (message: string) => (
     <Card>
-      <CardContent className="py-12 text-center text-muted-foreground">
+      <CardContent className="text-muted-foreground py-12 text-center">
         <p>{message}</p>
       </CardContent>
     </Card>
@@ -784,13 +784,15 @@ export function TestimonialsList({
                   </Badge>
                 )}
               </div>
-              <p className="mb-1 font-medium text-foreground">
+              <p className="text-foreground mb-1 font-medium">
                 {displayName ?? invite.email}
               </p>
               {displayName && (
-                <p className="mb-2 text-sm text-muted-foreground">{invite.email}</p>
+                <p className="text-muted-foreground mb-2 text-sm">
+                  {invite.email}
+                </p>
               )}
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
                 <span>
                   Sent {format(new Date(invite.createdAt), "MMM d, yyyy")}
                 </span>
@@ -802,7 +804,7 @@ export function TestimonialsList({
                 )}
               </div>
               {status === "completed" && invite.usedAt && (
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Used {format(new Date(invite.usedAt), "MMM d, yyyy")}
                 </p>
               )}

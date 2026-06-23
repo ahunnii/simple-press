@@ -11,11 +11,12 @@ import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
+import { faqRouter } from "./routers/faq";
 import { featuresRouter } from "./routers/featues";
 import { galleryRouter } from "./routers/gallery";
-import { mediaRouter } from "./routers/media";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
+import { mediaRouter } from "./routers/media";
 import { orderRouter } from "./routers/order";
 import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
@@ -59,6 +60,7 @@ export const appRouter = createTRPCRouter({
   shipping: shippingRouter,
 
   external: externalRouter,
+  faq: faqRouter,
 
   upload: uploadRouter,
 });

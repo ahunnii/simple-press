@@ -3,6 +3,8 @@
 import { Cormorant_Garamond, DM_Sans, JetBrains_Mono } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
 
 import { NoiseAnnouncementBar } from "./noise-announcement-bar";
@@ -33,7 +35,11 @@ export async function NoiseLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const session = await getSession();
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
+    getBusinessFlags(),
+  ]);
+  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
   return (
     <div
       className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} noise visual-noise dark:noise`}
@@ -47,7 +53,7 @@ export async function NoiseLayout({
         Skip to main content
       </a>
       <NoiseRouteAnnouncer />
-      <NoiseAnnouncementBar businessId={business.id} />
+      {banner && <NoiseAnnouncementBar banner={banner} />}
       <NoiseHeader business={business} session={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}

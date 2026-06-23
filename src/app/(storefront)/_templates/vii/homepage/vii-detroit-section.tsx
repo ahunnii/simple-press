@@ -57,7 +57,7 @@ export function ViiDetroitSection({
         {/* ── Image ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",
@@ -98,7 +98,7 @@ export function ViiDetroitSection({
         {/* ── Text ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <p
@@ -163,7 +163,8 @@ export function ViiDetroitSection({
                 listStyle: "none",
                 margin: "28px 0 0",
                 padding: "20px 0 0",
-                borderTop: "1px solid color-mix(in srgb, var(--vii-navy) 15%, transparent)",
+                borderTop:
+                  "1px solid color-mix(in srgb, var(--vii-navy) 15%, transparent)",
               }}
             >
               {details.map((detail, i) => {

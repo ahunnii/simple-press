@@ -66,7 +66,7 @@ export function PoolsTable({ pools }: Props) {
       {pools.length === 0 ? (
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">No base units yet.</p>
-          <p className="mt-1 text-sm text-muted-foreground/70">
+          <p className="text-muted-foreground/70 mt-1 text-sm">
             Create your first base unit to start tracking shared inventory.
           </p>
           <Button
@@ -85,16 +85,28 @@ export function PoolsTable({ pools }: Props) {
               <caption className="sr-only">Inventory base units</caption>
               <thead className="border-b">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
                     Name
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
                     Current Qty
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
                     Products
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
                     Threshold
                   </th>
                   <th scope="col" className="relative px-6 py-3">
@@ -106,11 +118,11 @@ export function PoolsTable({ pools }: Props) {
                 {pools.map((pool) => (
                   <tr key={pool.id} className="hover:bg-muted/50">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-foreground">
+                      <div className="text-foreground font-medium">
                         {pool.name}
                       </div>
                       {pool.description && (
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-sm">
                           {pool.description}
                         </div>
                       )}
@@ -140,10 +152,10 @@ export function PoolsTable({ pools }: Props) {
                         </Button>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-foreground">
+                    <td className="text-foreground px-6 py-4">
                       {pool._count.products}
                     </td>
-                    <td className="px-6 py-4 text-foreground">
+                    <td className="text-foreground px-6 py-4">
                       {pool.lowInventoryThreshold ?? "—"}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -155,7 +167,9 @@ export function PoolsTable({ pools }: Props) {
                             className="h-9 w-9 p-0"
                           >
                             <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Actions for {pool.name}</span>
+                            <span className="sr-only">
+                              Actions for {pool.name}
+                            </span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -222,7 +236,9 @@ export function PoolsTable({ pools }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletePool.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletePool.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               disabled={deletePool.isPending}

@@ -6,8 +6,9 @@ import { useSearchParams } from "next/navigation";
 
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
-import { ViiOverline } from "../shared/vii-overline";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -111,7 +112,8 @@ function ViiNavyTextLink({
         fontWeight: 400,
         letterSpacing: "0.04em",
         textDecoration: "underline",
-        textDecorationColor: "color-mix(in srgb, var(--vii-paper) 40%, transparent)",
+        textDecorationColor:
+          "color-mix(in srgb, var(--vii-paper) 40%, transparent)",
         textUnderlineOffset: 3,
         opacity: 0.85,
         transition: "opacity 0.2s, text-decoration-color 0.2s",
@@ -119,12 +121,14 @@ function ViiNavyTextLink({
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLAnchorElement;
         el.style.opacity = "1";
-        el.style.textDecorationColor = "color-mix(in srgb, var(--vii-paper) 80%, transparent)";
+        el.style.textDecorationColor =
+          "color-mix(in srgb, var(--vii-paper) 80%, transparent)";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLAnchorElement;
         el.style.opacity = "0.85";
-        el.style.textDecorationColor = "color-mix(in srgb, var(--vii-paper) 40%, transparent)";
+        el.style.textDecorationColor =
+          "color-mix(in srgb, var(--vii-paper) 40%, transparent)";
       }}
     >
       {children}
@@ -222,7 +226,8 @@ export function ViiOrderConfirmation({
           justifyContent: "center",
           minHeight: "60vh",
           background: "var(--vii-cream)",
-          padding: "clamp(128px, 12vh, 168px) clamp(24px, 6vw, 96px) clamp(64px, 8vh, 96px)",
+          padding:
+            "clamp(128px, 12vh, 168px) clamp(24px, 6vw, 96px) clamp(64px, 8vh, 96px)",
         }}
       >
         <p
@@ -256,7 +261,8 @@ export function ViiOrderConfirmation({
           justifyContent: "center",
           minHeight: "60vh",
           background: "var(--vii-cream)",
-          padding: "clamp(128px, 12vh, 168px) clamp(24px, 6vw, 96px) clamp(64px, 8vh, 96px)",
+          padding:
+            "clamp(128px, 12vh, 168px) clamp(24px, 6vw, 96px) clamp(64px, 8vh, 96px)",
           textAlign: "center",
         }}
       >
@@ -304,13 +310,9 @@ export function ViiOrderConfirmation({
     .map((line) => line.trim())
     .filter(Boolean);
 
-  const formattedTotal =
-    orderDetails
-      ? formatOrderTotal(
-          orderDetails.amount_total,
-          orderDetails.currency,
-        )
-      : null;
+  const formattedTotal = orderDetails
+    ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency)
+    : null;
 
   return (
     // Plain wrapper — the layout already provides <main id="main-content">.
@@ -342,7 +344,8 @@ export function ViiOrderConfirmation({
             textAlign: "center",
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(18px)",
-            transition: "opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)",
+            transition:
+              "opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
           {/* Copper-light circle mark */}
@@ -381,7 +384,9 @@ export function ViiOrderConfirmation({
             }}
           >
             {thankYouHeading || "Thank"}
-            {(thankYouHeading || "Thank") && (thankYouAccent || "you.") ? " " : ""}
+            {(thankYouHeading || "Thank") && (thankYouAccent || "you.")
+              ? " "
+              : ""}
             {(thankYouAccent || "you.") && (
               <em
                 style={{

@@ -62,7 +62,7 @@ export function TestimonialSettings({
               >
                 Auto-approve testimonials
               </Label>
-              <p className="mt-0.5 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-sm">
                 When on, customer-submitted testimonials are published
                 immediately. When off (default), they land in a pending state
                 and must be approved in the Testimonials admin before appearing.

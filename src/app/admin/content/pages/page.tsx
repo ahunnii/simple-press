@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { api } from "~/trpc/server";
-
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
+
 import { TrailHeader } from "../../_components/trail-header";
 import { PagesList } from "./_components/pages-list";
 

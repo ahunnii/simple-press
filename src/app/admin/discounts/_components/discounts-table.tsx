@@ -41,22 +41,40 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
           <caption className="sr-only">Discount codes</caption>
           <thead className="border-b">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase"
+              >
                 Code
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase"
+              >
                 Discount
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase"
+              >
                 Usage
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase"
+              >
                 Expires
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium uppercase"
+              >
                 Status
               </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-right text-xs font-medium uppercase"
+              >
                 Actions
               </th>
             </tr>
@@ -67,19 +85,19 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
                 <td className="px-6 py-4">
                   <Link
                     href={`/admin/discounts/${discount.id}`}
-                    className="font-mono font-semibold text-foreground hover:underline"
+                    className="text-foreground font-mono font-semibold hover:underline"
                   >
                     {discount.code}
                   </Link>
                 </td>
-                <td className="px-6 py-4 text-sm text-foreground">
+                <td className="text-foreground px-6 py-4 text-sm">
                   {formatValue(discount.type, discount.value)}
                 </td>
-                <td className="px-6 py-4 text-sm text-muted-foreground">
+                <td className="text-muted-foreground px-6 py-4 text-sm">
                   {discount.usageCount}
                   {discount.usageLimit && ` / ${discount.usageLimit}`}
                 </td>
-                <td className="px-6 py-4 text-sm text-muted-foreground">
+                <td className="text-muted-foreground px-6 py-4 text-sm">
                   {formatDate(discount.expiresAt)}
                   {isExpired(discount.expiresAt) && (
                     <Badge variant="destructive" className="ml-2">
@@ -100,7 +118,7 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm">
-                      <Trash className="h-4 w-4 text-destructive" />
+                      <Trash className="text-destructive h-4 w-4" />
                     </Button>
                   </div>
                 </td>

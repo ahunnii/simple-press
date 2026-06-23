@@ -9,6 +9,7 @@ import {
   sendOrderCancelled,
   sendOrderConfirmation,
   sendOrderFulfilled,
+  sendOrderReadyForPickup,
   sendOrderRefunded,
   sendOrderShipped,
 } from "~/lib/email/templates";
@@ -129,6 +130,81 @@ export const orderRouter = createTRPCRouter({
           tags: {
             "trpc.procedure": "order.markAsFulfilled",
             "email.type": "fulfillment",
+          },
+        });
+      }
+
+      return updatedOrder;
+    }),
+
+  markReadyForPickup: ownerAdminProcedure
+    .use(featureGate("orders"))
+    .input(z.object({ orderId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const order = await ctx.db.order.findUnique({
+        where: { id: input.orderId, businessId },
+        include: {
+          business: {
+            include: { siteContent: { select: { logoUrl: true } } },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
+      }
+
+      if (order.deliveryMethod !== "pickup") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This order is not a pickup order",
+        });
+      }
+
+      const updatedOrder = await ctx.db.order.update({
+        where: { id: input.orderId },
+        data: {
+          fulfillmentStatus: "fulfilled",
+          status: order.paymentStatus === "paid" ? "completed" : order.status,
+        },
+      });
+
+      try {
+        await sendOrderReadyForPickup({
+          to: order.customerEmail,
+          orderNumber: order.orderNumber,
+          customerName: order.customerName ?? undefined,
+          pickupLocation:
+            order.business.pickupLocation ??
+            order.business.businessAddress ??
+            undefined,
+          pickupInstructions: order.business.pickupInstructions ?? undefined,
+          business: {
+            name: order.business.name,
+            ownerEmail: order.business.ownerEmail,
+            siteContent: order.business.siteContent,
+            subdomain: order.business.subdomain,
+            customDomain: order.business.customDomain,
+            domainStatus: order.business.domainStatus,
+          },
+        });
+        console.log(
+          `[Orders] Ready for pickup email sent for order #${order.orderNumber}`,
+        );
+      } catch (emailError) {
+        console.error(
+          "[Orders] Failed to send ready-for-pickup email:",
+          emailError,
+        );
+        Sentry.captureException(emailError, {
+          tags: {
+            "trpc.procedure": "order.markReadyForPickup",
+            "email.type": "ready-for-pickup",
           },
         });
       }

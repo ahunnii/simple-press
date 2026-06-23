@@ -184,9 +184,9 @@ export function ReviewsAdminList() {
             </div>
 
             {/* Product link */}
-            <p className="mb-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mb-1 text-xs">
               On:{" "}
-              <span className="font-medium text-foreground">
+              <span className="text-foreground font-medium">
                 {review.product.name}
               </span>
             </p>
@@ -197,7 +197,7 @@ export function ReviewsAdminList() {
             )}
 
             {/* Comment */}
-            <p className="mb-3 line-clamp-3 text-sm text-foreground">
+            <p className="text-foreground mb-3 line-clamp-3 text-sm">
               {review.comment}
             </p>
 
@@ -220,17 +220,17 @@ export function ReviewsAdminList() {
             <div className="text-sm">
               <span className="font-medium">{review.customerName}</span>
               {review.customerEmail && (
-                <span className="ml-2 text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-2 text-xs">
                   ({review.customerEmail})
                 </span>
               )}
               {review.customerTitle && (
-                <span className="ml-1 text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-1 text-xs">
                   · {review.customerTitle}
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-0.5 text-xs">
               {review.source === "owner"
                 ? format(new Date(review.reviewDate), "MMM d, yyyy")
                 : formatDistanceToNow(new Date(review.createdAt), {
@@ -279,7 +279,10 @@ export function ReviewsAdminList() {
                   disabled={approvingId === review.id}
                   onClick={() => {
                     setApprovingId(review.id);
-                    approveMutation.mutate({ id: review.id, isApproved: false });
+                    approveMutation.mutate({
+                      id: review.id,
+                      isApproved: false,
+                    });
                   }}
                 >
                   {approvingId === review.id ? (
@@ -328,10 +331,12 @@ export function ReviewsAdminList() {
 
   const Empty = ({ msg, sub }: { msg: string; sub?: string }) => (
     <Card>
-      <CardContent className="py-12 text-center text-sm text-muted-foreground">
-        {sub && <MessageSquare className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />}
-        <p className="font-medium text-foreground">{msg}</p>
-        {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
+      <CardContent className="text-muted-foreground py-12 text-center text-sm">
+        {sub && (
+          <MessageSquare className="text-muted-foreground/40 mx-auto mb-3 h-8 w-8" />
+        )}
+        <p className="text-foreground font-medium">{msg}</p>
+        {sub && <p className="text-muted-foreground mt-1 text-xs">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -343,7 +348,7 @@ export function ReviewsAdminList() {
           <h1>Product Reviews</h1>
           <p>Manage your product reviews</p>
           <div className="mt-4 flex items-center gap-3">
-            <h2 className="text-sm font-medium text-muted-foreground">
+            <h2 className="text-muted-foreground text-sm font-medium">
               Filter by source:
             </h2>
             <Select

@@ -126,7 +126,7 @@ export function SendInviteDialog() {
                 className="mt-2"
                 required
               />
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 If this email isn&apos;t a customer, we&apos;ll create one
                 automatically
               </p>
@@ -150,7 +150,7 @@ export function SendInviteDialog() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-xs">
                 How many photos this customer can add to their testimonial
               </p>
             </div>

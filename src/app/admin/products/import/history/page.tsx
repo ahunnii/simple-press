@@ -27,8 +27,8 @@ export default async function ImportHistoryPage() {
       />
       <div className="admin-container">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Import History</h1>
-          <p className="mt-2 text-muted-foreground">View your import history</p>
+          <h1 className="text-foreground text-3xl font-bold">Import History</h1>
+          <p className="text-muted-foreground mt-2">View your import history</p>
         </div>
         <Card>
           <div className="overflow-x-auto">
@@ -36,18 +36,47 @@ export default async function ImportHistoryPage() {
               <caption className="sr-only">Product import history</caption>
               <thead className="border-b">
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Date</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Filename</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Status</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Imported</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">Errors</th>
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
+                    Date
+                  </th>
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
+                    Filename
+                  </th>
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
+                    Status
+                  </th>
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
+                    Imported
+                  </th>
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
+                    Errors
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-border divide-y">
                 {imports.map((imp) => (
                   <tr key={imp.id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-foreground whitespace-nowrap">{new Date(imp.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-3 text-foreground">{imp.filename}</td>
+                    <td className="text-foreground px-4 py-3 whitespace-nowrap">
+                      {new Date(imp.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="text-foreground px-4 py-3">
+                      {imp.filename}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Badge
                         variant={
@@ -57,8 +86,12 @@ export default async function ImportHistoryPage() {
                         {imp.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-foreground">{imp.importedCount}</td>
-                    <td className="px-4 py-3 text-foreground">{imp.errorCount}</td>
+                    <td className="text-foreground px-4 py-3">
+                      {imp.importedCount}
+                    </td>
+                    <td className="text-foreground px-4 py-3">
+                      {imp.errorCount}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -187,7 +187,7 @@ function RitualPhilosophy({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}
       >
         {overline && (
@@ -272,7 +272,7 @@ function RitualStep({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-ritual-step${isReversed ? " is-reversed" : ""}${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-ritual-step${isReversed ? "is-reversed" : ""}${visible ? "is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",

@@ -4,6 +4,8 @@ export type ShippingConfig = {
   shippingFlatRate: number | null;
   freeShippingThreshold: number | null;
   offersInStorePickup: boolean;
+  pickupLocation: string | null;
+  pickupInstructions: string | null;
 };
 
 /** Fallback when cart UI is used without business context (legacy / unused routes). */
@@ -12,6 +14,8 @@ export const DEFAULT_SHIPPING_CONFIG: ShippingConfig = {
   shippingFlatRate: null,
   freeShippingThreshold: null,
   offersInStorePickup: false,
+  pickupLocation: null,
+  pickupInstructions: null,
 };
 
 export const SHIPPING_TYPES = {
@@ -91,12 +95,16 @@ export function shippingConfigFromBusiness(business: {
   shippingFlatRate: number | null;
   freeShippingThreshold: number | null;
   offersInStorePickup: boolean;
+  pickupLocation?: string | null;
+  pickupInstructions?: string | null;
 }): ShippingConfig {
   return {
     shippingType: business.shippingType,
     shippingFlatRate: business.shippingFlatRate,
     freeShippingThreshold: business.freeShippingThreshold,
     offersInStorePickup: business.offersInStorePickup,
+    pickupLocation: business.pickupLocation ?? null,
+    pickupInstructions: business.pickupInstructions ?? null,
   };
 }
 
@@ -159,8 +167,13 @@ export function calculateZoneWeightShipping(input: {
   subtotalCents: number;
   config: ZoneWeightConfig;
 }): number {
-  const { destinationState, destinationCountry, totalWeightLb, subtotalCents, config } =
-    input;
+  const {
+    destinationState,
+    destinationCountry,
+    totalWeightLb,
+    subtotalCents,
+    config,
+  } = input;
 
   // 1. Free-shipping threshold
   if (

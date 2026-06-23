@@ -4,15 +4,7 @@
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  Download,
-  File,
-  Images,
-  Search,
-  Trash2,
-  Video,
-  X,
-} from "lucide-react";
+import { Download, File, Images, Search, Trash2, Video, X } from "lucide-react";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -65,7 +57,10 @@ type UsedFilter = "all" | "used" | "unused";
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
   const units = ["B", "KB", "MB", "GB"];
-  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const i = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(1024)),
+    units.length - 1,
+  );
   const val = bytes / Math.pow(1024, i);
   return `${i === 0 ? val.toString() : val.toFixed(1)} ${units[i] ?? "B"}`;
 }
@@ -74,7 +69,13 @@ function getFilename(key: string): string {
   return key.split("/").pop() ?? key;
 }
 
-const IMAGE_KINDS = new Set(["image", "gallery", "logo", "favicon", "testimonial"]);
+const IMAGE_KINDS = new Set([
+  "image",
+  "gallery",
+  "logo",
+  "favicon",
+  "testimonial",
+]);
 
 function isImageKind(kind: string): boolean {
   return IMAGE_KINDS.has(kind);
@@ -87,7 +88,7 @@ function MediaThumbnail({ item }: { item: MediaItem }) {
 
   if (isImageKind(item.kind)) {
     return (
-      <div className="relative aspect-video w-full overflow-hidden rounded-t-md bg-muted">
+      <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-t-md">
         <img
           src={item.url}
           alt={filename}
@@ -99,11 +100,11 @@ function MediaThumbnail({ item }: { item: MediaItem }) {
   }
 
   return (
-    <div className="flex aspect-video w-full items-center justify-center rounded-t-md bg-muted">
+    <div className="bg-muted flex aspect-video w-full items-center justify-center rounded-t-md">
       {item.kind === "video" ? (
-        <Video className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
+        <Video className="text-muted-foreground h-10 w-10" aria-hidden="true" />
       ) : (
-        <File className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
+        <File className="text-muted-foreground h-10 w-10" aria-hidden="true" />
       )}
     </div>
   );
@@ -114,7 +115,7 @@ function UsageBadge({ item }: { item: MediaItem }) {
 
   if (count === 0) {
     return (
-      <Badge variant="secondary" className="text-xs text-muted-foreground">
+      <Badge variant="secondary" className="text-muted-foreground text-xs">
         Unused
       </Badge>
     );
@@ -133,7 +134,7 @@ function UsageBadge({ item }: { item: MediaItem }) {
         </Badge>
       </HoverCardTrigger>
       <HoverCardContent className="w-72" align="start">
-        <p className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <p className="text-muted-foreground mb-2 text-xs font-semibold tracking-wide uppercase">
           Referenced by
         </p>
         <ul className="space-y-1.5">
@@ -142,7 +143,7 @@ function UsageBadge({ item }: { item: MediaItem }) {
               {usage.adminHref ? (
                 <Link
                   href={usage.adminHref}
-                  className="font-medium text-foreground underline-offset-2 hover:underline"
+                  className="text-foreground font-medium underline-offset-2 hover:underline"
                 >
                   {usage.location}
                   {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
@@ -207,7 +208,7 @@ function MediaCardActions({
       <Button
         variant="outline"
         size="sm"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive flex-1 border-destructive/30"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 flex-1"
         onClick={() => onDeleteConfirm(item)}
         disabled={inUse || isDeleting}
         aria-label={
@@ -260,7 +261,11 @@ export function MediaLibraryClient({ items, businessId }: Props) {
       if (nextType !== "all") p.set("type", nextType);
       if (nextUsed !== "all") p.set("used", nextUsed);
       const qs = p.toString();
-      window.history.replaceState(null, "", qs ? `/admin/media?${qs}` : "/admin/media");
+      window.history.replaceState(
+        null,
+        "",
+        qs ? `/admin/media?${qs}` : "/admin/media",
+      );
     },
     [businessId],
   );
@@ -287,7 +292,11 @@ export function MediaLibraryClient({ items, businessId }: Props) {
     const p = new URLSearchParams();
     if (businessId) p.set("businessId", businessId);
     const qs = p.toString();
-    window.history.replaceState(null, "", qs ? `/admin/media?${qs}` : "/admin/media");
+    window.history.replaceState(
+      null,
+      "",
+      qs ? `/admin/media?${qs}` : "/admin/media",
+    );
   };
 
   // ── In-memory filtering ─────────────────────────────────────────────────────
@@ -297,7 +306,10 @@ export function MediaLibraryClient({ items, businessId }: Props) {
     return items.filter((item) => {
       if (needle) {
         const filename = getFilename(item.key).toLowerCase();
-        if (!filename.includes(needle) && !item.key.toLowerCase().includes(needle)) {
+        if (
+          !filename.includes(needle) &&
+          !item.key.toLowerCase().includes(needle)
+        ) {
           return false;
         }
       }
@@ -341,9 +353,12 @@ export function MediaLibraryClient({ items, businessId }: Props) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Images className="mx-auto h-12 w-12 text-muted-foreground" aria-hidden="true" />
+          <Images
+            className="text-muted-foreground mx-auto h-12 w-12"
+            aria-hidden="true"
+          />
           <h3 className="mt-4 text-lg font-medium">No media uploaded yet</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-sm">
             Files will appear here once you upload images, videos, or other
             media to your store.
           </p>
@@ -355,12 +370,12 @@ export function MediaLibraryClient({ items, businessId }: Props) {
   return (
     <>
       {/* Filter bar */}
-      <div className="mb-6 rounded-lg border bg-card p-4">
+      <div className="bg-card mb-6 rounded-lg border p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           {/* Search */}
           <div className="relative flex-1">
             <Search
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
               aria-hidden="true"
             />
             <Input
@@ -415,9 +430,8 @@ export function MediaLibraryClient({ items, businessId }: Props) {
           {/* Clear filters + result count */}
           {isFiltering && (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                {filtered.length}{" "}
-                {filtered.length === 1 ? "result" : "results"}
+              <span className="text-muted-foreground text-sm">
+                {filtered.length} {filtered.length === 1 ? "result" : "results"}
               </span>
               <Button
                 variant="ghost"
@@ -432,7 +446,7 @@ export function MediaLibraryClient({ items, businessId }: Props) {
           )}
 
           {!isFiltering && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               {items.length} {items.length === 1 ? "file" : "files"}
             </span>
           )}
@@ -471,7 +485,7 @@ export function MediaLibraryClient({ items, businessId }: Props) {
                     <UsageBadge item={item} />
                   </div>
 
-                  <p className="mb-3 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mb-3 text-xs">
                     {formatBytes(item.size)} &middot; {date}
                   </p>
 

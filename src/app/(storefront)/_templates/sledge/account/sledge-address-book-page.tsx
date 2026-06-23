@@ -13,7 +13,10 @@ export function SledgeAddressBookPage({
   return (
     <PageTransition className="bg-white">
       <SledgeAccountLayout heading="Address Book">
-        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+        <AddressBookContent
+          customer={customer}
+          salesCountries={business.salesCountries}
+        />
       </SledgeAccountLayout>
     </PageTransition>
   );
