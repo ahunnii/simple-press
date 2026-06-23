@@ -9,9 +9,6 @@ export const discountFormSchema = z.object({
   expiresAt: z.date().nullable().optional(),
   minPurchase: z.coerce.number().nonnegative().optional().nullable(),
   maxDiscount: z.coerce.number().nonnegative().optional().nullable(),
-  showAsBanner: z.boolean(),
-  bannerText: z.string().optional().nullable(),
-  bannerLinkUrl: z.string().optional().nullable(),
 });
 
 export type DiscountFormSchema = z.infer<typeof discountFormSchema>;

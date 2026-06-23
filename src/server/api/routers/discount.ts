@@ -71,9 +71,6 @@ export const discountRouter = createTRPCRouter({
           expiresAt: input.expiresAt ?? undefined,
           minPurchase: input.minPurchase,
           maxDiscount: input.maxDiscount,
-          showAsBanner: input.showAsBanner ?? false,
-          bannerText: input.bannerText?.trim() ?? null,
-          bannerLinkUrl: input.bannerLinkUrl?.trim() ?? null,
         },
       });
       return {
@@ -117,9 +114,6 @@ export const discountRouter = createTRPCRouter({
           expiresAt: input.expiresAt ?? undefined,
           minPurchase: input.minPurchase ?? undefined,
           maxDiscount: input.maxDiscount ?? undefined,
-          showAsBanner: input.showAsBanner ?? false,
-          bannerText: input.bannerText?.trim() ?? null,
-          bannerLinkUrl: input.bannerLinkUrl?.trim() ?? null,
         },
       });
 
@@ -131,44 +125,6 @@ export const discountRouter = createTRPCRouter({
     .mutation(async ({ ctx }) => {
       const { businessId } = ctx;
       return deactivateExpiredDiscountCodes(ctx.db, businessId);
-    }),
-
-  getActiveBanner: publicProcedure
-    .use(getBusinessProcedure())
-    .use(featureGate("coupons"))
-    .query(async ({ ctx }) => {
-      const { businessId } = ctx;
-
-      const now = new Date();
-      const codes = await ctx.db.discountCode.findMany({
-        where: {
-          businessId,
-          showAsBanner: true,
-          active: true,
-          AND: [
-            { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-            { OR: [{ expiresAt: null }, { expiresAt: { gte: now } }] },
-          ],
-        },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      });
-
-      for (const code of codes) {
-        if (code.usageLimit != null && code.usageCount >= code.usageLimit) {
-          continue;
-        }
-        const text = code.bannerText?.trim();
-        if (!text) continue;
-        return {
-          id: code.id,
-          code: code.code,
-          bannerText: text,
-          bannerLinkUrl: code.bannerLinkUrl?.trim() ?? null,
-        };
-      }
-
-      return null;
     }),
 
   validate: publicProcedure

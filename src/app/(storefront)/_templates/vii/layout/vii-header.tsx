@@ -8,6 +8,7 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Menu, Phone, ShoppingBag, User, X } from "lucide-react";
 
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
@@ -26,7 +27,11 @@ type NavLink = {
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function ViiHeader({
+  business,
+  session,
+  banner,
+}: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -184,17 +189,11 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     "vii.global.book-cta-text",
     "vii.global.book-cta-link",
     "vii.global.location-tag",
-    "vii.global.announcement-text",
-    "vii.global.announcement-link-text",
-    "vii.global.announcement-link",
     "vii.homepage.contact-phone",
   ]);
   const bookCtaText = g["vii.global.book-cta-text"] ?? "Book Now";
   const bookCtaLink = g["vii.global.book-cta-link"] ?? "/contact";
   const locationTag = g["vii.global.location-tag"] ?? "";
-  const announcementText = g["vii.global.announcement-text"] ?? "";
-  const announcementLinkText = g["vii.global.announcement-link-text"] ?? "";
-  const announcementLinkHref = g["vii.global.announcement-link"] ?? "/contact";
   const phone = g["vii.homepage.contact-phone"] ?? "";
 
   const businessName = business?.name ?? "";
@@ -539,14 +538,7 @@ export function ViiHeader({ business, session }: DefaultHeaderTemplateProps) {
     <>
       <header className="fixed top-0 right-0 left-0 z-50 w-full">
         {/* ── Announcement bar — top row, hides on scroll ── */}
-        {!scrolled && (
-          <ViiAnnouncementBar
-            businessId={business.id}
-            announcementText={announcementText}
-            announcementLinkText={announcementLinkText}
-            announcementLinkHref={announcementLinkHref}
-          />
-        )}
+        {!scrolled && banner && <ViiAnnouncementBar banner={banner} />}
 
         {/* ── Nav row ── */}
         <div

@@ -2,51 +2,72 @@
 
 import Link from "next/link";
 
-import { api } from "~/trpc/react";
+import type { BannerConfig } from "~/lib/validators/site-banner";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
+import {
+  BannerDismissButton,
+  DismissibleBanner,
+} from "~/components/site-banner/dismissible-banner";
 
-export function HappyBambooAnnouncementBar() {
-  const { data, isLoading } = api.discount.getActiveBanner.useQuery(undefined, {
-    staleTime: 60_000,
-  });
+type HappyBambooAnnouncementBarProps = {
+  banner: BannerConfig;
+};
 
-  if (isLoading || !data) {
-    return null;
-  }
-
-  const rawHref = data.bannerLinkUrl?.trim();
-  const href = rawHref && rawHref.length > 0 ? rawHref : "/shop";
-  const isExternal = /^https?:\/\//i.test(href);
+export function HappyBambooAnnouncementBar({
+  banner,
+}: HappyBambooAnnouncementBarProps) {
+  const linkUrl = banner.linkUrl?.trim() ?? "";
+  const trimmedLabel = banner.linkLabel?.trim();
+  const linkLabel = trimmedLabel && trimmedLabel.length > 0 ? trimmedLabel : "Shop now";
+  const isExternal = /^https?:\/\//i.test(linkUrl);
 
   return (
-    <div
-      className="border-b border-emerald-900/10 bg-emerald-950/90 px-4 py-2.5 text-center text-sm text-white"
-      role="region"
-      aria-label="Promotion"
-    >
-      <p className="mx-auto max-w-4xl leading-relaxed">
-        {data.bannerText} {"- Code: "}
-        <span className="font-mono font-semibold tracking-wide">
-          {data.code}
-        </span>
-        {isExternal ? (
-          <a
-            href={href}
-            className="ml-2 inline-block font-medium text-emerald-200 underline underline-offset-2 hover:text-white"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Shop now
-            <span className="sr-only"> (opens in new tab)</span>
-          </a>
-        ) : (
-          <Link
-            href={href}
-            className="ml-2 inline-block font-medium text-emerald-200 underline underline-offset-2 hover:text-white"
-          >
-            Shop now
-          </Link>
-        )}
-      </p>
-    </div>
+    <DismissibleBanner version={banner.version}>
+      {(dismiss) => (
+        <div
+          className="relative border-b border-emerald-900/10 bg-emerald-950/90 px-4 py-2.5 text-center text-sm text-white"
+          style={{
+            ...(banner.bgColor ? { backgroundColor: banner.bgColor } : {}),
+            ...(banner.textColor ? { color: banner.textColor } : {}),
+          }}
+        >
+          <div className="mx-auto max-w-4xl leading-relaxed">
+            {banner.content != null && (
+              <TiptapRenderer
+                content={banner.content as TiptapJSON}
+                className="inline [&_p]:inline"
+              />
+            )}
+            {linkUrl && (
+              <>
+                {isExternal ? (
+                  <a
+                    href={linkUrl}
+                    className="ml-2 inline-block font-medium text-emerald-200 underline underline-offset-2 hover:text-white"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {linkLabel}
+                    <span className="sr-only"> (opens in new tab)</span>
+                  </a>
+                ) : (
+                  <Link
+                    href={linkUrl}
+                    className="ml-2 inline-block font-medium text-emerald-200 underline underline-offset-2 hover:text-white"
+                  >
+                    {linkLabel}
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+          <BannerDismissButton
+            dismiss={dismiss}
+            className="absolute top-1/2 right-3 -translate-y-1/2 opacity-60 transition-opacity hover:opacity-100"
+          />
+        </div>
+      )}
+    </DismissibleBanner>
   );
 }

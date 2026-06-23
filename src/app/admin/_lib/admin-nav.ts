@@ -4,6 +4,7 @@ import {
   FileText,
   Globe,
   Home,
+  Megaphone,
   Menu,
   Package,
   PowerOff,
@@ -358,6 +359,16 @@ export const HUB_CARDS: HubCard[] = [
     hub: "content",
     color: "indigo",
     icon: Globe,
+  },
+  {
+    key: "content-announcements",
+    title: "Banner & Popup",
+    description: "Site-wide announcements",
+    body: "Manage your announcement banner and homepage popup",
+    href: "/admin/content/announcements",
+    hub: "content",
+    color: "amber",
+    icon: Megaphone,
   },
 ];
 

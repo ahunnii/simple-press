@@ -3,6 +3,8 @@
 import { Jost, Playfair_Display } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
 
 import { ViiFooter } from "./vii-footer";
@@ -25,7 +27,12 @@ export async function ViiLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const session = await getSession();
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
+    getBusinessFlags(),
+  ]);
+
+  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
 
   return (
     <div
@@ -45,7 +52,14 @@ export async function ViiLayout({
         Skip to main content
       </a>
 
-      <ViiHeader business={business} session={session ?? null} />
+      {/*
+        The header is fixed (position: fixed, top-0). The announcement bar is
+        rendered INSIDE the fixed header stack (via ViiHeader) so that it scrolls
+        away with the header scrim. We pass the resolved banner down as a prop
+        rather than mounting it here above the header, which would push page
+        content down but leave the bar floating above the fixed nav unpredictably.
+      */}
+      <ViiHeader business={business} session={session ?? null} banner={banner} />
 
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}

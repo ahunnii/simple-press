@@ -3,6 +3,8 @@
 import { Outfit, Spectral } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
 
 import { HappyBambooAnnouncementBar } from "./happy-bamboo-announcement-bar";
@@ -20,7 +22,11 @@ export async function HappyBambooLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const session = await getSession();
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
+    getBusinessFlags(),
+  ]);
+  const banner = resolveBanner(business.siteContent, isEnabled("banners"));
   return (
     <main
       className={`${fontSans.variable} ${fontSerif.variable} happy-bamboo dark:happy-bamboo`}
@@ -31,7 +37,7 @@ export async function HappyBambooLayout({
       >
         Skip to main content
       </a>
-      <HappyBambooAnnouncementBar />
+      {banner && <HappyBambooAnnouncementBar banner={banner} />}
       <HappyBambooHeader business={business} session={session ?? null} />
       <div id="main-content" tabIndex={-1} className="min-h-[calc(100vh-4rem)]">
         {children}

@@ -207,6 +207,22 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: true,
     ownerCanToggle: false,
   },
+  banners: {
+    key: "banners",
+    label: "Announcement Banner",
+    description: "Show a site-wide announcement bar at the top of your storefront",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
+  popups: {
+    key: "popups",
+    label: "Homepage Popup",
+    description: "Show a dismissible popup on your homepage",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
 };
 
 // Ordered category labels for display

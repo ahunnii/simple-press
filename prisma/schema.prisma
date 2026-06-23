@@ -268,6 +268,9 @@ model SiteContent {
   //Misc Business Information
   customFields Json? // { key: value }
 
+  bannerConfig Json? // BannerConfig — see src/lib/validators/site-banner.ts
+  popupConfig  Json? // PopupConfig
+
   // Owner-only preview draft (never shipped to public visitors)
   previewCustomFields Json?
   previewUpdatedAt    DateTime?
@@ -761,11 +764,6 @@ model DiscountCode {
   // Restrictions
   minPurchase Int? // minimum order value in cents
   maxDiscount Int? // cap discount amount in cents
-
-  // Banner advertising (storefront)
-  showAsBanner  Boolean  @default(false)
-  bannerText    String?
-  bannerLinkUrl String?
 
   // Relationships
   orders Order[]

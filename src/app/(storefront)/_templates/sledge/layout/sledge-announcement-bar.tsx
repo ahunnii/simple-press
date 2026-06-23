@@ -2,61 +2,70 @@
 
 import Link from "next/link";
 
-import { api } from "~/trpc/react";
+import type { BannerConfig } from "~/lib/validators/site-banner";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
+import {
+  BannerDismissButton,
+  DismissibleBanner,
+} from "~/components/site-banner/dismissible-banner";
 
 type SledgeAnnouncementBarProps = {
-  businessId: string;
+  banner: BannerConfig;
 };
 
-export function SledgeAnnouncementBar({
-  businessId: _,
-}: SledgeAnnouncementBarProps) {
-  const { data, isLoading } = api.discount.getActiveBanner.useQuery(undefined, {
-    staleTime: 60_000,
-  });
+export function SledgeAnnouncementBar({ banner }: SledgeAnnouncementBarProps) {
+  const linkUrl = banner.linkUrl?.trim() ?? "";
+  const trimmedLabel = banner.linkLabel?.trim();
+  const linkLabel = trimmedLabel && trimmedLabel.length > 0 ? trimmedLabel : "Shop →";
+  const isExternal = /^https?:\/\//i.test(linkUrl);
 
-  if (isLoading || !data) {
-    return null;
-  }
-
-  const rawHref = data.bannerLinkUrl?.trim();
-  const href = rawHref && rawHref.length > 0 ? rawHref : "/shop";
-  const isExternal = /^https?:\/\//i.test(href);
-
-  // Side obs #2: replaced inline style={{ color }} with Tailwind classes.
-  // coral on the dark announcement bar passes contrast (6.35:1) — no need
-  // to switch to coral-aa here.
   const linkClassName =
     "ml-3 inline-flex shrink-0 items-center font-sans text-xs tracking-[0.16em] text-[var(--sl-coral)] uppercase underline underline-offset-[3px] transition-opacity hover:opacity-70";
 
   return (
-    <div className="sl-announcement-bar" role="region" aria-label="Promotion">
-      <p className="text-center font-sans text-xs leading-relaxed tracking-[0.12em] uppercase">
-        {/* Side obs #2: was style={{ color: "rgba(255,255,255,0.92)" }} */}
-        <span className="text-white/[0.92]">{data.bannerText}</span>
-        {/* Side obs #2: was style={{ color: "rgba(255,255,255,0.55)" }} */}
-        <span className="text-white/55"> · Code: </span>
-        {/* Side obs #2: was style={{ color: "var(--sl-coral)" }} */}
-        <span className="font-semibold text-[var(--sl-coral)]">
-          {data.code}
-        </span>
-        {isExternal ? (
-          <a
-            href={href}
-            className={linkClassName}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Shop →
-            {/* M-10: warn screen-reader users that the link opens in a new tab */}
-            <span className="sr-only"> (opens in new tab)</span>
-          </a>
-        ) : (
-          <Link href={href} className={linkClassName}>
-            Shop →
-          </Link>
-        )}
-      </p>
-    </div>
+    <DismissibleBanner version={banner.version}>
+      {(dismiss) => (
+        <div
+          className="sl-announcement-bar relative"
+          style={{
+            ...(banner.bgColor ? { backgroundColor: banner.bgColor } : {}),
+            ...(banner.textColor ? { color: banner.textColor } : {}),
+          }}
+        >
+          <div className="text-center font-sans text-xs leading-relaxed tracking-[0.12em] uppercase">
+            {banner.content != null && (
+              <TiptapRenderer
+                content={banner.content as TiptapJSON}
+                className="inline text-white/[0.92] [&_p]:inline"
+              />
+            )}
+            {linkUrl && (
+              <>
+                {isExternal ? (
+                  <a
+                    href={linkUrl}
+                    className={linkClassName}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {linkLabel}
+                    <span className="sr-only"> (opens in new tab)</span>
+                  </a>
+                ) : (
+                  <Link href={linkUrl} className={linkClassName}>
+                    {linkLabel}
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+          <BannerDismissButton
+            dismiss={dismiss}
+            className="absolute top-1/2 right-3 -translate-y-1/2 opacity-60 transition-opacity hover:opacity-100"
+          />
+        </div>
+      )}
+    </DismissibleBanner>
   );
 }

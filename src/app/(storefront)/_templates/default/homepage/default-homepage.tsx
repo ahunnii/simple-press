@@ -3,10 +3,13 @@ import Link from "next/link";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { DefaultPopup } from "./default-popup";
 import { DefaultParallaxHero } from "./default-parallax-hero";
 import { DefaultProductRail } from "./default-product-rail";
 
@@ -23,7 +26,12 @@ import { DefaultProductRail } from "./default-product-rail";
 export async function DefaultHomePage({
   business,
 }: DefaultHomepageTemplateProps) {
-  const homepage = await api.business.getHomepage();
+  const [homepage, { isEnabled }] = await Promise.all([
+    api.business.getHomepage(),
+    getBusinessFlags(),
+  ]);
+
+  const popup = resolvePopup(business?.siteContent, isEnabled("popups"));
   const products = homepage?.products ?? [];
 
   const f = resolveFields(business?.siteContent?.customFields, [
@@ -104,6 +112,7 @@ export async function DefaultHomePage({
 
   return (
     <HydrateClient>
+      {popup && <DefaultPopup popup={popup} />}
       <PageTransition>
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <DefaultParallaxHero

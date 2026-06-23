@@ -10,37 +10,37 @@ import {
   DismissibleBanner,
 } from "~/components/site-banner/dismissible-banner";
 
-type ViiAnnouncementBarProps = {
+type DefaultAnnouncementBarProps = {
   banner: BannerConfig;
 };
 
 const barBaseStyle: React.CSSProperties = {
-  background: "var(--vii-navy)",
-  color: "var(--vii-cream)",
+  background: "#0a0a0a",
+  color: "#ffffff",
   display: "grid",
   gridTemplateColumns: "1fr auto auto",
   alignItems: "center",
   gap: "12px",
-  padding: "10px 12px 10px 16px",
-  minHeight: "38px",
-  fontFamily: "var(--font-sans)",
-  fontSize: "12px",
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
+  padding: "10px 12px 10px 20px",
+  minHeight: "40px",
+  fontSize: "13px",
+  letterSpacing: "0.01em",
+  lineHeight: 1.4,
 };
 
 const linkStyle: React.CSSProperties = {
-  color: "var(--vii-copper-light)",
+  color: "inherit",
   textDecoration: "underline",
   textUnderlineOffset: "3px",
-  fontSize: "11px",
-  letterSpacing: "0.14em",
-  transition: "opacity 0.2s",
+  fontSize: "13px",
+  fontWeight: 500,
+  transition: "opacity 0.15s",
   flexShrink: 0,
   whiteSpace: "nowrap",
+  opacity: 0.85,
 };
 
-export function ViiAnnouncementBar({ banner }: ViiAnnouncementBarProps) {
+export function DefaultAnnouncementBar({ banner }: DefaultAnnouncementBarProps) {
   const isExternal = banner.linkUrl
     ? /^https?:\/\//i.test(banner.linkUrl)
     : false;
@@ -59,13 +59,9 @@ export function ViiAnnouncementBar({ banner }: ViiAnnouncementBarProps) {
   return (
     <DismissibleBanner version={banner.version}>
       {(dismiss) => (
-        <div
-          className="vii-announcement-bar"
-          data-announcement-bar
-          style={inlineStyle}
-        >
-          {/* Rich-text message — center column spans leftward */}
-          <div className="text-center">
+        <div data-announcement-bar style={inlineStyle}>
+          {/* Rich-text message */}
+          <div className="text-center text-sm">
             {banner.content !== null && (
               <TiptapRenderer
                 content={banner.content as TiptapJSON}
@@ -83,22 +79,22 @@ export function ViiAnnouncementBar({ banner }: ViiAnnouncementBarProps) {
                 target="_blank"
                 rel="noreferrer"
               >
-                {banner.linkLabel ?? "Learn More"} →
+                {banner.linkLabel ?? "Learn more"} →
                 <span className="sr-only"> (opens in new tab)</span>
               </a>
             ) : (
               <Link href={banner.linkUrl} style={resolvedLinkStyle}>
-                {banner.linkLabel ?? "Learn More"} →
+                {banner.linkLabel ?? "Learn more"} →
               </Link>
             )
           ) : (
             <span />
           )}
 
-          {/* Dismiss button — right edge */}
+          {/* Dismiss button */}
           <BannerDismissButton
             dismiss={dismiss}
-            className="flex items-center justify-center rounded p-1.5 opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="flex items-center justify-center rounded p-1.5 opacity-50 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           />
         </div>
       )}

@@ -3,6 +3,8 @@ import {
   parseTemplateIframeValue,
   parseTemplateListRows,
 } from "~/lib/template-fields";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { EmbedFrame } from "~/components/embed-frame";
@@ -10,6 +12,7 @@ import { InstagramEmbed } from "~/components/instagram-embed";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { ViiPopup } from "./vii-popup";
 import { ViiBlogSection } from "./vii-blog-section";
 import { ViiBrandsSection } from "./vii-brands-section";
 import { ViiCategorySection } from "./vii-category-section";
@@ -23,8 +26,13 @@ import { ViiStorySection } from "./vii-story-section";
 import { ViiTestimonialQuote } from "./vii-testimonial-quote";
 import { ViiVideoFeature } from "./vii-video-feature";
 
-export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
-  const homepage = await api.business.getHomepage();
+export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
+  const [homepage, { isEnabled }] = await Promise.all([
+    api.business.getHomepage(),
+    getBusinessFlags(),
+  ]);
+
+  const popup = resolvePopup(props?.business?.siteContent, isEnabled("popups"));
 
   // Blog posts for the journal section. `getBlogPages` is gated behind the
   // "blog" feature flag, so when it's disabled the catch yields an empty array
@@ -169,6 +177,7 @@ export async function ViiHomepage(_props?: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
+      {popup && <ViiPopup popup={popup} />}
       <PageTransition>
         {/* 1. Hero */}
         <ViiHeroSection

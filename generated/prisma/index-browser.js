@@ -244,6 +244,8 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   accentColor: 'accentColor',
   navigationItems: 'navigationItems',
   customFields: 'customFields',
+  bannerConfig: 'bannerConfig',
+  popupConfig: 'popupConfig',
   previewCustomFields: 'previewCustomFields',
   previewUpdatedAt: 'previewUpdatedAt',
   businessId: 'businessId'
@@ -497,10 +499,7 @@ exports.Prisma.DiscountCodeScalarFieldEnum = {
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
   minPurchase: 'minPurchase',
-  maxDiscount: 'maxDiscount',
-  showAsBanner: 'showAsBanner',
-  bannerText: 'bannerText',
-  bannerLinkUrl: 'bannerLinkUrl'
+  maxDiscount: 'maxDiscount'
 };
 
 exports.Prisma.InventoryHistoryScalarFieldEnum = {
