@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
+
 import { TrailHeader } from "../../_components/trail-header";
 
 export const metadata = {

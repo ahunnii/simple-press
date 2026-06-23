@@ -15,10 +15,10 @@
  *  - Logo / favicon objects are marked "always in use" via `isAlwaysInUseKey`
  */
 
-import { db } from "~/server/db";
 import { isStorageUrl } from "~/lib/s3/url";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
+import { db } from "~/server/db";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,7 +51,7 @@ export function isAlwaysInUseKey(key: string): boolean {
 type UsageMap = Map<string, MediaUsage[]>;
 
 /** Normalize a URL before using it as a map key (strip query string). */
-function normalizeUrl(url: string): string {
+export function normalizeUrl(url: string): string {
   const q = url.indexOf("?");
   return q >= 0 ? url.slice(0, q) : url;
 }
@@ -333,7 +333,11 @@ export async function buildUsedMediaIndex(
   const variantsPromise = db.productVariant
     .findMany({
       where: { product: { businessId } },
-      select: { id: true, imageUrl: true, product: { select: { id: true, name: true } } },
+      select: {
+        id: true,
+        imageUrl: true,
+        product: { select: { id: true, name: true } },
+      },
     })
     .then((variants) => {
       for (const v of variants) {
@@ -454,7 +458,14 @@ export async function buildUsedMediaIndex(
   const pagesPromise = db.page
     .findMany({
       where: { businessId },
-      select: { id: true, title: true, slug: true, image: true, ogImage: true, content: true },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        image: true,
+        ogImage: true,
+        content: true,
+      },
     })
     .then((pages) => {
       for (const page of pages) {
@@ -511,7 +522,12 @@ export async function buildUsedMediaIndex(
   const galleryImagesPromise = db.galleryImage
     .findMany({
       where: { gallery: { businessId } },
-      select: { id: true, url: true, galleryId: true, gallery: { select: { name: true } } },
+      select: {
+        id: true,
+        url: true,
+        galleryId: true,
+        gallery: { select: { name: true } },
+      },
     })
     .then((images) => {
       for (const img of images) {
@@ -551,7 +567,12 @@ export async function buildUsedMediaIndex(
   const reviewsPromise = db.productReview
     .findMany({
       where: { product: { businessId } },
-      select: { id: true, images: true, videoUrl: true, product: { select: { id: true, name: true } } },
+      select: {
+        id: true,
+        images: true,
+        videoUrl: true,
+        product: { select: { id: true, name: true } },
+      },
     })
     .then((reviews) => {
       for (const r of reviews) {
@@ -605,7 +626,11 @@ export async function buildUsedMediaIndex(
     const uniqueIds = Array.from(new Set(galleryRefs.map((r) => r.id)));
     const galleryImages = await db.galleryImage.findMany({
       where: { galleryId: { in: uniqueIds }, gallery: { businessId } },
-      select: { url: true, galleryId: true, gallery: { select: { name: true } } },
+      select: {
+        url: true,
+        galleryId: true,
+        gallery: { select: { name: true } },
+      },
     });
 
     const imagesByGallery = new Map<string, { url: string; name: string }[]>();

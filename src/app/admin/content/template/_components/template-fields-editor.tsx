@@ -544,7 +544,7 @@ export function TemplateFieldsEditor({
   }, [isDirty]);
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="bg-muted/40 min-h-screen">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
         <div className="toolbar-info">
           <Button variant="ghost" size="sm" asChild className="shrink-0">
@@ -620,7 +620,7 @@ export function TemplateFieldsEditor({
       </div>
 
       {/* Form ⇄ Preview segmented toggle — all breakpoints */}
-      <div className="flex items-center justify-center gap-1 border-b bg-card px-4 py-2">
+      <div className="bg-card flex items-center justify-center gap-1 border-b px-4 py-2">
         <Button
           variant="ghost"
           size="sm"
@@ -678,7 +678,7 @@ export function TemplateFieldsEditor({
                   {/* Search */}
                   <div className="flex w-full items-center gap-2 md:w-auto">
                     <div className="relative w-full md:w-64">
-                      <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                       <Input
                         placeholder="Search fields..."
                         aria-label="Search fields"
@@ -866,7 +866,7 @@ export function TemplateFieldsEditor({
 
                         {filteredFields.length === 0 &&
                           templateFields.length > 0 && (
-                            <div className="rounded-lg border border-dashed border-border p-12 text-center">
+                            <div className="border-border rounded-lg border border-dashed p-12 text-center">
                               <p className="text-muted-foreground">
                                 No fields match your search
                               </p>
@@ -895,8 +895,8 @@ export function TemplateFieldsEditor({
                         {/* Empty state */}
                         {templateFields.length === 0 &&
                           pagePairs.length === 0 && (
-                            <div className="rounded-lg border border-dashed border-border p-12 text-center">
-                              <p className="mb-3 text-muted-foreground">
+                            <div className="border-border rounded-lg border border-dashed p-12 text-center">
+                              <p className="text-muted-foreground mb-3">
                                 No template fields defined for this page yet
                               </p>
                               <Button

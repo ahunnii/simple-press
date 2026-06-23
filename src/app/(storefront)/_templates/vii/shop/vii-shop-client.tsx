@@ -54,7 +54,9 @@ export function ViiShopClient({
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <h2 id="vii-shop-products-heading" className="sr-only">Products</h2>
+          <h2 id="vii-shop-products-heading" className="sr-only">
+            Products
+          </h2>
           {products.length === 0 ? (
             <div
               style={{
@@ -238,10 +240,17 @@ export function ViiShopClient({
                   </ViiPageButton>
                   {(() => {
                     // Build windowed page list: first, last, current ± 1, with ellipsis gaps
-                    const pages: (number | "ellipsis-start" | "ellipsis-end")[] = [];
+                    const pages: (
+                      | number
+                      | "ellipsis-start"
+                      | "ellipsis-end"
+                    )[] = [];
                     const delta = 1;
                     const rangeStart = Math.max(2, currentPage - delta);
-                    const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+                    const rangeEnd = Math.min(
+                      totalPages - 1,
+                      currentPage + delta,
+                    );
 
                     pages.push(1);
                     if (rangeStart > 2) pages.push("ellipsis-start");
@@ -308,7 +317,7 @@ export function ViiShopClient({
         >
           <div
             ref={ref}
-            className={`vii-reveal${visible ? " is-visible" : ""}`}
+            className={`vii-reveal${visible ? "is-visible" : ""}`}
             style={{ maxWidth: 1200, margin: "0 auto" }}
           >
             <div style={{ marginBottom: "clamp(28px, 4vw, 48px)" }}>

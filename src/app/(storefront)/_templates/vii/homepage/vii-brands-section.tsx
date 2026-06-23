@@ -25,7 +25,8 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
       style={{
         background: "var(--vii-paper)",
         padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
-        borderTop: "1px solid var(--vii-rule, color-mix(in srgb, var(--vii-navy) 8%, transparent))",
+        borderTop:
+          "1px solid var(--vii-rule, color-mix(in srgb, var(--vii-navy) 8%, transparent))",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -72,7 +73,7 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
         </div>
 
         {/* Logo row */}
-        <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
+        <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
           <ul
             style={{
               display: "flex",

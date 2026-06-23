@@ -1,12 +1,12 @@
 import { headers } from "next/headers";
 import { permanentRedirect } from "next/navigation";
 
+import { enforceCanonicalHost } from "~/lib/canonical";
 import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
   buildWebSiteSchema,
 } from "~/lib/structured-data";
-import { enforceCanonicalHost } from "~/lib/canonical";
 import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";

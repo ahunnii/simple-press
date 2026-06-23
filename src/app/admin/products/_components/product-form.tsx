@@ -706,7 +706,7 @@ export function ProductForm({
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-muted"
+          className="bg-muted min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -912,7 +912,7 @@ export function ProductForm({
                                   <FormLabel>Price (USD)</FormLabel>
                                   <FormControl>
                                     <div className="relative">
-                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                         $
                                       </span>
                                       <NumberInput
@@ -939,7 +939,7 @@ export function ProductForm({
                                   <FormLabel>Compare At Price (USD)</FormLabel>
                                   <FormControl>
                                     <div className="relative">
-                                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                         $
                                       </span>
                                       <NumberInput
@@ -1288,7 +1288,7 @@ export function ProductForm({
                           )}
 
                           <div className="relative mb-3">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                             <Input
                               type="search"
                               placeholder="Search collections..."
@@ -1316,7 +1316,7 @@ export function ProductForm({
 
                                 if (filtered.length === 0) {
                                   return (
-                                    <p className="py-6 text-center text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground py-6 text-center text-sm">
                                       No collections match &ldquo;
                                       {collectionSearch}&rdquo;
                                     </p>
@@ -1326,7 +1326,7 @@ export function ProductForm({
                                 return filtered.map((collection) => (
                                   <label
                                     key={collection.id}
-                                    className="flex cursor-pointer items-center gap-3 rounded border p-3 hover:bg-muted"
+                                    className="hover:bg-muted flex cursor-pointer items-center gap-3 rounded border p-3"
                                   >
                                     <Checkbox
                                       className="shrink-0"
@@ -1348,7 +1348,7 @@ export function ProductForm({
                                       <p className="font-medium">
                                         {collection.name}
                                       </p>
-                                      <p className="text-sm text-muted-foreground">
+                                      <p className="text-muted-foreground text-sm">
                                         {collection._count.collectionProducts}{" "}
                                         product
                                         {collection._count
@@ -1363,7 +1363,7 @@ export function ProductForm({
                             </div>
                           </ScrollArea>
 
-                          <p className="mt-4 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground mt-4 text-sm">
                             {collectionIds.length} collection
                             {collectionIds.length !== 1 ? "s" : ""} selected
                           </p>

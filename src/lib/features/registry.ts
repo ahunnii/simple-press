@@ -158,6 +158,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["media"],
   },
+  storeTransfer: {
+    key: "storeTransfer",
+    label: "Store Transfer",
+    description:
+      "Export your entire store's content to a file and import it into another store",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["store-transfer"],
+  },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
   customerAccounts: {
@@ -210,7 +220,8 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
   banners: {
     key: "banners",
     label: "Announcement Banner",
-    description: "Show a site-wide announcement bar at the top of your storefront",
+    description:
+      "Show a site-wide announcement bar at the top of your storefront",
     category: "marketing",
     enabledByDefault: false,
     ownerCanToggle: true,

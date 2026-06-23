@@ -1,10 +1,10 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import {
   parseTemplateIframeValue,
   parseTemplateListRows,
 } from "~/lib/template-fields";
-import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { resolvePopup } from "~/lib/site-banner/resolve";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { EmbedFrame } from "~/components/embed-frame";
@@ -12,7 +12,6 @@ import { InstagramEmbed } from "~/components/instagram-embed";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { ViiPopup } from "./vii-popup";
 import { ViiBlogSection } from "./vii-blog-section";
 import { ViiBrandsSection } from "./vii-brands-section";
 import { ViiCategorySection } from "./vii-category-section";
@@ -21,6 +20,7 @@ import { ViiDetroitSection } from "./vii-detroit-section";
 import { ViiHeroSection } from "./vii-hero-section";
 import { ViiImageBand } from "./vii-image-band";
 import { ViiInstagramStrip } from "./vii-instagram-strip";
+import { ViiPopup } from "./vii-popup";
 import { ViiProductRail } from "./vii-product-rail";
 import { ViiStorySection } from "./vii-story-section";
 import { ViiTestimonialQuote } from "./vii-testimonial-quote";

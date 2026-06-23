@@ -8,12 +8,18 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { ShippingFormValues, ZoneWeightFormValues } from "~/lib/validators/shipping";
+import type {
+  ShippingFormValues,
+  ZoneWeightFormValues,
+} from "~/lib/validators/shipping";
 import type { RouterOutputs } from "~/trpc/react";
-import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { COUNTRY_LABELS } from "~/lib/geo/regions";
+import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { shippingFormSchema, zoneWeightFormSchema } from "~/lib/validators/shipping";
+import {
+  shippingFormSchema,
+  zoneWeightFormSchema,
+} from "~/lib/validators/shipping";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -35,10 +41,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
+import { Textarea } from "~/components/ui/textarea";
 
 import { ZoneWeightEditor } from "./zone-weight-editor";
 
@@ -64,15 +70,20 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
   const pickupInstructions = business.pickupInstructions ?? "";
 
   // If the business has saved zone_weight config, hydrate from it.
-  const savedTiers = business.shippingWeightTiers as WeightTierRaw[] | null | undefined;
-  const savedZones = (business as unknown as {
-    zones?: Array<{
-      name: string;
-      states: string[];
-      sortOrder: number;
-      rates: Array<{ tierIndex: number; priceCents: number }>;
-    }>;
-  }).zones;
+  const savedTiers = business.shippingWeightTiers as
+    | WeightTierRaw[]
+    | null
+    | undefined;
+  const savedZones = (
+    business as unknown as {
+      zones?: Array<{
+        name: string;
+        states: string[];
+        sortOrder: number;
+        rates: Array<{ tierIndex: number; priceCents: number }>;
+      }>;
+    }
+  ).zones;
 
   if (
     business.originState &&
@@ -182,7 +193,9 @@ export function ShippingSettings({ business }: Props) {
           data.business.freeShippingThreshold,
         ),
         offersInStorePickup: data.business.offersInStorePickup,
-        salesCountries: (data.business.salesCountries ?? []) as Array<"CA" | "MX">,
+        salesCountries: (data.business.salesCountries ?? []) as Array<
+          "CA" | "MX"
+        >,
         pickupLocation: data.business.pickupLocation ?? "",
         pickupInstructions: data.business.pickupInstructions ?? "",
       });
@@ -196,23 +209,24 @@ export function ShippingSettings({ business }: Props) {
     onMutate: () => toast.loading("Saving shipping settings..."),
   });
 
-  const saveZoneWeightMutation = api.business.saveZoneWeightShipping.useMutation({
-    onSuccess: (data) => {
-      toast.dismiss();
-      toast.success(data.message);
-      zoneForm.reset(zoneForm.getValues());
-      // Country toggles live on the flat `form`; clear their dirty state too so
-      // the toolbar returns to "Saved" after a zone+weight save.
-      form.reset(form.getValues());
-      void utils.business.invalidate();
-      router.refresh();
-    },
-    onError: (error) => {
-      toast.dismiss();
-      toast.error(error.message ?? "Failed to save zone + weight shipping");
-    },
-    onMutate: () => toast.loading("Saving shipping settings..."),
-  });
+  const saveZoneWeightMutation =
+    api.business.saveZoneWeightShipping.useMutation({
+      onSuccess: (data) => {
+        toast.dismiss();
+        toast.success(data.message);
+        zoneForm.reset(zoneForm.getValues());
+        // Country toggles live on the flat `form`; clear their dirty state too so
+        // the toolbar returns to "Saved" after a zone+weight save.
+        form.reset(form.getValues());
+        void utils.business.invalidate();
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.dismiss();
+        toast.error(error.message ?? "Failed to save zone + weight shipping");
+      },
+      onMutate: () => toast.loading("Saving shipping settings..."),
+    });
 
   // ── Submit handlers ───────────────────────────────────────────────────────
   const handleFlatSubmit = async (data: ShippingFormValues): Promise<void> => {
@@ -227,7 +241,10 @@ export function ShippingSettings({ business }: Props) {
 
     // data.shippingType is always a legacy type here — the zoneForm handles
     // zone_weight. Cast to satisfy the updateShipping input schema.
-    const st = data.shippingType as "free" | "flat_rate" | "flat_rate_with_threshold";
+    const st = data.shippingType as
+      | "free"
+      | "flat_rate"
+      | "flat_rate_with_threshold";
     updateMutation.mutate({
       shippingType: st,
       shippingFlatRate: flatCents,
@@ -268,8 +285,12 @@ export function ShippingSettings({ business }: Props) {
 
   useKeyboardEnter(
     shippingType === "zone_weight" ? zoneForm : form,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (shippingType === "zone_weight" ? handleZoneWeightSubmit : handleFlatSubmit) as (data: any) => Promise<void>,
+
+    (shippingType === "zone_weight"
+      ? handleZoneWeightSubmit
+      : handleFlatSubmit) as (
+      data: ShippingFormValues | ZoneWeightFormValues,
+    ) => Promise<void>,
   );
   useDirtyForm(isDirty);
 
@@ -283,7 +304,7 @@ export function ShippingSettings({ business }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="bg-muted min-h-screen">
       {/* Shared toolbar */}
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
         <div className="toolbar-info">
@@ -343,8 +364,8 @@ export function ShippingSettings({ business }: Props) {
                 <CardHeader>
                   <CardTitle>Shipping</CardTitle>
                   <CardDescription>
-                    How you charge for delivery and whether customers can pick up
-                    in store.
+                    How you charge for delivery and whether customers can pick
+                    up in store.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -430,7 +451,7 @@ export function ShippingSettings({ business }: Props) {
                           <FormLabel>Flat shipping rate (USD)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <Input
@@ -519,7 +540,9 @@ export function ShippingSettings({ business }: Props) {
                         name="pickupInstructions"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Pickup hours &amp; instructions</FormLabel>
+                            <FormLabel>
+                              Pickup hours &amp; instructions
+                            </FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="Mon–Fri 10am–6pm. Ring the bell at the side entrance."
@@ -540,16 +563,21 @@ export function ShippingSettings({ business }: Props) {
 
                   <div className="space-y-3">
                     <div>
-                      <p className="text-base font-medium">Countries you sell to</p>
+                      <p className="text-base font-medium">
+                        Countries you sell to
+                      </p>
                       <p className="text-muted-foreground text-sm">
-                        Choose which countries appear as shipping destinations at checkout.
+                        Choose which countries appear as shipping destinations
+                        at checkout.
                       </p>
                     </div>
 
                     {/* USA — always enabled */}
                     <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <p className="text-sm font-medium">{COUNTRY_LABELS.US}</p>
+                        <p className="text-sm font-medium">
+                          {COUNTRY_LABELS.US}
+                        </p>
                         <p className="text-muted-foreground text-sm">
                           Always available as a shipping destination.
                         </p>
@@ -568,7 +596,8 @@ export function ShippingSettings({ business }: Props) {
                               {COUNTRY_LABELS.CA}
                             </FormLabel>
                             <p className="text-muted-foreground text-sm">
-                              Show this country as a shipping option at checkout.
+                              Show this country as a shipping option at
+                              checkout.
                             </p>
                           </div>
                           <FormControl>
@@ -597,7 +626,8 @@ export function ShippingSettings({ business }: Props) {
                               {COUNTRY_LABELS.MX}
                             </FormLabel>
                             <p className="text-muted-foreground text-sm">
-                              Show this country as a shipping option at checkout.
+                              Show this country as a shipping option at
+                              checkout.
                             </p>
                           </div>
                           <FormControl>

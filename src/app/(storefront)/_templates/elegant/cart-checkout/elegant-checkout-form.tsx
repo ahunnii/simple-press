@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -19,7 +21,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -34,7 +35,9 @@ export function ElegantCheckoutForm({ business }: Props) {
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
-    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+    f.deliveryMethod === "ship" &&
+    f.state.trim().length > 0 &&
+    f.shippingPending;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -372,7 +375,9 @@ export function ElegantCheckoutForm({ business }: Props) {
                     margin: 0,
                   }}
                 >
-                  {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                  {f.shippingConfig.pickupLocation ??
+                    business.businessAddress ??
+                    "Pickup details will be confirmed by the store."}
                 </p>
                 {f.shippingConfig.pickupInstructions ? (
                   <p
@@ -762,7 +767,10 @@ export function ElegantCheckoutForm({ business }: Props) {
                     style={{ color: "var(--el-ink-soft, #6b6659)" }}
                     aria-live="polite"
                   >
-                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="size-3.5 animate-spin"
+                      aria-hidden="true"
+                    />
                     Calculating…
                   </span>
                 ) : f.shippingPending ? (
@@ -833,7 +841,10 @@ export function ElegantCheckoutForm({ business }: Props) {
               background: "var(--el-ink, #1c1a17)",
               color: "var(--el-paper, #fbf8f2)",
               border: "none",
-              cursor: f.isProcessing || shippingCalculating ? "not-allowed" : "pointer",
+              cursor:
+                f.isProcessing || shippingCalculating
+                  ? "not-allowed"
+                  : "pointer",
               opacity: f.isProcessing || shippingCalculating ? 0.7 : 1,
               fontFamily: "var(--font-sans, sans-serif)",
               transition: `background 0.4s ${ease}`,

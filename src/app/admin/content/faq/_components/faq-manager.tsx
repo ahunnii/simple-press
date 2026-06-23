@@ -187,7 +187,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="bg-muted/40 min-h-screen">
       {/* Toolbar */}
       <div className="admin-form-toolbar">
         <div className="toolbar-info">
@@ -217,10 +217,10 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
         {initialItems.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
-              <p className="mb-2 text-base font-medium text-foreground">
+              <p className="text-foreground mb-2 text-base font-medium">
                 No FAQ items yet
               </p>
-              <p className="mb-6 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-6 text-sm">
                 Add frequently asked questions to help your customers and
                 improve search visibility.
               </p>
@@ -245,7 +245,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-muted-foreground disabled:opacity-30"
+                          className="text-muted-foreground h-6 w-6 disabled:opacity-30"
                           aria-label="Move up"
                           disabled={index === 0 || isPending}
                           onClick={() => moveItem(index, "up")}
@@ -255,7 +255,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-muted-foreground disabled:opacity-30"
+                          className="text-muted-foreground h-6 w-6 disabled:opacity-30"
                           aria-label="Move down"
                           disabled={
                             index === initialItems.length - 1 || isPending
@@ -278,18 +278,18 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                           }
                           aria-expanded={expandedId === item.id}
                         >
-                          <span className="flex-1 text-sm font-medium leading-snug">
+                          <span className="flex-1 text-sm leading-snug font-medium">
                             {item.question}
                           </span>
                           {expandedId === item.id ? (
-                            <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <ChevronUp className="text-muted-foreground h-4 w-4 shrink-0" />
                           ) : (
-                            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" />
                           )}
                         </button>
 
                         {expandedId === item.id && (
-                          <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">
+                          <p className="text-muted-foreground mt-2 text-sm whitespace-pre-wrap">
                             {item.answer}
                           </p>
                         )}
@@ -307,7 +307,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                               Draft
                             </Badge>
                           )}
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             #{index + 1}
                           </span>
                         </div>
@@ -328,7 +328,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          className="text-destructive hover:text-destructive h-8 w-8"
                           aria-label={`Delete: ${item.question}`}
                           onClick={() => handleDelete(item)}
                           disabled={isPending}
@@ -412,9 +412,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
             <Button
               onClick={handleSubmit}
               disabled={
-                isPending ||
-                !form.question.trim() ||
-                !form.answer.trim()
+                isPending || !form.question.trim() || !form.answer.trim()
               }
             >
               {editingId ? "Save Changes" : "Add Question"}

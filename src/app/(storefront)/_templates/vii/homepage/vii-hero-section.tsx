@@ -116,8 +116,10 @@ export function ViiHeroSection({
               width: 44,
               height: 44,
               borderRadius: "50%",
-              background: "color-mix(in srgb, var(--vii-paper) 18%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--vii-paper) 40%, transparent)",
+              background:
+                "color-mix(in srgb, var(--vii-paper) 18%, transparent)",
+              border:
+                "1px solid color-mix(in srgb, var(--vii-paper) 40%, transparent)",
               color: "var(--vii-paper)",
               cursor: "pointer",
               display: "inline-flex",

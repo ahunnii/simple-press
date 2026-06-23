@@ -184,7 +184,7 @@ export function OwnerReviewDialog({
             )}
 
             {/* Attribution */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="customerName">
                   Reviewer Name <span className="text-destructive">*</span>
@@ -212,7 +212,7 @@ export function OwnerReviewDialog({
             </div>
 
             {/* Title & Date */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="customerTitle">Reviewer Title (Optional)</Label>
                 <Input
@@ -232,7 +232,7 @@ export function OwnerReviewDialog({
                   onChange={(e) => setReviewDate(e.target.value)}
                   className="mt-2"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-xs">
                   Backdate if importing
                 </p>
               </div>
@@ -298,7 +298,7 @@ export function OwnerReviewDialog({
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <Label htmlFor="verifiedPurchase">Verified Purchase</Label>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-0.5 text-xs">
                     Mark this reviewer as a verified buyer
                   </p>
                 </div>
@@ -312,7 +312,7 @@ export function OwnerReviewDialog({
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <Label htmlFor="isApproved">Publish Immediately</Label>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-0.5 text-xs">
                     Show this review on the storefront right away
                   </p>
                 </div>

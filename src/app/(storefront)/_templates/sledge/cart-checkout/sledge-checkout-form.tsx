@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -18,7 +20,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 import { SledgeOrderSummary } from "./sledge-order-summary";
 
@@ -255,10 +256,14 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                   Pickup location
                 </p>
                 <p className="font-sans text-sm text-[var(--sl-ink-soft)]">
-                  {shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                  {shippingConfig.pickupLocation ??
+                    business.businessAddress ??
+                    "Pickup details will be confirmed by the store."}
                 </p>
                 {shippingConfig.pickupInstructions ? (
-                  <p className="font-sans text-sm whitespace-pre-line text-[var(--sl-ink-soft)]">{shippingConfig.pickupInstructions}</p>
+                  <p className="font-sans text-sm whitespace-pre-line text-[var(--sl-ink-soft)]">
+                    {shippingConfig.pickupInstructions}
+                  </p>
                 ) : null}
               </div>
             )}
@@ -343,9 +348,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                     className={cn("w-full", INP)}
                     aria-labelledby="state-label"
                     aria-required="true"
-                    aria-invalid={
-                      submitAttempted && !state ? true : undefined
-                    }
+                    aria-invalid={submitAttempted && !state ? true : undefined}
                   >
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>

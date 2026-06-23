@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { getHubCards } from "~/app/admin/_lib/admin-nav";
 import type { NavHub } from "~/app/admin/_lib/admin-nav";
+import { getHubCards } from "~/app/admin/_lib/admin-nav";
 
 const HUB_LABELS: Record<NavHub, string> = {
   settings: "Settings",
@@ -25,7 +25,7 @@ export function HubSubNav({ hub }: Props) {
   return (
     <nav
       aria-label={`${HUB_LABELS[hub]} sub-navigation`}
-      className="border-b border-border bg-background"
+      className="border-border bg-background border-b"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="no-scrollbar -mb-px flex min-h-[2.75rem] overflow-x-auto">
@@ -37,10 +37,10 @@ export function HubSubNav({ hub }: Props) {
                 href={card.href}
                 aria-current={active ? "page" : undefined}
                 className={[
-                  "inline-flex shrink-0 items-center border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  "focus-visible:outline-ring inline-flex shrink-0 items-center border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2",
                   active
                     ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                    : "text-muted-foreground hover:border-border hover:text-foreground border-transparent",
                 ].join(" ")}
               >
                 {card.title}

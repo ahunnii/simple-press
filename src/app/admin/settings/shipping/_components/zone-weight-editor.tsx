@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
 import { Plus, RefreshCw, Trash2 } from "lucide-react";
+import { useFieldArray, useFormContext } from "react-hook-form";
 
 import type { ZoneWeightFormValues } from "~/lib/validators/shipping";
+import { centsToDollarsString } from "~/lib/prices";
 import {
   generateDefaultZoneWeightConfig,
   STATE_REGION_MAP,
 } from "~/lib/shipping-zones-default";
-import { centsToDollarsString } from "~/lib/prices";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -370,7 +370,7 @@ export function ZoneWeightEditor() {
         </CardHeader>
         <CardContent className="space-y-4">
           {zoneFields.map((zone, zoneIdx) => (
-            <div key={zone.id} className="rounded-lg border p-4 space-y-4">
+            <div key={zone.id} className="space-y-4 rounded-lg border p-4">
               {/* Zone header row */}
               <div className="flex items-start gap-3">
                 <FormField
@@ -401,7 +401,7 @@ export function ZoneWeightEditor() {
               {/* Rate cells — one input per tier */}
               {tiers.length > 0 && (
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-2 block">
+                  <Label className="text-muted-foreground mb-2 block text-xs">
                     Rates by weight tier (USD)
                   </Label>
                   <div className="flex flex-wrap gap-3">
@@ -412,12 +412,12 @@ export function ZoneWeightEditor() {
                         name={`zones.${zoneIdx}.rateDollars.${String(tierIdx)}`}
                         render={({ field }) => (
                           <FormItem className="w-28">
-                            <FormLabel className="text-xs font-normal text-muted-foreground">
+                            <FormLabel className="text-muted-foreground text-xs font-normal">
                               {tier.label ?? `Tier ${tierIdx + 1}`}
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none">
+                                <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm">
                                   $
                                 </span>
                                 <Input
@@ -441,7 +441,7 @@ export function ZoneWeightEditor() {
 
               {/* State checklist */}
               <div>
-                <Label className="text-xs text-muted-foreground mb-2 block">
+                <Label className="text-muted-foreground mb-2 block text-xs">
                   States in this zone
                 </Label>
                 <FormField
@@ -474,7 +474,7 @@ export function ZoneWeightEditor() {
                                   isChecked
                                     ? "bg-primary/10 text-primary font-medium"
                                     : isClaimed
-                                      ? "cursor-not-allowed text-muted-foreground/40 line-through"
+                                      ? "text-muted-foreground/40 cursor-not-allowed line-through"
                                       : "hover:bg-muted"
                                 }`}
                               >
@@ -552,7 +552,7 @@ export function ZoneWeightEditor() {
                 <FormLabel>Fallback shipping rate (USD)</FormLabel>
                 <FormControl>
                   <div className="relative max-w-xs">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
                       $
                     </span>
                     <Input
@@ -577,12 +577,10 @@ export function ZoneWeightEditor() {
             name="freeShippingThresholdDollars"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Free shipping threshold (USD) — optional
-                </FormLabel>
+                <FormLabel>Free shipping threshold (USD) — optional</FormLabel>
                 <FormControl>
                   <div className="relative max-w-xs">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                    <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
                       $
                     </span>
                     <Input

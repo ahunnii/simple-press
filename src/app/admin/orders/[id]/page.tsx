@@ -113,7 +113,10 @@ export default async function OrderDetailPage({ params }: Props) {
             </Badge>
 
             {order.deliveryMethod === "pickup" && (
-              <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700">
+              <Badge
+                variant="outline"
+                className="border-amber-300 bg-amber-50 text-amber-700"
+              >
                 Pickup
               </Badge>
             )}
@@ -145,25 +148,25 @@ export default async function OrderDetailPage({ params }: Props) {
                         className="flex items-center justify-between border-b py-4 last:border-0"
                       >
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="text-foreground font-medium">
                             {item.productName}
                           </p>
                           {item.variantName && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                               {item.variantName}
                             </p>
                           )}
                           {item.sku && (
-                            <p className="mt-1 text-xs text-muted-foreground">
+                            <p className="text-muted-foreground mt-1 text-xs">
                               SKU: {item.sku}
                             </p>
                           )}
-                          <p className="mt-1 text-sm text-muted-foreground">
+                          <p className="text-muted-foreground mt-1 text-sm">
                             Qty: {item.quantity} × {formatPrice(item.price)}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-foreground">
+                          <p className="text-foreground font-semibold">
                             {formatPrice(item.total)}
                           </p>
                         </div>
@@ -171,7 +174,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <p className="py-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground py-2 text-sm">
                     No item breakdown was recorded for this order.
                   </p>
                 )}
@@ -190,7 +193,7 @@ export default async function OrderDetailPage({ params }: Props) {
                       <span className="text-muted-foreground">
                         Discount
                         {order.discountCode && (
-                          <span className="ml-2 rounded bg-muted px-2 py-0.5 font-mono text-xs">
+                          <span className="bg-muted ml-2 rounded px-2 py-0.5 font-mono text-xs">
                             {order.discountCode.code}
                           </span>
                         )}
@@ -261,7 +264,7 @@ export default async function OrderDetailPage({ params }: Props) {
                     <CardTitle>Ready for Pickup</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="mb-4 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mb-4 text-sm">
                       Notify the customer that their order is ready to collect
                       in store. This will send them a pickup confirmation email.
                     </p>
@@ -298,14 +301,14 @@ export default async function OrderDetailPage({ params }: Props) {
 
                 {order.paymentStatus === "paid" &&
                   order.fulfillmentStatus !== "fulfilled" && (
-                    <p className="mt-4 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mt-4 text-sm">
                       Payment received. Ready to fulfill.
                     </p>
                   )}
 
                 {order.fulfillmentStatus === "fulfilled" &&
                   (order.deliveryMethod === "pickup" ? (
-                    <p className="mt-4 text-sm text-muted-foreground">
+                    <p className="text-muted-foreground mt-4 text-sm">
                       Customer notified — ready for pickup.
                     </p>
                   ) : (
@@ -324,18 +327,18 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Name</p>
+                  <p className="text-muted-foreground text-sm">Name</p>
                   <p className="font-medium">{order.customerName}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-muted-foreground text-sm">Email</p>
                   <p className="font-medium">{order.customerEmail}</p>
                 </div>
 
                 {order.customerPhone && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="text-muted-foreground text-sm">Phone</p>
                     <p className="font-medium">{order.customerPhone}</p>
                   </div>
                 )}
@@ -349,19 +352,17 @@ export default async function OrderDetailPage({ params }: Props) {
                   <CardTitle>Pickup Location</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {business?.pickupLocation ?? business?.businessAddress ? (
-                    <p className="text-sm font-medium text-foreground">
+                  {(business?.pickupLocation ?? business?.businessAddress) ? (
+                    <p className="text-foreground text-sm font-medium">
                       {business?.pickupLocation ?? business?.businessAddress}
                     </p>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       No pickup location configured.
                     </p>
                   )}
                   {business?.pickupInstructions && (
-                    <p
-                      className="whitespace-pre-line text-sm text-muted-foreground"
-                    >
+                    <p className="text-muted-foreground text-sm whitespace-pre-line">
                       {business.pickupInstructions}
                     </p>
                   )}
@@ -406,7 +407,7 @@ export default async function OrderDetailPage({ params }: Props) {
                       {order.shippingAddress.country}
                     </address>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       No shipping address on file.
                     </p>
                   )}
@@ -428,26 +429,28 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-muted-foreground text-sm">Status</p>
                   <p className="font-medium capitalize">
                     {order.paymentStatus}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Method</p>
+                  <p className="text-muted-foreground text-sm">Method</p>
                   <p className="font-medium">
                     {paymentMethodLabel(order.paymentMethod)}
                   </p>
                 </div>
                 {order.refundReason && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Refund Reason</p>
+                    <p className="text-muted-foreground text-sm">
+                      Refund Reason
+                    </p>
                     <p className="text-sm font-medium">{order.refundReason}</p>
                   </div>
                 )}
                 {order.stripePaymentIntentId && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Payment ID</p>
+                    <p className="text-muted-foreground text-sm">Payment ID</p>
                     <p className="font-mono text-xs">
                       {order.stripePaymentIntentId}
                     </p>

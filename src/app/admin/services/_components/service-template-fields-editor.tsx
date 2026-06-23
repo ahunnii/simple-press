@@ -68,8 +68,8 @@ export function ServiceTemplateFieldsEditor({ service, embedsEnabled }: Props) {
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4 rounded-lg border bg-card px-4 py-3">
-        <p className="text-sm text-muted-foreground">
+      <div className="bg-card flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
+        <p className="text-muted-foreground text-sm">
           Editing page content for the{" "}
           <span className="font-medium capitalize">
             {service.serviceTemplateId.replace("service-", "Template ")}

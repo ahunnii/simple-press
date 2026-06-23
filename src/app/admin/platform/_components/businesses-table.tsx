@@ -18,22 +18,40 @@ export function BusinessesTable({ businesses }: Props) {
           <caption className="sr-only">Platform businesses</caption>
           <thead className="border-b">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Business
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Domain
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Status
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Members
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Owner
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Created
               </th>
             </tr>
@@ -43,7 +61,7 @@ export function BusinessesTable({ businesses }: Props) {
               <tr key={business.id} className="hover:bg-muted/50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link href={`/admin/platform/businesses/${business.id}`}>
-                    <div className="font-medium text-foreground">
+                    <div className="text-foreground font-medium">
                       {business.name}
                     </div>
                   </Link>
@@ -68,14 +86,14 @@ export function BusinessesTable({ businesses }: Props) {
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm text-foreground">
+                  <span className="text-foreground text-sm">
                     {business._count.memberships}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+                <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                   {business.ownerEmail}
                 </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+                <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                   {new Date(business.createdAt).toLocaleDateString()}
                 </td>
               </tr>

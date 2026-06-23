@@ -1,4 +1,5 @@
 import { Skeleton } from "~/components/ui/skeleton";
+
 import { TrailHeader } from "../_components/trail-header";
 
 export default function PaymentsLoading() {
@@ -14,7 +15,7 @@ export default function PaymentsLoading() {
         <span className="sr-only">Loading payments…</span>
 
         {/* INFORM Act compliance card */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="bg-card rounded-xl border p-6 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div className="space-y-1.5">
               <Skeleton className="h-5 w-48" />
@@ -47,7 +48,7 @@ export default function PaymentsLoading() {
         </div>
 
         {/* Stripe Balance card */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="bg-card rounded-xl border p-6 shadow-sm">
           <div className="mb-4 space-y-1">
             <div className="flex items-center gap-2">
               <Skeleton className="h-4 w-4" />
@@ -70,7 +71,7 @@ export default function PaymentsLoading() {
         </div>
 
         {/* Recent Payouts card */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="bg-card rounded-xl border p-6 shadow-sm">
           <div className="mb-4 space-y-1">
             <Skeleton className="h-5 w-32" />
             <Skeleton className="h-4 w-44" />

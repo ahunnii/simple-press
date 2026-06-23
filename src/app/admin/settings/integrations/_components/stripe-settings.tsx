@@ -152,12 +152,12 @@ export function StripeSettings({
           <>
             <div>
               <label className="text-sm font-medium">Account ID</label>
-              <div className="mt-1 rounded border bg-muted p-3 font-mono text-sm">
+              <div className="bg-muted mt-1 rounded border p-3 font-mono text-sm">
                 {stripeAccountId}
               </div>
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Your Stripe account is connected. Payments will be deposited
               directly to your Stripe account.
             </p>
@@ -254,7 +254,7 @@ export function StripeSettings({
           </>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Connect your Stripe account to start accepting payments. Stripe
               handles all payment processing securely.
             </p>

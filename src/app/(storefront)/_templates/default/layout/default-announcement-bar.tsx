@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 
-import type { BannerConfig } from "~/lib/validators/site-banner";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import {
   BannerDismissButton,
   DismissibleBanner,
 } from "~/components/site-banner/dismissible-banner";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type DefaultAnnouncementBarProps = {
   banner: BannerConfig;
@@ -40,7 +40,9 @@ const linkStyle: React.CSSProperties = {
   opacity: 0.85,
 };
 
-export function DefaultAnnouncementBar({ banner }: DefaultAnnouncementBarProps) {
+export function DefaultAnnouncementBar({
+  banner,
+}: DefaultAnnouncementBarProps) {
   const isExternal = banner.linkUrl
     ? /^https?:\/\//i.test(banner.linkUrl)
     : false;
@@ -94,7 +96,7 @@ export function DefaultAnnouncementBar({ banner }: DefaultAnnouncementBarProps) 
           {/* Dismiss button */}
           <BannerDismissButton
             dismiss={dismiss}
-            className="flex items-center justify-center rounded p-1.5 opacity-50 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="flex items-center justify-center rounded p-1.5 opacity-50 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
           />
         </div>
       )}

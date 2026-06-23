@@ -23,7 +23,7 @@ export function ViiContactMap({ heading, mapImage, mapsUrl }: Props) {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 1180, margin: "0 auto" }}
       >
         {heading && (
@@ -64,7 +64,10 @@ export function ViiContactMap({ heading, mapImage, mapsUrl }: Props) {
             <div
               aria-hidden="true"
               className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-              style={{ background: "color-mix(in srgb, var(--vii-navy) 55%, transparent)" }}
+              style={{
+                background:
+                  "color-mix(in srgb, var(--vii-navy) 55%, transparent)",
+              }}
             >
               <div className="flex flex-col items-center gap-3">
                 <MapPin

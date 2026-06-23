@@ -171,7 +171,7 @@ export function SEOEditor({ business, siteContent }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)}
-        className="min-h-screen bg-muted/40"
+        className="bg-muted/40 min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -316,14 +316,14 @@ export function SEOEditor({ business, siteContent }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-lg border bg-card p-4">
-                    <div className="mb-1 text-sm text-primary">
+                  <div className="bg-card rounded-lg border p-4">
+                    <div className="text-primary mb-1 text-sm">
                       {form.watch("metaTitle") ?? "Your Store Name"}
                     </div>
                     <div className="mb-2 text-xs text-green-700">
                       https://yourstore.com
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       {form.watch("metaDescription") ??
                         "Your store description will appear here..."}
                     </div>

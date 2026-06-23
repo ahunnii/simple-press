@@ -13,7 +13,10 @@ export function BambooAddressBookPage({
   return (
     <PageTransition>
       <BambooAccountLayout heading="Address Book">
-        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+        <AddressBookContent
+          customer={customer}
+          salesCountries={business.salesCountries}
+        />
       </BambooAccountLayout>
     </PageTransition>
   );

@@ -3,19 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
+import type { SupportedCountry } from "~/lib/geo/regions";
 import {
-  calculateShipping,
-  shippingConfigFromBusiness,
-  SHIPPING_TYPES,
-} from "~/lib/shipping-utils";
-import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
-import { useCart } from "~/providers/cart-context";
-import { api } from "~/trpc/react";
-
-import {
-  type SupportedCountry,
   getAllowedCountries, // used at runtime inside useCheckoutForm
 } from "~/lib/geo/regions";
+import {
+  calculateShipping,
+  SHIPPING_TYPES,
+  shippingConfigFromBusiness,
+} from "~/lib/shipping-utils";
+import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
+import { api } from "~/trpc/react";
+import { useCart } from "~/providers/cart-context";
 
 import { useDiscountCode } from "./use-discount-code";
 

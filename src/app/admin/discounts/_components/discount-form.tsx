@@ -208,7 +208,7 @@ export function DiscountForm({ initialDiscount }: Props) {
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-muted/40"
+          className="bg-muted/40 min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -358,7 +358,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormControl>
                             <div className="relative">
                               {type === "fixed" && (
-                                <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                   $
                                 </span>
                               )}
@@ -375,7 +375,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                                 {...field}
                               />
                               {type === "percentage" && (
-                                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground">
+                                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
                                   %
                                 </span>
                               )}
@@ -436,7 +436,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormLabel> Minimum purchase (USD)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <NumberInput
@@ -464,7 +464,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormLabel> Maximum discount (USD)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <NumberInput

@@ -29,8 +29,7 @@ export default async function PageView({ params }: Props) {
   const t = getTemplate(business.templateId);
 
   const pageTitle = page.metaTitle ?? page.title;
-  const pageDescription =
-    page.metaDescription ?? page.excerpt ?? undefined;
+  const pageDescription = page.metaDescription ?? page.excerpt ?? undefined;
 
   const webPageSchema = buildWebPageSchema(business, {
     type: "WebPage",

@@ -146,12 +146,12 @@ export function DashboardContent({
   }));
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="bg-muted min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-foreground text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
             Welcome back! Here&apos;s what&apos;s happening with {business.name}
           </p>
         </div>
@@ -161,7 +161,7 @@ export function DashboardContent({
           {/* Revenue */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-muted-foreground text-sm font-medium">
                 Total Revenue
               </CardTitle>
               <DollarSign className="h-4 w-4 text-blue-600" />
@@ -170,49 +170,51 @@ export function DashboardContent({
               <div className="text-2xl font-bold">
                 {formatCurrency(stats.totalRevenue)}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">All time</p>
+              <p className="text-muted-foreground mt-1 text-xs">All time</p>
             </CardContent>
           </Card>
 
           {/* Orders */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-muted-foreground text-sm font-medium">
                 Total Orders
               </CardTitle>
               <ShoppingCart className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="mt-1 text-xs text-muted-foreground">All time</p>
+              <p className="text-muted-foreground mt-1 text-xs">All time</p>
             </CardContent>
           </Card>
 
           {/* Products */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-muted-foreground text-sm font-medium">
                 Products
               </CardTitle>
               <Package className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalProducts}</div>
-              <p className="mt-1 text-xs text-muted-foreground">In catalog</p>
+              <p className="text-muted-foreground mt-1 text-xs">In catalog</p>
             </CardContent>
           </Card>
 
           {/* Customers */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-muted-foreground text-sm font-medium">
                 Customers
               </CardTitle>
               <Users className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-              <p className="mt-1 text-xs text-muted-foreground">Total customers</p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                Total customers
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -233,9 +235,9 @@ export function DashboardContent({
             <CardContent>
               {recentOrders.length === 0 ? (
                 <div className="py-8 text-center">
-                  <ShoppingCart className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+                  <ShoppingCart className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
                   <p className="text-muted-foreground">No orders yet</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-1 text-sm">
                     Orders will appear here once customers start purchasing
                   </p>
                 </div>
@@ -247,7 +249,7 @@ export function DashboardContent({
                       href={`/admin/orders/${order.id}`}
                       className="block"
                     >
-                      <div className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-muted">
+                      <div className="hover:bg-muted flex items-center justify-between rounded-lg p-3 transition-colors">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">
@@ -259,10 +261,10 @@ export function DashboardContent({
                               {order.status}
                             </Badge>
                           </div>
-                          <p className="truncate text-sm text-muted-foreground">
+                          <p className="text-muted-foreground truncate text-sm">
                             {order.customerName}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             {formatDate(order.createdAt)}
                           </p>
                         </div>
@@ -294,8 +296,10 @@ export function DashboardContent({
               {lowStockProducts.length === 0 && lowStockPools.length === 0 ? (
                 <div className="py-8 text-center">
                   <Package className="mx-auto mb-3 h-12 w-12 text-green-400" />
-                  <p className="text-muted-foreground">All stock levels are good!</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground">
+                    All stock levels are good!
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-sm">
                     No products are running low
                   </p>
                 </div>
@@ -309,10 +313,10 @@ export function DashboardContent({
                       <div className="flex items-center gap-3">
                         <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
                         <div>
-                          <p className="text-sm font-medium text-foreground">
+                          <p className="text-foreground text-sm font-medium">
                             {variant.product.name}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             {variant.name}
                           </p>
                         </div>
@@ -332,10 +336,10 @@ export function DashboardContent({
                             className={`h-5 w-5 shrink-0 ${pool.inventoryQty === 0 ? "text-red-600" : "text-amber-600"}`}
                           />
                           <div>
-                            <p className="text-sm font-medium text-foreground">
+                            <p className="text-foreground text-sm font-medium">
                               {pool.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               Inventory pool
                             </p>
                           </div>
@@ -411,9 +415,9 @@ export function DashboardContent({
           <CardContent>
             {chartData.length === 0 ? (
               <div className="py-12 text-center">
-                <DollarSign className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+                <DollarSign className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
                 <p className="text-muted-foreground">No revenue data yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Revenue will be tracked here once you start making sales
                 </p>
               </div>
@@ -443,7 +447,11 @@ export function DashboardContent({
                       borderRadius: "6px",
                     }}
                   />
-                  <Bar dataKey="revenue" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="revenue"
+                    fill="var(--chart-1)"
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -458,9 +466,9 @@ export function DashboardContent({
           <CardContent>
             {topProducts.length === 0 ? (
               <div className="py-8 text-center">
-                <Package className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+                <Package className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
                 <p className="text-muted-foreground">No sales data yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   Top selling products will appear here
                 </p>
               </div>
@@ -469,14 +477,14 @@ export function DashboardContent({
                 {topProducts.map((product, index) => (
                   <div
                     key={product.productId}
-                    className="flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-muted"
+                    className="hover:bg-muted flex items-center gap-4 rounded-lg p-3 transition-colors"
                   >
                     <div className="w-8 shrink-0 text-center">
-                      <span className="text-lg font-bold text-muted-foreground">
+                      <span className="text-muted-foreground text-lg font-bold">
                         {index + 1}
                       </span>
                     </div>
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-muted">
+                    <div className="bg-muted h-16 w-16 shrink-0 overflow-hidden rounded">
                       {product.imageUrl ? (
                         <Image
                           src={product.imageUrl}
@@ -487,15 +495,15 @@ export function DashboardContent({
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <Package className="h-6 w-6 text-muted-foreground" />
+                          <Package className="text-muted-foreground h-6 w-6" />
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
+                      <p className="text-foreground truncate text-sm font-medium">
                         {product.productName}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">
                         {product.unitsSold} sold
                       </p>
                     </div>
@@ -503,7 +511,7 @@ export function DashboardContent({
                       <p className="text-sm font-semibold">
                         {formatCurrency(product.revenue)}
                       </p>
-                      <p className="text-xs text-muted-foreground">revenue</p>
+                      <p className="text-muted-foreground text-xs">revenue</p>
                     </div>
                   </div>
                 ))}

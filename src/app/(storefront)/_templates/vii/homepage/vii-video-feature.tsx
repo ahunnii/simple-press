@@ -75,7 +75,7 @@ export function ViiVideoFeature({
         {/* ── Text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <p
@@ -162,7 +162,7 @@ export function ViiVideoFeature({
         {/* ── Media column ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",
@@ -211,7 +211,8 @@ export function ViiVideoFeature({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "color-mix(in srgb, var(--vii-navy) 25%, transparent)",
+                    background:
+                      "color-mix(in srgb, var(--vii-navy) 25%, transparent)",
                     border: "none",
                     cursor: "pointer",
                   }}
@@ -223,7 +224,8 @@ export function ViiVideoFeature({
                       width: 72,
                       height: 72,
                       borderRadius: "50%",
-                      background: "color-mix(in srgb, var(--vii-paper) 92%, transparent)",
+                      background:
+                        "color-mix(in srgb, var(--vii-paper) 92%, transparent)",
                       color: "var(--vii-navy)",
                       display: "inline-flex",
                       alignItems: "center",

@@ -18,16 +18,28 @@ export function UsersTable({ users }: Props) {
           <caption className="sr-only">Platform users</caption>
           <thead className="border-b">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 User
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Platform Role
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Memberships
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Created
               </th>
             </tr>
@@ -38,10 +50,12 @@ export function UsersTable({ users }: Props) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link href={`/admin/platform/users/${user.id}`}>
                     <div>
-                      <div className="font-medium text-foreground">
+                      <div className="text-foreground font-medium">
                         {user.name}
                       </div>
-                      <div className="text-sm text-muted-foreground">{user.email}</div>
+                      <div className="text-muted-foreground text-sm">
+                        {user.email}
+                      </div>
                     </div>
                   </Link>
                 </td>
@@ -57,11 +71,11 @@ export function UsersTable({ users }: Props) {
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm text-foreground">
+                  <span className="text-foreground text-sm">
                     {user._count.memberships}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+                <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
               </tr>

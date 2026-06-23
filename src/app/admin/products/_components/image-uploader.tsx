@@ -169,7 +169,7 @@ export function ImageUploader({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold">Product Images</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {images.length} of {maxImages} images
             </p>
           </div>
@@ -228,9 +228,9 @@ export function ImageUploader({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="mb-2 text-foreground">No images yet</p>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <Upload className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+            <p className="text-foreground mb-2">No images yet</p>
+            <p className="text-muted-foreground mb-4 text-sm">
               Drag and drop images here, or click to select multiple (JPG, PNG,
               WebP)
             </p>
@@ -246,19 +246,19 @@ export function ImageUploader({
 
         {canUploadMore && images.length > 0 && (
           <div
-            className="data-[drag=true]:border-primary data-[drag=true]:bg-primary/5 rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors"
+            className="data-[drag=true]:border-primary data-[drag=true]:bg-primary/5 border-border rounded-lg border-2 border-dashed p-6 text-center transition-colors"
             data-drag="false"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Drag and drop more images here, or use the button above
             </p>
           </div>
         )}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Tip: Drag images to reorder. First image is the primary image.
           {images.some((img) => img.file) && (
             <span className="ml-1 text-amber-600">

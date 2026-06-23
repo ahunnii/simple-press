@@ -14,11 +14,11 @@
 
 import { TRPCError } from "@trpc/server";
 
-import { getPresignedDownloadUrl } from "~/lib/s3/presign";
-import { listBusinessObjects } from "~/lib/s3/list";
-import { keyToPublicUrl } from "~/lib/s3/url";
-import { deleteStoredObjects } from "~/lib/s3/delete";
 import { buildUsedMediaIndex, isAlwaysInUseKey } from "~/lib/media/usage";
+import { deleteStoredObjects } from "~/lib/s3/delete";
+import { listBusinessObjects } from "~/lib/s3/list";
+import { getPresignedDownloadUrl } from "~/lib/s3/presign";
+import { keyToPublicUrl } from "~/lib/s3/url";
 import {
   mediaDeleteInput,
   mediaDownloadInput,
@@ -29,7 +29,10 @@ import { createTRPCRouter, featureGate, ownerAdminProcedure } from "../trpc";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-type SessionCtx = { session: { user: { platformRole: string } }; businessId: string };
+type SessionCtx = {
+  session: { user: { platformRole: string } };
+  businessId: string;
+};
 
 /**
  * Return the target `businessId` for the operation.

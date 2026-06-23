@@ -71,7 +71,7 @@ export default async function AdminLayout({ children }: Props) {
           featureData={featureData}
         />
         <SidebarInset>
-          <div className="min-h-screen bg-muted">{children}</div>
+          <div className="bg-muted min-h-screen">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </HydrateClient>

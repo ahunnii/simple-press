@@ -6,9 +6,11 @@ import Link from "next/link";
 import { CreditCard, Loader2, Tag, X } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -22,7 +24,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -34,7 +35,9 @@ export function DarkTrendCheckoutForm({ business }: Props) {
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
-    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+    f.deliveryMethod === "ship" &&
+    f.state.trim().length > 0 &&
+    f.shippingPending;
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -176,10 +179,14 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   <div className="rounded-md border border-white/20 bg-white/5 p-3 text-sm">
                     <p className="font-medium text-white">Pickup location</p>
                     <p className="mt-0.5 text-white/70">
-                      {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                      {f.shippingConfig.pickupLocation ??
+                        business.businessAddress ??
+                        "Pickup details will be confirmed by the store."}
                     </p>
                     {f.shippingConfig.pickupInstructions ? (
-                      <p className="mt-1 whitespace-pre-line text-white/70">{f.shippingConfig.pickupInstructions}</p>
+                      <p className="mt-1 whitespace-pre-line text-white/70">
+                        {f.shippingConfig.pickupInstructions}
+                      </p>
                     ) : null}
                   </div>
                 )}
@@ -517,7 +524,10 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                         className="inline-flex items-center gap-1.5 text-white/70"
                         aria-live="polite"
                       >
-                        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        <Loader2
+                          className="size-3.5 animate-spin"
+                          aria-hidden="true"
+                        />
                         Calculating…
                       </span>
                     ) : f.shippingPending ? (

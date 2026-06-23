@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
+import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ReservationEntry } from "~/lib/inventory/reservation";
 import { env } from "~/env";
 import { computeSubtotalCents } from "~/lib/checkout/pricing";
@@ -12,21 +13,20 @@ import {
 } from "~/lib/checkout/validate-cart";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { getAllowedCountries } from "~/lib/geo/regions";
 import {
   releaseReservation,
   reserveInventory,
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
-import { getAllowedCountries } from "~/lib/geo/regions";
-import type { SupportedCountry } from "~/lib/geo/regions";
 import { buildZoneWeightConfig } from "~/lib/shipping-config";
 import {
   calculateShipping,
   calculateZoneWeightShipping,
   normalizeWeightToLb,
-  shippingConfigFromBusiness,
   SHIPPING_TYPES,
+  shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
 import { stripeClient } from "~/lib/stripe/client";
 import { checkoutSessionSchema } from "~/lib/validators/checkout";
@@ -569,10 +569,9 @@ export async function POST(req: NextRequest) {
       ...(deliveryMethod === "ship" && !lockShippingAddress
         ? {
             shipping_address_collection: {
-              allowed_countries:
-                getAllowedCountries(
-                  business.salesCountries,
-                ) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection["allowed_countries"],
+              allowed_countries: getAllowedCountries(
+                business.salesCountries,
+              ) as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection["allowed_countries"],
             },
           }
         : {}),

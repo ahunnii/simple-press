@@ -151,7 +151,7 @@ export function ViiProductCard({ product, index }: Props) {
         >
           <Link
             href={`/shop/${product.slug}`}
-            className="transition-opacity hover:opacity-70 focus-visible:opacity-70 after:absolute after:inset-0 after:z-[1] after:content-['']"
+            className="transition-opacity after:absolute after:inset-0 after:z-[1] after:content-[''] hover:opacity-70 focus-visible:opacity-70"
           >
             {product.name}
           </Link>

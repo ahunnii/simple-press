@@ -104,7 +104,7 @@ export function DomainQueueTable({ entries }: Props) {
 
   if (entries.length === 0) {
     return (
-      <Card className="p-12 text-center text-muted-foreground">
+      <Card className="text-muted-foreground p-12 text-center">
         No pending domain requests.
       </Card>
     );
@@ -115,24 +115,42 @@ export function DomainQueueTable({ entries }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full">
           <caption className="sr-only">Domain queue entries</caption>
-          <thead className="border-b bg-muted">
+          <thead className="bg-muted border-b">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Business
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Custom Domain
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Queue Status
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Domain Status
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Requested
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
                 Actions
               </th>
             </tr>
@@ -145,11 +163,13 @@ export function DomainQueueTable({ entries }: Props) {
               return (
                 <tr key={entry.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-foreground">
+                    <div className="text-foreground font-medium">
                       {b?.name ?? "Unknown"}
                     </div>
-                    <div className="text-sm text-muted-foreground">{b?.ownerEmail}</div>
-                    <div className="mt-0.5 font-mono text-xs text-muted-foreground/70">
+                    <div className="text-muted-foreground text-sm">
+                      {b?.ownerEmail}
+                    </div>
+                    <div className="text-muted-foreground/70 mt-0.5 font-mono text-xs">
                       {b?.subdomain}.{process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}
                     </div>
                   </td>
@@ -166,7 +186,7 @@ export function DomainQueueTable({ entries }: Props) {
                       </a>
                     </div>
                     {entry.lastError && (
-                      <div className="mt-1 text-xs text-destructive">
+                      <div className="text-destructive mt-1 text-xs">
                         {entry.lastError}
                       </div>
                     )}
@@ -175,7 +195,7 @@ export function DomainQueueTable({ entries }: Props) {
                   <td className="px-6 py-4">
                     {domainStatusBadge(b?.domainStatus ?? "NONE")}
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  <td className="text-muted-foreground px-6 py-4 text-sm">
                     {new Date(entry.createdAt).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",

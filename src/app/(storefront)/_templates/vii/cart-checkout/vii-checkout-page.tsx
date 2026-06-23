@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
-import { resolveFields } from "..";
 
+import { resolveFields } from "..";
 import { ViiCheckoutForm } from "./vii-checkout-form";
 
 export async function ViiCheckoutPage({
@@ -36,7 +36,8 @@ export async function ViiCheckoutPage({
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          padding: "clamp(144px, 14vw, 188px) clamp(24px, 6vw, 96px) clamp(64px, 10vw, 120px)",
+          padding:
+            "clamp(144px, 14vw, 188px) clamp(24px, 6vw, 96px) clamp(64px, 10vw, 120px)",
           background: "var(--vii-cream)",
           minHeight: "60vh",
         }}

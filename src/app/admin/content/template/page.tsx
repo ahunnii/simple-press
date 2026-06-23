@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
-
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
+
 import { TrailHeader } from "../../_components/trail-header";
 import { TemplateFieldsEditor } from "./_components/template-fields-editor";
 

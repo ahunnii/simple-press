@@ -8,8 +8,8 @@ import {
   getPlatformMaintenance,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
-import { dollarsToCents } from "~/lib/prices";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
@@ -867,9 +867,7 @@ export const businessRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const {
-        businessId,
-      } = ctx;
+      const { businessId } = ctx;
       const {
         metaTitle,
         metaDescription,

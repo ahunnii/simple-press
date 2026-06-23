@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
 
-import type { PopupConfig } from "~/lib/validators/site-banner";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import type { PopupConfig } from "~/lib/validators/site-banner";
 import { PopupModal } from "~/components/site-banner/popup-modal";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type DefaultPopupProps = {
   popup: PopupConfig;

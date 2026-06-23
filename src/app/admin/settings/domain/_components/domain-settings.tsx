@@ -209,7 +209,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                   </Link>
                 </Button>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-2 text-sm">
                 This is your permanent store URL. It cannot be changed.
               </p>
             </CardContent>
@@ -246,7 +246,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                       <p className="mb-3 text-sm text-amber-800">
                         Add these DNS records to your domain registrar:
                       </p>
-                      <div className="space-y-1 rounded border bg-card p-3 font-mono text-sm">
+                      <div className="bg-card space-y-1 rounded border p-3 font-mono text-sm">
                         <div>Type: A</div>
                         <div>Name: @</div>
                         <div>Value: {vpsIp}</div>
@@ -262,7 +262,10 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                         >
                           {isVerifying ? (
                             <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                              <Loader2
+                                className="mr-2 h-4 w-4 animate-spin"
+                                aria-hidden="true"
+                              />
                               <span className="sr-only">Loading…</span>
                               Verifying...
                             </>
@@ -307,7 +310,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                         onChange={(e) => setCustomDomain(e.target.value)}
                         placeholder="example.com"
                       />
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <p className="text-muted-foreground mt-1 text-sm">
                         Enter your domain without &quot;http://&quot; or
                         &quot;www&quot;
                       </p>
@@ -316,7 +319,10 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                     <Button type="submit" disabled={isAdding}>
                       {isAdding ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                          <Loader2
+                            className="mr-2 h-4 w-4 animate-spin"
+                            aria-hidden="true"
+                          />
                           <span className="sr-only">Loading…</span>
                           Adding...
                         </>
@@ -353,7 +359,10 @@ function RemoveDomainDialog({
         <Button variant="outline" size="sm" disabled={isPending}>
           {isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
               <span className="sr-only">Loading…</span>
             </>
           ) : (

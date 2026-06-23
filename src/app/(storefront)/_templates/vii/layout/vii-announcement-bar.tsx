@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 
-import type { BannerConfig } from "~/lib/validators/site-banner";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import {
   BannerDismissButton,
   DismissibleBanner,
 } from "~/components/site-banner/dismissible-banner";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type ViiAnnouncementBarProps = {
   banner: BannerConfig;
@@ -98,7 +98,7 @@ export function ViiAnnouncementBar({ banner }: ViiAnnouncementBarProps) {
           {/* Dismiss button — right edge */}
           <BannerDismissButton
             dismiss={dismiss}
-            className="flex items-center justify-center rounded p-1.5 opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            className="flex items-center justify-center rounded p-1.5 opacity-60 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-current focus-visible:outline-none"
           />
         </div>
       )}

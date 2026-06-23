@@ -215,7 +215,7 @@ function PullQuote({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 760, margin: "0 auto" }}
       >
         {/* Opening quotation mark */}
@@ -283,7 +283,7 @@ function TreatmentListRow({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-atelier-list-row${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-atelier-list-row${visible ? "is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1.4fr",
@@ -522,7 +522,7 @@ function AtelierList({
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal vii-atelier-list-row${headVisible ? "is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",

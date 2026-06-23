@@ -1,11 +1,11 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
+import type { z } from "zod";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
-import type { z } from "zod";
 
 import type { BannerConfig, PopupConfig } from "~/lib/validators/site-banner";
 import {
@@ -21,9 +21,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Form } from "~/components/ui/form";
-import { Separator } from "~/components/ui/separator";
 import {
+  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -32,6 +31,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Separator } from "~/components/ui/separator";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
@@ -158,7 +158,7 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                           className="h-9 w-14 cursor-pointer px-1 py-1"
                           aria-label="Background color picker"
                         />
-                        <span className="font-mono text-sm text-muted-foreground">
+                        <span className="text-muted-foreground font-mono text-sm">
                           {field.value ?? "#000000"}
                         </span>
                       </div>
@@ -183,12 +183,14 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                           className="h-9 w-14 cursor-pointer px-1 py-1"
                           aria-label="Text color picker"
                         />
-                        <span className="font-mono text-sm text-muted-foreground">
+                        <span className="text-muted-foreground font-mono text-sm">
                           {field.value ?? "#ffffff"}
                         </span>
                       </div>
                     </FormControl>
-                    <FormDescription>Banner text and link color.</FormDescription>
+                    <FormDescription>
+                      Banner text and link color.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -196,10 +198,7 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
             </div>
 
             <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={updateBanner.isPending}
-              >
+              <Button type="submit" disabled={updateBanner.isPending}>
                 {updateBanner.isPending ? "Saving…" : "Save banner"}
               </Button>
             </div>
@@ -359,10 +358,7 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
             </div>
 
             <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={updatePopup.isPending}
-              >
+              <Button type="submit" disabled={updatePopup.isPending}>
                 {updatePopup.isPending ? "Saving…" : "Save popup"}
               </Button>
             </div>

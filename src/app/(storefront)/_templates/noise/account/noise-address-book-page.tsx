@@ -13,7 +13,10 @@ export function NoiseAddressBookPage({
   return (
     <PageTransition>
       <NoiseAccountLayout heading="Address Book">
-        <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+        <AddressBookContent
+          customer={customer}
+          salesCountries={business.salesCountries}
+        />
       </NoiseAccountLayout>
     </PageTransition>
   );

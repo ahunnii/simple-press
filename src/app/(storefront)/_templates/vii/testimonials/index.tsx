@@ -88,8 +88,7 @@ const testimonialsCTAData: TemplateField[] = [
   {
     key: "vii.testimonials.cta-body",
     label: "CTA Body Text",
-    description:
-      "Short invitation encouraging clients to leave a review.",
+    description: "Short invitation encouraging clients to leave a review.",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.cta",

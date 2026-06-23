@@ -223,7 +223,7 @@ export function PageEditor({
         <form
           ref={formRef}
           onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="min-h-screen bg-muted/40"
+          className="bg-muted/40 min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
             <div className="toolbar-info">
@@ -334,7 +334,7 @@ export function PageEditor({
                               <Input {...field} placeholder="about-us" />
                             </FormControl>
                           </div>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             URL-friendly version (lowercase, hyphens)
                           </p>
                           <FormMessage />

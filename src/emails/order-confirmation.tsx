@@ -160,9 +160,7 @@ export default function OrderConfirmationEmail({
       {isPickup ? (
         <Section style={addressSection}>
           <Text style={sectionHeading}>Pickup Details</Text>
-          {pickupLocation && (
-            <Text style={addressText}>{pickupLocation}</Text>
-          )}
+          {pickupLocation && <Text style={addressText}>{pickupLocation}</Text>}
           {pickupInstructions && (
             <Text style={{ ...addressText, whiteSpace: "pre-line" }}>
               {pickupInstructions}

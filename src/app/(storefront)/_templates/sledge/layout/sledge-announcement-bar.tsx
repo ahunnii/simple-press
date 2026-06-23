@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 
-import type { BannerConfig } from "~/lib/validators/site-banner";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import type { BannerConfig } from "~/lib/validators/site-banner";
 import {
   BannerDismissButton,
   DismissibleBanner,
 } from "~/components/site-banner/dismissible-banner";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type SledgeAnnouncementBarProps = {
   banner: BannerConfig;
@@ -17,7 +17,8 @@ type SledgeAnnouncementBarProps = {
 export function SledgeAnnouncementBar({ banner }: SledgeAnnouncementBarProps) {
   const linkUrl = banner.linkUrl?.trim() ?? "";
   const trimmedLabel = banner.linkLabel?.trim();
-  const linkLabel = trimmedLabel && trimmedLabel.length > 0 ? trimmedLabel : "Shop →";
+  const linkLabel =
+    trimmedLabel && trimmedLabel.length > 0 ? trimmedLabel : "Shop →";
   const isExternal = /^https?:\/\//i.test(linkUrl);
 
   const linkClassName =

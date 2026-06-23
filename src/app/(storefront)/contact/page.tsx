@@ -27,7 +27,10 @@ export default async function ContactPage() {
     { name: "Contact", path: "/contact" },
   ]);
 
-  const schemas: Record<string, unknown>[] = [contactPageSchema, breadcrumbSchema];
+  const schemas: Record<string, unknown>[] = [
+    contactPageSchema,
+    breadcrumbSchema,
+  ];
 
   if (business.localBusinessEnabled) {
     schemas.push(buildLocalBusinessSchema(business));
@@ -45,8 +48,7 @@ export async function generateMetadata() {
   const business = await api.business.simplifiedGet();
 
   const title = "Contact Us";
-  const description =
-    business?.siteContent?.metaDescription ?? undefined;
+  const description = business?.siteContent?.metaDescription ?? undefined;
   const ogImage =
     business?.siteContent?.ogImage ??
     business?.siteContent?.logoUrl ??

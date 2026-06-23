@@ -168,9 +168,9 @@ export function GalleriesList({ galleries }: Props) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <Images className="mx-auto h-12 w-12 text-muted-foreground" />
+          <Images className="text-muted-foreground mx-auto h-12 w-12" />
           <h3 className="mt-4 text-lg font-medium">No galleries yet</h3>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Create your first gallery to get started
           </p>
           <Button className="mt-4" asChild>
@@ -184,11 +184,11 @@ export function GalleriesList({ galleries }: Props) {
   return (
     <>
       {/* Search + Layout filter bar */}
-      <div className="sticky top-0 z-20 mb-6 rounded-lg border bg-card p-4 shadow-sm">
+      <div className="bg-card sticky top-0 z-20 mb-6 rounded-lg border p-4 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search */}
           <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               type="text"
               placeholder="Search galleries..."
@@ -257,11 +257,11 @@ export function GalleriesList({ galleries }: Props) {
             {paginated.map((gallery) => (
               <Card key={gallery.id} className="overflow-hidden">
                 {/* Preview Images */}
-                <div className="grid grid-cols-2 gap-1 bg-muted p-2">
+                <div className="bg-muted grid grid-cols-2 gap-1 p-2">
                   {gallery.images.slice(0, 4).map((image) => (
                     <div
                       key={image.id}
-                      className="aspect-square overflow-hidden rounded bg-card"
+                      className="bg-card aspect-square overflow-hidden rounded"
                     >
                       <img
                         src={image.url}
@@ -272,8 +272,8 @@ export function GalleriesList({ galleries }: Props) {
                     </div>
                   ))}
                   {gallery.images.length === 0 && (
-                    <div className="col-span-2 flex aspect-square items-center justify-center rounded bg-muted">
-                      <Images className="h-8 w-8 text-muted-foreground" />
+                    <div className="bg-muted col-span-2 flex aspect-square items-center justify-center rounded">
+                      <Images className="text-muted-foreground h-8 w-8" />
                     </div>
                   )}
                 </div>
@@ -283,7 +283,7 @@ export function GalleriesList({ galleries }: Props) {
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate font-medium">{gallery.name}</h3>
                       {gallery.description && (
-                        <p className="mt-1 truncate text-sm text-muted-foreground">
+                        <p className="text-muted-foreground mt-1 truncate text-sm">
                           {gallery.description}
                         </p>
                       )}
@@ -394,7 +394,9 @@ export function GalleriesList({ galleries }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();

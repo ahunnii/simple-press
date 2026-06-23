@@ -96,7 +96,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
 
   const shippingCost = form.watch("shipping");
   const tax = form.watch("tax");
-  const selectedCountry = (form.watch("shippingAddress.country") ?? "US") as SupportedCountry;
+  const selectedCountry = (form.watch("shippingAddress.country") ??
+    "US") as SupportedCountry;
   const regionOptions = getRegionOptions(selectedCountry);
 
   const addItem = () => {
@@ -268,7 +269,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
         onChange={() => console.log(form.formState.errors)}
-        className="min-h-screen bg-muted/40"
+        className="bg-muted/40 min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -629,7 +630,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                           <FormLabel>Shipping</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <NumberInput
@@ -654,7 +655,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                           <FormLabel>Tax</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                                 $
                               </span>
                               <NumberInput
@@ -744,7 +745,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                 <div className="flex flex-col gap-1.5">
                   <Label>Subtotal</Label>
                   <div className="relative w-48">
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground">
+                    <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
                       $
                     </span>
                     <NumberInput
@@ -827,7 +828,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
 
                           <div className="min-w-0">
                             <Label>
-                              Quantity <span className="text-destructive">*</span>
+                              Quantity{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <NumberInput
                               id="quantity"

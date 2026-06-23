@@ -2,7 +2,12 @@ import { z } from "zod";
 
 export const shippingFormSchema = z
   .object({
-    shippingType: z.enum(["free", "flat_rate", "flat_rate_with_threshold", "zone_weight"]),
+    shippingType: z.enum([
+      "free",
+      "flat_rate",
+      "flat_rate_with_threshold",
+      "zone_weight",
+    ]),
     shippingFlatRateDollars: z.string().optional(),
     freeShippingThresholdDollars: z.string().optional(),
     offersInStorePickup: z.boolean(),
@@ -46,7 +51,8 @@ export const shippingFormSchema = z
       if (!data.pickupInstructions?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Add pickup hours/instructions so customers know when to collect their order",
+          message:
+            "Add pickup hours/instructions so customers know when to collect their order",
           path: ["pickupInstructions"],
         });
       }
@@ -86,7 +92,9 @@ const weightTierSchema = z
 
 const zoneRateRowSchema = z.object({
   name: z.string().min(1, "Zone name is required"),
-  states: z.array(z.string().length(2)).min(1, "Each zone must have at least one state"),
+  states: z
+    .array(z.string().length(2))
+    .min(1, "Each zone must have at least one state"),
   /**
    * Rate cells: indexed by tier position (0-based string key because HTML inputs
    * always produce string keys).  Values are dollar strings ("6.99").
@@ -151,7 +159,11 @@ export const zoneWeightFormSchema = z
       // Each tier's minLb must match the previous tier's maxLb (contiguous)
       if (i > 0) {
         const prev = tiers[i - 1];
-        if (prev !== undefined && prev.maxLb !== null && tier.minLb !== prev.maxLb) {
+        if (
+          prev !== undefined &&
+          prev.maxLb !== null &&
+          tier.minLb !== prev.maxLb
+        ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Tier ${i + 1} minLb (${tier.minLb}) must equal the previous tier's maxLb (${prev.maxLb})`,
@@ -196,7 +208,7 @@ export const zoneWeightFormSchema = z
     if (parseDollarString(data.fallbackRateDollars) === null) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Enter a valid fallback rate (e.g. \"19.99\")",
+        message: 'Enter a valid fallback rate (e.g. "19.99")',
         path: ["fallbackRateDollars"],
       });
     }
@@ -219,7 +231,8 @@ export const zoneWeightFormSchema = z
       if (!data.pickupInstructions?.trim()) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Add pickup hours/instructions so customers know when to collect their order",
+          message:
+            "Add pickup hours/instructions so customers know when to collect their order",
           path: ["pickupInstructions"],
         });
       }

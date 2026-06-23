@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -19,7 +21,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 import { NoiseOrderSummary } from "./noise-order-summary";
 
@@ -317,7 +318,9 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                   className="font-sans text-sm"
                   style={{ color: "var(--vn-steel)" }}
                 >
-                  {shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                  {shippingConfig.pickupLocation ??
+                    business.businessAddress ??
+                    "Pickup details will be confirmed by the store."}
                 </p>
                 {shippingConfig.pickupInstructions ? (
                   <p
@@ -431,9 +434,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                     className={cn("w-full", INP)}
                     aria-labelledby="state-label"
                     aria-required="true"
-                    aria-invalid={
-                      submitAttempted && !state ? true : undefined
-                    }
+                    aria-invalid={submitAttempted && !state ? true : undefined}
                   >
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>

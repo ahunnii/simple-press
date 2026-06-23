@@ -6,12 +6,13 @@ import Link from "next/link";
 import { ArrowRight, Loader2, ShoppingBag } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -39,7 +40,9 @@ export function ModernCheckoutForm({ business }: Props) {
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
-    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+    f.deliveryMethod === "ship" &&
+    f.state.trim().length > 0 &&
+    f.shippingPending;
 
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
@@ -280,10 +283,14 @@ export function ModernCheckoutForm({ business }: Props) {
                 <div className="border-border mt-3 border-t pt-3 text-sm">
                   <p className="text-foreground font-medium">Pickup location</p>
                   <p className="text-muted-foreground">
-                    {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                    {f.shippingConfig.pickupLocation ??
+                      business.businessAddress ??
+                      "Pickup details will be confirmed by the store."}
                   </p>
                   {f.shippingConfig.pickupInstructions ? (
-                    <p className="text-muted-foreground mt-1 whitespace-pre-line">{f.shippingConfig.pickupInstructions}</p>
+                    <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                      {f.shippingConfig.pickupInstructions}
+                    </p>
                   ) : null}
                 </div>
               )}
@@ -357,7 +364,11 @@ export function ModernCheckoutForm({ business }: Props) {
                   />
                 </div>
                 <div>
-                  <label htmlFor="state" id="state-label" className={labelClass}>
+                  <label
+                    htmlFor="state"
+                    id="state-label"
+                    className={labelClass}
+                  >
                     State / Province *
                   </label>
                   <select
@@ -495,7 +506,10 @@ export function ModernCheckoutForm({ business }: Props) {
                       className="text-muted-foreground inline-flex items-center gap-1.5"
                       aria-live="polite"
                     >
-                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                      <Loader2
+                        className="size-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
                       Calculating…
                     </span>
                   ) : f.shippingPending ? (

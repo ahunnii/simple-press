@@ -21,11 +21,15 @@ function statusStyles(status: string): {
   switch (status) {
     case "open":
       // glacier tint on cream — navy text passes AA
-      return { background: "color-mix(in srgb, var(--vii-glacier) 22%, transparent)", color: "var(--vii-navy)" };
+      return {
+        background: "color-mix(in srgb, var(--vii-glacier) 22%, transparent)",
+        color: "var(--vii-navy)",
+      };
     case "completed":
       // subtle copper-light tint on paper — navy text
       return {
-        background: "color-mix(in srgb, var(--vii-copper-deep) 12%, transparent)",
+        background:
+          "color-mix(in srgb, var(--vii-copper-deep) 12%, transparent)",
         color: "var(--vii-copper-deep)",
       };
     case "cancelled":
@@ -42,7 +46,10 @@ function statusStyles(status: string): {
       };
     default:
       // pending — tan tint / navy
-      return { background: "color-mix(in srgb, var(--vii-tan) 35%, transparent)", color: "var(--vii-navy)" };
+      return {
+        background: "color-mix(in srgb, var(--vii-tan) 35%, transparent)",
+        color: "var(--vii-navy)",
+      };
   }
 }
 
@@ -86,7 +93,11 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
                 }}
               >
                 <Package
-                  style={{ width: 28, height: 28, color: "var(--vii-copper-light)" }}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    color: "var(--vii-copper-light)",
+                  }}
                 />
               </div>
               <h2
@@ -236,9 +247,7 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
                       borderTop: "1px solid var(--vii-hairline)",
                     }}
                   >
-                    <div
-                      style={{ display: "flex", flexWrap: "wrap", gap: 6 }}
-                    >
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                       {order.items.slice(0, 3).map((item) => (
                         <span
                           key={item.id}
@@ -253,8 +262,9 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
                           }}
                         >
                           {item.productName}
-                          {item.variantName ? ` — ${item.variantName}` : ""} ×{" "}
-                          {item.quantity}
+                          {item.variantName
+                            ? ` — ${item.variantName}`
+                            : ""} × {item.quantity}
                         </span>
                       ))}
                       {order.items.length > 3 && (

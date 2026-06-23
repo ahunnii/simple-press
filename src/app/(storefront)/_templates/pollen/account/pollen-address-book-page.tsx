@@ -11,7 +11,10 @@ export function PollenAddressBookPage({
 }: AccountAddressBookPageProps) {
   return (
     <PollenAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+      <AddressBookContent
+        customer={customer}
+        salesCountries={business.salesCountries}
+      />
     </PollenAccountLayout>
   );
 }

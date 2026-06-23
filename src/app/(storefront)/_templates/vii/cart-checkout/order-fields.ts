@@ -52,7 +52,8 @@ export const viiOrderData: TemplateField[] = [
   {
     key: "vii.order.continue-cta",
     label: "Continue Shopping CTA Label",
-    description: "Label for the primary CTA button that returns the customer to the shop.",
+    description:
+      "Label for the primary CTA button that returns the customer to the shop.",
     type: "text",
     page: "cart",
     group: "order.main",

@@ -182,7 +182,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
             );
           })(e)
         }
-        className="min-h-screen bg-muted/40"
+        className="bg-muted/40 min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
           <div className="toolbar-info">
@@ -418,12 +418,14 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
                               <span
                                 className={cn(
                                   "text-sm font-medium",
-                                  isSelected ? "text-primary" : "text-foreground",
+                                  isSelected
+                                    ? "text-primary"
+                                    : "text-foreground",
                                 )}
                               >
                                 {meta.label}
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs">
                                 {meta.description}
                               </span>
                             </label>

@@ -45,7 +45,9 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {
-  ...Object.fromEntries(AVAILABLE_FREE_TEMPLATES.map((t) => [t.value, t.label])),
+  ...Object.fromEntries(
+    AVAILABLE_FREE_TEMPLATES.map((t) => [t.value, t.label]),
+  ),
   ...Object.fromEntries(
     Object.entries(COMMERCIAL_TEMPLATE_OWNERSHIP).map(([value, info]) => [
       value,

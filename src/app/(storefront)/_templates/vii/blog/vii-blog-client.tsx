@@ -325,7 +325,9 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
             style={{
               width: 15,
               height: 15,
-              color: searchFocused ? "var(--vii-copper-deep)" : "var(--vii-ink-soft)",
+              color: searchFocused
+                ? "var(--vii-copper-deep)"
+                : "var(--vii-ink-soft)",
               flexShrink: 0,
               transition: "color 0.2s ease",
             }}
@@ -379,7 +381,7 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
             {cover && (
               <div
                 ref={coverRef}
-                className={`vii-reveal${coverVisible ? " is-visible" : ""}`}
+                className={`vii-reveal${coverVisible ? "is-visible" : ""}`}
                 style={{ marginBottom: "clamp(48px, 7vw, 88px)" }}
               >
                 <CoverStory post={cover} image={coverImage} />
@@ -414,10 +416,14 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
 
                 <div
                   ref={rowsRef}
-                  className={`vii-reveal${rowsVisible ? " is-visible" : ""}`}
+                  className={`vii-reveal${rowsVisible ? "is-visible" : ""}`}
                 >
                   {rows.map((post, i) => (
-                    <JournalRow key={post.slug} post={post} withRule={i !== 0} />
+                    <JournalRow
+                      key={post.slug}
+                      post={post}
+                      withRule={i !== 0}
+                    />
                   ))}
                 </div>
               </>

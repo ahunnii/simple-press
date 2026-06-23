@@ -167,8 +167,13 @@ export function calculateZoneWeightShipping(input: {
   subtotalCents: number;
   config: ZoneWeightConfig;
 }): number {
-  const { destinationState, destinationCountry, totalWeightLb, subtotalCents, config } =
-    input;
+  const {
+    destinationState,
+    destinationCountry,
+    totalWeightLb,
+    subtotalCents,
+    config,
+  } = input;
 
   // 1. Free-shipping threshold
   if (

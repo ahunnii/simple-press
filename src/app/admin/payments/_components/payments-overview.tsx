@@ -206,7 +206,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
                 {INFORM_TRANSACTION_THRESHOLD}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div className="bg-muted h-2 overflow-hidden rounded-full">
               <div
                 className={`h-full rounded-full transition-all ${
                   transactionPct >= 100
@@ -227,7 +227,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
                 {formatCurrency(annualRevenueCents)} / $5,000
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div className="bg-muted h-2 overflow-hidden rounded-full">
               <div
                 className={`h-full rounded-full transition-all ${
                   revenuePct >= 100

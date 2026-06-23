@@ -4,10 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
 
-import type { PopupConfig } from "~/lib/validators/site-banner";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import type { PopupConfig } from "~/lib/validators/site-banner";
 import { PopupModal } from "~/components/site-banner/popup-modal";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type ViiPopupProps = {
   popup: PopupConfig;
@@ -15,14 +15,19 @@ type ViiPopupProps = {
 
 export function ViiPopup({ popup }: ViiPopupProps) {
   return (
-    <PopupModal version={popup.version} ariaLabel={popup.heading ?? "Announcement"}>
+    <PopupModal
+      version={popup.version}
+      ariaLabel={popup.heading ?? "Announcement"}
+    >
       {(close) => (
         <div
           style={{
             background: "var(--vii-paper)",
-            border: "1px solid color-mix(in srgb, var(--vii-navy) 12%, transparent)",
+            border:
+              "1px solid color-mix(in srgb, var(--vii-navy) 12%, transparent)",
             borderRadius: "var(--radius)",
-            boxShadow: "0 24px 64px color-mix(in srgb, var(--vii-navy) 28%, transparent)",
+            boxShadow:
+              "0 24px 64px color-mix(in srgb, var(--vii-navy) 28%, transparent)",
             width: "min(92vw, 520px)",
             overflow: "hidden",
             position: "relative",
@@ -51,8 +56,12 @@ export function ViiPopup({ popup }: ViiPopupProps) {
               opacity: 0.6,
               transition: "opacity 0.15s",
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.6"; }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.opacity = "0.6";
+            }}
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -61,7 +70,13 @@ export function ViiPopup({ popup }: ViiPopupProps) {
             /* ── Image mode ─────────────────────────────────────────────── */
             <>
               {popup.imagePath && (
-                <div style={{ position: "relative", aspectRatio: "4 / 3", width: "100%" }}>
+                <div
+                  style={{
+                    position: "relative",
+                    aspectRatio: "4 / 3",
+                    width: "100%",
+                  }}
+                >
                   <Image
                     src={popup.imagePath}
                     alt={popup.imageAlt ?? ""}
@@ -181,7 +196,13 @@ function CtaLink({
 
   if (isExternal) {
     return (
-      <a href={href} style={ctaStyle} target="_blank" rel="noreferrer" onClick={onClick}>
+      <a
+        href={href}
+        style={ctaStyle}
+        target="_blank"
+        rel="noreferrer"
+        onClick={onClick}
+      >
         {label}
         <span className="sr-only"> (opens in new tab)</span>
       </a>

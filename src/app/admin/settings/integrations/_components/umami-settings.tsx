@@ -103,7 +103,7 @@ export function UmamiSettings({ business }: Props) {
                 onChange={(e) => setUmamiWebsiteId(e.target.value)}
                 placeholder="abc123-def456-ghi789"
               />
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-sm">
                 Your Umami website tracking ID
               </p>
             </div>
@@ -111,7 +111,7 @@ export function UmamiSettings({ business }: Props) {
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="umamiEnabled">Enable Analytics</Label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Track visitor data on your storefront
                 </p>
               </div>
@@ -123,7 +123,7 @@ export function UmamiSettings({ business }: Props) {
             </div>
 
             <div className="border-t pt-2">
-              <p className="mb-2 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mb-2 text-sm">
                 Don&apos;t have a Umami account?
               </p>
               <Button type="button" variant="outline" size="sm" asChild>

@@ -433,9 +433,7 @@ interface FaqItemInput {
  * Returns the schema regardless of items.length — callers should skip
  * rendering if there are no items.
  */
-export function buildFaqSchema(
-  items: FaqItemInput[],
-): Record<string, unknown> {
+export function buildFaqSchema(items: FaqItemInput[]): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",

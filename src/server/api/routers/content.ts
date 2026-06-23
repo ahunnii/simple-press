@@ -11,8 +11,8 @@ import {
 } from "~/lib/validators/content";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 import {
-  newVersion,
   bannerConfigSchema,
+  newVersion,
   popupConfigSchema,
   updateBannerConfigSchema,
   updatePopupConfigSchema,

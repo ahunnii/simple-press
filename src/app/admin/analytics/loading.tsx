@@ -1,4 +1,5 @@
 import { Skeleton } from "~/components/ui/skeleton";
+
 import { TrailHeader } from "../_components/trail-header";
 
 export default function AnalyticsLoading() {
@@ -31,7 +32,7 @@ export default function AnalyticsLoading() {
           {/* Overview stat cards — 4 columns on large, 2 on small */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="rounded-xl border bg-card p-6 shadow-sm">
+              <div key={i} className="bg-card rounded-xl border p-6 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-4 rounded-full" />
@@ -43,7 +44,7 @@ export default function AnalyticsLoading() {
           </div>
 
           {/* Pageviews area chart */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <Skeleton className="mb-4 h-5 w-24" />
             <Skeleton className="h-[280px] w-full rounded-md" />
           </div>
@@ -51,7 +52,7 @@ export default function AnalyticsLoading() {
           {/* Top pages + top referrers — 2 columns on large */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Top pages */}
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="bg-card rounded-xl border p-6 shadow-sm">
               <Skeleton className="mb-4 h-5 w-24" />
               <div className="space-y-0">
                 {/* Table header */}
@@ -72,7 +73,7 @@ export default function AnalyticsLoading() {
             </div>
 
             {/* Top referrers */}
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="bg-card rounded-xl border p-6 shadow-sm">
               <Skeleton className="mb-4 h-5 w-28" />
               <div className="space-y-0">
                 <div className="flex justify-between border-b pb-2">
@@ -99,7 +100,7 @@ export default function AnalyticsLoading() {
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border bg-card p-6 shadow-sm"
+                  className="bg-card rounded-xl border p-6 shadow-sm"
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <Skeleton className="h-4 w-28" />
@@ -120,7 +121,7 @@ export default function AnalyticsLoading() {
               {Array.from({ length: 2 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border bg-card p-6 shadow-sm"
+                  className="bg-card rounded-xl border p-6 shadow-sm"
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <Skeleton className="h-4 w-32" />

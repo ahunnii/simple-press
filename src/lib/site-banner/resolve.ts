@@ -4,13 +4,13 @@
  * Called in server components; parsed values passed as props to client components.
  */
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { BannerConfig, PopupConfig } from "~/lib/validators/site-banner";
+import { isContentEmpty } from "~/lib/template-fields";
 import {
   bannerConfigSchema,
   popupConfigSchema,
 } from "~/lib/validators/site-banner";
-import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { isContentEmpty } from "~/lib/template-fields";
 
 type SiteContentLike =
   | { bannerConfig?: unknown; popupConfig?: unknown }

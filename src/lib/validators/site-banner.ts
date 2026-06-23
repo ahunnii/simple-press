@@ -27,8 +27,12 @@ export const popupConfigSchema = z.object({
 export type PopupConfig = z.infer<typeof popupConfigSchema>;
 
 // version is server-generated, so omit on the wire
-export const updateBannerConfigSchema = bannerConfigSchema.omit({ version: true });
-export const updatePopupConfigSchema = popupConfigSchema.omit({ version: true });
+export const updateBannerConfigSchema = bannerConfigSchema.omit({
+  version: true,
+});
+export const updatePopupConfigSchema = popupConfigSchema.omit({
+  version: true,
+});
 
 /** Short random id regenerated on every admin save — used as dismissal key. */
 export function newVersion(): string {

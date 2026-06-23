@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
-import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -20,7 +22,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 import { HappyBambooOrderSummary } from "./happy-bamboo-order-summary";
 
@@ -274,10 +275,14 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
               <div className="bg-muted/40 rounded-md border p-3 text-sm">
                 <p className="text-foreground font-medium">Pickup location</p>
                 <p className="text-muted-foreground mt-0.5">
-                  {shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                  {shippingConfig.pickupLocation ??
+                    business.businessAddress ??
+                    "Pickup details will be confirmed by the store."}
                 </p>
                 {shippingConfig.pickupInstructions ? (
-                  <p className="text-muted-foreground mt-1 whitespace-pre-line">{shippingConfig.pickupInstructions}</p>
+                  <p className="text-muted-foreground mt-1 whitespace-pre-line">
+                    {shippingConfig.pickupInstructions}
+                  </p>
                 ) : null}
               </div>
             )}

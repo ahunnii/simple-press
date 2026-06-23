@@ -99,12 +99,12 @@ function SortableItemRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 rounded-lg border bg-card p-3"
+      className="bg-card flex items-center gap-3 rounded-lg border p-3"
     >
       <button
         type="button"
         aria-label="Drag to reorder"
-        className="focus-visible:ring-ring flex h-9 w-9 cursor-move items-center justify-center text-muted-foreground hover:text-foreground focus-visible:ring-1 focus-visible:outline-none"
+        className="focus-visible:ring-ring text-muted-foreground hover:text-foreground flex h-9 w-9 cursor-move items-center justify-center focus-visible:ring-1 focus-visible:outline-none"
         {...attributes}
         {...listeners}
       >
@@ -112,12 +112,17 @@ function SortableItemRow({
       </button>
 
       {item.image ? (
-        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
+        <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={item.image}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         </div>
       ) : (
-        <div className="h-10 w-10 shrink-0 rounded bg-muted" />
+        <div className="bg-muted h-10 w-10 shrink-0 rounded" />
       )}
 
       <div className="min-w-0 flex-1">
@@ -129,10 +134,12 @@ function SortableItemRow({
             </Badge>
           )}
           {item.priceLabel && (
-            <span className="text-xs text-muted-foreground">{item.priceLabel}</span>
+            <span className="text-muted-foreground text-xs">
+              {item.priceLabel}
+            </span>
           )}
           {item.durationLabel && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               · {item.durationLabel}
             </span>
           )}
@@ -323,7 +330,7 @@ function ServiceItemFormDialog({
               )}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
                 control={form.control}
                 name="priceLabel"
@@ -552,8 +559,8 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
 
       <CardContent>
         {items.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border p-12 text-center">
-            <p className="mb-4 text-muted-foreground">
+          <div className="border-border rounded-lg border border-dashed p-12 text-center">
+            <p className="text-muted-foreground mb-4">
               No service items yet. Add the first one.
             </p>
             <Button
@@ -620,7 +627,9 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();

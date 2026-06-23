@@ -69,11 +69,7 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
           maxWidth: 820,
         }}
       >
-        <ViiOverline
-          align="left"
-          tone="dark"
-          style={{ marginBottom: 16 }}
-        >
+        <ViiOverline align="left" tone="dark" style={{ marginBottom: 16 }}>
           {`JOURNAL · ${formatDate(createdAt)}`}
         </ViiOverline>
 

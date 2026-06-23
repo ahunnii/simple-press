@@ -38,8 +38,7 @@ export async function generateMetadata() {
   const business = await api.business.simplifiedGet();
 
   const title = "About";
-  const description =
-    business?.siteContent?.metaDescription ?? undefined;
+  const description = business?.siteContent?.metaDescription ?? undefined;
   const ogImage =
     business?.siteContent?.ogImage ??
     business?.siteContent?.logoUrl ??

@@ -11,7 +11,10 @@ export function ModernAddressBookPage({
 }: AccountAddressBookPageProps) {
   return (
     <ModernAccountLayout heading="Address Book">
-      <AddressBookContent customer={customer} salesCountries={business.salesCountries} />
+      <AddressBookContent
+        customer={customer}
+        salesCountries={business.salesCountries}
+      />
     </ModernAccountLayout>
   );
 }

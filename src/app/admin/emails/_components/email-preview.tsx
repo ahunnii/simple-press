@@ -474,7 +474,7 @@ export function EmailPreview({ business, sampleOrder }: Props) {
                 title="Email Preview"
               />
             ) : (
-              <div className="py-12 text-center text-muted-foreground">
+              <div className="text-muted-foreground py-12 text-center">
                 <p>Select a template to preview</p>
               </div>
             )}

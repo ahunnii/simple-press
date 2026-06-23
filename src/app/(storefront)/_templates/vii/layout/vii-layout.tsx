@@ -59,7 +59,11 @@ export async function ViiLayout({
         rather than mounting it here above the header, which would push page
         content down but leave the bar floating above the fixed nav unpredictably.
       */}
-      <ViiHeader business={business} session={session ?? null} banner={banner} />
+      <ViiHeader
+        business={business}
+        session={session ?? null}
+        banner={banner}
+      />
 
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}

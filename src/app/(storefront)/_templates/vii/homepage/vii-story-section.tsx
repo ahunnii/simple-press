@@ -70,7 +70,7 @@ export function ViiStorySection({
         {/* ── Left: text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
         >
           <h2
             id="story-heading"
@@ -238,7 +238,8 @@ export function ViiStorySection({
                     width: 44,
                     height: 44,
                     borderRadius: "50%",
-                    border: "1px solid color-mix(in srgb, var(--vii-tan) 35%, transparent)",
+                    border:
+                      "1px solid color-mix(in srgb, var(--vii-tan) 35%, transparent)",
                     background: "transparent",
                     color: "var(--vii-tan)",
                     cursor: total <= 1 ? "default" : "pointer",
@@ -263,7 +264,8 @@ export function ViiStorySection({
                     width: 44,
                     height: 44,
                     borderRadius: "50%",
-                    border: "1px solid color-mix(in srgb, var(--vii-tan) 35%, transparent)",
+                    border:
+                      "1px solid color-mix(in srgb, var(--vii-tan) 35%, transparent)",
                     background: "transparent",
                     color: "var(--vii-tan)",
                     cursor: total <= 1 ? "default" : "pointer",

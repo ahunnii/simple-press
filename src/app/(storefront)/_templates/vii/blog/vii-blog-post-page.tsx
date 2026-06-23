@@ -15,7 +15,12 @@ type Props = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
 };
 
-export function ViiBlogPostPage({ page, relatedPosts, business, customFields }: Props) {
+export function ViiBlogPostPage({
+  page,
+  relatedPosts,
+  business,
+  customFields,
+}: Props) {
   // Prefer the route-level customFields (already cast); fall back to business.
   const fields =
     customFields ??

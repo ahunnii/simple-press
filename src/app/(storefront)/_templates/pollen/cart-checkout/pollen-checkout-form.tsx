@@ -6,9 +6,11 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
-import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
   Select,
@@ -18,7 +20,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
-import { COUNTRY_LABELS, type SupportedCountry, getRegionOptions } from "~/lib/geo/regions";
 
 const inputClass =
   "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
@@ -39,7 +40,9 @@ export function PollenCheckoutForm({ business }: Props) {
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
   const shippingCalculating =
-    f.deliveryMethod === "ship" && f.state.trim().length > 0 && f.shippingPending;
+    f.deliveryMethod === "ship" &&
+    f.state.trim().length > 0 &&
+    f.shippingPending;
 
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
@@ -215,10 +218,14 @@ export function PollenCheckoutForm({ business }: Props) {
               <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
                 <p className="font-medium text-gray-900">Pickup location</p>
                 <p className="mt-0.5 text-gray-600">
-                  {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                  {f.shippingConfig.pickupLocation ??
+                    business.businessAddress ??
+                    "Pickup details will be confirmed by the store."}
                 </p>
                 {f.shippingConfig.pickupInstructions ? (
-                  <p className="mt-1 whitespace-pre-line text-gray-600">{f.shippingConfig.pickupInstructions}</p>
+                  <p className="mt-1 whitespace-pre-line text-gray-600">
+                    {f.shippingConfig.pickupInstructions}
+                  </p>
                 ) : null}
               </div>
             )}
@@ -295,10 +302,7 @@ export function PollenCheckoutForm({ business }: Props) {
                   >
                     State / Province *
                   </label>
-                  <Select
-                    value={f.state}
-                    onValueChange={(v) => f.setState(v)}
-                  >
+                  <Select value={f.state} onValueChange={(v) => f.setState(v)}>
                     <SelectTrigger
                       id="state"
                       className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none"
@@ -440,7 +444,10 @@ export function PollenCheckoutForm({ business }: Props) {
                     className="inline-flex items-center gap-1.5 text-gray-500"
                     aria-live="polite"
                   >
-                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    <Loader2
+                      className="size-3.5 animate-spin"
+                      aria-hidden="true"
+                    />
                     Calculating…
                   </span>
                 ) : f.shippingPending ? (

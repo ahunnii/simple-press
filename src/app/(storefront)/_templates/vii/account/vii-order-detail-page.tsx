@@ -5,6 +5,7 @@ import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
 import { FadeIn, PageTransition } from "~/components/page-animations";
+
 import { ViiOverline } from "../shared/vii-overline";
 
 /** Returns inline-style objects for the order status badge — vii palette. */
@@ -14,10 +15,14 @@ function statusStyles(status: string): {
 } {
   switch (status) {
     case "open":
-      return { background: "color-mix(in srgb, var(--vii-glacier) 22%, transparent)", color: "var(--vii-navy)" };
+      return {
+        background: "color-mix(in srgb, var(--vii-glacier) 22%, transparent)",
+        color: "var(--vii-navy)",
+      };
     case "completed":
       return {
-        background: "color-mix(in srgb, var(--vii-copper-deep) 12%, transparent)",
+        background:
+          "color-mix(in srgb, var(--vii-copper-deep) 12%, transparent)",
         color: "var(--vii-copper-deep)",
       };
     case "cancelled":
@@ -31,7 +36,10 @@ function statusStyles(status: string): {
         color: "var(--vii-ink-soft)",
       };
     default:
-      return { background: "color-mix(in srgb, var(--vii-tan) 35%, transparent)", color: "var(--vii-navy)" };
+      return {
+        background: "color-mix(in srgb, var(--vii-tan) 35%, transparent)",
+        color: "var(--vii-navy)",
+      };
   }
 }
 
@@ -133,10 +141,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   { label: "Orders", href: "/account/orders" },
                   { label: `#${order.orderNumber}` },
                 ].map((crumb, i) => (
-                  <li
-                    key={i}
-                    style={{ display: "flex", alignItems: "center" }}
-                  >
+                  <li key={i} style={{ display: "flex", alignItems: "center" }}>
                     {i > 0 && (
                       <span
                         aria-hidden
@@ -411,7 +416,11 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                 <ViiCard>
                   <CardHeading>Tracking</CardHeading>
                   <div
-                    style={{ display: "flex", flexDirection: "column", gap: 16 }}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 16,
+                    }}
                   >
                     {order.shipments.map((shipment) => (
                       <div key={shipment.id}>
