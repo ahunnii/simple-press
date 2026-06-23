@@ -276,6 +276,17 @@ export function ModernCheckoutForm({ business }: Props) {
                   ? "No shipping charge. You'll pick up your order at the store."
                   : "Shipping cost is based on your store's shipping settings."}
               </p>
+              {f.deliveryMethod === "pickup" && (
+                <div className="border-border mt-3 border-t pt-3 text-sm">
+                  <p className="text-foreground font-medium">Pickup location</p>
+                  <p className="text-muted-foreground">
+                    {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                  </p>
+                  {f.shippingConfig.pickupInstructions ? (
+                    <p className="text-muted-foreground mt-1 whitespace-pre-line">{f.shippingConfig.pickupInstructions}</p>
+                  ) : null}
+                </div>
+              )}
             </fieldset>
           )}
 

@@ -249,6 +249,19 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 ? "No shipping charge — contact us for pick-up details."
                 : "Shipping cost based on your store's settings."}
             </p>
+            {deliveryMethod === "pickup" && (
+              <div className="flex flex-col gap-1 border border-[var(--sl-border)] bg-[var(--sl-cream)] p-3">
+                <p className="font-sans text-xs font-medium tracking-[0.16em] text-[var(--sl-ink)] uppercase">
+                  Pickup location
+                </p>
+                <p className="font-sans text-sm text-[var(--sl-ink-soft)]">
+                  {shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                </p>
+                {shippingConfig.pickupInstructions ? (
+                  <p className="font-sans text-sm whitespace-pre-line text-[var(--sl-ink-soft)]">{shippingConfig.pickupInstructions}</p>
+                ) : null}
+              </div>
+            )}
           </fieldset>
         ) : null}
 

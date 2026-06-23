@@ -99,6 +99,10 @@ const business = {
   shippingFlatRate: null,
   freeShippingThreshold: null,
   offersInStorePickup: false,
+  pickupLocation: null,
+  pickupInstructions: null,
+  businessAddress: null,
+  salesCountries: [],
   siteContent: { logoUrl: null },
 } as unknown as BusinessProp;
 

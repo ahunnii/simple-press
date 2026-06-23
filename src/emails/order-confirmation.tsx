@@ -28,6 +28,9 @@ type OrderConfirmationEmailProps = {
     postalCode: string;
     country: string;
   };
+  deliveryMethod?: "ship" | "pickup";
+  pickupLocation?: string;
+  pickupInstructions?: string;
   businessName: string;
   businessLogoUrl?: string;
   businessUrl: string;
@@ -44,11 +47,15 @@ export default function OrderConfirmationEmail({
   discount,
   total,
   shippingAddress,
+  deliveryMethod,
+  pickupLocation,
+  pickupInstructions,
   businessName,
   businessLogoUrl,
   businessUrl,
   trackingUrl,
 }: OrderConfirmationEmailProps) {
+  const isPickup = deliveryMethod === "pickup";
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -149,27 +156,41 @@ export default function OrderConfirmationEmail({
         </Row>
       </Section>
 
-      {/* Shipping Address */}
-      {shippingAddress && (
+      {/* Delivery Section — branches on pickup vs. ship */}
+      {isPickup ? (
         <Section style={addressSection}>
-          <Text style={sectionHeading}>Shipping Address</Text>
-          <Text style={addressText}>
-            {shippingAddress.name}
-            <br />
-            {shippingAddress.line1}
-            <br />
-            {shippingAddress.line2 && (
-              <>
-                {shippingAddress.line2}
-                <br />
-              </>
-            )}
-            {shippingAddress.city}, {shippingAddress.state}{" "}
-            {shippingAddress.postalCode}
-            <br />
-            {shippingAddress.country}
-          </Text>
+          <Text style={sectionHeading}>Pickup Details</Text>
+          {pickupLocation && (
+            <Text style={addressText}>{pickupLocation}</Text>
+          )}
+          {pickupInstructions && (
+            <Text style={{ ...addressText, whiteSpace: "pre-line" }}>
+              {pickupInstructions}
+            </Text>
+          )}
         </Section>
+      ) : (
+        shippingAddress && (
+          <Section style={addressSection}>
+            <Text style={sectionHeading}>Shipping Address</Text>
+            <Text style={addressText}>
+              {shippingAddress.name}
+              <br />
+              {shippingAddress.line1}
+              <br />
+              {shippingAddress.line2 && (
+                <>
+                  {shippingAddress.line2}
+                  <br />
+                </>
+              )}
+              {shippingAddress.city}, {shippingAddress.state}{" "}
+              {shippingAddress.postalCode}
+              <br />
+              {shippingAddress.country}
+            </Text>
+          </Section>
+        )
       )}
 
       {/* CTA Button */}
@@ -187,8 +208,9 @@ export default function OrderConfirmationEmail({
 
       {/* Footer Note */}
       <Text style={note}>
-        You&apos;ll receive another email when your order ships. If you have any
-        questions, please reply to this email.
+        {isPickup
+          ? "We'll send you another email when your order is ready for pickup. If you have any questions, please reply to this email."
+          : "You'll receive another email when your order ships. If you have any questions, please reply to this email."}
       </Text>
     </EmailLayout>
   );

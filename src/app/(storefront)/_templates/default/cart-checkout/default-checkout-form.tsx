@@ -182,6 +182,17 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
+                {f.deliveryMethod === "pickup" && (
+                  <div className="rounded-[var(--radius)] border border-gray-200 bg-[#f6f6f6] p-3 text-sm">
+                    <p className="font-medium text-[#0a0a0a]">Pickup location</p>
+                    <p className="mt-0.5 text-[#6b6b6b]">
+                      {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                    </p>
+                    {f.shippingConfig.pickupInstructions ? (
+                      <p className="mt-1 whitespace-pre-line text-[#6b6b6b]">{f.shippingConfig.pickupInstructions}</p>
+                    ) : null}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

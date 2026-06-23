@@ -302,6 +302,33 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 ? "No shipping charge — contact us for pick-up details."
                 : "Shipping cost based on your store's settings."}
             </p>
+            {deliveryMethod === "pickup" && (
+              <div
+                className="flex flex-col gap-1 border p-3"
+                style={{ borderColor: "var(--vn-rule)" }}
+              >
+                <p
+                  className="font-mono text-[9.5px] tracking-[0.22em] uppercase"
+                  style={{ color: "var(--vn-steel)" }}
+                >
+                  Pickup location
+                </p>
+                <p
+                  className="font-sans text-sm"
+                  style={{ color: "var(--vn-steel)" }}
+                >
+                  {shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                </p>
+                {shippingConfig.pickupInstructions ? (
+                  <p
+                    className="font-sans text-sm whitespace-pre-line"
+                    style={{ color: "var(--vn-steel-mist)" }}
+                  >
+                    {shippingConfig.pickupInstructions}
+                  </p>
+                ) : null}
+              </div>
+            )}
           </fieldset>
         )}
 

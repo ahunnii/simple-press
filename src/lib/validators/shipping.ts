@@ -7,6 +7,8 @@ export const shippingFormSchema = z
     freeShippingThresholdDollars: z.string().optional(),
     offersInStorePickup: z.boolean(),
     salesCountries: z.array(z.enum(["CA", "MX"])),
+    pickupLocation: z.string().optional(),
+    pickupInstructions: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -37,6 +39,15 @@ export const shippingFormSchema = z
           code: z.ZodIssueCode.custom,
           message: "Enter a valid free shipping threshold",
           path: ["freeShippingThresholdDollars"],
+        });
+      }
+    }
+    if (data.offersInStorePickup === true) {
+      if (!data.pickupInstructions?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Add pickup hours/instructions so customers know when to collect their order",
+          path: ["pickupInstructions"],
         });
       }
     }
@@ -118,6 +129,8 @@ export const zoneWeightFormSchema = z
     offersInStorePickup: z.boolean().default(false),
     /** Country allowlist — opt-in extras beyond US ("US" is always allowed). */
     salesCountries: z.array(z.enum(["CA", "MX"])).default([]),
+    pickupLocation: z.string().optional(),
+    pickupInstructions: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     // ── Weight tiers: ascending + contiguous bounds ──────────────────────────
@@ -197,6 +210,17 @@ export const zoneWeightFormSchema = z
           code: z.ZodIssueCode.custom,
           message: "Enter a valid free-shipping threshold greater than $0",
           path: ["freeShippingThresholdDollars"],
+        });
+      }
+    }
+
+    // ── In-store pickup instructions (required when pickup is enabled) ─────────
+    if (data.offersInStorePickup === true) {
+      if (!data.pickupInstructions?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Add pickup hours/instructions so customers know when to collect their order",
+          path: ["pickupInstructions"],
         });
       }
     }

@@ -7,6 +7,7 @@ import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
+import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
@@ -31,6 +32,9 @@ export async function sendOrderConfirmation(params: {
   discount: number;
   total: number;
   shippingAddress?: any;
+  deliveryMethod?: "ship" | "pickup";
+  pickupLocation?: string;
+  pickupInstructions?: string;
   business: {
     name: string;
     ownerEmail: string;
@@ -44,13 +48,16 @@ export async function sendOrderConfirmation(params: {
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
+  const isPickup = params.deliveryMethod === "pickup";
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
-    fromName: params.business.name, // ← NEW: Business name in from field
+    fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: `Order #${params.orderNumber} Confirmed`,
+    subject: isPickup
+      ? `Order #${params.orderNumber} confirmed — pickup details inside`
+      : `Order #${params.orderNumber} Confirmed`,
     react: OrderConfirmationEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
@@ -61,6 +68,9 @@ export async function sendOrderConfirmation(params: {
       discount: params.discount,
       total: params.total,
       shippingAddress: params.shippingAddress,
+      deliveryMethod: params.deliveryMethod,
+      pickupLocation: params.pickupLocation,
+      pickupInstructions: params.pickupInstructions,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
@@ -91,6 +101,7 @@ export async function sendNewOrderNotification(params: {
   tax: number;
   discount: number;
   total: number;
+  deliveryMethod?: "ship" | "pickup";
   business: {
     name: string;
     siteContent?: {
@@ -120,6 +131,7 @@ export async function sendNewOrderNotification(params: {
       tax: params.tax,
       discount: params.discount,
       total: params.total,
+      deliveryMethod: params.deliveryMethod,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       adminOrderUrl,
@@ -511,6 +523,46 @@ export async function sendPoolOutOfStockAlert(params: {
     }),
     tags: [
       { name: "category", value: "pool_out_of_stock_alert" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Order Ready for Pickup (customer)
+export async function sendOrderReadyForPickup(params: {
+  to: string;
+  orderNumber: number;
+  customerName?: string;
+  pickupLocation?: string;
+  pickupInstructions?: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent: { logoUrl: string | null } | null;
+    subdomain: string;
+    customDomain: string | null;
+    domainStatus: string | null;
+  };
+}): Promise<ReturnType<typeof sendEmail>> {
+  const businessUrl = getBusinessUrl(params.business);
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Order #${params.orderNumber} is ready for pickup`,
+    react: OrderReadyForPickupEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      businessUrl,
+      pickupLocation: params.pickupLocation,
+      pickupInstructions: params.pickupInstructions,
+    }),
+    tags: [
+      { name: "category", value: "order_ready_for_pickup" },
       { name: "business", value: params.business.subdomain },
     ],
   });

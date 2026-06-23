@@ -10635,6 +10635,8 @@ export namespace Prisma {
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
     offersInStorePickup: boolean | null
+    pickupLocation: string | null
+    pickupInstructions: string | null
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
@@ -10670,6 +10672,8 @@ export namespace Prisma {
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
     offersInStorePickup: boolean | null
+    pickupLocation: string | null
+    pickupInstructions: string | null
     originState: string | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
@@ -10706,6 +10710,8 @@ export namespace Prisma {
     shippingFlatRate: number
     freeShippingThreshold: number
     offersInStorePickup: number
+    pickupLocation: number
+    pickupInstructions: number
     originState: number
     shippingWeightTiers: number
     shippingFallbackRate: number
@@ -10759,6 +10765,8 @@ export namespace Prisma {
     shippingFlatRate?: true
     freeShippingThreshold?: true
     offersInStorePickup?: true
+    pickupLocation?: true
+    pickupInstructions?: true
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
@@ -10794,6 +10802,8 @@ export namespace Prisma {
     shippingFlatRate?: true
     freeShippingThreshold?: true
     offersInStorePickup?: true
+    pickupLocation?: true
+    pickupInstructions?: true
     originState?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
@@ -10830,6 +10840,8 @@ export namespace Prisma {
     shippingFlatRate?: true
     freeShippingThreshold?: true
     offersInStorePickup?: true
+    pickupLocation?: true
+    pickupInstructions?: true
     originState?: true
     shippingWeightTiers?: true
     shippingFallbackRate?: true
@@ -10955,6 +10967,8 @@ export namespace Prisma {
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
     offersInStorePickup: boolean
+    pickupLocation: string | null
+    pickupInstructions: string | null
     originState: string | null
     shippingWeightTiers: JsonValue | null
     shippingFallbackRate: number | null
@@ -11012,6 +11026,8 @@ export namespace Prisma {
     shippingFlatRate?: boolean
     freeShippingThreshold?: boolean
     offersInStorePickup?: boolean
+    pickupLocation?: boolean
+    pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
@@ -11071,6 +11087,8 @@ export namespace Prisma {
     shippingFlatRate?: boolean
     freeShippingThreshold?: boolean
     offersInStorePickup?: boolean
+    pickupLocation?: boolean
+    pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
@@ -11109,6 +11127,8 @@ export namespace Prisma {
     shippingFlatRate?: boolean
     freeShippingThreshold?: boolean
     offersInStorePickup?: boolean
+    pickupLocation?: boolean
+    pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
@@ -11147,6 +11167,8 @@ export namespace Prisma {
     shippingFlatRate?: boolean
     freeShippingThreshold?: boolean
     offersInStorePickup?: boolean
+    pickupLocation?: boolean
+    pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
     shippingFallbackRate?: boolean
@@ -11154,7 +11176,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11236,6 +11258,8 @@ export namespace Prisma {
       shippingFlatRate: number | null
       freeShippingThreshold: number | null
       offersInStorePickup: boolean
+      pickupLocation: string | null
+      pickupInstructions: string | null
       originState: string | null
       shippingWeightTiers: Prisma.JsonValue | null
       shippingFallbackRate: number | null
@@ -11714,6 +11738,8 @@ export namespace Prisma {
     readonly shippingFlatRate: FieldRef<"Business", 'Int'>
     readonly freeShippingThreshold: FieldRef<"Business", 'Int'>
     readonly offersInStorePickup: FieldRef<"Business", 'Boolean'>
+    readonly pickupLocation: FieldRef<"Business", 'String'>
+    readonly pickupInstructions: FieldRef<"Business", 'String'>
     readonly originState: FieldRef<"Business", 'String'>
     readonly shippingWeightTiers: FieldRef<"Business", 'Json'>
     readonly shippingFallbackRate: FieldRef<"Business", 'Int'>
@@ -26712,6 +26738,7 @@ export namespace Prisma {
     customerLastName: string | null
     customerPhone: string | null
     paymentMethod: string | null
+    deliveryMethod: string | null
     refundReason: string | null
     refundAmountCents: number | null
     customerNote: string | null
@@ -26743,6 +26770,7 @@ export namespace Prisma {
     customerLastName: string | null
     customerPhone: string | null
     paymentMethod: string | null
+    deliveryMethod: string | null
     refundReason: string | null
     refundAmountCents: number | null
     customerNote: string | null
@@ -26774,6 +26802,7 @@ export namespace Prisma {
     customerLastName: number
     customerPhone: number
     paymentMethod: number
+    deliveryMethod: number
     refundReason: number
     refundAmountCents: number
     customerNote: number
@@ -26827,6 +26856,7 @@ export namespace Prisma {
     customerLastName?: true
     customerPhone?: true
     paymentMethod?: true
+    deliveryMethod?: true
     refundReason?: true
     refundAmountCents?: true
     customerNote?: true
@@ -26858,6 +26888,7 @@ export namespace Prisma {
     customerLastName?: true
     customerPhone?: true
     paymentMethod?: true
+    deliveryMethod?: true
     refundReason?: true
     refundAmountCents?: true
     customerNote?: true
@@ -26889,6 +26920,7 @@ export namespace Prisma {
     customerLastName?: true
     customerPhone?: true
     paymentMethod?: true
+    deliveryMethod?: true
     refundReason?: true
     refundAmountCents?: true
     customerNote?: true
@@ -27007,6 +27039,7 @@ export namespace Prisma {
     customerLastName: string | null
     customerPhone: string | null
     paymentMethod: string
+    deliveryMethod: string
     refundReason: string | null
     refundAmountCents: number | null
     customerNote: string | null
@@ -27057,6 +27090,7 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     paymentMethod?: boolean
+    deliveryMethod?: boolean
     refundReason?: boolean
     refundAmountCents?: boolean
     customerNote?: boolean
@@ -27097,6 +27131,7 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     paymentMethod?: boolean
+    deliveryMethod?: boolean
     refundReason?: boolean
     refundAmountCents?: boolean
     customerNote?: boolean
@@ -27132,6 +27167,7 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     paymentMethod?: boolean
+    deliveryMethod?: boolean
     refundReason?: boolean
     refundAmountCents?: boolean
     customerNote?: boolean
@@ -27167,6 +27203,7 @@ export namespace Prisma {
     customerLastName?: boolean
     customerPhone?: boolean
     paymentMethod?: boolean
+    deliveryMethod?: boolean
     refundReason?: boolean
     refundAmountCents?: boolean
     customerNote?: boolean
@@ -27177,7 +27214,7 @@ export namespace Prisma {
     discountCodeId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
@@ -27238,6 +27275,7 @@ export namespace Prisma {
        */
       customerPhone: string | null
       paymentMethod: string
+      deliveryMethod: string
       refundReason: string | null
       refundAmountCents: number | null
       customerNote: string | null
@@ -27697,6 +27735,7 @@ export namespace Prisma {
     readonly customerLastName: FieldRef<"Order", 'String'>
     readonly customerPhone: FieldRef<"Order", 'String'>
     readonly paymentMethod: FieldRef<"Order", 'String'>
+    readonly deliveryMethod: FieldRef<"Order", 'String'>
     readonly refundReason: FieldRef<"Order", 'String'>
     readonly refundAmountCents: FieldRef<"Order", 'Int'>
     readonly customerNote: FieldRef<"Order", 'String'>
@@ -50765,6 +50804,8 @@ export namespace Prisma {
     shippingFlatRate: 'shippingFlatRate',
     freeShippingThreshold: 'freeShippingThreshold',
     offersInStorePickup: 'offersInStorePickup',
+    pickupLocation: 'pickupLocation',
+    pickupInstructions: 'pickupInstructions',
     originState: 'originState',
     shippingWeightTiers: 'shippingWeightTiers',
     shippingFallbackRate: 'shippingFallbackRate',
@@ -51032,6 +51073,7 @@ export namespace Prisma {
     customerLastName: 'customerLastName',
     customerPhone: 'customerPhone',
     paymentMethod: 'paymentMethod',
+    deliveryMethod: 'deliveryMethod',
     refundReason: 'refundReason',
     refundAmountCents: 'refundAmountCents',
     customerNote: 'customerNote',
@@ -51956,6 +51998,8 @@ export namespace Prisma {
     shippingFlatRate?: IntNullableFilter<"Business"> | number | null
     freeShippingThreshold?: IntNullableFilter<"Business"> | number | null
     offersInStorePickup?: BoolFilter<"Business"> | boolean
+    pickupLocation?: StringNullableFilter<"Business"> | string | null
+    pickupInstructions?: StringNullableFilter<"Business"> | string | null
     originState?: StringNullableFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableFilter<"Business">
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
@@ -52014,6 +52058,8 @@ export namespace Prisma {
     shippingFlatRate?: SortOrderInput | SortOrder
     freeShippingThreshold?: SortOrderInput | SortOrder
     offersInStorePickup?: SortOrder
+    pickupLocation?: SortOrderInput | SortOrder
+    pickupInstructions?: SortOrderInput | SortOrder
     originState?: SortOrderInput | SortOrder
     shippingWeightTiers?: SortOrderInput | SortOrder
     shippingFallbackRate?: SortOrderInput | SortOrder
@@ -52075,6 +52121,8 @@ export namespace Prisma {
     shippingFlatRate?: IntNullableFilter<"Business"> | number | null
     freeShippingThreshold?: IntNullableFilter<"Business"> | number | null
     offersInStorePickup?: BoolFilter<"Business"> | boolean
+    pickupLocation?: StringNullableFilter<"Business"> | string | null
+    pickupInstructions?: StringNullableFilter<"Business"> | string | null
     originState?: StringNullableFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableFilter<"Business">
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
@@ -52133,6 +52181,8 @@ export namespace Prisma {
     shippingFlatRate?: SortOrderInput | SortOrder
     freeShippingThreshold?: SortOrderInput | SortOrder
     offersInStorePickup?: SortOrder
+    pickupLocation?: SortOrderInput | SortOrder
+    pickupInstructions?: SortOrderInput | SortOrder
     originState?: SortOrderInput | SortOrder
     shippingWeightTiers?: SortOrderInput | SortOrder
     shippingFallbackRate?: SortOrderInput | SortOrder
@@ -52179,6 +52229,8 @@ export namespace Prisma {
     shippingFlatRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
     freeShippingThreshold?: IntNullableWithAggregatesFilter<"Business"> | number | null
     offersInStorePickup?: BoolWithAggregatesFilter<"Business"> | boolean
+    pickupLocation?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    pickupInstructions?: StringNullableWithAggregatesFilter<"Business"> | string | null
     originState?: StringNullableWithAggregatesFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableWithAggregatesFilter<"Business">
     shippingFallbackRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
@@ -53473,6 +53525,7 @@ export namespace Prisma {
     customerLastName?: StringNullableFilter<"Order"> | string | null
     customerPhone?: StringNullableFilter<"Order"> | string | null
     paymentMethod?: StringFilter<"Order"> | string
+    deliveryMethod?: StringFilter<"Order"> | string
     refundReason?: StringNullableFilter<"Order"> | string | null
     refundAmountCents?: IntNullableFilter<"Order"> | number | null
     customerNote?: StringNullableFilter<"Order"> | string | null
@@ -53512,6 +53565,7 @@ export namespace Prisma {
     customerLastName?: SortOrderInput | SortOrder
     customerPhone?: SortOrderInput | SortOrder
     paymentMethod?: SortOrder
+    deliveryMethod?: SortOrder
     refundReason?: SortOrderInput | SortOrder
     refundAmountCents?: SortOrderInput | SortOrder
     customerNote?: SortOrderInput | SortOrder
@@ -53555,6 +53609,7 @@ export namespace Prisma {
     customerLastName?: StringNullableFilter<"Order"> | string | null
     customerPhone?: StringNullableFilter<"Order"> | string | null
     paymentMethod?: StringFilter<"Order"> | string
+    deliveryMethod?: StringFilter<"Order"> | string
     refundReason?: StringNullableFilter<"Order"> | string | null
     refundAmountCents?: IntNullableFilter<"Order"> | number | null
     customerNote?: StringNullableFilter<"Order"> | string | null
@@ -53594,6 +53649,7 @@ export namespace Prisma {
     customerLastName?: SortOrderInput | SortOrder
     customerPhone?: SortOrderInput | SortOrder
     paymentMethod?: SortOrder
+    deliveryMethod?: SortOrder
     refundReason?: SortOrderInput | SortOrder
     refundAmountCents?: SortOrderInput | SortOrder
     customerNote?: SortOrderInput | SortOrder
@@ -53633,6 +53689,7 @@ export namespace Prisma {
     customerLastName?: StringNullableWithAggregatesFilter<"Order"> | string | null
     customerPhone?: StringNullableWithAggregatesFilter<"Order"> | string | null
     paymentMethod?: StringWithAggregatesFilter<"Order"> | string
+    deliveryMethod?: StringWithAggregatesFilter<"Order"> | string
     refundReason?: StringNullableWithAggregatesFilter<"Order"> | string | null
     refundAmountCents?: IntNullableWithAggregatesFilter<"Order"> | number | null
     customerNote?: StringNullableWithAggregatesFilter<"Order"> | string | null
@@ -55768,6 +55825,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -55826,6 +55885,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -55884,6 +55945,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -55942,6 +56005,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -56000,6 +56065,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -56038,6 +56105,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -56076,6 +56145,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -57574,6 +57645,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -57609,6 +57681,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -57644,6 +57717,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57679,6 +57753,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57714,6 +57789,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -57745,6 +57821,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57772,6 +57849,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60279,6 +60357,8 @@ export namespace Prisma {
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
     offersInStorePickup?: SortOrder
+    pickupLocation?: SortOrder
+    pickupInstructions?: SortOrder
     originState?: SortOrder
     shippingWeightTiers?: SortOrder
     shippingFallbackRate?: SortOrder
@@ -60323,6 +60403,8 @@ export namespace Prisma {
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
     offersInStorePickup?: SortOrder
+    pickupLocation?: SortOrder
+    pickupInstructions?: SortOrder
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
@@ -60358,6 +60440,8 @@ export namespace Prisma {
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
     offersInStorePickup?: SortOrder
+    pickupLocation?: SortOrder
+    pickupInstructions?: SortOrder
     originState?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
@@ -61389,6 +61473,7 @@ export namespace Prisma {
     customerLastName?: SortOrder
     customerPhone?: SortOrder
     paymentMethod?: SortOrder
+    deliveryMethod?: SortOrder
     refundReason?: SortOrder
     refundAmountCents?: SortOrder
     customerNote?: SortOrder
@@ -61430,6 +61515,7 @@ export namespace Prisma {
     customerLastName?: SortOrder
     customerPhone?: SortOrder
     paymentMethod?: SortOrder
+    deliveryMethod?: SortOrder
     refundReason?: SortOrder
     refundAmountCents?: SortOrder
     customerNote?: SortOrder
@@ -61461,6 +61547,7 @@ export namespace Prisma {
     customerLastName?: SortOrder
     customerPhone?: SortOrder
     paymentMethod?: SortOrder
+    deliveryMethod?: SortOrder
     refundReason?: SortOrder
     refundAmountCents?: SortOrder
     customerNote?: SortOrder
@@ -66349,6 +66436,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -66406,6 +66495,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -66522,6 +66613,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -66579,6 +66672,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -66970,6 +67065,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -67004,6 +67100,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -67835,6 +67932,7 @@ export namespace Prisma {
     customerLastName?: StringNullableFilter<"Order"> | string | null
     customerPhone?: StringNullableFilter<"Order"> | string | null
     paymentMethod?: StringFilter<"Order"> | string
+    deliveryMethod?: StringFilter<"Order"> | string
     refundReason?: StringNullableFilter<"Order"> | string | null
     refundAmountCents?: IntNullableFilter<"Order"> | number | null
     customerNote?: StringNullableFilter<"Order"> | string | null
@@ -68384,6 +68482,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -68441,6 +68541,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -68514,6 +68616,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68571,6 +68675,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68628,6 +68734,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -68685,6 +68793,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -68758,6 +68868,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68815,6 +68927,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68909,6 +69023,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -68966,6 +69082,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -69312,6 +69430,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69369,6 +69489,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69884,6 +70006,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -69941,6 +70065,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -70036,6 +70162,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70093,6 +70221,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70434,6 +70564,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -70491,6 +70623,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -70606,6 +70740,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70663,6 +70799,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70933,6 +71071,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -70990,6 +71130,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -71158,6 +71300,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71215,6 +71359,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71309,6 +71455,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -71366,6 +71514,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -71418,6 +71568,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -71452,6 +71603,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -71744,6 +71896,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71801,6 +71955,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71996,6 +72152,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -72030,6 +72187,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -72153,6 +72311,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -72210,6 +72370,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -72570,6 +72732,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72627,6 +72791,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72896,6 +73062,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -72930,6 +73097,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -72980,6 +73148,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73014,6 +73183,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73176,6 +73346,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -73210,6 +73381,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -73400,6 +73572,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73434,6 +73607,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73478,6 +73652,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -73535,6 +73711,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -73587,6 +73765,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -73621,6 +73800,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -73686,6 +73866,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73743,6 +73925,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73981,6 +74165,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -74038,6 +74224,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -74090,6 +74278,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -74124,6 +74313,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -74404,6 +74594,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74461,6 +74653,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74519,6 +74713,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74553,6 +74748,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74640,6 +74836,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -74697,6 +74895,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -74904,6 +75104,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74961,6 +75163,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75050,6 +75254,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75107,6 +75313,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75180,6 +75388,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75237,6 +75447,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75294,6 +75506,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75351,6 +75565,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75424,6 +75640,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75481,6 +75699,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75538,6 +75758,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75595,6 +75817,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75668,6 +75892,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75725,6 +75951,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75782,6 +76010,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75839,6 +76069,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -75944,6 +76176,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76001,6 +76235,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76173,6 +76409,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -76230,6 +76468,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -76350,6 +76590,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76407,6 +76649,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76517,6 +76761,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -76574,6 +76820,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -76694,6 +76942,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76751,6 +77001,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76987,6 +77239,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -77021,6 +77274,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -77245,6 +77499,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77279,6 +77534,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77463,6 +77719,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -77520,6 +77778,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -77630,6 +77890,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77687,6 +77949,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77787,6 +78051,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -77844,6 +78110,8 @@ export namespace Prisma {
     shippingFlatRate?: number | null
     freeShippingThreshold?: number | null
     offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
@@ -77939,6 +78207,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77996,6 +78266,8 @@ export namespace Prisma {
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
     freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78516,6 +78788,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -78969,6 +79242,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79003,6 +79277,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79037,6 +79312,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80217,6 +80493,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -80317,6 +80594,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80351,6 +80629,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80385,6 +80664,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80629,6 +80909,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -80659,6 +80940,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80693,6 +80975,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80727,6 +81010,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80995,6 +81279,7 @@ export namespace Prisma {
     customerLastName?: string | null
     customerPhone?: string | null
     paymentMethod?: string
+    deliveryMethod?: string
     refundReason?: string | null
     refundAmountCents?: number | null
     customerNote?: string | null
@@ -81025,6 +81310,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81059,6 +81345,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81093,6 +81380,7 @@ export namespace Prisma {
     customerLastName?: NullableStringFieldUpdateOperationsInput | string | null
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     paymentMethod?: StringFieldUpdateOperationsInput | string
+    deliveryMethod?: StringFieldUpdateOperationsInput | string
     refundReason?: NullableStringFieldUpdateOperationsInput | string | null
     refundAmountCents?: NullableIntFieldUpdateOperationsInput | number | null
     customerNote?: NullableStringFieldUpdateOperationsInput | string | null

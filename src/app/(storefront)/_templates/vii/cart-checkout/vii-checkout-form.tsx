@@ -393,6 +393,59 @@ export function ViiCheckoutForm({
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
+                {f.deliveryMethod === "pickup" && (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      padding: "12px 14px",
+                      border: "1px solid var(--vii-hairline)",
+                      borderRadius: "var(--radius)",
+                      background: "var(--vii-cream)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--vii-navy)",
+                        margin: 0,
+                      }}
+                    >
+                      Pickup location
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 13,
+                        color: "var(--vii-ink-soft)",
+                        lineHeight: 1.5,
+                        margin: 0,
+                      }}
+                    >
+                      {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                    </p>
+                    {f.shippingConfig.pickupInstructions ? (
+                      <p
+                        style={{
+                          fontFamily: "var(--font-sans)",
+                          fontSize: 13,
+                          color: "var(--vii-ink-soft)",
+                          lineHeight: 1.5,
+                          whiteSpace: "pre-line",
+                          margin: 0,
+                        }}
+                      >
+                        {f.shippingConfig.pickupInstructions}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -211,6 +211,17 @@ export function PollenCheckoutForm({ business }: Props) {
                 ? "No shipping charge. You'll pick up your order at the store."
                 : "Shipping cost is based on your store's shipping settings."}
             </p>
+            {f.deliveryMethod === "pickup" && (
+              <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm">
+                <p className="font-medium text-gray-900">Pickup location</p>
+                <p className="mt-0.5 text-gray-600">
+                  {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                </p>
+                {f.shippingConfig.pickupInstructions ? (
+                  <p className="mt-1 whitespace-pre-line text-gray-600">{f.shippingConfig.pickupInstructions}</p>
+                ) : null}
+              </div>
+            )}
           </section>
         )}
 

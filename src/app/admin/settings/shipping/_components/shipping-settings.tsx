@@ -28,11 +28,14 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Switch } from "~/components/ui/switch";
@@ -57,6 +60,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
   const salesCountries = (business.salesCountries ?? []).filter(
     (c): c is "CA" | "MX" => c === "CA" || c === "MX",
   );
+  const pickupLocation = business.pickupLocation ?? "";
+  const pickupInstructions = business.pickupInstructions ?? "";
 
   // If the business has saved zone_weight config, hydrate from it.
   const savedTiers = business.shippingWeightTiers as WeightTierRaw[] | null | undefined;
@@ -101,6 +106,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
       defaultItemWeightLb: business.shippingDefaultItemWeightLb ?? 0,
       offersInStorePickup,
       salesCountries,
+      pickupLocation,
+      pickupInstructions,
     };
   }
 
@@ -114,6 +121,8 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
     defaultItemWeightLb: 0,
     offersInStorePickup,
     salesCountries,
+    pickupLocation,
+    pickupInstructions,
   };
 }
 
@@ -143,10 +152,13 @@ export function ShippingSettings({ business }: Props) {
       ),
       offersInStorePickup: business.offersInStorePickup ?? false,
       salesCountries: (business.salesCountries ?? []) as Array<"CA" | "MX">,
+      pickupLocation: business.pickupLocation ?? "",
+      pickupInstructions: business.pickupInstructions ?? "",
     },
   });
 
   const shippingType = form.watch("shippingType");
+  const pickupEnabled = form.watch("offersInStorePickup");
 
   // ── Zone + weight form ────────────────────────────────────────────────────
   const zoneForm = useForm<ZoneWeightFormValues>({
@@ -171,6 +183,8 @@ export function ShippingSettings({ business }: Props) {
         ),
         offersInStorePickup: data.business.offersInStorePickup,
         salesCountries: (data.business.salesCountries ?? []) as Array<"CA" | "MX">,
+        pickupLocation: data.business.pickupLocation ?? "",
+        pickupInstructions: data.business.pickupInstructions ?? "",
       });
       void utils.business.invalidate();
       router.refresh();
@@ -220,6 +234,8 @@ export function ShippingSettings({ business }: Props) {
       freeShippingThreshold: thresholdCents,
       offersInStorePickup: data.offersInStorePickup,
       salesCountries: data.salesCountries,
+      pickupLocation: data.pickupLocation,
+      pickupInstructions: data.pickupInstructions,
     });
   };
 
@@ -233,6 +249,8 @@ export function ShippingSettings({ business }: Props) {
       ...data,
       offersInStorePickup: form.getValues("offersInStorePickup"),
       salesCountries: form.getValues("salesCountries"),
+      pickupLocation: form.getValues("pickupLocation"),
+      pickupInstructions: form.getValues("pickupInstructions"),
     });
   };
 
@@ -474,6 +492,51 @@ export function ShippingSettings({ business }: Props) {
                       </FormItem>
                     )}
                   />
+
+                  {pickupEnabled && (
+                    <div className="space-y-4 rounded-lg border p-4">
+                      <FormField
+                        control={form.control}
+                        name="pickupLocation"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Pickup location</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="123 Main St, Detroit, MI 48201"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Leave blank to use your business address.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="pickupInstructions"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Pickup hours &amp; instructions</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Mon–Fri 10am–6pm. Ring the bell at the side entrance."
+                                rows={3}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Shown to customers at checkout and in their
+                              confirmation email.
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     <div>

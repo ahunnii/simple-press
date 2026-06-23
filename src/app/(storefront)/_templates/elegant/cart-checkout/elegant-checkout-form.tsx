@@ -339,6 +339,56 @@ export function ElegantCheckoutForm({ business }: Props) {
                 ? "No shipping charge. Pick up at the store."
                 : "Shipping calculated at checkout."}
             </p>
+            {f.deliveryMethod === "pickup" && (
+              <div
+                style={{
+                  marginTop: 12,
+                  padding: "12px 14px",
+                  border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                  borderRadius: 6,
+                  background: "var(--el-cream-2, #ebe6dc)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    fontSize: 11,
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "var(--el-ink, #1c1a17)",
+                    margin: 0,
+                  }}
+                >
+                  Pickup location
+                </p>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    fontSize: 13,
+                    color: "var(--el-ink-soft, #6b6659)",
+                    margin: 0,
+                  }}
+                >
+                  {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                </p>
+                {f.shippingConfig.pickupInstructions ? (
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans, sans-serif)",
+                      fontSize: 13,
+                      color: "var(--el-ink-soft, #6b6659)",
+                      whiteSpace: "pre-line",
+                      margin: 0,
+                    }}
+                  >
+                    {f.shippingConfig.pickupInstructions}
+                  </p>
+                ) : null}
+              </div>
+            )}
           </fieldset>
         )}
 

@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { CopyAddressButton } from "../_components/copy-address-button";
 import { EditShippingAddressDialog } from "../_components/edit-shipping-address-dialog";
 import { FulfillmentForm } from "../_components/fulfillment-form";
+import { MarkReadyForPickup } from "../_components/mark-ready-for-pickup";
 import { OrderMoreOptions } from "../_components/order-more-options";
 import { OrderNotes } from "../_components/order-notes";
 import { RefundHandler } from "../_components/refund-handler";
@@ -110,6 +111,12 @@ export default async function OrderDetailPage({ params }: Props) {
             >
               Fulfillment: {order.fulfillmentStatus}
             </Badge>
+
+            {order.deliveryMethod === "pickup" && (
+              <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700">
+                Pickup
+              </Badge>
+            )}
 
             {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
           </div>
@@ -243,10 +250,27 @@ export default async function OrderDetailPage({ params }: Props) {
               </Alert>
             )}
 
-            {/* Fulfillment Form — show when payment is confirmed and order not yet fulfilled.
-                Keyed on paymentStatus rather than order.status so the form reappears
+            {/* Fulfillment controls — branched by delivery method.
+                Keyed on paymentStatus rather than order.status so controls reappear
                 if fulfillmentStatus is manually reset to unfulfilled via the override. */}
-            {order.paymentStatus === "paid" &&
+            {order.deliveryMethod === "pickup" ? (
+              order.paymentStatus === "paid" &&
+              order.fulfillmentStatus !== "fulfilled" ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ready for Pickup</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="mb-4 text-sm text-muted-foreground">
+                      Notify the customer that their order is ready to collect
+                      in store. This will send them a pickup confirmation email.
+                    </p>
+                    <MarkReadyForPickup orderId={order.id} />
+                  </CardContent>
+                </Card>
+              ) : order.fulfillmentStatus === "fulfilled" ? null : null
+            ) : (
+              order.paymentStatus === "paid" &&
               order.fulfillmentStatus !== "fulfilled" && (
                 <FulfillmentForm
                   orderId={order.id}
@@ -254,7 +278,8 @@ export default async function OrderDetailPage({ params }: Props) {
                   customerEmail={order.customerEmail}
                   customerName={order.customerName ?? ""}
                 />
-              )}
+              )
+            )}
           </div>
 
           {/* Right Column - Actions */}
@@ -278,12 +303,17 @@ export default async function OrderDetailPage({ params }: Props) {
                     </p>
                   )}
 
-                {order.fulfillmentStatus === "fulfilled" && (
-                  <ShipmentsPanel
-                    orderId={order.id}
-                    shipments={order.shipments}
-                  />
-                )}
+                {order.fulfillmentStatus === "fulfilled" &&
+                  (order.deliveryMethod === "pickup" ? (
+                    <p className="mt-4 text-sm text-muted-foreground">
+                      Customer notified — ready for pickup.
+                    </p>
+                  ) : (
+                    <ShipmentsPanel
+                      orderId={order.id}
+                      shipments={order.shipments}
+                    />
+                  ))}
               </CardContent>
             </Card>
 
@@ -312,50 +342,77 @@ export default async function OrderDetailPage({ params }: Props) {
               </CardContent>
             </Card>
 
-            {/* Shipping Address */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle>Shipping Address</CardTitle>
-                <div className="flex items-center gap-2">
-                  {order.shippingAddress && (
-                    <CopyAddressButton address={order.shippingAddress} />
+            {/* Shipping Address / Pickup Location */}
+            {order.deliveryMethod === "pickup" ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pickup Location</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {business?.pickupLocation ?? business?.businessAddress ? (
+                    <p className="text-sm font-medium text-foreground">
+                      {business?.pickupLocation ?? business?.businessAddress}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No pickup location configured.
+                    </p>
                   )}
-                  <EditShippingAddressDialog
-                    orderId={order.id}
-                    address={order.shippingAddress ?? null}
-                    canAdd={!!order.customerId}
-                    allowedCountries={getAllowedCountries(
-                      business?.salesCountries ?? [],
+                  {business?.pickupInstructions && (
+                    <p
+                      className="whitespace-pre-line text-sm text-muted-foreground"
+                    >
+                      {business.pickupInstructions}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle>Shipping Address</CardTitle>
+                  <div className="flex items-center gap-2">
+                    {order.shippingAddress && (
+                      <CopyAddressButton address={order.shippingAddress} />
                     )}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                {order.shippingAddress ? (
-                  <address className="text-foreground not-italic">
-                    {order.shippingAddress.firstName}{" "}
-                    {order.shippingAddress.lastName}
-                    <br />
-                    {order.shippingAddress.address1}
-                    <br />
-                    {order.shippingAddress.address2 && (
-                      <>
-                        {order.shippingAddress.address2}
-                        <br />
-                      </>
-                    )}
-                    {order.shippingAddress.city},{" "}
-                    {order.shippingAddress.province} {order.shippingAddress.zip}
-                    <br />
-                    {order.shippingAddress.country}
-                  </address>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No shipping address on file.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                    <EditShippingAddressDialog
+                      orderId={order.id}
+                      address={order.shippingAddress ?? null}
+                      canAdd={!!order.customerId}
+                      allowedCountries={getAllowedCountries(
+                        business?.salesCountries ?? [],
+                      )}
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {order.shippingAddress ? (
+                    <address className="text-foreground not-italic">
+                      {order.shippingAddress.firstName}{" "}
+                      {order.shippingAddress.lastName}
+                      <br />
+                      {order.shippingAddress.address1}
+                      <br />
+                      {order.shippingAddress.address2 && (
+                        <>
+                          {order.shippingAddress.address2}
+                          <br />
+                        </>
+                      )}
+                      {order.shippingAddress.city},{" "}
+                      {order.shippingAddress.province}{" "}
+                      {order.shippingAddress.zip}
+                      <br />
+                      {order.shippingAddress.country}
+                    </address>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No shipping address on file.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Notes — always visible and editable */}
             <OrderNotes

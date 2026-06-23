@@ -172,6 +172,17 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     ? "No shipping charge. You'll pick up your order at the store."
                     : "Shipping cost is based on your store's shipping settings."}
                 </p>
+                {f.deliveryMethod === "pickup" && (
+                  <div className="rounded-md border border-white/20 bg-white/5 p-3 text-sm">
+                    <p className="font-medium text-white">Pickup location</p>
+                    <p className="mt-0.5 text-white/70">
+                      {f.shippingConfig.pickupLocation ?? business.businessAddress ?? "Pickup details will be confirmed by the store."}
+                    </p>
+                    {f.shippingConfig.pickupInstructions ? (
+                      <p className="mt-1 whitespace-pre-line text-white/70">{f.shippingConfig.pickupInstructions}</p>
+                    ) : null}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

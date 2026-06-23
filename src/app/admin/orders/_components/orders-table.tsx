@@ -11,6 +11,7 @@ type Props = {
     items: OrderItem[];
     shippingAddress?: ShippingAddress;
     hasOversell?: boolean;
+    deliveryMethod?: string;
   })[];
 };
 
@@ -110,6 +111,11 @@ export function OrdersTable({ orders }: Props) {
                     <Badge variant={getStatusColor(order.status)}>
                       {order.status}
                     </Badge>
+                    {order.deliveryMethod === "pickup" && (
+                      <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700">
+                        Pickup
+                      </Badge>
+                    )}
                     {order.hasOversell && (
                       <Badge variant="destructive">Oversold</Badge>
                     )}

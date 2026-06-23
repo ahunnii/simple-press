@@ -176,6 +176,8 @@ model Business {
   shippingFlatRate      Int? // cents; used by flat_rate and flat_rate_with_threshold
   freeShippingThreshold Int? // cents; subtotal at which shipping becomes free (all modes)
   offersInStorePickup   Boolean @default(false)
+  pickupLocation        String? // free-text pickup address; falls back to businessAddress when blank
+  pickupInstructions    String? @db.Text // combined "pickup hours & instructions", shown verbatim at checkout + in emails
 
   // Zone + weight shipping fields
   originState                 String? // 2-letter US state code for shipping origin
@@ -626,6 +628,9 @@ model Order {
 
   // Payment
   paymentMethod String @default("card") // card | cash | check | manual
+
+  // Fulfillment method chosen at checkout
+  deliveryMethod String @default("ship") // ship | pickup
 
   // Refund
   refundReason      String?
