@@ -164,6 +164,10 @@ model Business {
   status             String  @default("active") // active | suspended | closed
   onboardingComplete Boolean @default(false)
 
+  // SEO / AEO / GEO controls
+  localBusinessEnabled Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
+  allowAiCrawlers      Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
+
   // Features
   featureFlags Json @default("{}") // Record<string, boolean>
 
@@ -202,6 +206,7 @@ model Business {
   platformInvites       PlatformInvite[]
   memberships           BusinessMembership[]
   zones                 ShippingZone[]
+  faqItems              FaqItem[]
 
   @@index([subdomain])
   @@index([customDomain])
@@ -259,6 +264,28 @@ model SiteContent {
   // One-to-one with Business
   businessId String   @unique
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// FAQ — store-level FAQ items (one list per business)
+// ---------------------------------------------------------------------------
+
+model FaqItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  question String
+  answer   String @db.Text
+
+  sortOrder Int     @default(0)
+  published Boolean @default(true)
+
+  // Multi-tenancy
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }
 
 model Product {

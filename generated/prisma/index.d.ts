@@ -49,6 +49,11 @@ export type Business = $Result.DefaultSelection<Prisma.$BusinessPayload>
  */
 export type SiteContent = $Result.DefaultSelection<Prisma.$SiteContentPayload>
 /**
+ * Model FaqItem
+ * 
+ */
+export type FaqItem = $Result.DefaultSelection<Prisma.$FaqItemPayload>
+/**
  * Model Product
  * 
  */
@@ -423,6 +428,16 @@ export class PrismaClient<
     * ```
     */
   get siteContent(): Prisma.SiteContentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.faqItem`: Exposes CRUD operations for the **FaqItem** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FaqItems
+    * const faqItems = await prisma.faqItem.findMany()
+    * ```
+    */
+  get faqItem(): Prisma.FaqItemDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.product`: Exposes CRUD operations for the **Product** model.
@@ -1161,6 +1176,7 @@ export namespace Prisma {
     Verification: 'Verification',
     Business: 'Business',
     SiteContent: 'SiteContent',
+    FaqItem: 'FaqItem',
     Product: 'Product',
     ProductVariant: 'ProductVariant',
     Collection: 'Collection',
@@ -1208,7 +1224,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "platformConfig" | "shippingZone" | "shippingRate"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "platformConfig" | "shippingZone" | "shippingRate"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1727,6 +1743,80 @@ export namespace Prisma {
           count: {
             args: Prisma.SiteContentCountArgs<ExtArgs>
             result: $Utils.Optional<SiteContentCountAggregateOutputType> | number
+          }
+        }
+      }
+      FaqItem: {
+        payload: Prisma.$FaqItemPayload<ExtArgs>
+        fields: Prisma.FaqItemFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FaqItemFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FaqItemFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>
+          }
+          findFirst: {
+            args: Prisma.FaqItemFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FaqItemFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>
+          }
+          findMany: {
+            args: Prisma.FaqItemFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>[]
+          }
+          create: {
+            args: Prisma.FaqItemCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>
+          }
+          createMany: {
+            args: Prisma.FaqItemCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FaqItemCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>[]
+          }
+          delete: {
+            args: Prisma.FaqItemDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>
+          }
+          update: {
+            args: Prisma.FaqItemUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>
+          }
+          deleteMany: {
+            args: Prisma.FaqItemDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FaqItemUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FaqItemUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>[]
+          }
+          upsert: {
+            args: Prisma.FaqItemUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FaqItemPayload>
+          }
+          aggregate: {
+            args: Prisma.FaqItemAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFaqItem>
+          }
+          groupBy: {
+            args: Prisma.FaqItemGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FaqItemGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FaqItemCountArgs<ExtArgs>
+            result: $Utils.Optional<FaqItemCountAggregateOutputType> | number
           }
         }
       }
@@ -3979,6 +4069,7 @@ export namespace Prisma {
     verification?: VerificationOmit
     business?: BusinessOmit
     siteContent?: SiteContentOmit
+    faqItem?: FaqItemOmit
     product?: ProductOmit
     productVariant?: ProductVariantOmit
     collection?: CollectionOmit
@@ -4182,6 +4273,7 @@ export namespace Prisma {
     platformInvites: number
     memberships: number
     zones: number
+    faqItems: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4203,6 +4295,7 @@ export namespace Prisma {
     platformInvites?: boolean | BusinessCountOutputTypeCountPlatformInvitesArgs
     memberships?: boolean | BusinessCountOutputTypeCountMembershipsArgs
     zones?: boolean | BusinessCountOutputTypeCountZonesArgs
+    faqItems?: boolean | BusinessCountOutputTypeCountFaqItemsArgs
   }
 
   // Custom InputTypes
@@ -4340,6 +4433,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountZonesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ShippingZoneWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountFaqItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FaqItemWhereInput
   }
 
 
@@ -10529,6 +10629,8 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    localBusinessEnabled: boolean | null
+    allowAiCrawlers: boolean | null
     shippingType: string | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
@@ -10562,6 +10664,8 @@ export namespace Prisma {
     umamiEnabled: boolean | null
     status: string | null
     onboardingComplete: boolean | null
+    localBusinessEnabled: boolean | null
+    allowAiCrawlers: boolean | null
     shippingType: string | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
@@ -10595,6 +10699,8 @@ export namespace Prisma {
     umamiEnabled: number
     status: number
     onboardingComplete: number
+    localBusinessEnabled: number
+    allowAiCrawlers: number
     featureFlags: number
     shippingType: number
     shippingFlatRate: number
@@ -10647,6 +10753,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    localBusinessEnabled?: true
+    allowAiCrawlers?: true
     shippingType?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
@@ -10680,6 +10788,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    localBusinessEnabled?: true
+    allowAiCrawlers?: true
     shippingType?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
@@ -10713,6 +10823,8 @@ export namespace Prisma {
     umamiEnabled?: true
     status?: true
     onboardingComplete?: true
+    localBusinessEnabled?: true
+    allowAiCrawlers?: true
     featureFlags?: true
     shippingType?: true
     shippingFlatRate?: true
@@ -10836,6 +10948,8 @@ export namespace Prisma {
     umamiEnabled: boolean
     status: string
     onboardingComplete: boolean
+    localBusinessEnabled: boolean
+    allowAiCrawlers: boolean
     featureFlags: JsonValue
     shippingType: string
     shippingFlatRate: number | null
@@ -10891,6 +11005,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -10920,6 +11036,7 @@ export namespace Prisma {
     platformInvites?: boolean | Business$platformInvitesArgs<ExtArgs>
     memberships?: boolean | Business$membershipsArgs<ExtArgs>
     zones?: boolean | Business$zonesArgs<ExtArgs>
+    faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -10947,6 +11064,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -10983,6 +11102,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -11019,6 +11140,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: boolean
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -11031,7 +11154,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11052,6 +11175,7 @@ export namespace Prisma {
     platformInvites?: boolean | Business$platformInvitesArgs<ExtArgs>
     memberships?: boolean | Business$membershipsArgs<ExtArgs>
     zones?: boolean | Business$zonesArgs<ExtArgs>
+    faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -11079,6 +11203,7 @@ export namespace Prisma {
       platformInvites: Prisma.$PlatformInvitePayload<ExtArgs>[]
       memberships: Prisma.$BusinessMembershipPayload<ExtArgs>[]
       zones: Prisma.$ShippingZonePayload<ExtArgs>[]
+      faqItems: Prisma.$FaqItemPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11104,6 +11229,8 @@ export namespace Prisma {
       umamiEnabled: boolean
       status: string
       onboardingComplete: boolean
+      localBusinessEnabled: boolean
+      allowAiCrawlers: boolean
       featureFlags: Prisma.JsonValue
       shippingType: string
       shippingFlatRate: number | null
@@ -11527,6 +11654,7 @@ export namespace Prisma {
     platformInvites<T extends Business$platformInvitesArgs<ExtArgs> = {}>(args?: Subset<T, Business$platformInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     memberships<T extends Business$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, Business$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     zones<T extends Business$zonesArgs<ExtArgs> = {}>(args?: Subset<T, Business$zonesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShippingZonePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    faqItems<T extends Business$faqItemsArgs<ExtArgs> = {}>(args?: Subset<T, Business$faqItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11579,6 +11707,8 @@ export namespace Prisma {
     readonly umamiEnabled: FieldRef<"Business", 'Boolean'>
     readonly status: FieldRef<"Business", 'String'>
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
+    readonly localBusinessEnabled: FieldRef<"Business", 'Boolean'>
+    readonly allowAiCrawlers: FieldRef<"Business", 'Boolean'>
     readonly featureFlags: FieldRef<"Business", 'Json'>
     readonly shippingType: FieldRef<"Business", 'String'>
     readonly shippingFlatRate: FieldRef<"Business", 'Int'>
@@ -12425,6 +12555,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ShippingZoneScalarFieldEnum | ShippingZoneScalarFieldEnum[]
+  }
+
+  /**
+   * Business.faqItems
+   */
+  export type Business$faqItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    where?: FaqItemWhereInput
+    orderBy?: FaqItemOrderByWithRelationInput | FaqItemOrderByWithRelationInput[]
+    cursor?: FaqItemWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FaqItemScalarFieldEnum | FaqItemScalarFieldEnum[]
   }
 
   /**
@@ -13780,6 +13934,1137 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: SiteContentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FaqItem
+   */
+
+  export type AggregateFaqItem = {
+    _count: FaqItemCountAggregateOutputType | null
+    _avg: FaqItemAvgAggregateOutputType | null
+    _sum: FaqItemSumAggregateOutputType | null
+    _min: FaqItemMinAggregateOutputType | null
+    _max: FaqItemMaxAggregateOutputType | null
+  }
+
+  export type FaqItemAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type FaqItemSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type FaqItemMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    question: string | null
+    answer: string | null
+    sortOrder: number | null
+    published: boolean | null
+    businessId: string | null
+  }
+
+  export type FaqItemMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    question: string | null
+    answer: string | null
+    sortOrder: number | null
+    published: boolean | null
+    businessId: string | null
+  }
+
+  export type FaqItemCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    question: number
+    answer: number
+    sortOrder: number
+    published: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type FaqItemAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type FaqItemSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type FaqItemMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    question?: true
+    answer?: true
+    sortOrder?: true
+    published?: true
+    businessId?: true
+  }
+
+  export type FaqItemMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    question?: true
+    answer?: true
+    sortOrder?: true
+    published?: true
+    businessId?: true
+  }
+
+  export type FaqItemCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    question?: true
+    answer?: true
+    sortOrder?: true
+    published?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type FaqItemAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FaqItem to aggregate.
+     */
+    where?: FaqItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FaqItems to fetch.
+     */
+    orderBy?: FaqItemOrderByWithRelationInput | FaqItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FaqItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FaqItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FaqItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FaqItems
+    **/
+    _count?: true | FaqItemCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FaqItemAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FaqItemSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FaqItemMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FaqItemMaxAggregateInputType
+  }
+
+  export type GetFaqItemAggregateType<T extends FaqItemAggregateArgs> = {
+        [P in keyof T & keyof AggregateFaqItem]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFaqItem[P]>
+      : GetScalarType<T[P], AggregateFaqItem[P]>
+  }
+
+
+
+
+  export type FaqItemGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FaqItemWhereInput
+    orderBy?: FaqItemOrderByWithAggregationInput | FaqItemOrderByWithAggregationInput[]
+    by: FaqItemScalarFieldEnum[] | FaqItemScalarFieldEnum
+    having?: FaqItemScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FaqItemCountAggregateInputType | true
+    _avg?: FaqItemAvgAggregateInputType
+    _sum?: FaqItemSumAggregateInputType
+    _min?: FaqItemMinAggregateInputType
+    _max?: FaqItemMaxAggregateInputType
+  }
+
+  export type FaqItemGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    question: string
+    answer: string
+    sortOrder: number
+    published: boolean
+    businessId: string
+    _count: FaqItemCountAggregateOutputType | null
+    _avg: FaqItemAvgAggregateOutputType | null
+    _sum: FaqItemSumAggregateOutputType | null
+    _min: FaqItemMinAggregateOutputType | null
+    _max: FaqItemMaxAggregateOutputType | null
+  }
+
+  type GetFaqItemGroupByPayload<T extends FaqItemGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FaqItemGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FaqItemGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FaqItemGroupByOutputType[P]>
+            : GetScalarType<T[P], FaqItemGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FaqItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean
+    answer?: boolean
+    sortOrder?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["faqItem"]>
+
+  export type FaqItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean
+    answer?: boolean
+    sortOrder?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["faqItem"]>
+
+  export type FaqItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean
+    answer?: boolean
+    sortOrder?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["faqItem"]>
+
+  export type FaqItemSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    question?: boolean
+    answer?: boolean
+    sortOrder?: boolean
+    published?: boolean
+    businessId?: boolean
+  }
+
+  export type FaqItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "question" | "answer" | "sortOrder" | "published" | "businessId", ExtArgs["result"]["faqItem"]>
+  export type FaqItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type FaqItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type FaqItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $FaqItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FaqItem"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      question: string
+      answer: string
+      sortOrder: number
+      published: boolean
+      businessId: string
+    }, ExtArgs["result"]["faqItem"]>
+    composites: {}
+  }
+
+  type FaqItemGetPayload<S extends boolean | null | undefined | FaqItemDefaultArgs> = $Result.GetResult<Prisma.$FaqItemPayload, S>
+
+  type FaqItemCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FaqItemFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FaqItemCountAggregateInputType | true
+    }
+
+  export interface FaqItemDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FaqItem'], meta: { name: 'FaqItem' } }
+    /**
+     * Find zero or one FaqItem that matches the filter.
+     * @param {FaqItemFindUniqueArgs} args - Arguments to find a FaqItem
+     * @example
+     * // Get one FaqItem
+     * const faqItem = await prisma.faqItem.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FaqItemFindUniqueArgs>(args: SelectSubset<T, FaqItemFindUniqueArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FaqItem that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FaqItemFindUniqueOrThrowArgs} args - Arguments to find a FaqItem
+     * @example
+     * // Get one FaqItem
+     * const faqItem = await prisma.faqItem.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FaqItemFindUniqueOrThrowArgs>(args: SelectSubset<T, FaqItemFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FaqItem that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemFindFirstArgs} args - Arguments to find a FaqItem
+     * @example
+     * // Get one FaqItem
+     * const faqItem = await prisma.faqItem.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FaqItemFindFirstArgs>(args?: SelectSubset<T, FaqItemFindFirstArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FaqItem that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemFindFirstOrThrowArgs} args - Arguments to find a FaqItem
+     * @example
+     * // Get one FaqItem
+     * const faqItem = await prisma.faqItem.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FaqItemFindFirstOrThrowArgs>(args?: SelectSubset<T, FaqItemFindFirstOrThrowArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FaqItems that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FaqItems
+     * const faqItems = await prisma.faqItem.findMany()
+     * 
+     * // Get first 10 FaqItems
+     * const faqItems = await prisma.faqItem.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const faqItemWithIdOnly = await prisma.faqItem.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FaqItemFindManyArgs>(args?: SelectSubset<T, FaqItemFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FaqItem.
+     * @param {FaqItemCreateArgs} args - Arguments to create a FaqItem.
+     * @example
+     * // Create one FaqItem
+     * const FaqItem = await prisma.faqItem.create({
+     *   data: {
+     *     // ... data to create a FaqItem
+     *   }
+     * })
+     * 
+     */
+    create<T extends FaqItemCreateArgs>(args: SelectSubset<T, FaqItemCreateArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FaqItems.
+     * @param {FaqItemCreateManyArgs} args - Arguments to create many FaqItems.
+     * @example
+     * // Create many FaqItems
+     * const faqItem = await prisma.faqItem.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FaqItemCreateManyArgs>(args?: SelectSubset<T, FaqItemCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FaqItems and returns the data saved in the database.
+     * @param {FaqItemCreateManyAndReturnArgs} args - Arguments to create many FaqItems.
+     * @example
+     * // Create many FaqItems
+     * const faqItem = await prisma.faqItem.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FaqItems and only return the `id`
+     * const faqItemWithIdOnly = await prisma.faqItem.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FaqItemCreateManyAndReturnArgs>(args?: SelectSubset<T, FaqItemCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FaqItem.
+     * @param {FaqItemDeleteArgs} args - Arguments to delete one FaqItem.
+     * @example
+     * // Delete one FaqItem
+     * const FaqItem = await prisma.faqItem.delete({
+     *   where: {
+     *     // ... filter to delete one FaqItem
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FaqItemDeleteArgs>(args: SelectSubset<T, FaqItemDeleteArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FaqItem.
+     * @param {FaqItemUpdateArgs} args - Arguments to update one FaqItem.
+     * @example
+     * // Update one FaqItem
+     * const faqItem = await prisma.faqItem.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FaqItemUpdateArgs>(args: SelectSubset<T, FaqItemUpdateArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FaqItems.
+     * @param {FaqItemDeleteManyArgs} args - Arguments to filter FaqItems to delete.
+     * @example
+     * // Delete a few FaqItems
+     * const { count } = await prisma.faqItem.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FaqItemDeleteManyArgs>(args?: SelectSubset<T, FaqItemDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FaqItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FaqItems
+     * const faqItem = await prisma.faqItem.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FaqItemUpdateManyArgs>(args: SelectSubset<T, FaqItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FaqItems and returns the data updated in the database.
+     * @param {FaqItemUpdateManyAndReturnArgs} args - Arguments to update many FaqItems.
+     * @example
+     * // Update many FaqItems
+     * const faqItem = await prisma.faqItem.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FaqItems and only return the `id`
+     * const faqItemWithIdOnly = await prisma.faqItem.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FaqItemUpdateManyAndReturnArgs>(args: SelectSubset<T, FaqItemUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FaqItem.
+     * @param {FaqItemUpsertArgs} args - Arguments to update or create a FaqItem.
+     * @example
+     * // Update or create a FaqItem
+     * const faqItem = await prisma.faqItem.upsert({
+     *   create: {
+     *     // ... data to create a FaqItem
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FaqItem we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FaqItemUpsertArgs>(args: SelectSubset<T, FaqItemUpsertArgs<ExtArgs>>): Prisma__FaqItemClient<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FaqItems.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemCountArgs} args - Arguments to filter FaqItems to count.
+     * @example
+     * // Count the number of FaqItems
+     * const count = await prisma.faqItem.count({
+     *   where: {
+     *     // ... the filter for the FaqItems we want to count
+     *   }
+     * })
+    **/
+    count<T extends FaqItemCountArgs>(
+      args?: Subset<T, FaqItemCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FaqItemCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FaqItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FaqItemAggregateArgs>(args: Subset<T, FaqItemAggregateArgs>): Prisma.PrismaPromise<GetFaqItemAggregateType<T>>
+
+    /**
+     * Group by FaqItem.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FaqItemGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FaqItemGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FaqItemGroupByArgs['orderBy'] }
+        : { orderBy?: FaqItemGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FaqItemGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFaqItemGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FaqItem model
+   */
+  readonly fields: FaqItemFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FaqItem.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FaqItemClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FaqItem model
+   */
+  interface FaqItemFieldRefs {
+    readonly id: FieldRef<"FaqItem", 'String'>
+    readonly createdAt: FieldRef<"FaqItem", 'DateTime'>
+    readonly updatedAt: FieldRef<"FaqItem", 'DateTime'>
+    readonly question: FieldRef<"FaqItem", 'String'>
+    readonly answer: FieldRef<"FaqItem", 'String'>
+    readonly sortOrder: FieldRef<"FaqItem", 'Int'>
+    readonly published: FieldRef<"FaqItem", 'Boolean'>
+    readonly businessId: FieldRef<"FaqItem", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FaqItem findUnique
+   */
+  export type FaqItemFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * Filter, which FaqItem to fetch.
+     */
+    where: FaqItemWhereUniqueInput
+  }
+
+  /**
+   * FaqItem findUniqueOrThrow
+   */
+  export type FaqItemFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * Filter, which FaqItem to fetch.
+     */
+    where: FaqItemWhereUniqueInput
+  }
+
+  /**
+   * FaqItem findFirst
+   */
+  export type FaqItemFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * Filter, which FaqItem to fetch.
+     */
+    where?: FaqItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FaqItems to fetch.
+     */
+    orderBy?: FaqItemOrderByWithRelationInput | FaqItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FaqItems.
+     */
+    cursor?: FaqItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FaqItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FaqItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FaqItems.
+     */
+    distinct?: FaqItemScalarFieldEnum | FaqItemScalarFieldEnum[]
+  }
+
+  /**
+   * FaqItem findFirstOrThrow
+   */
+  export type FaqItemFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * Filter, which FaqItem to fetch.
+     */
+    where?: FaqItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FaqItems to fetch.
+     */
+    orderBy?: FaqItemOrderByWithRelationInput | FaqItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FaqItems.
+     */
+    cursor?: FaqItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FaqItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FaqItems.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FaqItems.
+     */
+    distinct?: FaqItemScalarFieldEnum | FaqItemScalarFieldEnum[]
+  }
+
+  /**
+   * FaqItem findMany
+   */
+  export type FaqItemFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * Filter, which FaqItems to fetch.
+     */
+    where?: FaqItemWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FaqItems to fetch.
+     */
+    orderBy?: FaqItemOrderByWithRelationInput | FaqItemOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FaqItems.
+     */
+    cursor?: FaqItemWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FaqItems from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FaqItems.
+     */
+    skip?: number
+    distinct?: FaqItemScalarFieldEnum | FaqItemScalarFieldEnum[]
+  }
+
+  /**
+   * FaqItem create
+   */
+  export type FaqItemCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FaqItem.
+     */
+    data: XOR<FaqItemCreateInput, FaqItemUncheckedCreateInput>
+  }
+
+  /**
+   * FaqItem createMany
+   */
+  export type FaqItemCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FaqItems.
+     */
+    data: FaqItemCreateManyInput | FaqItemCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FaqItem createManyAndReturn
+   */
+  export type FaqItemCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * The data used to create many FaqItems.
+     */
+    data: FaqItemCreateManyInput | FaqItemCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FaqItem update
+   */
+  export type FaqItemUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FaqItem.
+     */
+    data: XOR<FaqItemUpdateInput, FaqItemUncheckedUpdateInput>
+    /**
+     * Choose, which FaqItem to update.
+     */
+    where: FaqItemWhereUniqueInput
+  }
+
+  /**
+   * FaqItem updateMany
+   */
+  export type FaqItemUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FaqItems.
+     */
+    data: XOR<FaqItemUpdateManyMutationInput, FaqItemUncheckedUpdateManyInput>
+    /**
+     * Filter which FaqItems to update
+     */
+    where?: FaqItemWhereInput
+    /**
+     * Limit how many FaqItems to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FaqItem updateManyAndReturn
+   */
+  export type FaqItemUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * The data used to update FaqItems.
+     */
+    data: XOR<FaqItemUpdateManyMutationInput, FaqItemUncheckedUpdateManyInput>
+    /**
+     * Filter which FaqItems to update
+     */
+    where?: FaqItemWhereInput
+    /**
+     * Limit how many FaqItems to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FaqItem upsert
+   */
+  export type FaqItemUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FaqItem to update in case it exists.
+     */
+    where: FaqItemWhereUniqueInput
+    /**
+     * In case the FaqItem found by the `where` argument doesn't exist, create a new FaqItem with this data.
+     */
+    create: XOR<FaqItemCreateInput, FaqItemUncheckedCreateInput>
+    /**
+     * In case the FaqItem was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FaqItemUpdateInput, FaqItemUncheckedUpdateInput>
+  }
+
+  /**
+   * FaqItem delete
+   */
+  export type FaqItemDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
+    /**
+     * Filter which FaqItem to delete.
+     */
+    where: FaqItemWhereUniqueInput
+  }
+
+  /**
+   * FaqItem deleteMany
+   */
+  export type FaqItemDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FaqItems to delete
+     */
+    where?: FaqItemWhereInput
+    /**
+     * Limit how many FaqItems to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FaqItem without action
+   */
+  export type FaqItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FaqItem
+     */
+    select?: FaqItemSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FaqItem
+     */
+    omit?: FaqItemOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FaqItemInclude<ExtArgs> | null
   }
 
 
@@ -49494,6 +50779,8 @@ export namespace Prisma {
     umamiEnabled: 'umamiEnabled',
     status: 'status',
     onboardingComplete: 'onboardingComplete',
+    localBusinessEnabled: 'localBusinessEnabled',
+    allowAiCrawlers: 'allowAiCrawlers',
     featureFlags: 'featureFlags',
     shippingType: 'shippingType',
     shippingFlatRate: 'shippingFlatRate',
@@ -49541,6 +50828,20 @@ export namespace Prisma {
   };
 
   export type SiteContentScalarFieldEnum = (typeof SiteContentScalarFieldEnum)[keyof typeof SiteContentScalarFieldEnum]
+
+
+  export const FaqItemScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    question: 'question',
+    answer: 'answer',
+    sortOrder: 'sortOrder',
+    published: 'published',
+    businessId: 'businessId'
+  };
+
+  export type FaqItemScalarFieldEnum = (typeof FaqItemScalarFieldEnum)[keyof typeof FaqItemScalarFieldEnum]
 
 
   export const ProductScalarFieldEnum: {
@@ -50670,6 +51971,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    localBusinessEnabled?: BoolFilter<"Business"> | boolean
+    allowAiCrawlers?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
     shippingType?: StringFilter<"Business"> | string
     shippingFlatRate?: IntNullableFilter<"Business"> | number | null
@@ -50699,6 +52002,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteListRelationFilter
     memberships?: BusinessMembershipListRelationFilter
     zones?: ShippingZoneListRelationFilter
+    faqItems?: FaqItemListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -50725,6 +52029,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    localBusinessEnabled?: SortOrder
+    allowAiCrawlers?: SortOrder
     featureFlags?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrderInput | SortOrder
@@ -50754,6 +52060,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteOrderByRelationAggregateInput
     memberships?: BusinessMembershipOrderByRelationAggregateInput
     zones?: ShippingZoneOrderByRelationAggregateInput
+    faqItems?: FaqItemOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -50783,6 +52090,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFilter<"Business"> | boolean
     status?: StringFilter<"Business"> | string
     onboardingComplete?: BoolFilter<"Business"> | boolean
+    localBusinessEnabled?: BoolFilter<"Business"> | boolean
+    allowAiCrawlers?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
     shippingType?: StringFilter<"Business"> | string
     shippingFlatRate?: IntNullableFilter<"Business"> | number | null
@@ -50812,6 +52121,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteListRelationFilter
     memberships?: BusinessMembershipListRelationFilter
     zones?: ShippingZoneListRelationFilter
+    faqItems?: FaqItemListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -50838,6 +52148,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    localBusinessEnabled?: SortOrder
+    allowAiCrawlers?: SortOrder
     featureFlags?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrderInput | SortOrder
@@ -50882,6 +52194,8 @@ export namespace Prisma {
     umamiEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     status?: StringWithAggregatesFilter<"Business"> | string
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
+    localBusinessEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
+    allowAiCrawlers?: BoolWithAggregatesFilter<"Business"> | boolean
     featureFlags?: JsonWithAggregatesFilter<"Business">
     shippingType?: StringWithAggregatesFilter<"Business"> | string
     shippingFlatRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
@@ -51062,6 +52376,78 @@ export namespace Prisma {
     previewCustomFields?: JsonNullableWithAggregatesFilter<"SiteContent">
     previewUpdatedAt?: DateTimeNullableWithAggregatesFilter<"SiteContent"> | Date | string | null
     businessId?: StringWithAggregatesFilter<"SiteContent"> | string
+  }
+
+  export type FaqItemWhereInput = {
+    AND?: FaqItemWhereInput | FaqItemWhereInput[]
+    OR?: FaqItemWhereInput[]
+    NOT?: FaqItemWhereInput | FaqItemWhereInput[]
+    id?: StringFilter<"FaqItem"> | string
+    createdAt?: DateTimeFilter<"FaqItem"> | Date | string
+    updatedAt?: DateTimeFilter<"FaqItem"> | Date | string
+    question?: StringFilter<"FaqItem"> | string
+    answer?: StringFilter<"FaqItem"> | string
+    sortOrder?: IntFilter<"FaqItem"> | number
+    published?: BoolFilter<"FaqItem"> | boolean
+    businessId?: StringFilter<"FaqItem"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type FaqItemOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    sortOrder?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type FaqItemWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: FaqItemWhereInput | FaqItemWhereInput[]
+    OR?: FaqItemWhereInput[]
+    NOT?: FaqItemWhereInput | FaqItemWhereInput[]
+    createdAt?: DateTimeFilter<"FaqItem"> | Date | string
+    updatedAt?: DateTimeFilter<"FaqItem"> | Date | string
+    question?: StringFilter<"FaqItem"> | string
+    answer?: StringFilter<"FaqItem"> | string
+    sortOrder?: IntFilter<"FaqItem"> | number
+    published?: BoolFilter<"FaqItem"> | boolean
+    businessId?: StringFilter<"FaqItem"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id">
+
+  export type FaqItemOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    sortOrder?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+    _count?: FaqItemCountOrderByAggregateInput
+    _avg?: FaqItemAvgOrderByAggregateInput
+    _max?: FaqItemMaxOrderByAggregateInput
+    _min?: FaqItemMinOrderByAggregateInput
+    _sum?: FaqItemSumOrderByAggregateInput
+  }
+
+  export type FaqItemScalarWhereWithAggregatesInput = {
+    AND?: FaqItemScalarWhereWithAggregatesInput | FaqItemScalarWhereWithAggregatesInput[]
+    OR?: FaqItemScalarWhereWithAggregatesInput[]
+    NOT?: FaqItemScalarWhereWithAggregatesInput | FaqItemScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"FaqItem"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"FaqItem"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FaqItem"> | Date | string
+    question?: StringWithAggregatesFilter<"FaqItem"> | string
+    answer?: StringWithAggregatesFilter<"FaqItem"> | string
+    sortOrder?: IntWithAggregatesFilter<"FaqItem"> | number
+    published?: BoolWithAggregatesFilter<"FaqItem"> | boolean
+    businessId?: StringWithAggregatesFilter<"FaqItem"> | string
   }
 
   export type ProductWhereInput = {
@@ -54402,6 +55788,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -54431,6 +55819,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -54457,6 +55846,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -54486,6 +55877,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -54512,6 +55904,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -54541,6 +55935,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -54567,6 +55962,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -54596,6 +55993,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -54622,6 +56020,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -54658,6 +56058,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -54694,6 +56096,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -54919,6 +56323,82 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FaqItemCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: string
+    answer: string
+    sortOrder?: number
+    published?: boolean
+    business: BusinessCreateNestedOneWithoutFaqItemsInput
+  }
+
+  export type FaqItemUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: string
+    answer: string
+    sortOrder?: number
+    published?: boolean
+    businessId: string
+  }
+
+  export type FaqItemUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutFaqItemsNestedInput
+  }
+
+  export type FaqItemUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type FaqItemCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: string
+    answer: string
+    sortOrder?: number
+    published?: boolean
+    businessId: string
+  }
+
+  export type FaqItemUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type FaqItemUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -58736,6 +60216,12 @@ export namespace Prisma {
     none?: ShippingZoneWhereInput
   }
 
+  export type FaqItemListRelationFilter = {
+    every?: FaqItemWhereInput
+    some?: FaqItemWhereInput
+    none?: FaqItemWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -58792,6 +60278,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type FaqItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BusinessCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -58816,6 +60306,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    localBusinessEnabled?: SortOrder
+    allowAiCrawlers?: SortOrder
     featureFlags?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrder
@@ -58859,6 +60351,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    localBusinessEnabled?: SortOrder
+    allowAiCrawlers?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
@@ -58892,6 +60386,8 @@ export namespace Prisma {
     umamiEnabled?: SortOrder
     status?: SortOrder
     onboardingComplete?: SortOrder
+    localBusinessEnabled?: SortOrder
+    allowAiCrawlers?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
@@ -59085,17 +60581,6 @@ export namespace Prisma {
     businessId?: SortOrder
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -59105,6 +60590,74 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type FaqItemCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    sortOrder?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FaqItemAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type FaqItemMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    sortOrder?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FaqItemMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    question?: SortOrder
+    answer?: SortOrder
+    sortOrder?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type FaqItemSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type BaseInventoryUnitNullableScalarRelationFilter = {
@@ -59308,22 +60861,6 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type ProductScalarRelationFilter = {
@@ -61455,6 +62992,13 @@ export namespace Prisma {
     connect?: ShippingZoneWhereUniqueInput | ShippingZoneWhereUniqueInput[]
   }
 
+  export type FaqItemCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<FaqItemCreateWithoutBusinessInput, FaqItemUncheckedCreateWithoutBusinessInput> | FaqItemCreateWithoutBusinessInput[] | FaqItemUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FaqItemCreateOrConnectWithoutBusinessInput | FaqItemCreateOrConnectWithoutBusinessInput[]
+    createMany?: FaqItemCreateManyBusinessInputEnvelope
+    connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -61585,6 +63129,13 @@ export namespace Prisma {
     connectOrCreate?: ShippingZoneCreateOrConnectWithoutBusinessInput | ShippingZoneCreateOrConnectWithoutBusinessInput[]
     createMany?: ShippingZoneCreateManyBusinessInputEnvelope
     connect?: ShippingZoneWhereUniqueInput | ShippingZoneWhereUniqueInput[]
+  }
+
+  export type FaqItemUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<FaqItemCreateWithoutBusinessInput, FaqItemUncheckedCreateWithoutBusinessInput> | FaqItemCreateWithoutBusinessInput[] | FaqItemUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FaqItemCreateOrConnectWithoutBusinessInput | FaqItemCreateOrConnectWithoutBusinessInput[]
+    createMany?: FaqItemCreateManyBusinessInputEnvelope
+    connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -61874,6 +63425,20 @@ export namespace Prisma {
     deleteMany?: ShippingZoneScalarWhereInput | ShippingZoneScalarWhereInput[]
   }
 
+  export type FaqItemUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<FaqItemCreateWithoutBusinessInput, FaqItemUncheckedCreateWithoutBusinessInput> | FaqItemCreateWithoutBusinessInput[] | FaqItemUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FaqItemCreateOrConnectWithoutBusinessInput | FaqItemCreateOrConnectWithoutBusinessInput[]
+    upsert?: FaqItemUpsertWithWhereUniqueWithoutBusinessInput | FaqItemUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: FaqItemCreateManyBusinessInputEnvelope
+    set?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    disconnect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    delete?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    update?: FaqItemUpdateWithWhereUniqueWithoutBusinessInput | FaqItemUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: FaqItemUpdateManyWithWhereWithoutBusinessInput | FaqItemUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -62136,6 +63701,20 @@ export namespace Prisma {
     deleteMany?: ShippingZoneScalarWhereInput | ShippingZoneScalarWhereInput[]
   }
 
+  export type FaqItemUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<FaqItemCreateWithoutBusinessInput, FaqItemUncheckedCreateWithoutBusinessInput> | FaqItemCreateWithoutBusinessInput[] | FaqItemUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: FaqItemCreateOrConnectWithoutBusinessInput | FaqItemCreateOrConnectWithoutBusinessInput[]
+    upsert?: FaqItemUpsertWithWhereUniqueWithoutBusinessInput | FaqItemUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: FaqItemCreateManyBusinessInputEnvelope
+    set?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    disconnect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    delete?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+    update?: FaqItemUpdateWithWhereUniqueWithoutBusinessInput | FaqItemUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: FaqItemUpdateManyWithWhereWithoutBusinessInput | FaqItemUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
     create?: XOR<BusinessCreateWithoutSiteContentInput, BusinessUncheckedCreateWithoutSiteContentInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutSiteContentInput
@@ -62148,6 +63727,28 @@ export namespace Prisma {
     upsert?: BusinessUpsertWithoutSiteContentInput
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutSiteContentInput, BusinessUpdateWithoutSiteContentInput>, BusinessUncheckedUpdateWithoutSiteContentInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutFaqItemsInput = {
+    create?: XOR<BusinessCreateWithoutFaqItemsInput, BusinessUncheckedCreateWithoutFaqItemsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutFaqItemsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type BusinessUpdateOneRequiredWithoutFaqItemsNestedInput = {
+    create?: XOR<BusinessCreateWithoutFaqItemsInput, BusinessUncheckedCreateWithoutFaqItemsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutFaqItemsInput
+    upsert?: BusinessUpsertWithoutFaqItemsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutFaqItemsInput, BusinessUpdateWithoutFaqItemsInput>, BusinessUncheckedUpdateWithoutFaqItemsInput>
   }
 
   export type BaseInventoryUnitCreateNestedOneWithoutProductsInput = {
@@ -62247,14 +63848,6 @@ export namespace Prisma {
   }
 
   export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
@@ -64256,6 +65849,22 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -64281,22 +65890,6 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type SessionCreateWithoutUserInput = {
@@ -64790,6 +66383,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -64818,6 +66413,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -64844,6 +66440,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -64872,6 +66470,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -64957,6 +66556,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -64985,6 +66586,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -65011,6 +66613,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -65039,6 +66643,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -66074,6 +67679,36 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type FaqItemCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: string
+    answer: string
+    sortOrder?: number
+    published?: boolean
+  }
+
+  export type FaqItemUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: string
+    answer: string
+    sortOrder?: number
+    published?: boolean
+  }
+
+  export type FaqItemCreateOrConnectWithoutBusinessInput = {
+    where: FaqItemWhereUniqueInput
+    create: XOR<FaqItemCreateWithoutBusinessInput, FaqItemUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type FaqItemCreateManyBusinessInputEnvelope = {
+    data: FaqItemCreateManyBusinessInput | FaqItemCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -66730,6 +68365,36 @@ export namespace Prisma {
     sortOrder?: IntFilter<"ShippingZone"> | number
   }
 
+  export type FaqItemUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: FaqItemWhereUniqueInput
+    update: XOR<FaqItemUpdateWithoutBusinessInput, FaqItemUncheckedUpdateWithoutBusinessInput>
+    create: XOR<FaqItemCreateWithoutBusinessInput, FaqItemUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type FaqItemUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: FaqItemWhereUniqueInput
+    data: XOR<FaqItemUpdateWithoutBusinessInput, FaqItemUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type FaqItemUpdateManyWithWhereWithoutBusinessInput = {
+    where: FaqItemScalarWhereInput
+    data: XOR<FaqItemUpdateManyMutationInput, FaqItemUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type FaqItemScalarWhereInput = {
+    AND?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
+    OR?: FaqItemScalarWhereInput[]
+    NOT?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
+    id?: StringFilter<"FaqItem"> | string
+    createdAt?: DateTimeFilter<"FaqItem"> | Date | string
+    updatedAt?: DateTimeFilter<"FaqItem"> | Date | string
+    question?: StringFilter<"FaqItem"> | string
+    answer?: StringFilter<"FaqItem"> | string
+    sortOrder?: IntFilter<"FaqItem"> | number
+    published?: BoolFilter<"FaqItem"> | boolean
+    businessId?: StringFilter<"FaqItem"> | string
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -66754,6 +68419,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -66782,6 +68449,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -66808,6 +68476,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -66836,6 +68506,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -66878,6 +68549,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -66906,6 +68579,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -66932,6 +68606,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -66947,6 +68623,251 @@ export namespace Prisma {
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutFaqItemsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutFaqItemsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutFaqItemsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutFaqItemsInput, BusinessUncheckedCreateWithoutFaqItemsInput>
+  }
+
+  export type BusinessUpsertWithoutFaqItemsInput = {
+    update: XOR<BusinessUpdateWithoutFaqItemsInput, BusinessUncheckedUpdateWithoutFaqItemsInput>
+    create: XOR<BusinessCreateWithoutFaqItemsInput, BusinessUncheckedCreateWithoutFaqItemsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutFaqItemsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutFaqItemsInput, BusinessUncheckedUpdateWithoutFaqItemsInput>
+  }
+
+  export type BusinessUpdateWithoutFaqItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
     images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
     discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -67023,6 +68944,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -67051,6 +68974,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -67077,6 +69001,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -67105,6 +69031,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -67420,6 +69347,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -67448,6 +69377,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -67474,6 +69404,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -67502,6 +69434,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -67986,6 +69919,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -68014,6 +69949,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -68040,6 +69976,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -68068,6 +70006,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -68132,6 +70071,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68160,6 +70101,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -68186,6 +70128,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68214,6 +70158,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -68524,6 +70469,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -68552,6 +70499,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -68578,6 +70526,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -68606,6 +70556,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -68690,6 +70641,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68718,6 +70671,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -68744,6 +70698,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68772,6 +70728,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -69011,6 +70968,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -69039,6 +70998,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -69065,6 +71025,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -69093,6 +71055,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -69230,6 +71193,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69258,6 +71223,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -69284,6 +71250,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69312,6 +71280,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -69375,6 +71344,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -69403,6 +71374,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -69429,6 +71401,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -69457,6 +71431,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -69804,6 +71779,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69832,6 +71809,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -69858,6 +71836,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -69886,6 +71866,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -70207,6 +72188,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -70235,6 +72218,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -70261,6 +72245,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -70289,6 +72275,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -70624,6 +72611,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70652,6 +72641,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -70678,6 +72668,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70706,6 +72698,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -71532,6 +73525,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -71560,6 +73555,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -71586,6 +73582,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -71614,6 +73612,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -71734,6 +73733,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71762,6 +73763,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -71788,6 +73790,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71816,6 +73820,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -72023,6 +74028,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72051,6 +74058,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -72077,6 +74085,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72105,6 +74115,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -72440,6 +74451,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72468,6 +74481,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -72494,6 +74508,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72522,6 +74538,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -72670,6 +74687,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72698,6 +74717,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -72724,6 +74744,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72752,6 +74774,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -72928,6 +74951,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72956,6 +74981,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -72982,6 +75008,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73010,6 +75038,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -73068,6 +75097,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73096,6 +75127,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -73122,6 +75154,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73150,6 +75184,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -73192,6 +75227,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73220,6 +75257,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -73246,6 +75284,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73274,6 +75314,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -73300,6 +75341,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73328,6 +75371,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -73354,6 +75398,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73382,6 +75428,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -73424,6 +75471,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73452,6 +75501,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -73478,6 +75528,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73506,6 +75558,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -73532,6 +75585,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73560,6 +75615,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -73586,6 +75642,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73614,6 +75672,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -73656,6 +75715,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73684,6 +75745,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -73710,6 +75772,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73738,6 +75802,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -73764,6 +75829,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73792,6 +75859,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -73818,6 +75886,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73846,6 +75916,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -73920,6 +75991,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73948,6 +76021,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -73974,6 +76048,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74002,6 +76078,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -74143,6 +76220,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -74171,6 +76250,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -74197,6 +76277,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -74225,6 +76307,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -74314,6 +76397,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74342,6 +76427,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -74368,6 +76454,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74396,6 +76484,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -74475,6 +76564,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -74503,6 +76594,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -74529,6 +76621,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -74557,6 +76651,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -74646,6 +76741,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74674,6 +76771,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -74700,6 +76798,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74728,6 +76828,7 @@ export namespace Prisma {
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -75409,6 +77510,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -75437,6 +77540,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -75463,6 +77567,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -75491,6 +77597,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -75570,6 +77677,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75598,6 +77707,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -75624,6 +77734,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75652,6 +77764,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -75721,6 +77834,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -75749,6 +77864,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
     platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -75775,6 +77891,8 @@ export namespace Prisma {
     umamiEnabled?: boolean
     status?: string
     onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -75803,6 +77921,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
     platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -75867,6 +77986,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75895,6 +78016,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
     platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -75921,6 +78043,8 @@ export namespace Prisma {
     umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75949,6 +78073,7 @@ export namespace Prisma {
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
     platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -76645,6 +78770,16 @@ export namespace Prisma {
     name: string
     states?: ShippingZoneCreatestatesInput | string[]
     sortOrder?: number
+  }
+
+  export type FaqItemCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    question: string
+    answer: string
+    sortOrder?: number
+    published?: boolean
   }
 
   export type ProductUpdateWithoutBusinessInput = {
@@ -77565,6 +79700,36 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     states?: ShippingZoneUpdatestatesInput | string[]
     sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type FaqItemUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type FaqItemUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type FaqItemUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    question?: StringFieldUpdateOperationsInput | string
+    answer?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    published?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ImageCreateManyProductInput = {

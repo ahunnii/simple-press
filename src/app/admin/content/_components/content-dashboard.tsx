@@ -33,6 +33,7 @@ const bgMap: Record<string, string> = {
   orange: "bg-orange-100",
   pink: "bg-pink-100",
   indigo: "bg-indigo-100",
+  teal: "bg-teal-100",
 };
 
 const textMap: Record<string, string> = {
@@ -42,6 +43,7 @@ const textMap: Record<string, string> = {
   orange: "text-orange-600",
   pink: "text-pink-600",
   indigo: "text-indigo-600",
+  teal: "text-teal-600",
 };
 
 const borderMap: Record<string, string> = {
@@ -51,6 +53,7 @@ const borderMap: Record<string, string> = {
   orange: "hover:border-orange-500",
   pink: "hover:border-pink-500",
   indigo: "hover:border-indigo-500",
+  teal: "hover:border-teal-500",
 };
 
 export function ContentDashboard({ pages }: Props) {

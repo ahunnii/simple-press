@@ -3,8 +3,13 @@ import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import {
+  buildBreadcrumbSchema,
+  buildServiceSchema,
+} from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { getServiceTemplateComponent } from "../../_templates/_service-pages/registry";
 
@@ -36,13 +41,23 @@ export default async function ServiceDetailPage({ params }: Props) {
     service.serviceTemplateId,
   );
 
+  const serviceSchema = buildServiceSchema(service, business);
+  const breadcrumbSchema = buildBreadcrumbSchema(business, [
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+    { name: service.name, path: `/services/${service.slug}` },
+  ]);
+
   return (
-    <Component
-      business={business}
-      service={service}
-      items={service.items}
-      embedsEnabled={embedsEnabled}
-    />
+    <>
+      <JsonLd data={[serviceSchema, breadcrumbSchema]} />
+      <Component
+        business={business}
+        service={service}
+        items={service.items}
+        embedsEnabled={embedsEnabled}
+      />
+    </>
   );
 }
 

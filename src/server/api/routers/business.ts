@@ -40,6 +40,7 @@ export const businessRouter = createTRPCRouter({
         customDomain: true,
         domainStatus: true,
         subdomain: true,
+        localBusinessEnabled: true,
         shippingType: true,
         shippingFlatRate: true,
         freeShippingThreshold: true,
@@ -123,6 +124,7 @@ export const businessRouter = createTRPCRouter({
         subdomain: true,
         customDomain: true,
         domainStatus: true,
+        localBusinessEnabled: true,
         shippingType: true,
         shippingFlatRate: true,
         freeShippingThreshold: true,
@@ -837,15 +839,28 @@ export const businessRouter = createTRPCRouter({
         metaDescription: z.string().optional(),
         metaKeywords: z.string().optional(),
         ogImage: z.string().optional(),
+        localBusinessEnabled: z.boolean().optional(),
+        allowAiCrawlers: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      const { metaTitle, metaDescription, metaKeywords, ogImage } = input;
+      const {
+        businessId,
+      } = ctx;
+      const {
+        metaTitle,
+        metaDescription,
+        metaKeywords,
+        ogImage,
+        localBusinessEnabled,
+        allowAiCrawlers,
+      } = input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
         data: {
+          ...(localBusinessEnabled !== undefined && { localBusinessEnabled }),
+          ...(allowAiCrawlers !== undefined && { allowAiCrawlers }),
           siteContent: {
             upsert: {
               create: {

@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
+import {
+  buildBreadcrumbSchema,
+  buildWebPageSchema,
+} from "~/lib/structured-data";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { getTemplate } from "../_templates/registry";
 
@@ -23,7 +28,27 @@ export default async function PageView({ params }: Props) {
 
   const t = getTemplate(business.templateId);
 
-  return <t.GenericPage business={business} page={page} />;
+  const pageTitle = page.metaTitle ?? page.title;
+  const pageDescription =
+    page.metaDescription ?? page.excerpt ?? undefined;
+
+  const webPageSchema = buildWebPageSchema(business, {
+    type: "WebPage",
+    name: pageTitle,
+    path: `/${slug}`,
+    description: pageDescription,
+  });
+  const breadcrumbSchema = buildBreadcrumbSchema(business, [
+    { name: "Home", path: "/" },
+    { name: pageTitle, path: `/${slug}` },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={[webPageSchema, breadcrumbSchema]} />
+      <t.GenericPage business={business} page={page} />
+    </>
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -36,13 +61,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!page) return { title: "Page Not Found" };
 
+  const title = !!page.metaTitle ? page.metaTitle : page.title;
+  const description = !!page.metaDescription
+    ? page.metaDescription
+    : (page.excerpt ?? undefined);
+
+  const ogImage =
+    page.ogImage ??
+    business?.siteContent?.ogImage ??
+    business?.siteContent?.logoUrl ??
+    undefined;
+
   return {
-    title: !!page.metaTitle ? page.metaTitle : page.title,
-    description: !!page.metaDescription ? page.metaDescription : page.excerpt,
+    title,
+    description,
     ...(business && {
       alternates: {
         canonical: getCanonicalUrl(business, `/${slug}`),
       },
     }),
+    openGraph: {
+      title,
+      description: description ?? "",
+      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
+    },
+    twitter: {
+      card: "summary_large_image" as const,
+      title,
+      description: description ?? "",
+      ...(ogImage && { images: [ogImage] }),
+    },
   };
 }

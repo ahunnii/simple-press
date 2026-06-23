@@ -340,6 +340,16 @@ export const HUB_CARDS: HubCard[] = [
     icon: Search,
   },
   {
+    key: "content-faq",
+    title: "FAQ",
+    description: "Frequently asked questions",
+    body: "Add and manage FAQ items for your storefront",
+    href: "/admin/content/faq",
+    hub: "content",
+    color: "teal",
+    icon: FileText,
+  },
+  {
     key: "content-template",
     title: "Template Fields",
     description: "Custom content",

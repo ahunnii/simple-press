@@ -204,6 +204,8 @@ exports.Prisma.BusinessScalarFieldEnum = {
   umamiEnabled: 'umamiEnabled',
   status: 'status',
   onboardingComplete: 'onboardingComplete',
+  localBusinessEnabled: 'localBusinessEnabled',
+  allowAiCrawlers: 'allowAiCrawlers',
   featureFlags: 'featureFlags',
   shippingType: 'shippingType',
   shippingFlatRate: 'shippingFlatRate',
@@ -244,6 +246,17 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   customFields: 'customFields',
   previewCustomFields: 'previewCustomFields',
   previewUpdatedAt: 'previewUpdatedAt',
+  businessId: 'businessId'
+};
+
+exports.Prisma.FaqItemScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  question: 'question',
+  answer: 'answer',
+  sortOrder: 'sortOrder',
+  published: 'published',
   businessId: 'businessId'
 };
 
@@ -752,6 +765,7 @@ exports.Prisma.ModelName = {
   Verification: 'Verification',
   Business: 'Business',
   SiteContent: 'SiteContent',
+  FaqItem: 'FaqItem',
   Product: 'Product',
   ProductVariant: 'ProductVariant',
   Collection: 'Collection',

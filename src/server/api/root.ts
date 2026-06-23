@@ -11,6 +11,7 @@ import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
+import { faqRouter } from "./routers/faq";
 import { featuresRouter } from "./routers/featues";
 import { galleryRouter } from "./routers/gallery";
 import { mediaRouter } from "./routers/media";
@@ -59,6 +60,7 @@ export const appRouter = createTRPCRouter({
   shipping: shippingRouter,
 
   external: externalRouter,
+  faq: faqRouter,
 
   upload: uploadRouter,
 });
