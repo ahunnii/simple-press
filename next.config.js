@@ -19,6 +19,14 @@ const config = {
   // to the custom `generated/prisma` path, so the default location is absent).
   serverExternalPackages: ["@prisma/client", "prisma-field-encryption"],
 
+  experimental: {
+    // Store-transfer imports POST a zip as the request body. Middleware buffers
+    // request bodies and caps them at 10MB by default; raise it to match the
+    // import route's own 200MB guard (MAX_UPLOAD_BYTES in
+    // src/app/api/admin/store-transfer/import/route.ts).
+    middlewareClientMaxBodySize: "200mb",
+  },
+
   images: {
     remotePatterns: [
       {
