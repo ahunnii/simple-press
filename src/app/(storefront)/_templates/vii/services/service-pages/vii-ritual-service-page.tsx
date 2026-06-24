@@ -20,6 +20,7 @@ import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { parseTemplateRichtext } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -474,6 +475,7 @@ function RitualStepStyles() {
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function ViiRitualServicePage({
+  business,
   service,
   items,
   embedsEnabled,
@@ -484,25 +486,18 @@ export function ViiRitualServicePage({
     "vii-ritual.philosophy-overline",
     "vii-ritual.philosophy-heading",
     "vii-ritual.philosophy-heading-accent",
-    "vii-ritual.philosophy-body",
     "vii-ritual.cta-image",
     "vii-ritual.cta-heading",
     "vii-ritual.cta-subheading",
     "vii-ritual.cta-body",
-    "vii-ritual.cta-phone",
-    "vii-ritual.cta-email",
   ]);
 
-  // Parse richtext philosophy body
-  let philosophyBodyJson: TiptapJSON | null = null;
-  const philosophyBodyRaw = f["vii-ritual.philosophy-body"];
-  if (philosophyBodyRaw) {
-    try {
-      philosophyBodyJson = JSON.parse(philosophyBodyRaw) as TiptapJSON;
-    } catch {
-      // fall back to plain text
-    }
-  }
+  // Parse richtext philosophy body directly from service.customFields
+  const philosophyBodyJson = parseTemplateRichtext(
+    (service.customFields as Record<string, unknown> | null | undefined)?.[
+      "vii-ritual.philosophy-body"
+    ],
+  );
 
   const publishedItems = items.filter((it) => it.published !== false);
 
@@ -522,7 +517,7 @@ export function ViiRitualServicePage({
         heading={f["vii-ritual.philosophy-heading"] ?? ""}
         headingAccent={f["vii-ritual.philosophy-heading-accent"] ?? ""}
         bodyJson={philosophyBodyJson}
-        bodyFallback={philosophyBodyJson ? "" : (philosophyBodyRaw ?? "")}
+        bodyFallback=""
       />
 
       {/* 3. Ritual steps */}
@@ -546,8 +541,8 @@ export function ViiRitualServicePage({
         heading={f["vii-ritual.cta-heading"] ?? ""}
         subheading={f["vii-ritual.cta-subheading"] ?? ""}
         body={f["vii-ritual.cta-body"] ?? ""}
-        phone={f["vii-ritual.cta-phone"] ?? ""}
-        email={f["vii-ritual.cta-email"] ?? ""}
+        phone={business.phoneNumber ?? ""}
+        email={business.supportEmail ?? ""}
       />
     </PageTransition>
   );

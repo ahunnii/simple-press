@@ -79,6 +79,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.video-cta-link",
     // Image Band
     "vii.homepage.band-image",
+    "vii.homepage.band-heading",
+    "vii.homepage.band-text",
     // Inside the Studio (Story)
     "vii.homepage.story-heading",
     "vii.homepage.story-heading-accent",
@@ -115,8 +117,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.contact-heading",
     "vii.homepage.contact-subheading",
     "vii.homepage.contact-body",
-    "vii.homepage.contact-phone",
-    "vii.homepage.contact-email",
+    "vii.homepage.contact-cta-text",
+    "vii.homepage.contact-cta-link",
     // Instagram
     "vii.homepage.instagram-handle",
     "vii.homepage.instagram-gallery",
@@ -209,7 +211,11 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         />
 
         {/* 5. Image Band */}
-        <ViiImageBand bandImage={f["vii.homepage.band-image"] ?? undefined} />
+        <ViiImageBand
+          bandImage={f["vii.homepage.band-image"] ?? undefined}
+          bandHeading={f["vii.homepage.band-heading"] ?? ""}
+          bandText={f["vii.homepage.band-text"] ?? ""}
+        />
 
         {/* 6. Inside the Studio */}
         {storyCards.length > 0 ? (
@@ -280,8 +286,10 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
           heading={f["vii.homepage.contact-heading"] ?? ""}
           subheading={f["vii.homepage.contact-subheading"] ?? ""}
           body={f["vii.homepage.contact-body"] ?? ""}
-          phone={f["vii.homepage.contact-phone"] ?? ""}
-          email={f["vii.homepage.contact-email"] ?? ""}
+          phone={homepage?.phoneNumber ?? ""}
+          email={homepage?.supportEmail ?? ""}
+          buttonLabel={f["vii.homepage.contact-cta-text"] ?? ""}
+          buttonHref={f["vii.homepage.contact-cta-link"] ?? ""}
         />
       </PageTransition>
     </HydrateClient>

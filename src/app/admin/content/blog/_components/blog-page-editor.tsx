@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, PlusCircle, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -53,6 +53,20 @@ import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
 
+const NEW_BLOG_POST_DEFAULTS = {
+  title: "",
+  slug: "",
+  content: { ...EMPTY_TIPTAP_DOC },
+  excerpt: "",
+  published: true,
+  metaTitle: "",
+  metaDescription: "",
+  image: undefined,
+  imageFile: undefined,
+  ogImage: undefined,
+  ogImageFile: undefined,
+};
+
 // Form schema
 const pageFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -97,6 +111,7 @@ export function BlogPostEditor({
   const formRef = useRef<HTMLFormElement>(null);
   const imageFileInputRef = useRef<HTMLInputElement | null>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const createAnotherRef = useRef<boolean>(false);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   // Initialize form with TipTap content
@@ -107,7 +122,7 @@ export function BlogPostEditor({
       slug: page?.slug ?? "",
       content: page?.content ?? { ...EMPTY_TIPTAP_DOC },
       excerpt: page?.excerpt ?? "",
-      published: page?.published ?? false,
+      published: page?.published ?? true,
       metaTitle: page?.metaTitle ?? "",
       metaDescription: page?.metaDescription ?? "",
       image: page?.image ?? undefined,
@@ -154,7 +169,7 @@ export function BlogPostEditor({
       slug: data?.slug ?? page?.slug ?? "",
       content: data?.content ?? page?.content ?? EMPTY_TIPTAP_DOC,
       excerpt: data?.excerpt ?? page?.excerpt ?? "",
-      published: data?.published ?? page?.published ?? false,
+      published: data?.published ?? page?.published ?? true,
       metaTitle: data?.metaTitle ?? page?.metaTitle ?? "",
       metaDescription: data?.metaDescription ?? page?.metaDescription ?? "",
       image:
@@ -167,10 +182,20 @@ export function BlogPostEditor({
   const createPage = api.content.createPage.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
-      toast.success("Page created successfully");
-      router.push(`/admin/content/blog/${data.id}`);
+      if (createAnotherRef.current) {
+        createAnotherRef.current = false;
+        form.reset(NEW_BLOG_POST_DEFAULTS);
+        if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+        if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
+        toast.success("Post created — add another");
+        router.push("/admin/content/blog/new");
+      } else {
+        toast.success("Page created successfully");
+        router.push(`/admin/content/blog/${data.id}`);
+      }
     },
     onError: (error) => {
+      createAnotherRef.current = false;
       toast.dismiss();
       toast.error(error.message || "Failed to create blog post");
     },
@@ -342,7 +367,30 @@ export function BlogPostEditor({
                 Reset
               </Button>
 
-              <Button type="submit" size="sm" disabled={isSubmitting}>
+              {!page?.id && (
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    createAnotherRef.current = true;
+                  }}
+                  className="hidden sm:inline-flex"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Save &amp; create another
+                </Button>
+              )}
+
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => {
+                  createAnotherRef.current = false;
+                }}
+              >
                 {isSubmitting ? (
                   <>
                     <span className="saving-indicator" />

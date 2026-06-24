@@ -11,6 +11,8 @@ import { ViiBlogRelated } from "./vii-blog-related";
 type Props = DefaultBlogPostPageTemplateProps & {
   business: {
     siteContent?: { customFields?: unknown } | null;
+    phoneNumber?: string | null;
+    supportEmail?: string | null;
   };
   customFields?: Record<string, string>;
 };
@@ -31,8 +33,6 @@ export function ViiBlogPostPage({
     "vii.homepage.contact-heading",
     "vii.homepage.contact-subheading",
     "vii.homepage.contact-body",
-    "vii.homepage.contact-phone",
-    "vii.homepage.contact-email",
   ]);
 
   // Lead paragraph: only when the author wrote an excerpt. Deriving from the
@@ -116,8 +116,8 @@ export function ViiBlogPostPage({
         heading={ctaHeading}
         subheading={ctaSubheading}
         body={ctaBody}
-        phone={f["vii.homepage.contact-phone"] ?? ""}
-        email={f["vii.homepage.contact-email"] ?? ""}
+        phone={business?.phoneNumber ?? ""}
+        email={business?.supportEmail ?? ""}
         buttonLabel="Book a visit"
         buttonHref="/contact"
       />

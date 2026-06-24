@@ -18,7 +18,7 @@ import { Pause, Play } from "lucide-react";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import { parseTemplateListRows, parseTemplateRichtext } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -619,6 +619,7 @@ function ViiBookButton({
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function ViiSanctuaryServicePage({
+  business,
   service,
   items,
   embedsEnabled,
@@ -630,26 +631,19 @@ export function ViiSanctuaryServicePage({
     "vii-sanctuary.intro-overline",
     "vii-sanctuary.intro-heading",
     "vii-sanctuary.intro-heading-accent",
-    "vii-sanctuary.intro-body",
     "vii-sanctuary.menu-heading",
     "vii-sanctuary.cta-image",
     "vii-sanctuary.cta-heading",
     "vii-sanctuary.cta-subheading",
     "vii-sanctuary.cta-body",
-    "vii-sanctuary.cta-phone",
-    "vii-sanctuary.cta-email",
   ]);
 
-  // Parse richtext body
-  let introBodyJson: TiptapJSON | null = null;
-  const introBodyRaw = f["vii-sanctuary.intro-body"];
-  if (introBodyRaw) {
-    try {
-      introBodyJson = JSON.parse(introBodyRaw) as TiptapJSON;
-    } catch {
-      // will fall back to plain text
-    }
-  }
+  // Parse richtext body directly from service.customFields (bypasses string-only resolver)
+  const introBodyJson = parseTemplateRichtext(
+    (service.customFields as Record<string, unknown> | null | undefined)?.[
+      "vii-sanctuary.intro-body"
+    ],
+  );
 
   // Parse benefits list
   const benefitRows = parseTemplateListRows(
@@ -680,7 +674,7 @@ export function ViiSanctuaryServicePage({
         heading={f["vii-sanctuary.intro-heading"] ?? ""}
         headingAccent={f["vii-sanctuary.intro-heading-accent"] ?? ""}
         bodyJson={introBodyJson}
-        bodyFallback={introBodyJson ? "" : (introBodyRaw ?? "")}
+        bodyFallback=""
       />
 
       {/* 3. Benefits strip */}
@@ -701,8 +695,8 @@ export function ViiSanctuaryServicePage({
         heading={f["vii-sanctuary.cta-heading"] ?? ""}
         subheading={f["vii-sanctuary.cta-subheading"] ?? ""}
         body={f["vii-sanctuary.cta-body"] ?? ""}
-        phone={f["vii-sanctuary.cta-phone"] ?? ""}
-        email={f["vii-sanctuary.cta-email"] ?? ""}
+        phone={business.phoneNumber ?? ""}
+        email={business.supportEmail ?? ""}
       />
     </PageTransition>
   );
