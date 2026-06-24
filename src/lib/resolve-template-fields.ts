@@ -13,7 +13,8 @@ export function resolveTemplateFields(
       : {};
   const out: Record<string, string> = {};
   for (const key of keys) {
-    const custom = raw[key]?.trim();
+    const value = raw[key];
+    const custom = typeof value === "string" ? value.trim() : undefined;
     out[key] = custom ?? fieldMap.get(key)?.defaultValue ?? "";
   }
   return out;

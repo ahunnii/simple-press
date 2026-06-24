@@ -223,6 +223,26 @@ const homepageBandData: TemplateField[] = [
     group: "homepage.band",
     gridColumn: "col-span-full",
   },
+  {
+    key: "vii.homepage.band-heading",
+    label: "Band Overlay Heading",
+    description:
+      "Optional serif heading centered over the band image. Leave blank to show the image without text.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.band",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii.homepage.band-text",
+    label: "Band Overlay Text",
+    description:
+      "Optional supporting sentence displayed beneath the band heading. Only shown when a band image is set.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.band",
+    gridColumn: "col-span-full",
+  },
 ];
 
 // ─── Inside the Studio (Story) ────────────────────────────────────────────────
@@ -535,24 +555,26 @@ const homepageContactData: TemplateField[] = [
       "Our team is here to help you find the right treatment for your skin. Reach out to learn more about our facials, services, and booking.",
   },
   {
-    key: "vii.homepage.contact-phone",
-    label: "Phone Number",
-    description: "Phone number displayed in the contact section.",
+    key: "vii.homepage.contact-cta-text",
+    label: "Button Label",
+    description:
+      "Text for the primary action button in the contact section (e.g. 'Book Now'). Both label and link must be set for the button to appear.",
     type: "text",
     page: "homepage",
     group: "homepage.contact",
     gridColumn: "col-span-1",
-    placeholder: "e.g. +1 (313) 555-0100",
+    defaultValue: "Book Now",
   },
   {
-    key: "vii.homepage.contact-email",
-    label: "Contact Email",
-    description: "Email address displayed in the contact section.",
-    type: "text",
+    key: "vii.homepage.contact-cta-link",
+    label: "Button Link",
+    description:
+      "URL the contact section button points to — e.g. your booking page or a scheduling tool.",
+    type: "url",
     page: "homepage",
     group: "homepage.contact",
     gridColumn: "col-span-1",
-    placeholder: "e.g. hello@skinbarvii.com",
+    placeholder: "e.g. https://bookings.skinbarvii.com",
   },
 ];
 

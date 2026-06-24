@@ -181,7 +181,7 @@ export function ViiHeader({
     | undefined;
   const links = customNav ?? DEFAULT_NAV_LINKS;
 
-  // ── Resolve global + contact fields ────────────────────────────────────────
+  // ── Resolve global fields ──────────────────────────────────────────────────
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
@@ -189,12 +189,11 @@ export function ViiHeader({
     "vii.global.book-cta-text",
     "vii.global.book-cta-link",
     "vii.global.location-tag",
-    "vii.homepage.contact-phone",
   ]);
   const bookCtaText = g["vii.global.book-cta-text"] ?? "Book Now";
   const bookCtaLink = g["vii.global.book-cta-link"] ?? "/contact";
   const locationTag = g["vii.global.location-tag"] ?? "";
-  const phone = g["vii.homepage.contact-phone"] ?? "";
+  const phone = business?.phoneNumber ?? "";
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;

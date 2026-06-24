@@ -179,28 +179,6 @@ export const viiSanctuaryFields: TemplateField[] = [
       "Our specialists are ready to create a personalized experience for you. Reach out to reserve your session.",
     placeholder: "Invite guests to book or call…",
   },
-  {
-    key: "vii-sanctuary.cta-phone",
-    label: "Phone Number",
-    description: "Phone number shown in the closing CTA.",
-    type: "text",
-    page: "homepage",
-    group: "vii-sanctuary.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "e.g. (313) 555-0100",
-  },
-  {
-    key: "vii-sanctuary.cta-email",
-    label: "Email Address",
-    description: "Email address shown in the closing CTA.",
-    type: "text",
-    page: "homepage",
-    group: "vii-sanctuary.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "e.g. hello@skanbarvii.com",
-  },
 ];
 
 const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
@@ -366,28 +344,6 @@ export const viiRitualFields: TemplateField[] = [
       "Each ritual is tailored to your skin, your pace, your moment. Contact us to begin.",
     placeholder: "Invite guests to book or call…",
   },
-  {
-    key: "vii-ritual.cta-phone",
-    label: "Phone Number",
-    description: "Phone number shown in the closing CTA.",
-    type: "text",
-    page: "homepage",
-    group: "vii-ritual.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "e.g. (313) 555-0100",
-  },
-  {
-    key: "vii-ritual.cta-email",
-    label: "Email Address",
-    description: "Email address shown in the closing CTA.",
-    type: "text",
-    page: "homepage",
-    group: "vii-ritual.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "e.g. hello@skanbarvii.com",
-  },
 ];
 
 const viiRitualFieldGroups: TemplateFieldGroup[] = [
@@ -550,28 +506,6 @@ export const viiAtelierFields: TemplateField[] = [
     defaultValue:
       "Our atelier is open by appointment. We look forward to creating your experience.",
     placeholder: "Invite guests to book or call…",
-  },
-  {
-    key: "vii-atelier.cta-phone",
-    label: "Phone Number",
-    description: "Phone number shown in the closing CTA.",
-    type: "text",
-    page: "homepage",
-    group: "vii-atelier.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "e.g. (313) 555-0100",
-  },
-  {
-    key: "vii-atelier.cta-email",
-    label: "Email Address",
-    description: "Email address shown in the closing CTA.",
-    type: "text",
-    page: "homepage",
-    group: "vii-atelier.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "",
-    placeholder: "e.g. hello@skanbarvii.com",
   },
 ];
 

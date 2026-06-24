@@ -427,6 +427,7 @@ function AtelierListStyles() {
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function ViiAtelierServicePage({
+  business,
   service,
   items,
   embedsEnabled,
@@ -441,8 +442,6 @@ export function ViiAtelierServicePage({
     "vii-atelier.cta-heading",
     "vii-atelier.cta-subheading",
     "vii-atelier.cta-body",
-    "vii-atelier.cta-phone",
-    "vii-atelier.cta-email",
   ]);
 
   // Parse gallery images from the list field
@@ -489,8 +488,8 @@ export function ViiAtelierServicePage({
         heading={f["vii-atelier.cta-heading"] ?? ""}
         subheading={f["vii-atelier.cta-subheading"] ?? ""}
         body={f["vii-atelier.cta-body"] ?? ""}
-        phone={f["vii-atelier.cta-phone"] ?? ""}
-        email={f["vii-atelier.cta-email"] ?? ""}
+        phone={business.phoneNumber ?? ""}
+        email={business.supportEmail ?? ""}
       />
     </PageTransition>
   );

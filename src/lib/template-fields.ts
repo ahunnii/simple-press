@@ -146,6 +146,28 @@ export function parseTemplateListRows(raw: unknown): TemplateListRow[] {
   });
 }
 
+/**
+ * Parses a raw `customFields` value for a richtext field.
+ *
+ * - If the value is a non-null, non-array object → return it cast as TiptapJSON
+ *   (admin editor stores Tiptap JSON objects directly).
+ * - If it's a non-empty string → JSON.parse inside try/catch (return null on failure).
+ * - Otherwise return null.
+ */
+export function parseTemplateRichtext(value: unknown): TiptapJSON | null {
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    return value as TiptapJSON;
+  }
+  if (typeof value === "string" && value) {
+    try {
+      return JSON.parse(value) as TiptapJSON;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export function getListFieldValue(
   customFields: unknown,
   key: string,
