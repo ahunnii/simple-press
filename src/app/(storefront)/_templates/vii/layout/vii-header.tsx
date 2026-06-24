@@ -656,7 +656,9 @@ export function ViiHeader({
                     classNames={{
                       trigger: {
                         base: "rounded-full w-auto h-auto p-0",
-                        avatar: { base: "size-7" },
+                        avatar: {
+                          base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
+                        },
                       },
                     }}
                     additionalLinks={[
