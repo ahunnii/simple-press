@@ -501,6 +501,13 @@ model ServiceItem {
   priceLabel    String?
   durationLabel String?
 
+  // Display-only "was" price (free text, e.g. "$120"), shown struck-through.
+  compareAtPriceLabel String?
+  // [{ label, priceLabel, compareAtPriceLabel? }] — alternate priced rows (display-only).
+  priceTiers Json?
+  // [{ name, priceLabel?, description? }] — optional extras (display-only).
+  addOns Json?
+
   // External booking iframe (sanitized HTTPS URL only)
   bookingEmbedSrc    String?
   bookingEmbedHeight Int?

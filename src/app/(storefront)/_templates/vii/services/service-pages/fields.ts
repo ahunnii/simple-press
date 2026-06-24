@@ -96,6 +96,28 @@ export const viiSanctuaryFields: TemplateField[] = [
     defaultValue: "",
     placeholder: "Describe the experience guests can expect…",
   },
+  {
+    key: "vii-sanctuary.intro-image",
+    label: "Intro Image",
+    description:
+      "Optional image shown beneath the intro body text. Displayed centered with a max-width of 680px.",
+    type: "image",
+    page: "homepage",
+    group: "vii-sanctuary.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "vii-sanctuary.intro-video",
+    label: "Intro Video",
+    description:
+      "Optional video (MP4) shown beneath the intro body text. Takes precedence over the intro image when set.",
+    type: "video",
+    page: "homepage",
+    group: "vii-sanctuary.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
 
   // Benefits strip
   {
@@ -179,6 +201,51 @@ export const viiSanctuaryFields: TemplateField[] = [
       "Our specialists are ready to create a personalized experience for you. Reach out to reserve your session.",
     placeholder: "Invite guests to book or call…",
   },
+  {
+    key: "vii-sanctuary.cta-button-label",
+    label: "Closing CTA Button Label",
+    description:
+      "Label for the primary action button in the closing CTA. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "e.g. Book Now",
+  },
+  {
+    key: "vii-sanctuary.cta-button-url",
+    label: "Closing CTA Button URL",
+    description:
+      "URL the CTA button links to (e.g. an external booking page). Required for the button to appear.",
+    type: "url",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "https://…",
+  },
+  {
+    key: "vii-sanctuary.cta-embed",
+    label: "Closing CTA Embed",
+    description:
+      "Optional embed (e.g. a booking widget) shown in the closing CTA section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
+    type: "iframe",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-sanctuary.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
@@ -194,7 +261,7 @@ const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
     id: "vii-sanctuary.intro",
     title: "Introduction",
     description:
-      "Overline, split heading, and rich-text body block below the hero",
+      "Overline, split heading, rich-text body, and an optional image or video below the body",
     icon: "✍️",
     columns: 2,
   },
@@ -217,7 +284,7 @@ const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
     id: "vii-sanctuary.cta",
     title: "Closing Call to Action",
     description:
-      "Background image, heading, body copy, and contact details for the closing navy CTA section",
+      "Background image, heading, body copy, button, embed, and contact details for the closing navy CTA section",
     icon: "📞",
     columns: 2,
   },
@@ -227,6 +294,17 @@ const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
 
 export const viiRitualFields: TemplateField[] = [
   // Hero
+  {
+    key: "vii-ritual.hero-video",
+    label: "Hero Video",
+    description:
+      "Optional background video (MP4) for the centred hero. Takes precedence over the hero image when set.",
+    type: "video",
+    page: "homepage",
+    group: "vii-ritual.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
   {
     key: "vii-ritual.hero-image",
     label: "Hero Image",
@@ -298,6 +376,28 @@ export const viiRitualFields: TemplateField[] = [
     defaultValue: "",
     placeholder: "Describe the ritual philosophy…",
   },
+  {
+    key: "vii-ritual.philosophy-image",
+    label: "Philosophy Image",
+    description:
+      "Optional image shown beneath the philosophy body text. Displayed centered with a max-width matching the section (~680px).",
+    type: "image",
+    page: "homepage",
+    group: "vii-ritual.philosophy",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "vii-ritual.philosophy-video",
+    label: "Philosophy Video",
+    description:
+      "Optional video (MP4) shown beneath the philosophy body text. Takes precedence over the philosophy image when set.",
+    type: "video",
+    page: "homepage",
+    group: "vii-ritual.philosophy",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
 
   // Closing CTA
   {
@@ -344,6 +444,51 @@ export const viiRitualFields: TemplateField[] = [
       "Each ritual is tailored to your skin, your pace, your moment. Contact us to begin.",
     placeholder: "Invite guests to book or call…",
   },
+  {
+    key: "vii-ritual.cta-button-label",
+    label: "Closing CTA Button Label",
+    description:
+      "Label for the primary action button in the closing CTA. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "e.g. Book Now",
+  },
+  {
+    key: "vii-ritual.cta-button-url",
+    label: "Closing CTA Button URL",
+    description:
+      "URL the CTA button links to (e.g. an external booking page). Required for the button to appear.",
+    type: "url",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "https://…",
+  },
+  {
+    key: "vii-ritual.cta-embed",
+    label: "Closing CTA Embed",
+    description:
+      "Optional embed (e.g. a booking widget) shown in the closing CTA section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
+    type: "iframe",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-ritual.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const viiRitualFieldGroups: TemplateFieldGroup[] = [
@@ -351,7 +496,7 @@ const viiRitualFieldGroups: TemplateFieldGroup[] = [
     id: "vii-ritual.hero",
     title: "Hero",
     description:
-      "Background image and overline text for the centred dark hero section",
+      "Background video or image and overline text for the centred dark hero section",
     icon: "🌿",
     columns: 1,
   },
@@ -359,7 +504,7 @@ const viiRitualFieldGroups: TemplateFieldGroup[] = [
     id: "vii-ritual.philosophy",
     title: "Philosophy",
     description:
-      "Overline, split heading, and rich-text body for the philosophy block shown between the hero and treatment steps",
+      "Overline, split heading, rich-text body, and an optional image or video for the philosophy block shown between the hero and treatment steps",
     icon: "💭",
     columns: 2,
   },
@@ -367,7 +512,7 @@ const viiRitualFieldGroups: TemplateFieldGroup[] = [
     id: "vii-ritual.cta",
     title: "Closing Call to Action",
     description:
-      "Background image, heading, body copy, and contact details for the closing navy CTA",
+      "Background image, heading, body copy, button, embed, and contact details for the closing navy CTA",
     icon: "📞",
     columns: 2,
   },
@@ -377,6 +522,17 @@ const viiRitualFieldGroups: TemplateFieldGroup[] = [
 
 export const viiAtelierFields: TemplateField[] = [
   // Hero gallery + overline
+  {
+    key: "vii-atelier.hero-video",
+    label: "Hero Video",
+    description:
+      "Optional background video (MP4) shown as a large full-width panel above the mosaic gallery when set. Takes precedence over the gallery as the primary hero.",
+    type: "video",
+    page: "homepage",
+    group: "vii-atelier.gallery",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
   {
     key: "vii-atelier.hero-overline",
     label: "Hero Overline",
@@ -434,6 +590,28 @@ export const viiAtelierFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "Skinbar VII, Detroit",
     placeholder: "e.g. Skinbar VII, Detroit",
+  },
+  {
+    key: "vii-atelier.quote-image",
+    label: "Quote Section Image",
+    description:
+      "Optional image shown beneath the pull quote in the navy band. Displayed centered with vii styling.",
+    type: "image",
+    page: "homepage",
+    group: "vii-atelier.quote",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "vii-atelier.quote-video",
+    label: "Quote Section Video",
+    description:
+      "Optional video (MP4) shown beneath the pull quote. Takes precedence over the quote image when set.",
+    type: "video",
+    page: "homepage",
+    group: "vii-atelier.quote",
+    gridColumn: "col-span-1",
+    defaultValue: "",
   },
 
   // Treatment list heading
@@ -507,6 +685,51 @@ export const viiAtelierFields: TemplateField[] = [
       "Our atelier is open by appointment. We look forward to creating your experience.",
     placeholder: "Invite guests to book or call…",
   },
+  {
+    key: "vii-atelier.cta-button-label",
+    label: "Closing CTA Button Label",
+    description:
+      "Label for the primary action button in the closing CTA. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "e.g. Book Now",
+  },
+  {
+    key: "vii-atelier.cta-button-url",
+    label: "Closing CTA Button URL",
+    description:
+      "URL the CTA button links to (e.g. an external booking page). Required for the button to appear.",
+    type: "url",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "https://…",
+  },
+  {
+    key: "vii-atelier.cta-embed",
+    label: "Closing CTA Embed",
+    description:
+      "Optional embed (e.g. a booking widget) shown in the closing CTA section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
+    type: "iframe",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-atelier.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const viiAtelierFieldGroups: TemplateFieldGroup[] = [
@@ -514,7 +737,7 @@ const viiAtelierFieldGroups: TemplateFieldGroup[] = [
     id: "vii-atelier.gallery",
     title: "Mosaic Gallery",
     description:
-      "Overline text and up to 5 images that compose the full-viewport mosaic hero grid",
+      "Optional hero video (takes precedence), overline text, and up to 5 images that compose the mosaic hero grid",
     icon: "🖼️",
     columns: 1,
   },
@@ -522,7 +745,7 @@ const viiAtelierFieldGroups: TemplateFieldGroup[] = [
     id: "vii-atelier.quote",
     title: "Pull Quote",
     description:
-      "Brand statement or client quote displayed on the dark navy band between the gallery and the treatment list",
+      "Brand statement or client quote on the dark navy band, with optional image or video beneath",
     icon: "💬",
     columns: 1,
   },
@@ -538,7 +761,7 @@ const viiAtelierFieldGroups: TemplateFieldGroup[] = [
     id: "vii-atelier.cta",
     title: "Closing Call to Action",
     description:
-      "Background image, heading, body copy, and contact details for the closing navy CTA",
+      "Background image, heading, body copy, button, embed, and contact details for the closing navy CTA",
     icon: "📞",
     columns: 2,
   },
@@ -588,7 +811,7 @@ export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "vii-sanctuary",
     label: "Sanctuary",
     description:
-      "Immersive full-viewport hero (video or image), centred intro, benefits strip, and a three-column treatment card grid with Book CTAs.",
+      "Immersive full-viewport hero (video or image), centred intro with optional media, benefits strip, and a three-column treatment card grid with Book CTAs.",
     fields: viiSanctuaryFields,
     fieldGroups: viiSanctuaryFieldGroups,
   },
@@ -596,7 +819,7 @@ export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "vii-ritual",
     label: "Ritual",
     description:
-      "Intimate editorial layout: centred dark hero, philosophy block, and treatments as alternating full-bleed image/text rows — each with a Book CTA.",
+      "Intimate editorial layout: centred dark hero (video or image), philosophy block with optional media, and treatments as alternating full-bleed image/text rows — each with a Book CTA.",
     fields: viiRitualFields,
     fieldGroups: viiRitualFieldGroups,
   },
@@ -604,7 +827,7 @@ export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
     id: "vii-atelier",
     label: "Atelier",
     description:
-      "Gallery-forward mosaic hero, a large italic pull quote on navy, and a refined two-column treatment table with inline Book links.",
+      "Gallery-forward mosaic hero (or hero video), a large italic pull quote on navy with optional media, and a refined two-column treatment table with inline Book links.",
     fields: viiAtelierFields,
     fieldGroups: viiAtelierFieldGroups,
   },

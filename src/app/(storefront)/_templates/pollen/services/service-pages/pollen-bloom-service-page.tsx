@@ -6,7 +6,9 @@ import type { RouterOutputs } from "~/trpc/react";
 import {
   getListFieldValue,
   parseTemplateImageListRows,
+  parseTemplateIframeValue,
 } from "~/lib/template-fields";
+import { parseServicePriceTiers, parseServiceAddOns } from "~/lib/validators/services";
 import { buttonVariants } from "~/components/ui/button";
 import {
   FadeIn,
@@ -15,6 +17,10 @@ import {
 } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { EmbedFrame } from "~/components/embed-frame";
+import { EmbedReveal } from "~/components/embed-reveal";
+import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
+import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { PollenGeneralLayout } from "../../layout/pollen-general-layout";
 import { resolvePollenBloomFields } from "./fields";
@@ -34,9 +40,11 @@ type Props = {
  *
  * Layout:
  * 1. PollenGeneralLayout title-hero (service name + description, global header bg)
- * 2. Mosaic gallery strip (2-4 owner-uploaded accent images)
- * 3. Centered intro: label + heading + richtext + optional CTA
- * 4. Image-heavy staggered service cards with soft green overlays
+ * 2. Optional hero video band (full-width, before gallery)
+ * 3. Mosaic gallery strip (2-4 owner-uploaded accent images)
+ * 4. Centered intro: label + heading + richtext + optional media + optional CTA
+ * 5. Image-heavy staggered service cards with soft green overlays
+ * 6. Closing CTA section + optional embed
  */
 export function PollenBloomServicePage({
   business,
@@ -51,6 +59,11 @@ export function PollenBloomServicePage({
     "pollen-bloom.items-heading",
     "pollen-bloom.cta-text",
     "pollen-bloom.cta-link",
+    "pollen-bloom.hero-video",
+    "pollen-bloom.intro-image",
+    "pollen-bloom.intro-video",
+    "pollen-bloom.cta-embed",
+    "pollen-bloom.cta-embed-reveal",
   ]);
 
   const introLabel = f["pollen-bloom.intro-label"] ?? "";
@@ -59,6 +72,10 @@ export function PollenBloomServicePage({
   const itemsHeading = f["pollen-bloom.items-heading"] ?? "";
   const ctaText = f["pollen-bloom.cta-text"] ?? "";
   const ctaLink = f["pollen-bloom.cta-link"] ?? "";
+  const heroVideoSrc = f["pollen-bloom.hero-video"] ?? "";
+  const introImage = f["pollen-bloom.intro-image"] ?? "";
+  const introVideoSrc = f["pollen-bloom.intro-video"] ?? "";
+  const ctaEmbedRaw = f["pollen-bloom.cta-embed"] ?? "";
 
   // Gallery images — stored as a list field on service.customFields
   const galleryImages =
@@ -75,6 +92,10 @@ export function PollenBloomServicePage({
     }
   }
 
+  const embed = ctaEmbedRaw ? parseTemplateIframeValue(ctaEmbedRaw) : null;
+  const ctaEmbedReveal = f["pollen-bloom.cta-embed-reveal"] === "true";
+  const showClosingCta = (ctaLink && ctaText) || !!embed;
+
   const publishedItems = items.filter((item) => item.published);
 
   return (
@@ -83,6 +104,13 @@ export function PollenBloomServicePage({
       title={service.name}
       subtitle={service.description ?? undefined}
     >
+      {/* ── Hero video band ─────────────────────────────────────────────── */}
+      {heroVideoSrc && (
+        <div className="relative min-h-[60vh] overflow-hidden">
+          <ServiceHeroVideo src={heroVideoSrc} />
+        </div>
+      )}
+
       {/* ── Mosaic gallery strip ─────────────────────────────────────────── */}
       {galleryImages.length > 0 && (
         <section className="bg-[#E5E8E0] py-12 md:py-16">
@@ -148,6 +176,17 @@ export function PollenBloomServicePage({
                 {introBodyRaw}
               </p>
             )}
+            {(introVideoSrc || introImage) && (
+              <div className="mt-8 mx-auto max-w-xl">
+                <ServiceSectionMedia
+                  imageSrc={introImage || undefined}
+                  videoSrc={introVideoSrc || undefined}
+                  alt=""
+                  className="relative aspect-video overflow-hidden rounded-2xl shadow-md"
+                  rounded={false}
+                />
+              </div>
+            )}
             {ctaLink && ctaText && (
               <Link
                 href={ctaLink}
@@ -189,6 +228,77 @@ export function PollenBloomServicePage({
           </div>
         </section>
       )}
+
+      {/* ── Closing CTA + embed ─────────────────────────────────────────── */}
+      {showClosingCta && (
+        <section className="bg-[#2a351f] py-16 md:py-24">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            {ctaLink && ctaText && (
+              <FadeIn direction="up" className="mb-10 text-center">
+                <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
+                  Ready to begin?
+                </p>
+                <h2 className="mb-8 text-2xl font-bold text-white md:text-3xl">
+                  {service.name}
+                </h2>
+                <Link
+                  href={ctaLink}
+                  className={buttonVariants({
+                    size: "lg",
+                    className: "border border-[#d4e8d4] bg-transparent! text-white hover:bg-[#d4e8d4]/10!",
+                  })}
+                >
+                  {ctaText}
+                </Link>
+              </FadeIn>
+            )}
+            {embed && (
+              <FadeIn direction="up">
+                {embedsEnabled ? (
+                  ctaEmbedReveal ? (
+                    <div className="text-center">
+                      <EmbedReveal
+                        src={embed.src}
+                        height={embed.height}
+                        title={embed.title ?? "Book"}
+                        className="rounded-xl overflow-hidden"
+                        triggerLabel={embed.title ?? "Book Now"}
+                        triggerClassName={buttonVariants({
+                          variant: "outline",
+                          size: "lg",
+                          className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                        })}
+                      />
+                    </div>
+                  ) : (
+                    <EmbedFrame
+                      src={embed.src}
+                      height={embed.height}
+                      title={embed.title ?? "Book"}
+                      className="rounded-xl overflow-hidden"
+                    />
+                  )
+                ) : (
+                  <div className="text-center">
+                    <a
+                      href={embed.src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({
+                        variant: "outline",
+                        size: "lg",
+                        className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                      })}
+                    >
+                      {embed.title ?? "Book Now"} ↗
+                    </a>
+                  </div>
+                )}
+              </FadeIn>
+            )}
+          </div>
+        </section>
+      )}
     </PollenGeneralLayout>
   );
 }
@@ -200,6 +310,9 @@ function PollenBloomItemCard({
   item: ServiceItem;
   embedsEnabled: boolean;
 }) {
+  const tiers = parseServicePriceTiers(item.priceTiers);
+  const addOns = parseServiceAddOns(item.addOns);
+
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* Large image with green overlay on hover */}
@@ -235,6 +348,48 @@ function PollenBloomItemCard({
             {item.durationLabel}
           </p>
         )}
+
+        {/* Compare-at price in text body */}
+        {item.compareAtPriceLabel && (
+          <p className="text-xs text-[#9ca3af] line-through">{item.compareAtPriceLabel}</p>
+        )}
+
+        {/* Price tiers */}
+        {tiers.length > 0 && (
+          <div className="space-y-1">
+            {tiers.map((tier, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-[#4b5563]">
+                <span className="font-medium">{tier.label}</span>
+                <span className="text-[#9ca3af]">—</span>
+                <span className="font-semibold text-[#2a351f]">{tier.priceLabel}</span>
+                {tier.compareAtPriceLabel && (
+                  <span className="text-[#9ca3af] line-through">{tier.compareAtPriceLabel}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add-ons */}
+        {addOns.length > 0 && (
+          <div className="border-t border-[#d4e8d4] pt-3 mt-3">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#5e8b4a]">Add-ons</p>
+            <div className="space-y-1">
+              {addOns.map((addOn, i) => (
+                <div key={i} className="text-xs text-[#4b5563]">
+                  <span className="font-medium">{addOn.name}</span>
+                  {addOn.priceLabel && (
+                    <span className="text-[#9ca3af]"> · {addOn.priceLabel}</span>
+                  )}
+                  {addOn.description && (
+                    <p className="text-[#9ca3af] mt-0.5">{addOn.description}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {item.description && (
           <p className="flex-1 text-sm leading-relaxed text-[#6b7280]">
             {item.description}

@@ -28,6 +28,15 @@ const pollenSpaFields: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
+  {
+    key: "pollen-spa.hero-video",
+    label: "Hero Background Video",
+    description: "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
+    type: "video",
+    page: "homepage",
+    group: "pollen-spa.hero",
+    gridColumn: "col-span-full",
+  },
 
   // Intro section
   {
@@ -74,6 +83,15 @@ const pollenSpaFields: TemplateField[] = [
     group: "pollen-spa.intro",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "pollen-spa.intro-video",
+    label: "Intro Accent Video",
+    description: "Optional video for the intro accent column; takes precedence over the accent image when set.",
+    type: "video",
+    page: "homepage",
+    group: "pollen-spa.intro",
+    gridColumn: "col-span-full",
   },
 
   // Items section heading
@@ -122,6 +140,25 @@ const pollenSpaFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/contact",
     placeholder: "/contact",
+  },
+  {
+    key: "pollen-spa.cta-embed",
+    label: "Booking Embed",
+    description: "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
+    type: "iframe",
+    page: "homepage",
+    group: "pollen-spa.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "pollen-spa.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "pollen-spa.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
   },
 ];
 
@@ -188,6 +225,15 @@ const pollenBloomFields: TemplateField[] = [
     minItems: 0,
     maxItems: 4,
   },
+  {
+    key: "pollen-bloom.hero-video",
+    label: "Hero Video Band",
+    description: "Optional background video; takes precedence over the hero image. Displayed as a full-width band before the gallery when set.",
+    type: "video",
+    page: "homepage",
+    group: "pollen-bloom.gallery",
+    gridColumn: "col-span-full",
+  },
 
   // Intro
   {
@@ -222,6 +268,24 @@ const pollenBloomFields: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "Share the philosophy behind your services...",
+  },
+  {
+    key: "pollen-bloom.intro-image",
+    label: "Intro Accent Image",
+    description: "Optional supporting image shown below the intro text.",
+    type: "image",
+    page: "homepage",
+    group: "pollen-bloom.intro",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "pollen-bloom.intro-video",
+    label: "Intro Accent Video",
+    description: "Optional video shown in the intro section; takes precedence over the intro image when set.",
+    type: "video",
+    page: "homepage",
+    group: "pollen-bloom.intro",
+    gridColumn: "col-span-full",
   },
 
   // Items heading
@@ -259,6 +323,25 @@ const pollenBloomFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/contact",
     placeholder: "/contact",
+  },
+  {
+    key: "pollen-bloom.cta-embed",
+    label: "Booking Embed",
+    description: "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
+    type: "iframe",
+    page: "homepage",
+    group: "pollen-bloom.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "pollen-bloom.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "pollen-bloom.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
   },
 ];
 
@@ -309,6 +392,15 @@ const pollenListFields: TemplateField[] = [
     defaultValue: "#5e8b4a",
     placeholder: "#5e8b4a",
   },
+  {
+    key: "pollen-list.hero-video",
+    label: "Hero Background Video",
+    description: "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
+    type: "video",
+    page: "homepage",
+    group: "pollen-list.hero",
+    gridColumn: "col-span-full",
+  },
 
   // Intro
   {
@@ -344,6 +436,24 @@ const pollenListFields: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "Introduce this service category...",
+  },
+  {
+    key: "pollen-list.intro-image",
+    label: "Intro Accent Image",
+    description: "Optional supporting image shown beside or below the intro text.",
+    type: "image",
+    page: "homepage",
+    group: "pollen-list.intro",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "pollen-list.intro-video",
+    label: "Intro Accent Video",
+    description: "Optional video for the intro section; takes precedence over the intro image when set.",
+    type: "video",
+    page: "homepage",
+    group: "pollen-list.intro",
+    gridColumn: "col-span-full",
   },
 
   // Items section heading
@@ -381,6 +491,25 @@ const pollenListFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/contact",
     placeholder: "/contact",
+  },
+  {
+    key: "pollen-list.cta-embed",
+    label: "Booking Embed",
+    description: "Optional iframe embed (e.g. booking widget) shown in the closing CTA band.",
+    type: "iframe",
+    page: "homepage",
+    group: "pollen-list.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "pollen-list.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "pollen-list.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
   },
 ];
 
