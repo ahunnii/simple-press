@@ -1,3 +1,4 @@
+import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -248,7 +249,14 @@ export const serviceRouter = createTRPCRouter({
     .input(serviceItemCreateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { serviceId, bookingEmbedSrc, bookingEmbedHeight, ...rest } = input;
+      const {
+        serviceId,
+        bookingEmbedSrc,
+        bookingEmbedHeight,
+        priceTiers,
+        addOns,
+        ...rest
+      } = input;
 
       // Re-validate parent service ownership
       const service = await ctx.db.service.findUnique({
@@ -296,6 +304,8 @@ export const serviceRouter = createTRPCRouter({
           businessId,
           bookingEmbedSrc: safeSrc,
           bookingEmbedHeight: safeHeight,
+          priceTiers: (priceTiers ?? []) as Prisma.InputJsonValue,
+          addOns: (addOns ?? []) as Prisma.InputJsonValue,
           sortOrder: (maxSort?.sortOrder ?? 0) + 1,
         },
       });
@@ -308,7 +318,14 @@ export const serviceRouter = createTRPCRouter({
     .input(serviceItemUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { id, bookingEmbedSrc, bookingEmbedHeight, ...rest } = input;
+      const {
+        id,
+        bookingEmbedSrc,
+        bookingEmbedHeight,
+        priceTiers,
+        addOns,
+        ...rest
+      } = input;
 
       // Re-validate item ownership via parent service
       const item = await ctx.db.serviceItem.findUnique({
@@ -351,6 +368,8 @@ export const serviceRouter = createTRPCRouter({
         where: { id },
         data: {
           ...rest,
+          priceTiers: (priceTiers ?? []) as Prisma.InputJsonValue,
+          addOns: (addOns ?? []) as Prisma.InputJsonValue,
           ...(safeSrc !== undefined ? { bookingEmbedSrc: safeSrc } : {}),
           ...(safeHeight !== undefined
             ? { bookingEmbedHeight: safeHeight }

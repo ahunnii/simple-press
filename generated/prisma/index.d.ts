@@ -21681,6 +21681,7 @@ export namespace Prisma {
     image: string | null
     priceLabel: string | null
     durationLabel: string | null
+    compareAtPriceLabel: string | null
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
     published: boolean | null
@@ -21698,6 +21699,7 @@ export namespace Prisma {
     image: string | null
     priceLabel: string | null
     durationLabel: string | null
+    compareAtPriceLabel: string | null
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
     published: boolean | null
@@ -21715,6 +21717,9 @@ export namespace Prisma {
     image: number
     priceLabel: number
     durationLabel: number
+    compareAtPriceLabel: number
+    priceTiers: number
+    addOns: number
     bookingEmbedSrc: number
     bookingEmbedHeight: number
     published: number
@@ -21744,6 +21749,7 @@ export namespace Prisma {
     image?: true
     priceLabel?: true
     durationLabel?: true
+    compareAtPriceLabel?: true
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
     published?: true
@@ -21761,6 +21767,7 @@ export namespace Prisma {
     image?: true
     priceLabel?: true
     durationLabel?: true
+    compareAtPriceLabel?: true
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
     published?: true
@@ -21778,6 +21785,9 @@ export namespace Prisma {
     image?: true
     priceLabel?: true
     durationLabel?: true
+    compareAtPriceLabel?: true
+    priceTiers?: true
+    addOns?: true
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
     published?: true
@@ -21882,6 +21892,9 @@ export namespace Prisma {
     image: string | null
     priceLabel: string | null
     durationLabel: string | null
+    compareAtPriceLabel: string | null
+    priceTiers: JsonValue | null
+    addOns: JsonValue | null
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
     published: boolean
@@ -21918,6 +21931,9 @@ export namespace Prisma {
     image?: boolean
     priceLabel?: boolean
     durationLabel?: boolean
+    compareAtPriceLabel?: boolean
+    priceTiers?: boolean
+    addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     published?: boolean
@@ -21936,6 +21952,9 @@ export namespace Prisma {
     image?: boolean
     priceLabel?: boolean
     durationLabel?: boolean
+    compareAtPriceLabel?: boolean
+    priceTiers?: boolean
+    addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     published?: boolean
@@ -21954,6 +21973,9 @@ export namespace Prisma {
     image?: boolean
     priceLabel?: boolean
     durationLabel?: boolean
+    compareAtPriceLabel?: boolean
+    priceTiers?: boolean
+    addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     published?: boolean
@@ -21972,6 +21994,9 @@ export namespace Prisma {
     image?: boolean
     priceLabel?: boolean
     durationLabel?: boolean
+    compareAtPriceLabel?: boolean
+    priceTiers?: boolean
+    addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     published?: boolean
@@ -21980,7 +22005,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "bookingEmbedSrc" | "bookingEmbedHeight" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
+  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "compareAtPriceLabel" | "priceTiers" | "addOns" | "bookingEmbedSrc" | "bookingEmbedHeight" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
   export type ServiceItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     service?: boolean | ServiceDefaultArgs<ExtArgs>
   }
@@ -22005,6 +22030,9 @@ export namespace Prisma {
       image: string | null
       priceLabel: string | null
       durationLabel: string | null
+      compareAtPriceLabel: string | null
+      priceTiers: Prisma.JsonValue | null
+      addOns: Prisma.JsonValue | null
       bookingEmbedSrc: string | null
       bookingEmbedHeight: number | null
       published: boolean
@@ -22443,6 +22471,9 @@ export namespace Prisma {
     readonly image: FieldRef<"ServiceItem", 'String'>
     readonly priceLabel: FieldRef<"ServiceItem", 'String'>
     readonly durationLabel: FieldRef<"ServiceItem", 'String'>
+    readonly compareAtPriceLabel: FieldRef<"ServiceItem", 'String'>
+    readonly priceTiers: FieldRef<"ServiceItem", 'Json'>
+    readonly addOns: FieldRef<"ServiceItem", 'Json'>
     readonly bookingEmbedSrc: FieldRef<"ServiceItem", 'String'>
     readonly bookingEmbedHeight: FieldRef<"ServiceItem", 'Int'>
     readonly published: FieldRef<"ServiceItem", 'Boolean'>
@@ -50985,6 +51016,9 @@ export namespace Prisma {
     image: 'image',
     priceLabel: 'priceLabel',
     durationLabel: 'durationLabel',
+    compareAtPriceLabel: 'compareAtPriceLabel',
+    priceTiers: 'priceTiers',
+    addOns: 'addOns',
     bookingEmbedSrc: 'bookingEmbedSrc',
     bookingEmbedHeight: 'bookingEmbedHeight',
     published: 'published',
@@ -53102,6 +53136,9 @@ export namespace Prisma {
     image?: StringNullableFilter<"ServiceItem"> | string | null
     priceLabel?: StringNullableFilter<"ServiceItem"> | string | null
     durationLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    compareAtPriceLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    priceTiers?: JsonNullableFilter<"ServiceItem">
+    addOns?: JsonNullableFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
     published?: BoolFilter<"ServiceItem"> | boolean
@@ -53120,6 +53157,9 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     priceLabel?: SortOrderInput | SortOrder
     durationLabel?: SortOrderInput | SortOrder
+    compareAtPriceLabel?: SortOrderInput | SortOrder
+    priceTiers?: SortOrderInput | SortOrder
+    addOns?: SortOrderInput | SortOrder
     bookingEmbedSrc?: SortOrderInput | SortOrder
     bookingEmbedHeight?: SortOrderInput | SortOrder
     published?: SortOrder
@@ -53141,6 +53181,9 @@ export namespace Prisma {
     image?: StringNullableFilter<"ServiceItem"> | string | null
     priceLabel?: StringNullableFilter<"ServiceItem"> | string | null
     durationLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    compareAtPriceLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    priceTiers?: JsonNullableFilter<"ServiceItem">
+    addOns?: JsonNullableFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
     published?: BoolFilter<"ServiceItem"> | boolean
@@ -53159,6 +53202,9 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     priceLabel?: SortOrderInput | SortOrder
     durationLabel?: SortOrderInput | SortOrder
+    compareAtPriceLabel?: SortOrderInput | SortOrder
+    priceTiers?: SortOrderInput | SortOrder
+    addOns?: SortOrderInput | SortOrder
     bookingEmbedSrc?: SortOrderInput | SortOrder
     bookingEmbedHeight?: SortOrderInput | SortOrder
     published?: SortOrder
@@ -53184,6 +53230,9 @@ export namespace Prisma {
     image?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
     priceLabel?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
     durationLabel?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    compareAtPriceLabel?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    priceTiers?: JsonNullableWithAggregatesFilter<"ServiceItem">
+    addOns?: JsonNullableWithAggregatesFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableWithAggregatesFilter<"ServiceItem"> | number | null
     published?: BoolWithAggregatesFilter<"ServiceItem"> | boolean
@@ -57167,6 +57216,9 @@ export namespace Prisma {
     image?: string | null
     priceLabel?: string | null
     durationLabel?: string | null
+    compareAtPriceLabel?: string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     published?: boolean
@@ -57184,6 +57236,9 @@ export namespace Prisma {
     image?: string | null
     priceLabel?: string | null
     durationLabel?: string | null
+    compareAtPriceLabel?: string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     published?: boolean
@@ -57201,6 +57256,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -57218,6 +57276,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -57235,6 +57296,9 @@ export namespace Prisma {
     image?: string | null
     priceLabel?: string | null
     durationLabel?: string | null
+    compareAtPriceLabel?: string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     published?: boolean
@@ -57252,6 +57316,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -57268,6 +57335,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -61172,6 +61242,9 @@ export namespace Prisma {
     image?: SortOrder
     priceLabel?: SortOrder
     durationLabel?: SortOrder
+    compareAtPriceLabel?: SortOrder
+    priceTiers?: SortOrder
+    addOns?: SortOrder
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
     published?: SortOrder
@@ -61194,6 +61267,7 @@ export namespace Prisma {
     image?: SortOrder
     priceLabel?: SortOrder
     durationLabel?: SortOrder
+    compareAtPriceLabel?: SortOrder
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
     published?: SortOrder
@@ -61211,6 +61285,7 @@ export namespace Prisma {
     image?: SortOrder
     priceLabel?: SortOrder
     durationLabel?: SortOrder
+    compareAtPriceLabel?: SortOrder
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
     published?: SortOrder
@@ -70665,6 +70740,9 @@ export namespace Prisma {
     image?: string | null
     priceLabel?: string | null
     durationLabel?: string | null
+    compareAtPriceLabel?: string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     published?: boolean
@@ -70681,6 +70759,9 @@ export namespace Prisma {
     image?: string | null
     priceLabel?: string | null
     durationLabel?: string | null
+    compareAtPriceLabel?: string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     published?: boolean
@@ -70855,6 +70936,9 @@ export namespace Prisma {
     image?: StringNullableFilter<"ServiceItem"> | string | null
     priceLabel?: StringNullableFilter<"ServiceItem"> | string | null
     durationLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    compareAtPriceLabel?: StringNullableFilter<"ServiceItem"> | string | null
+    priceTiers?: JsonNullableFilter<"ServiceItem">
+    addOns?: JsonNullableFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
     published?: BoolFilter<"ServiceItem"> | boolean
@@ -80417,6 +80501,9 @@ export namespace Prisma {
     image?: string | null
     priceLabel?: string | null
     durationLabel?: string | null
+    compareAtPriceLabel?: string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     published?: boolean
@@ -80433,6 +80520,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -80449,6 +80539,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean
@@ -80465,6 +80558,9 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    compareAtPriceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceTiers?: NullableJsonNullValueInput | InputJsonValue
+    addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     published?: BoolFieldUpdateOperationsInput | boolean

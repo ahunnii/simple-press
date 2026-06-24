@@ -23,10 +23,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
+import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import { serviceItemFormSchema } from "~/lib/validators/services";
 import { api } from "~/trpc/react";
 import {
@@ -199,7 +200,10 @@ function ServiceItemFormDialog({
       description: item?.description ?? "",
       image: item?.image ?? undefined,
       priceLabel: item?.priceLabel ?? "",
+      compareAtPriceLabel: item?.compareAtPriceLabel ?? "",
       durationLabel: item?.durationLabel ?? "",
+      priceTiers: (item?.priceTiers as ServicePriceTier[] | null) ?? [],
+      addOns: (item?.addOns as ServiceAddOn[] | null) ?? [],
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
@@ -216,13 +220,28 @@ function ServiceItemFormDialog({
       description: item?.description ?? "",
       image: item?.image ?? undefined,
       priceLabel: item?.priceLabel ?? "",
+      compareAtPriceLabel: item?.compareAtPriceLabel ?? "",
       durationLabel: item?.durationLabel ?? "",
+      priceTiers: (item?.priceTiers as ServicePriceTier[] | null) ?? [],
+      addOns: (item?.addOns as ServiceAddOn[] | null) ?? [],
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item]);
+
+  const {
+    fields: tierFields,
+    append: appendTier,
+    remove: removeTier,
+  } = useFieldArray({ control: form.control, name: "priceTiers" });
+
+  const {
+    fields: addOnFields,
+    append: appendAddOn,
+    remove: removeAddOn,
+  } = useFieldArray({ control: form.control, name: "addOns" });
 
   const addMutation = api.services.addItem.useMutation({
     onSuccess: () => {
@@ -251,7 +270,10 @@ function ServiceItemFormDialog({
         description: data.description,
         image: data.image,
         priceLabel: data.priceLabel,
+        compareAtPriceLabel: data.compareAtPriceLabel,
         durationLabel: data.durationLabel,
+        priceTiers: data.priceTiers,
+        addOns: data.addOns,
         bookingEmbedSrc: data.bookingEmbedSrc,
         bookingEmbedHeight: data.bookingEmbedHeight,
         published: data.published ?? false,
@@ -263,7 +285,10 @@ function ServiceItemFormDialog({
         description: data.description,
         image: data.image,
         priceLabel: data.priceLabel,
+        compareAtPriceLabel: data.compareAtPriceLabel,
         durationLabel: data.durationLabel,
+        priceTiers: data.priceTiers,
+        addOns: data.addOns,
         bookingEmbedSrc: data.bookingEmbedSrc,
         bookingEmbedHeight: data.bookingEmbedHeight,
         published: data.published ?? false,
@@ -369,6 +394,225 @@ function ServiceItemFormDialog({
                   </FormItem>
                 )}
               />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="compareAtPriceLabel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Was / compare-at price</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. $120 (was)"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Price tiers */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium leading-none">
+                  Price options
+                </p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Alternate prices for different groups (membership, annual,
+                  etc.).
+                </p>
+              </div>
+
+              {tierFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="border-border bg-muted/50 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
+                >
+                  <FormField
+                    control={form.control}
+                    name={`priceTiers.${index}.label`}
+                    render={({ field: f }) => (
+                      <FormItem className="min-w-0 flex-1">
+                        <FormLabel className="text-muted-foreground text-xs">
+                          Label
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Members" {...f} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`priceTiers.${index}.priceLabel`}
+                    render={({ field: f }) => (
+                      <FormItem className="min-w-0 flex-1">
+                        <FormLabel className="text-muted-foreground text-xs">
+                          Price
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. $70" {...f} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`priceTiers.${index}.compareAtPriceLabel`}
+                    render={({ field: f }) => (
+                      <FormItem className="min-w-0 flex-1">
+                        <FormLabel className="text-muted-foreground text-xs">
+                          Was (optional)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. $90"
+                            value={f.value ?? ""}
+                            onChange={f.onChange}
+                            onBlur={f.onBlur}
+                            name={f.name}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive/80 shrink-0"
+                    aria-label="Remove price tier"
+                    onClick={() => removeTier(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+
+              {tierFields.length < 8 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendTier({
+                      label: "",
+                      priceLabel: "",
+                      compareAtPriceLabel: "",
+                    })
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add tier
+                </Button>
+              )}
+            </div>
+
+            {/* Add-ons */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium leading-none">Add-ons</p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  Optional extras shown under this service.
+                </p>
+              </div>
+
+              {addOnFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="border-border bg-muted/50 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
+                >
+                  <FormField
+                    control={form.control}
+                    name={`addOns.${index}.name`}
+                    render={({ field: f }) => (
+                      <FormItem className="min-w-0 flex-[2]">
+                        <FormLabel className="text-muted-foreground text-xs">
+                          Name
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Hot stones" {...f} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`addOns.${index}.priceLabel`}
+                    render={({ field: f }) => (
+                      <FormItem className="min-w-0 flex-1">
+                        <FormLabel className="text-muted-foreground text-xs">
+                          Price
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g. +$20"
+                            value={f.value ?? ""}
+                            onChange={f.onChange}
+                            onBlur={f.onBlur}
+                            name={f.name}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`addOns.${index}.description`}
+                    render={({ field: f }) => (
+                      <FormItem className="min-w-0 flex-[2]">
+                        <FormLabel className="text-muted-foreground text-xs">
+                          Description
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Optional"
+                            value={f.value ?? ""}
+                            onChange={f.onChange}
+                            onBlur={f.onBlur}
+                            name={f.name}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:text-destructive/80 shrink-0"
+                    aria-label="Remove add-on"
+                    onClick={() => removeAddOn(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+
+              {addOnFields.length < 12 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    appendAddOn({ name: "", priceLabel: "", description: "" })
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add add-on
+                </Button>
+              )}
             </div>
 
             {/* Booking embed */}

@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 
+import { EmbedFrame } from "~/components/embed-frame";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
+
+type EmbedValue = {
+  src: string;
+  height: number;
+  title: string;
+};
 
 type Props = {
   contactImage?: string;
@@ -14,6 +22,10 @@ type Props = {
   email: string;
   buttonLabel?: string;
   buttonHref?: string;
+  /** Parsed iframe value from parseTemplateIframeValue. */
+  embed?: EmbedValue | null;
+  /** When false, render a plain external-link fallback instead of the iframe. */
+  embedsEnabled?: boolean;
 };
 
 export function ViiContactCtaSection({
@@ -25,6 +37,8 @@ export function ViiContactCtaSection({
   email,
   buttonLabel,
   buttonHref,
+  embed,
+  embedsEnabled,
 }: Props) {
   const { ref, visible } = useViiReveal(0.08);
 
@@ -74,6 +88,7 @@ export function ViiContactCtaSection({
           zIndex: 1,
           maxWidth: 680,
           textAlign: "center",
+          width: "100%",
         }}
       >
         {heading && (
@@ -136,6 +151,39 @@ export function ViiContactCtaSection({
             >
               {buttonLabel}
             </a>
+          </div>
+        )}
+
+        {/* Embed — iframe when enabled, external-link fallback when not */}
+        {embed && (
+          <div style={{ marginBottom: 28 }}>
+            {embedsEnabled ? (
+              <EmbedFrame
+                src={embed.src}
+                height={embed.height}
+                title={embed.title || "Book"}
+              />
+            ) : (
+              <a
+                href={embed.src}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-block",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 13,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-paper)",
+                  background: "var(--vii-copper-deep)",
+                  padding: "16px 36px",
+                  borderRadius: "var(--radius, 0.2rem)",
+                  textDecoration: "none",
+                }}
+              >
+                {embed.title || "Book"}
+              </a>
+            )}
           </div>
         )}
 

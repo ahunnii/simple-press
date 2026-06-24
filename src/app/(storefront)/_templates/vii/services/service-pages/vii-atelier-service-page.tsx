@@ -10,25 +10,60 @@
  * gallery from the list. Booking lives in an inline right-aligned CTA per row.
  *
  * Layout:
- * 1. Masonry-inspired mosaic gallery (up to 5 owner images) on navy.
+ * 1. Optional full-width hero video panel above the mosaic (when set). When no
+ *    video is configured, the masonry mosaic is the primary hero as before.
+ * 2. Masonry-inspired mosaic gallery (up to 5 owner images) on navy.
  *    Service name in oversized serif overlays the bottom-left cell.
- * 2. Pull-quote / brand statement block (dark navy band, large italic serif).
- * 3. Refined treatment list — two columns (name/meta + description/book).
- *    Thin 1px tan rules between rows. No card borders, no shadows.
- * 4. Closing CTA (reuses ViiContactCtaSection).
+ * 3. Pull-quote / brand statement block (dark navy band, large italic serif)
+ *    with optional media (image or video) beneath the quote.
+ * 4. Refined treatment list — two columns (name/meta + description/book).
+ *    Thin 1px tan rules between rows. Each row shows compare-at, tiers, and
+ *    add-ons alongside the standard price chip.
+ * 5. Closing CTA (reuses ViiContactCtaSection) with optional button + embed.
  */
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import { parseTemplateListRows } from "~/lib/template-fields";
+import { parseTemplateIframeValue, parseTemplateListRows } from "~/lib/template-fields";
+import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
+import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
 import { resolveAtelierFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
+
+/**
+ * When a hero video is configured it renders as a large full-width panel above
+ * the mosaic — the mosaic still renders beneath it as the secondary gallery.
+ * When no video is set the mosaic is the primary (and only) hero element.
+ */
+function AtelierHeroVideo({ src }: { src: string }) {
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "clamp(320px, 50vw, 640px)",
+        background: "var(--vii-navy)",
+        overflow: "hidden",
+      }}
+    >
+      <ServiceHeroVideo src={src} buttonClassName="vii-atelier-video-btn" />
+      <style>{`
+        .vii-atelier-video-btn {
+          border-color: color-mix(in srgb, var(--vii-paper) 50%, transparent) !important;
+          background: color-mix(in srgb, var(--vii-navy) 55%, transparent) !important;
+          color: var(--vii-paper) !important;
+        }
+      `}</style>
+    </div>
+  );
+}
 
 /**
  * Mosaic gallery: up to 5 images in a CSS grid.
@@ -196,11 +231,16 @@ function AtelierMosaic({
 function PullQuote({
   quote,
   attribution,
+  quoteImageSrc,
+  quoteVideoSrc,
 }: {
   quote: string;
   attribution: string;
+  quoteImageSrc?: string;
+  quoteVideoSrc?: string;
 }) {
   const { ref, visible } = useViiReveal(0.08);
+  const { ref: mediaRef, visible: mediaVisible } = useViiReveal(0.1);
 
   if (!quote) return null;
 
@@ -265,6 +305,24 @@ function PullQuote({
           </p>
         )}
       </div>
+
+      {/* Optional media beneath the quote — contained within the navy band */}
+      <div
+        ref={mediaRef}
+        className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+      >
+        <ServiceSectionMedia
+          imageSrc={quoteImageSrc}
+          videoSrc={quoteVideoSrc}
+          alt=""
+          rounded={false}
+          style={{
+            maxWidth: 760,
+            margin: "clamp(40px, 6vw, 64px) auto 0",
+            aspectRatio: "16/9",
+          }}
+        />
+      </div>
     </section>
   );
 }
@@ -279,6 +337,9 @@ function TreatmentListRow({
   isLast: boolean;
 }) {
   const { ref, visible } = useViiReveal(0.1);
+
+  const priceTiers = parseServicePriceTiers(item.priceTiers);
+  const addOns = parseServiceAddOns(item.addOns);
 
   return (
     <div
@@ -308,8 +369,8 @@ function TreatmentListRow({
           {item.name}
         </h3>
 
-        {/* Duration + price */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {/* Duration + compare-at + price chips */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
           {item.durationLabel && (
             <span
               style={{
@@ -324,6 +385,21 @@ function TreatmentListRow({
               }}
             >
               {item.durationLabel}
+            </span>
+          )}
+          {item.compareAtPriceLabel && (
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 10,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                textDecoration: "line-through",
+                opacity: 0.6,
+              }}
+            >
+              {item.compareAtPriceLabel}
             </span>
           )}
           {item.priceLabel && (
@@ -344,15 +420,73 @@ function TreatmentListRow({
             </span>
           )}
         </div>
+
+        {/* Price tiers */}
+        {priceTiers.length > 0 && (
+          <div style={{ marginTop: 14 }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 6,
+              }}
+            >
+              Pricing
+            </p>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
+              {priceTiers.map((tier, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{tier.label}</span>
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "var(--vii-copper-light)", flexShrink: 0 }}
+                  >
+                    —
+                  </span>
+                  {tier.compareAtPriceLabel && (
+                    <span style={{ textDecoration: "line-through", opacity: 0.55 }}>
+                      {tier.compareAtPriceLabel}
+                    </span>
+                  )}
+                  <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                    {tier.priceLabel}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      {/* Right: description + book */}
+      {/* Right: description + add-ons + book */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          gap: 18,
+          gap: 16,
         }}
       >
         {item.description && (
@@ -367,6 +501,72 @@ function TreatmentListRow({
           >
             {item.description}
           </p>
+        )}
+
+        {/* Add-ons */}
+        {addOns.length > 0 && (
+          <div>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 6,
+              }}
+            >
+              Add-ons
+            </p>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              {addOns.map((addon, i) => (
+                <li
+                  key={i}
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{addon.name}</span>
+                  {addon.priceLabel && (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        style={{ margin: "0 4px", color: "var(--vii-copper-light)" }}
+                      >
+                        ·
+                      </span>
+                      <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                        {addon.priceLabel}
+                      </span>
+                    </>
+                  )}
+                  {addon.description && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 11,
+                        opacity: 0.65,
+                        marginTop: 1,
+                      }}
+                    >
+                      {addon.description}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {/* Inline book — very minimal text link style */}
@@ -432,44 +632,58 @@ export function ViiAtelierServicePage({
   items,
   embedsEnabled,
 }: ServiceTemplateProps) {
+  const cf = service.customFields as Record<string, unknown> | null | undefined;
+
   const f = resolveAtelierFields(service.customFields, [
+    "vii-atelier.hero-video",
     "vii-atelier.hero-overline",
     "vii-atelier.pull-quote",
     "vii-atelier.pull-quote-attribution",
+    "vii-atelier.quote-image",
+    "vii-atelier.quote-video",
     "vii-atelier.list-heading",
     "vii-atelier.list-intro",
     "vii-atelier.cta-image",
     "vii-atelier.cta-heading",
     "vii-atelier.cta-subheading",
     "vii-atelier.cta-body",
+    "vii-atelier.cta-button-label",
+    "vii-atelier.cta-button-url",
+    "vii-atelier.cta-embed",
   ]);
 
   // Parse gallery images from the list field
-  const galleryRows = parseTemplateListRows(
-    (service.customFields as Record<string, unknown> | null | undefined)?.[
-      "vii-atelier.gallery"
-    ],
-  );
+  const galleryRows = parseTemplateListRows(cf?.["vii-atelier.gallery"]);
   const galleryImages = galleryRows
     .map((r) => (typeof r.image === "string" ? r.image : ""))
     .filter(Boolean)
     .slice(0, 5);
 
+  // Parse CTA embed
+  const ctaEmbed = parseTemplateIframeValue(f["vii-atelier.cta-embed"]);
+
+  const heroVideoSrc = f["vii-atelier.hero-video"] ?? "";
+
   const publishedItems = items.filter((it) => it.published !== false);
 
   return (
     <PageTransition>
-      {/* 1. Mosaic gallery hero */}
+      {/* 1a. Optional hero video — full-width panel above the mosaic */}
+      {heroVideoSrc && <AtelierHeroVideo src={heroVideoSrc} />}
+
+      {/* 1b. Mosaic gallery hero (always rendered; secondary when video is set) */}
       <AtelierMosaic
         galleryImages={galleryImages}
         serviceName={service.name}
         overline={f["vii-atelier.hero-overline"] ?? ""}
       />
 
-      {/* 2. Pull quote */}
+      {/* 2. Pull quote + optional media */}
       <PullQuote
         quote={f["vii-atelier.pull-quote"] ?? ""}
         attribution={f["vii-atelier.pull-quote-attribution"] ?? ""}
+        quoteImageSrc={f["vii-atelier.quote-image"] ?? ""}
+        quoteVideoSrc={f["vii-atelier.quote-video"] ?? ""}
       />
 
       {/* 3. Refined treatment list */}
@@ -490,6 +704,10 @@ export function ViiAtelierServicePage({
         body={f["vii-atelier.cta-body"] ?? ""}
         phone={business.phoneNumber ?? ""}
         email={business.supportEmail ?? ""}
+        buttonLabel={f["vii-atelier.cta-button-label"] ?? ""}
+        buttonHref={f["vii-atelier.cta-button-url"] ?? ""}
+        embed={ctaEmbed}
+        embedsEnabled={embedsEnabled}
       />
     </PageTransition>
   );
@@ -531,9 +749,9 @@ function AtelierList({
             borderBottom: "1px solid var(--vii-tan)",
             alignItems: "end",
           }}
-          id="atelier-list-heading"
         >
           <h2
+            id="atelier-list-heading"
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,

@@ -4,9 +4,14 @@ import Link from "next/link";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buttonVariants } from "~/components/ui/button";
+import { EmbedFrame } from "~/components/embed-frame";
 import { FadeIn } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { parseTemplateIframeValue } from "~/lib/template-fields";
+import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
+import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
+import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { PollenGeneralLayout } from "../../layout/pollen-general-layout";
 import { resolvePollenListFields } from "./fields";
@@ -26,9 +31,11 @@ type Props = {
  *
  * Layout:
  * 1. PollenGeneralLayout title-hero (service name + description)
- * 2. Narrow centered intro: label + heading + richtext
- * 3. Alternating left/right image + text rows for each service item
- * 4. Optional footer CTA
+ * 2. Optional hero video band
+ * 3. Accent stripe
+ * 4. Narrow centered intro: label + heading + richtext + optional media
+ * 5. Alternating left/right image + text rows for each service item
+ * 6. Optional footer CTA + embed
  */
 export function PollenListServicePage({
   business,
@@ -38,21 +45,31 @@ export function PollenListServicePage({
 }: Props) {
   const f = resolvePollenListFields(service.customFields, [
     "pollen-list.accent-color",
+    "pollen-list.hero-video",
     "pollen-list.intro-label",
     "pollen-list.intro-heading",
     "pollen-list.intro-body",
+    "pollen-list.intro-image",
+    "pollen-list.intro-video",
     "pollen-list.items-heading",
     "pollen-list.cta-text",
     "pollen-list.cta-link",
+    "pollen-list.cta-embed",
   ]);
 
   const accentColor = f["pollen-list.accent-color"] ?? "#5e8b4a";
+  const heroVideoSrc = f["pollen-list.hero-video"] ?? "";
   const introLabel = f["pollen-list.intro-label"] ?? "";
   const introHeading = f["pollen-list.intro-heading"] ?? "";
   const introBodyRaw = f["pollen-list.intro-body"];
+  const introImage = f["pollen-list.intro-image"] ?? "";
+  const introVideoSrc = f["pollen-list.intro-video"] ?? "";
   const itemsHeading = f["pollen-list.items-heading"] ?? "";
   const ctaText = f["pollen-list.cta-text"] ?? "";
   const ctaLink = f["pollen-list.cta-link"] ?? "";
+  const ctaEmbedRaw = f["pollen-list.cta-embed"] ?? "";
+
+  const embed = ctaEmbedRaw ? parseTemplateIframeValue(ctaEmbedRaw) : null;
 
   let introBodyJson: TiptapJSON | null = null;
   if (introBodyRaw) {
@@ -71,11 +88,18 @@ export function PollenListServicePage({
       title={service.name}
       subtitle={service.description ?? undefined}
     >
+      {/* ── Hero video band ─────────────────────────────────────────────── */}
+      {heroVideoSrc && (
+        <div className="relative min-h-[60vh] overflow-hidden">
+          <ServiceHeroVideo src={heroVideoSrc} />
+        </div>
+      )}
+
       {/* ── Accent stripe ────────────────────────────────────────────────── */}
       <div className="h-1.5 w-full" style={{ backgroundColor: accentColor }} />
 
       {/* ── Centered intro ───────────────────────────────────────────────── */}
-      {(introLabel || introHeading || introBodyRaw) && (
+      {(introLabel || introHeading || introImage || introVideoSrc || introBodyRaw) && (
         <section className="bg-white py-20 md:py-28">
           <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
             <FadeIn direction="up">
@@ -99,6 +123,17 @@ export function PollenListServicePage({
               )}
               {!introBodyJson && introBodyRaw && (
                 <p className="leading-relaxed text-[#4b5563]">{introBodyRaw}</p>
+              )}
+              {(introVideoSrc || introImage) && (
+                <div className="mt-8 mx-auto max-w-xl">
+                  <ServiceSectionMedia
+                    imageSrc={introImage || undefined}
+                    videoSrc={introVideoSrc || undefined}
+                    alt=""
+                    className="relative aspect-video overflow-hidden rounded-2xl shadow-sm"
+                    rounded={false}
+                  />
+                </div>
               )}
             </FadeIn>
           </div>
@@ -132,27 +167,58 @@ export function PollenListServicePage({
         </section>
       )}
 
-      {/* ── Footer CTA ───────────────────────────────────────────────────── */}
-      {ctaLink && ctaText && (
+      {/* ── Footer CTA + embed ──────────────────────────────────────────── */}
+      {((ctaLink && ctaText) || !!embed) && (
         <section className="bg-[#2a351f] py-16 md:py-20">
-          <FadeIn direction="up" className="mx-auto max-w-xl px-4 text-center">
-            <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
-              Ready to begin?
-            </p>
-            <h2 className="mb-8 text-2xl font-bold text-white md:text-3xl">
-              {service.name}
-            </h2>
-            <Link
-              href={ctaLink}
-              className={buttonVariants({
-                size: "lg",
-                className:
-                  "border border-[#d4e8d4] bg-transparent! text-white hover:bg-[#d4e8d4]/10!",
-              })}
-            >
-              {ctaText}
-            </Link>
-          </FadeIn>
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            {(ctaLink && ctaText) && (
+              <FadeIn direction="up" className="mb-10 text-center">
+                <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
+                  Ready to begin?
+                </p>
+                <h2 className="mb-8 text-2xl font-bold text-white md:text-3xl">
+                  {service.name}
+                </h2>
+                <Link
+                  href={ctaLink}
+                  className={buttonVariants({
+                    size: "lg",
+                    className:
+                      "border border-[#d4e8d4] bg-transparent! text-white hover:bg-[#d4e8d4]/10!",
+                  })}
+                >
+                  {ctaText}
+                </Link>
+              </FadeIn>
+            )}
+            {embed && (
+              <FadeIn direction="up">
+                {embedsEnabled ? (
+                  <EmbedFrame
+                    src={embed.src}
+                    height={embed.height}
+                    title={embed.title ?? "Book"}
+                    className="rounded-xl overflow-hidden"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <a
+                      href={embed.src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({
+                        variant: "outline",
+                        size: "lg",
+                        className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                      })}
+                    >
+                      {embed.title ?? "Book Now"} ↗
+                    </a>
+                  </div>
+                )}
+              </FadeIn>
+            )}
+          </div>
         </section>
       )}
     </PollenGeneralLayout>
@@ -211,12 +277,61 @@ function PollenListItemRow({
               {item.priceLabel}
             </span>
           )}
+          {item.compareAtPriceLabel && (
+            <span className="rounded-full bg-[#f0f4ee] px-3 py-0.5 text-xs text-[#9ca3af] line-through">
+              {item.compareAtPriceLabel}
+            </span>
+          )}
           {item.durationLabel && (
             <span className="rounded-full bg-[#f0f4ee] px-3 py-0.5 text-xs text-[#4b5563]">
               {item.durationLabel}
             </span>
           )}
         </div>
+
+        {/* Price tiers */}
+        {(() => {
+          const tiers = parseServicePriceTiers(item.priceTiers);
+          if (!tiers.length) return null;
+          return (
+            <div className="mb-4 space-y-1">
+              {tiers.map((tier, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs text-[#4b5563]">
+                  <span className="font-medium">{tier.label}</span>
+                  <span className="text-[#9ca3af]">—</span>
+                  <span className="font-semibold text-[#2a351f]">{tier.priceLabel}</span>
+                  {tier.compareAtPriceLabel && (
+                    <span className="text-[#9ca3af] line-through">{tier.compareAtPriceLabel}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* Add-ons */}
+        {(() => {
+          const addOns = parseServiceAddOns(item.addOns);
+          if (!addOns.length) return null;
+          return (
+            <div className="mb-4 border-t border-[#d4e8d4] pt-3">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#5e8b4a]">Add-ons</p>
+              <div className="space-y-1">
+                {addOns.map((addOn, i) => (
+                  <div key={i} className="text-xs text-[#4b5563]">
+                    <span className="font-medium">{addOn.name}</span>
+                    {addOn.priceLabel && (
+                      <span className="text-[#9ca3af]"> · {addOn.priceLabel}</span>
+                    )}
+                    {addOn.description && (
+                      <p className="text-[#9ca3af] mt-0.5">{addOn.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {item.description && (
           <p className="mb-8 max-w-prose leading-relaxed text-[#6b7280]">

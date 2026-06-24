@@ -1,7 +1,8 @@
 /**
  * Service template: service-one — Clean / Minimal
  *
- * Fields: intro heading, intro body (richtext), hero image, CTA text + link.
+ * Fields: intro heading, intro body (richtext), hero image, hero video,
+ * intro section media, CTA text + link + embed.
  * Adapts to the active storefront CSS variables (no fixed palette).
  */
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
@@ -18,6 +19,16 @@ export const serviceOneFields: TemplateField[] = [
     group: "service-one.hero",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "service-one.hero-video",
+    label: "Hero Video",
+    description:
+      "Optional background video (MP4). Takes precedence over the hero image.",
+    type: "video",
+    page: "homepage",
+    group: "service-one.hero",
+    gridColumn: "col-span-full",
   },
 
   // ── Intro ─────────────────────────────────────────────────────────────────
@@ -42,6 +53,25 @@ export const serviceOneFields: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "",
     placeholder: "Describe what this service involves...",
+  },
+  {
+    key: "service-one.intro-image",
+    label: "Intro Image",
+    description: "Optional image displayed beside the intro text",
+    type: "image",
+    page: "homepage",
+    group: "service-one.intro",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "service-one.intro-video",
+    label: "Intro Video",
+    description:
+      "Optional video displayed beside the intro text (MP4). Takes precedence over intro image.",
+    type: "video",
+    page: "homepage",
+    group: "service-one.intro",
+    gridColumn: "col-span-full",
   },
 
   // ── CTA ───────────────────────────────────────────────────────────────────
@@ -68,27 +98,40 @@ export const serviceOneFields: TemplateField[] = [
     defaultValue: "",
     placeholder: "https://example.com/book",
   },
+  {
+    key: "service-one.cta-embed",
+    label: "CTA Booking Embed",
+    description:
+      "Optional embedded booking widget shown in the closing CTA section (e.g. Calendly, Acuity)",
+    type: "iframe",
+    page: "homepage",
+    group: "service-one.cta",
+    gridColumn: "col-span-full",
+  },
 ];
 
 export const serviceOneFieldGroups: TemplateFieldGroup[] = [
   {
     id: "service-one.hero",
-    title: "Hero Image",
-    description: "Large banner image at the top of the service page",
+    title: "Hero Image & Video",
+    description:
+      "Large banner at the top of the service page. Video takes precedence when set.",
     icon: "🖼️",
     columns: 1,
   },
   {
     id: "service-one.intro",
     title: "Introduction",
-    description: "Heading and rich-text body describing this service",
+    description:
+      "Heading, rich-text body, and optional media for the intro section",
     icon: "📝",
     columns: 1,
   },
   {
     id: "service-one.cta",
     title: "Call to Action",
-    description: "Optional button linking visitors to a booking page",
+    description:
+      "Optional button and/or booking embed shown at the bottom of the page",
     icon: "👆",
     columns: 2,
   },

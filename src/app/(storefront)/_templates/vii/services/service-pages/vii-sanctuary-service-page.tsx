@@ -6,10 +6,12 @@
  * Layout:
  * 1. Full-viewport hero (video or image) with the service name arching over a
  *    dark navy scrim.
- * 2. Centred intro block — overline, split heading + italic accent, richtext body.
+ * 2. Centred intro block — overline, split heading + italic accent, richtext body,
+ *    optional section media (image or video).
  * 3. Benefits strip (icon-list row across a dark-navy band).
  * 4. Treatment menu — a 3-col card grid in cream. Each card: image, name,
- *    duration/price chips, description, and a copper "Book" CTA.
+ *    compare-at / duration / price chips, tier list, add-on list, description,
+ *    and a copper "Book" CTA.
  * 5. Closing contact CTA section (reuses ViiContactCtaSection).
  */
 import { useEffect, useRef, useState } from "react";
@@ -18,10 +20,12 @@ import { Pause, Play } from "lucide-react";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { parseTemplateListRows, parseTemplateRichtext } from "~/lib/template-fields";
+import { parseTemplateIframeValue, parseTemplateListRows, parseTemplateRichtext } from "~/lib/template-fields";
+import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
@@ -272,15 +276,20 @@ function SanctuaryIntro({
   headingAccent,
   bodyJson,
   bodyFallback,
+  introImageSrc,
+  introVideoSrc,
 }: {
   overline: string;
   heading: string;
   headingAccent: string;
   bodyJson: TiptapJSON | null;
   bodyFallback: string;
+  introImageSrc?: string;
+  introVideoSrc?: string;
 }) {
   const { ref: headRef, visible: headVisible } = useViiReveal(0.1);
   const { ref: bodyRef, visible: bodyVisible } = useViiReveal(0.1);
+  const { ref: mediaRef, visible: mediaVisible } = useViiReveal(0.1);
 
   if (!heading && !headingAccent && !bodyJson && !bodyFallback) return null;
 
@@ -367,6 +376,26 @@ function SanctuaryIntro({
             )}
           </div>
         )}
+
+        {/* Optional section media */}
+        {(Boolean(introImageSrc) || Boolean(introVideoSrc)) && (
+          <div
+            ref={mediaRef}
+            className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          >
+            <ServiceSectionMedia
+              imageSrc={introImageSrc}
+              videoSrc={introVideoSrc}
+              alt=""
+              style={{
+                marginTop: "clamp(32px, 5vw, 48px)",
+                maxWidth: 680,
+                margin: "clamp(32px, 5vw, 48px) auto 0",
+                aspectRatio: "16/9",
+              }}
+            />
+          </div>
+        )}
       </div>
     </section>
   );
@@ -446,6 +475,9 @@ function TreatmentCard({
 }) {
   const { ref, visible } = useViiReveal(0.1);
 
+  const priceTiers = parseServicePriceTiers(item.priceTiers);
+  const addOns = parseServiceAddOns(item.addOns);
+
   return (
     <article
       ref={ref}
@@ -504,14 +536,15 @@ function TreatmentCard({
           gap: 0,
         }}
       >
-        {/* Duration + price chips */}
-        {(item.durationLabel ?? item.priceLabel) && (
+        {/* Duration + price + compare-at chips */}
+        {(item.durationLabel ?? item.priceLabel ?? item.compareAtPriceLabel) && (
           <div
             style={{
               display: "flex",
               gap: 8,
               marginBottom: 12,
               flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
             {item.durationLabel && (
@@ -528,6 +561,21 @@ function TreatmentCard({
                 }}
               >
                 {item.durationLabel}
+              </span>
+            )}
+            {item.compareAtPriceLabel && (
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-ink-soft)",
+                  textDecoration: "line-through",
+                  opacity: 0.6,
+                }}
+              >
+                {item.compareAtPriceLabel}
               </span>
             )}
             {item.priceLabel && (
@@ -577,6 +625,143 @@ function TreatmentCard({
           </p>
         )}
 
+        {/* Price tiers */}
+        {priceTiers.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 6,
+              }}
+            >
+              Pricing
+            </p>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
+              {priceTiers.map((tier, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{tier.label}</span>
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "var(--vii-copper-light)", flexShrink: 0 }}
+                  >
+                    —
+                  </span>
+                  {tier.compareAtPriceLabel && (
+                    <span
+                      style={{
+                        textDecoration: "line-through",
+                        opacity: 0.55,
+                      }}
+                    >
+                      {tier.compareAtPriceLabel}
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      color: "var(--vii-navy)",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {tier.priceLabel}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Add-ons */}
+        {addOns.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 6,
+              }}
+            >
+              Add-ons
+            </p>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              {addOns.map((addon, i) => (
+                <li
+                  key={i}
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{addon.name}</span>
+                  {addon.priceLabel && (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          margin: "0 4px",
+                          color: "var(--vii-copper-light)",
+                        }}
+                      >
+                        ·
+                      </span>
+                      <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                        {addon.priceLabel}
+                      </span>
+                    </>
+                  )}
+                  {addon.description && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 11,
+                        opacity: 0.65,
+                        marginTop: 1,
+                      }}
+                    >
+                      {addon.description}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Book CTA — styled to match vii's copper button aesthetic */}
         <div style={{ marginTop: "auto" }}>
           <ViiBookButton
@@ -624,6 +809,8 @@ export function ViiSanctuaryServicePage({
   items,
   embedsEnabled,
 }: ServiceTemplateProps) {
+  const cf = service.customFields as Record<string, unknown> | null | undefined;
+
   const f = resolveSanctuaryFields(service.customFields, [
     "vii-sanctuary.hero-video",
     "vii-sanctuary.hero-image",
@@ -631,29 +818,29 @@ export function ViiSanctuaryServicePage({
     "vii-sanctuary.intro-overline",
     "vii-sanctuary.intro-heading",
     "vii-sanctuary.intro-heading-accent",
+    "vii-sanctuary.intro-image",
+    "vii-sanctuary.intro-video",
     "vii-sanctuary.menu-heading",
     "vii-sanctuary.cta-image",
     "vii-sanctuary.cta-heading",
     "vii-sanctuary.cta-subheading",
     "vii-sanctuary.cta-body",
+    "vii-sanctuary.cta-button-label",
+    "vii-sanctuary.cta-button-url",
+    "vii-sanctuary.cta-embed",
   ]);
 
   // Parse richtext body directly from service.customFields (bypasses string-only resolver)
-  const introBodyJson = parseTemplateRichtext(
-    (service.customFields as Record<string, unknown> | null | undefined)?.[
-      "vii-sanctuary.intro-body"
-    ],
-  );
+  const introBodyJson = parseTemplateRichtext(cf?.["vii-sanctuary.intro-body"]);
 
   // Parse benefits list
-  const benefitRows = parseTemplateListRows(
-    (service.customFields as Record<string, unknown> | null | undefined)?.[
-      "vii-sanctuary.benefits"
-    ],
-  );
+  const benefitRows = parseTemplateListRows(cf?.["vii-sanctuary.benefits"]);
   const benefits = benefitRows
     .map((r) => (typeof r.label === "string" ? r.label : ""))
     .filter(Boolean);
+
+  // Parse CTA embed
+  const ctaEmbed = parseTemplateIframeValue(f["vii-sanctuary.cta-embed"]);
 
   const publishedItems = items.filter((it) => it.published !== false);
 
@@ -675,6 +862,8 @@ export function ViiSanctuaryServicePage({
         headingAccent={f["vii-sanctuary.intro-heading-accent"] ?? ""}
         bodyJson={introBodyJson}
         bodyFallback=""
+        introImageSrc={f["vii-sanctuary.intro-image"] ?? ""}
+        introVideoSrc={f["vii-sanctuary.intro-video"] ?? ""}
       />
 
       {/* 3. Benefits strip */}
@@ -697,6 +886,10 @@ export function ViiSanctuaryServicePage({
         body={f["vii-sanctuary.cta-body"] ?? ""}
         phone={business.phoneNumber ?? ""}
         email={business.supportEmail ?? ""}
+        buttonLabel={f["vii-sanctuary.cta-button-label"] ?? ""}
+        buttonHref={f["vii-sanctuary.cta-button-url"] ?? ""}
+        embed={ctaEmbed}
+        embedsEnabled={embedsEnabled}
       />
     </PageTransition>
   );

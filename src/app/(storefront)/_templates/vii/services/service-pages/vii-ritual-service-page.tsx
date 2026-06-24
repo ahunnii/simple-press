@@ -11,19 +11,26 @@
  * Layout:
  * 1. Compact dark hero with the service name, a thin copper rule, and a
  *    brief description below — positioned centre-stage, not bottom-anchored.
- * 2. Rich-text "philosophy" block on cream (centered, italic accent).
+ *    Optional background video takes precedence over the image.
+ * 2. Rich-text "philosophy" block on cream (centered, italic accent) with
+ *    optional section media (image or video) beneath the body.
  * 3. Ritual steps — one per service item, alternating image/text sides.
- *    Each step contains the item name, duration/price, description, and Book.
- * 4. Full-bleed navy closing CTA with background image.
+ *    Each step contains the item name, compare-at / duration / price chips,
+ *    tier list, add-on list, description, and Book.
+ * 4. Full-bleed navy closing CTA with background image, optional button, and
+ *    optional booking embed.
  */
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { parseTemplateRichtext } from "~/lib/template-fields";
+import { parseTemplateIframeValue, parseTemplateRichtext } from "~/lib/template-fields";
+import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
+import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
@@ -32,16 +39,19 @@ import { resolveRitualFields } from "./fields";
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
 function RitualHero({
+  heroVideo,
   heroImage,
   overline,
   serviceName,
   serviceDescription,
 }: {
+  heroVideo?: string;
   heroImage?: string;
   overline: string;
   serviceName: string;
   serviceDescription?: string | null;
 }) {
+  const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
 
   return (
@@ -58,7 +68,13 @@ function RitualHero({
         background: "var(--vii-navy)",
       }}
     >
-      {hasImage ? (
+      {/* Background media — video takes precedence */}
+      {hasVideo ? (
+        <ServiceHeroVideo
+          src={heroVideo!}
+          buttonClassName="vii-ritual-video-btn"
+        />
+      ) : hasImage ? (
         <Image
           src={heroImage!}
           alt=""
@@ -157,6 +173,15 @@ function RitualHero({
           </p>
         )}
       </div>
+
+      {/* Style vii-ritual video toggle to match vii aesthetic */}
+      <style>{`
+        .vii-ritual-video-btn {
+          border-color: color-mix(in srgb, var(--vii-paper) 50%, transparent) !important;
+          background: color-mix(in srgb, var(--vii-navy) 55%, transparent) !important;
+          color: var(--vii-paper) !important;
+        }
+      `}</style>
     </section>
   );
 }
@@ -167,14 +192,19 @@ function RitualPhilosophy({
   headingAccent,
   bodyJson,
   bodyFallback,
+  philosophyImageSrc,
+  philosophyVideoSrc,
 }: {
   overline: string;
   heading: string;
   headingAccent: string;
   bodyJson: TiptapJSON | null;
   bodyFallback: string;
+  philosophyImageSrc?: string;
+  philosophyVideoSrc?: string;
 }) {
   const { ref, visible } = useViiReveal(0.1);
+  const { ref: mediaRef, visible: mediaVisible } = useViiReveal(0.1);
 
   if (!heading && !headingAccent && !bodyJson && !bodyFallback) return null;
 
@@ -253,6 +283,25 @@ function RitualPhilosophy({
           </p>
         ) : null}
       </div>
+
+      {/* Optional section media beneath the body */}
+      {(Boolean(philosophyImageSrc) || Boolean(philosophyVideoSrc)) && (
+        <div
+          ref={mediaRef}
+          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+        >
+          <ServiceSectionMedia
+            imageSrc={philosophyImageSrc}
+            videoSrc={philosophyVideoSrc}
+            alt=""
+            style={{
+              maxWidth: 680,
+              margin: "clamp(32px, 5vw, 48px) auto 0",
+              aspectRatio: "16/9",
+            }}
+          />
+        </div>
+      )}
     </section>
   );
 }
@@ -269,6 +318,9 @@ function RitualStep({
   const { ref, visible } = useViiReveal(0.1);
   const isReversed = index % 2 === 1;
   const stepNum = String(index + 1).padStart(2, "0");
+
+  const priceTiers = parseServicePriceTiers(item.priceTiers);
+  const addOns = parseServiceAddOns(item.addOns);
 
   return (
     <div
@@ -342,14 +394,15 @@ function RitualStep({
           order: isReversed ? 1 : 2,
         }}
       >
-        {/* Chips */}
-        {(item.durationLabel ?? item.priceLabel) && (
+        {/* Duration + price + compare-at chips */}
+        {(item.durationLabel ?? item.priceLabel ?? item.compareAtPriceLabel) && (
           <div
             style={{
               display: "flex",
               gap: 8,
               marginBottom: 20,
               flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
             {item.durationLabel && (
@@ -366,6 +419,21 @@ function RitualStep({
                 }}
               >
                 {item.durationLabel}
+              </span>
+            )}
+            {item.compareAtPriceLabel && (
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 10,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-ink-soft)",
+                  textDecoration: "line-through",
+                  opacity: 0.6,
+                }}
+              >
+                {item.compareAtPriceLabel}
               </span>
             )}
             {item.priceLabel && (
@@ -407,12 +475,136 @@ function RitualStep({
               fontSize: "clamp(14px, 1.3vw, 16px)",
               lineHeight: 1.8,
               color: "var(--vii-ink-soft)",
-              margin: "0 0 32px",
+              margin: "0 0 24px",
               maxWidth: 420,
             }}
           >
             {item.description}
           </p>
+        )}
+
+        {/* Price tiers */}
+        {priceTiers.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 6,
+              }}
+            >
+              Pricing
+            </p>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
+              {priceTiers.map((tier, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{tier.label}</span>
+                  <span
+                    aria-hidden="true"
+                    style={{ color: "var(--vii-copper-light)", flexShrink: 0 }}
+                  >
+                    —
+                  </span>
+                  {tier.compareAtPriceLabel && (
+                    <span style={{ textDecoration: "line-through", opacity: 0.55 }}>
+                      {tier.compareAtPriceLabel}
+                    </span>
+                  )}
+                  <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                    {tier.priceLabel}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Add-ons */}
+        {addOns.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                marginBottom: 6,
+              }}
+            >
+              Add-ons
+            </p>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
+              {addOns.map((addon, i) => (
+                <li
+                  key={i}
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{addon.name}</span>
+                  {addon.priceLabel && (
+                    <>
+                      <span
+                        aria-hidden="true"
+                        style={{ margin: "0 4px", color: "var(--vii-copper-light)" }}
+                      >
+                        ·
+                      </span>
+                      <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                        {addon.priceLabel}
+                      </span>
+                    </>
+                  )}
+                  {addon.description && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 11,
+                        opacity: 0.65,
+                        marginTop: 1,
+                      }}
+                    >
+                      {addon.description}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {/* Book button — copper ghost style */}
@@ -480,24 +672,31 @@ export function ViiRitualServicePage({
   items,
   embedsEnabled,
 }: ServiceTemplateProps) {
+  const cf = service.customFields as Record<string, unknown> | null | undefined;
+
   const f = resolveRitualFields(service.customFields, [
+    "vii-ritual.hero-video",
     "vii-ritual.hero-image",
     "vii-ritual.hero-overline",
     "vii-ritual.philosophy-overline",
     "vii-ritual.philosophy-heading",
     "vii-ritual.philosophy-heading-accent",
+    "vii-ritual.philosophy-image",
+    "vii-ritual.philosophy-video",
     "vii-ritual.cta-image",
     "vii-ritual.cta-heading",
     "vii-ritual.cta-subheading",
     "vii-ritual.cta-body",
+    "vii-ritual.cta-button-label",
+    "vii-ritual.cta-button-url",
+    "vii-ritual.cta-embed",
   ]);
 
   // Parse richtext philosophy body directly from service.customFields
-  const philosophyBodyJson = parseTemplateRichtext(
-    (service.customFields as Record<string, unknown> | null | undefined)?.[
-      "vii-ritual.philosophy-body"
-    ],
-  );
+  const philosophyBodyJson = parseTemplateRichtext(cf?.["vii-ritual.philosophy-body"]);
+
+  // Parse CTA embed
+  const ctaEmbed = parseTemplateIframeValue(f["vii-ritual.cta-embed"]);
 
   const publishedItems = items.filter((it) => it.published !== false);
 
@@ -505,6 +704,7 @@ export function ViiRitualServicePage({
     <PageTransition>
       {/* 1. Hero */}
       <RitualHero
+        heroVideo={f["vii-ritual.hero-video"] ?? ""}
         heroImage={f["vii-ritual.hero-image"] ?? undefined}
         overline={f["vii-ritual.hero-overline"] ?? ""}
         serviceName={service.name}
@@ -518,6 +718,8 @@ export function ViiRitualServicePage({
         headingAccent={f["vii-ritual.philosophy-heading-accent"] ?? ""}
         bodyJson={philosophyBodyJson}
         bodyFallback=""
+        philosophyImageSrc={f["vii-ritual.philosophy-image"] ?? ""}
+        philosophyVideoSrc={f["vii-ritual.philosophy-video"] ?? ""}
       />
 
       {/* 3. Ritual steps */}
@@ -543,6 +745,10 @@ export function ViiRitualServicePage({
         body={f["vii-ritual.cta-body"] ?? ""}
         phone={business.phoneNumber ?? ""}
         email={business.supportEmail ?? ""}
+        buttonLabel={f["vii-ritual.cta-button-label"] ?? ""}
+        buttonHref={f["vii-ritual.cta-button-url"] ?? ""}
+        embed={ctaEmbed}
+        embedsEnabled={embedsEnabled}
       />
     </PageTransition>
   );

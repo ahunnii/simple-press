@@ -45,6 +45,23 @@ export const serviceUpdateSchema = serviceFormSchema.extend({
 export type ServiceCreateData = z.infer<typeof serviceCreateSchema>;
 export type ServiceUpdateData = z.infer<typeof serviceUpdateSchema>;
 
+// ─── ServiceItem sub-schemas ──────────────────────────────────────────────────
+
+export const servicePriceTierSchema = z.object({
+  label: z.string().trim().min(1, "Label is required").max(60),
+  priceLabel: z.string().trim().min(1, "Price is required").max(60),
+  compareAtPriceLabel: z.string().trim().max(60).optional().nullable(),
+});
+
+export const serviceAddOnSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(80),
+  priceLabel: z.string().trim().max(60).optional().nullable(),
+  description: z.string().trim().max(200).optional().nullable(),
+});
+
+export type ServicePriceTier = z.infer<typeof servicePriceTierSchema>;
+export type ServiceAddOn = z.infer<typeof serviceAddOnSchema>;
+
 // ─── ServiceItem (specific bookable service) ──────────────────────────────────
 
 export const serviceItemFormSchema = z.object({
@@ -69,6 +86,9 @@ export const serviceItemFormSchema = z.object({
     .max(60, "Duration label must be 60 characters or fewer")
     .optional()
     .nullable(),
+  compareAtPriceLabel: z.string().max(60).optional().nullable(),
+  priceTiers: z.array(servicePriceTierSchema).max(8).optional().default([]),
+  addOns: z.array(serviceAddOnSchema).max(12).optional().default([]),
   // Raw embed input — bare URL or <iframe> snippet. Router sanitizes via parseEmbedInput.
   bookingEmbedSrc: z.string().optional().nullable(),
   bookingEmbedHeight: z
@@ -126,3 +146,15 @@ export const serviceCustomFieldsSchema = z.object({
 });
 
 export type ServiceCustomFieldsData = z.infer<typeof serviceCustomFieldsSchema>;
+
+// ─── JSON narrowing helpers ───────────────────────────────────────────────────
+
+export function parseServicePriceTiers(value: unknown): ServicePriceTier[] {
+  const parsed = z.array(servicePriceTierSchema).safeParse(value);
+  return parsed.success ? parsed.data : [];
+}
+
+export function parseServiceAddOns(value: unknown): ServiceAddOn[] {
+  const parsed = z.array(serviceAddOnSchema).safeParse(value);
+  return parsed.success ? parsed.data : [];
+}
