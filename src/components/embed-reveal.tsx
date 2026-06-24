@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { AnimatePresence, motion } from "motion/react";
 
-import { Button } from "~/components/ui/button";
+import { buttonVariants } from "~/components/ui/button";
 import { EmbedFrame } from "~/components/embed-frame";
 import { cn } from "~/lib/utils";
 
@@ -49,13 +49,13 @@ export function EmbedReveal({
             <EmbedFrame src={src} height={height} title={title} className="w-full" />
           </motion.div>
         ) : (
-          <Button
+          <button
             type="button"
             onClick={() => setOpen(true)}
-            className={cn(triggerClassName)}
+            className={cn(triggerClassName ?? buttonVariants())}
           >
             {triggerLabel}
-          </Button>
+          </button>
         )}
       </AnimatePresence>
     </div>
