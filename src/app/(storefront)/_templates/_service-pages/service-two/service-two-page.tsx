@@ -17,6 +17,7 @@ import {
 import { buttonVariants } from "~/components/ui/button";
 import { db } from "~/server/db";
 import { EmbedFrame } from "~/components/embed-frame";
+import { EmbedReveal } from "~/components/embed-reveal";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ServiceHeroVideo } from "../_shared/service-hero-video";
@@ -62,6 +63,7 @@ export async function ServiceTemplateTwo({
     "service-two.cta-text",
     "service-two.cta-link",
     "service-two.cta-embed",
+    "service-two.cta-embed-reveal",
   ]);
 
   const heroVideoNative = f["service-two.hero-video-native"] ?? "";
@@ -99,6 +101,7 @@ export async function ServiceTemplateTwo({
   );
 
   const ctaEmbed = parseTemplateIframeValue(ctaEmbedRaw);
+  const ctaEmbedReveal = f["service-two.cta-embed-reveal"] === "true";
   const hasClosingCta = Boolean(ctaHeading || (ctaText && ctaLink) || ctaEmbed);
   const hasIntroMedia = Boolean(introVideo) || Boolean(introImage);
 
@@ -276,12 +279,21 @@ export async function ServiceTemplateTwo({
             )}
             {ctaEmbed &&
               (embedsEnabled ? (
-                <EmbedFrame
-                  src={ctaEmbed.src}
-                  height={ctaEmbed.height}
-                  title={ctaEmbed.title || "Book"}
-                  className="w-full"
-                />
+                ctaEmbedReveal ? (
+                  <EmbedReveal
+                    src={ctaEmbed.src}
+                    height={ctaEmbed.height}
+                    title={ctaEmbed.title || "Book"}
+                    className="w-full"
+                  />
+                ) : (
+                  <EmbedFrame
+                    src={ctaEmbed.src}
+                    height={ctaEmbed.height}
+                    title={ctaEmbed.title || "Book"}
+                    className="w-full"
+                  />
+                )
               ) : (
                 <a
                   href={ctaEmbed.src}

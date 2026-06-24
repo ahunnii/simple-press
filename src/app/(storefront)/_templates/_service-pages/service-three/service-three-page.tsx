@@ -12,6 +12,7 @@ import {
 } from "~/lib/validators/services";
 import { buttonVariants } from "~/components/ui/button";
 import { EmbedFrame } from "~/components/embed-frame";
+import { EmbedReveal } from "~/components/embed-reveal";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ServiceHeroVideo } from "../_shared/service-hero-video";
@@ -57,6 +58,7 @@ export async function ServiceTemplateThree({
     "service-three.cta-text",
     "service-three.cta-link",
     "service-three.cta-embed",
+    "service-three.cta-embed-reveal",
   ]);
 
   const heroImage = f["service-three.hero-image"] ?? "/placeholder.svg";
@@ -83,6 +85,7 @@ export async function ServiceTemplateThree({
   }
 
   const ctaEmbed = parseTemplateIframeValue(ctaEmbedRaw);
+  const ctaEmbedReveal = f["service-three.cta-embed-reveal"] === "true";
   const hasClosingCta = Boolean(ctaHeading || (ctaText && ctaLink) || ctaEmbed);
   const hasQuoteMedia = Boolean(quoteVideo) || Boolean(quoteImage);
 
@@ -232,12 +235,21 @@ export async function ServiceTemplateThree({
             )}
             {ctaEmbed &&
               (embedsEnabled ? (
-                <EmbedFrame
-                  src={ctaEmbed.src}
-                  height={ctaEmbed.height}
-                  title={ctaEmbed.title || "Book"}
-                  className="w-full"
-                />
+                ctaEmbedReveal ? (
+                  <EmbedReveal
+                    src={ctaEmbed.src}
+                    height={ctaEmbed.height}
+                    title={ctaEmbed.title || "Book"}
+                    className="w-full"
+                  />
+                ) : (
+                  <EmbedFrame
+                    src={ctaEmbed.src}
+                    height={ctaEmbed.height}
+                    title={ctaEmbed.title || "Book"}
+                    className="w-full"
+                  />
+                )
               ) : (
                 <a
                   href={ctaEmbed.src}

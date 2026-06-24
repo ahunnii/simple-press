@@ -150,6 +150,16 @@ const pollenSpaFields: TemplateField[] = [
     group: "pollen-spa.cta",
     gridColumn: "col-span-full",
   },
+  {
+    key: "pollen-spa.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "pollen-spa.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const pollenSpaFieldGroups: TemplateFieldGroup[] = [
@@ -323,6 +333,16 @@ const pollenBloomFields: TemplateField[] = [
     group: "pollen-bloom.cta",
     gridColumn: "col-span-full",
   },
+  {
+    key: "pollen-bloom.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "pollen-bloom.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const pollenBloomFieldGroups: TemplateFieldGroup[] = [
@@ -480,6 +500,16 @@ const pollenListFields: TemplateField[] = [
     page: "homepage",
     group: "pollen-list.cta",
     gridColumn: "col-span-full",
+  },
+  {
+    key: "pollen-list.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "pollen-list.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
   },
 ];
 

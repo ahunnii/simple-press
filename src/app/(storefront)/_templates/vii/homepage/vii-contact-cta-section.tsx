@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { EmbedFrame } from "~/components/embed-frame";
+import { EmbedReveal } from "~/components/embed-reveal";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -26,6 +27,8 @@ type Props = {
   embed?: EmbedValue | null;
   /** When false, render a plain external-link fallback instead of the iframe. */
   embedsEnabled?: boolean;
+  /** When true and embedsEnabled, hide the iframe behind a reveal button. Default false. */
+  embedReveal?: boolean;
 };
 
 export function ViiContactCtaSection({
@@ -39,6 +42,7 @@ export function ViiContactCtaSection({
   buttonHref,
   embed,
   embedsEnabled,
+  embedReveal = false,
 }: Props) {
   const { ref, visible } = useViiReveal(0.08);
 
@@ -158,11 +162,21 @@ export function ViiContactCtaSection({
         {embed && (
           <div style={{ marginBottom: 28 }}>
             {embedsEnabled ? (
-              <EmbedFrame
-                src={embed.src}
-                height={embed.height}
-                title={embed.title || "Book"}
-              />
+              embedReveal ? (
+                <EmbedReveal
+                  src={embed.src}
+                  height={embed.height}
+                  title={embed.title || "Book"}
+                  triggerLabel={embed.title || "Book Now"}
+                  triggerClassName="inline-block font-sans text-[13px] tracking-[0.14em] uppercase text-[var(--vii-paper)] bg-[var(--vii-copper-deep)] px-9 py-4 rounded-[var(--radius,0.2rem)] no-underline cursor-pointer border-0 hover:bg-[var(--vii-slate)] transition-colors duration-300"
+                />
+              ) : (
+                <EmbedFrame
+                  src={embed.src}
+                  height={embed.height}
+                  title={embed.title || "Book"}
+                />
+              )
             ) : (
               <a
                 href={embed.src}

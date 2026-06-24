@@ -152,6 +152,17 @@ export const serviceTwoFields: TemplateField[] = [
     group: "service-two.cta",
     gridColumn: "col-span-full",
   },
+  {
+    key: "service-two.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "service-two.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 export const serviceTwoFieldGroups: TemplateFieldGroup[] = [

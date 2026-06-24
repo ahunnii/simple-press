@@ -235,6 +235,17 @@ export const viiSanctuaryFields: TemplateField[] = [
     group: "vii-sanctuary.cta",
     gridColumn: "col-span-full",
   },
+  {
+    key: "vii-sanctuary.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
@@ -467,6 +478,17 @@ export const viiRitualFields: TemplateField[] = [
     group: "vii-ritual.cta",
     gridColumn: "col-span-full",
   },
+  {
+    key: "vii-ritual.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 const viiRitualFieldGroups: TemplateFieldGroup[] = [
@@ -696,6 +718,17 @@ export const viiAtelierFields: TemplateField[] = [
     page: "homepage",
     group: "vii-atelier.cta",
     gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-atelier.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
   },
 ];
 

@@ -650,6 +650,7 @@ export function ViiAtelierServicePage({
     "vii-atelier.cta-button-label",
     "vii-atelier.cta-button-url",
     "vii-atelier.cta-embed",
+    "vii-atelier.cta-embed-reveal",
   ]);
 
   // Parse gallery images from the list field
@@ -661,6 +662,7 @@ export function ViiAtelierServicePage({
 
   // Parse CTA embed
   const ctaEmbed = parseTemplateIframeValue(f["vii-atelier.cta-embed"]);
+  const ctaEmbedReveal = f["vii-atelier.cta-embed-reveal"] === "true";
 
   const heroVideoSrc = f["vii-atelier.hero-video"] ?? "";
 
@@ -708,6 +710,7 @@ export function ViiAtelierServicePage({
         buttonHref={f["vii-atelier.cta-button-url"] ?? ""}
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
+        embedReveal={ctaEmbedReveal}
       />
     </PageTransition>
   );

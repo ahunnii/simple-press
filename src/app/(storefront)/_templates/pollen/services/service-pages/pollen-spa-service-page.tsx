@@ -5,6 +5,7 @@ import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buttonVariants } from "~/components/ui/button";
 import { EmbedFrame } from "~/components/embed-frame";
+import { EmbedReveal } from "~/components/embed-reveal";
 import {
   FadeIn,
   StaggerContainer,
@@ -64,6 +65,7 @@ export function PollenSpaServicePage({
     "pollen-spa.cta-text",
     "pollen-spa.cta-link",
     "pollen-spa.cta-embed",
+    "pollen-spa.cta-embed-reveal",
   ]);
 
   const heroImage = f["pollen-spa.hero-image"] ?? "/placeholder.svg";
@@ -89,6 +91,7 @@ export function PollenSpaServicePage({
   }
 
   const embed = ctaEmbedRaw ? parseTemplateIframeValue(ctaEmbedRaw) : null;
+  const ctaEmbedReveal = f["pollen-spa.cta-embed-reveal"] === "true";
   const showClosingCta = (ctaLink && ctaText) || !!embed;
 
   const publishedItems = items.filter((item) => item.published);
@@ -221,12 +224,30 @@ export function PollenSpaServicePage({
             {embed && (
               <FadeIn direction="up">
                 {embedsEnabled ? (
-                  <EmbedFrame
-                    src={embed.src}
-                    height={embed.height}
-                    title={embed.title ?? "Book"}
-                    className="rounded-xl overflow-hidden"
-                  />
+                  ctaEmbedReveal ? (
+                    <div className="text-center">
+                      <EmbedReveal
+                        src={embed.src}
+                        height={embed.height}
+                        title={embed.title ?? "Book"}
+                        className="rounded-xl overflow-hidden"
+                        triggerLabel={embed.title ?? "Book Now"}
+                        triggerClassName={buttonVariants({
+                          variant: "outline",
+                          size: "lg",
+                          className:
+                            "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                        })}
+                      />
+                    </div>
+                  ) : (
+                    <EmbedFrame
+                      src={embed.src}
+                      height={embed.height}
+                      title={embed.title ?? "Book"}
+                      className="rounded-xl overflow-hidden"
+                    />
+                  )
                 ) : (
                   <div className="text-center">
                     <a

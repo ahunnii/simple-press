@@ -146,6 +146,17 @@ export const serviceThreeFields: TemplateField[] = [
     group: "service-three.cta",
     gridColumn: "col-span-full",
   },
+  {
+    key: "service-three.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "service-three.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
 ];
 
 export const serviceThreeFieldGroups: TemplateFieldGroup[] = [

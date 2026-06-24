@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { Loader2 } from "lucide-react";
+
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   DEFAULT_EMBED_HEIGHT,
   EMBED_SANDBOX,
@@ -43,6 +46,7 @@ type EmbedFrameProps = {
 export function EmbedFrame({ src, height, title, className }: EmbedFrameProps) {
   const safeSrc = sanitizeEmbedSrc(src);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     // Timestamp (ms) when the user last clicked into this frame; null when idle.
@@ -84,9 +88,20 @@ export function EmbedFrame({ src, height, title, className }: EmbedFrameProps) {
 
   if (!safeSrc) return null;
 
+  const loadingOverlay = !loaded && (
+    <>
+      <Skeleton className="absolute inset-0 h-full w-full" />
+      <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+        <span>Loading…</span>
+      </div>
+    </>
+  );
+
   if (isVideoEmbed(safeSrc)) {
     return (
       <div className={cn("relative aspect-video w-full", className)}>
+        {loadingOverlay}
         <iframe
           ref={iframeRef}
           src={safeSrc}
@@ -95,23 +110,36 @@ export function EmbedFrame({ src, height, title, className }: EmbedFrameProps) {
           referrerPolicy="no-referrer"
           loading="lazy"
           data-embed-title={title}
-          className="absolute inset-0 h-full w-full border-0"
+          onLoad={() => setLoaded(true)}
+          className={cn(
+            "absolute inset-0 h-full w-full border-0 transition-opacity duration-300",
+            loaded ? "opacity-100" : "opacity-0",
+          )}
         />
       </div>
     );
   }
 
   return (
-    <iframe
-      ref={iframeRef}
-      src={safeSrc}
-      title={title}
-      sandbox={EMBED_SANDBOX}
-      referrerPolicy="no-referrer"
-      loading="lazy"
-      data-embed-title={title}
-      className={cn("w-full border-0", className)}
+    <div
+      className={cn("relative w-full", className)}
       style={{ height: height ?? DEFAULT_EMBED_HEIGHT }}
-    />
+    >
+      {loadingOverlay}
+      <iframe
+        ref={iframeRef}
+        src={safeSrc}
+        title={title}
+        sandbox={EMBED_SANDBOX}
+        referrerPolicy="no-referrer"
+        loading="lazy"
+        data-embed-title={title}
+        onLoad={() => setLoaded(true)}
+        className={cn(
+          "h-full w-full border-0 transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </div>
   );
 }

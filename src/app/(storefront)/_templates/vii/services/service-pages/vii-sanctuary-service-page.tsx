@@ -828,6 +828,7 @@ export function ViiSanctuaryServicePage({
     "vii-sanctuary.cta-button-label",
     "vii-sanctuary.cta-button-url",
     "vii-sanctuary.cta-embed",
+    "vii-sanctuary.cta-embed-reveal",
   ]);
 
   // Parse richtext body directly from service.customFields (bypasses string-only resolver)
@@ -841,6 +842,7 @@ export function ViiSanctuaryServicePage({
 
   // Parse CTA embed
   const ctaEmbed = parseTemplateIframeValue(f["vii-sanctuary.cta-embed"]);
+  const ctaEmbedReveal = f["vii-sanctuary.cta-embed-reveal"] === "true";
 
   const publishedItems = items.filter((it) => it.published !== false);
 
@@ -890,6 +892,7 @@ export function ViiSanctuaryServicePage({
         buttonHref={f["vii-sanctuary.cta-button-url"] ?? ""}
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
+        embedReveal={ctaEmbedReveal}
       />
     </PageTransition>
   );

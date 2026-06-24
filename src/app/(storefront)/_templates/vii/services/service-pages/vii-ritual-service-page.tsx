@@ -690,6 +690,7 @@ export function ViiRitualServicePage({
     "vii-ritual.cta-button-label",
     "vii-ritual.cta-button-url",
     "vii-ritual.cta-embed",
+    "vii-ritual.cta-embed-reveal",
   ]);
 
   // Parse richtext philosophy body directly from service.customFields
@@ -697,6 +698,7 @@ export function ViiRitualServicePage({
 
   // Parse CTA embed
   const ctaEmbed = parseTemplateIframeValue(f["vii-ritual.cta-embed"]);
+  const ctaEmbedReveal = f["vii-ritual.cta-embed-reveal"] === "true";
 
   const publishedItems = items.filter((it) => it.published !== false);
 
@@ -749,6 +751,7 @@ export function ViiRitualServicePage({
         buttonHref={f["vii-ritual.cta-button-url"] ?? ""}
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
+        embedReveal={ctaEmbedReveal}
       />
     </PageTransition>
   );
