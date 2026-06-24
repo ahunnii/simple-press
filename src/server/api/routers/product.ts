@@ -62,6 +62,38 @@ export const productRouter = createTRPCRouter({
       return products;
     }),
 
+  getRailProducts: publicProcedure
+    .use(getBusinessProcedure())
+    .use(featureGate("products"))
+    .input(
+      z
+        .object({
+          featuredOnly: z.boolean().default(false),
+          limit: z.number().int().min(1).max(12).default(4),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const featuredOnly = input?.featuredOnly ?? false;
+      const limit = input?.limit ?? 4;
+      return ctx.db.product.findMany({
+        where: {
+          businessId,
+          published: true,
+          ...(featuredOnly ? { featured: true } : {}),
+        },
+        include: {
+          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          variants: true,
+        },
+        orderBy: featuredOnly
+          ? [{ sortOrder: "asc" }, { createdAt: "desc" }]
+          : { createdAt: "desc" },
+        take: limit,
+      });
+    }),
+
   getRelated: publicProcedure
     .use(getBusinessProcedure())
     .use(featureGate("products"))

@@ -5,6 +5,7 @@ import Image from "next/image";
 import type { TemplateListRow } from "~/lib/template-fields";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   overline?: string;
@@ -25,8 +26,7 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
       style={{
         background: "var(--vii-paper)",
         padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
-        borderTop:
-          "1px solid var(--vii-rule, color-mix(in srgb, var(--vii-navy) 8%, transparent))",
+        borderTop: "1px solid var(--vii-hairline)",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -42,18 +42,9 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
           }}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                margin: 0,
-              }}
-            >
+            <ViiOverline tone="light" align="center">
               {overline}
-            </p>
+            </ViiOverline>
           )}
           {heading && (
             <h2
@@ -73,7 +64,7 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
         </div>
 
         {/* Logo row */}
-        <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
+        <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
           <ul
             style={{
               display: "flex",

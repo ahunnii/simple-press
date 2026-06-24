@@ -1,3 +1,10 @@
+"use client";
+
+import {
+  heroHeadingStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../hooks/use-vii-hero-motion";
 import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
@@ -13,6 +20,7 @@ type Props = {
  * A type-led editorial masthead (not a generic centered-title-on-photo hero):
  * oversized Playfair display with a copper italic accent, framed by hairline
  * rules and a dateline. The photographic moment lives in the cover story below.
+ * No full-bleed media, so no Ken-Burns; stagger: meta row 0s → h1 0.15s → intro 0.3s.
  */
 export function ViiBlogHero({
   heading,
@@ -20,6 +28,8 @@ export function ViiBlogHero({
   intro,
   storyCount,
 }: Props) {
+  const { shown, reduced } = useViiHeroMotion();
+
   return (
     <section
       aria-label="The Journal"
@@ -30,9 +40,10 @@ export function ViiBlogHero({
       }}
     >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        {/* Meta row above a hairline rule */}
+        {/* Meta row — overline beat (0s) */}
         <div
           style={{
+            ...heroRevealStyle(shown, reduced, 0),
             display: "flex",
             justifyContent: "space-between",
             alignItems: "baseline",
@@ -59,9 +70,10 @@ export function ViiBlogHero({
           </span>
         </div>
 
-        {/* Oversized masthead title */}
+        {/* Oversized masthead title — heading beat (0.15s) */}
         <h1
           style={{
+            ...heroHeadingStyle(shown, reduced, 0.15),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(50px, 9vw, 96px)",
@@ -81,10 +93,11 @@ export function ViiBlogHero({
           )}
         </h1>
 
-        {/* Intro — narrow measure, offset right for editorial asymmetry */}
+        {/* Intro — CTA beat (0.3s), narrow measure, offset right for editorial asymmetry */}
         {intro && (
           <p
             style={{
+              ...heroRevealStyle(shown, reduced, 0.3),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(15px, 1.5vw, 18px)",
               lineHeight: 1.7,

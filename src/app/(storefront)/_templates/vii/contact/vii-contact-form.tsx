@@ -198,8 +198,10 @@ export function ViiContactForm({ heading }: Props) {
           <button
             type="submit"
             disabled={isSubmitting || !captchaToken}
-            className="flex items-center justify-center gap-3 px-6 py-4 text-[12px] uppercase transition-opacity hover:opacity-90 disabled:opacity-40"
+            className="vii-cta-btn flex items-center justify-center gap-3 px-6 py-4 text-[12px] uppercase transition-opacity hover:opacity-90 disabled:opacity-40"
             style={{
+              position: "relative",
+              overflow: "hidden",
               fontFamily: "var(--font-sans)",
               letterSpacing: "0.2em",
               background: "var(--vii-copper-deep)",

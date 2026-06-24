@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ViiReveal } from "../shared/vii-reveal";
+
 /**
  * ViiCheckoutUnavailable — rendered inside ViiLayout when the store has not
  * yet connected Stripe. ViiLayout already provides the skip link, header,
@@ -18,7 +20,7 @@ export function ViiCheckoutUnavailable() {
         minHeight: "60vh",
       }}
     >
-      <div style={{ maxWidth: 480, textAlign: "center" }}>
+      <ViiReveal style={{ maxWidth: 480, textAlign: "center" }}>
         {/* Decorative copper mark */}
         <span
           aria-hidden="true"
@@ -60,7 +62,10 @@ export function ViiCheckoutUnavailable() {
 
         <Link
           href="/shop"
+          className="vii-cta-btn"
           style={{
+            position: "relative",
+            overflow: "hidden",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -79,7 +84,7 @@ export function ViiCheckoutUnavailable() {
         >
           Back to shop
         </Link>
-      </div>
+      </ViiReveal>
     </div>
   );
 }

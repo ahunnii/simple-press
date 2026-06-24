@@ -27,13 +27,10 @@ function MemberCard({
   bio: string;
   index: number;
 }) {
-  const { ref, visible } = useViiReveal(0.12);
-
   return (
     <div
-      ref={ref}
-      className={`vii-reveal${visible ? "is-visible" : ""}`}
-      style={{ transitionDelay: `${index * 0.05}s` }}
+      className="vii-reveal-item"
+      style={{ "--i": Math.min(index + 1, 7) } as React.CSSProperties}
     >
       {/* Portrait */}
       <div
@@ -125,16 +122,22 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
       }}
     >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div
+        ref={headRef}
+        className={`vii-reveal-group${headVisible ? " is-visible" : ""}`}
+        style={{ maxWidth: 1100, margin: "0 auto" }}
+      >
         {/* Header */}
         <div
-          ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
-          style={{
-            textAlign: "center",
-            maxWidth: 680,
-            margin: "0 auto clamp(48px, 7vw, 80px)",
-          }}
+          className="vii-reveal-item"
+          style={
+            {
+              "--i": 0,
+              textAlign: "center",
+              maxWidth: 680,
+              margin: "0 auto clamp(48px, 7vw, 80px)",
+            } as React.CSSProperties
+          }
         >
           {overline && (
             <ViiOverline

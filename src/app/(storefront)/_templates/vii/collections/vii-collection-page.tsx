@@ -5,6 +5,7 @@ import type { DefaultCollectionPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 
 import { ViiProductCard } from "../shared/vii-product-card";
+import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
 
 export function ViiCollectionPage({
   collection,
@@ -31,93 +32,99 @@ export function ViiCollectionPage({
         }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <nav
-            aria-label="Breadcrumb"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 20,
-              fontFamily: "var(--font-sans)",
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--vii-ink-soft)",
-            }}
-          >
-            <Link
-              href="/"
+          <ViiReveal>
+            <nav
+              aria-label="Breadcrumb"
               style={{
-                color: "inherit",
-                textDecoration: "none",
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
-                paddingBlock: 8,
-                marginBlock: -8,
+                gap: 8,
+                marginBottom: 20,
+                fontFamily: "var(--font-sans)",
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
               }}
             >
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link
-              href="/collections"
-              style={{
-                color: "inherit",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                paddingBlock: 8,
-                marginBlock: -8,
-              }}
-            >
-              Collections
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page" style={{ color: "var(--vii-navy)" }}>
-              {collection.name}
-            </span>
-          </nav>
+              <Link
+                href="/"
+                className="vii-nav-link"
+                style={{
+                  position: "relative",
+                  color: "inherit",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  paddingBlock: 8,
+                  marginBlock: -8,
+                }}
+              >
+                Home
+              </Link>
+              <span aria-hidden="true">/</span>
+              <Link
+                href="/collections"
+                className="vii-nav-link"
+                style={{
+                  position: "relative",
+                  color: "inherit",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  paddingBlock: 8,
+                  marginBlock: -8,
+                }}
+              >
+                Collections
+              </Link>
+              <span aria-hidden="true">/</span>
+              <span aria-current="page" style={{ color: "var(--vii-navy)" }}>
+                {collection.name}
+              </span>
+            </nav>
 
-          <h1
-            id="vii-collection-heading"
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 400,
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              lineHeight: 1.05,
-              color: "var(--vii-navy)",
-              margin: 0,
-            }}
-          >
-            {collection.name}
-          </h1>
-          {collection.description && (
+            <h1
+              id="vii-collection-heading"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 400,
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                lineHeight: 1.05,
+                color: "var(--vii-navy)",
+                margin: 0,
+              }}
+            >
+              {collection.name}
+            </h1>
+            {collection.description && (
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(15px, 1.4vw, 17px)",
+                  lineHeight: 1.7,
+                  color: "var(--vii-ink-soft)",
+                  maxWidth: 600,
+                  margin: "18px 0 0",
+                }}
+              >
+                {collection.description}
+              </p>
+            )}
             <p
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "clamp(15px, 1.4vw, 17px)",
-                lineHeight: 1.7,
+                fontSize: 13,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
                 color: "var(--vii-ink-soft)",
-                maxWidth: 600,
-                margin: "18px 0 0",
+                margin: "20px 0 0",
               }}
             >
-              {collection.description}
+              {products.length} product{products.length !== 1 ? "s" : ""}
             </p>
-          )}
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 13,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              color: "var(--vii-ink-soft)",
-              margin: "20px 0 0",
-            }}
-          >
-            {products.length} product{products.length !== 1 ? "s" : ""}
-          </p>
+          </ViiReveal>
 
           {/* Banner image */}
           {collection.imageUrl && (
@@ -196,7 +203,7 @@ export function ViiCollectionPage({
               </Link>
             </div>
           ) : (
-            <div
+            <ViiRevealGroup
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
@@ -207,14 +214,19 @@ export function ViiCollectionPage({
                 const product = cp.product;
                 if (!product) return null;
                 return (
-                  <ViiProductCard
+                  <div
                     key={cp.id}
-                    product={product as unknown as Product}
-                    index={index}
-                  />
+                    className="vii-reveal-item"
+                    style={{ "--i": Math.min(index, 7) } as React.CSSProperties}
+                  >
+                    <ViiProductCard
+                      product={product as unknown as Product}
+                      index={index}
+                    />
+                  </div>
                 );
               })}
-            </div>
+            </ViiRevealGroup>
           )}
         </div>
       </section>
@@ -229,7 +241,7 @@ export function ViiCollectionPage({
           }}
         >
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div
+            <ViiReveal
               style={{
                 display: "flex",
                 flexWrap: "wrap",
@@ -275,20 +287,20 @@ export function ViiCollectionPage({
               >
                 All collections <span aria-hidden="true">→</span>
               </Link>
-            </div>
-            <div
+            </ViiReveal>
+            <ViiRevealGroup
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
                 gap: "clamp(20px, 3vw, 36px)",
               }}
             >
-              {others.map((col) => (
+              {others.map((col, i) => (
                 <Link
                   key={col.id}
                   href={`/collections/${col.slug}`}
-                  className="group"
-                  style={{ display: "block", textDecoration: "none" }}
+                  className="group vii-reveal-item"
+                  style={{ "--i": Math.min(i, 7), display: "block", textDecoration: "none" } as React.CSSProperties}
                 >
                   <div
                     style={{
@@ -333,7 +345,7 @@ export function ViiCollectionPage({
                   </p>
                 </Link>
               ))}
-            </div>
+            </ViiRevealGroup>
           </div>
         </section>
       )}

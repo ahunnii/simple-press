@@ -35,7 +35,7 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
         {/* Header row */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{
             display: "flex",
             alignItems: "flex-end",
@@ -90,28 +90,31 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
         {/* Post grid */}
         <div
           ref={gridRef}
-          className={`vii-reveal${gridVisible ? "is-visible" : ""}`}
+          className={`vii-reveal-group${gridVisible ? " is-visible" : ""}`}
           style={{
             display: "flex",
             flexWrap: "wrap",
             gap: "clamp(20px, 3vw, 36px)",
           }}
         >
-          {others.map((post) => (
+          {others.map((post, i) => (
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group vii-blog-card"
-              style={{
-                display: "block",
-                textDecoration: "none",
-                color: "inherit",
-                // Grow to fill a multi-card row, but cap width so a single
-                // related post doesn't stretch to a full-bleed thumbnail.
-                flex: "1 1 280px",
-                maxWidth: 380,
-                minWidth: 0,
-              }}
+              className="group vii-blog-card vii-reveal-item"
+              style={
+                {
+                  "--i": i,
+                  display: "block",
+                  textDecoration: "none",
+                  color: "inherit",
+                  // Grow to fill a multi-card row, but cap width so a single
+                  // related post doesn't stretch to a full-bleed thumbnail.
+                  flex: "1 1 280px",
+                  maxWidth: 380,
+                  minWidth: 0,
+                } as React.CSSProperties
+              }
             >
               {/* Thumbnail */}
               <div
@@ -121,7 +124,7 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
                   aspectRatio: "4 / 3",
                   borderRadius: "var(--radius)",
                   overflow: "hidden",
-                  background: "var(--vii-tan)",
+                  background: "var(--vii-paper)",
                   marginBottom: 18,
                 }}
               >
@@ -133,7 +136,24 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
                   />
-                ) : null}
+                ) : (
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-serif)",
+                      fontStyle: "italic",
+                      fontSize: 44,
+                      color: "var(--vii-tan)",
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                )}
               </div>
 
               {/* Date label */}

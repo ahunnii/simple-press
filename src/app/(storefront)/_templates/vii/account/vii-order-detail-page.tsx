@@ -4,9 +4,9 @@ import { ExternalLink } from "lucide-react";
 import type { OrderDetailPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/format-date";
 import { formatPrice } from "~/lib/prices";
-import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
 
 /** Returns inline-style objects for the order status badge — vii palette. */
 function statusStyles(status: string): {
@@ -87,7 +87,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
   const addr = order.shippingAddress;
 
   return (
-    <PageTransition>
+    <>
       {/* Hero band — own heading (the layout heading is NOT used here;
           this page renders its own h1 with order number) */}
       <section
@@ -105,7 +105,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
             paddingInline: "clamp(20px, 4vw, 32px)",
           }}
         >
-          <FadeIn direction="up">
+          <ViiReveal>
             <ViiOverline style={{ marginBottom: 16 }}>Account</ViiOverline>
             <h1
               style={{
@@ -156,9 +156,11 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                     {crumb.href ? (
                       <Link
                         href={crumb.href}
+                        className="vii-nav-link"
                         style={{
                           color: "var(--vii-ink-soft)",
                           textDecoration: "none",
+                          position: "relative",
                         }}
                       >
                         {crumb.label}
@@ -187,7 +189,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   letterSpacing: "0.1em",
                   textTransform: "capitalize",
                   padding: "4px 12px",
-                  borderRadius: "9999px",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 {order.status}
@@ -200,13 +202,13 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   fontSize: 12,
                   color: "var(--vii-ink-soft)",
                   padding: "4px 12px",
-                  borderRadius: "9999px",
+                  borderRadius: "var(--radius)",
                 }}
               >
                 {formatDate(order.createdAt)}
               </span>
             </div>
-          </FadeIn>
+          </ViiReveal>
         </div>
       </section>
 
@@ -229,9 +231,14 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           className="lg:grid-cols-[1fr_320px]"
         >
           {/* ── Left column ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <ViiRevealGroup
+            style={{ display: "flex", flexDirection: "column", gap: 24 }}
+          >
             {/* Items card */}
-            <FadeIn direction="up">
+            <div
+              className="vii-reveal-item vii-lift"
+              style={{ "--i": 0 } as React.CSSProperties}
+            >
               <ViiCard>
                 <CardHeading>Items</CardHeading>
                 {order.items.length > 0 ? (
@@ -408,11 +415,14 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   </div>
                 </div>
               </ViiCard>
-            </FadeIn>
+            </div>
 
             {/* Tracking card */}
             {order.shipments.length > 0 && (
-              <FadeIn direction="up" delay={0.1}>
+              <div
+                className="vii-reveal-item vii-lift"
+                style={{ "--i": 1 } as React.CSSProperties}
+              >
                 <ViiCard>
                   <CardHeading>Tracking</CardHeading>
                   <div
@@ -454,6 +464,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                             href={shipment.trackingUrl}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="vii-nav-link"
                             style={{
                               display: "inline-flex",
                               alignItems: "center",
@@ -463,6 +474,7 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                               fontWeight: 500,
                               color: "var(--vii-copper-deep)",
                               textDecoration: "none",
+                              position: "relative",
                             }}
                           >
                             Track shipment{" "}
@@ -486,15 +498,20 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                     ))}
                   </div>
                 </ViiCard>
-              </FadeIn>
+              </div>
             )}
-          </div>
+          </ViiRevealGroup>
 
           {/* ── Right column ── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <ViiRevealGroup
+            style={{ display: "flex", flexDirection: "column", gap: 24 }}
+          >
             {/* Shipping address */}
             {addr && (
-              <FadeIn direction="up" delay={0.05}>
+              <div
+                className="vii-reveal-item vii-lift"
+                style={{ "--i": 0 } as React.CSSProperties}
+              >
                 <ViiCard>
                   <CardHeading>Shipping Address</CardHeading>
                   <address
@@ -527,11 +544,14 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                     <p style={{ margin: 0 }}>{addr.country}</p>
                   </address>
                 </ViiCard>
-              </FadeIn>
+              </div>
             )}
 
             {/* Order info */}
-            <FadeIn direction="up" delay={0.1}>
+            <div
+              className="vii-reveal-item vii-lift"
+              style={{ "--i": 1 } as React.CSSProperties}
+            >
               <ViiCard>
                 <CardHeading>Order Info</CardHeading>
                 <dl
@@ -622,24 +642,26 @@ export function ViiOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
                   </div>
                 </dl>
               </ViiCard>
-            </FadeIn>
+            </div>
 
             {/* Back link */}
             <Link
               href="/account/orders"
+              className="vii-nav-link"
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: 13,
                 fontWeight: 500,
                 color: "var(--vii-copper-deep)",
                 textDecoration: "none",
+                position: "relative",
               }}
             >
               ← Back to orders
             </Link>
-          </div>
+          </ViiRevealGroup>
         </div>
       </section>
-    </PageTransition>
+    </>
   );
 }

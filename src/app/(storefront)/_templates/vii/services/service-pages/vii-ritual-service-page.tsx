@@ -20,6 +20,7 @@
  * 4. Full-bleed navy closing CTA with background image, optional button, and
  *    optional booking embed.
  */
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -34,6 +35,7 @@ import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-page
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { ViiOverline } from "../../shared/vii-overline";
 import { resolveRitualFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -51,6 +53,54 @@ function RitualHero({
   serviceName: string;
   serviceDescription?: string | null;
 }) {
+  const [shown, setShown] = useState(false);
+  const [reduced, setReduced] = useState(false);
+
+  // Entrance animation — fire ~60 ms after mount so the browser has painted once
+  useEffect(() => {
+    const t = setTimeout(() => setShown(true), 60);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Honour prefers-reduced-motion: skip all entrance animation
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) setReduced(true);
+  }, []);
+
+  const easeOut = "var(--vii-ease)";
+
+  // Staggered fade-rise for overline, copper rule, and description.
+  // Reduced-motion users land on the final visible state immediately.
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reduced
+      ? { opacity: 1 }
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(20px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
+
+  // Heading wipes up behind a clip-path mask — cinematic, same 0.15s beat as
+  // vii-hero-section.
+  const headingStyle: React.CSSProperties = reduced
+    ? { opacity: 1 }
+    : {
+        opacity: shown ? 1 : 0,
+        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
+        transform: shown ? "translateY(0)" : "translateY(8px)",
+        transition: `opacity 0.95s ${easeOut} 0.15s, clip-path 0.95s ${easeOut} 0.15s, transform 0.95s ${easeOut} 0.15s`,
+      };
+
+  // Slow Ken-Burns scale-settle on the background media layer.
+  const mediaStyle: React.CSSProperties = reduced
+    ? {}
+    : {
+        transform: shown ? "scale(1)" : "scale(1.08)",
+        transition: `transform 2.2s ${easeOut}`,
+      };
+
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
 
@@ -68,32 +118,43 @@ function RitualHero({
         background: "var(--vii-navy)",
       }}
     >
-      {/* Background media — video takes precedence */}
-      {hasVideo ? (
-        <ServiceHeroVideo
-          src={heroVideo!}
-          buttonClassName="vii-ritual-video-btn"
-        />
-      ) : hasImage ? (
-        <Image
-          src={heroImage!}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover", opacity: 0.35 }}
-        />
-      ) : (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(135deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
-          }}
-        />
-      )}
+      {/* Background media layer — overflow:hidden clips the Ken-Burns bloom.
+          The scale lives on the media element itself (video/image), not this
+          wrapper, so the pause/play button (a sibling of the video) stays put. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+        }}
+      >
+        {hasVideo ? (
+          <ServiceHeroVideo
+            src={heroVideo ?? ""}
+            buttonClassName="vii-ritual-video-btn"
+            style={mediaStyle}
+          />
+        ) : hasImage ? (
+          <Image
+            src={heroImage ?? ""}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover", opacity: 0.35, ...mediaStyle }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(135deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
+            }}
+          />
+        )}
+      </div>
 
       {/* Scrim */}
       <div
@@ -116,38 +177,36 @@ function RitualHero({
           maxWidth: 760,
         }}
       >
+        {/* Overline — cascade beat 0 */}
         {overline && (
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "var(--vii-copper-light)",
-              marginBottom: 20,
-            }}
-          >
+          <ViiOverline tone="dark" align="center" style={{ ...revealStyle(0), marginBottom: 20 }}>
             {overline}
-          </p>
+          </ViiOverline>
         )}
 
+        {/* Service name — clip-path wipe, beat 0.15s */}
         <h1
           style={{
+            ...headingStyle,
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(42px, 7.5vw, 96px)",
             lineHeight: 1.0,
             color: "var(--vii-paper)",
             margin: 0,
+            // Room below the baseline so the clip-path reveal doesn't shave
+            // Playfair descenders (g/y/p).
+            paddingBottom: "0.18em",
           }}
         >
           {serviceName}
         </h1>
 
-        {/* Copper rule divider */}
+        {/* Copper rule divider — beat 0.3s */}
         <div
           aria-hidden="true"
           style={{
+            ...revealStyle(0.3),
             width: 56,
             height: 1,
             background: "var(--vii-copper-light)",
@@ -155,14 +214,16 @@ function RitualHero({
           }}
         />
 
+        {/* Description — beat 0.3s */}
         {serviceDescription && (
           <p
             style={{
+              ...revealStyle(0.3),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.4vw, 16px)",
               lineHeight: 1.8,
               color: "var(--vii-paper)",
-              opacity: 0.82,
+              opacity: shown || reduced ? 0.82 : 0,
               margin: 0,
               maxWidth: 520,
               marginLeft: "auto",
@@ -218,22 +279,13 @@ function RitualPhilosophy({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}
       >
         {overline && (
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.26em",
-              textTransform: "uppercase",
-              color: "var(--vii-ink-soft)",
-              marginBottom: 16,
-            }}
-          >
+          <ViiOverline tone="light" align="center" style={{ marginBottom: 16 }}>
             {overline}
-          </p>
+          </ViiOverline>
         )}
 
         {(heading || headingAccent) && (
@@ -288,7 +340,7 @@ function RitualPhilosophy({
       {(Boolean(philosophyImageSrc) || Boolean(philosophyVideoSrc)) && (
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
         >
           <ServiceSectionMedia
             imageSrc={philosophyImageSrc}
@@ -306,6 +358,20 @@ function RitualPhilosophy({
   );
 }
 
+/** Wraps all ritual steps in a single vii-reveal-group so they stagger in
+ *  together under one IntersectionObserver rather than firing independently. */
+function StepsGroup({ children }: { children: React.ReactNode }) {
+  const { ref, visible } = useViiReveal(0.05);
+  return (
+    <div
+      ref={ref}
+      className={`vii-reveal-group${visible ? " is-visible" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 function RitualStep({
   item,
   index,
@@ -315,7 +381,6 @@ function RitualStep({
   index: number;
   embedsEnabled: boolean;
 }) {
-  const { ref, visible } = useViiReveal(0.1);
   const isReversed = index % 2 === 1;
   const stepNum = String(index + 1).padStart(2, "0");
 
@@ -324,13 +389,15 @@ function RitualStep({
 
   return (
     <div
-      ref={ref}
-      className={`vii-reveal vii-ritual-step${isReversed ? " is-reversed" : ""}${visible ? " is-visible" : ""}`}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        minHeight: "clamp(360px, 50vw, 560px)",
-      }}
+      className={`vii-reveal-item vii-ritual-step${isReversed ? " is-reversed" : ""}`}
+      style={
+        {
+          "--i": Math.min(index, 7),
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          minHeight: "clamp(360px, 50vw, 560px)",
+        } as React.CSSProperties
+      }
     >
       {/* Media panel */}
       <div
@@ -343,13 +410,24 @@ function RitualStep({
         }}
       >
         {item.image ? (
-          <Image
-            src={item.image}
-            alt={item.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            style={{ objectFit: "cover" }}
-          />
+          /* group wrapper lets the scale transition be clipped by the
+             parent's overflow:hidden without an extra positioning layer */
+          <div
+            className="group"
+            style={{ position: "absolute", inset: 0 }}
+          >
+            <Image
+              src={item.image}
+              alt={item.name}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              style={{
+                objectFit: "cover",
+                transition: "transform 0.65s var(--vii-ease)",
+              }}
+              className="group-hover:scale-[1.04]"
+            />
+          </div>
         ) : (
           <div
             aria-hidden="true"
@@ -726,10 +804,12 @@ export function ViiRitualServicePage({
         philosophyVideoSrc={f["vii-ritual.philosophy-video"] ?? ""}
       />
 
-      {/* 3. Ritual steps */}
+      {/* 3. Ritual steps — one IntersectionObserver on the group; each step
+           staggers in via vii-reveal-item + --i index */}
       {publishedItems.length > 0 && (
         <section aria-label="Treatment rituals">
           <RitualStepStyles />
+          <StepsGroup>
           {publishedItems.map((item, i) => (
             <RitualStep
               key={item.id}
@@ -738,6 +818,7 @@ export function ViiRitualServicePage({
               embedsEnabled={embedsEnabled}
             />
           ))}
+          </StepsGroup>
         </section>
       )}
 

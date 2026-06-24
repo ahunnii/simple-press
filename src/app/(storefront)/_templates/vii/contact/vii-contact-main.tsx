@@ -1,6 +1,7 @@
 "use client";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 import { ViiContactForm } from "./vii-contact-form";
 
 type Props = {
@@ -89,21 +90,16 @@ export function ViiContactMain({
         {/* Left — intro + info */}
         <div
           ref={infoRef}
-          className={`vii-reveal${infoVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${infoVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                marginBottom: 14,
-              }}
+            <ViiOverline
+              align="left"
+              tone="light"
+              style={{ marginBottom: 14 }}
             >
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           <h2
@@ -178,7 +174,7 @@ export function ViiContactMain({
         {/* Right — form card */}
         <div
           ref={formRef}
-          className={`vii-reveal${formVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${formVisible ? " is-visible" : ""}`}
           style={{
             background: "var(--vii-paper)",
             borderRadius: "var(--radius)",

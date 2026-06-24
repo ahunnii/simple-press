@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
+import { ViiOverline } from "../shared/vii-overline";
+
 type Props = {
   heroVideo?: string;
   heroImage?: string;
@@ -24,6 +26,7 @@ export function ViiHeroSection({
 }: Props) {
   const [videoPaused, setVideoPaused] = useState(false);
   const [shown, setShown] = useState(false);
+  const [reduced, setReduced] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Entrance animation
@@ -32,11 +35,12 @@ export function ViiHeroSection({
     return () => clearTimeout(t);
   }, []);
 
-  // Honour prefers-reduced-motion: pause video immediately
+  // Honour prefers-reduced-motion: pause video + skip entrance motion
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) {
+      setReduced(true);
       setVideoPaused(true);
       videoRef.current?.pause();
     }
@@ -57,16 +61,37 @@ export function ViiHeroSection({
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
 
-  const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
+  const easeOut = "var(--vii-ease)";
 
-  // Only animate when motion is allowed — detect via CSS media query flag
-  // We assume reduced motion was checked in the useEffect above;
-  // for the enter animation we just gate on `shown`.
-  const revealStyle = (delay: number): React.CSSProperties => ({
-    opacity: shown ? 1 : 0,
-    transform: shown ? "translateY(0)" : "translateY(20px)",
-    transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-  });
+  // Staggered fade-rise for overline + CTA. Reduced-motion users land on the
+  // final, fully-visible state with no transition.
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reduced
+      ? { opacity: 1 }
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(20px)",
+          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
+        };
+
+  // Heading wipes up behind a clip-path mask — a touch more cinematic than a
+  // plain fade-rise, on the same 0.15s beat.
+  const headingStyle: React.CSSProperties = reduced
+    ? { opacity: 1 }
+    : {
+        opacity: shown ? 1 : 0,
+        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
+        transform: shown ? "translateY(0)" : "translateY(8px)",
+        transition: `opacity 0.95s ${easeOut} 0.15s, clip-path 0.95s ${easeOut} 0.15s, transform 0.95s ${easeOut} 0.15s`,
+      };
+
+  // Slow Ken-Burns scale-settle on the background media as the hero loads.
+  const mediaStyle: React.CSSProperties = reduced
+    ? {}
+    : {
+        transform: shown ? "scale(1)" : "scale(1.08)",
+        transition: `transform 2.2s ${easeOut}`,
+      };
 
   return (
     <section
@@ -81,9 +106,17 @@ export function ViiHeroSection({
         background: "var(--vii-navy)",
       }}
     >
-      {/* ── Background media ── */}
-      {hasVideo ? (
-        <>
+      {/* ── Background media — slow Ken-Burns scale-settle on load ── */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          ...mediaStyle,
+        }}
+      >
+        {hasVideo ? (
           <video
             ref={videoRef}
             autoPlay={!videoPaused}
@@ -101,61 +134,62 @@ export function ViiHeroSection({
           >
             <source src={heroVideo} type="video/mp4" />
           </video>
-          {/* Pause / play button */}
-          <button
-            type="button"
-            onClick={toggleVideo}
-            aria-label={
-              videoPaused ? "Play background video" : "Pause background video"
-            }
+        ) : hasImage ? (
+          <Image
+            src={heroImage!}
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+        ) : (
+          // Navy gradient fallback
+          <div
             style={{
               position: "absolute",
-              bottom: 24,
-              right: 24,
-              zIndex: 20,
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
+              inset: 0,
               background:
-                "color-mix(in srgb, var(--vii-paper) 18%, transparent)",
-              border:
-                "1px solid color-mix(in srgb, var(--vii-paper) 40%, transparent)",
-              color: "var(--vii-paper)",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
+                "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
             }}
-          >
-            {videoPaused ? (
-              <Play aria-hidden={true} style={{ width: 14, height: 14 }} />
-            ) : (
-              <Pause aria-hidden={true} style={{ width: 14, height: 14 }} />
-            )}
-          </button>
-        </>
-      ) : hasImage ? (
-        <Image
-          src={heroImage!}
-          alt=""
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
-      ) : (
-        // Navy gradient fallback
-        <div
-          aria-hidden="true"
+          />
+        )}
+      </div>
+
+      {/* Pause / play button — outside the scaled layer so it stays put */}
+      {hasVideo && (
+        <button
+          type="button"
+          onClick={toggleVideo}
+          aria-label={
+            videoPaused ? "Play background video" : "Pause background video"
+          }
           style={{
             position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
+            bottom: 24,
+            right: 24,
+            zIndex: 20,
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            background: "color-mix(in srgb, var(--vii-paper) 18%, transparent)",
+            border:
+              "1px solid color-mix(in srgb, var(--vii-paper) 40%, transparent)",
+            color: "var(--vii-paper)",
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
           }}
-        />
+        >
+          {videoPaused ? (
+            <Play aria-hidden={true} style={{ width: 14, height: 14 }} />
+          ) : (
+            <Pause aria-hidden={true} style={{ width: 14, height: 14 }} />
+          )}
+        </button>
       )}
 
       {/* ── Dark overlay scrim ── */}
@@ -181,26 +215,16 @@ export function ViiHeroSection({
       >
         {/* Overline */}
         {heroOverline && (
-          <p
-            style={{
-              ...revealStyle(0),
-              fontFamily: "var(--font-sans)",
-              fontSize: 11,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--vii-tan)",
-              marginBottom: 20,
-            }}
-          >
-            {heroOverline}
-          </p>
+          <div style={{ ...revealStyle(0), marginBottom: 20 }}>
+            <ViiOverline tone="dark">{heroOverline}</ViiOverline>
+          </div>
         )}
 
         {/* Primary statement — the page's h1 */}
         {heroHeading && (
           <h1
             style={{
-              ...revealStyle(0.15),
+              ...headingStyle,
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(18px, 2.4vw, 28px)",
               lineHeight: 1.55,
@@ -220,6 +244,8 @@ export function ViiHeroSection({
             <Link
               href={heroCtaLink}
               style={{
+                position: "relative",
+                overflow: "hidden",
                 display: "inline-block",
                 padding: "14px 32px",
                 background: "var(--vii-copper-deep)",
@@ -231,7 +257,7 @@ export function ViiHeroSection({
                 textTransform: "uppercase",
                 textDecoration: "none",
                 borderRadius: "var(--radius)",
-                transition: "background 0.3s ease, opacity 0.3s ease",
+                transition: "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
               }}
               className="vii-cta-btn"
             >

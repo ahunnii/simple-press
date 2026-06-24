@@ -1,9 +1,9 @@
 "use client";
 
 import type { AccountAddressBookPageProps } from "../../types";
-import { PageTransition } from "~/components/page-animations";
 import { AddressBookContent } from "~/app/(storefront)/_components/account/address-components";
 
+import { ViiReveal } from "../shared/vii-reveal";
 import { ViiAccountLayout } from "./vii-account-layout";
 
 export function ViiAddressBookPage({
@@ -11,20 +11,20 @@ export function ViiAddressBookPage({
   customer,
 }: AccountAddressBookPageProps) {
   return (
-    <PageTransition>
-      <ViiAccountLayout
-        heading="Address Book"
-        breadcrumb={[
-          { label: "Home", href: "/" },
-          { label: "Account", href: "/account/settings" },
-          { label: "Address Book" },
-        ]}
-      >
+    <ViiAccountLayout
+      heading="Address Book"
+      breadcrumb={[
+        { label: "Home", href: "/" },
+        { label: "Account", href: "/account/settings" },
+        { label: "Address Book" },
+      ]}
+    >
+      <ViiReveal>
         <AddressBookContent
           customer={customer}
           salesCountries={business.salesCountries}
         />
-      </ViiAccountLayout>
-    </PageTransition>
+      </ViiReveal>
+    </ViiAccountLayout>
   );
 }

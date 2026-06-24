@@ -4,6 +4,7 @@ import type { DefaultCartPageTemplateProps } from "../../types";
 
 import { resolveFields } from "..";
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiReveal } from "../shared/vii-reveal";
 import { ViiCartContents } from "./vii-cart-contents";
 
 export async function ViiCartPage({ business }: DefaultCartPageTemplateProps) {
@@ -57,10 +58,11 @@ export async function ViiCartPage({ business }: DefaultCartPageTemplateProps) {
               <li>
                 <Link
                   href="/"
+                  className="vii-nav-link"
                   style={{
                     color: "var(--vii-ink-soft)",
                     textDecoration: "none",
-                    transition: "color 0.2s",
+                    position: "relative",
                   }}
                 >
                   Home
@@ -75,28 +77,30 @@ export async function ViiCartPage({ business }: DefaultCartPageTemplateProps) {
             </ol>
           </nav>
 
-          {/* Overline */}
-          {overline && (
-            <ViiOverline tone="light" style={{ marginBottom: 16 }}>
-              {overline}
-            </ViiOverline>
-          )}
+          <ViiReveal>
+            {/* Overline */}
+            {overline && (
+              <ViiOverline tone="light" style={{ marginBottom: 16 }}>
+                {overline}
+              </ViiOverline>
+            )}
 
-          {/* h1 — one per page, serif display */}
-          <h1
-            id="vii-cart-heading"
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 500,
-              fontSize: "clamp(32px, 5vw, 56px)",
-              lineHeight: 1.08,
-              color: "var(--vii-navy)",
-              margin: 0,
-              textWrap: "balance",
-            }}
-          >
-            {heading}
-          </h1>
+            {/* h1 — one per page, serif display */}
+            <h1
+              id="vii-cart-heading"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 500,
+                fontSize: "clamp(32px, 5vw, 56px)",
+                lineHeight: 1.08,
+                color: "var(--vii-navy)",
+                margin: 0,
+                textWrap: "balance",
+              }}
+            >
+              {heading}
+            </h1>
+          </ViiReveal>
         </div>
       </section>
 

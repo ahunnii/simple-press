@@ -155,7 +155,7 @@ export function ViiVariantSelector({
                   fontSize: 14,
                   cursor: outOfStock ? "not-allowed" : "pointer",
                   opacity: outOfStock ? 0.4 : 1,
-                  transition: "border-color 0.2s, background 0.2s",
+                  transition: "border-color 0.2s var(--vii-ease), background 0.2s var(--vii-ease)",
                 }}
               >
                 {variant.name}
@@ -260,6 +260,7 @@ export function ViiVariantSelector({
               type="button"
               onClick={handleAddToCart}
               aria-disabled={addToCartDisabled || undefined}
+              data-vii-pulse=""
               style={{
                 flex: 1,
                 height: 48,
@@ -277,7 +278,8 @@ export function ViiVariantSelector({
                 textTransform: "uppercase",
                 cursor: addToCartDisabled ? "not-allowed" : "pointer",
                 opacity: addToCartDisabled ? 0.5 : 1,
-                transition: "opacity 0.2s",
+                transition: "opacity 0.2s var(--vii-ease)",
+                animation: isAdded ? "vii-pulse 0.42s var(--vii-ease)" : "none",
               }}
             >
               {isAdded ? (

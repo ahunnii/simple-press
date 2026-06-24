@@ -3,6 +3,8 @@ import type { Product } from "~/types";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
+import { ViiOverline } from "../shared/vii-overline";
+import { ViiReveal } from "../shared/vii-reveal";
 import { ViiShopClient } from "./vii-shop-client";
 
 export async function ViiShopPage({
@@ -40,21 +42,15 @@ export async function ViiShopPage({
             "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <ViiReveal style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                color: "var(--vii-ink-soft)",
-                margin: "0 0 14px",
-              }}
+            <ViiOverline
+              align="center"
+              tone="light"
+              style={{ marginBottom: 14 }}
             >
               {overline}
-            </p>
+            </ViiOverline>
           )}
           <h1
             id="vii-shop-heading"
@@ -89,7 +85,7 @@ export async function ViiShopPage({
               {f["vii.shop.intro-body"]}
             </p>
           )}
-        </div>
+        </ViiReveal>
       </section>
 
       <ViiShopClient

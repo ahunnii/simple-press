@@ -26,23 +26,21 @@ function StepRow({
   body: string;
   index: number;
 }) {
-  const { ref, visible } = useViiReveal(0.12);
   const reversed = index % 2 === 1;
   const number = String(index + 1).padStart(2, "0");
 
   return (
     <div
-      ref={ref}
-      className={`vii-reveal vii-step-row${reversed ? " is-reversed" : ""}${
-        visible ? " is-visible" : ""
-      }`}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "clamp(28px, 5vw, 72px)",
-        alignItems: "center",
-        transitionDelay: `${index * 0.05}s`,
-      }}
+      className={`vii-reveal-item vii-step-row${reversed ? " is-reversed" : ""}`}
+      style={
+        {
+          "--i": Math.min(index + 1, 7),
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "clamp(28px, 5vw, 72px)",
+          alignItems: "center",
+        } as React.CSSProperties
+      }
     >
       {/* Media */}
       <div
@@ -142,16 +140,22 @@ export function ViiAboutSteps({
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
       }}
     >
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div
+        ref={headRef}
+        className={`vii-reveal-group${headVisible ? " is-visible" : ""}`}
+        style={{ maxWidth: 1100, margin: "0 auto" }}
+      >
         {/* Header */}
         <div
-          ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
-          style={{
-            textAlign: "center",
-            maxWidth: 680,
-            margin: "0 auto clamp(48px, 7vw, 80px)",
-          }}
+          className="vii-reveal-item"
+          style={
+            {
+              "--i": 0,
+              textAlign: "center",
+              maxWidth: 680,
+              margin: "0 auto clamp(48px, 7vw, 80px)",
+            } as React.CSSProperties
+          }
         >
           {overline && (
             <ViiOverline

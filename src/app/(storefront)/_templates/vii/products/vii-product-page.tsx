@@ -21,6 +21,8 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
 
 import { resolveFields } from "..";
+import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductCard } from "../shared/vii-product-card";
 import { ViiProductActions } from "./vii-product-actions";
 
@@ -102,6 +104,8 @@ export function ViiProductPage({
     productId: product.id,
   });
 
+  const related = useViiReveal(0.08);
+
   const isAdditionalEmpty = isContentEmpty(
     additionalFields?.additionalInformation as TiptapJSON,
   );
@@ -157,13 +161,18 @@ export function ViiProductPage({
             color: "var(--vii-ink-soft)",
           }}
         >
-          <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+          <Link
+            href="/"
+            className="vii-nav-link"
+            style={{ color: "inherit", textDecoration: "none", position: "relative" }}
+          >
             Home
           </Link>
           <span aria-hidden="true">/</span>
           <Link
             href="/shop"
-            style={{ color: "inherit", textDecoration: "none" }}
+            className="vii-nav-link"
+            style={{ color: "inherit", textDecoration: "none", position: "relative" }}
           >
             Shop
           </Link>
@@ -182,7 +191,7 @@ export function ViiProductPage({
             enableLightbox
             styleProps={{
               containerClassName:
-                "lg:sticky lg:top-[calc(72px+24px)] lg:self-start",
+                "lg:sticky lg:top-[calc(var(--vii-header-offset)+24px)] lg:self-start",
               // Bridge the shared gallery onto vii tokens: paper surface + vii
               // radius (overrides the component's bg-secondary / rounded-2xl) so
               // the product sits on the same light field as the listing cards.
@@ -407,84 +416,95 @@ export function ViiProductPage({
             }}
           >
             <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "flex-end",
-                justifyContent: "space-between",
-                gap: 12,
-                marginBottom: "clamp(28px, 4vw, 44px)",
-              }}
+              ref={related.ref}
+              className={`vii-reveal-group${related.visible ? " is-visible" : ""}`}
             >
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: 11,
-                    fontWeight: 500,
-                    letterSpacing: "0.24em",
-                    textTransform: "uppercase",
-                    color: "var(--vii-ink-soft)",
-                    margin: "0 0 6px",
-                  }}
-                >
-                  Pair it with
-                </p>
-                <h2
-                  id="vii-related-heading"
-                  style={{
-                    fontFamily: "var(--font-serif)",
-                    fontWeight: 400,
-                    fontSize: "clamp(26px, 3.6vw, 40px)",
-                    lineHeight: 1.1,
-                    color: "var(--vii-navy)",
-                    margin: 0,
-                  }}
-                >
-                  You may also{" "}
-                  <em
-                    style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+              {/* Header */}
+              <div
+                className="vii-reveal-item"
+                style={
+                  {
+                    "--i": 0,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "flex-end",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    marginBottom: "clamp(28px, 4vw, 44px)",
+                  } as React.CSSProperties
+                }
+              >
+                <div>
+                  <ViiOverline
+                    align="left"
+                    tone="light"
+                    style={{ marginBottom: 6 }}
                   >
-                    like
-                  </em>
-                </h2>
+                    Pair it with
+                  </ViiOverline>
+                  <h2
+                    id="vii-related-heading"
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontWeight: 400,
+                      fontSize: "clamp(26px, 3.6vw, 40px)",
+                      lineHeight: 1.1,
+                      color: "var(--vii-navy)",
+                      margin: 0,
+                    }}
+                  >
+                    You may also{" "}
+                    <em
+                      style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+                    >
+                      like
+                    </em>
+                  </h2>
+                </div>
+                <Link
+                  href="/shop"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 10,
+                    flexShrink: 0,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    fontWeight: 500,
+                    color: "var(--vii-navy)",
+                    textDecoration: "none",
+                    borderBottom: "1px solid var(--vii-copper)",
+                    paddingBottom: 4,
+                  }}
+                >
+                  All products
+                  <span aria-hidden="true">→</span>
+                </Link>
               </div>
-              <Link
-                href="/shop"
+
+              {/* Product grid */}
+              <div
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  flexShrink: 0,
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  color: "var(--vii-navy)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--vii-copper)",
-                  paddingBottom: 4,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                  gap: "clamp(20px, 3vw, 36px)",
                 }}
               >
-                All products
-                <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: "clamp(20px, 3vw, 36px)",
-              }}
-            >
-              {relatedProducts?.map((p, index) => (
-                <ViiProductCard
-                  key={p.id}
-                  product={p as unknown as Product}
-                  index={index}
-                />
-              ))}
+                {relatedProducts?.map((p, index) => (
+                  <div
+                    key={p.id}
+                    className="vii-reveal-item"
+                    style={{ "--i": Math.min(index + 1, 7) } as React.CSSProperties}
+                  >
+                    <ViiProductCard
+                      product={p as unknown as Product}
+                      index={index}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}

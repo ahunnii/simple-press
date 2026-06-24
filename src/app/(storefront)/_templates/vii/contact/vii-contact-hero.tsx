@@ -1,4 +1,14 @@
+"use client";
+
 import Image from "next/image";
+
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../hooks/use-vii-hero-motion";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   heroImage?: string;
@@ -7,6 +17,7 @@ type Props = {
 };
 
 export function ViiContactHero({ heroImage, overline, heading }: Props) {
+  const { shown, reduced } = useViiHeroMotion();
   const hasImage = !!heroImage?.trim();
 
   return (
@@ -22,29 +33,38 @@ export function ViiContactHero({ heroImage, overline, heading }: Props) {
         background: "var(--vii-navy)",
       }}
     >
-      {/* Background image */}
-      {hasImage ? (
-        <Image
-          src={heroImage!}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover" }}
-        />
-      ) : (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
-          }}
-        />
-      )}
+      {/* Background media — Ken-Burns scale-settle, clipped by overflow:hidden */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          ...heroMediaStyle(shown, reduced),
+        }}
+      >
+        {hasImage ? (
+          <Image
+            src={heroImage ?? "/fallback"}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
+            }}
+          />
+        )}
+      </div>
 
-      {/* Scrim */}
+      {/* Scrim — outside the scaled layer so it stays flat */}
       <div
         aria-hidden="true"
         style={{
@@ -66,25 +86,21 @@ export function ViiContactHero({ heroImage, overline, heading }: Props) {
         }}
       >
         {overline && (
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 11,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--vii-tan)",
-              marginBottom: 16,
-            }}
+          <ViiOverline
+            align="left"
+            tone="dark"
+            style={{ marginBottom: 16, ...heroRevealStyle(shown, reduced, 0) }}
           >
             {overline}
-          </p>
+          </ViiOverline>
         )}
 
         <h1
           style={{
+            ...heroHeadingStyle(shown, reduced, 0.15),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
-            fontSize: "clamp(44px, 7vw, 96px)",
+            fontSize: "clamp(40px, 6vw, 80px)",
             lineHeight: 1.02,
             color: "var(--vii-paper)",
             margin: 0,

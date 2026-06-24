@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Play } from "lucide-react";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   overline: string;
@@ -75,22 +76,12 @@ export function ViiVideoFeature({
         {/* ── Text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                color: "var(--vii-tan)",
-                margin: "0 0 16px",
-              }}
-            >
+            <ViiOverline tone="dark" style={{ marginBottom: 16 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           {(heading || headingAccent) && (
@@ -162,7 +153,7 @@ export function ViiVideoFeature({
         {/* ── Media column ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",
