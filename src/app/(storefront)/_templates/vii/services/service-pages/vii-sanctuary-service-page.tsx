@@ -983,7 +983,9 @@ function TreatmentMenu({
         .vii-sanctuary-card-img:hover { transform: scale(1.04); }
         .vii-book-btn-wrap button,
         .vii-book-btn-wrap a {
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          height: auto;
           padding: 14px 28px;
           background: var(--vii-copper-deep);
           color: var(--vii-paper) !important;
