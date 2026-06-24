@@ -95,6 +95,7 @@ export interface ExportedBusiness {
   pickupInstructions: string | null;
   originState: string | null;
   shippingWeightTiers: unknown; // WeightTier[]
+  businessHours: unknown; // BusinessHoursRow[]
   shippingFallbackRate: number | null;
   shippingDefaultItemWeightLb: number | null;
   salesCountries: string[];

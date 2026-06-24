@@ -41,15 +41,22 @@ type Props = {
   siteContent: {
     navigationItems: NavItem[];
   };
+  servicesEnabled?: boolean;
+  services?: Array<{ name: string; slug: string }>;
 };
 
-export function NavigationBuilder({ business, siteContent }: Props) {
+export function NavigationBuilder({
+  business,
+  siteContent,
+  servicesEnabled,
+  services,
+}: Props) {
   const router = useRouter();
 
   const [navItems, setNavItems] = useState<NavItem[]>(
     siteContent.navigationItems ?? [
       { label: "Home", href: "/" },
-      { label: "Products", href: "/products" },
+      { label: "Shop", href: "/shop" },
     ],
   );
 
@@ -150,6 +157,22 @@ export function NavigationBuilder({ business, siteContent }: Props) {
       { label: title, href: `/${slug}`, external: false },
     ]);
     toast.success(`Added "${title}" to navigation`);
+  };
+
+  const addServicesMenu = () => {
+    setNavItems([
+      ...navItems,
+      {
+        label: "Services",
+        href: "/services",
+        external: false,
+        children: (services ?? []).map((s) => ({
+          label: s.name,
+          href: `/services/${s.slug}`,
+        })),
+      },
+    ]);
+    toast.success("Added Services menu to navigation");
   };
 
   const initialNavItems = siteContent.navigationItems ?? [];
@@ -424,14 +447,6 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                       variant="outline"
                       size="sm"
                       className="w-full justify-start"
-                      onClick={() => quickAddPage("products", "Products")}
-                    >
-                      Products
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
                       onClick={() => quickAddPage("collections", "Collections")}
                     >
                       Collections
@@ -470,6 +485,27 @@ export function NavigationBuilder({ business, siteContent }: Props) {
                     </Button>
                   </div>
                 </div>
+
+                {servicesEnabled && (
+                  <div>
+                    <h4 className="mb-2 text-sm font-medium">Services</h4>
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={addServicesMenu}
+                      >
+                        Add Services menu
+                        {(services?.length ?? 0) > 0 && (
+                          <span className="text-muted-foreground ml-auto text-xs">
+                            {services!.length} service{services!.length !== 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {business.pages.length > 0 && (
                   <div>

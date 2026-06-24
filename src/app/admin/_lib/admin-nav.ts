@@ -20,6 +20,7 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import {
+  Clock,
   FileText,
   Globe,
   Home,
@@ -230,6 +231,16 @@ export const HUB_CARDS: HubCard[] = [
     hub: "settings",
     color: "emerald",
     icon: Package,
+  },
+  {
+    key: "settings-hours",
+    title: "Business Hours",
+    description: "Opening hours by day",
+    body: "Publish your opening hours for your storefront footer and contact page",
+    href: "/admin/settings/hours",
+    hub: "settings",
+    color: "cyan",
+    icon: Clock,
   },
   {
     key: "settings-tax",

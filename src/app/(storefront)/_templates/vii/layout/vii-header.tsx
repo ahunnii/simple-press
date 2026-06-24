@@ -90,6 +90,17 @@ export function ViiHeader({
     return () => document.removeEventListener("keydown", onKey);
   }, [openDropdown]);
 
+  // ── Outside click/tap closes any open desktop dropdown ────────────────────
+  useEffect(() => {
+    if (openDropdown === null) return;
+    const onPointer = (e: PointerEvent) => {
+      const target = e.target as Element | null;
+      if (!target?.closest("[data-vii-dropdown]")) setOpenDropdown(null);
+    };
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
+  }, [openDropdown]);
+
   // ── Escape key closes the mobile menu ─────────────────────────────────────
   useEffect(() => {
     if (!mobileOpen) return;
@@ -211,10 +222,12 @@ export function ViiHeader({
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
 
-  const isActive = (href: string) =>
-    href === "/"
+  const isActive = (href: string) => {
+    if (!href || href === "#") return false;
+    return href === "/"
       ? pathname === "/"
       : pathname === href || pathname.startsWith(href + "/");
+  };
 
   const showAdminLink =
     session?.user?.platformRole === "PLATFORM_ADMIN" ||
@@ -310,9 +323,6 @@ export function ViiHeader({
       return next;
     });
 
-  const isParentActive = (link: NavLink) =>
-    isActive(link.href) || !!link.children?.some((c) => isActive(c.href));
-
   // ── Desktop nav link (handles flat links + dropdowns) ───────────────────────
   const renderDesktopNavLink = (
     link: NavLink,
@@ -322,12 +332,13 @@ export function ViiHeader({
     if (link.children?.length) {
       const key = dropdownKey(side, index);
       const isOpen = openDropdown === key;
-      const parentActive = isParentActive(link);
+      const childActive = !!link.children?.some((c) => isActive(c.href));
 
       return (
         <div
           key={link.href + link.label}
           className="relative flex items-center"
+          data-vii-dropdown
           onMouseEnter={() => setOpenDropdown(key)}
           onMouseLeave={() => setOpenDropdown(null)}
           onBlur={(e) => {
@@ -340,11 +351,11 @@ export function ViiHeader({
             type="button"
             aria-haspopup="true"
             aria-expanded={isOpen}
-            onClick={() => setOpenDropdown(isOpen ? null : key)}
+            onClick={() => setOpenDropdown(key)}
             className="vii-nav-link"
-            data-current={parentActive ? "true" : undefined}
+            data-current={childActive ? "true" : undefined}
             style={{
-              ...navLinkStyle(parentActive),
+              ...navLinkStyle(childActive),
               display: "inline-flex",
               alignItems: "center",
               gap: "4px",
@@ -457,7 +468,7 @@ export function ViiHeader({
     if (link.children?.length) {
       const submenuId = `${mobileSubmenuId}-${i}`;
       const expanded = expandedMobile.has(i);
-      const parentActive = isParentActive(link);
+      const childActive = !!link.children?.some((c) => isActive(c.href));
 
       return (
         <li key={link.href + link.label}>
@@ -467,14 +478,14 @@ export function ViiHeader({
             aria-expanded={expanded}
             aria-controls={submenuId}
             style={{
-              ...mobileLinkStyle(parentActive),
+              ...mobileLinkStyle(childActive),
               display: "flex",
               width: "100%",
               alignItems: "center",
               justifyContent: "space-between",
               background: "transparent",
               border: "none",
-              borderBottom: parentActive
+              borderBottom: childActive
                 ? "1px solid var(--vii-copper)"
                 : "1px solid transparent",
               cursor: "pointer",
@@ -645,7 +656,9 @@ export function ViiHeader({
                     classNames={{
                       trigger: {
                         base: "rounded-full w-auto h-auto p-0",
-                        avatar: { base: "size-7" },
+                        avatar: {
+                          base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
+                        },
                       },
                     }}
                     additionalLinks={[

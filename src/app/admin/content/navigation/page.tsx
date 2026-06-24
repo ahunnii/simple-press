@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
@@ -18,6 +19,16 @@ export default async function NavigationPage() {
   siteContent ??= await db.siteContent.create({
     data: { businessId: business.id },
   });
+
+  const { isEnabled } = await getBusinessFlags();
+  const servicesEnabled = isEnabled("services");
+
+  let services: Array<{ name: string; slug: string }> = [];
+  if (servicesEnabled) {
+    services = (await api.services.getAll())
+      .filter((s) => s.published)
+      .map((s) => ({ name: s.name, slug: s.slug }));
+  }
 
   return (
     <>
@@ -40,6 +51,8 @@ export default async function NavigationPage() {
             }[];
           }
         }
+        servicesEnabled={servicesEnabled}
+        services={services}
       />
     </>
   );

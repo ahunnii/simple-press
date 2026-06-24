@@ -182,6 +182,7 @@ model Business {
   // Zone + weight shipping fields
   originState                 String? // 2-letter US state code for shipping origin
   shippingWeightTiers         Json? // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
+  businessHours               Json? // BusinessHoursRow[] — see src/lib/business-hours.ts
   shippingFallbackRate        Int? // cents; used when destination state matches no zone
   shippingDefaultItemWeightLb Float?  @default(0) // assumed weight (lb) for products with no weight set
 

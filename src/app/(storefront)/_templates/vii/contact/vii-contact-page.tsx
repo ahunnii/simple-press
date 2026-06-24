@@ -1,5 +1,9 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { PageTransition } from "~/components/page-animations";
+import {
+  parseBusinessHours,
+  formatBusinessHours,
+} from "~/lib/business-hours";
 
 import { resolveFields } from "..";
 import { ViiContactHero } from "./vii-contact-hero";
@@ -39,6 +43,10 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
   const phone = business.phoneNumber ?? undefined;
   const email = business.supportEmail ?? undefined;
 
+  const hourRows = formatBusinessHours(
+    parseBusinessHours(business.businessHours),
+  );
+
   const mapImage = f["vii.contact.map-image"]?.trim() ?? "";
   const mapsUrl = address
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
@@ -63,6 +71,7 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
         headingAccent={f["vii.contact.intro-heading-accent"] ?? ""}
         body={f["vii.contact.intro-body"] ?? ""}
         hours={f["vii.contact.hours"] ?? ""}
+        hourRows={hourRows}
         formHeading={f["vii.contact.form-heading"] ?? "Send a message"}
         address={address}
         phone={phone}

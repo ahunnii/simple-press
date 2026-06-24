@@ -10,11 +10,18 @@ import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { TwitterIcon } from "~/components/icons/twitter-icon";
 
 import { resolveFields } from "../index";
+import {
+  parseBusinessHours,
+  formatBusinessHours,
+} from "~/lib/business-hours";
 
 export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phone = business?.phoneNumber;
   const address = business?.businessAddress;
+  const hourRows = formatBusinessHours(
+    parseBusinessHours(business?.businessHours),
+  );
   const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
 
@@ -203,7 +210,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           />
 
           {/* ── Col 4: Contact info ── */}
-          {(address ?? email ?? phone) && (
+          {((address ?? email ?? phone) ?? hourRows.length > 0) && (
             <div>
               <h2
                 style={{
@@ -244,6 +251,49 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                   >
                     {address}
                   </p>
+                </div>
+              )}
+
+              {hourRows.length > 0 && (
+                <div style={{ marginBottom: "16px" }}>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      color: "var(--vii-navy)",
+                      marginBottom: "4px",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Hours
+                  </p>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "13px",
+                      lineHeight: 1.8,
+                      color: "var(--vii-ink-soft)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    {hourRows.map((row) => (
+                      <div
+                        key={row.label}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 12,
+                        }}
+                      >
+                        <span style={{ color: "var(--vii-navy)" }}>{row.label}</span>
+                        <span>{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
