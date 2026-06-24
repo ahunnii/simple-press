@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
-import { FadeIn } from "~/components/page-animations";
+import { useViiReveal } from "../hooks/use-vii-reveal";
 
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -26,6 +26,7 @@ type Props = {
 
 export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
   const pathname = usePathname();
+  const { ref: heroRef, visible: heroVisible } = useViiReveal(0.08);
 
   return (
     <div className="vii-account">
@@ -45,7 +46,10 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
             paddingInline: "clamp(20px, 4vw, 32px)",
           }}
         >
-          <FadeIn direction="up">
+          <div
+            ref={heroRef}
+            className={`vii-reveal${heroVisible ? " is-visible" : ""}`}
+          >
             <ViiOverline style={{ marginBottom: 16 }}>Account</ViiOverline>
             <h1
               style={{
@@ -97,8 +101,9 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                           style={{
                             color: "var(--vii-ink-soft)",
                             textDecoration: "none",
+                            position: "relative",
                           }}
-                          className="vii-bc-link"
+                          className="vii-nav-link"
                         >
                           {crumb.label}
                         </Link>
@@ -115,7 +120,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                 </ol>
               </nav>
             )}
-          </FadeIn>
+          </div>
         </div>
       </section>
 
@@ -164,7 +169,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 6,
-                      borderRadius: "9999px",
+                      borderRadius: "var(--radius)",
                       padding: "8px 16px",
                       fontFamily: "var(--font-sans)",
                       fontSize: 13,
@@ -210,6 +215,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                     <Link
                       href={href}
                       aria-current={active ? "page" : undefined}
+                      className="vii-nav-link"
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -224,8 +230,9 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
                         transition: "background 0.15s, color 0.15s",
                         background: active ? "var(--vii-tan)" : "transparent",
                         color: active
-                          ? "var(--vii-copper-deep)"
+                          ? "var(--vii-navy)"
                           : "var(--vii-ink-soft)",
+                        position: "relative",
                       }}
                     >
                       <Icon

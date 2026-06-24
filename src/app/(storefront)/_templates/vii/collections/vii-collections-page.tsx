@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
 
 export function ViiCollectionsPage({
   collections,
@@ -22,7 +23,7 @@ export function ViiCollectionsPage({
             "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <ViiReveal style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           <ViiOverline align="center" style={{ marginBottom: 14 }}>
             Shop by collection
           </ViiOverline>
@@ -54,7 +55,7 @@ export function ViiCollectionsPage({
               {list.length} collection{list.length !== 1 ? "s" : ""}
             </p>
           )}
-        </div>
+        </ViiReveal>
       </section>
 
       {/* Grid */}
@@ -85,19 +86,19 @@ export function ViiCollectionsPage({
               </p>
             </div>
           ) : (
-            <div
+            <ViiRevealGroup
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
                 gap: "clamp(24px, 3.5vw, 44px)",
               }}
             >
-              {list.map((collection) => (
+              {list.map((collection, i) => (
                 <Link
                   key={collection.id}
                   href={`/collections/${collection.slug}`}
-                  className="group"
-                  style={{ display: "block", textDecoration: "none" }}
+                  className="group vii-reveal-item"
+                  style={{ "--i": Math.min(i, 7), display: "block", textDecoration: "none" } as React.CSSProperties}
                 >
                   <div
                     style={{
@@ -164,7 +165,7 @@ export function ViiCollectionsPage({
                   </div>
                 </Link>
               ))}
-            </div>
+            </ViiRevealGroup>
           )}
         </div>
       </section>

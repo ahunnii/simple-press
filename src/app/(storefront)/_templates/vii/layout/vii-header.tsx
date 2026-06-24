@@ -25,7 +25,7 @@ type NavLink = {
   children?: NavChild[];
 };
 
-const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
+const ease = "var(--vii-ease-strong)";
 
 export function ViiHeader({
   business,
@@ -38,6 +38,8 @@ export function ViiHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [expandedMobile, setExpandedMobile] = useState<Set<number>>(new Set());
+  const [cartBump, setCartBump] = useState(false);
+  const prevItemCount = useRef(itemCount);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const mobileDialogRef = useRef<HTMLDivElement>(null);
@@ -59,6 +61,17 @@ export function ViiHeader({
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // ── Cart badge bump: pulse once when the item count goes up ────────────────
+  useEffect(() => {
+    if (itemCount > prevItemCount.current && !reduced) {
+      setCartBump(true);
+      const t = setTimeout(() => setCartBump(false), 420);
+      prevItemCount.current = itemCount;
+      return () => clearTimeout(t);
+    }
+    prevItemCount.current = itemCount;
+  }, [itemCount, reduced]);
 
   // ── Close on route change ──────────────────────────────────────────────────
   useEffect(() => {
@@ -259,6 +272,7 @@ export function ViiHeader({
     );
 
   const navLinkStyle = (active: boolean): React.CSSProperties => ({
+    position: "relative",
     display: "inline-flex",
     alignItems: "center",
     lineHeight: 1,
@@ -276,7 +290,6 @@ export function ViiHeader({
         ? "var(--vii-paper)"
         : "color-mix(in srgb, var(--vii-paper) 85%, transparent)",
     transition: `color 0.4s ${ease}`,
-    borderBottom: active ? "1px solid currentColor" : "1px solid transparent",
     paddingBottom: "2px",
     whiteSpace: "nowrap",
   });
@@ -328,6 +341,8 @@ export function ViiHeader({
             aria-haspopup="true"
             aria-expanded={isOpen}
             onClick={() => setOpenDropdown(isOpen ? null : key)}
+            className="vii-nav-link"
+            data-current={parentActive ? "true" : undefined}
             style={{
               ...navLinkStyle(parentActive),
               display: "inline-flex",
@@ -335,9 +350,6 @@ export function ViiHeader({
               gap: "4px",
               background: "transparent",
               border: "none",
-              borderBottom: parentActive
-                ? "1px solid currentColor"
-                : "1px solid transparent",
               cursor: "pointer",
             }}
           >
@@ -361,11 +373,8 @@ export function ViiHeader({
                 style={{
                   minWidth: "200px",
                   background: "var(--vii-paper)",
-                  border:
-                    "1px solid color-mix(in srgb, var(--vii-navy) 10%, transparent)",
+                  border: "1px solid var(--vii-hairline-strong)",
                   borderRadius: "var(--radius)",
-                  boxShadow:
-                    "0 12px 32px color-mix(in srgb, var(--vii-navy) 12%, transparent)",
                   padding: "6px 0",
                 }}
               >
@@ -388,7 +397,7 @@ export function ViiHeader({
                         textTransform: "uppercase",
                         fontWeight: childActive ? 600 : 400,
                         color: childActive
-                          ? "var(--vii-copper)"
+                          ? "var(--vii-copper-deep)"
                           : "var(--vii-navy)",
                         textDecoration: "none",
                         whiteSpace: "nowrap",
@@ -416,6 +425,8 @@ export function ViiHeader({
         target={link.external ? "_blank" : undefined}
         rel={link.external ? "noopener noreferrer" : undefined}
         aria-current={active ? "page" : undefined}
+        className="vii-nav-link"
+        data-current={active ? "true" : undefined}
         style={navLinkStyle(active)}
       >
         {link.label}
@@ -500,7 +511,7 @@ export function ViiHeader({
                         textTransform: "uppercase",
                         fontWeight: childActive ? 600 : 300,
                         color: childActive
-                          ? "var(--vii-copper)"
+                          ? "var(--vii-copper-deep)"
                           : "var(--vii-navy)",
                         textDecoration: "none",
                       }}
@@ -570,7 +581,16 @@ export function ViiHeader({
             />
           )}
 
-          <div className="relative mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-6 py-4 sm:px-8">
+          <div
+            className="relative mx-auto flex w-full max-w-[1440px] items-center justify-between gap-6 px-6 sm:px-8"
+            style={{
+              paddingTop: solid ? "14px" : "22px",
+              paddingBottom: solid ? "14px" : "22px",
+              transition: reduced
+                ? "none"
+                : `padding 0.5s ${ease}`,
+            }}
+          >
             {/* ── Left: hamburger (mobile) + wordmark ── */}
             <div className="flex items-center gap-3">
               <button
@@ -596,7 +616,12 @@ export function ViiHeader({
               <Link
                 href="/"
                 aria-label={`${businessName} — Home`}
-                style={{ flexShrink: 0 }}
+                style={{
+                  flexShrink: 0,
+                  transformOrigin: "left center",
+                  transform: solid ? "scale(0.94)" : "scale(1)",
+                  transition: reduced ? "none" : `transform 0.5s ${ease}`,
+                }}
               >
                 {renderWordmark(solid)}
               </Link>
@@ -678,12 +703,15 @@ export function ViiHeader({
                 {itemCount > 0 && (
                   <span
                     aria-hidden="true"
+                    data-vii-pulse=""
                     className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
                     style={{
                       background: "var(--vii-copper-deep)",
                       color: "var(--vii-paper)",
                       minWidth: "16px",
-                      transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                      animation: cartBump
+                        ? "vii-pulse 0.42s var(--vii-ease)"
+                        : "none",
                     }}
                   >
                     {itemCount}

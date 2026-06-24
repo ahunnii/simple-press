@@ -129,7 +129,7 @@ export function ViiStorySection({
                   borderRadius: "var(--radius)",
                   overflow: "hidden",
                   background: "var(--vii-slate)",
-                  transition: reducedMotion ? "none" : "opacity 0.4s ease",
+                  transition: reducedMotion ? "none" : "opacity 0.4s var(--vii-ease)",
                 }}
               >
                 {cards.map((card, i) => {
@@ -147,7 +147,7 @@ export function ViiStorySection({
                         opacity: i === current ? 1 : 0,
                         transition: reducedMotion
                           ? "none"
-                          : "opacity 0.5s ease",
+                          : "opacity 0.5s var(--vii-ease)",
                       }}
                     >
                       {image ? (

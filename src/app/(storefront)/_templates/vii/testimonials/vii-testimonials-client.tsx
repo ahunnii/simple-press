@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import type React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -31,7 +31,13 @@ type Props = {
 
 // ─── Flow block (masonry) ─────────────────────────────────────────────────────
 
-function FlowBlock({ testimonial }: { testimonial: Testimonial }) {
+function FlowBlock({
+  testimonial,
+  index,
+}: {
+  testimonial: Testimonial;
+  index: number;
+}) {
   const date = new Date(testimonial.testimonialDate);
   const dateLabel = date.toLocaleDateString(undefined, {
     month: "long",
@@ -46,13 +52,15 @@ function FlowBlock({ testimonial }: { testimonial: Testimonial }) {
 
   return (
     <div
+      className="vii-reveal-item"
       style={{
         breakInside: "avoid",
         marginBottom: "clamp(24px, 3.5vw, 44px)",
         paddingTop: "clamp(20px, 2.5vw, 28px)",
         borderTop:
           "1px solid var(--vii-hairline, color-mix(in srgb, var(--vii-navy) 10%, transparent))",
-      }}
+        "--i": Math.min(index, 7),
+      } as React.CSSProperties}
     >
       {/* Opening quotation mark */}
       <p
@@ -194,7 +202,6 @@ export function ViiTestimonialsClient({
   const { ref: featuredRef, visible: featuredVisible } = useViiReveal(0.08);
   const { ref: flowRef, visible: flowVisible } = useViiReveal(0.06);
   const { ref: ctaRef, visible: ctaVisible } = useViiReveal(0.1);
-  const [ctaHovered, setCtaHovered] = useState(false);
 
   const featured = testimonials[0];
   const remaining = testimonials.slice(1);
@@ -409,14 +416,14 @@ export function ViiTestimonialsClient({
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div
               ref={flowRef}
-              className={`vii-reveal${flowVisible ? " is-visible" : ""}`}
+              className={`vii-reveal-group${flowVisible ? " is-visible" : ""}`}
               style={{
                 columns: "320px auto",
                 columnGap: "clamp(24px, 3.5vw, 44px)",
               }}
             >
-              {remaining.map((t) => (
-                <FlowBlock key={t.id} testimonial={t} />
+              {remaining.map((t, i) => (
+                <FlowBlock key={t.id} testimonial={t} index={i} />
               ))}
             </div>
           </div>
@@ -470,15 +477,12 @@ export function ViiTestimonialsClient({
 
           <Link
             href="/testimonials/submit"
-            onMouseEnter={() => setCtaHovered(true)}
-            onMouseLeave={() => setCtaHovered(false)}
-            onFocus={() => setCtaHovered(true)}
-            onBlur={() => setCtaHovered(false)}
+            className="vii-cta-btn"
             style={{
               display: "inline-block",
-              background: ctaHovered
-                ? "var(--vii-copper)"
-                : "var(--vii-copper-deep)",
+              position: "relative",
+              overflow: "hidden",
+              background: "var(--vii-copper-deep)",
               color: "var(--vii-paper)",
               padding: "16px 36px",
               borderRadius: "var(--radius)",
@@ -488,7 +492,6 @@ export function ViiTestimonialsClient({
               textTransform: "uppercase",
               fontWeight: 500,
               textDecoration: "none",
-              transition: "background 0.3s ease",
             }}
           >
             {ctaButton}

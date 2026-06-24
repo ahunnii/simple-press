@@ -1,7 +1,15 @@
+"use client";
+
 import Image from "next/image";
 
 import { formatDate } from "~/lib/utils";
 
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../hooks/use-vii-hero-motion";
 import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
@@ -11,6 +19,7 @@ type Props = {
 };
 
 export function ViiBlogPostHero({ image, title, createdAt }: Props) {
+  const { shown, reduced } = useViiHeroMotion();
   const hasImage = !!image?.trim();
 
   return (
@@ -26,29 +35,38 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
         background: "var(--vii-navy)",
       }}
     >
-      {/* Background image — meaningful alt (article lead image) */}
-      {hasImage ? (
-        <Image
-          src={image!}
-          alt={title}
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover", objectPosition: "center 30%" }}
-        />
-      ) : (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
-          }}
-        />
-      )}
+      {/* Background media — Ken-Burns scale-settle, clipped by overflow:hidden */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          ...heroMediaStyle(shown, reduced),
+        }}
+      >
+        {hasImage ? (
+          <Image
+            src={image ?? "/fallback"}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover", objectPosition: "center 30%" }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
+            }}
+          />
+        )}
+      </div>
 
-      {/* Scrim */}
+      {/* Scrim — outside the scaled layer so it stays flat */}
       <div
         aria-hidden="true"
         style={{
@@ -69,12 +87,17 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
           maxWidth: 820,
         }}
       >
-        <ViiOverline align="left" tone="dark" style={{ marginBottom: 16 }}>
+        <ViiOverline
+          align="left"
+          tone="dark"
+          style={{ marginBottom: 16, ...heroRevealStyle(shown, reduced, 0) }}
+        >
           {`JOURNAL · ${formatDate(createdAt)}`}
         </ViiOverline>
 
         <h1
           style={{
+            ...heroHeadingStyle(shown, reduced, 0.15),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(36px, 6vw, 80px)",

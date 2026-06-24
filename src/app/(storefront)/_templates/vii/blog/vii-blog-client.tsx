@@ -150,16 +150,28 @@ function CoverStory({ post, image }: { post: Page; image?: string }) {
 
 // ─── Editorial index row — big serif title + thumbnail, hairline separated ────
 
-function JournalRow({ post, withRule }: { post: Page; withRule: boolean }) {
+function JournalRow({
+  post,
+  withRule,
+  index,
+}: {
+  post: Page;
+  withRule: boolean;
+  index: number;
+}) {
   const excerpt = postExcerpt(post, 170);
 
   return (
     <article
-      style={{
-        borderTop: withRule ? "1px solid var(--vii-hairline)" : "none",
-        paddingTop: withRule ? "clamp(28px, 4vw, 52px)" : 0,
-        paddingBottom: "clamp(28px, 4vw, 52px)",
-      }}
+      className="vii-reveal-item"
+      style={
+        {
+          "--i": Math.min(index, 7),
+          borderTop: withRule ? "1px solid var(--vii-hairline)" : "none",
+          paddingTop: withRule ? "clamp(28px, 4vw, 52px)" : 0,
+          paddingBottom: "clamp(28px, 4vw, 52px)",
+        } as React.CSSProperties
+      }
     >
       <Link
         href={`/blog/${post.slug}`}
@@ -248,7 +260,7 @@ function JournalRow({ post, withRule }: { post: Page; withRule: boolean }) {
               aspectRatio: "4 / 3",
               borderRadius: "var(--radius)",
               overflow: "hidden",
-              background: "var(--vii-tan)",
+              background: "var(--vii-paper)",
             }}
           >
             {post.image ? (
@@ -259,7 +271,24 @@ function JournalRow({ post, withRule }: { post: Page; withRule: boolean }) {
                 sizes="(max-width: 768px) 100vw, 400px"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
               />
-            ) : null}
+            ) : (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--font-serif)",
+                  fontStyle: "italic",
+                  fontSize: 44,
+                  color: "var(--vii-tan)",
+                }}
+              >
+                {index + 1}
+              </div>
+            )}
           </div>
         </div>
       </Link>
@@ -416,13 +445,14 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
 
                 <div
                   ref={rowsRef}
-                  className={`vii-reveal${rowsVisible ? " is-visible" : ""}`}
+                  className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
                 >
                   {rows.map((post, i) => (
                     <JournalRow
                       key={post.slug}
                       post={post}
                       withRule={i !== 0}
+                      index={i}
                     />
                   ))}
                 </div>

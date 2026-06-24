@@ -29,6 +29,7 @@ import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-page
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { ViiOverline } from "../../shared/vii-overline";
 import { resolveSanctuaryFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -68,7 +69,6 @@ function SanctuaryHero({
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
-  const ease = "cubic-bezier(0.16, 1, 0.3, 1)";
 
   const toggleVideo = () => {
     const v = videoRef.current;
@@ -89,8 +89,26 @@ function SanctuaryHero({
       : {
           opacity: shown ? 1 : 0,
           transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.95s ${ease} ${delay}s, transform 0.95s ${ease} ${delay}s`,
+          transition: `opacity 0.95s var(--vii-ease) ${delay}s, transform 0.95s var(--vii-ease) ${delay}s`,
         };
+
+  // Heading clip-path line-reveal — more cinematic than a plain fade-rise.
+  const headingStyle: React.CSSProperties = reduceMotion
+    ? {}
+    : {
+        opacity: shown ? 1 : 0,
+        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
+        transform: shown ? "translateY(0)" : "translateY(8px)",
+        transition: `opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s`,
+      };
+
+  // Ken-Burns scale-settle on the background media layer.
+  const mediaStyle: React.CSSProperties = reduceMotion
+    ? {}
+    : {
+        transform: shown ? "scale(1)" : "scale(1.08)",
+        transition: `transform 2.2s var(--vii-ease)`,
+      };
 
   return (
     <section
@@ -105,45 +123,56 @@ function SanctuaryHero({
         background: "var(--vii-navy)",
       }}
     >
-      {/* Background media */}
-      {hasVideo ? (
-        <video
-          ref={videoRef}
-          autoPlay={!reduceMotion}
-          muted
-          loop
-          playsInline
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        >
-          <source src={heroVideo} type="video/mp4" />
-        </video>
-      ) : hasImage ? (
-        <Image
-          src={heroImage!}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover" }}
-        />
-      ) : (
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
-          }}
-        />
-      )}
+      {/* Background media — wrapped so the Ken-Burns transform is clipped
+          by the section's overflow: hidden. The pause/play button stays
+          outside this wrapper so it is not scaled with the media. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          ...mediaStyle,
+        }}
+      >
+        {hasVideo ? (
+          <video
+            ref={videoRef}
+            autoPlay={!reduceMotion}
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+        ) : hasImage ? (
+          <Image
+            src={heroImage!}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: "cover" }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(160deg, var(--vii-navy) 0%, var(--vii-slate) 100%)",
+            }}
+          />
+        )}
+      </div>
 
       {/* Layered scrim — stronger at the bottom where text sits */}
       <div
@@ -181,24 +210,14 @@ function SanctuaryHero({
         }}
       >
         {overline && (
-          <p
-            style={{
-              ...revealStyle(0),
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.26em",
-              textTransform: "uppercase",
-              color: "var(--vii-copper-light)",
-              marginBottom: 18,
-            }}
-          >
+          <ViiOverline tone="dark" align="left" style={{ ...revealStyle(0), marginBottom: 18 }}>
             {overline}
-          </p>
+          </ViiOverline>
         )}
 
         <h1
           style={{
-            ...revealStyle(0.12),
+            ...headingStyle,
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontStyle: "italic",
@@ -207,6 +226,9 @@ function SanctuaryHero({
             color: "var(--vii-paper)",
             margin: 0,
             marginBottom: serviceDescription ? 24 : 0,
+            // Room below the baseline so the clip-path reveal doesn't shave
+            // Playfair descenders (g/y/p).
+            paddingBottom: "0.18em",
           }}
         >
           {serviceName}
@@ -307,18 +329,9 @@ function SanctuaryIntro({
           className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 10,
-                letterSpacing: "0.26em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                marginBottom: 16,
-              }}
-            >
+            <ViiOverline tone="light" align="center" style={{ marginBottom: 16 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           {(heading || headingAccent) && (
@@ -473,23 +486,22 @@ function TreatmentCard({
   embedsEnabled: boolean;
   index: number;
 }) {
-  const { ref, visible } = useViiReveal(0.1);
-
   const priceTiers = parseServicePriceTiers(item.priceTiers);
   const addOns = parseServiceAddOns(item.addOns);
 
   return (
     <article
-      ref={ref}
-      className={`vii-reveal${visible ? " is-visible" : ""}`}
-      style={{
-        transitionDelay: `${index * 0.07}s`,
-        background: "var(--vii-paper)",
-        borderRadius: "var(--radius)",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      className="vii-reveal-item"
+      style={
+        {
+          "--i": Math.min(index, 7),
+          background: "var(--vii-paper)",
+          borderRadius: "var(--radius)",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        } as React.CSSProperties
+      }
     >
       {/* Image */}
       <div
@@ -509,7 +521,7 @@ function TreatmentCard({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             style={{
               objectFit: "cover",
-              transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+              transition: "transform 0.6s var(--vii-ease)",
             }}
             className="vii-sanctuary-card-img"
           />
@@ -789,7 +801,10 @@ function ViiBookButton({
   embedsEnabled: boolean;
 }) {
   return (
-    <div className="vii-book-btn-wrap">
+    <div
+      className="vii-book-btn-wrap vii-cta-btn"
+      style={{ position: "relative", overflow: "hidden" }}
+    >
       <ServiceBookingDialog
         triggerLabel="Book This Treatment"
         itemName={itemName}
@@ -908,6 +923,7 @@ function TreatmentMenu({
   menuHeading: string;
 }) {
   const { ref: headRef, visible: headVisible } = useViiReveal(0.08);
+  const { ref: gridRef, visible: gridVisible } = useViiReveal(0.08);
 
   return (
     <section
@@ -924,18 +940,9 @@ function TreatmentMenu({
           className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{ marginBottom: "clamp(40px, 6vw, 64px)" }}
         >
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.26em",
-              textTransform: "uppercase",
-              color: "var(--vii-ink-soft)",
-              marginBottom: 12,
-            }}
-          >
+          <ViiOverline tone="light" align="left" style={{ marginBottom: 12 }}>
             Our Services
-          </p>
+          </ViiOverline>
           <h2
             id="sanctuary-menu-heading"
             style={{
@@ -959,9 +966,11 @@ function TreatmentMenu({
           </h2>
         </div>
 
-        {/* 3-column grid */}
+        {/* 3-column grid — one IntersectionObserver on the container;
+            each TreatmentCard cascades in as a vii-reveal-item. */}
         <div
-          className="vii-sanctuary-grid"
+          ref={gridRef}
+          className={`vii-sanctuary-grid vii-reveal-group${gridVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",

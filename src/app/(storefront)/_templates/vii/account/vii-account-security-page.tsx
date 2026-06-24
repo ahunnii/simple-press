@@ -2,23 +2,23 @@
 
 import { SecuritySettingsCards } from "@daveyplate/better-auth-ui";
 
-import { PageTransition } from "~/components/page-animations";
+import { ViiReveal } from "../shared/vii-reveal";
 
 import { ViiAccountLayout } from "./vii-account-layout";
 
 export function ViiAccountSecurityPage() {
   return (
-    <PageTransition>
-      <ViiAccountLayout
-        heading="Security"
-        breadcrumb={[
-          { label: "Home", href: "/" },
-          { label: "Account", href: "/account/settings" },
-          { label: "Security" },
-        ]}
-      >
+    <ViiAccountLayout
+      heading="Security"
+      breadcrumb={[
+        { label: "Home", href: "/" },
+        { label: "Account", href: "/account/settings" },
+        { label: "Security" },
+      ]}
+    >
+      <ViiReveal>
         <SecuritySettingsCards />
-      </ViiAccountLayout>
-    </PageTransition>
+      </ViiReveal>
+    </ViiAccountLayout>
   );
 }

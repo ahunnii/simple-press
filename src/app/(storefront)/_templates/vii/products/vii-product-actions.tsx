@@ -180,6 +180,7 @@ export function ViiProductActions({
           <button
             type="button"
             onClick={handleAddToCart}
+            data-vii-pulse=""
             style={{
               flex: 1,
               height: 48,
@@ -196,7 +197,8 @@ export function ViiProductActions({
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               cursor: "pointer",
-              transition: "opacity 0.2s",
+              transition: "opacity 0.2s var(--vii-ease)",
+              animation: justAdded ? "vii-pulse 0.42s var(--vii-ease)" : "none",
             }}
           >
             {justAdded ? (

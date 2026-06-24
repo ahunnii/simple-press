@@ -64,7 +64,10 @@ function ViiCtaButton({
   return (
     <Link
       href={href}
+      className="vii-cta-btn"
       style={{
+        position: "relative",
+        overflow: "hidden",
         display: "inline-block",
         background: "var(--vii-copper-deep)",
         color: "var(--vii-paper)",
@@ -138,10 +141,11 @@ function ViiNavyTextLink({
 
 // ─── Copper-light circle confirmation mark ────────────────────────────────────
 
-function ViiConfirmMark() {
+function ViiConfirmMark({ pulse = false }: { pulse?: boolean }) {
   return (
     <span
       aria-hidden="true"
+      data-vii-pulse=""
       style={{
         display: "flex",
         alignItems: "center",
@@ -157,6 +161,7 @@ function ViiConfirmMark() {
         fontWeight: 400,
         lineHeight: 1,
         flexShrink: 0,
+        animation: pulse ? "vii-pulse 0.42s var(--vii-ease)" : undefined,
       }}
     >
       ✓
@@ -337,51 +342,56 @@ export function ViiOrderConfirmation({
       >
         <div
           ref={ref}
-          className="vii-reveal"
+          className={`vii-reveal-group${visible ? " is-visible" : ""}`}
           style={{
             maxWidth: 720,
             margin: "0 auto",
             textAlign: "center",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(18px)",
-            transition:
-              "opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
           {/* Copper-light circle mark */}
           <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: 32,
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: 32,
+                "--i": 0,
+              } as React.CSSProperties
+            }
           >
-            <ViiConfirmMark />
+            <ViiConfirmMark pulse={visible} />
           </div>
 
           {/* Overline — tone="dark": tan label + copper-light rule */}
           {overline && (
-            <ViiOverline
-              tone="dark"
-              align="center"
-              style={{ marginBottom: 24 }}
+            <div
+              className="vii-reveal-item"
+              style={{ "--i": 1 } as React.CSSProperties}
             >
-              {overline}
-            </ViiOverline>
+              <ViiOverline tone="dark" align="center" style={{ marginBottom: 24 }}>
+                {overline}
+              </ViiOverline>
+            </div>
           )}
 
           {/* h1 — the one per-page heading; display serif + copper-light italic accent */}
           <h1
             id="vii-order-heading"
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 500,
-              fontSize: "clamp(2rem, 5vw, 3.5rem)",
-              lineHeight: 1.1,
-              color: "var(--vii-paper)",
-              margin: "0 0 12px",
-              textWrap: "balance",
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                fontFamily: "var(--font-serif)",
+                fontWeight: 500,
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                lineHeight: 1.1,
+                color: "var(--vii-paper)",
+                margin: "0 0 12px",
+                textWrap: "balance",
+                "--i": 2,
+              } as React.CSSProperties
+            }
           >
             {thankYouHeading || "Thank"}
             {(thankYouHeading || "Thank") && (thankYouAccent || "you.")
@@ -401,15 +411,19 @@ export function ViiOrderConfirmation({
 
           {/* Business name */}
           <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 14,
-              fontWeight: 400,
-              color: "var(--vii-tan)",
-              letterSpacing: "0.08em",
-              margin: "0 0 40px",
-              textTransform: "uppercase",
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                fontFamily: "var(--font-sans)",
+                fontSize: 14,
+                fontWeight: 400,
+                color: "var(--vii-tan)",
+                letterSpacing: "0.08em",
+                margin: "0 0 40px",
+                textTransform: "uppercase",
+                "--i": 3,
+              } as React.CSSProperties
+            }
           >
             {business.name}
           </p>
@@ -417,25 +431,33 @@ export function ViiOrderConfirmation({
           {/* Divider hairline on navy */}
           <div
             aria-hidden="true"
-            style={{
-              width: 48,
-              height: 1,
-              background: "var(--vii-copper-light)",
-              margin: "0 auto 40px",
-              opacity: 0.5,
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                width: 48,
+                height: 1,
+                background: "var(--vii-copper-light)",
+                margin: "0 auto 40px",
+                opacity: 0.5,
+                "--i": 4,
+              } as React.CSSProperties
+            }
           />
 
           {/* Order details — email + total */}
           {(orderDetails?.customer_email ?? formattedTotal) && (
             <div
-              style={{
-                marginBottom: 40,
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                alignItems: "center",
-              }}
+              className="vii-reveal-item"
+              style={
+                {
+                  marginBottom: 40,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  alignItems: "center",
+                  "--i": 5,
+                } as React.CSSProperties
+              }
             >
               {orderDetails?.customer_email && (
                 <p
@@ -479,11 +501,15 @@ export function ViiOrderConfirmation({
           {/* What happens next */}
           {nextStepsLines.length > 0 && (
             <div
-              style={{
-                marginBottom: 48,
-                textAlign: "left",
-                display: "inline-block",
-              }}
+              className="vii-reveal-item"
+              style={
+                {
+                  marginBottom: 48,
+                  textAlign: "left",
+                  display: "inline-block",
+                  "--i": 6,
+                } as React.CSSProperties
+              }
             >
               <p
                 style={{
@@ -544,12 +570,16 @@ export function ViiOrderConfirmation({
 
           {/* CTAs */}
           <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 16,
+                "--i": 7,
+              } as React.CSSProperties
+            }
           >
             <ViiCtaButton href="/shop">
               {continueCta || "Continue Shopping"}

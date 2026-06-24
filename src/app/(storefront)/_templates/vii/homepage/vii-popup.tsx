@@ -26,6 +26,8 @@ export function ViiPopup({ popup }: ViiPopupProps) {
             border:
               "1px solid color-mix(in srgb, var(--vii-navy) 12%, transparent)",
             borderRadius: "var(--radius)",
+            // Exception to the vii No-Shadow-Rule: a centered modal over a full
+            // overlay needs depth cue to separate it from the scrim layer.
             boxShadow:
               "0 24px 64px color-mix(in srgb, var(--vii-navy) 28%, transparent)",
             width: "min(92vw, 520px)",
@@ -51,8 +53,8 @@ export function ViiPopup({ popup }: ViiPopupProps) {
               alignItems: "center",
               justifyContent: "center",
               padding: "6px",
-              minWidth: "36px",
-              minHeight: "36px",
+              minWidth: "44px",
+              minHeight: "44px",
               opacity: 0.6,
               transition: "opacity 0.15s",
             }}

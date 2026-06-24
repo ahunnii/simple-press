@@ -9,6 +9,7 @@ import type { Product } from "~/types";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductCard } from "../shared/vii-product-card";
 
 type Collections = RouterOutputs["collections"]["getAllPublic"];
@@ -38,7 +39,8 @@ export function ViiShopClient({
     paginated,
   } = useShopFilters(products, { pageSize: 12 });
 
-  const { ref, visible } = useViiReveal(0.05);
+  const productsReveal = useViiReveal(0.05);
+  const collectionsReveal = useViiReveal(0.05);
 
   const hairline = "1px solid var(--vii-hairline)";
 
@@ -53,7 +55,11 @@ export function ViiShopClient({
             "clamp(40px, 6vw, 72px) clamp(24px, 6vw, 96px) clamp(64px, 9vw, 112px)",
         }}
       >
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div
+          ref={productsReveal.ref}
+          className={`vii-reveal${productsReveal.visible ? " is-visible" : ""}`}
+          style={{ maxWidth: 1200, margin: "0 auto" }}
+        >
           <h2 id="vii-shop-products-heading" className="sr-only">
             Products
           </h2>
@@ -316,25 +322,19 @@ export function ViiShopClient({
           }}
         >
           <div
-            ref={ref}
-            className={`vii-reveal${visible ? " is-visible" : ""}`}
+            ref={collectionsReveal.ref}
+            className={`vii-reveal-group${collectionsReveal.visible ? " is-visible" : ""}`}
             style={{ maxWidth: 1200, margin: "0 auto" }}
           >
             <div style={{ marginBottom: "clamp(28px, 4vw, 48px)" }}>
               {collectionsOverline && (
-                <p
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: 11,
-                    letterSpacing: "0.24em",
-                    textTransform: "uppercase",
-                    fontWeight: 500,
-                    color: "var(--vii-ink-soft)",
-                    margin: "0 0 6px",
-                  }}
+                <ViiOverline
+                  align="left"
+                  tone="light"
+                  style={{ marginBottom: 6 }}
                 >
                   {collectionsOverline}
-                </p>
+                </ViiOverline>
               )}
               <h2
                 id="vii-shop-collections-heading"
@@ -366,12 +366,12 @@ export function ViiShopClient({
                 gap: "clamp(20px, 3vw, 36px)",
               }}
             >
-              {collections.map((collection) => (
+              {collections.map((collection, i) => (
                 <Link
                   key={collection.id}
                   href={`/collections/${collection.slug}`}
-                  className="group"
-                  style={{ display: "block", textDecoration: "none" }}
+                  className="group vii-reveal-item"
+                  style={{ "--i": Math.min(i, 7), display: "block", textDecoration: "none" } as React.CSSProperties}
                 >
                   <div
                     style={{

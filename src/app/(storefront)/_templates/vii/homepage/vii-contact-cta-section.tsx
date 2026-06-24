@@ -140,8 +140,11 @@ export function ViiContactCtaSection({
           <div style={{ marginBottom: 28 }}>
             <a
               href={buttonHref}
+              className="vii-cta-btn"
               style={{
                 display: "inline-block",
+                position: "relative",
+                overflow: "hidden",
                 fontFamily: "var(--font-sans)",
                 fontSize: 13,
                 letterSpacing: "0.14em",
@@ -168,7 +171,7 @@ export function ViiContactCtaSection({
                   height={embed.height}
                   title={embed.title || "Book"}
                   triggerLabel={embed.title || "Book Now"}
-                  triggerClassName="inline-block font-sans text-[13px] tracking-[0.14em] uppercase text-[var(--vii-paper)] bg-[var(--vii-copper-deep)] px-9 py-4 rounded-[var(--radius,0.2rem)] no-underline cursor-pointer border-0 hover:bg-[var(--vii-slate)] transition-colors duration-300"
+                  triggerClassName="inline-block font-sans text-[13px] tracking-[0.14em] uppercase text-[var(--vii-paper)] bg-[var(--vii-copper-deep)] px-9 py-4 rounded-[var(--radius,0.2rem)] no-underline cursor-pointer border-0 hover:opacity-90 transition-opacity duration-300"
                 />
               ) : (
                 <EmbedFrame
@@ -182,8 +185,11 @@ export function ViiContactCtaSection({
                 href={embed.src}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="vii-cta-btn"
                 style={{
                   display: "inline-block",
+                  position: "relative",
+                  overflow: "hidden",
                   fontFamily: "var(--font-sans)",
                   fontSize: 13,
                   letterSpacing: "0.14em",

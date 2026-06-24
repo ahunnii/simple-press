@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { TemplateListRow } from "~/lib/template-fields";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 
 type Props = {
   overline?: string;
@@ -38,18 +39,9 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
           }}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                margin: 0,
-              }}
-            >
+            <ViiOverline tone="light" align="center">
               {overline}
-            </p>
+            </ViiOverline>
           )}
           {heading && (
             <h2
@@ -71,7 +63,7 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
         {/* Category tiles */}
         <div
           ref={ref}
-          className={`vii-reveal${visible ? " is-visible" : ""}`}
+          className={`vii-reveal-group${visible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -90,15 +82,18 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
                 key={card._id ?? i}
                 href={link}
                 aria-label={title || `Category ${i + 1}`}
-                className="group"
-                style={{
-                  position: "relative",
-                  display: "block",
-                  overflow: "hidden",
-                  borderRadius: "var(--radius)",
-                  aspectRatio: "4 / 3",
-                  background: "var(--vii-slate)",
-                }}
+                className="group vii-reveal-item"
+                style={
+                  {
+                    "--i": Math.min(i, 7),
+                    position: "relative",
+                    display: "block",
+                    overflow: "hidden",
+                    borderRadius: "var(--radius)",
+                    aspectRatio: "4 / 3",
+                    background: "var(--vii-slate)",
+                  } as React.CSSProperties
+                }
               >
                 {image ? (
                   <Image

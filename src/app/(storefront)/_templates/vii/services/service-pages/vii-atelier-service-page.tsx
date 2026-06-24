@@ -21,6 +21,7 @@
  *    add-ons alongside the standard price chip.
  * 5. Closing CTA (reuses ViiContactCtaSection) with optional button + embed.
  */
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -33,6 +34,7 @@ import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-page
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { ViiOverline } from "../../shared/vii-overline";
 import { resolveAtelierFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -43,6 +45,29 @@ import { resolveAtelierFields } from "./fields";
  * When no video is set the mosaic is the primary (and only) hero element.
  */
 function AtelierHeroVideo({ src }: { src: string }) {
+  const [shown, setShown] = useState(false);
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShown(true), 60);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) setReduced(true);
+  }, []);
+
+  // Ken-Burns scale-settle on the media layer; pause/play button lives outside
+  // this wrapper so it stays fixed in position during the scale.
+  const mediaStyle: React.CSSProperties = reduced
+    ? {}
+    : {
+        transform: shown ? "scale(1)" : "scale(1.08)",
+        transition: "transform 2.2s var(--vii-ease)",
+      };
+
   return (
     <div
       style={{
@@ -53,7 +78,14 @@ function AtelierHeroVideo({ src }: { src: string }) {
         overflow: "hidden",
       }}
     >
-      <ServiceHeroVideo src={src} buttonClassName="vii-atelier-video-btn" />
+      {/* The Ken-Burns scale lives on the <video> itself (via the style prop),
+          so the pause/play button — a sibling of the video — stays fixed while
+          the media settles. The wrapper's overflow:hidden clips the bloom. */}
+      <ServiceHeroVideo
+        src={src}
+        buttonClassName="vii-atelier-video-btn"
+        style={mediaStyle}
+      />
       <style>{`
         .vii-atelier-video-btn {
           border-color: color-mix(in srgb, var(--vii-paper) 50%, transparent) !important;
@@ -79,6 +111,49 @@ function AtelierMosaic({
   serviceName: string;
   overline: string;
 }) {
+  const [shown, setShown] = useState(false);
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShown(true), 60);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) setReduced(true);
+  }, []);
+
+  // Ken-Burns scale-settle on the primary (large) mosaic cell image.
+  const mediaStyle: React.CSSProperties = reduced
+    ? {}
+    : {
+        transform: shown ? "scale(1)" : "scale(1.08)",
+        transition: "transform 2.2s var(--vii-ease)",
+      };
+
+  // Clip-path line-reveal on the oversized h1 — wipes up from below.
+  const headingStyle: React.CSSProperties = reduced
+    ? { opacity: 1 }
+    : {
+        opacity: shown ? 1 : 0,
+        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
+        transform: shown ? "translateY(0)" : "translateY(8px)",
+        transition:
+          "opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s",
+      };
+
+  // Staggered fade-rise for the overline (delay 0) — matches hero-section cascade.
+  const revealStyle = (delay: number): React.CSSProperties =>
+    reduced
+      ? { opacity: 1 }
+      : {
+          opacity: shown ? 1 : 0,
+          transform: shown ? "translateY(0)" : "translateY(20px)",
+          transition: `opacity 0.9s var(--vii-ease) ${delay}s, transform 0.9s var(--vii-ease) ${delay}s`,
+        };
+
   const imgs = galleryImages.slice(0, 5);
   const hasImages = imgs.length > 0;
 
@@ -105,7 +180,7 @@ function AtelierMosaic({
             gap: 3,
           }}
         >
-          {/* Cell 1 — large, spans 2 rows left */}
+          {/* Cell 1 — large, spans 2 rows left. Ken-Burns applied here. */}
           <div
             style={{
               gridColumn: "1",
@@ -122,7 +197,7 @@ function AtelierMosaic({
                 fill
                 priority
                 sizes="33vw"
-                style={{ objectFit: "cover" }}
+                style={{ objectFit: "cover", ...mediaStyle }}
               />
             )}
           </div>
@@ -196,28 +271,23 @@ function AtelierMosaic({
         }}
       >
         {overline && (
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "var(--vii-copper-light)",
-              marginBottom: 16,
-            }}
-          >
+          <ViiOverline tone="dark" align="left" style={{ ...revealStyle(0), marginBottom: 16 }}>
             {overline}
-          </p>
+          </ViiOverline>
         )}
 
         <h1
           style={{
+            ...headingStyle,
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(52px, 9vw, 120px)",
             lineHeight: 0.95,
             color: "var(--vii-paper)",
             margin: 0,
+            // Room below the baseline so the clip-path reveal doesn't shave
+            // Playfair descenders (g/y/p).
+            paddingBottom: "0.18em",
             maxWidth: 700,
           }}
         >
@@ -331,28 +401,28 @@ function TreatmentListRow({
   item,
   embedsEnabled,
   isLast,
+  index,
 }: {
   item: ServiceTemplateProps["items"][number];
   embedsEnabled: boolean;
   isLast: boolean;
+  index: number;
 }) {
-  const { ref, visible } = useViiReveal(0.1);
-
   const priceTiers = parseServicePriceTiers(item.priceTiers);
   const addOns = parseServiceAddOns(item.addOns);
 
   return (
     <div
-      ref={ref}
-      className={`vii-reveal vii-atelier-list-row${visible ? " is-visible" : ""}`}
+      className="vii-reveal-item vii-atelier-list-row"
       style={{
+        "--i": Math.min(index, 7),
         display: "grid",
         gridTemplateColumns: "1fr 1.4fr",
         gap: "clamp(24px, 4vw, 56px)",
         padding: "clamp(28px, 4vw, 48px) 0",
         borderBottom: isLast ? "none" : "1px solid var(--vii-tan)",
         alignItems: "start",
-      }}
+      } as React.CSSProperties & { "--i": number }}
     >
       {/* Left: name + meta */}
       <div>
@@ -730,6 +800,7 @@ function AtelierList({
   listIntro: string;
 }) {
   const { ref: headRef, visible: headVisible } = useViiReveal(0.08);
+  const { ref: rowsRef, visible: rowsVisible } = useViiReveal(0.06);
 
   return (
     <section
@@ -791,14 +862,18 @@ function AtelierList({
           )}
         </div>
 
-        {/* Treatment rows */}
-        <div>
+        {/* Treatment rows — stagger group: one observer, per-item --i cascade */}
+        <div
+          ref={rowsRef}
+          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+        >
           {items.map((item, i) => (
             <TreatmentListRow
               key={item.id}
               item={item}
               embedsEnabled={embedsEnabled}
               isLast={i === items.length - 1}
+              index={i}
             />
           ))}
         </div>

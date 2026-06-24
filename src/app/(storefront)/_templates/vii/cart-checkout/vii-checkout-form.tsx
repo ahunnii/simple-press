@@ -19,6 +19,7 @@ import {
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
 
+import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
 const formatPrice = (cents: number) =>
@@ -57,6 +58,7 @@ export function ViiCheckoutForm({
 }: Props) {
   const f = useCheckoutForm(business);
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const { ref, visible } = useViiReveal(0.05);
 
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
@@ -120,26 +122,31 @@ export function ViiCheckoutForm({
     // vii-contact-form class applies underline-input CSS from globals.css
     <form className="vii-contact-form" onSubmit={onSubmit}>
       <div
+        ref={ref}
         style={{
           display: "grid",
           gap: "clamp(32px, 4vw, 48px)",
           gridTemplateColumns: "1fr",
           alignItems: "start",
         }}
-        className="lg:grid-cols-[1fr_360px]"
+        className={`lg:grid-cols-[1fr_360px] vii-reveal-group${visible ? " is-visible" : ""}`}
       >
         {/* ── Left: fieldsets ─────────────────────────────────────────────── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
           {/* Contact Information */}
           <fieldset
             aria-labelledby="vii-co-contact-heading"
-            style={{
-              border: 0,
-              padding: 0,
-              margin: 0,
-              background: "var(--vii-paper)",
-              borderRadius: "var(--radius)",
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                border: 0,
+                padding: 0,
+                margin: 0,
+                background: "var(--vii-paper)",
+                borderRadius: "var(--radius)",
+                "--i": 0,
+              } as React.CSSProperties
+            }
           >
             <div
               style={{
@@ -238,10 +245,14 @@ export function ViiCheckoutForm({
             <div
               role="group"
               aria-labelledby="vii-co-delivery-heading"
-              style={{
-                background: "var(--vii-paper)",
-                borderRadius: "var(--radius)",
-              }}
+              className="vii-reveal-item"
+              style={
+                {
+                  background: "var(--vii-paper)",
+                  borderRadius: "var(--radius)",
+                  "--i": 1,
+                } as React.CSSProperties
+              }
             >
               <div
                 style={{
@@ -303,6 +314,7 @@ export function ViiCheckoutForm({
                       {f.deliveryMethod === "ship" && (
                         <span
                           aria-hidden="true"
+                          className="vii-fade-up"
                           style={{
                             width: 14,
                             height: 14,
@@ -357,6 +369,7 @@ export function ViiCheckoutForm({
                       {f.deliveryMethod === "pickup" && (
                         <span
                           aria-hidden="true"
+                          className="vii-fade-up"
                           style={{
                             width: 14,
                             height: 14,
@@ -396,6 +409,7 @@ export function ViiCheckoutForm({
                 </p>
                 {f.deliveryMethod === "pickup" && (
                   <div
+                    className="vii-fade-up"
                     style={{
                       marginTop: 12,
                       padding: "12px 14px",
@@ -457,6 +471,7 @@ export function ViiCheckoutForm({
           {f.deliveryMethod === "ship" && (
             <fieldset
               aria-labelledby="vii-co-shipping-heading"
+              className="vii-fade-up"
               style={{
                 border: 0,
                 padding: 0,
@@ -730,11 +745,15 @@ export function ViiCheckoutForm({
         {/* ── Right: Order Summary (sticky paper card) ─────────────────────── */}
         <div style={{ position: "sticky", top: 24 }}>
           <div
-            style={{
-              background: "var(--vii-paper)",
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--vii-hairline)",
-            }}
+            className="vii-reveal-item"
+            style={
+              {
+                background: "var(--vii-paper)",
+                borderRadius: "var(--radius)",
+                border: "1px solid var(--vii-hairline)",
+                "--i": 2,
+              } as React.CSSProperties
+            }
           >
             {/* Summary header */}
             <div
@@ -998,6 +1017,7 @@ export function ViiCheckoutForm({
                   <p
                     id="vii-discount-error"
                     role="alert"
+                    className="vii-fade-up"
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: 12,
@@ -1018,6 +1038,7 @@ export function ViiCheckoutForm({
                 {f.discountCodeLabel && f.discountAmount > 0 && (
                   <p
                     role="status"
+                    className="vii-fade-up"
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: 12,
@@ -1198,6 +1219,7 @@ export function ViiCheckoutForm({
               <div role="alert" aria-live="assertive" aria-atomic="true">
                 {f.error && (
                   <p
+                    className="vii-fade-up"
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: 13,
@@ -1220,7 +1242,10 @@ export function ViiCheckoutForm({
                 type="submit"
                 disabled={f.isProcessing || shippingCalculating}
                 aria-busy={f.isProcessing || shippingCalculating}
+                className="vii-cta-btn"
                 style={{
+                  position: "relative",
+                  overflow: "hidden",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

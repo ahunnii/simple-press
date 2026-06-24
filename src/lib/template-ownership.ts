@@ -40,7 +40,7 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   },
   vii: {
     label: "Skinbar VII",
-    subdomains: ["skinbarvii"],
+    subdomains: ["skinbar-vii", "demo"],
   },
 };
 

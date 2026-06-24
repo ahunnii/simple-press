@@ -38,6 +38,7 @@ import { api } from "~/trpc/react";
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { ViiProductRail } from "../../homepage/vii-product-rail";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { ViiOverline } from "../../shared/vii-overline";
 import { resolveLedgerFields } from "./fields";
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -75,16 +76,37 @@ function LedgerHero({
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
-  const ease = "cubic-bezier(0.16, 1, 0.3, 1)";
 
+  // Staggered fade-rise for overline, rule, description.
   const revealStyle = (delay: number): React.CSSProperties =>
     reduceMotion
       ? {}
       : {
           opacity: shown ? 1 : 0,
           transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.95s ${ease} ${delay}s, transform 0.95s ${ease} ${delay}s`,
+          transition: `opacity 0.95s var(--vii-ease) ${delay}s, transform 0.95s var(--vii-ease) ${delay}s`,
         };
+
+  // Clip-path line-reveal on the primary <h1> — more cinematic than a plain
+  // fade-rise. Mirrors headingStyle from vii-hero-section.tsx.
+  const headingStyle: React.CSSProperties = reduceMotion
+    ? {}
+    : {
+        opacity: shown ? 1 : 0,
+        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
+        transform: shown ? "translateY(0)" : "translateY(8px)",
+        transition: `opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s`,
+      };
+
+  // Slow Ken-Burns scale-settle on the background media — mirrors mediaStyle
+  // from vii-hero-section.tsx. Applied to the inner media wrapper (which is
+  // nested inside an overflow:hidden container so the scale is clipped).
+  const mediaStyle: React.CSSProperties = reduceMotion
+    ? {}
+    : {
+        transform: shown ? "scale(1)" : "scale(1.08)",
+        transition: `transform 2.2s var(--vii-ease)`,
+      };
 
   // ── Media branch (video or image): navy background + scrim + bottom-left overlay ──
   if (hasVideo || hasImage) {
@@ -100,18 +122,41 @@ function LedgerHero({
         }}
       >
         {hasVideo ? (
-          <div style={{ position: "absolute", inset: 0 }}>
-            <ServiceHeroVideo src={heroVideo!} buttonClassName="vii-ledger-video-btn" />
+          // The Ken-Burns scale lives on the <video> itself (via the style
+          // prop), not this wrapper — so the pause/play button, a sibling of
+          // the video, stays fixed while the media settles. overflow:hidden
+          // clips the scaled bloom.
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              overflow: "hidden",
+            }}
+          >
+            <ServiceHeroVideo
+              src={heroVideo!}
+              buttonClassName="vii-ledger-video-btn"
+              style={mediaStyle}
+            />
           </div>
         ) : (
-          <Image
-            src={heroImage!}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            style={{ objectFit: "cover" }}
-          />
+          // Image: apply Ken-Burns scale; section's overflow:hidden clips it.
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              ...mediaStyle,
+            }}
+          >
+            <Image
+              src={heroImage!}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              style={{ objectFit: "cover" }}
+            />
+          </div>
         )}
 
         {/* Navy scrim — stronger at the bottom where text sits */}
@@ -126,7 +171,7 @@ function LedgerHero({
           }}
         />
 
-        {/* Bottom-left name overlay */}
+        {/* Bottom-left name overlay — cascades in on entrance */}
         <div
           style={{
             position: "absolute",
@@ -139,28 +184,23 @@ function LedgerHero({
           }}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 10,
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
-                color: "var(--vii-copper-light)",
-                marginBottom: 16,
-              }}
-            >
+            <ViiOverline tone="dark" align="left" style={{ ...revealStyle(0), marginBottom: 16 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           <h1
             style={{
+              ...headingStyle,
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
               fontSize: "clamp(52px, 9vw, 120px)",
               lineHeight: 0.95,
               color: "var(--vii-paper)",
               margin: 0,
+              // Room below the baseline so the clip-path reveal doesn't shave
+              // Playfair descenders (g/y/p).
+              paddingBottom: "0.18em",
               maxWidth: 700,
             }}
           >
@@ -191,36 +231,14 @@ function LedgerHero({
     >
       <div style={{ maxWidth: 860 }}>
         {overline && (
-          <p
-            style={{
-              ...revealStyle(0),
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.26em",
-              textTransform: "uppercase",
-              color: "var(--vii-copper-deep)",
-              marginBottom: 18,
-            }}
-          >
+          <ViiOverline tone="light" align="left" style={{ ...revealStyle(0), marginBottom: 28 }}>
             {overline}
-          </p>
+          </ViiOverline>
         )}
-
-        {/* Thin copper rule beneath overline */}
-        <div
-          aria-hidden="true"
-          style={{
-            ...revealStyle(0.06),
-            width: 40,
-            height: 1,
-            background: "var(--vii-copper)",
-            marginBottom: 28,
-          }}
-        />
 
         <h1
           style={{
-            ...revealStyle(0.12),
+            ...headingStyle,
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontStyle: "italic",
@@ -229,6 +247,9 @@ function LedgerHero({
             color: "var(--vii-navy)",
             margin: 0,
             marginBottom: serviceDescription ? 24 : 0,
+            // Room below the baseline so the clip-path reveal doesn't shave
+            // Playfair descenders (g/y/p).
+            paddingBottom: "0.18em",
           }}
         >
           {serviceName}
@@ -290,18 +311,9 @@ function LedgerIntro({
           className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 10,
-                letterSpacing: "0.26em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-                marginBottom: 16,
-              }}
-            >
+            <ViiOverline tone="light" align="center" style={{ marginBottom: 16 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
 
           {(heading || headingAccent) && (
@@ -374,28 +386,30 @@ function TreatmentListRow({
   item,
   embedsEnabled,
   isLast,
+  index,
 }: {
   item: ServiceTemplateProps["items"][number];
   embedsEnabled: boolean;
   isLast: boolean;
+  index: number;
 }) {
-  const { ref, visible } = useViiReveal(0.1);
-
   const priceTiers = parseServicePriceTiers(item.priceTiers);
   const addOns = parseServiceAddOns(item.addOns);
 
   return (
     <div
-      ref={ref}
-      className={`vii-reveal vii-ledger-list-row${visible ? " is-visible" : ""}`}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1.4fr",
-        gap: "clamp(24px, 4vw, 56px)",
-        padding: "clamp(28px, 4vw, 48px) 0",
-        borderBottom: isLast ? "none" : "1px solid var(--vii-tan)",
-        alignItems: "start",
-      }}
+      className="vii-reveal-item vii-ledger-list-row"
+      style={
+        {
+          "--i": Math.min(index, 7),
+          display: "grid",
+          gridTemplateColumns: "1fr 1.4fr",
+          gap: "clamp(24px, 4vw, 56px)",
+          padding: "clamp(28px, 4vw, 48px) 0",
+          borderBottom: isLast ? "none" : "1px solid var(--vii-tan)",
+          alignItems: "start",
+        } as React.CSSProperties
+      }
     >
       {/* Left: name + meta */}
       <div>
@@ -681,6 +695,7 @@ function LedgerList({
   listIntro: string;
 }) {
   const { ref: headRef, visible: headVisible } = useViiReveal(0.08);
+  const { ref: rowsRef, visible: rowsVisible } = useViiReveal(0.08);
 
   return (
     <section
@@ -742,14 +757,18 @@ function LedgerList({
           )}
         </div>
 
-        {/* Treatment rows */}
-        <div>
+        {/* Treatment rows — stagger group */}
+        <div
+          ref={rowsRef}
+          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+        >
           {items.map((item, i) => (
             <TreatmentListRow
               key={item.id}
               item={item}
               embedsEnabled={embedsEnabled}
               isLast={i === items.length - 1}
+              index={i}
             />
           ))}
         </div>

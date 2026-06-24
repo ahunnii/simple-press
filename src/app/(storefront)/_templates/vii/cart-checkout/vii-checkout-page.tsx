@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 
 import { resolveFields } from "..";
+import { ViiReveal } from "../shared/vii-reveal";
 import { ViiCheckoutForm } from "./vii-checkout-form";
 
 export async function ViiCheckoutPage({
@@ -42,7 +43,7 @@ export async function ViiCheckoutPage({
           minHeight: "60vh",
         }}
       >
-        <div style={{ maxWidth: 480, textAlign: "center" }}>
+        <ViiReveal style={{ maxWidth: 480, textAlign: "center" }}>
           <span
             aria-hidden="true"
             style={{
@@ -79,7 +80,10 @@ export async function ViiCheckoutPage({
           </p>
           <Link
             href="/shop"
+            className="vii-cta-btn"
             style={{
+              position: "relative",
+              overflow: "hidden",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -97,7 +101,7 @@ export async function ViiCheckoutPage({
           >
             Back to shop
           </Link>
-        </div>
+        </ViiReveal>
       </div>
     );
   }
@@ -113,7 +117,7 @@ export async function ViiCheckoutPage({
             "clamp(184px, 17vw, 232px) clamp(24px, 6vw, 96px) clamp(28px, 3vw, 40px)",
         }}
       >
-        <div
+        <ViiReveal
           style={{
             maxWidth: 1280,
             margin: "0 auto",
@@ -139,21 +143,21 @@ export async function ViiCheckoutPage({
 
           <Link
             href="/cart"
+            className="vii-nav-link"
             style={{
+              position: "relative",
               fontFamily: "var(--font-sans)",
               fontSize: 13,
               letterSpacing: "0.04em",
               color: "var(--vii-ink-soft)",
               textDecoration: "none",
-              borderBottom: "1px solid var(--vii-hairline)",
-              paddingBottom: 1,
-              transition: "color 0.15s ease, border-color 0.15s ease",
+              transition: "color 0.15s ease",
               flexShrink: 0,
             }}
           >
             <span aria-hidden="true">←</span> Back to cart
           </Link>
-        </div>
+        </ViiReveal>
       </div>
 
       {/* Form area */}

@@ -147,8 +147,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.instagram && (
                   <a
                     href={socialLinks.instagram}
-                    className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)" }}
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
                     aria-label="Instagram"
                   >
                     <InstagramIcon className="h-4 w-4" />
@@ -157,8 +157,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.facebook && (
                   <a
                     href={socialLinks.facebook}
-                    className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)" }}
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
                     aria-label="Facebook"
                   >
                     <FacebookIcon className="h-4 w-4" />
@@ -167,8 +167,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.twitter && (
                   <a
                     href={socialLinks.twitter}
-                    className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)" }}
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
                     aria-label="X (Twitter)"
                   >
                     <TwitterIcon className="h-4 w-4" />
@@ -177,8 +177,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.tiktok && (
                   <a
                     href={socialLinks.tiktok}
-                    className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)" }}
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
                     aria-label="TikTok"
                   >
                     <TikTokIcon className="h-4 w-4" />
@@ -273,8 +273,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                     {email && (
                       <a
                         href={`mailto:${email}`}
-                        className="block transition-opacity hover:opacity-80"
-                        style={{ color: "inherit" }}
+                        className="block hover:opacity-80"
+                        style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
                       >
                         {email}
                       </a>
@@ -282,8 +282,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                     {phone && (
                       <a
                         href={`tel:${phone.replace(/\s/g, "")}`}
-                        className="block transition-opacity hover:opacity-80"
-                        style={{ color: "inherit" }}
+                        className="block hover:opacity-80"
+                        style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
                       >
                         {phone}
                       </a>
@@ -329,16 +329,16 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           {privacyPolicy ? (
             <Link
               href={`/${privacyPolicy.slug}`}
-              className="transition-opacity hover:opacity-80"
-              style={{ color: "inherit" }}
+              className="hover:opacity-80"
+              style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
             >
               Privacy Policy
             </Link>
           ) : (
             <Link
               href="/platform/policies/privacy-policy"
-              className="transition-opacity hover:opacity-80"
-              style={{ color: "inherit" }}
+              className="hover:opacity-80"
+              style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
             >
               Privacy Policy
             </Link>
@@ -347,16 +347,16 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
           {termsOfService ? (
             <Link
               href={`/${termsOfService.slug}`}
-              className="transition-opacity hover:opacity-80"
-              style={{ color: "inherit" }}
+              className="hover:opacity-80"
+              style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
             >
               Terms of Service
             </Link>
           ) : (
             <Link
               href="/platform/policies/terms-of-service"
-              className="transition-opacity hover:opacity-80"
-              style={{ color: "inherit" }}
+              className="hover:opacity-80"
+              style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
             >
               Terms of Service
             </Link>
@@ -364,8 +364,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
           <Link
             href="/platform/policies/"
-            className="transition-opacity hover:opacity-80"
-            style={{ color: "inherit" }}
+            className="hover:opacity-80"
+            style={{ color: "inherit", transition: "opacity 0.4s var(--vii-ease)" }}
           >
             Platform Policies
           </Link>
@@ -408,7 +408,7 @@ function ViiFooterCol({
                 color: "var(--vii-navy)",
                 textDecoration: "none",
                 lineHeight: 1.5,
-                transition: "opacity 0.2s",
+                transition: "opacity 0.4s var(--vii-ease)",
                 opacity: 0.85,
               }}
               className="hover:opacity-100"

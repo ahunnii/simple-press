@@ -7,6 +7,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductCard } from "../shared/vii-product-card";
 
 type FeaturedProduct = NonNullable<
@@ -48,25 +49,20 @@ export function ViiProductRail({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal-group${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 1200, margin: "0 auto" }}
       >
         {/* Header — left-aligned label + heading with a hairline rule */}
-        <div style={{ marginBottom: "clamp(32px, 4.5vw, 52px)" }}>
+        <div
+          className="vii-reveal-item"
+          style={
+            { "--i": 0, marginBottom: "clamp(32px, 4.5vw, 52px)" } as React.CSSProperties
+          }
+        >
           {overline && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.24em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                color: "var(--vii-ink-soft)",
-                margin: "0 0 6px",
-              }}
-            >
+            <ViiOverline tone="light" style={{ marginBottom: 6 }}>
               {overline}
-            </p>
+            </ViiOverline>
           )}
           {heading && (
             <h2
@@ -103,18 +99,30 @@ export function ViiProductRail({
           }}
         >
           {shown.map((product, i) => (
-            <ViiProductCard
+            <div
               key={product.id}
-              product={product as unknown as Product}
-              index={i}
-            />
+              className="vii-reveal-item"
+              style={{ "--i": Math.min(i + 1, 7) } as React.CSSProperties}
+            >
+              <ViiProductCard
+                product={product as unknown as Product}
+                index={i}
+              />
+            </div>
           ))}
         </div>
 
         {/* CTA */}
         {ctaText && (
           <div
-            style={{ textAlign: "center", marginTop: "clamp(36px, 5vw, 56px)" }}
+            className="vii-reveal-item"
+            style={
+              {
+                "--i": Math.min(shown.length + 1, 8),
+                textAlign: "center",
+                marginTop: "clamp(36px, 5vw, 56px)",
+              } as React.CSSProperties
+            }
           >
             <Link
               href={ctaHref}

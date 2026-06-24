@@ -121,7 +121,10 @@ export function ViiCartContents({
 
         <Link
           href="/shop"
+          className="vii-cta-btn"
           style={{
+            position: "relative",
+            overflow: "hidden",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -156,7 +159,7 @@ export function ViiCartContents({
   return (
     <div
       ref={ref}
-      className={`vii-reveal${visible ? " is-visible" : ""} grid grid-cols-1 items-start lg:grid-cols-[1fr_360px]`}
+      className={`vii-reveal-group${visible ? " is-visible" : ""} grid grid-cols-1 items-start lg:grid-cols-[1fr_360px]`}
       style={{ gap: "clamp(32px, 5vw, 64px)" }}
     >
       {/* Visually-hidden section heading keeps the h1 → h2 → h3 order intact */}
@@ -177,13 +180,17 @@ export function ViiCartContents({
             <div
               key={`${item.productId}-${item.variantId ?? "no-variant"}`}
               role="listitem"
-              style={{
-                display: "flex",
-                gap: "clamp(16px, 3vw, 28px)",
-                padding: "clamp(20px, 3vh, 32px) 0",
-                borderTop:
-                  index === 0 ? "none" : "1px solid var(--vii-hairline)",
-              }}
+              className="vii-reveal-item"
+              style={
+                {
+                  display: "flex",
+                  gap: "clamp(16px, 3vw, 28px)",
+                  padding: "clamp(20px, 3vh, 32px) 0",
+                  borderTop:
+                    index === 0 ? "none" : "1px solid var(--vii-hairline)",
+                  "--i": Math.min(index, 7),
+                } as React.CSSProperties
+              }
             >
               {/* Product image — square paper field, object-contain */}
               <div
@@ -483,7 +490,11 @@ export function ViiCartContents({
       </div>
 
       {/* ── Order summary card (sticky on large screens) ─────────────── */}
-      <aside aria-label="Order summary">
+      <aside
+        aria-label="Order summary"
+        className="vii-reveal-item"
+        style={{ "--i": Math.min(items.length, 7) } as React.CSSProperties}
+      >
         <div
           style={{
             position: "sticky",
@@ -605,7 +616,10 @@ export function ViiCartContents({
           {/* CTA — Continue to checkout */}
           <Link
             href="/checkout"
+            className="vii-cta-btn"
             style={{
+              position: "relative",
+              overflow: "hidden",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

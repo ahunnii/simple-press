@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { Check, ShoppingBag } from "lucide-react";
 
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
@@ -76,7 +76,7 @@ export function ViiProductCard({ product, index }: Props) {
             src={productImage}
             alt=""
             fill
-            className="object-cover transition-opacity duration-500 group-hover:opacity-90"
+            className="object-contain p-[5%] transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.04] group-hover:opacity-90"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
@@ -123,16 +123,30 @@ export function ViiProductCard({ product, index }: Props) {
               type="button"
               onClick={handleAddToCart}
               aria-label={`Add ${product.name} to bag`}
+              data-vii-pulse=""
               className="flex w-full items-center justify-center gap-2 py-3 text-[10px] tracking-[0.22em] uppercase transition-opacity hover:opacity-90"
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 500,
-                background: "var(--vii-copper-deep)",
+                background: isAdded
+                  ? "var(--vii-navy)"
+                  : "var(--vii-copper-deep)",
                 color: "var(--vii-paper)",
+                transition: "background 0.3s var(--vii-ease)",
+                animation: isAdded ? "vii-pulse 0.42s var(--vii-ease)" : "none",
               }}
             >
-              <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
-              Add to bag
+              {isAdded ? (
+                <>
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                  Added
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
+                  Add to bag
+                </>
+              )}
             </button>
           </div>
         )}
