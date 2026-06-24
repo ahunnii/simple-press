@@ -11,6 +11,7 @@ import {
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
+import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
   createTRPCRouter,
@@ -35,6 +36,7 @@ export const businessRouter = createTRPCRouter({
         name: true,
         templateId: true,
         businessAddress: true,
+        businessHours: true,
         supportEmail: true,
         phoneNumber: true,
         customDomain: true,
@@ -122,6 +124,7 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         featureFlags: true,
         businessAddress: true,
+        businessHours: true,
         stripeAccountId: true,
         supportEmail: true,
         phoneNumber: true,
@@ -855,6 +858,16 @@ export const businessRouter = createTRPCRouter({
         message: "Shipping settings updated successfully",
         business: updatedBusiness,
       };
+    }),
+
+  updateBusinessHours: ownerAdminProcedure
+    .input(z.object({ businessHours: businessHoursSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      return ctx.db.business.update({
+        where: { id: businessId },
+        data: { businessHours: input.businessHours as Prisma.InputJsonValue },
+      });
     }),
 
   updateSeo: ownerAdminProcedure

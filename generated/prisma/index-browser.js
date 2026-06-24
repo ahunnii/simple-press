@@ -215,6 +215,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   pickupInstructions: 'pickupInstructions',
   originState: 'originState',
   shippingWeightTiers: 'shippingWeightTiers',
+  businessHours: 'businessHours',
   shippingFallbackRate: 'shippingFallbackRate',
   shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
   salesCountries: 'salesCountries'

@@ -10714,6 +10714,7 @@ export namespace Prisma {
     pickupInstructions: number
     originState: number
     shippingWeightTiers: number
+    businessHours: number
     shippingFallbackRate: number
     shippingDefaultItemWeightLb: number
     salesCountries: number
@@ -10844,6 +10845,7 @@ export namespace Prisma {
     pickupInstructions?: true
     originState?: true
     shippingWeightTiers?: true
+    businessHours?: true
     shippingFallbackRate?: true
     shippingDefaultItemWeightLb?: true
     salesCountries?: true
@@ -10971,6 +10973,7 @@ export namespace Prisma {
     pickupInstructions: string | null
     originState: string | null
     shippingWeightTiers: JsonValue | null
+    businessHours: JsonValue | null
     shippingFallbackRate: number | null
     shippingDefaultItemWeightLb: number | null
     salesCountries: string[]
@@ -11030,6 +11033,7 @@ export namespace Prisma {
     pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
+    businessHours?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
@@ -11091,6 +11095,7 @@ export namespace Prisma {
     pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
+    businessHours?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
@@ -11131,6 +11136,7 @@ export namespace Prisma {
     pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
+    businessHours?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
@@ -11171,12 +11177,13 @@ export namespace Prisma {
     pickupInstructions?: boolean
     originState?: boolean
     shippingWeightTiers?: boolean
+    businessHours?: boolean
     shippingFallbackRate?: boolean
     shippingDefaultItemWeightLb?: boolean
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11262,6 +11269,7 @@ export namespace Prisma {
       pickupInstructions: string | null
       originState: string | null
       shippingWeightTiers: Prisma.JsonValue | null
+      businessHours: Prisma.JsonValue | null
       shippingFallbackRate: number | null
       shippingDefaultItemWeightLb: number | null
       salesCountries: string[]
@@ -11742,6 +11750,7 @@ export namespace Prisma {
     readonly pickupInstructions: FieldRef<"Business", 'String'>
     readonly originState: FieldRef<"Business", 'String'>
     readonly shippingWeightTiers: FieldRef<"Business", 'Json'>
+    readonly businessHours: FieldRef<"Business", 'Json'>
     readonly shippingFallbackRate: FieldRef<"Business", 'Int'>
     readonly shippingDefaultItemWeightLb: FieldRef<"Business", 'Float'>
     readonly salesCountries: FieldRef<"Business", 'String[]'>
@@ -50839,6 +50848,7 @@ export namespace Prisma {
     pickupInstructions: 'pickupInstructions',
     originState: 'originState',
     shippingWeightTiers: 'shippingWeightTiers',
+    businessHours: 'businessHours',
     shippingFallbackRate: 'shippingFallbackRate',
     shippingDefaultItemWeightLb: 'shippingDefaultItemWeightLb',
     salesCountries: 'salesCountries'
@@ -52036,6 +52046,7 @@ export namespace Prisma {
     pickupInstructions?: StringNullableFilter<"Business"> | string | null
     originState?: StringNullableFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableFilter<"Business">
+    businessHours?: JsonNullableFilter<"Business">
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
@@ -52096,6 +52107,7 @@ export namespace Prisma {
     pickupInstructions?: SortOrderInput | SortOrder
     originState?: SortOrderInput | SortOrder
     shippingWeightTiers?: SortOrderInput | SortOrder
+    businessHours?: SortOrderInput | SortOrder
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
     salesCountries?: SortOrder
@@ -52159,6 +52171,7 @@ export namespace Prisma {
     pickupInstructions?: StringNullableFilter<"Business"> | string | null
     originState?: StringNullableFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableFilter<"Business">
+    businessHours?: JsonNullableFilter<"Business">
     shippingFallbackRate?: IntNullableFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
@@ -52219,6 +52232,7 @@ export namespace Prisma {
     pickupInstructions?: SortOrderInput | SortOrder
     originState?: SortOrderInput | SortOrder
     shippingWeightTiers?: SortOrderInput | SortOrder
+    businessHours?: SortOrderInput | SortOrder
     shippingFallbackRate?: SortOrderInput | SortOrder
     shippingDefaultItemWeightLb?: SortOrderInput | SortOrder
     salesCountries?: SortOrder
@@ -52267,6 +52281,7 @@ export namespace Prisma {
     pickupInstructions?: StringNullableWithAggregatesFilter<"Business"> | string | null
     originState?: StringNullableWithAggregatesFilter<"Business"> | string | null
     shippingWeightTiers?: JsonNullableWithAggregatesFilter<"Business">
+    businessHours?: JsonNullableWithAggregatesFilter<"Business">
     shippingFallbackRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
     shippingDefaultItemWeightLb?: FloatNullableWithAggregatesFilter<"Business"> | number | null
     salesCountries?: StringNullableListFilter<"Business">
@@ -55878,6 +55893,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -55938,6 +55954,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -55998,6 +56015,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -56058,6 +56076,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -56118,6 +56137,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -56158,6 +56178,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -56198,6 +56219,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -60431,6 +60453,7 @@ export namespace Prisma {
     pickupInstructions?: SortOrder
     originState?: SortOrder
     shippingWeightTiers?: SortOrder
+    businessHours?: SortOrder
     shippingFallbackRate?: SortOrder
     shippingDefaultItemWeightLb?: SortOrder
     salesCountries?: SortOrder
@@ -66515,6 +66538,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -66574,6 +66598,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -66692,6 +66717,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -66751,6 +66777,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -68561,6 +68588,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -68620,6 +68648,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -68695,6 +68724,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -68754,6 +68784,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -68813,6 +68844,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -68872,6 +68904,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -68947,6 +68980,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -69006,6 +69040,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -69102,6 +69137,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -69161,6 +69197,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -69509,6 +69546,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -69568,6 +69606,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -70085,6 +70124,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -70144,6 +70184,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -70241,6 +70282,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -70300,6 +70342,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -70643,6 +70686,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -70702,6 +70746,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -70825,6 +70870,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -70884,6 +70930,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -71159,6 +71206,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -71218,6 +71266,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -71388,6 +71437,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -71447,6 +71497,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -71543,6 +71594,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -71602,6 +71654,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -71984,6 +72037,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -72043,6 +72097,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -72399,6 +72454,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -72458,6 +72514,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -72820,6 +72877,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -72879,6 +72937,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -73740,6 +73799,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -73799,6 +73859,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -73954,6 +74015,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -74013,6 +74075,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -74253,6 +74316,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -74312,6 +74376,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -74682,6 +74747,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -74741,6 +74807,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -74924,6 +74991,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -74983,6 +75051,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75192,6 +75261,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -75251,6 +75321,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -75342,6 +75413,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75401,6 +75473,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75476,6 +75549,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -75535,6 +75609,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -75594,6 +75669,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75653,6 +75729,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75728,6 +75805,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -75787,6 +75865,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -75846,6 +75925,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75905,6 +75985,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -75980,6 +76061,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -76039,6 +76121,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -76098,6 +76181,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -76157,6 +76241,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -76264,6 +76349,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -76323,6 +76409,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -76497,6 +76584,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -76556,6 +76644,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -76678,6 +76767,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -76737,6 +76827,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -76849,6 +76940,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -76908,6 +77000,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -77030,6 +77123,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -77089,6 +77183,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -77807,6 +77902,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -77866,6 +77962,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -77978,6 +78075,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -78037,6 +78135,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -78139,6 +78238,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -78198,6 +78298,7 @@ export namespace Prisma {
     pickupInstructions?: string | null
     originState?: string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: number | null
     shippingDefaultItemWeightLb?: number | null
     salesCountries?: BusinessCreatesalesCountriesInput | string[]
@@ -78295,6 +78396,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]
@@ -78354,6 +78456,7 @@ export namespace Prisma {
     pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     originState?: NullableStringFieldUpdateOperationsInput | string | null
     shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
     shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
     shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
     salesCountries?: BusinessUpdatesalesCountriesInput | string[]

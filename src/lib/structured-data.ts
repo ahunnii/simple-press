@@ -18,6 +18,10 @@
  */
 
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
+import {
+  parseBusinessHours,
+  buildOpeningHoursSpecification,
+} from "~/lib/business-hours";
 
 // ---------------------------------------------------------------------------
 // Local type aliases mirroring the shape returned by tRPC / Prisma selects.
@@ -367,6 +371,7 @@ interface BusinessForLocalBusiness extends CanonicalBusiness {
   businessAddress?: string | null;
   phoneNumber?: string | null;
   supportEmail?: string | null;
+  businessHours?: unknown;
   siteContent?: {
     logoUrl?: string | null;
     socialLinks?: unknown;
@@ -413,6 +418,13 @@ export function buildLocalBusinessSchema(
   const sameAs = parseSameAs(business.siteContent?.socialLinks);
   if (sameAs) {
     schema.sameAs = sameAs;
+  }
+
+  const openingHours = buildOpeningHoursSpecification(
+    parseBusinessHours(business.businessHours),
+  );
+  if (openingHours.length) {
+    schema.openingHoursSpecification = openingHours;
   }
 
   return schema;

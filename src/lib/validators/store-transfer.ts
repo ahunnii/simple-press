@@ -76,6 +76,7 @@ const exportedBusinessSchema = z.object({
   pickupInstructions: nullableString.optional(),
   originState: nullableString.optional(),
   shippingWeightTiers: z.unknown(),
+  businessHours: z.unknown(),
   shippingFallbackRate: nullableNumber.optional(),
   shippingDefaultItemWeightLb: nullableNumber.optional(),
   salesCountries: z.array(z.string()),

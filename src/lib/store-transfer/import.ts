@@ -195,6 +195,7 @@ export async function importStoreBundle(args: {
         pickupInstructions: biz.pickupInstructions ?? null,
         originState: biz.originState ?? null,
         shippingWeightTiers: biz.shippingWeightTiers ?? undefined,
+        businessHours: biz.businessHours ?? undefined,
         shippingFallbackRate: biz.shippingFallbackRate ?? null,
         shippingDefaultItemWeightLb: biz.shippingDefaultItemWeightLb ?? null,
         salesCountries: biz.salesCountries,

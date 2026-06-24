@@ -10,6 +10,7 @@ type Props = {
   headingAccent: string;
   body: string;
   hours: string;
+  hourRows: { label: string; value: string }[];
   formHeading: string;
   address?: string;
   phone?: string;
@@ -58,6 +59,7 @@ export function ViiContactMain({
   headingAccent,
   body,
   hours,
+  hourRows,
   formHeading,
   address,
   phone,
@@ -167,7 +169,31 @@ export function ViiContactMain({
                 </a>
               </InfoBlock>
             )}
-            {hours && <InfoBlock label="Hours">{hours}</InfoBlock>}
+            {hourRows.length > 0 ? (
+              <InfoBlock label="Hours">
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {hourRows.map((row) => (
+                    <div
+                      key={row.label}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 16,
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "clamp(13px, 1.2vw, 15px)",
+                        lineHeight: 1.7,
+                        color: "var(--vii-navy)",
+                      }}
+                    >
+                      <span>{row.label}</span>
+                      <span style={{ color: "var(--vii-ink-soft)" }}>{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </InfoBlock>
+            ) : (
+              hours && <InfoBlock label="Hours">{hours}</InfoBlock>
+            )}
           </div>
         </div>
 
