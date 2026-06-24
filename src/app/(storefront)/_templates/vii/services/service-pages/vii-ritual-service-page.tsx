@@ -325,7 +325,7 @@ function RitualStep({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-ritual-step${isReversed ? "is-reversed" : ""}${visible ? "is-visible" : ""}`}
+      className={`vii-reveal vii-ritual-step${isReversed ? " is-reversed" : ""}${visible ? " is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
@@ -628,7 +628,9 @@ function RitualStepStyles() {
     <style>{`
       .vii-ritual-book button,
       .vii-ritual-book a {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        height: auto;
         padding: 13px 32px;
         background: transparent;
         color: var(--vii-navy) !important;

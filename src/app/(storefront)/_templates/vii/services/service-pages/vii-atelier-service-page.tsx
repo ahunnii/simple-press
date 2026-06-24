@@ -344,7 +344,7 @@ function TreatmentListRow({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-atelier-list-row${visible ? "is-visible" : ""}`}
+      className={`vii-reveal vii-atelier-list-row${visible ? " is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1.4fr",
@@ -590,7 +590,9 @@ function AtelierListStyles() {
     <style>{`
       .vii-atelier-book button,
       .vii-atelier-book a {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        height: auto;
         padding: 11px 0;
         background: transparent;
         color: var(--vii-navy) !important;
@@ -742,7 +744,7 @@ function AtelierList({
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal vii-atelier-list-row${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",

@@ -726,6 +726,15 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
   const [editingItem, setEditingItem] = useState<ServiceItem | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Re-sync local state when the server page hands down fresh data after
+  // router.refresh() (e.g. an added/edited item). Without this, useState only
+  // reads initialItems on first render, so new items don't appear until a full
+  // page reload. Delete/reorder mutate `items` directly, so this is a no-op for
+  // them once the server prop catches up.
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {

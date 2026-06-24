@@ -33,8 +33,8 @@ function StepRow({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-step-row${reversed ? "is-reversed" : ""}${
-        visible ? "is-visible" : ""
+      className={`vii-reveal vii-step-row${reversed ? " is-reversed" : ""}${
+        visible ? " is-visible" : ""
       }`}
       style={{
         display: "grid",
