@@ -49,7 +49,7 @@ export function ViiBlogSection({
         {/* ── Header ── */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{ maxWidth: 720, marginBottom: "clamp(36px, 5vw, 60px)" }}
         >
           <h2
@@ -95,7 +95,7 @@ export function ViiBlogSection({
         {/* ── Post cards ── */}
         <div
           ref={gridRef}
-          className={`vii-reveal${gridVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${gridVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",

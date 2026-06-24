@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Lightweight IntersectionObserver-based scroll-reveal hook.
@@ -13,15 +13,17 @@ import { useEffect, useRef, useState } from "react";
  * the element is always fully visible without animation.
  */
 export function useViiReveal(threshold = 0.1): {
-  ref: React.RefObject<HTMLDivElement | null>;
+  ref: (node: HTMLDivElement | null) => void;
   visible: boolean;
 } {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    const el = ref.current;
+  const ref = useCallback((node: HTMLDivElement | null) => {
+    if (node) setEl(node);
+  }, []);
 
+  useEffect(() => {
     // Arm the reveal system: the `.vii-js` flag gates the hidden state in CSS,
     // so without JS (or before this effect runs) content stays fully visible
     // rather than shipping blank. Added to the scope root on first mount.
@@ -52,7 +54,7 @@ export function useViiReveal(threshold = 0.1): {
 
     io.observe(el);
     return () => io.disconnect();
-  }, [threshold]);
+  }, [threshold, el]);
 
   return { ref, visible };
 }

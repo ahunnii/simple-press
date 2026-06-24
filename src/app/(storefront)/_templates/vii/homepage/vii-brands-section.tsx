@@ -73,7 +73,7 @@ export function ViiBrandsSection({ overline, heading, logos }: Props) {
         </div>
 
         {/* Logo row */}
-        <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
+        <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
           <ul
             style={{
               display: "flex",

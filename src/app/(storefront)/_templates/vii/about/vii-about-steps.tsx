@@ -146,7 +146,7 @@ export function ViiAboutSteps({
         {/* Header */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{
             textAlign: "center",
             maxWidth: 680,

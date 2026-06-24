@@ -317,7 +317,7 @@ export function ViiShopClient({
         >
           <div
             ref={ref}
-            className={`vii-reveal${visible ? "is-visible" : ""}`}
+            className={`vii-reveal${visible ? " is-visible" : ""}`}
             style={{ maxWidth: 1200, margin: "0 auto" }}
           >
             <div style={{ marginBottom: "clamp(28px, 4vw, 48px)" }}>

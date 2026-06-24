@@ -767,6 +767,389 @@ const viiAtelierFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
+// ─── vii-ledger ───────────────────────────────────────────────────────────────
+
+export const viiLedgerFields: TemplateField[] = [
+  // Hero
+  {
+    key: "vii-ledger.hero-video",
+    label: "Hero Video",
+    description:
+      "Optional hero video (MP4) shown as a single full-width media panel. Takes precedence over the hero image. Leave both blank for the minimal cream typographic hero.",
+    type: "video",
+    page: "homepage",
+    group: "vii-ledger.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "vii-ledger.hero-image",
+    label: "Hero Image",
+    description:
+      "Optional full-bleed hero image, used when no video is set.",
+    type: "image",
+    page: "homepage",
+    group: "vii-ledger.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "vii-ledger.hero-overline",
+    label: "Hero Overline",
+    description:
+      "Small all-caps eyebrow text above the service name (e.g. 'Skinbar VII · Services').",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Skinbar VII · Services",
+    placeholder: "e.g. Skinbar VII · Facials",
+  },
+
+  // Intro
+  {
+    key: "vii-ledger.intro-overline",
+    label: "Intro Overline",
+    description: "Small all-caps label above the intro heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. The Experience",
+  },
+  {
+    key: "vii-ledger.intro-heading",
+    label: "Intro Heading",
+    description: "Primary serif heading in the intro block.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. Designed for your skin.",
+  },
+  {
+    key: "vii-ledger.intro-heading-accent",
+    label: "Intro Heading Accent",
+    description:
+      "Italic copper-coloured word or phrase appended to the heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. your skin.",
+  },
+  {
+    key: "vii-ledger.intro-body",
+    label: "Intro Body",
+    description: "Rich-text description of what this service category offers.",
+    type: "richtext",
+    page: "homepage",
+    group: "vii-ledger.intro",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    placeholder: "Describe the experience guests can expect…",
+  },
+  {
+    key: "vii-ledger.intro-image",
+    label: "Intro Image",
+    description:
+      "Optional image shown beneath the intro body text. Displayed centered with a max-width of 680px.",
+    type: "image",
+    page: "homepage",
+    group: "vii-ledger.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "vii-ledger.intro-video",
+    label: "Intro Video",
+    description:
+      "Optional video (MP4) shown beneath the intro body text. Takes precedence over the intro image when set.",
+    type: "video",
+    page: "homepage",
+    group: "vii-ledger.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+
+  // Treatment list
+  {
+    key: "vii-ledger.list-heading",
+    label: "Treatment List Heading",
+    description:
+      "Heading for the refined treatment list section. Leave blank for the default 'Our treatments' heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.list",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. The Collection",
+  },
+  {
+    key: "vii-ledger.list-intro",
+    label: "Treatment List Intro",
+    description:
+      "Short paragraph shown to the right of the list heading, describing the service collection.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-ledger.list",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    placeholder: "Briefly describe the treatment collection…",
+  },
+
+  // Notes (gratuity / cancellation)
+  {
+    key: "vii-ledger.notes-heading",
+    label: "Notes Heading",
+    description: "Optional heading for the fine-print band. Clear to hide it.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.notes",
+    gridColumn: "col-span-full",
+    defaultValue: "Before you book",
+    placeholder: "e.g. Before you book",
+  },
+  {
+    key: "vii-ledger.notes-gratuity",
+    label: "Gratuity Note",
+    description:
+      "Short note about gratuity policy. Clear to hide this item.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-ledger.notes",
+    gridColumn: "col-span-1",
+    defaultValue: "A 15% gratuity is added to all services.",
+    placeholder: "e.g. A 15% gratuity is added to all services.",
+  },
+  {
+    key: "vii-ledger.notes-cancellation",
+    label: "Cancellation Policy",
+    description:
+      "Short note about cancellation or rescheduling. Clear to hide this item.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-ledger.notes",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Please allow at least 48 hours' notice to cancel or reschedule an appointment.",
+    placeholder: "e.g. Please allow at least 48 hours' notice…",
+  },
+
+  // Product Rail
+  {
+    key: "vii-ledger.rail-overline",
+    label: "Product Rail Overline",
+    description: "Small caps label above the product rail heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. Our favorites",
+  },
+  {
+    key: "vii-ledger.rail-heading",
+    label: "Product Rail Heading",
+    description: "Section heading for the featured product rail.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "Take it home",
+    placeholder: "e.g. Take it home",
+  },
+  {
+    key: "vii-ledger.rail-collection",
+    label: "Product Rail Collection",
+    description:
+      "Pick a collection to feature. Defaults to your latest products when left empty.",
+    type: "collection",
+    page: "homepage",
+    group: "vii-ledger.rail",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-ledger.rail-featured-only",
+    label: "Show featured products only",
+    description:
+      "When no collection is selected: on shows only products you've marked Featured; off shows your most recent products.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ledger.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+  {
+    key: "vii-ledger.rail-cta-text",
+    label: "Product Rail CTA Text",
+    description: "Text for the 'shop all' link below the product rail.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop all products",
+    placeholder: "e.g. Shop all products",
+  },
+  {
+    key: "vii-ledger.rail-cta-url",
+    label: "Product Rail CTA URL",
+    description: "URL the product rail CTA link points to.",
+    type: "url",
+    page: "homepage",
+    group: "vii-ledger.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
+  },
+
+  // Closing CTA
+  {
+    key: "vii-ledger.cta-image",
+    label: "Closing CTA Image",
+    description:
+      "Background image for the closing contact CTA section (shown at 30% opacity behind the navy overlay).",
+    type: "image",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "vii-ledger.cta-heading",
+    label: "Closing CTA Heading",
+    description: "Large italic serif heading in the closing CTA block.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Reserve your appointment.",
+    placeholder: "e.g. Reserve your appointment.",
+  },
+  {
+    key: "vii-ledger.cta-subheading",
+    label: "Closing CTA Subheading",
+    description: "Small all-caps line below the heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Detroit · By Appointment",
+    placeholder: "e.g. Detroit · By Appointment",
+  },
+  {
+    key: "vii-ledger.cta-body",
+    label: "Closing CTA Body",
+    description: "Short paragraph inviting guests to book.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Our specialists are ready to help you book. Reach out to reserve your session.",
+    placeholder: "Invite guests to book or call…",
+  },
+  {
+    key: "vii-ledger.cta-button-label",
+    label: "Closing CTA Button Label",
+    description:
+      "Label for the primary action button in the closing CTA. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "e.g. Book Now",
+  },
+  {
+    key: "vii-ledger.cta-button-url",
+    label: "Closing CTA Button URL",
+    description:
+      "URL the CTA button links to (e.g. an external booking page). Required for the button to appear.",
+    type: "url",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "https://…",
+  },
+  {
+    key: "vii-ledger.cta-embed",
+    label: "Closing CTA Embed",
+    description:
+      "Optional embed (e.g. a booking widget) shown in the closing CTA section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
+    type: "iframe",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-ledger.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+];
+
+const viiLedgerFieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "vii-ledger.hero",
+    title: "Hero",
+    description:
+      "Optional single image or video (video takes precedence) and overline. Leave media blank for the minimal cream typographic hero.",
+    icon: "🎬",
+    columns: 1,
+  },
+  {
+    id: "vii-ledger.intro",
+    title: "Introduction",
+    description:
+      "Optional overline, split heading, rich-text body, and an image or video below. Hidden entirely when left blank.",
+    icon: "✍️",
+    columns: 2,
+  },
+  {
+    id: "vii-ledger.list",
+    title: "Treatment List",
+    description:
+      "Optional heading and intro paragraph for the two-column treatment table.",
+    icon: "📋",
+    columns: 1,
+  },
+  {
+    id: "vii-ledger.notes",
+    title: "Before You Book",
+    description:
+      "A short fine-print band shown under the treatment prices — gratuity and cancellation policy. Clear a line to hide it.",
+    icon: "📝",
+    columns: 2,
+  },
+  {
+    id: "vii-ledger.rail",
+    title: "Product Rail",
+    description:
+      "A row of products shown below the note. Defaults to your latest products; pick a collection to feature specific ones.",
+    icon: "🛍️",
+    columns: 2,
+  },
+  {
+    id: "vii-ledger.cta",
+    title: "Closing Call to Action",
+    description:
+      "Background image, heading, body copy, button, embed, and contact details for the closing navy CTA section",
+    icon: "📞",
+    columns: 2,
+  },
+];
+
 // ─── Exported defs ────────────────────────────────────────────────────────────
 
 // ─── Bound field resolvers (one per template) ─────────────────────────────────
@@ -804,6 +1187,17 @@ export function resolveAtelierFields(
   return resolveTemplateFields(customFields, keys, _atelierFieldMap);
 }
 
+const _ledgerFieldMap = new Map<string, TemplateField>(
+  viiLedgerFields.map((f) => [f.key, f]),
+);
+
+export function resolveLedgerFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _ledgerFieldMap);
+}
+
 // ─── Exported defs ────────────────────────────────────────────────────────────
 
 export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
@@ -830,5 +1224,13 @@ export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
       "Gallery-forward mosaic hero (or hero video), a large italic pull quote on navy with optional media, and a refined two-column treatment table with inline Book links.",
     fields: viiAtelierFields,
     fieldGroups: viiAtelierFieldGroups,
+  },
+  {
+    id: "vii-ledger",
+    label: "Ledger",
+    description:
+      "Minimal, type-led layout for services without photography: a cream typographic hero (or an optional single image/video), an optional centred intro, and a refined two-column treatment table with inline Book links.",
+    fields: viiLedgerFields,
+    fieldGroups: viiLedgerFieldGroups,
   },
 ];

@@ -255,7 +255,7 @@ function PullQuote({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 760, margin: "0 auto" }}
       >
         {/* Opening quotation mark */}
@@ -309,7 +309,7 @@ function PullQuote({
       {/* Optional media beneath the quote — contained within the navy band */}
       <div
         ref={mediaRef}
-        className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+        className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
       >
         <ServiceSectionMedia
           imageSrc={quoteImageSrc}

@@ -48,7 +48,7 @@ export function ViiProductRail({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 1200, margin: "0 auto" }}
       >
         {/* Header — left-aligned label + heading with a hairline rule */}

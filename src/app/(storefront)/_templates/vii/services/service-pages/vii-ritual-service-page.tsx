@@ -218,7 +218,7 @@ function RitualPhilosophy({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}
       >
         {overline && (
@@ -288,7 +288,7 @@ function RitualPhilosophy({
       {(Boolean(philosophyImageSrc) || Boolean(philosophyVideoSrc)) && (
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
         >
           <ServiceSectionMedia
             imageSrc={philosophyImageSrc}

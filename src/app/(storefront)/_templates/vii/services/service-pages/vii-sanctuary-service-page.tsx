@@ -304,7 +304,7 @@ function SanctuaryIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <p
@@ -346,7 +346,7 @@ function SanctuaryIntro({
         {(bodyJson ?? bodyFallback) && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             {bodyJson ? (
@@ -381,7 +381,7 @@ function SanctuaryIntro({
         {(Boolean(introImageSrc) || Boolean(introVideoSrc)) && (
           <div
             ref={mediaRef}
-            className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           >
             <ServiceSectionMedia
               imageSrc={introImageSrc}
@@ -415,7 +415,7 @@ function BenefitsStrip({ benefits }: { benefits: string[] }) {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{
           maxWidth: 1100,
           margin: "0 auto",
@@ -481,7 +481,7 @@ function TreatmentCard({
   return (
     <article
       ref={ref}
-      className={`vii-reveal${visible ? "is-visible" : ""}`}
+      className={`vii-reveal${visible ? " is-visible" : ""}`}
       style={{
         transitionDelay: `${index * 0.07}s`,
         background: "var(--vii-paper)",
@@ -921,7 +921,7 @@ function TreatmentMenu({
         {/* Section heading */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{ marginBottom: "clamp(40px, 6vw, 64px)" }}
         >
           <p

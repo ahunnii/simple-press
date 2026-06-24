@@ -32,7 +32,7 @@ function MemberCard({
   return (
     <div
       ref={ref}
-      className={`vii-reveal${visible ? "is-visible" : ""}`}
+      className={`vii-reveal${visible ? " is-visible" : ""}`}
       style={{ transitionDelay: `${index * 0.05}s` }}
     >
       {/* Portrait */}
@@ -129,7 +129,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
         {/* Header */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{
             textAlign: "center",
             maxWidth: 680,

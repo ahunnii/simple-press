@@ -381,7 +381,7 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
             {cover && (
               <div
                 ref={coverRef}
-                className={`vii-reveal${coverVisible ? "is-visible" : ""}`}
+                className={`vii-reveal${coverVisible ? " is-visible" : ""}`}
                 style={{ marginBottom: "clamp(48px, 7vw, 88px)" }}
               >
                 <CoverStory post={cover} image={coverImage} />
@@ -416,7 +416,7 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
 
                 <div
                   ref={rowsRef}
-                  className={`vii-reveal${rowsVisible ? "is-visible" : ""}`}
+                  className={`vii-reveal${rowsVisible ? " is-visible" : ""}`}
                 >
                   {rows.map((post, i) => (
                     <JournalRow
