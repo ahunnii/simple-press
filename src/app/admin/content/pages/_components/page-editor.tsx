@@ -5,8 +5,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, ExternalLink, PlusCircle, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -45,11 +46,24 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
+
+const NEW_PAGE_DEFAULTS = {
+  title: "",
+  slug: "",
+  content: { ...EMPTY_TIPTAP_DOC },
+  excerpt: "",
+  published: true,
+  metaTitle: "",
+  metaDescription: "",
+  image: undefined,
+  imageFile: undefined,
+};
 
 // Form schema
 const pageFormSchema = z.object({
@@ -60,6 +74,8 @@ const pageFormSchema = z.object({
   published: z.boolean(),
   metaTitle: z.string().optional().nullable(),
   metaDescription: z.string().optional().nullable(),
+  imageFile: z.instanceof(File).optional().nullable(),
+  image: z.string().url().optional().nullable(),
 });
 
 type PageFormValues = z.infer<typeof pageFormSchema>;
@@ -74,6 +90,7 @@ type PageEditorProps = {
     published: boolean;
     metaTitle: string | null;
     metaDescription: string | null;
+    image: string | null;
   };
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
@@ -87,6 +104,8 @@ export function PageEditor({
   const router = useRouter();
   const utils = api.useUtils();
   const formRef = useRef<HTMLFormElement>(null);
+  const imageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const createAnotherRef = useRef<boolean>(false);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   // Initialize form with TipTap content
@@ -97,9 +116,19 @@ export function PageEditor({
       slug: page?.slug ?? "",
       content: page?.content ?? { ...EMPTY_TIPTAP_DOC },
       excerpt: page?.excerpt ?? "",
-      published: page?.published ?? false,
+      published: page?.published ?? true,
       metaTitle: page?.metaTitle ?? "",
       metaDescription: page?.metaDescription ?? "",
+      image: page?.image ?? undefined,
+      imageFile: undefined,
+    },
+  });
+
+  const imageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
     },
   });
 
@@ -132,19 +161,32 @@ export function PageEditor({
       slug: data?.slug ?? page?.slug ?? "",
       content: data?.content ?? page?.content ?? EMPTY_TIPTAP_DOC,
       excerpt: data?.excerpt ?? page?.excerpt ?? "",
-      published: data?.published ?? page?.published ?? false,
+      published: data?.published ?? page?.published ?? true,
       metaTitle: data?.metaTitle ?? page?.metaTitle ?? "",
       metaDescription: data?.metaDescription ?? page?.metaDescription ?? "",
+      image:
+        data !== undefined ? (data.image ?? null) : (page?.image ?? undefined),
+      imageFile: undefined,
     });
+    if (imageFileInputRef.current) imageFileInputRef.current.value = "";
   };
 
   const createPage = api.content.createPage.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
-      toast.success("Page created successfully");
-      router.push(`/admin/content/pages/${data.id}`);
+      if (createAnotherRef.current) {
+        createAnotherRef.current = false;
+        form.reset(NEW_PAGE_DEFAULTS);
+        if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+        toast.success("Page created — add another");
+        router.push("/admin/content/pages/new");
+      } else {
+        toast.success("Page created successfully");
+        router.push(`/admin/content/pages/${data.id}`);
+      }
     },
     onError: (error) => {
+      createAnotherRef.current = false;
       toast.dismiss();
       toast.error(error.message || "Failed to create page");
     },
@@ -189,10 +231,30 @@ export function PageEditor({
   });
 
   const onSubmit = async (data: PageFormValues) => {
+    let imageUrl: string | null | undefined;
+    const imageFile = data.imageFile;
+    if (imageFile === null) {
+      imageUrl = null;
+    } else if (imageFile instanceof File) {
+      try {
+        const response = await imageUploader.upload(imageFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        if (fileLocation) imageUrl = fileLocation;
+      } catch {
+        toast.error("Failed to upload image.");
+        return;
+      }
+    } else {
+      imageUrl = data.image ?? undefined;
+    }
+
     const pageData = {
       title: data.title,
       slug: data.slug,
       content: data.content, // TipTap JSON
+      image: imageUrl,
       excerpt: data.excerpt ?? "",
       published: data.published,
       metaTitle: data.metaTitle ?? "",
@@ -209,7 +271,8 @@ export function PageEditor({
     }
   };
 
-  const isSubmitting = updatePage.isPending || createPage.isPending;
+  const isSubmitting =
+    updatePage.isPending || createPage.isPending || imageUploader.isPending;
   const isDeleting = deletePage.isPending;
 
   const isDirty = form.formState.isDirty;
@@ -250,6 +313,26 @@ export function PageEditor({
             </div>
 
             <div className="toolbar-actions">
+              {page?.id && page.published && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="hidden sm:inline-flex"
+                >
+                  <a
+                    href={`/${page.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View on storefront"
+                    title="View on storefront"
+                  >
+                    <ExternalLink className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">View on storefront</span>
+                  </a>
+                </Button>
+              )}
+
               <FormField
                 control={form.control}
                 name="published"
@@ -275,7 +358,30 @@ export function PageEditor({
                 Reset
               </Button>
 
-              <Button type="submit" size="sm" disabled={isSubmitting}>
+              {!page?.id && (
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    createAnotherRef.current = true;
+                  }}
+                  className="hidden sm:inline-flex"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Save &amp; create another
+                </Button>
+              )}
+
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => {
+                  createAnotherRef.current = false;
+                }}
+              >
                 {isSubmitting ? (
                   <>
                     <span className="saving-indicator" />
@@ -351,6 +457,16 @@ export function PageEditor({
                       rows={3}
                     />
 
+                    {/* Cover Image */}
+                    <ImageUploadFormField
+                      form={form}
+                      name="imageFile"
+                      label="Cover image"
+                      description="Shown as the page hero on supported templates."
+                      existingPreviewUrl={page?.image ?? undefined}
+                      inputRef={imageFileInputRef}
+                    />
+
                     <MinimalTiptapFormField
                       form={form}
                       name="content"
@@ -407,7 +523,7 @@ export function PageEditor({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete product</AlertDialogTitle>
+            <AlertDialogTitle>Delete page</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &quot;{page?.title}&quot;? This
               action cannot be undone.

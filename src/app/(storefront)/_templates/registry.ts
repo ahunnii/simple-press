@@ -240,6 +240,7 @@ import { ViiOrderSuccessPage } from "./vii/cart-checkout/vii-order-success-page"
 import { ViiCollectionPage } from "./vii/collections/vii-collection-page";
 import { ViiCollectionsPage } from "./vii/collections/vii-collections-page";
 import { ViiContactPage } from "./vii/contact/vii-contact-page";
+import { ViiGenericPage } from "./vii/generic/vii-generic-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
@@ -520,6 +521,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionsPage: ViiCollectionsPage,
     CollectionPage: ViiCollectionPage,
     CartPage: ViiCartPage,
+    GenericPage: ViiGenericPage,
     CheckoutPage: ViiCheckoutPage,
     CheckoutUnavailable: ViiCheckoutUnavailable,
     OrderSuccessPage: ViiOrderSuccessPage,
