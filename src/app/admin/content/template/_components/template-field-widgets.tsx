@@ -390,6 +390,27 @@ export function ListItemSubFieldInput({
     );
   }
 
+  if (subField.type === "boolean") {
+    return (
+      <div className="space-y-1.5">
+        <Label className="text-muted-foreground text-xs">
+          {subField.label}
+        </Label>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={value === "true"}
+            onCheckedChange={(checked) => onChange(checked ? "true" : "false")}
+          />
+          {subField.description && (
+            <span className="text-muted-foreground text-xs">
+              {subField.description}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const inputType = subField.type === "url" ? "url" : "text";
 
   return (

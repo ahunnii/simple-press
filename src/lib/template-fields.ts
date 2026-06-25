@@ -62,7 +62,7 @@ export type TemplateListItemField = {
   key: string;
   label: string;
   description?: string;
-  type: "text" | "textarea" | "image" | "video" | "url" | "icon";
+  type: "text" | "textarea" | "image" | "video" | "url" | "icon" | "boolean";
   placeholder?: string;
 };
 

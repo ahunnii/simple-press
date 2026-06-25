@@ -375,6 +375,7 @@ exports.Prisma.ServiceItemScalarFieldEnum = {
   bookingEmbedSrc: 'bookingEmbedSrc',
   bookingEmbedHeight: 'bookingEmbedHeight',
   category: 'category',
+  isSignature: 'isSignature',
   published: 'published',
   sortOrder: 'sortOrder',
   serviceId: 'serviceId',

@@ -516,7 +516,8 @@ model ServiceItem {
   // Section assignment key (matches a section row `_id` defined in the parent
   // Service.customFields). Used only by category-aware templates (vii-collection);
   // null/ignored by all other service templates.
-  category String?
+  category    String?
+  isSignature Boolean @default(false)
 
   published Boolean @default(false)
   sortOrder  Int     @default(0)

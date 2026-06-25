@@ -56,7 +56,7 @@ function LedgerList({
     <section
       aria-labelledby="ledger-list-heading"
       style={{
-        background: "var(--vii-cream)",
+        background: "var(--vii-paper)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
       }}
     >
@@ -84,6 +84,7 @@ function LedgerList({
               lineHeight: 1.08,
               color: "var(--vii-navy)",
               margin: 0,
+              textWrap: "balance",
             }}
           >
             {listHeading || (
@@ -199,6 +200,7 @@ export function ViiLedgerServicePage({
         heading={f["vii-ledger.notes-heading"] ?? ""}
         gratuity={f["vii-ledger.notes-gratuity"] ?? ""}
         cancellation={f["vii-ledger.notes-cancellation"] ?? ""}
+        surface="var(--vii-paper)"
       />
 
       <LedgerProductRail
