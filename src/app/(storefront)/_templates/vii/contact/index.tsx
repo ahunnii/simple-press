@@ -119,14 +119,28 @@ const contactMapData: TemplateField[] = [
     defaultValue: "Find us in Detroit",
   },
   {
-    key: "vii.contact.map-image",
-    label: "Map Image",
+    key: "vii.contact.map-lat",
+    label: "Map Latitude",
     description:
-      "A static map screenshot of your location. Clicking it opens Google Maps with your business address. Leave empty to hide the map section.",
-    type: "image",
+      "Latitude of your location pin. In Google Maps, right-click your spot → click the coordinates to copy them (the first number).",
+    type: "number",
     page: "contact",
     group: "contact.map",
-    gridColumn: "col-span-full",
+    gridColumn: "col-span-1",
+    defaultValue: "42.4305",
+    placeholder: "42.4305",
+  },
+  {
+    key: "vii.contact.map-lng",
+    label: "Map Longitude",
+    description:
+      "Longitude of your location pin (the second number from the copied Google Maps coordinates).",
+    type: "number",
+    page: "contact",
+    group: "contact.map",
+    gridColumn: "col-span-1",
+    defaultValue: "-83.1419",
+    placeholder: "-83.1419",
   },
 ];
 
@@ -221,7 +235,7 @@ export const viiContactFieldGroups: TemplateFieldGroup[] = [
     id: "contact.map",
     title: "Location Map",
     description:
-      "A static map image that links to your address on Google Maps. Leave the image empty to hide it.",
+      "An interactive map of your location, driven by latitude/longitude coordinates, with links to open it in Google Maps.",
     icon: "📍",
     columns: 2,
   },
