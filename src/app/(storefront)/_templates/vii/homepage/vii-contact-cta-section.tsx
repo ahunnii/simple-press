@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
 
@@ -10,8 +11,12 @@ import { ViiOverline } from "../shared/vii-overline";
 
 type EmbedValue = {
   src: string;
-  height: number;
+  height?: number;
   title: string;
+  aspectRatio?: string;
+  maxWidth?: string;
+  displayMode?: string;
+  triggerLabel?: string;
 };
 
 type Props = {
@@ -171,13 +176,25 @@ export function ViiContactCtaSection({
                   height={embed.height}
                   title={embed.title || "Book"}
                   triggerLabel={embed.title || "Book Now"}
+                  aspectRatio={embed.aspectRatio}
+                  maxWidth={embed.maxWidth}
                   triggerClassName="inline-block font-sans text-[13px] tracking-[0.14em] uppercase text-[var(--vii-paper)] bg-[var(--vii-copper-deep)] px-9 py-4 rounded-[var(--radius,0.2rem)] no-underline cursor-pointer border-0 hover:opacity-90 transition-opacity duration-300"
+                />
+              ) : embed.displayMode === "dialog" ? (
+                <EmbedDialog
+                  src={embed.src}
+                  title={embed.title || "Book"}
+                  aspectRatio={embed.aspectRatio}
+                  height={embed.height}
+                  triggerLabel={embed.triggerLabel ?? embed.title ?? "Book"}
                 />
               ) : (
                 <EmbedFrame
                   src={embed.src}
                   height={embed.height}
                   title={embed.title || "Book"}
+                  aspectRatio={embed.aspectRatio}
+                  maxWidth={embed.maxWidth}
                 />
               )
             ) : (

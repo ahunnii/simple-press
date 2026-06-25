@@ -14,6 +14,7 @@ import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
 import { TableKit } from "~/components/ui/minimal-tiptap/extensions/table";
+import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { GalleryRenderer } from "~/components/gallery-renderer";
 
@@ -166,7 +167,15 @@ function isGalleryNode(
 }
 
 function isEmbedNode(node: ContentNode): node is ContentNode & {
-  attrs: { src?: string; height?: number | string; title?: string };
+  attrs: {
+    src?: string;
+    height?: number | string;
+    title?: string;
+    aspectRatio?: string;
+    maxWidth?: string;
+    displayMode?: string;
+    triggerLabel?: string;
+  };
 } {
   return node.type === "embed" && node.attrs != null && "src" in node.attrs;
 }
@@ -188,12 +197,35 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
         );
       }
       if (isEmbedNode(node) && node.attrs.src) {
+        const src = String(node.attrs.src);
+        const height = node.attrs.height ? Number(node.attrs.height) : undefined;
+        const title = typeof node.attrs.title === "string" ? node.attrs.title : "";
+        const aspectRatio = typeof node.attrs.aspectRatio === "string" ? node.attrs.aspectRatio : undefined;
+        const maxWidth = typeof node.attrs.maxWidth === "string" ? node.attrs.maxWidth : undefined;
+        const displayMode = typeof node.attrs.displayMode === "string" ? node.attrs.displayMode : undefined;
+        const triggerLabel = typeof node.attrs.triggerLabel === "string" ? node.attrs.triggerLabel : undefined;
+
+        if (displayMode === "dialog") {
+          return (
+            <EmbedDialog
+              key={`embed-${index}`}
+              src={src}
+              title={title}
+              aspectRatio={aspectRatio}
+              height={height}
+              triggerLabel={triggerLabel}
+            />
+          );
+        }
+
         return (
           <EmbedFrame
             key={`embed-${index}`}
-            src={String(node.attrs.src)}
-            height={node.attrs.height ? Number(node.attrs.height) : undefined}
-            title={typeof node.attrs.title === "string" ? node.attrs.title : ""}
+            src={src}
+            height={height}
+            title={title}
+            aspectRatio={aspectRatio}
+            maxWidth={maxWidth}
           />
         );
       }

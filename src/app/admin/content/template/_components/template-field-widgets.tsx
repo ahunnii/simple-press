@@ -30,8 +30,11 @@ import type {
   TemplateListItemField,
   TemplateListRow,
 } from "~/lib/template-fields";
+import type { EmbedAspectRatio, EmbedDisplayMode, EmbedWidth } from "~/lib/embed";
 import {
   DEFAULT_EMBED_HEIGHT,
+  EMBED_ASPECT_RATIOS,
+  EMBED_WIDTH_PRESETS,
   isVideoEmbed,
   parseEmbedInput,
 } from "~/lib/embed";
@@ -581,19 +584,24 @@ export function IframeFieldEditor({
   );
   const [titleState, setTitleState] = useState<string>(parsed?.title ?? "");
   const [parseError, setParseError] = useState<string | null>(null);
+  const [aspectRatioState, setAspectRatioState] = useState<EmbedAspectRatio>(
+    parsed?.aspectRatio ?? "16:9",
+  );
+  const [maxWidthState, setMaxWidthState] = useState<EmbedWidth>(
+    parsed?.maxWidth ?? "full",
+  );
+  const [displayModeState, setDisplayModeState] = useState<EmbedDisplayMode>(
+    parsed?.displayMode ?? "inline",
+  );
+  const [triggerLabelState, setTriggerLabelState] = useState<string>(
+    parsed?.triggerLabel ?? "Open",
+  );
 
   const currentParsed = parseEmbedInput(pasteText);
   const currentSrc = currentParsed?.src ?? null;
-  const isVideo = currentSrc ? isVideoEmbed(currentSrc) : false;
 
-  const emitChange = useCallback(
-    (src: string, height: number, title: string) => {
-      if (!src || !title) return;
-      onChange(JSON.stringify({ src, height, title }));
-    },
-    [onChange],
-  );
-
+  // When a new src is pasted and no aspect ratio was previously saved, default
+  // video URLs to 16:9 and everything else to "fit".
   const handlePasteTextChange = (text: string) => {
     setPasteText(text);
     if (!text.trim()) {
@@ -607,28 +615,108 @@ export function IframeFieldEditor({
       onChange("");
     } else {
       setParseError(null);
-      emitChange(result.src, result.height ?? heightState, titleState);
+      // Auto-pick a sensible default when no ratio is saved yet.
+      if (!parsed?.aspectRatio) {
+        const auto: EmbedAspectRatio = isVideoEmbed(result.src) ? "16:9" : "fit";
+        setAspectRatioState(auto);
+        emitChange(
+          result.src,
+          heightState,
+          titleState,
+          auto,
+          maxWidthState,
+          displayModeState,
+          triggerLabelState,
+        );
+      } else {
+        emitChange(
+          result.src,
+          result.height ?? heightState,
+          titleState,
+          aspectRatioState,
+          maxWidthState,
+          displayModeState,
+          triggerLabelState,
+        );
+      }
     }
   };
+
+  const emitChange = useCallback(
+    (
+      src: string,
+      height: number,
+      title: string,
+      aspectRatio: EmbedAspectRatio,
+      maxWidth: EmbedWidth,
+      displayMode: EmbedDisplayMode,
+      triggerLabel: string,
+    ) => {
+      if (!src || !title) return;
+      const payload: Record<string, unknown> = {
+        src,
+        title,
+        aspectRatio,
+        maxWidth,
+        displayMode,
+      };
+      if (aspectRatio === "fit") payload.height = height;
+      if (displayMode === "dialog") payload.triggerLabel = triggerLabel;
+      onChange(JSON.stringify(payload));
+    },
+    [onChange],
+  );
 
   const handleHeightChange = (h: number) => {
     setHeightState(h);
     if (currentSrc && titleState) {
-      emitChange(currentSrc, h, titleState);
+      emitChange(currentSrc, h, titleState, aspectRatioState, maxWidthState, displayModeState, triggerLabelState);
     }
   };
 
   const handleTitleChange = (t: string) => {
     setTitleState(t);
     if (currentSrc && t) {
-      emitChange(currentSrc, heightState, t);
+      emitChange(currentSrc, heightState, t, aspectRatioState, maxWidthState, displayModeState, triggerLabelState);
     } else if (!t) {
       onChange("");
     }
   };
 
+  const handleAspectRatioChange = (v: string) => {
+    const ar = v as EmbedAspectRatio;
+    setAspectRatioState(ar);
+    if (currentSrc && titleState) {
+      emitChange(currentSrc, heightState, titleState, ar, maxWidthState, displayModeState, triggerLabelState);
+    }
+  };
+
+  const handleMaxWidthChange = (v: string) => {
+    const mw = v as EmbedWidth;
+    setMaxWidthState(mw);
+    if (currentSrc && titleState) {
+      emitChange(currentSrc, heightState, titleState, aspectRatioState, mw, displayModeState, triggerLabelState);
+    }
+  };
+
+  const handleDisplayModeChange = (v: string) => {
+    const dm = v as EmbedDisplayMode;
+    setDisplayModeState(dm);
+    if (currentSrc && titleState) {
+      emitChange(currentSrc, heightState, titleState, aspectRatioState, maxWidthState, dm, triggerLabelState);
+    }
+  };
+
+  const handleTriggerLabelChange = (t: string) => {
+    setTriggerLabelState(t);
+    if (currentSrc && titleState) {
+      emitChange(currentSrc, heightState, titleState, aspectRatioState, maxWidthState, displayModeState, t);
+    }
+  };
+
   return (
     <div className="space-y-3">
+      {/* ── URL / embed code ── */}
       <div className="space-y-1.5">
         <Label className="text-sm">URL or embed code</Label>
         <Textarea
@@ -638,13 +726,58 @@ export function IframeFieldEditor({
           rows={3}
           disabled={disabled}
           className={cn(
+            "field-sizing-normal w-full max-w-full break-all",
             parseError ? "border-red-400 focus-visible:ring-red-400" : "",
           )}
         />
         {parseError && <p className="text-xs text-red-600">{parseError}</p>}
       </div>
 
-      {!isVideo && (
+      {/* ── Sizing controls ── */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-sm">Aspect ratio</Label>
+          <Select
+            value={aspectRatioState}
+            onValueChange={handleAspectRatioChange}
+            disabled={disabled}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {EMBED_ASPECT_RATIOS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-sm">Width</Label>
+          <Select
+            value={maxWidthState}
+            onValueChange={handleMaxWidthChange}
+            disabled={disabled}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {EMBED_WIDTH_PRESETS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* ── Height — only when aspect ratio is "fit" ── */}
+      {aspectRatioState === "fit" && (
         <div className="space-y-1.5">
           <Label className="text-sm">Height (px)</Label>
           <Input
@@ -660,12 +793,40 @@ export function IframeFieldEditor({
           />
         </div>
       )}
-      {isVideo && (
-        <p className="text-muted-foreground text-xs">
-          Video embeds display at 16:9 aspect ratio.
-        </p>
+
+      {/* ── Display mode ── */}
+      <div className="space-y-1.5">
+        <Label className="text-sm">Display</Label>
+        <Select
+          value={displayModeState}
+          onValueChange={handleDisplayModeChange}
+          disabled={disabled}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="inline">Inline</SelectItem>
+            <SelectItem value="dialog">Open in dialog</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* ── Trigger label — only when display mode is "dialog" ── */}
+      {displayModeState === "dialog" && (
+        <div className="space-y-1.5">
+          <Label className="text-sm">Button label</Label>
+          <Input
+            type="text"
+            value={triggerLabelState}
+            onChange={(e) => handleTriggerLabelChange(e.target.value)}
+            placeholder="Open"
+            disabled={disabled}
+          />
+        </div>
       )}
 
+      {/* ── Accessibility title ── */}
       <div className="space-y-1.5">
         <Label className="text-sm">Title</Label>
         <Input
@@ -680,14 +841,23 @@ export function IframeFieldEditor({
         </p>
       </div>
 
-      {currentSrc && titleState && (
+      {/* ── Live preview ── */}
+      {currentSrc && titleState && displayModeState === "inline" && (
         <div className="border-border overflow-hidden rounded-md border">
           <EmbedFrame
             src={currentSrc}
-            height={isVideo ? undefined : heightState}
+            height={aspectRatioState === "fit" ? heightState : undefined}
             title={titleState}
+            aspectRatio={aspectRatioState}
+            maxWidth={maxWidthState}
           />
         </div>
+      )}
+      {currentSrc && titleState && displayModeState === "dialog" && (
+        <p className="text-muted-foreground text-xs">
+          Preview not shown for dialog embeds — the embed opens in a modal on
+          the storefront.
+        </p>
       )}
 
       <p className="text-muted-foreground text-xs">

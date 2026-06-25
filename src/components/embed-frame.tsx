@@ -8,6 +8,8 @@ import { Skeleton } from "~/components/ui/skeleton";
 import {
   DEFAULT_EMBED_HEIGHT,
   EMBED_SANDBOX,
+  aspectRatioToCss,
+  embedWidthClass,
   isVideoEmbed,
   sanitizeEmbedSrc,
 } from "~/lib/embed";
@@ -26,6 +28,15 @@ type EmbedFrameProps = {
   height?: number;
   title: string;
   className?: string;
+  /** Named aspect-ratio preset. When omitted, video URLs default to 16:9; others use fixed height. */
+  aspectRatio?: string;
+  /** Named max-width preset. Ignored when `fill` is true. */
+  maxWidth?: string;
+  /**
+   * When true, skips the centered max-width wrapper so the frame fills its
+   * container (e.g. inside a dialog). Defaults to false.
+   */
+  fill?: boolean;
 };
 
 /**
@@ -43,7 +54,15 @@ type EmbedFrameProps = {
  *   switching also triggers window blur, so values can over-count).
  * - Both listeners no-op when Umami is not loaded or tracking is disabled.
  */
-export function EmbedFrame({ src, height, title, className }: EmbedFrameProps) {
+export function EmbedFrame({
+  src,
+  height,
+  title,
+  className,
+  aspectRatio,
+  maxWidth,
+  fill = false,
+}: EmbedFrameProps) {
   const safeSrc = sanitizeEmbedSrc(src);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loaded, setLoaded] = useState(false);
@@ -98,9 +117,21 @@ export function EmbedFrame({ src, height, title, className }: EmbedFrameProps) {
     </>
   );
 
-  if (isVideoEmbed(safeSrc)) {
-    return (
-      <div className={cn("relative aspect-video w-full", className)}>
+  // Resolve effective aspect-ratio CSS value:
+  // - Explicit aspectRatio prop takes precedence (but "fit" and unknowns return null → fixed height)
+  // - Legacy: no aspectRatio + video URL → 16:9
+  // - Otherwise: null → fixed pixel height
+  const ratioCss =
+    aspectRatioToCss(aspectRatio) ??
+    (aspectRatio === undefined && isVideoEmbed(safeSrc) ? "16 / 9" : null);
+
+  // Inner frame: ratio-based or fixed-height
+  const innerFrame =
+    ratioCss !== null ? (
+      <div
+        className={cn("relative w-full", className)}
+        style={{ aspectRatio: ratioCss }}
+      >
         {loadingOverlay}
         <iframe
           ref={iframeRef}
@@ -117,29 +148,34 @@ export function EmbedFrame({ src, height, title, className }: EmbedFrameProps) {
           )}
         />
       </div>
+    ) : (
+      <div
+        className={cn("relative w-full", className)}
+        style={{ height: height ?? DEFAULT_EMBED_HEIGHT }}
+      >
+        {loadingOverlay}
+        <iframe
+          ref={iframeRef}
+          src={safeSrc}
+          title={title}
+          sandbox={EMBED_SANDBOX}
+          referrerPolicy="no-referrer"
+          loading="lazy"
+          data-embed-title={title}
+          onLoad={() => setLoaded(true)}
+          className={cn(
+            "h-full w-full border-0 transition-opacity duration-300",
+            loaded ? "opacity-100" : "opacity-0",
+          )}
+        />
+      </div>
     );
+
+  // Width wrapper: only when not fill mode and a constraining class applies
+  const widthClass = embedWidthClass(maxWidth);
+  if (!fill && widthClass) {
+    return <div className={cn(widthClass, "mx-auto")}>{innerFrame}</div>;
   }
 
-  return (
-    <div
-      className={cn("relative w-full", className)}
-      style={{ height: height ?? DEFAULT_EMBED_HEIGHT }}
-    >
-      {loadingOverlay}
-      <iframe
-        ref={iframeRef}
-        src={safeSrc}
-        title={title}
-        sandbox={EMBED_SANDBOX}
-        referrerPolicy="no-referrer"
-        loading="lazy"
-        data-embed-title={title}
-        onLoad={() => setLoaded(true)}
-        className={cn(
-          "h-full w-full border-0 transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0",
-        )}
-      />
-    </div>
-  );
+  return innerFrame;
 }

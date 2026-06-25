@@ -11,6 +11,7 @@ import {
   type ServiceAddOn,
 } from "~/lib/validators/services";
 import { buttonVariants } from "~/components/ui/button";
+import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
@@ -241,6 +242,16 @@ export async function ServiceTemplateThree({
                     height={ctaEmbed.height}
                     title={ctaEmbed.title || "Book"}
                     className="w-full"
+                    aspectRatio={ctaEmbed.aspectRatio}
+                    maxWidth={ctaEmbed.maxWidth}
+                  />
+                ) : ctaEmbed.displayMode === "dialog" ? (
+                  <EmbedDialog
+                    src={ctaEmbed.src}
+                    title={ctaEmbed.title || "Book"}
+                    aspectRatio={ctaEmbed.aspectRatio}
+                    height={ctaEmbed.height}
+                    triggerLabel={ctaEmbed.triggerLabel ?? ctaEmbed.title ?? "Book"}
                   />
                 ) : (
                   <EmbedFrame
@@ -248,6 +259,8 @@ export async function ServiceTemplateThree({
                     height={ctaEmbed.height}
                     title={ctaEmbed.title || "Book"}
                     className="w-full"
+                    aspectRatio={ctaEmbed.aspectRatio}
+                    maxWidth={ctaEmbed.maxWidth}
                   />
                 )
               ) : (
