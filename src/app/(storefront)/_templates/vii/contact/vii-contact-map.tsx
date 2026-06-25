@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import type { MapViewport } from "~/components/ui/map";
-import { Button } from "~/components/ui/button";
 import {
   Map,
   MapMarker,
@@ -96,26 +95,96 @@ export function ViiContactMap({
             </MapMarker>
           </Map>
 
-          <div className="bg-background/95 absolute bottom-4 left-4 z-10 max-w-[min(320px,calc(100%-2rem))] rounded-lg border p-4 shadow-lg backdrop-blur">
-            <p className="text-foreground font-semibold">{businessName}</p>
+          <div
+            style={{
+              position: "absolute",
+              bottom: 16,
+              left: 16,
+              zIndex: 10,
+              maxWidth: "min(320px, calc(100% - 2rem))",
+              background: "var(--vii-paper)",
+              border: "1px solid var(--vii-hairline)",
+              borderRadius: "var(--radius)",
+              padding: 20,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 400,
+                fontSize: 18,
+                color: "var(--vii-navy)",
+                margin: 0,
+              }}
+            >
+              {businessName}
+            </p>
             {address && (
-              <p className="text-muted-foreground mt-0.5 text-sm">{address}</p>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 13,
+                  color: "var(--vii-ink-soft)",
+                  margin: "4px 0 0",
+                  lineHeight: 1.5,
+                }}
+              >
+                {address}
+              </p>
             )}
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline">
-                <a href={viewUrl} target="_blank" rel="noopener noreferrer">
-                  View larger map
-                </a>
-              </Button>
-              <Button asChild size="sm">
-                <a
-                  href={directionsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Directions
-                </a>
-              </Button>
+            <div
+              style={{
+                marginTop: 16,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <a
+                href={directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get directions (opens in a new tab)"
+                className="vii-cta-btn"
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  display: "inline-block",
+                  background: "var(--vii-copper-deep)",
+                  color: "var(--vii-paper)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  padding: "14px 28px",
+                  borderRadius: "var(--radius)",
+                  textDecoration: "none",
+                }}
+              >
+                Directions
+              </a>
+              <a
+                href={viewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View larger map (opens in a new tab)"
+                style={{
+                  display: "inline-block",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-navy)",
+                  textDecoration: "none",
+                  borderBottom: "1px solid var(--vii-copper-deep)",
+                  paddingBottom: 2,
+                }}
+              >
+                View larger map
+              </a>
             </div>
           </div>
         </div>

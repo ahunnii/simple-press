@@ -147,6 +147,21 @@ const globalProductData: TemplateField[] = [
   },
 ];
 
+// ─── Global: Authentication ───────────────────────────────────────────────────
+
+const globalAuthenticationData: TemplateField[] = [
+  {
+    key: "vii.global.authentication-image",
+    label: "Authentication Image",
+    description: "Image shown on the sign-in and sign-up screens.",
+    type: "image",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+];
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export const viiData = {
@@ -162,6 +177,7 @@ export const viiData = {
     ...viiOrderData,
     ...globalBrandingData,
     ...globalProductData,
+    ...globalAuthenticationData,
   ],
 };
 
@@ -190,6 +206,13 @@ export const viiFieldGroups = {
       description:
         "Shipping/returns text, 'ask a question' text, and trust badges shown on every product page",
       icon: "📦",
+      columns: 1,
+    } satisfies TemplateFieldGroup,
+    {
+      id: "global.authentication",
+      title: "Authentication",
+      description: "Image shown on the sign-in and sign-up screens",
+      icon: "🔐",
       columns: 1,
     } satisfies TemplateFieldGroup,
   ],

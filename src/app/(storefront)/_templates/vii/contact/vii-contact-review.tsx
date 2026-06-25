@@ -1,6 +1,8 @@
 "use client";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { GoogleIcon } from "~/components/icons/google-icon";
+import { FacebookBrandIcon } from "~/components/icons/facebook-brand-icon";
 
 type Props = {
   heading: string;
@@ -10,14 +12,22 @@ type Props = {
   facebookUrl?: string;
 };
 
-function ReviewButton({ href, label }: { href: string; label: string }) {
+function ReviewButton({
+  href,
+  label,
+  icon,
+}: {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+}) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${label} (opens in a new tab)`}
-      className="inline-flex items-center gap-2 transition-opacity hover:opacity-85"
+      className="group inline-flex items-center gap-2 transition-opacity hover:opacity-85"
       style={{
         fontFamily: "var(--font-sans)",
         fontSize: 12,
@@ -30,6 +40,7 @@ function ReviewButton({ href, label }: { href: string; label: string }) {
         textDecoration: "none",
       }}
     >
+      {icon}
       {label}
       <span aria-hidden="true">→</span>
     </a>
@@ -106,10 +117,20 @@ export function ViiContactReview({
           }}
         >
           {googleUrl && (
-            <ReviewButton href={googleUrl} label="Review on Google" />
+            <ReviewButton
+              href={googleUrl}
+              label="Review on Google"
+              icon={<GoogleIcon className="h-4 w-4 text-[var(--vii-navy)]" />}
+            />
           )}
           {facebookUrl && (
-            <ReviewButton href={facebookUrl} label="Review on Facebook" />
+            <ReviewButton
+              href={facebookUrl}
+              label="Review on Facebook"
+              icon={
+                <FacebookBrandIcon className="h-4 w-4 text-[var(--vii-navy)] transition-colors duration-300 group-hover:text-[#1877F2]" />
+              }
+            />
           )}
         </div>
       </div>

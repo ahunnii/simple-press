@@ -83,17 +83,6 @@ const contactMainData: TemplateField[] = [
       "Whether you're booking your first facial, planning your next visit, or simply have a question about your skin — we're here and happy to help. Drop us a message and we'll get back to you, usually within one business day.",
   },
   {
-    key: "vii.contact.hours",
-    label: "Opening Hours",
-    description:
-      "Studio hours shown beside your address and contact details. One day or range per line.",
-    type: "textarea",
-    page: "contact",
-    group: "contact.main",
-    gridColumn: "col-span-full",
-    defaultValue: "Tuesday – Saturday: 10am – 6pm\nSunday & Monday: Closed",
-  },
-  {
     key: "vii.contact.form-heading",
     label: "Form Heading",
     description: "Heading shown above the contact form.",
@@ -227,7 +216,7 @@ export const viiContactFieldGroups: TemplateFieldGroup[] = [
     id: "contact.main",
     title: "Intro & Form",
     description:
-      "Two-part heading, invitation text, opening hours, and the contact form heading",
+      "Two-part heading, invitation text, and the contact form heading",
     icon: "💬",
     columns: 2,
   },
