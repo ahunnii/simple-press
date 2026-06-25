@@ -208,7 +208,7 @@ export function BlogPagesList({ business }: Props) {
                             {page.published && (
                               <DropdownMenuItem asChild>
                                 <a
-                                  href={`${storefrontUrl}/${page.slug}`}
+                                  href={`${storefrontUrl}/blog/${page.slug}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >

@@ -9,6 +9,8 @@ type Props = {
   overline: string;
   heading: string;
   body: string;
+  buttonText?: string;
+  buttonLink?: string;
 };
 
 /**
@@ -17,7 +19,7 @@ type Props = {
  * Replaces the heavy navy ViiContactCtaSection with a quiet centered block
  * that sits naturally after "More from the Journal." No phone/email/image.
  */
-export function ViiBlogPostCta({ overline, heading, body }: Props) {
+export function ViiBlogPostCta({ overline, heading, body, buttonText, buttonLink }: Props) {
   const { ref, visible } = useViiReveal(0.1);
 
   return (
@@ -77,7 +79,7 @@ export function ViiBlogPostCta({ overline, heading, body }: Props) {
         )}
 
         <Link
-          href="/contact"
+          href={buttonLink ?? "/contact"}
           className="vii-cta-btn"
           style={{
             position: "relative",
@@ -98,7 +100,7 @@ export function ViiBlogPostCta({ overline, heading, body }: Props) {
               "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
           }}
         >
-          Book a visit
+          {buttonText ?? "Book a visit"}
         </Link>
       </div>
     </section>

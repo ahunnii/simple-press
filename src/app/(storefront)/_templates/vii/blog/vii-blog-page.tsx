@@ -82,7 +82,12 @@ export function ViiBlogPage({ pages, business, customFields }: Props) {
           </ViiBlogReadLink>
         </section>
       ) : (
-        <ViiBlogClient pages={pages} coverImage={coverImage} />
+        <ViiBlogClient
+          pages={pages}
+          coverImage={coverImage}
+          logoUrl={business.siteContent?.logoUrl ?? undefined}
+          businessName={business.name}
+        />
       )}
     </PageTransition>
   );

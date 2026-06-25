@@ -22,6 +22,8 @@ type Page = DefaultBlogPageTemplateProps["pages"][number];
 type Props = {
   pages: DefaultBlogPageTemplateProps["pages"];
   coverImage?: string;
+  logoUrl?: string;
+  businessName?: string;
 };
 
 function postExcerpt(post: Page, max: number): string {
@@ -136,10 +138,14 @@ function JournalRow({
   post,
   withRule,
   index,
+  logoUrl,
+  businessName,
 }: {
   post: Page;
   withRule: boolean;
   index: number;
+  logoUrl?: string;
+  businessName?: string;
 }) {
   const excerpt = postExcerpt(post, 170);
 
@@ -235,7 +241,7 @@ function JournalRow({
               aspectRatio: "4 / 3",
               borderRadius: "var(--radius)",
               overflow: "hidden",
-              background: "var(--vii-paper)",
+              background: "var(--vii-navy)",
             }}
           >
             {post.image ? (
@@ -255,13 +261,32 @@ function JournalRow({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontFamily: "var(--font-serif)",
-                  fontStyle: "italic",
-                  fontSize: 44,
-                  color: "var(--vii-tan)",
+                  padding: "10%",
                 }}
               >
-                {index + 1}
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt=""
+                    fill
+                    sizes="400px"
+                    style={{ objectFit: "contain", opacity: 0.9, padding: "10%" }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontStyle: "italic",
+                      fontSize: "clamp(18px, 3vw, 26px)",
+                      color: "var(--vii-cream)",
+                      textAlign: "center",
+                      lineHeight: 1.2,
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {businessName ?? ""}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -273,7 +298,7 @@ function JournalRow({
 
 // ─── Main client component ────────────────────────────────────────────────────
 
-export function ViiBlogClient({ pages, coverImage }: Props) {
+export function ViiBlogClient({ pages, coverImage, logoUrl, businessName }: Props) {
   const [query, setQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -428,6 +453,8 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
                       post={post}
                       withRule={i !== 0}
                       index={i}
+                      logoUrl={logoUrl}
+                      businessName={businessName}
                     />
                   ))}
                 </div>

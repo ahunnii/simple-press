@@ -13,9 +13,16 @@ import { ViiBlogReadLink } from "./vii-blog-read-link";
 type Props = {
   posts: DefaultBlogPostPageTemplateProps["relatedPosts"];
   currentSlug: string;
+  logoUrl?: string;
+  businessName?: string;
 };
 
-export function ViiBlogRelated({ posts, currentSlug }: Props) {
+export function ViiBlogRelated({
+  posts,
+  currentSlug,
+  logoUrl,
+  businessName,
+}: Props) {
   const others = posts.filter((p) => p.slug !== currentSlug).slice(0, 3);
 
   const { ref: headRef, visible: headVisible } = useViiReveal(0.1);
@@ -108,7 +115,7 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
                   aspectRatio: "4 / 3",
                   borderRadius: "var(--radius)",
                   overflow: "hidden",
-                  background: "var(--vii-paper)",
+                  background: "var(--vii-navy)",
                   marginBottom: 18,
                 }}
               >
@@ -129,13 +136,36 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontFamily: "var(--font-serif)",
-                      fontStyle: "italic",
-                      fontSize: 44,
-                      color: "var(--vii-tan)",
+                      padding: "10%",
                     }}
                   >
-                    {i + 1}
+                    {logoUrl ? (
+                      <Image
+                        src={logoUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        style={{
+                          objectFit: "contain",
+                          opacity: 0.9,
+                          padding: "10%",
+                        }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          fontFamily: "var(--font-serif)",
+                          fontStyle: "italic",
+                          fontSize: "clamp(18px, 3vw, 26px)",
+                          color: "var(--vii-cream)",
+                          textAlign: "center",
+                          lineHeight: 1.2,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        {businessName ?? ""}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

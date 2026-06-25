@@ -2,7 +2,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { viiAboutData, viiAboutFieldGroups } from "./about";
-import { viiBlogFieldGroup, viiBlogFields } from "./blog";
+import { viiBlogCtaFieldGroup, viiBlogFieldGroup, viiBlogFields } from "./blog";
 import { viiCartData, viiCartFieldGroups } from "./cart-checkout/cart-fields";
 import {
   viiCheckoutData,
@@ -188,6 +188,7 @@ export const viiFieldGroups = {
     ...viiAboutFieldGroups,
     ...viiTestimonialsFieldGroups,
     viiBlogFieldGroup,
+    viiBlogCtaFieldGroup,
     ...viiContactFieldGroups,
     ...viiCartFieldGroups,
     ...viiCheckoutFieldGroups,

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, PlusCircle, Save } from "lucide-react";
+import { ArrowLeft, ExternalLink, PlusCircle, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -59,6 +59,7 @@ const NEW_BLOG_POST_DEFAULTS = {
   content: { ...EMPTY_TIPTAP_DOC },
   excerpt: "",
   published: true,
+  publishedAt: "",
   metaTitle: "",
   metaDescription: "",
   image: undefined,
@@ -74,6 +75,7 @@ const pageFormSchema = z.object({
   content: z.any(), // TipTap JSON
   excerpt: z.string().optional().nullable(),
   published: z.boolean(),
+  publishedAt: z.string().optional().nullable(),
   metaTitle: z.string().optional().nullable(),
   metaDescription: z.string().optional().nullable(),
   imageFile: z.instanceof(File).optional().nullable(),
@@ -92,6 +94,7 @@ type BlogPostEditorProps = {
     content: any; // JSON from TipTap
     excerpt: string | null;
     published: boolean;
+    publishedAt: Date | null;
     metaTitle: string | null;
     metaDescription: string | null;
     image: string | null;
@@ -123,6 +126,9 @@ export function BlogPostEditor({
       content: page?.content ?? { ...EMPTY_TIPTAP_DOC },
       excerpt: page?.excerpt ?? "",
       published: page?.published ?? true,
+      publishedAt: page?.publishedAt
+        ? new Date(page.publishedAt).toISOString().slice(0, 10)
+        : "",
       metaTitle: page?.metaTitle ?? "",
       metaDescription: page?.metaDescription ?? "",
       image: page?.image ?? undefined,
@@ -163,13 +169,23 @@ export function BlogPostEditor({
     }
   };
 
-  const handleReset = (data?: PageFormValues) => {
+  const handleReset = (
+    data?: Omit<Partial<PageFormValues>, "publishedAt"> & {
+      publishedAt?: string | Date | null;
+    },
+  ) => {
+    const toDateInput = (value?: string | Date | null) =>
+      value ? new Date(value).toISOString().slice(0, 10) : "";
     form.reset({
       title: data?.title ?? page?.title ?? "",
       slug: data?.slug ?? page?.slug ?? "",
       content: data?.content ?? page?.content ?? EMPTY_TIPTAP_DOC,
       excerpt: data?.excerpt ?? page?.excerpt ?? "",
       published: data?.published ?? page?.published ?? true,
+      publishedAt:
+        data !== undefined
+          ? toDateInput(data.publishedAt)
+          : toDateInput(page?.publishedAt),
       metaTitle: data?.metaTitle ?? page?.metaTitle ?? "",
       metaDescription: data?.metaDescription ?? page?.metaDescription ?? "",
       image:
@@ -286,6 +302,7 @@ export function BlogPostEditor({
       ogImage: ogImageUrl,
       excerpt: data.excerpt ?? "",
       published: data.published,
+      publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
       metaTitle: data.metaTitle ?? "",
       metaDescription: data.metaDescription ?? "",
       type: "blog" as const,
@@ -342,6 +359,25 @@ export function BlogPostEditor({
             </div>
 
             <div className="toolbar-actions">
+              {page?.id && page.published && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="hidden sm:inline-flex"
+                >
+                  <a
+                    href={`/blog/${page.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="View on storefront"
+                    title="View on storefront"
+                  >
+                    <ExternalLink className="h-4 w-4 lg:mr-2" />
+                    <span className="hidden lg:inline">View on storefront</span>
+                  </a>
+                </Button>
+              )}
               <FormField
                 control={form.control}
                 name="published"
@@ -451,6 +487,30 @@ export function BlogPostEditor({
                           </div>
                           <p className="text-muted-foreground text-xs">
                             URL-friendly version (lowercase, hyphens)
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Publish date */}
+                    <FormField
+                      control={form.control}
+                      name="publishedAt"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Publish date</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              className="w-auto"
+                              value={field.value ?? ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                            />
+                          </FormControl>
+                          <p className="text-muted-foreground text-xs">
+                            Leave blank to use the date the post was created.
                           </p>
                           <FormMessage />
                         </FormItem>
