@@ -6,11 +6,14 @@ import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import type { TemplateListRow } from "~/lib/template-fields";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductCard } from "../shared/vii-product-card";
+import { ViiBrandsSection } from "../homepage/vii-brands-section";
+import { type PromoHalf, ViiShopPromoBand } from "./vii-shop-promo-band";
 
 type Collections = RouterOutputs["collections"]["getAllPublic"];
 
@@ -19,6 +22,9 @@ type Props = {
   collections: Collections;
   collectionsOverline: string;
   collectionsHeading: string;
+  promo: { left: PromoHalf; right: PromoHalf };
+  showBrands: boolean;
+  brands: { overline: string; heading: string; logos: TemplateListRow[] };
 };
 
 export function ViiShopClient({
@@ -26,6 +32,9 @@ export function ViiShopClient({
   collections,
   collectionsOverline,
   collectionsHeading,
+  promo,
+  showBrands,
+  brands,
 }: Props) {
   const {
     sortParam,
@@ -312,6 +321,11 @@ export function ViiShopClient({
         </div>
       </section>
 
+      {/* Promo band — Beyond the Catalog */}
+      {(promo.left.heading.trim() || promo.right.heading.trim()) && (
+        <ViiShopPromoBand left={promo.left} right={promo.right} />
+      )}
+
       {/* Collections strip */}
       {collectionsHeading.trim() && collections.length > 0 && (
         <section
@@ -436,6 +450,17 @@ export function ViiShopClient({
             </div>
           </div>
         </section>
+      )}
+
+      {/* Brands marquee — reuses homepage brand logos */}
+      {showBrands && brands.logos.length > 0 && (
+        <ViiBrandsSection
+          marquee
+          headingId="vii-shop-brands-heading"
+          overline={brands.overline}
+          heading={brands.heading}
+          logos={brands.logos}
+        />
       )}
     </>
   );

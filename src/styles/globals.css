@@ -3329,10 +3329,37 @@
   }
 }
 
-/* Marquee keyframe — used by homepage marquee band */
+/* Marquee keyframe — used by the continuous brands marquee (vii-marquee-track) */
 @keyframes vii-marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+/* Continuous horizontal brand-logo marquee track.
+   The track contains the logo list duplicated once, so -50% brings the
+   second copy exactly into view — creating a seamless infinite loop.
+   Animation is linear (not eased) so motion speed is constant throughout.
+   Pauses on hover, keyboard focus inside the track, and via the
+   data-paused="true" attribute toggled by the pause/play button. */
+.vii .vii-marquee-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: vii-marquee 50s linear infinite;
+  will-change: transform;
+}
+
+/* Spacing lives on each item (not flex `gap`) so the LAST item of each set
+   also carries a trailing gap. That makes the duplicated set + its gap exactly
+   half the track width, so translateX(-50%) loops with no half-gap stutter. */
+.vii .vii-marquee-track > li {
+  margin-right: clamp(40px, 6vw, 80px);
+}
+
+.vii .vii-marquee-track:hover,
+.vii .vii-marquee-track:focus-within,
+.vii .vii-marquee-track[data-paused="true"] {
+  animation-play-state: paused;
 }
 
 /* Card hover whisper — quiet 2px lift. Generic sibling to .vii-blog-card so
@@ -3368,8 +3395,13 @@
     transition: none;
   }
 
-  .vii [style*="vii-marquee"] {
-    animation-play-state: paused !important;
+  /* Marquee track: stop the animation entirely under reduced motion.
+     The JS component renders the static wrapping row instead when
+     useReducedMotion() returns true, so this rule is a belt-and-braces
+     fallback for any case where the CSS loads before hydration. */
+  .vii .vii-marquee-track {
+    animation: none;
+    transform: none;
   }
 
   /* No sweeps, growing underlines, or pulses for reduced-motion users. */
