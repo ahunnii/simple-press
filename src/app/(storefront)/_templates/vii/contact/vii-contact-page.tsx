@@ -1,9 +1,6 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { PageTransition } from "~/components/page-animations";
-import {
-  parseBusinessHours,
-  formatBusinessHours,
-} from "~/lib/business-hours";
 
 import { resolveFields } from "..";
 import { ViiContactHero } from "./vii-contact-hero";
@@ -30,7 +27,8 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
     "vii.contact.form-heading",
     // Map
     "vii.contact.map-heading",
-    "vii.contact.map-image",
+    "vii.contact.map-lat",
+    "vii.contact.map-lng",
     // Review
     "vii.contact.review-heading",
     "vii.contact.review-heading-accent",
@@ -47,10 +45,12 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
     parseBusinessHours(business.businessHours),
   );
 
-  const mapImage = f["vii.contact.map-image"]?.trim() ?? "";
-  const mapsUrl = address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
-    : undefined;
+  const lat = Number(f["vii.contact.map-lat"]);
+  const lng = Number(f["vii.contact.map-lng"]);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+  const mapDest = address ? encodeURIComponent(address) : `${lat},${lng}`;
+  const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
 
   const googleUrl = f["vii.contact.review-google-url"]?.trim() ?? "";
   const facebookUrl = f["vii.contact.review-facebook-url"]?.trim() ?? "";
@@ -78,12 +78,16 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
         email={email}
       />
 
-      {/* 3. Location map (only when configured) */}
-      {mapImage && (
+      {/* 3. Location map (only when coordinates are configured) */}
+      {hasCoords && (
         <ViiContactMap
           heading={f["vii.contact.map-heading"] ?? ""}
-          mapImage={mapImage}
-          mapsUrl={mapsUrl}
+          businessName={business.name}
+          address={address}
+          latitude={lat}
+          longitude={lng}
+          viewUrl={viewUrl}
+          directionsUrl={directionsUrl}
         />
       )}
 

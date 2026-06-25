@@ -1,17 +1,46 @@
 "use client";
 
-import { MapPin } from "lucide-react";
+import { useState } from "react";
+
+import type { MapViewport } from "~/components/ui/map";
+import { Button } from "~/components/ui/button";
+import {
+  Map,
+  MapMarker,
+  MarkerContent,
+  MarkerPopup,
+  MarkerTooltip,
+} from "~/components/ui/map";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
   heading: string;
-  mapImage: string;
-  mapsUrl?: string;
+  businessName: string;
+  address?: string;
+  latitude: number;
+  longitude: number;
+  viewUrl: string;
+  directionsUrl: string;
 };
 
-export function ViiContactMap({ heading, mapImage, mapsUrl }: Props) {
+export function ViiContactMap({
+  heading,
+  businessName,
+  address,
+  latitude,
+  longitude,
+  viewUrl,
+  directionsUrl,
+}: Props) {
   const { ref, visible } = useViiReveal(0.08);
+
+  const [viewport, setViewport] = useState<MapViewport>({
+    center: [longitude, latitude],
+    zoom: 12,
+    bearing: 0,
+    pitch: 0,
+  });
 
   return (
     <section
@@ -42,69 +71,54 @@ export function ViiContactMap({ heading, mapImage, mapsUrl }: Props) {
           </h2>
         )}
 
-        {mapsUrl ? (
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="View our location on Google Maps (opens in a new tab)"
-            className="group relative block aspect-[21/9] w-full overflow-hidden"
-            style={{
-              borderRadius: "var(--radius)",
-              background: "var(--vii-slate)",
+        <div className="relative h-[420px] w-full">
+          <Map
+            viewport={viewport}
+            onViewportChange={setViewport}
+            styles={{
+              light: "https://tiles.openfreemap.org/styles/bright",
+              dark: "https://tiles.openfreemap.org/styles/bright",
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={mapImage}
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-              style={{
-                background:
-                  "color-mix(in srgb, var(--vii-navy) 55%, transparent)",
-              }}
-            >
-              <div className="flex flex-col items-center gap-3">
-                <MapPin
-                  className="h-10 w-10"
-                  style={{ color: "var(--vii-paper)" }}
-                />
-                <p
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: 12,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "var(--vii-paper)",
-                  }}
+            <MapMarker longitude={longitude} latitude={latitude}>
+              <MarkerContent>
+                <div className="bg-primary size-4 rounded-full border-2 border-white shadow-lg" />
+              </MarkerContent>
+              <MarkerTooltip>{businessName}</MarkerTooltip>
+              <MarkerPopup>
+                <div className="space-y-1">
+                  <p className="text-foreground font-medium">{businessName}</p>
+                  {address && (
+                    <p className="text-muted-foreground text-xs">{address}</p>
+                  )}
+                </div>
+              </MarkerPopup>
+            </MapMarker>
+          </Map>
+
+          <div className="bg-background/95 absolute bottom-4 left-4 z-10 max-w-[min(320px,calc(100%-2rem))] rounded-lg border p-4 shadow-lg backdrop-blur">
+            <p className="text-foreground font-semibold">{businessName}</p>
+            {address && (
+              <p className="text-muted-foreground mt-0.5 text-sm">{address}</p>
+            )}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button asChild size="sm" variant="outline">
+                <a href={viewUrl} target="_blank" rel="noopener noreferrer">
+                  View larger map
+                </a>
+              </Button>
+              <Button asChild size="sm">
+                <a
+                  href={directionsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  View on Google Maps
-                </p>
-              </div>
+                  Directions
+                </a>
+              </Button>
             </div>
-          </a>
-        ) : (
-          <div
-            className="relative block aspect-[21/9] w-full overflow-hidden"
-            style={{
-              borderRadius: "var(--radius)",
-              background: "var(--vii-slate)",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={mapImage}
-              alt="Map of our studio location"
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

@@ -1111,7 +1111,7 @@
 
 /* ─── Elegant Template – Shared Component Styles ───────────────────────────
    All .el-* interactive and structural rules live here, scoped via the
-   `.elegant` class on the layout root. Components no longer embed <style>
+   `.elegant` class on the layout root. Components no longer embed \3c style>
    blocks — those injected CSS on every render and caused duplication.      */
 
 /* ── Buttons ── */
@@ -2941,6 +2941,12 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--sl-coral-aa);
+  }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
   }
 }
 
