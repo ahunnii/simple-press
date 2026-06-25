@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import {
@@ -15,6 +15,7 @@ import { formatDate } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiBlogReadLink } from "./vii-blog-read-link";
 
 type Page = DefaultBlogPageTemplateProps["pages"][number];
 
@@ -26,18 +27,6 @@ type Props = {
 function postExcerpt(post: Page, max: number): string {
   return post.excerpt?.trim() ? post.excerpt : deriveExcerpt(post.content, max);
 }
-
-const READ_LINK_STYLE = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 8,
-  fontFamily: "var(--font-sans)",
-  fontSize: 12,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  fontWeight: 500,
-  paddingBottom: 3,
-} as const;
 
 // ─── Cover story — the lead post, full-bleed image with overlaid title ────────
 
@@ -131,17 +120,10 @@ function CoverStory({ post, image }: { post: Page; image?: string }) {
           </p>
         )}
 
-        <span
-          aria-hidden="true"
-          style={{
-            ...READ_LINK_STYLE,
-            marginTop: 26,
-            color: "var(--vii-paper)",
-            borderBottom: "1px solid var(--vii-copper-light)",
-          }}
-        >
-          Read article
-          <ArrowRight style={{ width: 14, height: 14 }} />
+        <span style={{ marginTop: 26, display: "inline-flex" }}>
+          <ViiBlogReadLink as="span" tone="dark">
+            Read article
+          </ViiBlogReadLink>
         </span>
       </div>
     </Link>
@@ -231,17 +213,10 @@ function JournalRow({
             </p>
           )}
 
-          <span
-            aria-hidden="true"
-            style={{
-              ...READ_LINK_STYLE,
-              marginTop: 22,
-              color: "var(--vii-navy)",
-              borderBottom: "1px solid var(--vii-copper)",
-            }}
-          >
-            Read article
-            <ArrowRight style={{ width: 13, height: 13 }} />
+          <span style={{ marginTop: 22, display: "inline-flex" }}>
+            <ViiBlogReadLink as="span" tone="light">
+              Read article
+            </ViiBlogReadLink>
           </span>
         </div>
 

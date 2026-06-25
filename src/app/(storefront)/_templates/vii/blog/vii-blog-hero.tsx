@@ -36,7 +36,7 @@ export function ViiBlogHero({
       style={{
         background: "var(--vii-cream)",
         padding:
-          "clamp(88px, 11vw, 168px) clamp(24px, 6vw, 96px) clamp(36px, 5vw, 64px)",
+          "clamp(72px, 10vw, 140px) clamp(24px, 6vw, 96px) clamp(36px, 5vw, 64px)",
       }}
     >
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>

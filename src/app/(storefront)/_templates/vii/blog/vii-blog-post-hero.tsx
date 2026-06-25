@@ -47,12 +47,13 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
       >
         {hasImage ? (
           <Image
-            src={image ?? "/fallback"}
+            src={image!}
             alt=""
             fill
             priority
             sizes="100vw"
-            style={{ objectFit: "cover", objectPosition: "center 30%" }}
+            className="object-cover"
+            style={{ objectPosition: "center 30%" }}
           />
         ) : (
           <div
@@ -92,7 +93,7 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
           tone="dark"
           style={{ marginBottom: 16, ...heroRevealStyle(shown, reduced, 0) }}
         >
-          {`JOURNAL · ${formatDate(createdAt)}`}
+          {`Journal · ${formatDate(createdAt)}`}
         </ViiOverline>
 
         <h1
@@ -100,8 +101,10 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
             ...heroHeadingStyle(shown, reduced, 0.15),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
+            // Larger ceiling than the cream masthead (72px) — this h1 sits over a dark photo.
             fontSize: "clamp(36px, 6vw, 80px)",
             lineHeight: 1.05,
+            letterSpacing: "-0.01em",
             color: "var(--vii-paper)",
             margin: 0,
             textWrap: "balance",

@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiBlogReadLink } from "./vii-blog-read-link";
 
 type Props = {
   posts: DefaultBlogPostPageTemplateProps["relatedPosts"];
@@ -64,27 +64,11 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
             </h2>
           </div>
 
-          <Link
-            href="/blog"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--font-sans)",
-              fontSize: 12,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              fontWeight: 500,
-              color: "var(--vii-navy)",
-              textDecoration: "none",
-              borderBottom: "1px solid var(--vii-copper)",
-              paddingBottom: 4,
-              flexShrink: 0,
-            }}
-          >
-            All posts
-            <ArrowRight aria-hidden="true" style={{ width: 13, height: 13 }} />
-          </Link>
+          <span style={{ flexShrink: 0 }}>
+            <ViiBlogReadLink as="link" href="/blog" tone="light">
+              All posts
+            </ViiBlogReadLink>
+          </span>
         </div>
 
         {/* Post grid */}
@@ -186,25 +170,9 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
               </h3>
 
               {/* Read more link signal */}
-              <span
-                aria-hidden="true"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  color: "var(--vii-navy)",
-                  borderBottom: "1px solid var(--vii-copper)",
-                  paddingBottom: 3,
-                }}
-              >
+              <ViiBlogReadLink as="span" tone="light">
                 Read more
-                <ArrowRight style={{ width: 13, height: 13 }} />
-              </span>
+              </ViiBlogReadLink>
             </Link>
           ))}
         </div>
