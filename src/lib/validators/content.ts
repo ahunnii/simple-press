@@ -8,6 +8,7 @@ const socialLinksSchema = z
     linkedin: z.string().url().optional().nullable().or(z.literal("")),
     tiktok: z.string().url().optional().nullable().or(z.literal("")),
     pinterest: z.string().url().optional().nullable().or(z.literal("")),
+    youtube: z.string().url().optional().nullable().or(z.literal("")),
   })
   .optional();
 

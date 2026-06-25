@@ -2,6 +2,8 @@ import Link from "next/link";
 import { TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Facebook, Instagram } from "lucide-react";
 
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 
@@ -31,6 +33,7 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
         instagram?: string;
         facebook?: string;
         twitter?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -52,7 +55,8 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
             )}
             {(socialLinks?.instagram ??
               socialLinks?.facebook ??
-              socialLinks?.twitter) && (
+              socialLinks?.twitter ??
+              socialLinks?.youtube) && (
               <div className="mt-4 flex gap-3">
                 {/* M-7: "(opens in new tab)" appended to aria-label; M-2: aria-hidden on decorative icons */}
                 {socialLinks?.instagram && (
@@ -86,6 +90,17 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <TwitterLogoIcon className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                )}
+                {socialLinks?.youtube && (
+                  <a
+                    href={socialLinks.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube (opens in new tab)"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <YouTubeIcon className="h-4 w-4" aria-hidden="true" />
                   </a>
                 )}
               </div>

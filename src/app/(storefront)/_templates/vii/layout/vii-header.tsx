@@ -333,6 +333,7 @@ export function ViiHeader({
       const key = dropdownKey(side, index);
       const isOpen = openDropdown === key;
       const childActive = !!link.children?.some((c) => isActive(c.href));
+      const hasParentLink = !!link.href && link.href !== "#";
 
       return (
         <div
@@ -347,33 +348,78 @@ export function ViiHeader({
             }
           }}
         >
-          <button
-            type="button"
-            aria-haspopup="true"
-            aria-expanded={isOpen}
-            onClick={() => setOpenDropdown(key)}
-            className="vii-nav-link"
-            data-current={childActive ? "true" : undefined}
-            style={{
-              ...navLinkStyle(childActive),
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            {link.label}
-            <ChevronDown
-              className="h-3 w-3"
-              aria-hidden="true"
+          {hasParentLink ? (
+            <>
+              <Link
+                href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
+                className="vii-nav-link"
+                data-current={childActive ? "true" : undefined}
+                aria-current={childActive ? "page" : undefined}
+                style={navLinkStyle(childActive)}
+              >
+                {link.label}
+                {link.external ? (
+                  <span className="sr-only"> (opens in new tab)</span>
+                ) : null}
+              </Link>
+              <button
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+                aria-label={`Toggle ${link.label} menu`}
+                onClick={() => setOpenDropdown(isOpen ? null : key)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "4px 2px",
+                  color: navLinkStyle(childActive).color,
+                  transition: `color 0.4s ${ease}`,
+                }}
+              >
+                <ChevronDown
+                  className="h-3 w-3"
+                  aria-hidden="true"
+                  style={{
+                    transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              aria-haspopup="true"
+              aria-expanded={isOpen}
+              onClick={() => setOpenDropdown(key)}
+              className="vii-nav-link"
+              data-current={childActive ? "true" : undefined}
               style={{
-                transition: reduced ? "none" : `transform 0.2s ${ease}`,
-                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                ...navLinkStyle(childActive),
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
               }}
-            />
-          </button>
+            >
+              {link.label}
+              <ChevronDown
+                className="h-3 w-3"
+                aria-hidden="true"
+                style={{
+                  transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                  transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </button>
+          )}
 
           {isOpen ? (
             <div
@@ -469,38 +515,98 @@ export function ViiHeader({
       const submenuId = `${mobileSubmenuId}-${i}`;
       const expanded = expandedMobile.has(i);
       const childActive = !!link.children?.some((c) => isActive(c.href));
+      const hasParentLink = !!link.href && link.href !== "#";
 
       return (
         <li key={link.href + link.label}>
-          <button
-            type="button"
-            onClick={() => toggleMobileExpanded(i)}
-            aria-expanded={expanded}
-            aria-controls={submenuId}
-            style={{
-              ...mobileLinkStyle(childActive),
-              display: "flex",
-              width: "100%",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: "transparent",
-              border: "none",
-              borderBottom: childActive
-                ? "1px solid var(--vii-copper)"
-                : "1px solid transparent",
-              cursor: "pointer",
-            }}
-          >
-            {link.label}
-            <ChevronDown
-              className="h-5 w-5 shrink-0"
-              aria-hidden="true"
+          {hasParentLink ? (
+            <div
               style={{
-                transition: reduced ? "none" : `transform 0.2s ${ease}`,
-                transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderBottom: childActive
+                  ? "1px solid var(--vii-copper)"
+                  : "1px solid transparent",
               }}
-            />
-          </button>
+            >
+              <Link
+                href={link.href}
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noopener noreferrer" : undefined}
+                onClick={() => setMobileOpen(false)}
+                aria-current={childActive ? "page" : undefined}
+                style={{
+                  ...mobileLinkStyle(childActive),
+                  borderBottom: "none",
+                  flex: 1,
+                }}
+              >
+                {link.label}
+                {link.external ? (
+                  <span className="sr-only"> (opens in new tab)</span>
+                ) : null}
+              </Link>
+              <button
+                type="button"
+                onClick={() => toggleMobileExpanded(i)}
+                aria-expanded={expanded}
+                aria-controls={submenuId}
+                aria-label={`Toggle ${link.label} menu`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--vii-navy)",
+                  padding: "10px 0 10px 12px",
+                  minWidth: "44px",
+                  minHeight: "44px",
+                }}
+              >
+                <ChevronDown
+                  className="h-5 w-5 shrink-0"
+                  aria-hidden="true"
+                  style={{
+                    transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                    transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => toggleMobileExpanded(i)}
+              aria-expanded={expanded}
+              aria-controls={submenuId}
+              style={{
+                ...mobileLinkStyle(childActive),
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "transparent",
+                border: "none",
+                borderBottom: childActive
+                  ? "1px solid var(--vii-copper)"
+                  : "1px solid transparent",
+                cursor: "pointer",
+              }}
+            >
+              {link.label}
+              <ChevronDown
+                className="h-5 w-5 shrink-0"
+                aria-hidden="true"
+                style={{
+                  transition: reduced ? "none" : `transform 0.2s ${ease}`,
+                  transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </button>
+          )}
           {expanded ? (
             <ul id={submenuId} className="flex flex-col pb-2 pl-4">
               {link.children.map((child) => {

@@ -2,6 +2,8 @@ import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
 
@@ -26,6 +28,7 @@ export async function DarkTrendFooter({
         instagram?: string;
         facebook?: string;
         twitter?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -239,6 +242,19 @@ export async function DarkTrendFooter({
                         fill="currentColor"
                       />
                     </svg>
+                  </a>
+                </li>
+              )}
+              {socialLinks?.youtube && (
+                <li>
+                  <a
+                    href={socialLinks.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube (opens in new tab)"
+                    className="text-white/70 transition-colors hover:text-white"
+                  >
+                    <YouTubeIcon className="h-5 w-5" />
                   </a>
                 </li>
               )}

@@ -8,6 +8,7 @@ import { Separator } from "~/components/ui/separator";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -42,6 +43,7 @@ export async function HappyBambooFooter({
         facebook?: string;
         twitter?: string;
         tiktok?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -99,6 +101,15 @@ export async function HappyBambooFooter({
                   aria-label="TikTok"
                 >
                   <TikTokIcon className="h-5 w-5" aria-hidden="true" />
+                </a>
+              )}
+              {socialLinks?.youtube && (
+                <a
+                  href={socialLinks.youtube}
+                  className="text-muted hover:text-primary transition-colors"
+                  aria-label="YouTube"
+                >
+                  <YouTubeIcon className="h-5 w-5" aria-hidden="true" />
                 </a>
               )}
             </div>

@@ -8,6 +8,7 @@ import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { TwitterIcon } from "~/components/icons/twitter-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { resolveFields } from "../index";
 import {
@@ -46,6 +47,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
         facebook?: string;
         twitter?: string;
         tiktok?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -149,7 +151,8 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
             {(socialLinks?.instagram ??
               socialLinks?.facebook ??
               socialLinks?.twitter ??
-              socialLinks?.tiktok) && (
+              socialLinks?.tiktok ??
+              socialLinks?.youtube) && (
               <div className="flex gap-4">
                 {socialLinks?.instagram && (
                   <a
@@ -189,6 +192,16 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
                     aria-label="TikTok"
                   >
                     <TikTokIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.youtube && (
+                  <a
+                    href={socialLinks.youtube}
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="YouTube"
+                  >
+                    <YouTubeIcon className="h-4 w-4" />
                   </a>
                 )}
               </div>

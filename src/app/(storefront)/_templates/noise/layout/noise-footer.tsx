@@ -8,6 +8,7 @@ import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { resolveFields } from "../index";
 
@@ -47,6 +48,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
         facebook?: string;
         twitter?: string;
         tiktok?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -146,7 +148,8 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
               {(socialLinks?.instagram ??
                 socialLinks?.facebook ??
                 socialLinks?.twitter ??
-                socialLinks?.tiktok) && (
+                socialLinks?.tiktok ??
+                socialLinks?.youtube) && (
                 <div className="flex gap-4">
                   {socialLinks?.instagram && (
                     <a
@@ -186,6 +189,16 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                       aria-label="TikTok"
                     >
                       <TikTokIcon className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                  {socialLinks?.youtube && (
+                    <a
+                      href={socialLinks.youtube}
+                      className="-m-3 flex items-center justify-center p-3 transition-opacity hover:opacity-60"
+                      style={{ color: "var(--vn-steel-mist)" }}
+                      aria-label="YouTube"
+                    >
+                      <YouTubeIcon className="h-3.5 w-3.5" />
                     </a>
                   )}
                 </div>
