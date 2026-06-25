@@ -8,6 +8,7 @@ const socialLinksSchema = z
     linkedin: z.string().url().optional().nullable().or(z.literal("")),
     tiktok: z.string().url().optional().nullable().or(z.literal("")),
     pinterest: z.string().url().optional().nullable().or(z.literal("")),
+    youtube: z.string().url().optional().nullable().or(z.literal("")),
   })
   .optional();
 
@@ -106,4 +107,5 @@ export const pageSchema = z.object({
   type: z.enum(["page", "policy", "blog", "custom"]).default("page"),
   template: z.enum(["default", "sidebar", "full-width"]).default("default"),
   image: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
+  publishedAt: z.union([z.coerce.date(), z.null()]).optional(),
 });

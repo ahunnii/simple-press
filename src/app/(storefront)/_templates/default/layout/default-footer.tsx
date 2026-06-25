@@ -11,6 +11,7 @@ import { LinkedinIcon } from "~/components/icons/linkedin-icon";
 import { PinterestIcon } from "~/components/icons/pinterest-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { TwitterIcon } from "~/components/icons/twitter-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
   const year = new Date().getFullYear();
@@ -24,6 +25,7 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
         tiktok?: string;
         pinterest?: string;
         linkedin?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -120,6 +122,15 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
                         label: "LinkedIn",
                         href: socialLinks.linkedin,
                         Icon: LinkedinIcon,
+                      },
+                    ]
+                  : []),
+                ...(socialLinks?.youtube
+                  ? [
+                      {
+                        label: "YouTube",
+                        href: socialLinks.youtube,
+                        Icon: YouTubeIcon,
                       },
                     ]
                   : []),

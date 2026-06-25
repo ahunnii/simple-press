@@ -4,13 +4,15 @@ import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
-import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
+import { ViiBlogPostCta } from "./vii-blog-post-cta";
 import { ViiBlogPostHero } from "./vii-blog-post-hero";
+import { ViiBlogPostMasthead } from "./vii-blog-post-masthead";
 import { ViiBlogRelated } from "./vii-blog-related";
 
 type Props = DefaultBlogPostPageTemplateProps & {
   business: {
-    siteContent?: { customFields?: unknown } | null;
+    name?: string | null;
+    siteContent?: { customFields?: unknown; logoUrl?: string | null } | null;
     phoneNumber?: string | null;
     supportEmail?: string | null;
   };
@@ -29,37 +31,56 @@ export function ViiBlogPostPage({
     (business.siteContent?.customFields as Record<string, string> | undefined);
 
   const f = resolveFields(fields, [
-    "vii.homepage.contact-image",
-    "vii.homepage.contact-heading",
-    "vii.homepage.contact-subheading",
-    "vii.homepage.contact-body",
+    "vii.blog.cta-enabled",
+    "vii.blog.cta-overline",
+    "vii.blog.cta-heading",
+    "vii.blog.cta-body",
+    "vii.blog.cta-button-text",
+    "vii.blog.cta-button-link",
   ]);
 
   // Lead paragraph: only when the author wrote an excerpt. Deriving from the
   // body here would just duplicate the article's opening paragraph.
   const lead = page.excerpt?.trim() ?? "";
 
-  // Closing CTA reuses the homepage contact content; fall back to blog-friendly
-  // defaults so the post never ends on an empty navy band.
+  // Closing CTA — owner-configurable via template fields.
+  const ctaEnabled = (f["vii.blog.cta-enabled"] ?? "true") !== "false";
+  const ctaOverline =
+    (f["vii.blog.cta-overline"] ?? "").trim() || "The Studio";
   const ctaHeading =
-    (f["vii.homepage.contact-heading"] ?? "").trim() || "Come see us";
-  const ctaSubheading =
-    (f["vii.homepage.contact-subheading"] ?? "").trim() || "The Studio";
+    (f["vii.blog.cta-heading"] ?? "").trim() || "Come see us";
   const ctaBody =
-    (f["vii.homepage.contact-body"] ?? "").trim() ||
+    (f["vii.blog.cta-body"] ?? "").trim() ||
     "Book a facial or reach out — we'd love to help you find your glow.";
+  const ctaButtonText =
+    (f["vii.blog.cta-button-text"] ?? "").trim() || "Book a visit";
+  const ctaButtonLink =
+    (f["vii.blog.cta-button-link"] ?? "").trim() || "/contact";
+
+  // Branch: image hero vs. cream type-led masthead.
+  const hasCover = !!page.image?.trim();
 
   return (
     <PageTransition>
-      {/* 1. Hero — full-width image band, title + date overlaid bottom-left */}
-      <ViiBlogPostHero
-        image={page.image ?? undefined}
-        title={page.title}
-        createdAt={page.createdAt}
-      />
+      {/* 1. Hero — image band when a cover is set; cream masthead otherwise */}
+      {hasCover ? (
+        <ViiBlogPostHero
+          image={page.image!}
+          title={page.title}
+          createdAt={page.createdAt}
+        />
+      ) : (
+        <ViiBlogPostMasthead
+          title={page.title}
+          createdAt={page.createdAt}
+          excerpt={lead}
+        />
+      )}
 
-      {/* 2. Intro lead — excerpt (or derived summary) as editorial serif lead */}
-      {lead && (
+      {/* 2. Intro lead — serif-italic excerpt band; image path only.
+          The cream masthead already shows the excerpt, so suppress it there
+          to avoid stacked-cream duplication. */}
+      {hasCover && lead && (
         <div
           style={{
             background: "var(--vii-cream)",
@@ -90,15 +111,15 @@ export function ViiBlogPostPage({
         aria-label={page.title}
         style={{
           background: "var(--vii-cream)",
-          padding: lead
-            ? "0 clamp(24px, 6vw, 96px) clamp(64px, 9vw, 104px)"
-            : "clamp(48px, 7vw, 80px) clamp(24px, 6vw, 96px) clamp(64px, 9vw, 104px)",
+          padding:
+            hasCover && lead
+              ? "0 clamp(24px, 6vw, 96px) clamp(48px, 7vw, 80px)"
+              : "clamp(48px, 7vw, 80px) clamp(24px, 6vw, 96px) clamp(48px, 7vw, 80px)",
         }}
       >
         <div
-          className="vii-prose"
+          className="vii-prose max-w-7xl"
           style={{
-            maxWidth: 720,
             margin: "0 auto",
           }}
         >
@@ -107,20 +128,23 @@ export function ViiBlogPostPage({
       </article>
 
       {/* 4. Related posts grid */}
-      <ViiBlogRelated posts={relatedPosts} currentSlug={page.slug} />
-
-      {/* 5. Closing contact CTA — reuses homepage contact-* fields, with
-          blog-friendly defaults + a Book button so it never renders empty */}
-      <ViiContactCtaSection
-        contactImage={f["vii.homepage.contact-image"] ?? undefined}
-        heading={ctaHeading}
-        subheading={ctaSubheading}
-        body={ctaBody}
-        phone={business?.phoneNumber ?? ""}
-        email={business?.supportEmail ?? ""}
-        buttonLabel="Book a visit"
-        buttonHref="/contact"
+      <ViiBlogRelated
+        posts={relatedPosts}
+        currentSlug={page.slug}
+        logoUrl={business.siteContent?.logoUrl ?? undefined}
+        businessName={business.name ?? undefined}
       />
+
+      {/* 5. Closing CTA — light cream sign-off, no heavy navy band */}
+      {ctaEnabled && (
+        <ViiBlogPostCta
+          overline={ctaOverline}
+          heading={ctaHeading}
+          body={ctaBody}
+          buttonText={ctaButtonText}
+          buttonLink={ctaButtonLink}
+        />
+      )}
     </PageTransition>
   );
 }

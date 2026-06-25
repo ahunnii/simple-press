@@ -36695,6 +36695,7 @@ export namespace Prisma {
     id: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    publishedAt: Date | null
     title: string | null
     slug: string | null
     excerpt: string | null
@@ -36714,6 +36715,7 @@ export namespace Prisma {
     id: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    publishedAt: Date | null
     title: string | null
     slug: string | null
     excerpt: string | null
@@ -36733,6 +36735,7 @@ export namespace Prisma {
     id: number
     createdAt: number
     updatedAt: number
+    publishedAt: number
     title: number
     slug: number
     content: number
@@ -36763,6 +36766,7 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    publishedAt?: true
     title?: true
     slug?: true
     excerpt?: true
@@ -36782,6 +36786,7 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    publishedAt?: true
     title?: true
     slug?: true
     excerpt?: true
@@ -36801,6 +36806,7 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    publishedAt?: true
     title?: true
     slug?: true
     content?: true
@@ -36908,6 +36914,7 @@ export namespace Prisma {
     id: string
     createdAt: Date
     updatedAt: Date
+    publishedAt: Date | null
     title: string
     slug: string
     content: JsonValue
@@ -36947,6 +36954,7 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    publishedAt?: boolean
     title?: boolean
     slug?: boolean
     content?: boolean
@@ -36968,6 +36976,7 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    publishedAt?: boolean
     title?: boolean
     slug?: boolean
     content?: boolean
@@ -36989,6 +36998,7 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    publishedAt?: boolean
     title?: boolean
     slug?: boolean
     content?: boolean
@@ -37010,6 +37020,7 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    publishedAt?: boolean
     title?: boolean
     slug?: boolean
     content?: boolean
@@ -37026,7 +37037,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "publishedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -37046,6 +37057,7 @@ export namespace Prisma {
       id: string
       createdAt: Date
       updatedAt: Date
+      publishedAt: Date | null
       title: string
       slug: string
       content: Prisma.JsonValue
@@ -37487,6 +37499,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Page", 'String'>
     readonly createdAt: FieldRef<"Page", 'DateTime'>
     readonly updatedAt: FieldRef<"Page", 'DateTime'>
+    readonly publishedAt: FieldRef<"Page", 'DateTime'>
     readonly title: FieldRef<"Page", 'String'>
     readonly slug: FieldRef<"Page", 'String'>
     readonly content: FieldRef<"Page", 'Json'>
@@ -51276,6 +51289,7 @@ export namespace Prisma {
     id: 'id',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    publishedAt: 'publishedAt',
     title: 'title',
     slug: 'slug',
     content: 'content',
@@ -54412,6 +54426,7 @@ export namespace Prisma {
     id?: StringFilter<"Page"> | string
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
+    publishedAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     title?: StringFilter<"Page"> | string
     slug?: StringFilter<"Page"> | string
     content?: JsonFilter<"Page">
@@ -54433,6 +54448,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    publishedAt?: SortOrderInput | SortOrder
     title?: SortOrder
     slug?: SortOrder
     content?: SortOrder
@@ -54458,6 +54474,7 @@ export namespace Prisma {
     NOT?: PageWhereInput | PageWhereInput[]
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
+    publishedAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     title?: StringFilter<"Page"> | string
     slug?: StringFilter<"Page"> | string
     content?: JsonFilter<"Page">
@@ -54479,6 +54496,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    publishedAt?: SortOrderInput | SortOrder
     title?: SortOrder
     slug?: SortOrder
     content?: SortOrder
@@ -54507,6 +54525,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Page"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Page"> | Date | string
+    publishedAt?: DateTimeNullableWithAggregatesFilter<"Page"> | Date | string | null
     title?: StringWithAggregatesFilter<"Page"> | string
     slug?: StringWithAggregatesFilter<"Page"> | string
     content?: JsonWithAggregatesFilter<"Page">
@@ -58651,6 +58670,7 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    publishedAt?: Date | string | null
     title: string
     slug: string
     content: JsonNullValueInput | InputJsonValue
@@ -58671,6 +58691,7 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    publishedAt?: Date | string | null
     title: string
     slug: string
     content: JsonNullValueInput | InputJsonValue
@@ -58691,6 +58712,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
@@ -58711,6 +58733,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
@@ -58731,6 +58754,7 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    publishedAt?: Date | string | null
     title: string
     slug: string
     content: JsonNullValueInput | InputJsonValue
@@ -58751,6 +58775,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
@@ -58770,6 +58795,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
@@ -62087,6 +62113,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    publishedAt?: SortOrder
     title?: SortOrder
     slug?: SortOrder
     content?: SortOrder
@@ -62111,6 +62138,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    publishedAt?: SortOrder
     title?: SortOrder
     slug?: SortOrder
     excerpt?: SortOrder
@@ -62130,6 +62158,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    publishedAt?: SortOrder
     title?: SortOrder
     slug?: SortOrder
     excerpt?: SortOrder
@@ -67597,6 +67626,7 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    publishedAt?: Date | string | null
     title: string
     slug: string
     content: JsonNullValueInput | InputJsonValue
@@ -67616,6 +67646,7 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    publishedAt?: Date | string | null
     title: string
     slug: string
     content: JsonNullValueInput | InputJsonValue
@@ -68364,6 +68395,7 @@ export namespace Prisma {
     id?: StringFilter<"Page"> | string
     createdAt?: DateTimeFilter<"Page"> | Date | string
     updatedAt?: DateTimeFilter<"Page"> | Date | string
+    publishedAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     title?: StringFilter<"Page"> | string
     slug?: StringFilter<"Page"> | string
     content?: JsonFilter<"Page">
@@ -79135,6 +79167,7 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    publishedAt?: Date | string | null
     title: string
     slug: string
     content: JsonNullValueInput | InputJsonValue
@@ -79839,6 +79872,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
@@ -79858,6 +79892,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue
@@ -79877,6 +79912,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     title?: StringFieldUpdateOperationsInput | string
     slug?: StringFieldUpdateOperationsInput | string
     content?: JsonNullValueInput | InputJsonValue

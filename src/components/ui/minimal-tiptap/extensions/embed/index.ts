@@ -18,6 +18,10 @@ declare module "@tiptap/core" {
         src?: string;
         height?: number;
         title?: string;
+        aspectRatio?: string | null;
+        maxWidth?: string | null;
+        displayMode?: string | null;
+        triggerLabel?: string | null;
       }) => ReturnType;
     };
   }
@@ -84,6 +88,58 @@ export const Embed = Node.create<EmbedOptions>({
           }
           return {
             "data-title": title,
+          };
+        },
+      },
+      aspectRatio: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-aspect-ratio"),
+        renderHTML: (attributes) => {
+          const aspectRatio = attributes.aspectRatio as string | null;
+          if (!aspectRatio) {
+            return {};
+          }
+          return {
+            "data-aspect-ratio": aspectRatio,
+          };
+        },
+      },
+      maxWidth: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-max-width"),
+        renderHTML: (attributes) => {
+          const maxWidth = attributes.maxWidth as string | null;
+          if (!maxWidth) {
+            return {};
+          }
+          return {
+            "data-max-width": maxWidth,
+          };
+        },
+      },
+      displayMode: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-display-mode"),
+        renderHTML: (attributes) => {
+          const displayMode = attributes.displayMode as string | null;
+          if (!displayMode) {
+            return {};
+          }
+          return {
+            "data-display-mode": displayMode,
+          };
+        },
+      },
+      triggerLabel: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-trigger-label"),
+        renderHTML: (attributes) => {
+          const triggerLabel = attributes.triggerLabel as string | null;
+          if (!triggerLabel) {
+            return {};
+          }
+          return {
+            "data-trigger-label": triggerLabel,
           };
         },
       },

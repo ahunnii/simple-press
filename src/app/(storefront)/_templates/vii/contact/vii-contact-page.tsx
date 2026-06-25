@@ -23,7 +23,6 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
     "vii.contact.intro-heading",
     "vii.contact.intro-heading-accent",
     "vii.contact.intro-body",
-    "vii.contact.hours",
     "vii.contact.form-heading",
     // Map
     "vii.contact.map-heading",
@@ -40,6 +39,18 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
   const address = business.businessAddress ?? undefined;
   const phone = business.phoneNumber ?? undefined;
   const email = business.supportEmail ?? undefined;
+
+  const socialLinks = business.siteContent?.socialLinks as
+    | {
+        instagram?: string;
+        facebook?: string;
+        twitter?: string;
+        tiktok?: string;
+        youtube?: string;
+        linkedin?: string;
+        pinterest?: string;
+      }
+    | undefined;
 
   const hourRows = formatBusinessHours(
     parseBusinessHours(business.businessHours),
@@ -70,8 +81,8 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
         heading={f["vii.contact.intro-heading"] ?? ""}
         headingAccent={f["vii.contact.intro-heading-accent"] ?? ""}
         body={f["vii.contact.intro-body"] ?? ""}
-        hours={f["vii.contact.hours"] ?? ""}
         hourRows={hourRows}
+        socialLinks={socialLinks}
         formHeading={f["vii.contact.form-heading"] ?? "Send a message"}
         address={address}
         phone={phone}

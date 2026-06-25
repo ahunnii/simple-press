@@ -2,20 +2,27 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import { formatDate } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiBlogReadLink } from "./vii-blog-read-link";
 
 type Props = {
   posts: DefaultBlogPostPageTemplateProps["relatedPosts"];
   currentSlug: string;
+  logoUrl?: string;
+  businessName?: string;
 };
 
-export function ViiBlogRelated({ posts, currentSlug }: Props) {
+export function ViiBlogRelated({
+  posts,
+  currentSlug,
+  logoUrl,
+  businessName,
+}: Props) {
   const others = posts.filter((p) => p.slug !== currentSlug).slice(0, 3);
 
   const { ref: headRef, visible: headVisible } = useViiReveal(0.1);
@@ -64,27 +71,11 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
             </h2>
           </div>
 
-          <Link
-            href="/blog"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--font-sans)",
-              fontSize: 12,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              fontWeight: 500,
-              color: "var(--vii-navy)",
-              textDecoration: "none",
-              borderBottom: "1px solid var(--vii-copper)",
-              paddingBottom: 4,
-              flexShrink: 0,
-            }}
-          >
-            All posts
-            <ArrowRight aria-hidden="true" style={{ width: 13, height: 13 }} />
-          </Link>
+          <span style={{ flexShrink: 0 }}>
+            <ViiBlogReadLink as="link" href="/blog" tone="light">
+              All posts
+            </ViiBlogReadLink>
+          </span>
         </div>
 
         {/* Post grid */}
@@ -124,7 +115,7 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
                   aspectRatio: "4 / 3",
                   borderRadius: "var(--radius)",
                   overflow: "hidden",
-                  background: "var(--vii-paper)",
+                  background: "var(--vii-navy)",
                   marginBottom: 18,
                 }}
               >
@@ -145,13 +136,36 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontFamily: "var(--font-serif)",
-                      fontStyle: "italic",
-                      fontSize: 44,
-                      color: "var(--vii-tan)",
+                      padding: "10%",
                     }}
                   >
-                    {i + 1}
+                    {logoUrl ? (
+                      <Image
+                        src={logoUrl}
+                        alt=""
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        style={{
+                          objectFit: "contain",
+                          opacity: 0.9,
+                          padding: "10%",
+                        }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          fontFamily: "var(--font-serif)",
+                          fontStyle: "italic",
+                          fontSize: "clamp(18px, 3vw, 26px)",
+                          color: "var(--vii-cream)",
+                          textAlign: "center",
+                          lineHeight: 1.2,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        {businessName ?? ""}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -186,25 +200,9 @@ export function ViiBlogRelated({ posts, currentSlug }: Props) {
               </h3>
 
               {/* Read more link signal */}
-              <span
-                aria-hidden="true"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  fontWeight: 500,
-                  color: "var(--vii-navy)",
-                  borderBottom: "1px solid var(--vii-copper)",
-                  paddingBottom: 3,
-                }}
-              >
+              <ViiBlogReadLink as="span" tone="light">
                 Read more
-                <ArrowRight style={{ width: 13, height: 13 }} />
-              </span>
+              </ViiBlogReadLink>
             </Link>
           ))}
         </div>

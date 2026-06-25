@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
 import type { DefaultFooterTemplateProps } from "../../types";
 
 const mainMenuLinks = [
@@ -32,6 +34,7 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
         facebook?: string;
         twitter?: string;
         linkedin?: string;
+        youtube?: string;
       }
     | undefined;
 
@@ -243,6 +246,18 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
                     strokeLinecap="round"
                   />
                 </svg>
+                <span className="sr-only">(opens in new tab)</span>
+              </a>
+            )}
+            {socialLinks?.youtube && (
+              <a
+                href={socialLinks.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="p-2 text-[#6b7280] transition-colors hover:text-[#374151]"
+              >
+                <YouTubeIcon className="h-5 w-5" />
                 <span className="sr-only">(opens in new tab)</span>
               </a>
             )}

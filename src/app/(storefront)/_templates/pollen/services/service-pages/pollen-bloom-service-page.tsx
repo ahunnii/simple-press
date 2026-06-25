@@ -17,6 +17,7 @@ import {
 } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
@@ -263,11 +264,23 @@ export function PollenBloomServicePage({
                         title={embed.title ?? "Book"}
                         className="rounded-xl overflow-hidden"
                         triggerLabel={embed.title ?? "Book Now"}
+                        aspectRatio={embed.aspectRatio}
+                        maxWidth={embed.maxWidth}
                         triggerClassName={buttonVariants({
                           variant: "outline",
                           size: "lg",
                           className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
                         })}
+                      />
+                    </div>
+                  ) : embed.displayMode === "dialog" ? (
+                    <div className="text-center">
+                      <EmbedDialog
+                        src={embed.src}
+                        title={embed.title ?? "Book"}
+                        aspectRatio={embed.aspectRatio}
+                        height={embed.height}
+                        triggerLabel={embed.triggerLabel ?? embed.title ?? "Book"}
                       />
                     </div>
                   ) : (
@@ -276,6 +289,8 @@ export function PollenBloomServicePage({
                       height={embed.height}
                       title={embed.title ?? "Book"}
                       className="rounded-xl overflow-hidden"
+                      aspectRatio={embed.aspectRatio}
+                      maxWidth={embed.maxWidth}
                     />
                   )
                 ) : (

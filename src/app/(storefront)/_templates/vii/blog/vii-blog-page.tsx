@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import { PageTransition } from "~/components/page-animations";
@@ -8,6 +5,7 @@ import { PageTransition } from "~/components/page-animations";
 import { resolveFields } from "..";
 import { ViiBlogClient } from "./vii-blog-client";
 import { ViiBlogHero } from "./vii-blog-hero";
+import { ViiBlogReadLink } from "./vii-blog-read-link";
 
 type Props = {
   pages: DefaultBlogPageTemplateProps["pages"];
@@ -79,29 +77,17 @@ export function ViiBlogPage({ pages, business, customFields }: Props) {
           >
             Check back soon — something is in the works.
           </p>
-          <Link
-            href="/"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              fontFamily: "var(--font-sans)",
-              fontSize: 12,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              fontWeight: 500,
-              color: "var(--vii-navy)",
-              textDecoration: "none",
-              borderBottom: "1px solid var(--vii-copper)",
-              paddingBottom: 4,
-            }}
-          >
+          <ViiBlogReadLink as="link" href="/" tone="light">
             Back to home
-            <ArrowRight aria-hidden="true" style={{ width: 13, height: 13 }} />
-          </Link>
+          </ViiBlogReadLink>
         </section>
       ) : (
-        <ViiBlogClient pages={pages} coverImage={coverImage} />
+        <ViiBlogClient
+          pages={pages}
+          coverImage={coverImage}
+          logoUrl={business.siteContent?.logoUrl ?? undefined}
+          businessName={business.name}
+        />
       )}
     </PageTransition>
   );

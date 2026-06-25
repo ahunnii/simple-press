@@ -3,18 +3,33 @@
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiContactForm } from "./vii-contact-form";
+import { InstagramIcon } from "~/components/icons/instagram-icon";
+import { FacebookIcon } from "~/components/icons/facebook-icon";
+import { TwitterIcon } from "~/components/icons/twitter-icon";
+import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import { LinkedinIcon } from "~/components/icons/linkedin-icon";
+import { PinterestIcon } from "~/components/icons/pinterest-icon";
 
 type Props = {
   overline: string;
   heading: string;
   headingAccent: string;
   body: string;
-  hours: string;
   hourRows: { label: string; value: string }[];
   formHeading: string;
   address?: string;
   phone?: string;
   email?: string;
+  socialLinks?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    tiktok?: string;
+    youtube?: string;
+    linkedin?: string;
+    pinterest?: string;
+  };
 };
 
 function InfoBlock({
@@ -58,12 +73,12 @@ export function ViiContactMain({
   heading,
   headingAccent,
   body,
-  hours,
   hourRows,
   formHeading,
   address,
   phone,
   email,
+  socialLinks,
 }: Props) {
   const { ref: infoRef, visible: infoVisible } = useViiReveal(0.08);
   const { ref: formRef, visible: formVisible } = useViiReveal(0.08);
@@ -169,7 +184,7 @@ export function ViiContactMain({
                 </a>
               </InfoBlock>
             )}
-            {hourRows.length > 0 ? (
+            {hourRows.length > 0 && (
               <InfoBlock label="Hours">
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {hourRows.map((row) => (
@@ -191,10 +206,117 @@ export function ViiContactMain({
                   ))}
                 </div>
               </InfoBlock>
-            ) : (
-              hours && <InfoBlock label="Hours">{hours}</InfoBlock>
             )}
           </div>
+
+          {(socialLinks?.instagram ??
+            socialLinks?.facebook ??
+            socialLinks?.twitter ??
+            socialLinks?.tiktok ??
+            socialLinks?.youtube ??
+            socialLinks?.linkedin ??
+            socialLinks?.pinterest) && (
+            <div style={{ marginTop: "clamp(28px, 4vw, 40px)" }}>
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 11,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "var(--vii-ink-soft)",
+                  marginBottom: 6,
+                }}
+              >
+                Follow us on
+              </p>
+              <div className="flex gap-4">
+                {socialLinks?.instagram && (
+                  <a
+                    href={socialLinks.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="Instagram"
+                  >
+                    <InstagramIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.facebook && (
+                  <a
+                    href={socialLinks.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="Facebook"
+                  >
+                    <FacebookIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.twitter && (
+                  <a
+                    href={socialLinks.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="X (Twitter)"
+                  >
+                    <TwitterIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.tiktok && (
+                  <a
+                    href={socialLinks.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="TikTok"
+                  >
+                    <TikTokIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.youtube && (
+                  <a
+                    href={socialLinks.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="YouTube"
+                  >
+                    <YouTubeIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.linkedin && (
+                  <a
+                    href={socialLinks.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="LinkedIn"
+                  >
+                    <LinkedinIcon className="h-4 w-4" />
+                  </a>
+                )}
+                {socialLinks?.pinterest && (
+                  <a
+                    href={socialLinks.pinterest}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
+                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    aria-label="Pinterest"
+                  >
+                    <PinterestIcon className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right — form card */}

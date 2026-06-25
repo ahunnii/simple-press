@@ -5,9 +5,15 @@ import { useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { Frame, X } from "lucide-react";
 
+import type { EmbedAspectRatio, EmbedDisplayMode, EmbedWidth } from "~/lib/embed";
 import type { EmbedOptions } from "./index";
 import {
   DEFAULT_EMBED_HEIGHT,
+  EMBED_ASPECT_RATIOS,
+  EMBED_WIDTH_PRESETS,
+  coerceEmbedAspectRatio,
+  coerceEmbedDisplayMode,
+  coerceEmbedWidth,
   isVideoEmbed,
   parseEmbedInput,
 } from "~/lib/embed";
@@ -15,6 +21,13 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { EmbedFrame } from "~/components/embed-frame";
 
 export function EmbedNodeView({
@@ -47,6 +60,43 @@ export function EmbedNodeView({
   const parsed = parseEmbedInput(pasteValue);
   const isVideo = parsed ? isVideoEmbed(parsed.src) : false;
 
+  // Derive the initial aspect ratio from stored attr, or default based on video detection
+  const storedAspectRatio = coerceEmbedAspectRatio(node.attrs.aspectRatio);
+  const defaultAspectRatio: EmbedAspectRatio = isVideo ? "16:9" : "fit";
+  const [aspectRatio, setAspectRatio] = useState<EmbedAspectRatio>(
+    storedAspectRatio ?? defaultAspectRatio,
+  );
+
+  const storedMaxWidth = coerceEmbedWidth(node.attrs.maxWidth);
+  const [maxWidth, setMaxWidth] = useState<EmbedWidth>(storedMaxWidth ?? "full");
+
+  const storedDisplayMode = coerceEmbedDisplayMode(node.attrs.displayMode);
+  const [displayMode, setDisplayMode] = useState<EmbedDisplayMode>(
+    storedDisplayMode ?? "inline",
+  );
+
+  const [triggerLabel, setTriggerLabel] = useState<string>(
+    typeof node.attrs.triggerLabel === "string"
+      ? node.attrs.triggerLabel
+      : "Open",
+  );
+
+  // When the URL input changes, auto-default aspect ratio for video if user hasn't set one yet
+  const handlePasteChange = (value: string) => {
+    setPasteValue(value);
+    setUrlError(null);
+    const p = parseEmbedInput(value);
+    if (p && !storedAspectRatio) {
+      // Only auto-adjust when no stored value is present (first parse)
+      const newIsVideo = isVideoEmbed(p.src);
+      if (newIsVideo && aspectRatio === "fit") {
+        setAspectRatio("16:9");
+      } else if (!newIsVideo && aspectRatio === "16:9" && !storedAspectRatio) {
+        setAspectRatio("fit");
+      }
+    }
+  };
+
   const handleSave = () => {
     setUrlError(null);
     setTitleError(null);
@@ -63,8 +113,12 @@ export function EmbedNodeView({
 
     updateAttributes({
       src: result.src,
-      height: result.height ?? heightInput,
       title: titleInput.trim(),
+      aspectRatio,
+      height: aspectRatio === "fit" ? (result.height ?? heightInput) : undefined,
+      maxWidth,
+      displayMode,
+      triggerLabel: displayMode === "dialog" ? (triggerLabel.trim() || "Open") : undefined,
     });
     setIsEditing(false);
   };
@@ -98,8 +152,8 @@ export function EmbedNodeView({
   // Editing / insertion state
   if (isEditing || !node.attrs.src) {
     return (
-      <NodeViewWrapper className="embed-node my-4">
-        <div className="rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 p-6">
+      <NodeViewWrapper className="embed-node my-4 max-w-full">
+        <div className="max-w-full overflow-hidden rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 p-6">
           <div className="flex items-start gap-4">
             <div className="shrink-0">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
@@ -124,12 +178,9 @@ export function EmbedNodeView({
                   id="embed-paste"
                   placeholder="https://example.com or <iframe ...>"
                   value={pasteValue}
-                  onChange={(e) => {
-                    setPasteValue(e.target.value);
-                    setUrlError(null);
-                  }}
+                  onChange={(e) => handlePasteChange(e.target.value)}
                   rows={3}
-                  className="font-mono text-sm"
+                  className="field-sizing-normal w-full max-w-full font-mono text-sm break-all"
                 />
                 {urlError && <p className="text-sm text-red-600">{urlError}</p>}
               </div>
@@ -155,7 +206,53 @@ export function EmbedNodeView({
                 )}
               </div>
 
-              {!isVideo && (
+              {/* Sizing controls */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="embed-aspect-ratio" className="text-sm font-medium">
+                    Aspect ratio
+                  </Label>
+                  <Select
+                    value={aspectRatio}
+                    onValueChange={(v) => setAspectRatio(v as EmbedAspectRatio)}
+                  >
+                    <SelectTrigger id="embed-aspect-ratio" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EMBED_ASPECT_RATIOS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="embed-max-width" className="text-sm font-medium">
+                    Width
+                  </Label>
+                  <Select
+                    value={maxWidth}
+                    onValueChange={(v) => setMaxWidth(v as EmbedWidth)}
+                  >
+                    <SelectTrigger id="embed-max-width" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EMBED_WIDTH_PRESETS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Height — only shown when aspect ratio is "fit" */}
+              {aspectRatio === "fit" && (
                 <div className="space-y-1">
                   <Label htmlFor="embed-height" className="text-sm font-medium">
                     Height (px)
@@ -172,14 +269,42 @@ export function EmbedNodeView({
                 </div>
               )}
 
-              {isVideo && (
-                <p className="text-xs text-gray-500 italic">
-                  Video embeds display at 16:9 — height setting is not
-                  applicable.
-                </p>
+              {/* Display mode */}
+              <div className="space-y-1">
+                <Label htmlFor="embed-display-mode" className="text-sm font-medium">
+                  Display mode
+                </Label>
+                <Select
+                  value={displayMode}
+                  onValueChange={(v) => setDisplayMode(v as EmbedDisplayMode)}
+                >
+                  <SelectTrigger id="embed-display-mode" className="w-full max-w-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inline">Inline</SelectItem>
+                    <SelectItem value="dialog">Dialog (opens in a modal)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Trigger label — only shown when display mode is "dialog" */}
+              {displayMode === "dialog" && (
+                <div className="space-y-1">
+                  <Label htmlFor="embed-trigger-label" className="text-sm font-medium">
+                    Button label
+                  </Label>
+                  <Input
+                    id="embed-trigger-label"
+                    placeholder="Open"
+                    value={triggerLabel}
+                    onChange={(e) => setTriggerLabel(e.target.value)}
+                    className="w-48"
+                  />
+                </div>
               )}
 
-              {/* Live preview */}
+              {/* Live preview — always inline even if displayMode is dialog */}
               {parsed && titleInput.trim() && (
                 <div className="mt-2">
                   <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -189,9 +314,13 @@ export function EmbedNodeView({
                     <EmbedFrame
                       src={parsed.src}
                       height={
-                        isVideo ? undefined : (parsed.height ?? heightInput)
+                        aspectRatio === "fit"
+                          ? (parsed.height ?? heightInput)
+                          : undefined
                       }
                       title={titleInput.trim()}
+                      aspectRatio={aspectRatio}
+                      maxWidth={maxWidth}
                     />
                   </div>
                 </div>
@@ -212,10 +341,15 @@ export function EmbedNodeView({
     );
   }
 
-  // Display state
+  // Display state — read saved attrs
+  const savedAspectRatio = coerceEmbedAspectRatio(node.attrs.aspectRatio);
+  const savedMaxWidth = coerceEmbedWidth(node.attrs.maxWidth);
+  const savedHeight =
+    typeof node.attrs.height === "number" ? node.attrs.height : undefined;
+
   return (
-    <NodeViewWrapper className="embed-node my-6">
-      <div className="group relative">
+    <NodeViewWrapper className="embed-node my-6 max-w-full">
+      <div className="group relative max-w-full overflow-hidden">
         {/* Edit Overlay */}
         <div className="absolute top-2 right-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
           <div className="flex gap-2 rounded-lg bg-white p-1 shadow-lg">
@@ -236,12 +370,10 @@ export function EmbedNodeView({
         <div className="overflow-hidden rounded-lg border border-gray-200">
           <EmbedFrame
             src={String(node.attrs.src)}
-            height={
-              typeof node.attrs.height === "number"
-                ? node.attrs.height
-                : undefined
-            }
+            height={savedHeight}
             title={typeof node.attrs.title === "string" ? node.attrs.title : ""}
+            aspectRatio={savedAspectRatio}
+            maxWidth={savedMaxWidth}
           />
         </div>
       </div>

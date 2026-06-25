@@ -5,6 +5,7 @@ import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { resolveFields } from "../index";
 
@@ -27,11 +28,15 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
         facebook?: string;
         twitter?: string;
         tiktok?: string;
+        youtube?: string;
       }
     | undefined;
 
   const hasSocial =
-    socialLinks?.instagram ?? socialLinks?.facebook ?? socialLinks?.tiktok;
+    socialLinks?.instagram ??
+    socialLinks?.facebook ??
+    socialLinks?.tiktok ??
+    socialLinks?.youtube;
 
   const policies = await api.content.getSimplifiedPages({ type: "policy" });
 
@@ -84,6 +89,15 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   className="sl-social-btn transition-opacity hover:opacity-70"
                 >
                   <TikTokIcon className="h-5 w-5" />
+                </a>
+              )}
+              {socialLinks?.youtube && (
+                <a
+                  href={socialLinks.youtube}
+                  aria-label="YouTube"
+                  className="sl-social-btn transition-opacity hover:opacity-70"
+                >
+                  <YouTubeIcon className="h-5 w-5" />
                 </a>
               )}
             </div>

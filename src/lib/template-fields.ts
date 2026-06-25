@@ -4,7 +4,14 @@ import { Leaf } from "lucide-react";
 import { z } from "zod";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { DEFAULT_EMBED_HEIGHT, sanitizeEmbedSrc } from "~/lib/embed";
+import type { EmbedAspectRatio, EmbedDisplayMode, EmbedWidth } from "~/lib/embed";
+import {
+  DEFAULT_EMBED_HEIGHT,
+  coerceEmbedAspectRatio,
+  coerceEmbedDisplayMode,
+  coerceEmbedWidth,
+  sanitizeEmbedSrc,
+} from "~/lib/embed";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";
 import {
   bambooData,
@@ -332,15 +339,26 @@ export type TemplateIframeValue = {
   src: string;
   height: number;
   title: string;
+  /** Named aspect-ratio preset. Absent on legacy embeds — callers apply their own legacy logic. */
+  aspectRatio?: EmbedAspectRatio;
+  /** Named max-width preset. Absent on legacy embeds — callers default to full width. */
+  maxWidth?: EmbedWidth;
+  /** Display mode. Absent on legacy embeds — callers default to inline. */
+  displayMode?: EmbedDisplayMode;
+  /** Dialog trigger button label. Only meaningful when `displayMode === "dialog"`. */
+  triggerLabel?: string;
 };
 
 /**
  * Parses a raw `customFields` value for an iframe field.
  *
- * Expects a non-empty JSON string encoding `{ src, height?, title? }`.
+ * Expects a non-empty JSON string encoding `{ src, height?, title?, aspectRatio?,
+ * maxWidth?, displayMode?, triggerLabel? }`.
  * `src` is run through `sanitizeEmbedSrc` — returns `null` when the URL is
  * invalid or not HTTPS. `height` defaults to `DEFAULT_EMBED_HEIGHT` when
- * absent or non-positive. `title` defaults to `""`.
+ * absent or non-positive. `title` defaults to `""`. The new optional fields
+ * are validated against their respective unions via the `coerce*` helpers;
+ * unrecognised values are silently dropped (backward compat).
  */
 export function parseTemplateIframeValue(
   raw: unknown,
@@ -372,7 +390,22 @@ export function parseTemplateIframeValue(
 
   const title = typeof obj.title === "string" ? obj.title : "";
 
-  return { src: safeSrc, height, title };
+  const result: TemplateIframeValue = { src: safeSrc, height, title };
+
+  const aspectRatio = coerceEmbedAspectRatio(obj.aspectRatio);
+  if (aspectRatio !== undefined) result.aspectRatio = aspectRatio;
+
+  const maxWidth = coerceEmbedWidth(obj.maxWidth);
+  if (maxWidth !== undefined) result.maxWidth = maxWidth;
+
+  const displayMode = coerceEmbedDisplayMode(obj.displayMode);
+  if (displayMode !== undefined) result.displayMode = displayMode;
+
+  if (typeof obj.triggerLabel === "string" && obj.triggerLabel) {
+    result.triggerLabel = obj.triggerLabel;
+  }
+
+  return result;
 }
 
 export type TemplateFieldGroup = {

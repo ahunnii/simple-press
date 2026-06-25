@@ -3,6 +3,114 @@
  * No DOM APIs used.
  */
 
+// ---------------------------------------------------------------------------
+// Embed sizing / display types
+// ---------------------------------------------------------------------------
+
+/** Named aspect-ratio presets for iframe embeds. */
+export type EmbedAspectRatio = "16:9" | "4:3" | "1:1" | "9:16" | "fit";
+
+/** Named max-width presets for iframe embed containers. */
+export type EmbedWidth = "full" | "large" | "medium" | "small";
+
+/** Display mode for iframe embeds. */
+export type EmbedDisplayMode = "inline" | "dialog";
+
+/** Ordered options for aspect-ratio selects. */
+export const EMBED_ASPECT_RATIOS: ReadonlyArray<{
+  value: EmbedAspectRatio;
+  label: string;
+}> = [
+  { value: "16:9", label: "Video (16:9)" },
+  { value: "4:3", label: "Classic (4:3)" },
+  { value: "1:1", label: "Square (1:1)" },
+  { value: "9:16", label: "Vertical (9:16)" },
+  { value: "fit", label: "Fit content (set height)" },
+] as const;
+
+/** Ordered options for max-width selects, with Tailwind className. */
+export const EMBED_WIDTH_PRESETS: ReadonlyArray<{
+  value: EmbedWidth;
+  label: string;
+  className: string;
+}> = [
+  { value: "full", label: "Full width", className: "" },
+  { value: "large", label: "Large", className: "max-w-4xl" },
+  { value: "medium", label: "Medium", className: "max-w-2xl" },
+  { value: "small", label: "Small", className: "max-w-md" },
+] as const;
+
+/**
+ * Converts a named aspect-ratio preset to a CSS `aspect-ratio` value string.
+ *
+ * Returns `null` for `"fit"`, `undefined`, or any unrecognised value — the
+ * caller should fall back to a fixed pixel height.
+ */
+export function aspectRatioToCss(value?: string): string | null {
+  switch (value) {
+    case "16:9":
+      return "16 / 9";
+    case "4:3":
+      return "4 / 3";
+    case "1:1":
+      return "1 / 1";
+    case "9:16":
+      return "9 / 16";
+    default:
+      return null;
+  }
+}
+
+/**
+ * Returns the Tailwind `max-w-*` class for the given width preset.
+ * Returns `""` for `"full"`, `undefined`, or unrecognised values.
+ */
+export function embedWidthClass(value?: string): string {
+  switch (value) {
+    case "large":
+      return "max-w-4xl";
+    case "medium":
+      return "max-w-2xl";
+    case "small":
+      return "max-w-md";
+    default:
+      return "";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Coerce helpers — validate and narrow unknown values to the named unions.
+// These are intentionally non-throwing: return undefined for invalid input.
+// ---------------------------------------------------------------------------
+
+/** Returns a valid `EmbedAspectRatio` or `undefined`. */
+export function coerceEmbedAspectRatio(v: unknown): EmbedAspectRatio | undefined {
+  if (v === "16:9" || v === "4:3" || v === "1:1" || v === "9:16" || v === "fit") {
+    return v;
+  }
+  return undefined;
+}
+
+/** Returns a valid `EmbedWidth` or `undefined`. */
+export function coerceEmbedWidth(v: unknown): EmbedWidth | undefined {
+  if (v === "full" || v === "large" || v === "medium" || v === "small") {
+    return v;
+  }
+  return undefined;
+}
+
+/** Returns a valid `EmbedDisplayMode` or `undefined`. */
+export function coerceEmbedDisplayMode(v: unknown): EmbedDisplayMode | undefined {
+  if (v === "inline" || v === "dialog") {
+    return v;
+  }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// Original exports (unchanged below)
+// ---------------------------------------------------------------------------
+
 /** Sandbox attribute for all embedded iframes. */
 export const EMBED_SANDBOX =
   "allow-scripts allow-same-origin allow-forms allow-popups";

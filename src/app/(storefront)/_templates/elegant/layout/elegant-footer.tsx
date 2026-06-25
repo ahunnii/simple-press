@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
@@ -21,7 +23,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
     | undefined;
 
   const socialLinks = business?.siteContent?.socialLinks as
-    | { instagram?: string; facebook?: string; twitter?: string }
+    | { instagram?: string; facebook?: string; twitter?: string; youtube?: string }
     | undefined;
 
   const DEFAULT_NAV_LINKS = [
@@ -155,6 +157,26 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
                     aria-hidden={true}
                     style={{ width: 15, height: 15 }}
                   />
+                </a>
+              )}
+              {socialLinks?.youtube && (
+                <a
+                  href={socialLinks.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube (opens in new tab)"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    color: "rgba(255,255,255,0.7)",
+                  }}
+                >
+                  <YouTubeIcon className="h-[15px] w-[15px]" />
                 </a>
               )}
             </div>

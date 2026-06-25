@@ -60,6 +60,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         linkedin?: string;
         tiktok?: string;
         pinterest?: string;
+        youtube?: string;
       }
     | undefined) ?? {
     instagram: "",
@@ -68,6 +69,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
     linkedin: "",
     pinterest: "",
     tiktok: "",
+    youtube: "",
   };
 
   // Refs
@@ -89,6 +91,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         linkedin: socialLinks.linkedin ?? "",
         tiktok: socialLinks.tiktok ?? "",
         pinterest: socialLinks.pinterest ?? "",
+        youtube: socialLinks.youtube ?? "",
       },
       logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
@@ -115,6 +118,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
             linkedin?: string;
             tiktok?: string;
             pinterest?: string;
+            youtube?: string;
           }
         | undefined) ?? {
         instagram: "",
@@ -123,6 +127,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         linkedin: "",
         pinterest: "",
         tiktok: "",
+        youtube: "",
       };
 
       form.reset({
@@ -426,6 +431,15 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       name="socialLinks.pinterest"
                       label="Pinterest"
                       placeholder="https://pinterest.com/yourstore"
+                      type="url"
+                      disabled={isSubmitting}
+                      className="col-span-1"
+                    />
+                    <InputFormField
+                      form={form}
+                      name="socialLinks.youtube"
+                      label="YouTube"
+                      placeholder="https://youtube.com/@yourchannel"
                       type="url"
                       disabled={isSubmitting}
                       className="col-span-1"

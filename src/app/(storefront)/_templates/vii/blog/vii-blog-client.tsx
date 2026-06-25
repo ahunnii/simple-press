@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import {
@@ -15,29 +15,20 @@ import { formatDate } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
+import { ViiBlogReadLink } from "./vii-blog-read-link";
 
 type Page = DefaultBlogPageTemplateProps["pages"][number];
 
 type Props = {
   pages: DefaultBlogPageTemplateProps["pages"];
   coverImage?: string;
+  logoUrl?: string;
+  businessName?: string;
 };
 
 function postExcerpt(post: Page, max: number): string {
   return post.excerpt?.trim() ? post.excerpt : deriveExcerpt(post.content, max);
 }
-
-const READ_LINK_STYLE = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 8,
-  fontFamily: "var(--font-sans)",
-  fontSize: 12,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  fontWeight: 500,
-  paddingBottom: 3,
-} as const;
 
 // ─── Cover story — the lead post, full-bleed image with overlaid title ────────
 
@@ -131,17 +122,10 @@ function CoverStory({ post, image }: { post: Page; image?: string }) {
           </p>
         )}
 
-        <span
-          aria-hidden="true"
-          style={{
-            ...READ_LINK_STYLE,
-            marginTop: 26,
-            color: "var(--vii-paper)",
-            borderBottom: "1px solid var(--vii-copper-light)",
-          }}
-        >
-          Read article
-          <ArrowRight style={{ width: 14, height: 14 }} />
+        <span style={{ marginTop: 26, display: "inline-flex" }}>
+          <ViiBlogReadLink as="span" tone="dark">
+            Read article
+          </ViiBlogReadLink>
         </span>
       </div>
     </Link>
@@ -154,10 +138,14 @@ function JournalRow({
   post,
   withRule,
   index,
+  logoUrl,
+  businessName,
 }: {
   post: Page;
   withRule: boolean;
   index: number;
+  logoUrl?: string;
+  businessName?: string;
 }) {
   const excerpt = postExcerpt(post, 170);
 
@@ -231,17 +219,10 @@ function JournalRow({
             </p>
           )}
 
-          <span
-            aria-hidden="true"
-            style={{
-              ...READ_LINK_STYLE,
-              marginTop: 22,
-              color: "var(--vii-navy)",
-              borderBottom: "1px solid var(--vii-copper)",
-            }}
-          >
-            Read article
-            <ArrowRight style={{ width: 13, height: 13 }} />
+          <span style={{ marginTop: 22, display: "inline-flex" }}>
+            <ViiBlogReadLink as="span" tone="light">
+              Read article
+            </ViiBlogReadLink>
           </span>
         </div>
 
@@ -260,7 +241,7 @@ function JournalRow({
               aspectRatio: "4 / 3",
               borderRadius: "var(--radius)",
               overflow: "hidden",
-              background: "var(--vii-paper)",
+              background: "var(--vii-navy)",
             }}
           >
             {post.image ? (
@@ -280,13 +261,32 @@ function JournalRow({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontFamily: "var(--font-serif)",
-                  fontStyle: "italic",
-                  fontSize: 44,
-                  color: "var(--vii-tan)",
+                  padding: "10%",
                 }}
               >
-                {index + 1}
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt=""
+                    fill
+                    sizes="400px"
+                    style={{ objectFit: "contain", opacity: 0.9, padding: "10%" }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontStyle: "italic",
+                      fontSize: "clamp(18px, 3vw, 26px)",
+                      color: "var(--vii-cream)",
+                      textAlign: "center",
+                      lineHeight: 1.2,
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {businessName ?? ""}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -298,7 +298,7 @@ function JournalRow({
 
 // ─── Main client component ────────────────────────────────────────────────────
 
-export function ViiBlogClient({ pages, coverImage }: Props) {
+export function ViiBlogClient({ pages, coverImage, logoUrl, businessName }: Props) {
   const [query, setQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -453,6 +453,8 @@ export function ViiBlogClient({ pages, coverImage }: Props) {
                       post={post}
                       withRule={i !== 0}
                       index={i}
+                      logoUrl={logoUrl}
+                      businessName={businessName}
                     />
                   ))}
                 </div>

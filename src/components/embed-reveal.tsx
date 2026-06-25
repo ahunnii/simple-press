@@ -17,6 +17,10 @@ type EmbedRevealProps = {
   triggerLabel?: string;
   /** Optional className applied to the trigger button (template-specific styling). */
   triggerClassName?: string;
+  /** Named aspect-ratio preset forwarded to EmbedFrame. */
+  aspectRatio?: string;
+  /** Named max-width preset forwarded to EmbedFrame. */
+  maxWidth?: string;
 };
 
 /**
@@ -31,6 +35,8 @@ export function EmbedReveal({
   className,
   triggerLabel = "Book Now",
   triggerClassName,
+  aspectRatio,
+  maxWidth,
 }: EmbedRevealProps) {
   const [open, setOpen] = useState(false);
 
@@ -46,7 +52,7 @@ export function EmbedReveal({
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <EmbedFrame src={src} height={height} title={title} className="w-full" />
+            <EmbedFrame src={src} height={height} title={title} aspectRatio={aspectRatio} maxWidth={maxWidth} className="w-full" />
           </motion.div>
         ) : (
           <button

@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import { buttonVariants } from "~/components/ui/button";
+import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
 import {
@@ -232,6 +233,8 @@ export function PollenSpaServicePage({
                         title={embed.title ?? "Book"}
                         className="rounded-xl overflow-hidden"
                         triggerLabel={embed.title ?? "Book Now"}
+                        aspectRatio={embed.aspectRatio}
+                        maxWidth={embed.maxWidth}
                         triggerClassName={buttonVariants({
                           variant: "outline",
                           size: "lg",
@@ -240,12 +243,24 @@ export function PollenSpaServicePage({
                         })}
                       />
                     </div>
+                  ) : embed.displayMode === "dialog" ? (
+                    <div className="text-center">
+                      <EmbedDialog
+                        src={embed.src}
+                        title={embed.title ?? "Book"}
+                        aspectRatio={embed.aspectRatio}
+                        height={embed.height}
+                        triggerLabel={embed.triggerLabel ?? embed.title ?? "Book"}
+                      />
+                    </div>
                   ) : (
                     <EmbedFrame
                       src={embed.src}
                       height={embed.height}
                       title={embed.title ?? "Book"}
                       className="rounded-xl overflow-hidden"
+                      aspectRatio={embed.aspectRatio}
+                      maxWidth={embed.maxWidth}
                     />
                   )
                 ) : (
