@@ -1274,6 +1274,7 @@ export const viiCollectionFields: TemplateField[] = [
       { key: "description", label: "Description", type: "textarea", placeholder: "Optional intro for this section…" },
       { key: "image", label: "Image", type: "image" },
       { key: "video", label: "Video", type: "video" },
+      { key: "premium", label: "Feature as signature collection", type: "boolean" },
     ],
     defaultValue: "",
   },

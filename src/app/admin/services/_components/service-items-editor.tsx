@@ -235,6 +235,7 @@ function ServiceItemFormDialog({
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
+      isSignature: item?.isSignature ?? false,
       category: item?.category ?? SECTION_NONE,
     },
   });
@@ -256,6 +257,7 @@ function ServiceItemFormDialog({
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
+      isSignature: item?.isSignature ?? false,
       category: item?.category ?? SECTION_NONE,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -775,6 +777,30 @@ function ServiceItemFormDialog({
                       onCheckedChange={field.onChange}
                     />
                     <Label htmlFor="item-published">Published</Label>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isSignature"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      id="item-is-signature"
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                    />
+                    <div>
+                      <Label htmlFor="item-is-signature">
+                        Signature offering
+                      </Label>
+                      <p className="text-muted-foreground text-xs">
+                        Spotlight this as the flagship treatment.
+                      </p>
+                    </div>
                   </div>
                 </FormItem>
               )}

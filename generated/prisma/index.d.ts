@@ -21694,6 +21694,7 @@ export namespace Prisma {
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
     category: string | null
+    isSignature: boolean | null
     published: boolean | null
     sortOrder: number | null
     serviceId: string | null
@@ -21713,6 +21714,7 @@ export namespace Prisma {
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
     category: string | null
+    isSignature: boolean | null
     published: boolean | null
     sortOrder: number | null
     serviceId: string | null
@@ -21734,6 +21736,7 @@ export namespace Prisma {
     bookingEmbedSrc: number
     bookingEmbedHeight: number
     category: number
+    isSignature: number
     published: number
     sortOrder: number
     serviceId: number
@@ -21765,6 +21768,7 @@ export namespace Prisma {
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
     category?: true
+    isSignature?: true
     published?: true
     sortOrder?: true
     serviceId?: true
@@ -21784,6 +21788,7 @@ export namespace Prisma {
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
     category?: true
+    isSignature?: true
     published?: true
     sortOrder?: true
     serviceId?: true
@@ -21805,6 +21810,7 @@ export namespace Prisma {
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
     category?: true
+    isSignature?: true
     published?: true
     sortOrder?: true
     serviceId?: true
@@ -21913,6 +21919,7 @@ export namespace Prisma {
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
     category: string | null
+    isSignature: boolean
     published: boolean
     sortOrder: number
     serviceId: string
@@ -21953,6 +21960,7 @@ export namespace Prisma {
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     category?: boolean
+    isSignature?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
@@ -21975,6 +21983,7 @@ export namespace Prisma {
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     category?: boolean
+    isSignature?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
@@ -21997,6 +22006,7 @@ export namespace Prisma {
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     category?: boolean
+    isSignature?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
@@ -22019,13 +22029,14 @@ export namespace Prisma {
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
     category?: boolean
+    isSignature?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
     businessId?: boolean
   }
 
-  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "compareAtPriceLabel" | "priceTiers" | "addOns" | "bookingEmbedSrc" | "bookingEmbedHeight" | "category" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
+  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "compareAtPriceLabel" | "priceTiers" | "addOns" | "bookingEmbedSrc" | "bookingEmbedHeight" | "category" | "isSignature" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
   export type ServiceItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     service?: boolean | ServiceDefaultArgs<ExtArgs>
   }
@@ -22056,6 +22067,7 @@ export namespace Prisma {
       bookingEmbedSrc: string | null
       bookingEmbedHeight: number | null
       category: string | null
+      isSignature: boolean
       published: boolean
       sortOrder: number
       serviceId: string
@@ -22498,6 +22510,7 @@ export namespace Prisma {
     readonly bookingEmbedSrc: FieldRef<"ServiceItem", 'String'>
     readonly bookingEmbedHeight: FieldRef<"ServiceItem", 'Int'>
     readonly category: FieldRef<"ServiceItem", 'String'>
+    readonly isSignature: FieldRef<"ServiceItem", 'Boolean'>
     readonly published: FieldRef<"ServiceItem", 'Boolean'>
     readonly sortOrder: FieldRef<"ServiceItem", 'Int'>
     readonly serviceId: FieldRef<"ServiceItem", 'String'>
@@ -51045,6 +51058,7 @@ export namespace Prisma {
     bookingEmbedSrc: 'bookingEmbedSrc',
     bookingEmbedHeight: 'bookingEmbedHeight',
     category: 'category',
+    isSignature: 'isSignature',
     published: 'published',
     sortOrder: 'sortOrder',
     serviceId: 'serviceId',
@@ -53171,6 +53185,7 @@ export namespace Prisma {
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
     category?: StringNullableFilter<"ServiceItem"> | string | null
+    isSignature?: BoolFilter<"ServiceItem"> | boolean
     published?: BoolFilter<"ServiceItem"> | boolean
     sortOrder?: IntFilter<"ServiceItem"> | number
     serviceId?: StringFilter<"ServiceItem"> | string
@@ -53193,6 +53208,7 @@ export namespace Prisma {
     bookingEmbedSrc?: SortOrderInput | SortOrder
     bookingEmbedHeight?: SortOrderInput | SortOrder
     category?: SortOrderInput | SortOrder
+    isSignature?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -53218,6 +53234,7 @@ export namespace Prisma {
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
     category?: StringNullableFilter<"ServiceItem"> | string | null
+    isSignature?: BoolFilter<"ServiceItem"> | boolean
     published?: BoolFilter<"ServiceItem"> | boolean
     sortOrder?: IntFilter<"ServiceItem"> | number
     serviceId?: StringFilter<"ServiceItem"> | string
@@ -53240,6 +53257,7 @@ export namespace Prisma {
     bookingEmbedSrc?: SortOrderInput | SortOrder
     bookingEmbedHeight?: SortOrderInput | SortOrder
     category?: SortOrderInput | SortOrder
+    isSignature?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -53269,6 +53287,7 @@ export namespace Prisma {
     bookingEmbedSrc?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableWithAggregatesFilter<"ServiceItem"> | number | null
     category?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
+    isSignature?: BoolWithAggregatesFilter<"ServiceItem"> | boolean
     published?: BoolWithAggregatesFilter<"ServiceItem"> | boolean
     sortOrder?: IntWithAggregatesFilter<"ServiceItem"> | number
     serviceId?: StringWithAggregatesFilter<"ServiceItem"> | string
@@ -57263,6 +57282,7 @@ export namespace Prisma {
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     category?: string | null
+    isSignature?: boolean
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -57284,6 +57304,7 @@ export namespace Prisma {
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     category?: string | null
+    isSignature?: boolean
     published?: boolean
     sortOrder?: number
     serviceId: string
@@ -57305,6 +57326,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -57326,6 +57348,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     serviceId?: StringFieldUpdateOperationsInput | string
@@ -57347,6 +57370,7 @@ export namespace Prisma {
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     category?: string | null
+    isSignature?: boolean
     published?: boolean
     sortOrder?: number
     serviceId: string
@@ -57368,6 +57392,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -57388,6 +57413,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     serviceId?: StringFieldUpdateOperationsInput | string
@@ -61297,6 +61323,7 @@ export namespace Prisma {
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
     category?: SortOrder
+    isSignature?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -61321,6 +61348,7 @@ export namespace Prisma {
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
     category?: SortOrder
+    isSignature?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -61340,6 +61368,7 @@ export namespace Prisma {
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
     category?: SortOrder
+    isSignature?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -70820,6 +70849,7 @@ export namespace Prisma {
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     category?: string | null
+    isSignature?: boolean
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -70840,6 +70870,7 @@ export namespace Prisma {
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     category?: string | null
+    isSignature?: boolean
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -71020,6 +71051,7 @@ export namespace Prisma {
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
     category?: StringNullableFilter<"ServiceItem"> | string | null
+    isSignature?: BoolFilter<"ServiceItem"> | boolean
     published?: BoolFilter<"ServiceItem"> | boolean
     sortOrder?: IntFilter<"ServiceItem"> | number
     serviceId?: StringFilter<"ServiceItem"> | string
@@ -80642,6 +80674,7 @@ export namespace Prisma {
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
     category?: string | null
+    isSignature?: boolean
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -80662,6 +80695,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -80682,6 +80716,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -80702,6 +80737,7 @@ export namespace Prisma {
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
+    isSignature?: BoolFieldUpdateOperationsInput | boolean
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
