@@ -89,6 +89,7 @@ export const serviceItemFormSchema = z.object({
   compareAtPriceLabel: z.string().max(60).optional().nullable(),
   priceTiers: z.array(servicePriceTierSchema).max(8).optional().default([]),
   addOns: z.array(serviceAddOnSchema).max(12).optional().default([]),
+  category: z.string().max(80).optional().nullable(),
   // Raw embed input — bare URL or <iframe> snippet. Router sanitizes via parseEmbedInput.
   bookingEmbedSrc: z.string().optional().nullable(),
   bookingEmbedHeight: z

@@ -1,6 +1,7 @@
 "use client";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { parseTemplateListRows } from "~/lib/template-fields";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { ServiceForm } from "./service-form";
@@ -18,6 +19,17 @@ export function ServiceEditTabs({
   embedsEnabled,
   storefrontTemplateId,
 }: Props) {
+  const customFields =
+    service.customFields !== null &&
+    typeof service.customFields === "object" &&
+    !Array.isArray(service.customFields)
+      ? (service.customFields as Record<string, unknown>)
+      : null;
+
+  const sections = parseTemplateListRows(
+    customFields?.["vii-collection.sections"],
+  );
+
   return (
     <Tabs defaultValue="details" className="w-full">
       <div className="bg-card border-b px-4 py-2 sm:px-6">
@@ -37,7 +49,12 @@ export function ServiceEditTabs({
 
       <TabsContent value="items" className="mt-0">
         <div className="admin-container">
-          <ServiceItemsEditor serviceId={service.id} items={service.items} />
+          <ServiceItemsEditor
+            serviceId={service.id}
+            items={service.items}
+            serviceTemplateId={service.serviceTemplateId}
+            sections={sections}
+          />
         </div>
       </TabsContent>
 
