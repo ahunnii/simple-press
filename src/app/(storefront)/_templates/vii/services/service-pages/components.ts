@@ -6,6 +6,7 @@
 import type { ServiceTemplateComponent } from "~/app/(storefront)/_templates/_service-pages/registry";
 
 import { ViiAtelierServicePage } from "./vii-atelier-service-page";
+import { ViiCollectionServicePage } from "./vii-collection-service-page";
 import { ViiLedgerServicePage } from "./vii-ledger-service-page";
 import { ViiRitualServicePage } from "./vii-ritual-service-page";
 import { ViiSanctuaryServicePage } from "./vii-sanctuary-service-page";
@@ -16,4 +17,5 @@ export const VII_SERVICE_COMPONENTS: Record<string, ServiceTemplateComponent> =
     "vii-ritual": ViiRitualServicePage,
     "vii-atelier": ViiAtelierServicePage,
     "vii-ledger": ViiLedgerServicePage,
+    "vii-collection": ViiCollectionServicePage,
   };

@@ -1150,6 +1150,417 @@ const viiLedgerFieldGroups: TemplateFieldGroup[] = [
   },
 ];
 
+// ─── vii-collection ───────────────────────────────────────────────────────────
+
+export const viiCollectionFields: TemplateField[] = [
+  // Hero
+  {
+    key: "vii-collection.hero-video",
+    label: "Hero Video",
+    description:
+      "Optional hero video (MP4) shown as a single full-width media panel. Takes precedence over the hero image. Leave both blank for the minimal cream typographic hero.",
+    type: "video",
+    page: "homepage",
+    group: "vii-collection.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "vii-collection.hero-image",
+    label: "Hero Image",
+    description:
+      "Optional full-bleed hero image, used when no video is set.",
+    type: "image",
+    page: "homepage",
+    group: "vii-collection.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "vii-collection.hero-overline",
+    label: "Hero Overline",
+    description:
+      "Small all-caps eyebrow text above the service name (e.g. 'Skinbar VII · Services').",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "Skinbar VII · Services",
+    placeholder: "e.g. Skinbar VII · Skin Care",
+  },
+
+  // Intro
+  {
+    key: "vii-collection.intro-overline",
+    label: "Intro Overline",
+    description: "Small all-caps label above the intro heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. The Experience",
+  },
+  {
+    key: "vii-collection.intro-heading",
+    label: "Intro Heading",
+    description: "Primary serif heading in the intro block.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. Designed for your skin.",
+  },
+  {
+    key: "vii-collection.intro-heading-accent",
+    label: "Intro Heading Accent",
+    description:
+      "Italic copper-coloured word or phrase appended to the heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. your skin.",
+  },
+  {
+    key: "vii-collection.intro-body",
+    label: "Intro Body",
+    description: "Rich-text description of what this service category offers.",
+    type: "richtext",
+    page: "homepage",
+    group: "vii-collection.intro",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    placeholder: "Describe the experience guests can expect…",
+  },
+  {
+    key: "vii-collection.intro-image",
+    label: "Intro Image",
+    description:
+      "Optional image shown beneath the intro body text. Displayed centered with a max-width of 680px.",
+    type: "image",
+    page: "homepage",
+    group: "vii-collection.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "vii-collection.intro-video",
+    label: "Intro Video",
+    description:
+      "Optional video (MP4) shown beneath the intro body text. Takes precedence over the intro image when set.",
+    type: "video",
+    page: "homepage",
+    group: "vii-collection.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+
+  // Sections list
+  {
+    key: "vii-collection.sections",
+    label: "Service Sections",
+    description:
+      "Group your services into sections (e.g. Facials, Needling). Each section can have an optional description and an image or video. Assign items to sections in the \"Specific services\" tab.",
+    type: "list",
+    page: "homepage",
+    group: "vii-collection.sections",
+    gridColumn: "col-span-full",
+    maxItems: 4,
+    itemSchema: [
+      { key: "label", label: "Section name", type: "text", placeholder: "e.g. Facials" },
+      { key: "description", label: "Description", type: "textarea", placeholder: "Optional intro for this section…" },
+      { key: "image", label: "Image", type: "image" },
+      { key: "video", label: "Video", type: "video" },
+    ],
+    defaultValue: "",
+  },
+
+  // Treatment list
+  {
+    key: "vii-collection.list-heading",
+    label: "Treatment List Heading",
+    description:
+      "Heading for the treatment list section. Leave blank for the default 'Our treatments' heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.list",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. The Collection",
+  },
+  {
+    key: "vii-collection.list-intro",
+    label: "Treatment List Intro",
+    description:
+      "Short paragraph shown to the right of the list heading, describing the service collection.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-collection.list",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+    placeholder: "Briefly describe the treatment collection…",
+  },
+
+  // Notes (gratuity / cancellation)
+  {
+    key: "vii-collection.notes-heading",
+    label: "Notes Heading",
+    description: "Optional heading for the fine-print band. Clear to hide it.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.notes",
+    gridColumn: "col-span-full",
+    defaultValue: "Before you book",
+    placeholder: "e.g. Before you book",
+  },
+  {
+    key: "vii-collection.notes-gratuity",
+    label: "Gratuity Note",
+    description:
+      "Short note about gratuity policy. Clear to hide this item.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-collection.notes",
+    gridColumn: "col-span-1",
+    defaultValue: "A 15% gratuity is added to all services.",
+    placeholder: "e.g. A 15% gratuity is added to all services.",
+  },
+  {
+    key: "vii-collection.notes-cancellation",
+    label: "Cancellation Policy",
+    description:
+      "Short note about cancellation or rescheduling. Clear to hide this item.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-collection.notes",
+    gridColumn: "col-span-1",
+    defaultValue:
+      "Please allow at least 48 hours' notice to cancel or reschedule an appointment.",
+    placeholder: "e.g. Please allow at least 48 hours' notice…",
+  },
+
+  // Product Rail
+  {
+    key: "vii-collection.rail-overline",
+    label: "Product Rail Overline",
+    description: "Small caps label above the product rail heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "e.g. Our favorites",
+  },
+  {
+    key: "vii-collection.rail-heading",
+    label: "Product Rail Heading",
+    description: "Section heading for the featured product rail.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "Take it home",
+    placeholder: "e.g. Take it home",
+  },
+  {
+    key: "vii-collection.rail-collection",
+    label: "Product Rail Collection",
+    description:
+      "Pick a collection to feature. Defaults to your latest products when left empty.",
+    type: "collection",
+    page: "homepage",
+    group: "vii-collection.rail",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-collection.rail-featured-only",
+    label: "Show featured products only",
+    description:
+      "When no collection is selected: on shows only products you've marked Featured; off shows your most recent products.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-collection.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+  {
+    key: "vii-collection.rail-cta-text",
+    label: "Product Rail CTA Text",
+    description: "Text for the 'shop all' link below the product rail.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "Shop all products",
+    placeholder: "e.g. Shop all products",
+  },
+  {
+    key: "vii-collection.rail-cta-url",
+    label: "Product Rail CTA URL",
+    description: "URL the product rail CTA link points to.",
+    type: "url",
+    page: "homepage",
+    group: "vii-collection.rail",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
+  },
+
+  // Closing CTA
+  {
+    key: "vii-collection.cta-image",
+    label: "Closing CTA Image",
+    description:
+      "Background image for the closing contact CTA section (shown at 30% opacity behind the navy overlay).",
+    type: "image",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-full",
+    defaultValue: "",
+  },
+  {
+    key: "vii-collection.cta-heading",
+    label: "Closing CTA Heading",
+    description: "Large italic serif heading in the closing CTA block.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Reserve your appointment.",
+    placeholder: "e.g. Reserve your appointment.",
+  },
+  {
+    key: "vii-collection.cta-subheading",
+    label: "Closing CTA Subheading",
+    description: "Small all-caps line below the heading.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Detroit · By Appointment",
+    placeholder: "e.g. Detroit · By Appointment",
+  },
+  {
+    key: "vii-collection.cta-body",
+    label: "Closing CTA Body",
+    description: "Short paragraph inviting guests to book.",
+    type: "textarea",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Our specialists are ready to help you book. Reach out to reserve your session.",
+    placeholder: "Invite guests to book or call…",
+  },
+  {
+    key: "vii-collection.cta-button-label",
+    label: "Closing CTA Button Label",
+    description:
+      "Label for the primary action button in the closing CTA. Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "Book Now",
+    placeholder: "e.g. Book Now",
+  },
+  {
+    key: "vii-collection.cta-button-url",
+    label: "Closing CTA Button URL",
+    description:
+      "URL the CTA button links to (e.g. an external booking page). Required for the button to appear.",
+    type: "url",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "https://…",
+  },
+  {
+    key: "vii-collection.cta-embed",
+    label: "Closing CTA Embed",
+    description:
+      "Optional embed (e.g. a booking widget) shown in the closing CTA section. Paste an embed URL or <iframe> snippet. When embeds are disabled, a fallback external link is shown instead.",
+    type: "iframe",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-full",
+  },
+  {
+    key: "vii-collection.cta-embed-reveal",
+    label: "Reveal booking behind a button",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "false",
+  },
+];
+
+const viiCollectionFieldGroups: TemplateFieldGroup[] = [
+  {
+    id: "vii-collection.hero",
+    title: "Hero",
+    description:
+      "Optional single image or video (video takes precedence) and overline. Leave media blank for the minimal cream typographic hero.",
+    icon: "🎬",
+    columns: 1,
+  },
+  {
+    id: "vii-collection.intro",
+    title: "Introduction",
+    description:
+      "Optional overline, split heading, rich-text body, and an image or video below. Hidden entirely when left blank.",
+    icon: "✍️",
+    columns: 2,
+  },
+  {
+    id: "vii-collection.sections",
+    title: "Service Sections",
+    description:
+      "Define up to 4 named sections (e.g. Facials, Needling) to group your treatments. Each section supports an optional description and image or video header. Assign individual services to sections in the “Specific services” tab.",
+    icon: "🗂️",
+    columns: 1,
+  },
+  {
+    id: "vii-collection.list",
+    title: "Treatment List",
+    description:
+      "Optional heading and intro paragraph shown above the full treatment list.",
+    icon: "📋",
+    columns: 1,
+  },
+  {
+    id: "vii-collection.notes",
+    title: "Before You Book",
+    description:
+      "A short fine-print band shown under the treatment prices — gratuity and cancellation policy. Clear a line to hide it.",
+    icon: "📝",
+    columns: 2,
+  },
+  {
+    id: "vii-collection.rail",
+    title: "Product Rail",
+    description:
+      "A row of products shown below the notes. Defaults to your latest products; pick a collection to feature specific ones.",
+    icon: "🛍️",
+    columns: 2,
+  },
+  {
+    id: "vii-collection.cta",
+    title: "Closing Call to Action",
+    description:
+      "Background image, heading, body copy, button, embed, and contact details for the closing navy CTA section.",
+    icon: "📞",
+    columns: 2,
+  },
+];
+
 // ─── Exported defs ────────────────────────────────────────────────────────────
 
 // ─── Bound field resolvers (one per template) ─────────────────────────────────
@@ -1198,6 +1609,17 @@ export function resolveLedgerFields(
   return resolveTemplateFields(customFields, keys, _ledgerFieldMap);
 }
 
+const _collectionFieldMap = new Map<string, TemplateField>(
+  viiCollectionFields.map((f) => [f.key, f]),
+);
+
+export function resolveCollectionFields(
+  customFields: unknown,
+  keys: string[],
+): Record<string, string> {
+  return resolveTemplateFields(customFields, keys, _collectionFieldMap);
+}
+
 // ─── Exported defs ────────────────────────────────────────────────────────────
 
 export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
@@ -1232,5 +1654,13 @@ export const viiServiceTemplateDefs: ServiceTemplateDef[] = [
       "Minimal, type-led layout for services without photography: a cream typographic hero (or an optional single image/video), an optional centred intro, and a refined two-column treatment table with inline Book links.",
     fields: viiLedgerFields,
     fieldGroups: viiLedgerFieldGroups,
+  },
+  {
+    id: "vii-collection",
+    label: "Collection (sectioned)",
+    description:
+      "Minimal type-led service page that groups treatments into sections (e.g. Facials, Needling, Dermaplaning). Each section can have an optional description and image or video header.",
+    fields: viiCollectionFields,
+    fieldGroups: viiCollectionFieldGroups,
   },
 ];

@@ -21693,6 +21693,7 @@ export namespace Prisma {
     compareAtPriceLabel: string | null
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
+    category: string | null
     published: boolean | null
     sortOrder: number | null
     serviceId: string | null
@@ -21711,6 +21712,7 @@ export namespace Prisma {
     compareAtPriceLabel: string | null
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
+    category: string | null
     published: boolean | null
     sortOrder: number | null
     serviceId: string | null
@@ -21731,6 +21733,7 @@ export namespace Prisma {
     addOns: number
     bookingEmbedSrc: number
     bookingEmbedHeight: number
+    category: number
     published: number
     sortOrder: number
     serviceId: number
@@ -21761,6 +21764,7 @@ export namespace Prisma {
     compareAtPriceLabel?: true
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
+    category?: true
     published?: true
     sortOrder?: true
     serviceId?: true
@@ -21779,6 +21783,7 @@ export namespace Prisma {
     compareAtPriceLabel?: true
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
+    category?: true
     published?: true
     sortOrder?: true
     serviceId?: true
@@ -21799,6 +21804,7 @@ export namespace Prisma {
     addOns?: true
     bookingEmbedSrc?: true
     bookingEmbedHeight?: true
+    category?: true
     published?: true
     sortOrder?: true
     serviceId?: true
@@ -21906,6 +21912,7 @@ export namespace Prisma {
     addOns: JsonValue | null
     bookingEmbedSrc: string | null
     bookingEmbedHeight: number | null
+    category: string | null
     published: boolean
     sortOrder: number
     serviceId: string
@@ -21945,6 +21952,7 @@ export namespace Prisma {
     addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
+    category?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
@@ -21966,6 +21974,7 @@ export namespace Prisma {
     addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
+    category?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
@@ -21987,6 +21996,7 @@ export namespace Prisma {
     addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
+    category?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
@@ -22008,13 +22018,14 @@ export namespace Prisma {
     addOns?: boolean
     bookingEmbedSrc?: boolean
     bookingEmbedHeight?: boolean
+    category?: boolean
     published?: boolean
     sortOrder?: boolean
     serviceId?: boolean
     businessId?: boolean
   }
 
-  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "compareAtPriceLabel" | "priceTiers" | "addOns" | "bookingEmbedSrc" | "bookingEmbedHeight" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
+  export type ServiceItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "description" | "image" | "priceLabel" | "durationLabel" | "compareAtPriceLabel" | "priceTiers" | "addOns" | "bookingEmbedSrc" | "bookingEmbedHeight" | "category" | "published" | "sortOrder" | "serviceId" | "businessId", ExtArgs["result"]["serviceItem"]>
   export type ServiceItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     service?: boolean | ServiceDefaultArgs<ExtArgs>
   }
@@ -22044,6 +22055,7 @@ export namespace Prisma {
       addOns: Prisma.JsonValue | null
       bookingEmbedSrc: string | null
       bookingEmbedHeight: number | null
+      category: string | null
       published: boolean
       sortOrder: number
       serviceId: string
@@ -22485,6 +22497,7 @@ export namespace Prisma {
     readonly addOns: FieldRef<"ServiceItem", 'Json'>
     readonly bookingEmbedSrc: FieldRef<"ServiceItem", 'String'>
     readonly bookingEmbedHeight: FieldRef<"ServiceItem", 'Int'>
+    readonly category: FieldRef<"ServiceItem", 'String'>
     readonly published: FieldRef<"ServiceItem", 'Boolean'>
     readonly sortOrder: FieldRef<"ServiceItem", 'Int'>
     readonly serviceId: FieldRef<"ServiceItem", 'String'>
@@ -51031,6 +51044,7 @@ export namespace Prisma {
     addOns: 'addOns',
     bookingEmbedSrc: 'bookingEmbedSrc',
     bookingEmbedHeight: 'bookingEmbedHeight',
+    category: 'category',
     published: 'published',
     sortOrder: 'sortOrder',
     serviceId: 'serviceId',
@@ -53156,6 +53170,7 @@ export namespace Prisma {
     addOns?: JsonNullableFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
+    category?: StringNullableFilter<"ServiceItem"> | string | null
     published?: BoolFilter<"ServiceItem"> | boolean
     sortOrder?: IntFilter<"ServiceItem"> | number
     serviceId?: StringFilter<"ServiceItem"> | string
@@ -53177,6 +53192,7 @@ export namespace Prisma {
     addOns?: SortOrderInput | SortOrder
     bookingEmbedSrc?: SortOrderInput | SortOrder
     bookingEmbedHeight?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -53201,6 +53217,7 @@ export namespace Prisma {
     addOns?: JsonNullableFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
+    category?: StringNullableFilter<"ServiceItem"> | string | null
     published?: BoolFilter<"ServiceItem"> | boolean
     sortOrder?: IntFilter<"ServiceItem"> | number
     serviceId?: StringFilter<"ServiceItem"> | string
@@ -53222,6 +53239,7 @@ export namespace Prisma {
     addOns?: SortOrderInput | SortOrder
     bookingEmbedSrc?: SortOrderInput | SortOrder
     bookingEmbedHeight?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -53250,6 +53268,7 @@ export namespace Prisma {
     addOns?: JsonNullableWithAggregatesFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableWithAggregatesFilter<"ServiceItem"> | number | null
+    category?: StringNullableWithAggregatesFilter<"ServiceItem"> | string | null
     published?: BoolWithAggregatesFilter<"ServiceItem"> | boolean
     sortOrder?: IntWithAggregatesFilter<"ServiceItem"> | number
     serviceId?: StringWithAggregatesFilter<"ServiceItem"> | string
@@ -57243,6 +57262,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
+    category?: string | null
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -57263,6 +57283,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
+    category?: string | null
     published?: boolean
     sortOrder?: number
     serviceId: string
@@ -57283,6 +57304,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -57303,6 +57325,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     serviceId?: StringFieldUpdateOperationsInput | string
@@ -57323,6 +57346,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
+    category?: string | null
     published?: boolean
     sortOrder?: number
     serviceId: string
@@ -57343,6 +57367,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -57362,6 +57387,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     serviceId?: StringFieldUpdateOperationsInput | string
@@ -61270,6 +61296,7 @@ export namespace Prisma {
     addOns?: SortOrder
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
+    category?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -61293,6 +61320,7 @@ export namespace Prisma {
     compareAtPriceLabel?: SortOrder
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
+    category?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -61311,6 +61339,7 @@ export namespace Prisma {
     compareAtPriceLabel?: SortOrder
     bookingEmbedSrc?: SortOrder
     bookingEmbedHeight?: SortOrder
+    category?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
     serviceId?: SortOrder
@@ -70790,6 +70819,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
+    category?: string | null
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -70809,6 +70839,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
+    category?: string | null
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -70988,6 +71019,7 @@ export namespace Prisma {
     addOns?: JsonNullableFilter<"ServiceItem">
     bookingEmbedSrc?: StringNullableFilter<"ServiceItem"> | string | null
     bookingEmbedHeight?: IntNullableFilter<"ServiceItem"> | number | null
+    category?: StringNullableFilter<"ServiceItem"> | string | null
     published?: BoolFilter<"ServiceItem"> | boolean
     sortOrder?: IntFilter<"ServiceItem"> | number
     serviceId?: StringFilter<"ServiceItem"> | string
@@ -80609,6 +80641,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: string | null
     bookingEmbedHeight?: number | null
+    category?: string | null
     published?: boolean
     sortOrder?: number
     businessId: string
@@ -80628,6 +80661,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -80647,6 +80681,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
@@ -80666,6 +80701,7 @@ export namespace Prisma {
     addOns?: NullableJsonNullValueInput | InputJsonValue
     bookingEmbedSrc?: NullableStringFieldUpdateOperationsInput | string | null
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string

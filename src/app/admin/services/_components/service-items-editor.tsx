@@ -28,6 +28,7 @@ import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
+import { isCategoryAwareServiceTemplate } from "~/lib/service-templates";
 import { serviceItemFormSchema } from "~/lib/validators/services";
 import { api } from "~/trpc/react";
 import {
@@ -40,6 +41,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -72,9 +80,16 @@ import { Textarea } from "~/components/ui/textarea";
 
 type ServiceItem = RouterOutputs["services"]["getById"]["items"][number];
 
+type SectionRow = { _id?: string; label?: unknown; [k: string]: unknown };
+
+/** Coerce an unknown section-row label to a string. */
+const asStr = (v: unknown): string => (typeof v === "string" ? v : "");
+
 type Props = {
   serviceId: string;
   items: ServiceItem[];
+  serviceTemplateId: string;
+  sections: SectionRow[];
 };
 
 // ─── Sortable Row ─────────────────────────────────────────────────────────────
@@ -83,10 +98,12 @@ function SortableItemRow({
   item,
   onEdit,
   onDelete,
+  sectionLabel,
 }: {
   item: ServiceItem;
   onEdit: (item: ServiceItem) => void;
   onDelete: (id: string) => void;
+  sectionLabel?: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id });
@@ -134,6 +151,11 @@ function SortableItemRow({
               Draft
             </Badge>
           )}
+          {sectionLabel && (
+            <Badge variant="outline" className="text-muted-foreground text-xs">
+              {sectionLabel}
+            </Badge>
+          )}
           {item.priceLabel && (
             <span className="text-muted-foreground text-xs">
               {item.priceLabel}
@@ -179,18 +201,24 @@ function SortableItemRow({
 
 // ─── Item Form (in Dialog) ────────────────────────────────────────────────────
 
+const SECTION_NONE = "__none__";
+
 function ServiceItemFormDialog({
   serviceId,
   item,
   open,
   onOpenChange,
   onSuccess,
+  categoryAware,
+  sections,
 }: {
   serviceId: string;
   item?: ServiceItem;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  categoryAware: boolean;
+  sections: SectionRow[];
 }) {
   const form = useForm<z.input<typeof serviceItemFormSchema>>({
     resolver: zodResolver(serviceItemFormSchema),
@@ -207,6 +235,7 @@ function ServiceItemFormDialog({
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
+      category: item?.category ?? SECTION_NONE,
     },
   });
 
@@ -227,6 +256,7 @@ function ServiceItemFormDialog({
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
+      category: item?.category ?? SECTION_NONE,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item]);
@@ -263,6 +293,13 @@ function ServiceItemFormDialog({
   });
 
   const onSubmit = (data: z.input<typeof serviceItemFormSchema>) => {
+    // Normalize the "no section" sentinel to null so the DB column is cleared.
+    const category = categoryAware
+      ? (data.category === SECTION_NONE || !data.category
+          ? null
+          : data.category)
+      : undefined;
+
     if (item?.id) {
       updateMutation.mutate({
         id: item.id,
@@ -277,6 +314,7 @@ function ServiceItemFormDialog({
         bookingEmbedSrc: data.bookingEmbedSrc,
         bookingEmbedHeight: data.bookingEmbedHeight,
         published: data.published ?? false,
+        category,
       });
     } else {
       addMutation.mutate({
@@ -292,6 +330,7 @@ function ServiceItemFormDialog({
         bookingEmbedSrc: data.bookingEmbedSrc,
         bookingEmbedHeight: data.bookingEmbedHeight,
         published: data.published ?? false,
+        category,
       });
     }
   };
@@ -333,6 +372,52 @@ function ServiceItemFormDialog({
                 </FormItem>
               )}
             />
+
+            {categoryAware && (
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) =>
+                  sections.length === 0 ? (
+                    <FormItem>
+                      <FormLabel>Section</FormLabel>
+                      <p className="text-muted-foreground text-sm">
+                        Define sections in the Page content tab first, then
+                        assign items here.
+                      </p>
+                    </FormItem>
+                  ) : (
+                    <FormItem>
+                      <FormLabel>Section</FormLabel>
+                      <Select
+                        value={field.value ?? SECTION_NONE}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="No section" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={SECTION_NONE}>
+                            No section
+                          </SelectItem>
+                          {sections.map((s) => (
+                            <SelectItem
+                              key={s._id ?? asStr(s.label)}
+                              value={s._id ?? ""}
+                            >
+                              {asStr(s.label) || "Untitled section"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -717,7 +802,13 @@ function ServiceItemFormDialog({
 
 // ─── Main Editor ──────────────────────────────────────────────────────────────
 
-export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
+export function ServiceItemsEditor({
+  serviceId,
+  items: initialItems,
+  serviceTemplateId,
+  sections,
+}: Props) {
+  const categoryAware = isCategoryAwareServiceTemplate(serviceTemplateId);
   const utils = api.useUtils();
   const router = useRouter();
 
@@ -840,17 +931,23 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-2">
-                {items.map((item) => (
-                  <SortableItemRow
-                    key={item.id}
-                    item={item}
-                    onEdit={(i) => {
-                      setEditingItem(i);
-                      setDialogOpen(true);
-                    }}
-                    onDelete={(id) => setDeleteId(id)}
-                  />
-                ))}
+                {items.map((item) => {
+                  const sectionLabel = categoryAware
+                    ? asStr(sections.find((s) => s._id === item.category)?.label)
+                    : "";
+                  return (
+                    <SortableItemRow
+                      key={item.id}
+                      item={item}
+                      onEdit={(i) => {
+                        setEditingItem(i);
+                        setDialogOpen(true);
+                      }}
+                      onDelete={(id) => setDeleteId(id)}
+                      sectionLabel={sectionLabel || undefined}
+                    />
+                  );
+                })}
               </div>
             </SortableContext>
           </DndContext>
@@ -867,6 +964,8 @@ export function ServiceItemsEditor({ serviceId, items: initialItems }: Props) {
           if (!open) setEditingItem(undefined);
         }}
         onSuccess={handleEditSuccess}
+        categoryAware={categoryAware}
+        sections={sections}
       />
 
       {/* Delete confirmation */}

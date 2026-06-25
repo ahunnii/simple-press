@@ -143,6 +143,21 @@ export const SERVICE_TEMPLATE_META: Record<string, ServiceTemplateMeta> =
     ]),
   );
 
+// ─── Category-aware templates ─────────────────────────────────────────────────
+
+/**
+ * Service template ids that support section-based item grouping via the
+ * `ServiceItem.category` field. The admin item editor renders a Section picker
+ * only for these templates.
+ */
+export const CATEGORY_AWARE_SERVICE_TEMPLATES = new Set<string>([
+  "vii-collection",
+]);
+
+export function isCategoryAwareServiceTemplate(id: string): boolean {
+  return CATEGORY_AWARE_SERVICE_TEMPLATES.has(id);
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
