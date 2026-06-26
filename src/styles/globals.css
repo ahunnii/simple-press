@@ -3648,3 +3648,51 @@
   display: block;
   margin-bottom: 6px;
 }
+
+/* ─── Builders / Industrial Solidarity — design tokens ─────────────────────
+   Light-canvas co-op/construction template. Sharp 0px corners everywhere.
+   Fonts: Jost (display/headlines) + Agdasima (body).
+   Scoped to .builders so tokens never bleed into other templates.          */
+
+.builders {
+  --builders-bg: #F8F9FA;
+  --builders-surface: #ffffff;
+  --builders-alt: #F1F3F5;
+  --builders-ink: #131313;
+  --builders-accent: #FFC5B6;
+  --builders-accent-hover: #F2B9AB;
+  --builders-accent-ink: #31130A;
+  --builders-rule: #e5e7eb;
+  --builders-muted: #53433f;
+  --radius: 0;
+  /* Map template fonts onto the shared Tailwind vars so font-sans / font-serif
+     work inside components without extra inline styles.                     */
+  --font-sans: var(--font-builders-display), "Jost", sans-serif;
+  --font-serif: var(--font-builders-body), "Agdasima", sans-serif;
+  background: var(--builders-bg);
+  color: var(--builders-ink);
+  font-family: var(--font-builders-body, "Agdasima", sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sharp borders — override any default radius leaking from shadcn base */
+.builders *,
+.builders *::before,
+.builders *::after {
+  border-radius: 0 !important;
+}
+
+/* Focus ring — high-contrast outline, no radius */
+.builders *:focus-visible {
+  outline: 2px solid var(--builders-ink);
+  outline-offset: 2px;
+}
+
+/* Headings default to display font (Jost) */
+.builders h1,
+.builders h2,
+.builders h3,
+.builders h4 {
+  font-family: var(--font-builders-display, "Jost", sans-serif);
+}

@@ -13,6 +13,15 @@
 import type { ComponentType } from "react";
 
 // ---------------------------------------------------------------------------
+// Builders
+// ---------------------------------------------------------------------------
+import { BuildersLayout } from "./builders/layout/builders-layout";
+import { BuildersAboutPage } from "./builders/about/builders-about-page";
+import { BuildersContactPage } from "./builders/contact/builders-contact-page";
+import { BuildersGenericPage } from "./builders/builders-generic-page";
+import { BuildersServicesIndexPage } from "./builders/services/builders-services-index-page";
+import { BuildersTestimonialsPage } from "./builders/testimonials/builders-testimonials-page";
+// ---------------------------------------------------------------------------
 // Bamboo
 // ---------------------------------------------------------------------------
 import { BambooAboutPage } from "./bamboo/about/bamboo-about-page";
@@ -440,6 +449,15 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: ModernOrderDetailPage,
     OrdersPage: ModernOrdersPage,
     PreferencesPage: ModernPreferencesPage,
+  },
+
+  builders: {
+    Layout: BuildersLayout,
+    AboutPage: BuildersAboutPage,
+    ContactPage: BuildersContactPage,
+    GenericPage: BuildersGenericPage,
+    ServicesIndexPage: BuildersServicesIndexPage,
+    TestimonialsPage: BuildersTestimonialsPage,
   },
 
   noise: {

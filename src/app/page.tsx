@@ -15,6 +15,8 @@ import { PreviewOverlay } from "~/components/preview/preview-overlay";
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
 import { BambooLayout } from "./(storefront)/_templates/bamboo/layout/bamboo-general-layout";
+import { BuildersHomepage } from "./(storefront)/_templates/builders/homepage/builders-homepage";
+import { BuildersLayout } from "./(storefront)/_templates/builders/layout/builders-layout";
 import { DarkTrendHomepage } from "./(storefront)/_templates/dark-trend/homepage/dark-trend-homepage";
 import { DarkTrendLayout } from "./(storefront)/_templates/dark-trend/layout/dark-trend-layout";
 import { DefaultHomePage } from "./(storefront)/_templates/default/homepage/default-homepage";
@@ -81,6 +83,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       bamboo: BambooHomepage,
       "happy-bamboo": HappyBambooHomepage,
       noise: NoiseHomepage,
+      builders: BuildersHomepage,
       sledge: SledgeHomepage,
       vii: ViiHomepage,
     }[business.templateId] ?? DefaultHomePage;
@@ -95,6 +98,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       pollen: PollenLayout,
       "happy-bamboo": HappyBambooLayout,
       noise: NoiseLayout,
+      builders: BuildersLayout,
       sledge: SledgeLayout,
       vii: ViiLayout,
     }[business.templateId] ?? DefaultLayout;
