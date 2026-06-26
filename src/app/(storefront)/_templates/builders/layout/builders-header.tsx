@@ -9,7 +9,7 @@ import {
   IconLayoutDashboard,
   IconPackage,
 } from "@tabler/icons-react";
-import { Menu, ShoppingBag, User, X } from "lucide-react";
+import { ArrowRight, Menu, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
@@ -350,7 +350,7 @@ export function BuildersHeader({
           aria-label="Mobile navigation"
           className="fixed inset-0 z-[60] flex flex-col md:hidden"
           style={{
-            background: "var(--builders-surface, #ffffff)",
+            background: "#f9f9f7",
             color: "var(--builders-ink, #131313)",
           }}
         >
@@ -372,7 +372,7 @@ export function BuildersHeader({
               type="button"
               onClick={closeMobileMenu}
               aria-label="Close menu"
-              className="flex h-10 w-10 items-center justify-center border border-gray-200 text-gray-600 transition-opacity hover:opacity-70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="p-2 text-[var(--builders-ink)] transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--builders-ink)]"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -380,88 +380,135 @@ export function BuildersHeader({
 
           {/* Mobile nav links */}
           <nav
-            className="flex-1 overflow-y-auto overscroll-contain px-5 py-8"
+            className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-8"
             aria-label="Mobile navigation"
           >
-            <ul className="flex flex-col">
-              {navLinks.map((link) => (
-                <li
-                  key={link.href + link.label}
-                  className="border-b"
-                  style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
-                >
-                  <Link
-                    href={link.href}
-                    target={link.external ? "_blank" : undefined}
-                    rel={link.external ? "noopener noreferrer" : undefined}
-                    onClick={closeMobileMenu}
-                    aria-current={isActive(link.href) ? "page" : undefined}
-                    className={cn(
-                      "flex w-full items-center py-4 text-base font-bold uppercase tracking-widest transition-colors",
-                      isActive(link.href)
-                        ? "text-gray-900"
-                        : "text-gray-500 hover:text-gray-900",
-                    )}
-                    style={{
-                      fontFamily:
-                        "var(--font-builders-body, 'Agdasima', sans-serif)",
-                    }}
-                  >
-                    {link.label}
-                    {link.external && (
-                      <span className="sr-only">(opens in new tab)</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
+            <ul className="flex flex-1 flex-col items-start gap-6 pt-10">
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      onClick={closeMobileMenu}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "group flex items-center gap-4 text-4xl leading-tight transition-all",
+                        active
+                          ? "scale-105 -ml-4 border-l-4 pl-4 font-bold text-[var(--builders-ink)]"
+                          : "text-[var(--builders-ink)]/70 hover:text-[var(--builders-ink)]",
+                      )}
+                      style={{
+                        fontFamily:
+                          "var(--font-builders-display, 'Jost', sans-serif)",
+                        fontWeight: active ? 700 : 300,
+                        ...(active
+                          ? { borderColor: "var(--builders-accent-hover)" }
+                          : {}),
+                      }}
+                    >
+                      {link.label}
+                      {link.external && (
+                        <span className="sr-only">(opens in new tab)</span>
+                      )}
+                      <ArrowRight
+                        aria-hidden
+                        className="-translate-x-4 h-7 w-7 text-[var(--builders-accent-hover)] opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                      />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
-          {/* Mobile bottom bar */}
+          {/* Mobile footer */}
           <div
-            className="shrink-0 border-t px-5 py-4"
+            className="shrink-0 border-t px-5 py-6"
             style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
           >
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  closeMobileMenu();
-                  setIsOpen(true);
-                }}
-                aria-label={
-                  itemCount > 0
-                    ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                    : "Open cart"
-                }
-                className="flex h-11 items-center justify-center gap-2 border border-gray-200 text-sm font-bold uppercase tracking-widest text-gray-600 transition-opacity hover:opacity-80"
+            <div className="flex flex-col gap-6">
+              {/* Contact CTA */}
+              <Link
+                href="/contact"
+                onClick={closeMobileMenu}
+                className="flex h-12 items-center justify-center rounded-none border border-transparent bg-[var(--builders-accent)] transition-colors hover:border-[var(--builders-ink)] hover:bg-[var(--builders-accent-hover)]"
                 style={{
+                  color: "var(--builders-accent-ink)",
                   fontFamily:
                     "var(--font-builders-body, 'Agdasima', sans-serif)",
                 }}
               >
-                <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-                Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-              </button>
+                <span className="text-xs font-bold uppercase tracking-widest">
+                  Contact
+                </span>
+              </Link>
 
-              {session?.user ? (
-                <div className="flex items-center justify-center">
-                  {userMenu}
-                </div>
-              ) : (
-                <Link
-                  href="/auth/sign-in"
-                  onClick={closeMobileMenu}
-                  className="flex h-11 items-center justify-center gap-2 border border-gray-200 text-sm font-bold uppercase tracking-widest text-gray-600 transition-opacity hover:opacity-80"
+              {/* Cart + account row */}
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMobileMenu();
+                    setIsOpen(true);
+                  }}
+                  aria-label={
+                    itemCount > 0
+                      ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                      : "Open cart"
+                  }
+                  className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-[var(--builders-ink)]"
                   style={{
+                    color: "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
                     fontFamily:
                       "var(--font-builders-body, 'Agdasima', sans-serif)",
                   }}
                 >
-                  <User className="h-4 w-4" aria-hidden="true" />
-                  Login
-                </Link>
-              )}
+                  <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
+                  Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+                </button>
+
+                <span
+                  aria-hidden="true"
+                  className="h-4 w-px bg-[var(--builders-rule)]"
+                />
+
+                {session?.user ? (
+                  <div className="flex items-center justify-center">
+                    {userMenu}
+                  </div>
+                ) : (
+                  <Link
+                    href="/auth/sign-in"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-[var(--builders-ink)]"
+                    style={{
+                      color:
+                        "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
+                      fontFamily:
+                        "var(--font-builders-body, 'Agdasima', sans-serif)",
+                    }}
+                  >
+                    <User className="h-3.5 w-3.5" aria-hidden="true" />
+                    Login
+                  </Link>
+                )}
+              </div>
+
+              {/* Business name / location label */}
+              <div
+                className="text-center text-xs font-bold uppercase tracking-[0.2em]"
+                style={{
+                  color:
+                    "color-mix(in srgb, var(--builders-ink) 50%, transparent)",
+                  fontFamily:
+                    "var(--font-builders-body, 'Agdasima', sans-serif)",
+                }}
+              >
+                {business?.name ?? ""}
+              </div>
             </div>
           </div>
         </div>
