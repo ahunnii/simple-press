@@ -1347,6 +1347,8 @@ export function ViiCollectionServicePage({
     "vii-collection.cta-button-url",
     "vii-collection.cta-embed",
     "vii-collection.cta-embed-reveal",
+    "vii-collection.cta-show-phone",
+    "vii-collection.cta-show-email",
   ]);
 
   const introBodyJson = parseTemplateRichtext(cf?.["vii-collection.intro-body"]);
@@ -1415,6 +1417,8 @@ export function ViiCollectionServicePage({
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
         embedReveal={ctaEmbedReveal}
+        showPhone={f["vii-collection.cta-show-phone"] !== "false"}
+        showEmail={f["vii-collection.cta-show-email"] !== "false"}
       />
     </PageTransition>
   );

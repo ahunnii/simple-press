@@ -34,6 +34,10 @@ type Props = {
   embedsEnabled?: boolean;
   /** When true and embedsEnabled, hide the iframe behind a reveal button. Default false. */
   embedReveal?: boolean;
+  /** When false, hide the phone link even if a phone is set. Default true. */
+  showPhone?: boolean;
+  /** When false, hide the email link even if an email is set. Default true. */
+  showEmail?: boolean;
 };
 
 export function ViiContactCtaSection({
@@ -48,6 +52,8 @@ export function ViiContactCtaSection({
   embed,
   embedsEnabled,
   embedReveal = false,
+  showPhone = true,
+  showEmail = true,
 }: Props) {
   const { ref, visible } = useViiReveal(0.08);
 
@@ -233,7 +239,7 @@ export function ViiContactCtaSection({
             alignItems: "center",
           }}
         >
-          {phone && (
+          {showPhone && phone && (
             <a
               href={`tel:${phone.replace(/\s/g, "")}`}
               style={{
@@ -250,7 +256,7 @@ export function ViiContactCtaSection({
               {phone}
             </a>
           )}
-          {email && (
+          {showEmail && email && (
             <a
               href={`mailto:${email}`}
               style={{

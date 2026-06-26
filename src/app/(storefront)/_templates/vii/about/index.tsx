@@ -428,6 +428,28 @@ const aboutCtaData: TemplateField[] = [
     gridColumn: "col-span-1",
     placeholder: "e.g. hello@skinbarvii.com",
   },
+  {
+    key: "vii.about.cta-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the phone number above in the contact section. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii.about.cta-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the email above in the contact section. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "about",
+    group: "about.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
 ];
 
 // ─── Aggregated export ────────────────────────────────────────────────────────

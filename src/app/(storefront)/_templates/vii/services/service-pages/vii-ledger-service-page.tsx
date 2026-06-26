@@ -159,6 +159,8 @@ export function ViiLedgerServicePage({
     "vii-ledger.cta-button-url",
     "vii-ledger.cta-embed",
     "vii-ledger.cta-embed-reveal",
+    "vii-ledger.cta-show-phone",
+    "vii-ledger.cta-show-email",
   ]);
 
   const introBodyJson = parseTemplateRichtext(cf?.["vii-ledger.intro-body"]);
@@ -223,6 +225,8 @@ export function ViiLedgerServicePage({
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
         embedReveal={ctaEmbedReveal}
+        showPhone={f["vii-ledger.cta-show-phone"] !== "false"}
+        showEmail={f["vii-ledger.cta-show-email"] !== "false"}
       />
     </PageTransition>
   );

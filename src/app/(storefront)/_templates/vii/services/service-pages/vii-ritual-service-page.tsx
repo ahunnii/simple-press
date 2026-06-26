@@ -771,6 +771,8 @@ export function ViiRitualServicePage({
     "vii-ritual.cta-button-url",
     "vii-ritual.cta-embed",
     "vii-ritual.cta-embed-reveal",
+    "vii-ritual.cta-show-phone",
+    "vii-ritual.cta-show-email",
   ]);
 
   // Parse richtext philosophy body directly from service.customFields
@@ -835,6 +837,8 @@ export function ViiRitualServicePage({
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
         embedReveal={ctaEmbedReveal}
+        showPhone={f["vii-ritual.cta-show-phone"] !== "false"}
+        showEmail={f["vii-ritual.cta-show-email"] !== "false"}
       />
     </PageTransition>
   );

@@ -583,6 +583,28 @@ const homepageContactData: TemplateField[] = [
     gridColumn: "col-span-1",
     placeholder: "e.g. https://bookings.skinbarvii.com",
   },
+  {
+    key: "vii.homepage.contact-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the business phone number in the contact CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii.homepage.contact-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the business email in the contact CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "homepage.contact",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
 ];
 
 // ─── Instagram ────────────────────────────────────────────────────────────────

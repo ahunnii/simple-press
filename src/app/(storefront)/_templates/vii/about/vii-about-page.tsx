@@ -121,6 +121,8 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
     "vii.about.cta-button-link",
     "vii.about.cta-phone",
     "vii.about.cta-email",
+    "vii.about.cta-show-phone",
+    "vii.about.cta-show-email",
   ]);
 
   const parsedSteps = parseTemplateListRows(customFields?.["vii.about.steps"]);
@@ -190,6 +192,8 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
         buttonHref={f["vii.about.cta-button-link"] ?? ""}
         phone={f["vii.about.cta-phone"] ?? ""}
         email={f["vii.about.cta-email"] ?? ""}
+        showPhone={f["vii.about.cta-show-phone"] !== "false"}
+        showEmail={f["vii.about.cta-show-email"] !== "false"}
       />
     </PageTransition>
   );

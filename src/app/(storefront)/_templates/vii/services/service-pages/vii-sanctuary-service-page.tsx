@@ -844,6 +844,8 @@ export function ViiSanctuaryServicePage({
     "vii-sanctuary.cta-button-url",
     "vii-sanctuary.cta-embed",
     "vii-sanctuary.cta-embed-reveal",
+    "vii-sanctuary.cta-show-phone",
+    "vii-sanctuary.cta-show-email",
   ]);
 
   // Parse richtext body directly from service.customFields (bypasses string-only resolver)
@@ -908,6 +910,8 @@ export function ViiSanctuaryServicePage({
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
         embedReveal={ctaEmbedReveal}
+        showPhone={f["vii-sanctuary.cta-show-phone"] !== "false"}
+        showEmail={f["vii-sanctuary.cta-show-email"] !== "false"}
       />
     </PageTransition>
   );
