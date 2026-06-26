@@ -93,7 +93,7 @@ export function ViiBlogPostHero({ image, title, createdAt }: Props) {
           tone="dark"
           style={{ marginBottom: 16, ...heroRevealStyle(shown, reduced, 0) }}
         >
-          {`Journal · ${formatDate(createdAt)}`}
+          {`Blog · ${formatDate(createdAt)}`}
         </ViiOverline>
 
         <h1

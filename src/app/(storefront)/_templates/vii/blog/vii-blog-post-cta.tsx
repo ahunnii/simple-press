@@ -17,7 +17,7 @@ type Props = {
  * ViiBlogPostCta — a calm, cream editorial sign-off that closes blog posts.
  *
  * Replaces the heavy navy ViiContactCtaSection with a quiet centered block
- * that sits naturally after "More from the Journal." No phone/email/image.
+ * that sits naturally after "More from the Blog." No phone/email/image.
  */
 export function ViiBlogPostCta({ overline, heading, body, buttonText, buttonLink }: Props) {
   const { ref, visible } = useViiReveal(0.1);

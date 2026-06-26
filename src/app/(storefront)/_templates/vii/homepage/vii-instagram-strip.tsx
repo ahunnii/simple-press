@@ -8,9 +8,10 @@ type GalleryImage = {
 type Props = {
   handle: string;
   images: GalleryImage[];
+  ctaText?: string;
 };
 
-export function ViiInstagramStrip({ handle, images }: Props) {
+export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
   const displayed = images.slice(0, 5);
 
   if (displayed.length === 0 && !handle) {
@@ -91,6 +92,35 @@ export function ViiInstagramStrip({ handle, images }: Props) {
             ))}
           </div>
         )}
+
+        {/* Follow button */}
+        {handle && (
+          <div style={{ textAlign: "center", marginTop: "clamp(24px, 4vw, 40px)" }}>
+            <a
+              href={`https://instagram.com/${handle.replace(/^@/, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${ctaText ?? "Follow on Instagram"} (opens in new tab)`}
+              style={{
+                display: "inline-block",
+                fontFamily: "var(--font-sans)",
+                fontSize: 12,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                fontWeight: 500,
+                color: "var(--vii-navy)",
+                textDecoration: "none",
+                border: "1px solid var(--vii-copper)",
+                borderRadius: "2rem",
+                padding: "10px 28px",
+                transition: "background 0.2s ease, color 0.2s ease",
+              }}
+              className="vii-ig-cta"
+            >
+              {ctaText ?? "Follow on Instagram"}
+            </a>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -98,6 +128,16 @@ export function ViiInstagramStrip({ handle, images }: Props) {
           .vii-instagram-strip {
             grid-template-columns: repeat(3, 1fr) !important;
           }
+        }
+        .vii-ig-cta:hover,
+        .vii-ig-cta:focus-visible {
+          background: var(--vii-copper);
+          color: var(--vii-paper);
+          outline: none;
+        }
+        .vii-ig-cta:focus-visible {
+          outline: 2px solid var(--vii-copper);
+          outline-offset: 3px;
         }
       `}</style>
     </section>

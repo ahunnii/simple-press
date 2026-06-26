@@ -24,11 +24,11 @@ export function ViiTestimonialQuote({
         position: "relative",
         overflow: "hidden",
         background: "var(--vii-slate)",
-        padding: "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
+        padding: "clamp(54px, 9vw, 105px) clamp(24px, 6vw, 90px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "clamp(360px, 45vw, 560px)",
+        minHeight: "clamp(270px, 34vw, 420px)",
       }}
     >
       {/* Background image */}
@@ -60,7 +60,7 @@ export function ViiTestimonialQuote({
         style={{
           position: "relative",
           zIndex: 1,
-          maxWidth: 800,
+          maxWidth: 640,
           textAlign: "center",
         }}
       >
@@ -68,12 +68,12 @@ export function ViiTestimonialQuote({
           <p
             style={{
               fontFamily: "var(--font-serif)",
-              fontSize: "clamp(22px, 3.2vw, 42px)",
+              fontSize: "clamp(17px, 2.4vw, 32px)",
               fontWeight: 400,
               fontStyle: "italic",
               lineHeight: 1.45,
               color: "var(--vii-paper)",
-              marginBottom: 32,
+              marginBottom: 24,
             }}
           >
             {quoteText}

@@ -200,7 +200,6 @@ export function ViiLedgerServicePage({
         heading={f["vii-ledger.notes-heading"] ?? ""}
         gratuity={f["vii-ledger.notes-gratuity"] ?? ""}
         cancellation={f["vii-ledger.notes-cancellation"] ?? ""}
-        surface="var(--vii-paper)"
       />
 
       <LedgerProductRail

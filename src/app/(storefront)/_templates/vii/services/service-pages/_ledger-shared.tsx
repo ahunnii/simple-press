@@ -12,6 +12,7 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
+import { isContentEmpty } from "~/lib/template-fields";
 import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 
@@ -248,7 +249,18 @@ export function LedgerIntro({
   const { ref: bodyRef, visible: bodyVisible } = useViiReveal(0.1);
   const { ref: mediaRef, visible: mediaVisible } = useViiReveal(0.1);
 
-  if (!heading && !headingAccent && !bodyJson) return null;
+  const bodyEmpty = !bodyJson || isContentEmpty(bodyJson);
+  const hasMedia =
+    Boolean(introImageSrc?.trim()) || Boolean(introVideoSrc?.trim());
+  if (
+    !overline.trim() &&
+    !heading.trim() &&
+    !headingAccent.trim() &&
+    bodyEmpty &&
+    !hasMedia
+  ) {
+    return null;
+  }
 
   return (
     <section
@@ -289,7 +301,7 @@ export function LedgerIntro({
           )}
         </div>
 
-        {bodyJson && (
+        {!bodyEmpty && (
           <div
             ref={bodyRef}
             className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
@@ -335,12 +347,10 @@ export function LedgerNotes({
   heading,
   gratuity,
   cancellation,
-  surface = "var(--vii-cream)",
 }: {
   heading: string;
   gratuity: string;
   cancellation: string;
-  surface?: string;
 }) {
   const { ref, visible } = useViiReveal(0.08);
 
@@ -354,8 +364,8 @@ export function LedgerNotes({
         ? { "aria-labelledby": "ledger-notes-heading" }
         : { "aria-label": "Before you book" })}
       style={{
-        background: surface,
-        padding: "clamp(8px, 2vw, 20px) clamp(24px, 6vw, 96px) clamp(48px, 6vw, 80px)",
+        background: "var(--vii-navy)",
+        padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
       }}
     >
       <style>{`
@@ -374,7 +384,7 @@ export function LedgerNotes({
       <div style={{
         maxWidth: 1100,
         margin: "0 auto",
-        borderTop: "1px solid var(--vii-tan)",
+        borderTop: "1px solid color-mix(in srgb, var(--vii-paper) 18%, transparent)",
         paddingTop: "clamp(28px, 3.5vw, 40px)",
       }}>
         <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
@@ -385,7 +395,7 @@ export function LedgerNotes({
               fontStyle: "italic",
               fontSize: "clamp(22px, 3vw, 30px)",
               lineHeight: 1.15,
-              color: "var(--vii-navy)",
+              color: "var(--vii-paper)",
               margin: "0 0 clamp(20px, 3vw, 32px)",
             }}>
               {heading}
@@ -395,10 +405,10 @@ export function LedgerNotes({
           <div className="vii-ledger-notes-grid">
             {gratuity && (
               <div>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-deep)", margin: "0 0 8px" }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-light)", margin: "0 0 8px" }}>
                   Gratuity
                 </p>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(13px, 1.2vw, 15px)", lineHeight: 1.7, color: "var(--vii-ink-soft)", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(16px, 1.8vw, 20px)", lineHeight: 1.6, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
                   {gratuity}
                 </p>
               </div>
@@ -406,10 +416,10 @@ export function LedgerNotes({
 
             {cancellation && (
               <div>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-deep)", margin: "0 0 8px" }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-light)", margin: "0 0 8px" }}>
                   Cancellations
                 </p>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(13px, 1.2vw, 15px)", lineHeight: 1.7, color: "var(--vii-ink-soft)", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(16px, 1.8vw, 20px)", lineHeight: 1.6, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
                   {cancellation}
                 </p>
               </div>

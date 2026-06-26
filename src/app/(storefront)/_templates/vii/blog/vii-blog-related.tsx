@@ -67,7 +67,7 @@ export function ViiBlogRelated({
                 margin: 0,
               }}
             >
-              More from the Journal
+              More from the Blog
             </h2>
           </div>
 

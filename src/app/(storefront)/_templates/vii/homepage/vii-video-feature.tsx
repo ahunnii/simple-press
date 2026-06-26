@@ -8,6 +8,13 @@ import { Play } from "lucide-react";
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
+const ASPECT_RATIO_MAP: Record<string, string> = {
+  "16:9": "16 / 9",
+  "4:3": "4 / 3",
+  "1:1": "1 / 1",
+  "9:16": "9 / 16",
+};
+
 type Props = {
   overline: string;
   heading: string;
@@ -17,6 +24,7 @@ type Props = {
   posterSrc?: string;
   ctaText: string;
   ctaHref: string;
+  aspectRatio?: string;
 };
 
 export function ViiVideoFeature({
@@ -28,7 +36,10 @@ export function ViiVideoFeature({
   posterSrc,
   ctaText,
   ctaHref,
+  aspectRatio,
 }: Props) {
+  const resolvedRatio = ASPECT_RATIO_MAP[aspectRatio ?? ""] ?? "16 / 9";
+  const isPortrait = resolvedRatio === "9 / 16";
   const { ref: textRef, visible: textVisible } = useViiReveal(0.1);
   const { ref: mediaRef, visible: mediaVisible } = useViiReveal(0.1);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -157,10 +168,11 @@ export function ViiVideoFeature({
           style={{
             position: "relative",
             width: "100%",
-            aspectRatio: "4 / 3",
+            aspectRatio: resolvedRatio,
             borderRadius: "var(--radius)",
             overflow: "hidden",
             background: "var(--vii-slate)",
+            ...(isPortrait ? { maxWidth: 360, marginInline: "auto" } : {}),
           }}
         >
           {playing && hasVideo ? (

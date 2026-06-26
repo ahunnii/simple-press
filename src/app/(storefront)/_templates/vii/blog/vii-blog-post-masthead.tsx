@@ -42,7 +42,7 @@ export function ViiBlogPostMasthead({ title, createdAt, excerpt }: Props) {
           align="left"
           style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 20 }}
         >
-          {`Journal · ${formatDate(createdAt)}`}
+          {`Blog · ${formatDate(createdAt)}`}
         </ViiOverline>
 
         {/* Post title — beat 0.15s */}

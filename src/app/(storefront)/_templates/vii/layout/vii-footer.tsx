@@ -64,7 +64,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
   const QUICK_LINKS = [
     { href: "/about", label: "About Us" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
     { href: "/contact", label: "Contact" },
     ...(isEnabled("testimonials")
       ? [{ href: "/testimonials", label: "Reviews" }]

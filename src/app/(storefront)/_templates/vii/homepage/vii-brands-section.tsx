@@ -40,52 +40,26 @@ type LogoItemProps = {
 function LogoItem({ logo, index, ariaHidden = false }: LogoItemProps) {
   const image = typeof logo.image === "string" ? logo.image : "";
   const name = typeof logo.name === "string" ? logo.name : "";
-  const link =
-    typeof logo.link === "string" && logo.link.trim() ? logo.link : "";
   if (!image) return null;
-
-  const isExternal = /^https?:\/\//i.test(link);
-
-  const img = (
-    <span
-      style={{
-        position: "relative",
-        display: "block",
-        width: "clamp(110px, 16vw, 160px)",
-        height: "clamp(56px, 8vw, 80px)",
-      }}
-    >
-      <Image
-        src={image}
-        alt={ariaHidden ? "" : name || "Brand logo"}
-        fill
-        sizes="160px"
-        style={{ objectFit: "contain" }}
-      />
-    </span>
-  );
 
   return (
     <li key={logo._id ?? index}>
-      {link ? (
-        <a
-          href={link}
-          {...(isExternal
-            ? { target: "_blank", rel: "noopener noreferrer" }
-            : {})}
-          aria-label={ariaHidden ? undefined : name || "Brand"}
-          aria-hidden={ariaHidden ? true : undefined}
-          tabIndex={ariaHidden ? -1 : undefined}
-          className="inline-block transition-opacity hover:opacity-70 focus-visible:opacity-70"
-        >
-          {img}
-          {isExternal && !ariaHidden && (
-            <span className="sr-only"> (opens in new tab)</span>
-          )}
-        </a>
-      ) : (
-        img
-      )}
+      <span
+        style={{
+          position: "relative",
+          display: "block",
+          width: "clamp(90px, 12vw, 140px)",
+          height: "clamp(48px, 7vw, 72px)",
+        }}
+      >
+        <Image
+          src={image}
+          alt={ariaHidden ? "" : name || ""}
+          fill
+          sizes="140px"
+          style={{ objectFit: "contain" }}
+        />
+      </span>
     </li>
   );
 }
@@ -235,19 +209,35 @@ export function ViiBrandsSection({
           /* ── Static mode (default — unchanged behaviour) ───────────────── */
           <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
             <ul
+              className="vii-brands-grid"
               style={{
                 ...listStyle,
-                display: "flex",
-                flexWrap: "wrap",
+                display: "grid",
+                gap: "clamp(24px, 4vw, 48px)",
                 alignItems: "center",
-                justifyContent: "center",
-                gap: "clamp(32px, 6vw, 72px)",
+                maxWidth: 1100,
+                margin: "0 auto",
               }}
             >
               {logos.map((logo, i) => (
                 <LogoItem key={logo._id ?? i} logo={logo} index={i} />
               ))}
             </ul>
+            <style>{`
+              .vii-brands-grid {
+                grid-template-columns: repeat(5, 1fr);
+              }
+              @media (max-width: 900px) {
+                .vii-brands-grid {
+                  grid-template-columns: repeat(3, 1fr) !important;
+                }
+              }
+              @media (max-width: 520px) {
+                .vii-brands-grid {
+                  grid-template-columns: repeat(2, 1fr) !important;
+                }
+              }
+            `}</style>
           </div>
         )}
       </div>
