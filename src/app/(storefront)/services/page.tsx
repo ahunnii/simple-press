@@ -25,6 +25,11 @@ export default async function ServicesPage() {
   // ── Services feature ENABLED → theme-aware index ──────────────────────────
   const services = await api.services.getAllPublic();
 
+  const t = getTemplate(business.templateId);
+  if (t.ServicesIndexPage) {
+    return <t.ServicesIndexPage business={business} services={services} />;
+  }
+
   return (
     <div className="bg-background text-foreground min-h-screen">
       <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">

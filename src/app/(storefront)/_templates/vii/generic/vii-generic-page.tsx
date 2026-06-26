@@ -178,7 +178,7 @@ export function ViiGenericPage({ page }: { page: Page }) {
         <TiptapRenderer
           content={page.content as TiptapJSON}
           className={cn(
-            "prose w-full max-w-7xl",
+            "prose w-full max-w-[1440px]",
             // Headings — Playfair Display, navy
             "prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight",
             "prose-headings:text-[var(--vii-navy)]",

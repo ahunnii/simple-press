@@ -13,6 +13,7 @@ import {
   viiOrderFieldGroups,
 } from "./cart-checkout/order-fields";
 import { viiContactData, viiContactFieldGroups } from "./contact";
+import { viiServicesData, viiServicesFieldGroups } from "./services";
 import { viiHomepageData, viiHomepageFieldGroups } from "./homepage";
 import { viiShopData, viiShopFieldGroups } from "./shop";
 import {
@@ -172,6 +173,7 @@ export const viiData = {
     ...viiTestimonialsData,
     ...viiBlogFields,
     ...viiContactData,
+    ...viiServicesData,
     ...viiCartData,
     ...viiCheckoutData,
     ...viiOrderData,
@@ -190,6 +192,7 @@ export const viiFieldGroups = {
     viiBlogFieldGroup,
     viiBlogCtaFieldGroup,
     ...viiContactFieldGroups,
+    ...viiServicesFieldGroups,
     ...viiCartFieldGroups,
     ...viiCheckoutFieldGroups,
     ...viiOrderFieldGroups,
