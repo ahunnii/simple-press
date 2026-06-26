@@ -7,6 +7,14 @@ import {
 } from "./homepage";
 import { buildersAboutData, buildersAboutFieldGroups } from "./about";
 import { buildersContactData, buildersContactFieldGroups } from "./contact";
+import {
+  buildersServicesData,
+  buildersServicesFieldGroups,
+} from "./services";
+import {
+  buildersTestimonialsData,
+  buildersTestimonialsFieldGroups,
+} from "./testimonials";
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
@@ -15,6 +23,8 @@ export const buildersData: { builders: TemplateField[] } = {
     ...buildersHomepageData,
     ...buildersAboutData,
     ...buildersContactData,
+    ...buildersServicesData,
+    ...buildersTestimonialsData,
   ],
 };
 
@@ -23,6 +33,8 @@ export const buildersFieldGroups: { builders: TemplateFieldGroup[] } = {
     ...buildersHomepageFieldGroups,
     ...buildersAboutFieldGroups,
     ...buildersContactFieldGroups,
+    ...buildersServicesFieldGroups,
+    ...buildersTestimonialsFieldGroups,
   ],
 };
 

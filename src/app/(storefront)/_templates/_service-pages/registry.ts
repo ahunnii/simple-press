@@ -18,6 +18,7 @@ import {
   getServiceTemplatesForStorefront,
 } from "~/lib/service-templates";
 
+import { BUILDERS_SERVICE_COMPONENTS } from "../builders/services/service-pages/components";
 import { POLLEN_SERVICE_COMPONENTS } from "../pollen/services/service-pages/components";
 import { VII_SERVICE_COMPONENTS } from "../vii/services/service-pages/components";
 import { ServiceTemplateOne } from "./service-one/service-one-page";
@@ -53,6 +54,7 @@ export const SERVICE_TEMPLATE_COMPONENTS: Record<
   ...GENERIC_SERVICE_COMPONENTS,
   ...POLLEN_SERVICE_COMPONENTS,
   ...VII_SERVICE_COMPONENTS,
+  ...BUILDERS_SERVICE_COMPONENTS,
 };
 
 /**
