@@ -1284,7 +1284,7 @@ export const viiCollectionFields: TemplateField[] = [
     key: "vii-collection.list-heading",
     label: "Treatment List Heading",
     description:
-      "Heading for the treatment list section. Leave blank for the default 'Our treatments' heading.",
+      "Optional heading for the treatment list section. Leave blank to hide it.",
     type: "text",
     page: "homepage",
     group: "vii-collection.list",

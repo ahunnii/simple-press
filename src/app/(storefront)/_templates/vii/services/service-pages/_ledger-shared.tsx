@@ -408,7 +408,7 @@ export function LedgerNotes({
                 <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-light)", margin: "0 0 8px" }}>
                   Gratuity
                 </p>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(13px, 1.2vw, 15px)", lineHeight: 1.7, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(16px, 1.8vw, 20px)", lineHeight: 1.6, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
                   {gratuity}
                 </p>
               </div>
@@ -419,7 +419,7 @@ export function LedgerNotes({
                 <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-light)", margin: "0 0 8px" }}>
                   Cancellations
                 </p>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(13px, 1.2vw, 15px)", lineHeight: 1.7, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(16px, 1.8vw, 20px)", lineHeight: 1.6, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
                   {cancellation}
                 </p>
               </div>

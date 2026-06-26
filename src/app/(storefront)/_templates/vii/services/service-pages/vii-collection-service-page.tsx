@@ -5,16 +5,19 @@
  *
  * A sibling of vii-ledger that groups a service's items into owner-defined
  * sub-sections (e.g. a "Skin Care" service split into Facials, Needling,
- * Dermaplaning). Each section is now a full-width band that can be cream
- * (default) or navy (premium/signature collection).
+ * Dermaplaning).
  *
  * Layout:
  * 1. LedgerHero          — identical to vii-ledger (shared)
  * 2. LedgerIntro         — identical to vii-ledger (shared)
- * 3. Sectioned list      — ListHeading + optional CollectionSectionNav +
- *                          optional SignatureFeature + one SectionBand per
- *                          section (cream or navy). Trailing band for orphans.
- *                          Falls back to a flat list when no sections configured.
+ * 3. Sectioned list      — Full-bleed sibling "rooms":
+ *      • Light room A (paper): header + optional signature spotlight +
+ *        non-premium chapters BEFORE the premium section.
+ *      • Slate room: the premium section (full-bleed, slate bg).
+ *      • Light room B (paper): non-premium chapters AFTER the premium
+ *        section + orphan/"More" chapter.
+ *      No-premium case → one paper room with header + all chapters + orphan.
+ *      Falls back to a flat list when no sections configured.
  * 4. LedgerNotes         — identical to vii-ledger (shared)
  * 5. LedgerProductRail   — identical to vii-ledger (shared)
  * 6. ViiContactCtaSection — identical to vii-ledger (shared)
@@ -49,12 +52,34 @@ import { resolveCollectionFields } from "./fields";
 /** Coerce an unknown template-list-row value to a trimmed string. */
 const asStr = (v: unknown): string => (typeof v === "string" ? v : "");
 
+type SectionItems = ServiceTemplateProps["items"];
+
+interface PremiumSectionDef {
+  sectionId: string;
+  label: string;
+  description: string;
+  imageSrc: string;
+  videoSrc: string;
+  items: SectionItems;
+  indexOffset: number;
+}
+
+interface ChapterDef {
+  id: string;
+  label: string;
+  description: string;
+  imageSrc: string;
+  videoSrc: string;
+  items: SectionItems;
+  indexOffset: number;
+}
+
 // ─── CollectionListHeader ─────────────────────────────────────────────────────
 
 /**
  * The heading row shown at the top of the whole list (mirrors LedgerList's
  * header row). Rendered once regardless of whether sections are active.
- * Lives inside the cream outer padding wrapper.
+ * Lives inside the first light room.
  */
 function CollectionListHeader({
   listHeading,
@@ -67,6 +92,10 @@ function CollectionListHeader({
   showBorder?: boolean;
 }) {
   const { ref, visible } = useViiReveal(0.08);
+  const hasHeading = listHeading.trim().length > 0;
+  const hasIntro = listIntro.trim().length > 0;
+  // Heading is optional — when both are blank, render nothing (no fallback).
+  if (!hasHeading && !hasIntro) return null;
   return (
     <div
       ref={ref}
@@ -83,29 +112,24 @@ function CollectionListHeader({
         alignItems: "end",
       }}
     >
-      <h2
-        id="collection-list-heading"
-        style={{
-          fontFamily: "var(--font-serif)",
-          fontWeight: 400,
-          fontSize: "clamp(28px, 4vw, 52px)",
-          lineHeight: 1.08,
-          color: "var(--vii-navy)",
-          margin: 0,
-          textWrap: "balance",
-        }}
-      >
-        {listHeading || (
-          <>
-            Our{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
-              treatments
-            </em>
-          </>
-        )}
-      </h2>
+      {hasHeading && (
+        <h2
+          id="collection-list-heading"
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontSize: "clamp(28px, 4vw, 52px)",
+            lineHeight: 1.08,
+            color: "var(--vii-navy)",
+            margin: 0,
+            textWrap: "balance",
+          }}
+        >
+          {listHeading}
+        </h2>
+      )}
 
-      {listIntro && (
+      {hasIntro && (
         <p
           style={{
             fontFamily: "var(--font-sans)",
@@ -252,7 +276,7 @@ function CollectionSectionNav({
         position: "sticky",
         top: headerH != null ? `${headerH}px` : "var(--vii-header-offset)",
         zIndex: 40,
-        background: "var(--vii-cream)",
+        background: "var(--vii-paper)",
         borderBottom: "1px solid var(--vii-tan)",
       }}
     >
@@ -323,18 +347,15 @@ function CollectionSectionNav({
 
 /**
  * Optional feature spotlight for the first published item with isSignature=true.
- * Placed after the list header / above the section bands.
+ * Placed inside the first light room, after the list header.
  * That item is excluded from the section rows to avoid duplication.
  */
 function SignatureFeature({
   item,
   embedsEnabled,
-  topPad = false,
 }: {
   item: ServiceTemplateProps["items"][number];
   embedsEnabled: boolean;
-  /** When true, adds top padding to the outer cream wrapper (used in the sectioned path). */
-  topPad?: boolean;
 }) {
   const { ref, visible } = useViiReveal(0.08);
   const priceTiers = parseServicePriceTiers(item.priceTiers);
@@ -342,215 +363,208 @@ function SignatureFeature({
 
   return (
     <div
+      ref={ref}
+      className={`vii-reveal vii-signature-feature-grid${visible ? " is-visible" : ""}`}
       style={{
+        maxWidth: 1100,
+        margin: "0 auto",
         background: "var(--vii-cream)",
-        padding: `${topPad ? "clamp(48px, 7vw, 72px)" : "0"} clamp(24px, 6vw, 96px) clamp(48px, 7vw, 80px)`,
+        border: "1px solid var(--vii-tan)",
+        borderRadius: "0.35rem",
+        overflow: "hidden",
+        display: "grid",
+        gridTemplateColumns: hasImage ? "1fr 1.2fr" : "1fr",
       }}
     >
+      <style>{`
+        @media (max-width: 768px) {
+          .vii-signature-feature-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
+      {/* Content column */}
       <div
-        ref={ref}
-        className={`vii-reveal vii-signature-feature-grid${visible ? " is-visible" : ""}`}
         style={{
-          maxWidth: 1100,
-          margin: "0 auto",
-          background: "var(--vii-paper)",
-          borderRadius: "0.35rem",
-          overflow: "hidden",
-          display: "grid",
-          gridTemplateColumns: hasImage ? "1fr 1.2fr" : "1fr",
+          padding: "clamp(32px, 5vw, 56px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          gap: 20,
         }}
       >
-        <style>{`
-          @media (max-width: 768px) {
-            .vii-signature-feature-grid {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}</style>
-        {/* Content column */}
-        <div
+        {/* Eyebrow */}
+        <p
           style={{
-            padding: "clamp(32px, 5vw, 56px)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            gap: 20,
+            fontFamily: "var(--font-sans)",
+            fontSize: 10,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: "var(--vii-copper)",
+            margin: 0,
           }}
         >
-          {/* Eyebrow */}
+          <span aria-hidden="true">✦</span> Signature
+        </p>
+
+        {/* Name */}
+        <h3
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontStyle: "italic",
+            fontSize: "clamp(26px, 3.5vw, 42px)",
+            lineHeight: 1.1,
+            color: "var(--vii-navy)",
+            margin: 0,
+            textWrap: "balance",
+          }}
+        >
+          {item.name}
+        </h3>
+
+        {/* Description */}
+        {item.description && (
           <p
             style={{
               fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: "var(--vii-copper)",
+              fontSize: "clamp(13px, 1.2vw, 15px)",
+              lineHeight: 1.8,
+              color: "var(--vii-ink-soft)",
               margin: 0,
+              maxWidth: "60ch",
             }}
           >
-            <span aria-hidden="true">✦</span> Signature
+            {item.description}
           </p>
+        )}
 
-          {/* Name */}
-          <h3
-            style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 400,
-              fontStyle: "italic",
-              fontSize: "clamp(26px, 3.5vw, 42px)",
-              lineHeight: 1.1,
-              color: "var(--vii-navy)",
-              margin: 0,
-              textWrap: "balance",
-            }}
-          >
-            {item.name}
-          </h3>
-
-          {/* Description */}
-          {item.description && (
+        {/* Price tiers */}
+        {priceTiers.length > 0 && (
+          <div>
             <p
               style={{
                 fontFamily: "var(--font-sans)",
-                fontSize: "clamp(13px, 1.2vw, 15px)",
-                lineHeight: 1.8,
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
                 color: "var(--vii-ink-soft)",
-                margin: 0,
-                maxWidth: "60ch",
+                marginBottom: 8,
               }}
             >
-              {item.description}
+              Pricing
             </p>
-          )}
-
-          {/* Price tiers */}
-          {priceTiers.length > 0 && (
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 9,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--vii-ink-soft)",
-                  marginBottom: 8,
-                }}
-              >
-                Pricing
-              </p>
-              <ul
-                style={{
-                  listStyle: "none",
-                  margin: 0,
-                  padding: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 5,
-                }}
-              >
-                {priceTiers.map((tier: ServicePriceTier, i: number) => (
-                  <li
-                    key={i}
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 5,
+              }}
+            >
+              {priceTiers.map((tier: ServicePriceTier, i: number) => (
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: "var(--vii-ink-soft)",
+                  }}
+                >
+                  <span>{tier.label}</span>
+                  <span
+                    aria-hidden="true"
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 12,
-                      color: "var(--vii-ink-soft)",
+                      color: "var(--vii-copper-light)",
+                      flexShrink: 0,
                     }}
                   >
-                    <span>{tier.label}</span>
+                    —
+                  </span>
+                  {tier.compareAtPriceLabel && (
                     <span
-                      aria-hidden="true"
                       style={{
-                        color: "var(--vii-copper-light)",
-                        flexShrink: 0,
+                        textDecoration: "line-through",
+                        opacity: 0.55,
                       }}
                     >
-                      —
+                      {tier.compareAtPriceLabel}
                     </span>
-                    {tier.compareAtPriceLabel && (
-                      <span
-                        style={{
-                          textDecoration: "line-through",
-                          opacity: 0.55,
-                        }}
-                      >
-                        {tier.compareAtPriceLabel}
-                      </span>
-                    )}
-                    <span
-                      style={{ color: "var(--vii-navy)", fontWeight: 500 }}
-                    >
-                      {tier.priceLabel}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Single price pill fallback */}
-          {priceTiers.length === 0 && item.priceLabel && (
-            <p
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "var(--vii-navy)",
-                fontWeight: 500,
-                margin: 0,
-              }}
-            >
-              {item.priceLabel}
-            </p>
-          )}
-
-          {/* Book CTA */}
-          <div className="vii-ledger-book" style={{ marginTop: 4 }}>
-            <ServiceBookingDialog
-              triggerLabel="Book →"
-              itemName={item.name}
-              embedSrc={item.bookingEmbedSrc ?? undefined}
-              embedHeight={item.bookingEmbedHeight ?? undefined}
-              embedsEnabled={embedsEnabled}
-            />
-          </div>
-        </div>
-
-        {/* Image column */}
-        {hasImage && (
-          <div
-            style={{
-              position: "relative",
-              minHeight: 320,
-              overflow: "hidden",
-            }}
-          >
-            <Image
-              src={item.image!}
-              alt={item.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              style={{ objectFit: "cover" }}
-            />
+                  )}
+                  <span
+                    style={{ color: "var(--vii-navy)", fontWeight: 500 }}
+                  >
+                    {tier.priceLabel}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
+
+        {/* Single price pill fallback */}
+        {priceTiers.length === 0 && item.priceLabel && (
+          <p
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: 11,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--vii-navy)",
+              fontWeight: 500,
+              margin: 0,
+            }}
+          >
+            {item.priceLabel}
+          </p>
+        )}
+
+        {/* Book CTA */}
+        <div className="vii-ledger-book" style={{ marginTop: 4 }}>
+          <ServiceBookingDialog
+            triggerLabel="Book →"
+            itemName={item.name}
+            embedSrc={item.bookingEmbedSrc ?? undefined}
+            embedHeight={item.bookingEmbedHeight ?? undefined}
+            embedsEnabled={embedsEnabled}
+          />
+        </div>
       </div>
+
+      {/* Image column */}
+      {hasImage && (
+        <div
+          style={{
+            position: "relative",
+            minHeight: 320,
+            overflow: "hidden",
+          }}
+        >
+          <Image
+            src={item.image!}
+            alt={item.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            style={{ objectFit: "cover" }}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── SectionBand ──────────────────────────────────────────────────────────────
+// ─── Chapter ──────────────────────────────────────────────────────────────────
 
 /**
- * One full-width section band. Cream or paper (alternating among non-premium)
- * or navy (premium). Features an asymmetric chapter header with label + item
- * count, optional description, optional media banner, and the treatment rows.
+ * One non-premium chapter rendered inside a light (paper) room.
+ * Each chapter gets an id for scroll-spy anchoring.
  */
-function SectionBand({
+function Chapter({
   id,
   label,
   description,
@@ -559,8 +573,7 @@ function SectionBand({
   items,
   embedsEnabled,
   indexOffset,
-  isPremium,
-  bandSurface,
+  isFirst,
 }: {
   id: string;
   label: string;
@@ -570,9 +583,8 @@ function SectionBand({
   items: ServiceTemplateProps["items"];
   embedsEnabled: boolean;
   indexOffset: number;
-  isPremium: boolean;
-  /** Surface color for non-premium bands (alternates cream/paper). Premium always uses navy. */
-  bandSurface: string;
+  /** True when this is the first chapter in its room (no leading hairline/gap). */
+  isFirst: boolean;
 }) {
   const { ref: headRef, visible: headVisible } = useViiReveal(0.08);
   const { ref: rowsRef, visible: rowsVisible } = useViiReveal(0.08);
@@ -585,162 +597,324 @@ function SectionBand({
       ? null
       : `${itemCount} ${itemCount === 1 ? "treatment" : "treatments"}`;
 
-  const tone = isPremium ? "dark" : "light";
+  const hasLabel = label.trim().length > 0;
 
-  const bandBg = isPremium ? "var(--vii-navy)" : bandSurface;
-  const labelColor = isPremium ? "var(--vii-paper)" : "var(--vii-navy)";
-  const hairlineColor = isPremium
-    ? "color-mix(in srgb, var(--vii-paper) 18%, transparent)"
-    : "var(--vii-tan)";
-  const metaColor = isPremium
-    ? "var(--vii-copper-light)"
-    : "var(--vii-ink-soft)";
-  const descColor = isPremium
-    ? "color-mix(in srgb, var(--vii-paper) 80%, var(--vii-navy))"
-    : "var(--vii-ink-soft)";
+  return (
+    <div
+      id={id}
+      {...(hasLabel
+        ? { "aria-labelledby": `${id}-heading` }
+        : { "aria-label": "More treatments" })}
+      style={{
+        marginTop: isFirst ? 0 : "clamp(48px, 7vw, 72px)",
+        paddingTop: isFirst
+          ? 0
+          : "clamp(48px, 7vw, 72px)",
+        borderTop: isFirst ? "none" : "1px solid var(--vii-tan)",
+        scrollMarginTop:
+          "calc(var(--vii-collection-header-h, var(--vii-header-offset)) + var(--vii-collection-nav-h, 45px) + 8px)",
+      }}
+    >
+      {/* Chapter header */}
+      {(label || hasDescription || hasMedia) && (
+        <div
+          ref={headRef}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          style={{
+            marginBottom: "clamp(20px, 3vw, 32px)",
+            paddingBottom: "clamp(16px, 2vw, 28px)",
+            borderBottom: "1px solid var(--vii-tan)",
+          }}
+        >
+          {/* Label + count row */}
+          {label && (
+            <div
+              className="vii-collection-chapter-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: hasDescription ? "1fr 1.4fr" : "1fr auto",
+                gap: "clamp(16px, 3vw, 40px)",
+                alignItems: hasDescription ? "start" : "baseline",
+              }}
+            >
+              <h3
+                id={`${id}-heading`}
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  fontSize: "clamp(26px, 3.5vw, 42px)",
+                  lineHeight: 1.1,
+                  color: "var(--vii-navy)",
+                  margin: 0,
+                  textWrap: "balance",
+                }}
+              >
+                {label}
+              </h3>
 
-  const vPad = isPremium
-    ? "clamp(44px, 6vw, 76px)"
-    : "clamp(12px, 2vw, 20px)";
+              {hasDescription ? (
+                /* Description on the right when description present */
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "clamp(13px, 1.2vw, 15px)",
+                    lineHeight: 1.75,
+                    color: "var(--vii-ink-soft)",
+                    margin: "4px 0 0",
+                    maxWidth: "60ch",
+                  }}
+                >
+                  {description}
+                </p>
+              ) : (
+                /* Count meta on the right when no description */
+                countLabel && (
+                  <span
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: 10,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "var(--vii-ink-soft)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {countLabel}
+                  </span>
+                )
+              )}
+            </div>
+          )}
 
-  // Determine whether this band has a label for aria-labelledby vs aria-label
+          {/* Count meta below label when description also present */}
+          {label && hasDescription && countLabel && (
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--vii-ink-soft)",
+                margin: "10px 0 0",
+              }}
+            >
+              {countLabel}
+            </p>
+          )}
+
+          {/* Optional media banner */}
+          {hasMedia && (
+            <div style={{ marginTop: "clamp(20px, 3vw, 28px)" }}>
+              <ServiceSectionMedia
+                imageSrc={imageSrc || undefined}
+                videoSrc={videoSrc || undefined}
+                alt={label ? `${label} section` : ""}
+                style={{
+                  maxWidth: 680,
+                  aspectRatio: "16/9",
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Item rows */}
+      {items.length > 0 && (
+        <div
+          ref={rowsRef}
+          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+        >
+          {items.map((item, i) => (
+            <TreatmentListRow
+              key={item.id}
+              item={item}
+              embedsEnabled={embedsEnabled}
+              isLast={i === items.length - 1}
+              index={indexOffset + i}
+              tone="light"
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SlateRoom ────────────────────────────────────────────────────────────────
+
+/**
+ * Full-bleed slate room for the premium/signature section.
+ * Uses var(--vii-slate) instead of navy so when it lands last it steps
+ * cleanly into the navy LedgerNotes without a stray cream seam.
+ */
+function SlateRoom({
+  id,
+  label,
+  description,
+  imageSrc,
+  videoSrc,
+  items,
+  embedsEnabled,
+  indexOffset,
+}: {
+  id: string;
+  label: string;
+  description: string;
+  imageSrc: string;
+  videoSrc: string;
+  items: ServiceTemplateProps["items"];
+  embedsEnabled: boolean;
+  indexOffset: number;
+}) {
+  const { ref: headRef, visible: headVisible } = useViiReveal(0.08);
+  const { ref: rowsRef, visible: rowsVisible } = useViiReveal(0.08);
+
+  const hasMedia = videoSrc.trim().length > 0 || imageSrc.trim().length > 0;
+  const hasDescription = description.trim().length > 0;
+  const itemCount = items.length;
+  const countLabel =
+    itemCount === 0
+      ? null
+      : `${itemCount} ${itemCount === 1 ? "treatment" : "treatments"}`;
+
   const hasLabel = label.trim().length > 0;
 
   return (
     <section
       id={id}
-      className={isPremium ? "vii-ledger-list--dark" : undefined}
+      className="vii-ledger-list--dark"
       {...(hasLabel
         ? { "aria-labelledby": `${id}-heading` }
-        : { "aria-label": "More treatments" })}
+        : { "aria-label": "Signature Collection" })}
       style={{
-        background: bandBg,
-        padding: `${vPad} clamp(24px, 6vw, 96px)`,
+        background: "var(--vii-slate)",
+        padding:
+          "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
         scrollMarginTop:
           "calc(var(--vii-collection-header-h, var(--vii-header-offset)) + var(--vii-collection-nav-h, 45px) + 8px)",
       }}
     >
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         {/* Chapter header */}
-        {(label || hasDescription || hasMedia) && (
-          <div
-            ref={headRef}
-            className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+        <div
+          ref={headRef}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          style={{
+            marginBottom: "clamp(20px, 3vw, 32px)",
+            paddingBottom: "clamp(16px, 2vw, 28px)",
+            borderBottom:
+              "1px solid color-mix(in srgb, var(--vii-paper) 18%, transparent)",
+          }}
+        >
+          {/* Eyebrow */}
+          <p
             style={{
-              marginBottom: "clamp(20px, 3vw, 36px)",
-              paddingBottom: "clamp(16px, 2vw, 28px)",
-              borderBottom: `1px solid ${hairlineColor}`,
+              fontFamily: "var(--font-sans)",
+              fontSize: 10,
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              color: "var(--vii-tan)",
+              margin: "0 0 14px",
             }}
           >
-            {/* Eyebrow for premium band */}
-            {isPremium && (
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 10,
-                  letterSpacing: "0.22em",
-                  textTransform: "uppercase",
-                  color: "var(--vii-copper-light)",
-                  margin: "0 0 14px",
-                }}
-              >
-                <span aria-hidden="true">✦</span> Signature Collection
-              </p>
-            )}
+            <span aria-hidden="true" style={{ color: "var(--vii-copper-light)" }}>✦</span>{" "}
+            Signature Collection
+          </p>
 
-            {/* Label + count row */}
-            {label && (
-              <div
-                className="vii-collection-chapter-grid"
+          {/* Label + count row */}
+          {label && (
+            <div
+              className="vii-collection-chapter-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: hasDescription ? "1fr 1.4fr" : "1fr auto",
+                gap: "clamp(16px, 3vw, 40px)",
+                alignItems: hasDescription ? "start" : "baseline",
+              }}
+            >
+              <h3
+                id={`${id}-heading`}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: hasDescription ? "1fr 1.4fr" : "1fr auto",
-                  gap: "clamp(16px, 3vw, 40px)",
-                  alignItems: hasDescription ? "start" : "baseline",
+                  fontFamily: "var(--font-serif)",
+                  fontWeight: 400,
+                  fontStyle: "normal",
+                  fontSize: "clamp(26px, 3.5vw, 42px)",
+                  lineHeight: 1.1,
+                  color: "var(--vii-paper)",
+                  margin: 0,
+                  textWrap: "balance",
                 }}
               >
-                <h3
-                  id={`${id}-heading`}
+                {label}
+              </h3>
+
+              {hasDescription ? (
+                /* Description on the right when description present */
+                <p
                   style={{
-                    fontFamily: "var(--font-serif)",
-                    fontWeight: 400,
-                    fontStyle: isPremium ? "normal" : "italic",
-                    fontSize: "clamp(26px, 3.5vw, 42px)",
-                    lineHeight: 1.1,
-                    color: labelColor,
-                    margin: 0,
-                    textWrap: "balance",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "clamp(13px, 1.2vw, 15px)",
+                    lineHeight: 1.75,
+                    color: "color-mix(in srgb, var(--vii-paper) 80%, var(--vii-slate))",
+                    margin: "4px 0 0",
+                    maxWidth: "60ch",
                   }}
                 >
-                  {label}
-                </h3>
-
-                {hasDescription ? (
-                  /* Description on the right when description present */
-                  <p
+                  {description}
+                </p>
+              ) : (
+                /* Count meta on the right when no description */
+                countLabel && (
+                  <span
                     style={{
                       fontFamily: "var(--font-sans)",
-                      fontSize: "clamp(13px, 1.2vw, 15px)",
-                      lineHeight: 1.75,
-                      color: descColor,
-                      margin: hasDescription ? "4px 0 0" : 0,
-                      maxWidth: "60ch",
+                      fontSize: 10,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "var(--vii-tan)",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {description}
-                  </p>
-                ) : (
-                  /* Count meta on the right when no description */
-                  countLabel && (
-                    <span
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: 10,
-                        letterSpacing: "0.18em",
-                        textTransform: "uppercase",
-                        color: metaColor,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {countLabel}
-                    </span>
-                  )
-                )}
-              </div>
-            )}
+                    {countLabel}
+                  </span>
+                )
+              )}
+            </div>
+          )}
 
-            {/* Count meta below label when description also present */}
-            {label && hasDescription && countLabel && (
-              <p
+          {/* Count meta below label when description also present */}
+          {label && hasDescription && countLabel && (
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--vii-tan)",
+                margin: "10px 0 0",
+              }}
+            >
+              {countLabel}
+            </p>
+          )}
+
+          {/* Optional media banner */}
+          {hasMedia && (
+            <div style={{ marginTop: "clamp(20px, 3vw, 28px)" }}>
+              <ServiceSectionMedia
+                imageSrc={imageSrc || undefined}
+                videoSrc={videoSrc || undefined}
+                alt={label ? `${label} section` : ""}
                 style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 10,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: metaColor,
-                  margin: "10px 0 0",
+                  maxWidth: 680,
+                  aspectRatio: "16/9",
                 }}
-              >
-                {countLabel}
-              </p>
-            )}
-
-            {/* Optional media banner */}
-            {hasMedia && (
-              <div style={{ marginTop: "clamp(20px, 3vw, 28px)" }}>
-                <ServiceSectionMedia
-                  imageSrc={imageSrc || undefined}
-                  videoSrc={videoSrc || undefined}
-                  alt={label ? `${label} section` : ""}
-                  style={{
-                    maxWidth: 680,
-                    aspectRatio: "16/9",
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        )}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Item rows */}
         {items.length > 0 && (
@@ -755,11 +929,61 @@ function SectionBand({
                 embedsEnabled={embedsEnabled}
                 isLast={i === items.length - 1}
                 index={indexOffset + i}
-                tone={tone}
+                tone="dark"
               />
             ))}
           </div>
         )}
+      </div>
+    </section>
+  );
+}
+
+// ─── LightRoom ────────────────────────────────────────────────────────────────
+
+/**
+ * A paper-background room containing one or more chapters. Returns null when
+ * empty. `compactTop` trims the top padding for the room that directly follows
+ * the header room + sticky nav (so the heading and first chapter don't drift
+ * apart); rooms that follow the slate room keep full top padding.
+ */
+function LightRoom({
+  chapters,
+  compactTop,
+  embedsEnabled,
+}: {
+  chapters: ChapterDef[];
+  compactTop: boolean;
+  embedsEnabled: boolean;
+}) {
+  if (chapters.length === 0) return null;
+
+  const padTop = compactTop
+    ? "clamp(24px, 3.5vw, 40px)"
+    : "clamp(72px, 10vw, 120px)";
+
+  return (
+    <section
+      style={{
+        background: "var(--vii-paper)",
+        padding: `${padTop} clamp(24px, 6vw, 96px) clamp(72px, 10vw, 120px)`,
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        {chapters.map((ch, i) => (
+          <Chapter
+            key={ch.id}
+            id={ch.id}
+            label={ch.label}
+            description={ch.description}
+            imageSrc={ch.imageSrc}
+            videoSrc={ch.videoSrc}
+            items={ch.items}
+            embedsEnabled={embedsEnabled}
+            indexOffset={ch.indexOffset}
+            isFirst={i === 0}
+          />
+        ))}
       </div>
     </section>
   );
@@ -852,36 +1076,21 @@ function CollectionList({
   const flatRowItems = items.filter((it) => it.id !== signatureItem?.id);
   const flatRowCount = flatRowItems.length;
 
-  // Compute alternating surface colors for non-premium bands.
-  // Alternation is PAPER-first so the cream intro block is immediately followed
-  // by a paper lift (cream→paper reads as a visible step up). Only bands that
-  // will actually render advance the toggle — skipped empty sections must not
-  // desync the rhythm and cause two adjacent rendered bands to share the same
-  // surface.
-  let renderableLightBandCount = 0;
-  const lightSurfaceAt = (n: number) =>
-    n % 2 === 0 ? "var(--vii-paper)" : "var(--vii-cream)";
-  const bandSurfaces: string[] = sections.map((s) => {
-    const sectionId = String(s._id ?? "");
-    const isPremium = sectionId === premiumSectionId;
-    if (isPremium) return ""; // unused — premium renders navy
-    const willRender =
-      asStr(s.label).trim().length > 0 || rowItems(sectionId).length > 0;
-    if (!willRender) return "var(--vii-paper)"; // skipped; don't advance toggle
-    const surface = lightSurfaceAt(renderableLightBandCount);
-    renderableLightBandCount++;
-    return surface;
-  });
-  // The orphan "More" band continues the alternation from where the last
-  // renderable section left off.
-  const orphanSurface = lightSurfaceAt(renderableLightBandCount);
+  // Heading is fully optional — when blank, no heading renders (no fallback)
+  // and the header room is omitted so the nav sits flush.
+  const hasHeaderText = listHeading.trim().length > 0;
+  const hasHeaderContent = hasHeaderText || listIntro.trim().length > 0;
 
   return (
-    <section aria-labelledby="collection-list-heading">
+    <section
+      {...(hasHeaderText
+        ? { "aria-labelledby": "collection-list-heading" }
+        : { "aria-label": "Treatments" })}
+    >
       <LedgerListStyles />
 
       {/* Responsive rule for the chapter-header grid — guaranteed to be present
-          for every SectionBand render, including when the nav is hidden. */}
+          for every Chapter/SlateRoom render, including when the nav is hidden. */}
       <style>{`
         @media (max-width: 640px) {
           .vii-collection-chapter-grid {
@@ -891,35 +1100,44 @@ function CollectionList({
         }
       `}</style>
 
-      {/* List heading lives in its own cream padded wrapper */}
-      <div
-        style={{
-          background: "var(--vii-cream)",
-          padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px) 0",
-        }}
-      >
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <CollectionListHeader
-            listHeading={listHeading}
-            listIntro={listIntro}
-            showBorder={navItems.length < 2}
-          />
-        </div>
-      </div>
-
       {sections.length === 0 ? (
         /* ── Fallback: flat list (no sections configured yet) ── */
-        <>
-          {signatureItem && (
-            <SignatureFeature item={signatureItem} embedsEnabled={embedsEnabled} />
-          )}
-          <div
-            style={{
-              background: "var(--vii-cream)",
-              padding: "clamp(32px, 5vw, 56px) clamp(24px, 6vw, 96px) clamp(72px, 10vw, 120px)",
-            }}
-          >
-            <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div
+          style={{
+            background: "var(--vii-paper)",
+            padding:
+              "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
+          }}
+        >
+          <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+            <CollectionListHeader
+              listHeading={listHeading}
+              listIntro={listIntro}
+              showBorder={true}
+            />
+
+            {signatureItem && (
+              <div
+                style={{
+                  marginTop: hasHeaderContent ? "clamp(32px, 5vw, 56px)" : 0,
+                }}
+              >
+                <SignatureFeature
+                  item={signatureItem}
+                  embedsEnabled={embedsEnabled}
+                />
+              </div>
+            )}
+
+            <div
+              style={{
+                marginTop: signatureItem
+                  ? "clamp(48px, 7vw, 72px)"
+                  : hasHeaderContent
+                    ? "clamp(32px, 5vw, 56px)"
+                    : 0,
+              }}
+            >
               <div
                 ref={fallbackRef}
                 className={`vii-reveal-group${fallbackVisible ? " is-visible" : ""}`}
@@ -936,85 +1154,156 @@ function CollectionList({
               </div>
             </div>
           </div>
-        </>
+        </div>
       ) : (
-        /* ── Sectioned layout ── */
-        <>
-          {/* Sticky scroll-spy nav — only when ≥2 sections will render */}
-          <CollectionSectionNav navItems={navItems} />
+        /* ── Sectioned layout: full-bleed sibling rooms ── */
+        (() => {
+          // Split non-premium renderable sections into before/after groups,
+          // relative to the single premium section (if any).
+          const beforeChapters: ChapterDef[] = [];
+          const afterChapters: ChapterDef[] = [];
+          let premiumSection: PremiumSectionDef | null = null;
+          let passedPremium = false;
 
-          {/* Signature feature block — after header, before section bands */}
-          {signatureItem && (
-            <SignatureFeature
-              item={signatureItem}
-              embedsEnabled={embedsEnabled}
-              topPad
-            />
-          )}
+          sections.forEach((s, si) => {
+            const sectionId = String(s._id ?? "");
+            const label = asStr(s.label).trim();
+            const description = asStr(s.description).trim();
+            const imageSrc = asStr(s.image).trim();
+            const videoSrc = asStr(s.video).trim();
+            const sectionRowItems = rowItems(sectionId);
+            const offset = getIndexOffset(si);
 
-          {/* Section bands — each is a full-width block */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "clamp(28px, 3.5vw, 48px)",
-              paddingTop: signatureItem ? 0 : "clamp(20px, 3vw, 36px)",
-              paddingBottom: "clamp(36px, 5vw, 56px)",
-              background: "var(--vii-cream)",
-            }}
-          >
-            {sections.map((section, si) => {
-              const sectionId = String(section._id ?? "");
-              const sectionLabel = asStr(section.label).trim();
-              const sectionDescription = asStr(section.description).trim();
-              const sectionImage = asStr(section.image).trim();
-              const sectionVideo = asStr(section.video).trim();
+            // Skip sections with neither a label nor items
+            if (!label && sectionRowItems.length === 0) return;
 
-              const sectionRowItems = rowItems(sectionId);
+            if (sectionId === premiumSectionId) {
+              premiumSection = {
+                sectionId,
+                label,
+                description,
+                imageSrc,
+                videoSrc,
+                items: sectionRowItems,
+                indexOffset: offset,
+              };
+              passedPremium = true;
+            } else {
+              const chDef: ChapterDef = {
+                id: `section-${sectionId}`,
+                label,
+                description,
+                imageSrc,
+                videoSrc,
+                items: sectionRowItems,
+                indexOffset: offset,
+              };
+              (passedPremium ? afterChapters : beforeChapters).push(chDef);
+            }
+          });
 
-              // Skip sections with neither a label nor items
-              if (!sectionLabel && sectionRowItems.length === 0) return null;
+          // Unassigned / orphan items trail the after-group when a premium
+          // section exists; otherwise they extend the single before-group so
+          // they stay in one continuous paper room (no stray seam).
+          if (unassignedRowItems.length > 0) {
+            const orphanOffset = sections.reduce(
+              (acc, s) => acc + rowItems(String(s._id ?? "")).length,
+              0,
+            );
+            const orphanChapter: ChapterDef = {
+              id: "section-more",
+              label: "",
+              description: "",
+              imageSrc: "",
+              videoSrc: "",
+              items: unassignedRowItems,
+              indexOffset: orphanOffset,
+            };
+            (premiumSection ? afterChapters : beforeChapters).push(
+              orphanChapter,
+            );
+          }
 
-              const isPremium = sectionId === premiumSectionId;
-              const surface = bandSurfaces[si] ?? "var(--vii-cream)";
+          return (
+            <>
+              {/* Header room — heading and/or signature spotlight. Omitted
+                  entirely when both are blank so the nav sits flush.
+                  `display: flow-root` contains the heading's bottom margin so
+                  it paints paper (not a stray cream strip above the nav). */}
+              {(hasHeaderContent || signatureItem) && (
+                <section
+                  style={{
+                    background: "var(--vii-paper)",
+                    display: "flow-root",
+                    padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px) 0",
+                  }}
+                >
+                  <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+                    <CollectionListHeader
+                      listHeading={listHeading}
+                      listIntro={listIntro}
+                      showBorder={navItems.length < 2}
+                    />
+                    {signatureItem && (
+                      <div
+                        style={{
+                          marginTop: hasHeaderContent
+                            ? "clamp(32px, 5vw, 56px)"
+                            : 0,
+                        }}
+                      >
+                        <SignatureFeature
+                          item={signatureItem}
+                          embedsEnabled={embedsEnabled}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
 
-              return (
-                <SectionBand
-                  key={sectionId || si}
-                  id={`section-${sectionId}`}
-                  label={sectionLabel}
-                  description={sectionDescription}
-                  imageSrc={sectionImage}
-                  videoSrc={sectionVideo}
-                  items={sectionRowItems}
-                  embedsEnabled={embedsEnabled}
-                  indexOffset={getIndexOffset(si)}
-                  isPremium={isPremium}
-                  bandSurface={surface}
-                />
-              );
-            })}
+              {/* Sticky scroll-spy nav — single sibling so it sticks across
+                  every room below it. Returns null when < 2 sections. */}
+              <CollectionSectionNav navItems={navItems} />
 
-            {/* Trailing block for unassigned / orphaned items */}
-            {unassignedRowItems.length > 0 && (
-              <SectionBand
-                id="section-more"
-                label=""
-                description=""
-                imageSrc=""
-                videoSrc=""
-                items={unassignedRowItems}
+              {/* Light room A — chapters before the premium section */}
+              <LightRoom
+                chapters={beforeChapters}
+                compactTop={
+                  hasHeaderContent ||
+                  signatureItem !== null ||
+                  navItems.length >= 2
+                }
                 embedsEnabled={embedsEnabled}
-                indexOffset={sections.reduce(
-                  (acc, s) => acc + rowItems(String(s._id ?? "")).length,
-                  0,
-                )}
-                isPremium={false}
-                bandSurface={orphanSurface}
               />
-            )}
-          </div>
-        </>
+
+              {/* Slate room — premium section (steps off the navy notes) */}
+              {premiumSection !== null &&
+                (() => {
+                  const ps: PremiumSectionDef = premiumSection;
+                  return (
+                    <SlateRoom
+                      id={`section-${ps.sectionId}`}
+                      label={ps.label}
+                      description={ps.description}
+                      imageSrc={ps.imageSrc}
+                      videoSrc={ps.videoSrc}
+                      items={ps.items}
+                      embedsEnabled={embedsEnabled}
+                      indexOffset={ps.indexOffset}
+                    />
+                  );
+                })()}
+
+              {/* Light room B — chapters after the premium section + orphan */}
+              <LightRoom
+                chapters={afterChapters}
+                compactTop={false}
+                embedsEnabled={embedsEnabled}
+              />
+            </>
+          );
+        })()
       )}
     </section>
   );
