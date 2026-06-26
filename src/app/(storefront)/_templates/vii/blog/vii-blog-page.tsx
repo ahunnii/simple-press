@@ -26,7 +26,7 @@ export function ViiBlogPage({ pages, business, customFields }: Props) {
   ]);
 
   const heading = f["vii.blog.heading"] ?? "The";
-  const headingAccent = f["vii.blog.heading-accent"] ?? "Journal";
+  const headingAccent = f["vii.blog.heading-accent"] ?? "Blog";
   const intro = f["vii.blog.intro"] ?? "";
   // Optional owner override for the cover-story image (else the cover uses the
   // latest post's own image, handled in the client).

@@ -15,7 +15,7 @@ type Props = {
 };
 
 /**
- * ViiBlogHero — the Journal masthead.
+ * ViiBlogHero — the Blog masthead.
  *
  * A type-led editorial masthead (not a generic centered-title-on-photo hero):
  * oversized Playfair display with a copper italic accent, framed by hairline
@@ -32,7 +32,7 @@ export function ViiBlogHero({
 
   return (
     <section
-      aria-label="The Journal"
+      aria-label="The Blog"
       style={{
         background: "var(--vii-cream)",
         padding:
@@ -54,7 +54,7 @@ export function ViiBlogHero({
           }}
         >
           <ViiOverline tone="light" align="left">
-            The Journal
+            The Blog
           </ViiOverline>
           <span
             style={{

@@ -1,14 +1,9 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolvePopup } from "~/lib/site-banner/resolve";
-import {
-  parseTemplateIframeValue,
-  parseTemplateListRows,
-} from "~/lib/template-fields";
+import { parseTemplateListRows } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
-import { EmbedFrame } from "~/components/embed-frame";
-import { InstagramEmbed } from "~/components/instagram-embed";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -22,7 +17,6 @@ import { ViiImageBand } from "./vii-image-band";
 import { ViiInstagramStrip } from "./vii-instagram-strip";
 import { ViiPopup } from "./vii-popup";
 import { ViiProductRail } from "./vii-product-rail";
-import { ViiStorySection } from "./vii-story-section";
 import { ViiTestimonialQuote } from "./vii-testimonial-quote";
 import { ViiVideoFeature } from "./vii-video-feature";
 
@@ -34,7 +28,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
 
   const popup = resolvePopup(props?.business?.siteContent, isEnabled("popups"));
 
-  // Blog posts for the journal section. `getBlogPages` is gated behind the
+  // Blog posts for the blog section. `getBlogPages` is gated behind the
   // "blog" feature flag, so when it's disabled the catch yields an empty array
   // and the section renders nothing.
   const blogPages = await api.content.getBlogPages().catch(() => []);
@@ -77,6 +71,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.video-poster",
     "vii.homepage.video-cta-text",
     "vii.homepage.video-cta-link",
+    "vii.homepage.video-aspect",
     // Image Band
     "vii.homepage.band-image",
     "vii.homepage.band-heading",
@@ -121,20 +116,13 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.contact-cta-link",
     // Instagram
     "vii.homepage.instagram-handle",
+    "vii.homepage.instagram-cta-text",
     "vii.homepage.instagram-gallery",
-    "vii.homepage.instagram-feed-url",
-    "vii.homepage.instagram-feed-width",
-    "vii.homepage.instagram-feed-align",
-    "vii.homepage.instagram-feed-frame",
-    "vii.homepage.instagram-feed-bg",
   ]);
 
   // ── Parse list fields from raw customFields ───────────────────────────────
   const categoryCards = parseTemplateListRows(
     customFields?.["vii.homepage.categories-cards"],
-  );
-  const storyCards = parseTemplateListRows(
-    customFields?.["vii.homepage.story-cards"],
   );
   const brandLogos = parseTemplateListRows(
     customFields?.["vii.homepage.brands-logos"],
@@ -208,6 +196,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
           posterSrc={f["vii.homepage.video-poster"] ?? undefined}
           ctaText={f["vii.homepage.video-cta-text"] ?? ""}
           ctaHref={f["vii.homepage.video-cta-link"] ?? "/about"}
+          aspectRatio={f["vii.homepage.video-aspect"]}
         />
 
         {/* 5. Image Band */}
@@ -216,16 +205,6 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
           bandHeading={f["vii.homepage.band-heading"] ?? ""}
           bandText={f["vii.homepage.band-text"] ?? ""}
         />
-
-        {/* 6. Inside the Studio */}
-        {storyCards.length > 0 ? (
-          <ViiStorySection
-            heading={f["vii.homepage.story-heading"] ?? ""}
-            headingAccent={f["vii.homepage.story-heading-accent"] ?? ""}
-            intro={f["vii.homepage.story-intro"] ?? ""}
-            cards={storyCards}
-          />
-        ) : null}
 
         {/* 7. Product Rail */}
         <ViiProductRail
@@ -252,12 +231,12 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
           logos={brandLogos}
         />
 
-        {/* 10. Blog / Journal */}
+        {/* 10. Blog */}
         <ViiBlogSection
           heading={f["vii.homepage.blog-heading"] ?? ""}
           headingAccent={f["vii.homepage.blog-heading-accent"] ?? ""}
           intro={f["vii.homepage.blog-intro"] ?? ""}
-          ctaText={f["vii.homepage.blog-cta-text"] ?? "Read the journal"}
+          ctaText={f["vii.homepage.blog-cta-text"] ?? "Read the blog"}
           ctaHref={f["vii.homepage.blog-cta-link"] ?? "/blog"}
           posts={blogPosts}
         />
@@ -266,6 +245,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         <ViiInstagramStrip
           handle={f["vii.homepage.instagram-handle"] ?? ""}
           images={instagramImages}
+          ctaText={f["vii.homepage.instagram-cta-text"] ?? "Follow on Instagram"}
         />
 
         {/* 12. Rooted in Detroit */}

@@ -17,7 +17,7 @@ type Page = NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 
 const KICKER: Record<string, string> = {
   policy: "Policy",
-  blog: "Journal",
+  blog: "Blog",
 };
 
 function formatUpdated(date: Date) {

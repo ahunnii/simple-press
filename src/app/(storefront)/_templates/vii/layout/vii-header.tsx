@@ -196,7 +196,7 @@ export function ViiHeader({
   const DEFAULT_NAV_LINKS: NavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
     { href: "/about", label: "About" },
-    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Blog" }] : []),
     { href: "/contact", label: "Contact" },
   ];
 

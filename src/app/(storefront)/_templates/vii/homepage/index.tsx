@@ -208,6 +208,18 @@ const homepageVideoData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/about",
   },
+  {
+    key: "vii.homepage.video-aspect",
+    label: "Video Aspect Ratio",
+    description:
+      "Controls the shape of the video player. Allowed values: 16:9 (landscape, default), 4:3, 1:1 (square), 9:16 (vertical/portrait).",
+    type: "text",
+    page: "homepage",
+    group: "homepage.video",
+    gridColumn: "col-span-1",
+    defaultValue: "16:9",
+    placeholder: "16:9",
+  },
 ];
 
 // ─── Image Band ───────────────────────────────────────────────────────────────
@@ -245,7 +257,8 @@ const homepageBandData: TemplateField[] = [
   },
 ];
 
-// ─── Inside the Studio (Story) ────────────────────────────────────────────────
+// ─── Inside the Studio (Story) ─────────────────────────────────────────────
+// "Inside the Studio" section temporarily removed from homepage — kept for restore.
 
 const homepageStoryData: TemplateField[] = [
   {
@@ -442,17 +455,11 @@ const homepageBrandsData: TemplateField[] = [
         type: "text",
         placeholder: "e.g. Dermalogica",
       },
-      {
-        key: "link",
-        label: "Link (optional)",
-        type: "text",
-        placeholder: "e.g. https://dermalogica.com",
-      },
     ],
   },
 ];
 
-// ─── Blog / Journal ───────────────────────────────────────────────────────────
+// ─── Blog ───────────────────────────────────────────────────────────────────
 
 const homepageBlogData: TemplateField[] = [
   {
@@ -481,13 +488,13 @@ const homepageBlogData: TemplateField[] = [
     key: "vii.homepage.blog-intro",
     label: "Blog Intro Text",
     description:
-      "Short paragraph introducing the journal section beneath the heading.",
+      "Short paragraph introducing the blog section beneath the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.blog",
     gridColumn: "col-span-full",
     defaultValue:
-      "Stories, rituals, and inspiration from our studio. Explore our journal for skincare guidance and a look at life at Skinbar VII.",
+      "Stories, rituals, and inspiration from our studio. Explore our blog for skincare guidance and a look at life at Skinbar VII.",
   },
   {
     key: "vii.homepage.blog-cta-text",
@@ -497,7 +504,7 @@ const homepageBlogData: TemplateField[] = [
     page: "homepage",
     group: "homepage.blog",
     gridColumn: "col-span-1",
-    defaultValue: "Read the journal",
+    defaultValue: "Read the blog",
   },
   {
     key: "vii.homepage.blog-cta-link",
@@ -593,6 +600,17 @@ const homepageInstagramData: TemplateField[] = [
     defaultValue: "@skinbarvii",
   },
   {
+    key: "vii.homepage.instagram-cta-text",
+    label: "Follow Button Label",
+    description:
+      "Text for the follow button displayed alongside the Instagram handle.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.instagram",
+    gridColumn: "col-span-1",
+    defaultValue: "Follow on Instagram",
+  },
+  {
     key: "vii.homepage.instagram-gallery",
     label: "Instagram Gallery",
     description:
@@ -601,69 +619,6 @@ const homepageInstagramData: TemplateField[] = [
     page: "homepage",
     group: "homepage.instagram",
     gridColumn: "col-span-full",
-  },
-  {
-    key: "vii.homepage.instagram-embed",
-    label: "Embed Below Instagram",
-    description:
-      "Optional embed (e.g. an Instagram feed widget, map, or video) shown directly beneath the Instagram strip. Paste an embed URL or <iframe> snippet.",
-    type: "iframe",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-full",
-  },
-  {
-    key: "vii.homepage.instagram-feed-url",
-    label: "Instagram Embed (native)",
-    description:
-      "Paste a link to an Instagram profile, post, or reel to embed it natively below the photo strip using Instagram's official embed card. This is separate from the generic embed field above — it renders Instagram's own iframe rather than a sandboxed iframe, so interactions like liking or following work as expected.",
-    type: "url",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-full",
-  },
-  {
-    key: "vii.homepage.instagram-feed-width",
-    label: "Native Embed Width (px)",
-    description:
-      "Maximum width of the native Instagram embed card. Instagram allows 326–540px; values outside that range are clamped. Leave blank for the default (540).",
-    type: "number",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-1",
-    placeholder: "540",
-  },
-  {
-    key: "vii.homepage.instagram-feed-align",
-    label: "Center the Native Embed",
-    description:
-      "When on, the native Instagram card is centered in its section. Turn off to align it to the left.",
-    type: "boolean",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-1",
-    defaultValue: "true",
-  },
-  {
-    key: "vii.homepage.instagram-feed-frame",
-    label: "Frame the Native Embed",
-    description:
-      "When on, wraps the native Instagram card in a bordered, rounded card with a soft shadow.",
-    type: "boolean",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-1",
-    defaultValue: "false",
-  },
-  {
-    key: "vii.homepage.instagram-feed-bg",
-    label: "Native Embed Background",
-    description:
-      "Background color of the section behind the native Instagram embed. Leave blank to use the template's cream background.",
-    type: "color",
-    page: "homepage",
-    group: "homepage.instagram",
-    gridColumn: "col-span-1",
   },
 ];
 
@@ -769,7 +724,7 @@ export const viiHomepageData: TemplateField[] = [
   ...homepageCategoriesData,
   ...homepageVideoData,
   ...homepageBandData,
-  ...homepageStoryData,
+  // homepageStoryData — "Inside the Studio" section temporarily removed from homepage — kept for restore.
   ...homepageProductRailData,
   ...homepageTestimonialData,
   ...homepageBrandsData,
@@ -815,14 +770,6 @@ export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
     columns: 1,
   },
   {
-    id: "homepage.story",
-    title: "Inside the Studio",
-    description:
-      "Dark navy studio section with two-part heading, intro text, and a photo carousel",
-    icon: "📷",
-    columns: 2,
-  },
-  {
     id: "homepage.productRail",
     title: "Product Rail",
     description:
@@ -847,7 +794,7 @@ export const viiHomepageFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "homepage.blog",
-    title: "Journal / Blog",
+    title: "Blog",
     description:
       "Two-part heading, intro, and a row of your latest published blog posts",
     icon: "📖",

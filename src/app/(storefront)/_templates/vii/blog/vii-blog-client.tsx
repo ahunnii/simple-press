@@ -368,7 +368,7 @@ export function ViiBlogClient({ pages, coverImage, logoUrl, businessName }: Prop
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            aria-label="Search journal posts"
+            aria-label="Search blog posts"
             style={{
               flex: 1,
               background: "transparent",

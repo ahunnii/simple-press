@@ -7,7 +7,7 @@ export const viiBlogFields: TemplateField[] = [
     key: "vii.blog.hero-image",
     label: "Cover Story Image",
     description:
-      "Optional image for the large featured 'cover story' at the top of the Journal. Leave blank to use the latest post's own image.",
+      "Optional image for the large featured 'cover story' at the top of the blog. Leave blank to use the latest post's own image.",
     type: "image",
     page: "blog",
     group: "blog.hero",
@@ -15,8 +15,8 @@ export const viiBlogFields: TemplateField[] = [
   },
   {
     key: "vii.blog.heading",
-    label: "Journal Heading",
-    description: "The main masthead title for the Journal page.",
+    label: "Blog Heading",
+    description: "The main masthead title for the Blog page.",
     type: "text",
     page: "blog",
     group: "blog.hero",
@@ -32,13 +32,13 @@ export const viiBlogFields: TemplateField[] = [
     page: "blog",
     group: "blog.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Journal",
+    defaultValue: "Blog",
   },
   {
     key: "vii.blog.intro",
     label: "Intro Text",
     description:
-      "Short paragraph in the masthead, beneath the title — introduces your journal to visitors.",
+      "Short paragraph in the masthead, beneath the title — introduces your blog to visitors.",
     type: "textarea",
     page: "blog",
     group: "blog.hero",
@@ -118,9 +118,9 @@ export const viiBlogFields: TemplateField[] = [
 
 export const viiBlogFieldGroup: TemplateFieldGroup = {
   id: "blog.hero",
-  title: "Journal Page",
+  title: "Blog Page",
   description:
-    "Masthead heading, accent word, intro text, and an optional cover-story image for the Journal listing page",
+    "Masthead heading, accent word, intro text, and an optional cover-story image for the Blog listing page",
   icon: "📖",
   columns: 2,
 };
