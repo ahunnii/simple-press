@@ -21,7 +21,10 @@
  * 4. Closing CTA — ViiContactCtaSection with vii-ledger.cta-* fields.
  */
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import { parseTemplateIframeValue, parseTemplateRichtext } from "~/lib/template-fields";
+import {
+  parseTemplateIframeValue,
+  parseTemplateRichtext,
+} from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
@@ -62,50 +65,64 @@ function LedgerList({
     >
       <LedgerListStyles />
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div
-          ref={headRef}
-          className={`vii-reveal vii-ledger-list-row${headVisible ? " is-visible" : ""}`}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1.4fr",
-            gap: "clamp(24px, 4vw, 56px)",
-            marginBottom: "clamp(32px, 5vw, 56px)",
-            paddingBottom: "clamp(24px, 3vw, 40px)",
-            borderBottom: "1px solid var(--vii-tan)",
-            alignItems: "end",
-          }}
-        >
-          <h2
-            id="ledger-list-heading"
+        {(listHeading || listIntro) && (
+          <div
+            ref={headRef}
+            className={`vii-reveal vii-ledger-list-row${headVisible ? "is-visible" : ""}`}
             style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 400,
-              fontSize: "clamp(28px, 4vw, 52px)",
-              lineHeight: 1.08,
-              color: "var(--vii-navy)",
-              margin: 0,
-              textWrap: "balance",
+              display: "grid",
+              gridTemplateColumns: "1fr 1.4fr",
+              gap: "clamp(24px, 4vw, 56px)",
+              marginBottom: "clamp(32px, 5vw, 56px)",
+              paddingBottom: "clamp(24px, 3vw, 40px)",
+              borderBottom: "1px solid var(--vii-tan)",
+              alignItems: "end",
             }}
           >
-            {listHeading || (
-              <>Our{" "}<em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>treatments</em></>
+            <h2
+              id="ledger-list-heading"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 400,
+                fontSize: "clamp(28px, 4vw, 52px)",
+                lineHeight: 1.08,
+                color: "var(--vii-navy)",
+                margin: 0,
+                textWrap: "balance",
+              }}
+            >
+              {listHeading || (
+                <>
+                  Our{" "}
+                  <em
+                    style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+                  >
+                    treatments
+                  </em>
+                </>
+              )}
+            </h2>
+
+            {listIntro && (
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(14px, 1.3vw, 15px)",
+                  lineHeight: 1.8,
+                  color: "var(--vii-ink-soft)",
+                  margin: 0,
+                }}
+              >
+                {listIntro}
+              </p>
             )}
-          </h2>
+          </div>
+        )}
 
-          {listIntro && (
-            <p style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "clamp(14px, 1.3vw, 15px)",
-              lineHeight: 1.8,
-              color: "var(--vii-ink-soft)",
-              margin: 0,
-            }}>
-              {listIntro}
-            </p>
-          )}
-        </div>
-
-        <div ref={rowsRef} className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}>
+        <div
+          ref={rowsRef}
+          className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
+        >
           {items.map((item, i) => (
             <TreatmentListRow
               key={item.id}

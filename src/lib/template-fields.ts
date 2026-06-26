@@ -60,6 +60,7 @@ export type TemplatePage =
   | "blog"
   | "collections"
   | "shop"
+  | "services"
   | "cart"
   | "checkout"
   | "global"
@@ -606,6 +607,11 @@ export const PAGE_METADATA = {
     title: "Collections",
     description: "Collections page content",
     icon: "📂",
+  },
+  services: {
+    title: "Services",
+    description: "Services index page content",
+    icon: "🗂️",
   },
 } as const;
 

@@ -245,6 +245,7 @@ import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiProductPage } from "./vii/products/vii-product-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
 import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
+import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -291,6 +292,7 @@ export type TemplateComponentSet = {
   PreferencesPage: AnyComponent;
   // Optional — only some templates implement this
   ServicesPage?: AnyComponent;
+  ServicesIndexPage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -532,6 +534,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: ViiOrdersPage,
     PreferencesPage: ViiPreferencesPage,
     TestimonialsPage: ViiTestimonialsPage,
+    ServicesIndexPage: ViiServicesIndexPage,
   },
 };
 
