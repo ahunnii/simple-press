@@ -114,6 +114,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.contact-body",
     "vii.homepage.contact-cta-text",
     "vii.homepage.contact-cta-link",
+    "vii.homepage.contact-show-phone",
+    "vii.homepage.contact-show-email",
     // Instagram
     "vii.homepage.instagram-handle",
     "vii.homepage.instagram-cta-text",
@@ -226,6 +228,7 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
 
         {/* 9. Brands We Carry */}
         <ViiBrandsSection
+          marquee
           overline={f["vii.homepage.brands-overline"] ?? ""}
           heading={f["vii.homepage.brands-heading"] ?? ""}
           logos={brandLogos}
@@ -270,6 +273,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
           email={homepage?.supportEmail ?? ""}
           buttonLabel={f["vii.homepage.contact-cta-text"] ?? ""}
           buttonHref={f["vii.homepage.contact-cta-link"] ?? ""}
+          showPhone={f["vii.homepage.contact-show-phone"] !== "false"}
+          showEmail={f["vii.homepage.contact-show-email"] !== "false"}
         />
       </PageTransition>
     </HydrateClient>

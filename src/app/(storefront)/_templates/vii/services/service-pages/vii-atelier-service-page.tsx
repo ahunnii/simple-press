@@ -723,6 +723,8 @@ export function ViiAtelierServicePage({
     "vii-atelier.cta-button-url",
     "vii-atelier.cta-embed",
     "vii-atelier.cta-embed-reveal",
+    "vii-atelier.cta-show-phone",
+    "vii-atelier.cta-show-email",
   ]);
 
   // Parse gallery images from the list field
@@ -783,6 +785,8 @@ export function ViiAtelierServicePage({
         embed={ctaEmbed}
         embedsEnabled={embedsEnabled}
         embedReveal={ctaEmbedReveal}
+        showPhone={f["vii-atelier.cta-show-phone"] !== "false"}
+        showEmail={f["vii-atelier.cta-show-email"] !== "false"}
       />
     </PageTransition>
   );

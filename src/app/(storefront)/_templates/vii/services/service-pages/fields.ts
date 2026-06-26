@@ -246,6 +246,28 @@ export const viiSanctuaryFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "false",
   },
+  {
+    key: "vii-sanctuary.cta-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the business phone number in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii-sanctuary.cta-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the business email in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-sanctuary.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
 ];
 
 const viiSanctuaryFieldGroups: TemplateFieldGroup[] = [
@@ -489,6 +511,28 @@ export const viiRitualFields: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "false",
   },
+  {
+    key: "vii-ritual.cta-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the business phone number in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii-ritual.cta-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the business email in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ritual.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
 ];
 
 const viiRitualFieldGroups: TemplateFieldGroup[] = [
@@ -729,6 +773,28 @@ export const viiAtelierFields: TemplateField[] = [
     group: "vii-atelier.cta",
     gridColumn: "col-span-1",
     defaultValue: "false",
+  },
+  {
+    key: "vii-atelier.cta-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the business phone number in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii-atelier.cta-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the business email in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-atelier.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
   },
 ];
 
@@ -1096,6 +1162,28 @@ export const viiLedgerFields: TemplateField[] = [
     group: "vii-ledger.cta",
     gridColumn: "col-span-1",
     defaultValue: "false",
+  },
+  {
+    key: "vii-ledger.cta-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the business phone number in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii-ledger.cta-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the business email in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-ledger.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
   },
 ];
 
@@ -1500,6 +1588,28 @@ export const viiCollectionFields: TemplateField[] = [
     group: "vii-collection.cta",
     gridColumn: "col-span-1",
     defaultValue: "false",
+  },
+  {
+    key: "vii-collection.cta-show-phone",
+    label: "Show phone number in this section",
+    description:
+      "Display the business phone number in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
+  },
+  {
+    key: "vii-collection.cta-show-email",
+    label: "Show email in this section",
+    description:
+      "Display the business email in the closing CTA. Turn off for booking-only CTAs.",
+    type: "boolean",
+    page: "homepage",
+    group: "vii-collection.cta",
+    gridColumn: "col-span-1",
+    defaultValue: "true",
   },
 ];
 
