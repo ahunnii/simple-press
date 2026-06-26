@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiReveal } from "../shared/vii-reveal";
 import { ViiGenericCoverHero } from "./vii-generic-cover-hero";
@@ -177,7 +178,7 @@ export function ViiGenericPage({ page }: { page: Page }) {
         <TiptapRenderer
           content={page.content as TiptapJSON}
           className={cn(
-            "prose w-full max-w-[75ch]",
+            "prose w-full max-w-7xl",
             // Headings — Playfair Display, navy
             "prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight",
             "prose-headings:text-[var(--vii-navy)]",
