@@ -34,6 +34,10 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Noise",
     subdomains: ["visualnoise", "visual-noise"],
   },
+  builders: {
+    label: "Builders",
+    subdomains: ["buildingcooperatively", "detroit-coop"],
+  },
   sledge: {
     label: "Sledge",
     subdomains: ["judysledge"],

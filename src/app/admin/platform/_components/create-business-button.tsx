@@ -35,6 +35,7 @@ const TEMPLATES = [
   { id: "pollen", label: "Pollen" },
   { id: "dark-trend", label: "Dark Trend" },
   { id: "noise", label: "Noise" },
+  { id: "builders", label: "Builders" },
   { id: "vii", label: "Skinbar VII" },
 ];
 
