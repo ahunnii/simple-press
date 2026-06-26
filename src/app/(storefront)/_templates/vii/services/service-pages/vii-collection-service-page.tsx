@@ -853,23 +853,28 @@ function CollectionList({
   const flatRowCount = flatRowItems.length;
 
   // Compute alternating surface colors for non-premium bands.
-  // Premium bands are always navy; among non-premium bands we alternate
-  // cream → paper → cream → … so adjacent cream bands read as distinct chapters.
-  let nonPremiumBandIndex = 0;
+  // Alternation is PAPER-first so the cream intro block is immediately followed
+  // by a paper lift (cream→paper reads as a visible step up). Only bands that
+  // will actually render advance the toggle — skipped empty sections must not
+  // desync the rhythm and cause two adjacent rendered bands to share the same
+  // surface.
+  let renderableLightBandCount = 0;
+  const lightSurfaceAt = (n: number) =>
+    n % 2 === 0 ? "var(--vii-paper)" : "var(--vii-cream)";
   const bandSurfaces: string[] = sections.map((s) => {
     const sectionId = String(s._id ?? "");
     const isPremium = sectionId === premiumSectionId;
-    if (isPremium) return ""; // unused — premium gets navy
-    const surface =
-      nonPremiumBandIndex % 2 === 0
-        ? "var(--vii-cream)"
-        : "var(--vii-paper)";
-    nonPremiumBandIndex++;
+    if (isPremium) return ""; // unused — premium renders navy
+    const willRender =
+      asStr(s.label).trim().length > 0 || rowItems(sectionId).length > 0;
+    if (!willRender) return "var(--vii-paper)"; // skipped; don't advance toggle
+    const surface = lightSurfaceAt(renderableLightBandCount);
+    renderableLightBandCount++;
     return surface;
   });
-  // The orphan "More" band gets the next index in sequence
-  const orphanSurface =
-    nonPremiumBandIndex % 2 === 0 ? "var(--vii-cream)" : "var(--vii-paper)";
+  // The orphan "More" band continues the alternation from where the last
+  // renderable section left off.
+  const orphanSurface = lightSurfaceAt(renderableLightBandCount);
 
   return (
     <section aria-labelledby="collection-list-heading">
