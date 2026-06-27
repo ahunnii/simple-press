@@ -2,10 +2,9 @@ import Link from "next/link";
 import { TwitterLogoIcon } from "@radix-ui/react-icons";
 import { Facebook, Instagram } from "lucide-react";
 
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
-
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },

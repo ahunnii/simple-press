@@ -1,7 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
-import { api } from "~/trpc/server";
 import { parseTemplateListRows } from "~/lib/template-fields";
+import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { ViiOverline } from "../shared/vii-overline";
@@ -97,7 +97,9 @@ export async function ViiShopPage({
             "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
-        <ViiReveal style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <ViiReveal
+          style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}
+        >
           {overline && (
             <ViiOverline
               align="center"

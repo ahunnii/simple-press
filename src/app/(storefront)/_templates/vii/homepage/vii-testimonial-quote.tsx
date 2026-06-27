@@ -56,7 +56,7 @@ export function ViiTestimonialQuote({
       {/* Quote content */}
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{
           position: "relative",
           zIndex: 1,

@@ -57,7 +57,7 @@ export function ViiDetroitSection({
         {/* ── Image ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",
@@ -98,7 +98,7 @@ export function ViiDetroitSection({
         {/* ── Text ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <p

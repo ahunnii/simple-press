@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { api } from "~/trpc/server";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 
@@ -66,8 +66,7 @@ function WideCard({ t }: { t: Testimonial }) {
           <span
             className="text-sm font-semibold"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               color: "var(--builders-ink, #131313)",
             }}
           >
@@ -78,8 +77,7 @@ function WideCard({ t }: { t: Testimonial }) {
           <p
             className="text-lg"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 500,
               color: "var(--builders-ink, #131313)",
             }}
@@ -88,11 +86,10 @@ function WideCard({ t }: { t: Testimonial }) {
           </p>
           {location && (
             <p
-              className="mt-0.5 text-xs uppercase tracking-widest"
+              className="mt-0.5 text-xs tracking-widest uppercase"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
-                color: "var(--builders-muted, #6b7280)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
+                color: "var(--builders-muted, #6B7280)",
               }}
             >
               {location}
@@ -138,8 +135,7 @@ function NarrowCard({ t }: { t: Testimonial }) {
         <p
           className="text-lg"
           style={{
-            fontFamily:
-              "var(--font-builders-display, 'Jost', sans-serif)",
+            fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
             fontWeight: 500,
             color: "var(--builders-ink, #131313)",
           }}
@@ -148,11 +144,10 @@ function NarrowCard({ t }: { t: Testimonial }) {
         </p>
         {location && (
           <p
-            className="mt-1 text-xs uppercase tracking-widest"
+            className="mt-1 text-xs tracking-widest uppercase"
             style={{
-              fontFamily:
-                "var(--font-builders-body, 'Agdasima', sans-serif)",
-              color: "var(--builders-muted, #6b7280)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
+              color: "var(--builders-muted, #6B7280)",
             }}
           >
             {location}
@@ -189,8 +184,7 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
           <p
             className="text-base"
             style={{
-              fontFamily:
-                "var(--font-builders-body, 'Agdasima', sans-serif)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               color: "var(--builders-ink, #131313)",
               opacity: 0.75,
             }}
@@ -202,8 +196,7 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
           <p
             className="text-lg"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 500,
               color: "var(--builders-ink, #131313)",
             }}
@@ -212,11 +205,10 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
           </p>
           {location && (
             <p
-              className="mt-1 text-xs uppercase tracking-widest"
+              className="mt-1 text-xs tracking-widest uppercase"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
-                color: "var(--builders-muted, #6b7280)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
+                color: "var(--builders-muted, #6B7280)",
               }}
             >
               {location}
@@ -241,6 +233,8 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
         src={photo}
         alt=""
         className="absolute inset-0 h-full w-full object-cover opacity-10 transition-all duration-500 group-hover:scale-105 group-hover:opacity-20"
+        loading="lazy"
+        decoding="async"
       />
       <div
         className="relative z-10 flex h-full flex-col justify-end p-8"
@@ -265,8 +259,7 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
           <span
             className="text-lg"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 500,
               color: "var(--builders-ink, #131313)",
             }}
@@ -275,11 +268,10 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
           </span>
           {location && (
             <span
-              className="text-xs uppercase tracking-widest"
+              className="text-xs tracking-widest uppercase"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
-                color: "var(--builders-muted, #6b7280)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
+                color: "var(--builders-muted, #6B7280)",
               }}
             >
               {location}
@@ -320,8 +312,7 @@ function CenteredCard({ t }: { t: Testimonial }) {
         <p
           className="uppercase"
           style={{
-            fontFamily:
-              "var(--font-builders-display, 'Jost', sans-serif)",
+            fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
             fontWeight: 500,
             color: "var(--builders-ink, #131313)",
           }}
@@ -330,11 +321,10 @@ function CenteredCard({ t }: { t: Testimonial }) {
         </p>
         {location && (
           <p
-            className="text-xs uppercase tracking-widest"
+            className="text-xs tracking-widest uppercase"
             style={{
-              fontFamily:
-                "var(--font-builders-body, 'Agdasima', sans-serif)",
-              color: "var(--builders-muted, #6b7280)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
+              color: "var(--builders-muted, #6B7280)",
             }}
           >
             {location}
@@ -363,18 +353,21 @@ export async function BuildersTestimonialsPage({
     "builders.testimonials.cta-button-label",
   ]);
 
-  const pageHeading = f["builders.testimonials.page-heading"] ?? "Community Voice";
+  const pageHeading =
+    f["builders.testimonials.page-heading"] ?? "Community Voice";
   const pageIntro = f["builders.testimonials.page-intro"] ?? "";
   const emptyStateText = f["builders.testimonials.empty-state-text"] ?? "";
-  const ctaHeading = f["builders.testimonials.cta-heading"] ?? "Worked With Us?";
+  const ctaHeading =
+    f["builders.testimonials.cta-heading"] ?? "Worked With Us?";
   const ctaBody = f["builders.testimonials.cta-body"] ?? "";
-  const ctaButtonLabel = f["builders.testimonials.cta-button-label"] ?? "Share Your Story";
+  const ctaButtonLabel =
+    f["builders.testimonials.cta-button-label"] ?? "Share Your Story";
 
   const testimonials = await api.testimonial.list({ publicOnly: true });
 
   return (
-    <main
-      className="mx-auto w-full max-w-[1280px] px-4 pb-24 pt-32 md:px-12 md:pb-32 md:pt-48"
+    <div
+      className="mx-auto w-full max-w-[1280px] px-4 pt-32 pb-24 md:px-12 md:pt-48 md:pb-32"
       style={{ background: "var(--builders-bg, #F8F9FA)" }}
     >
       {/* ── 1. Header ───────────────────────────────────────────────────────── */}
@@ -385,10 +378,9 @@ export async function BuildersTestimonialsPage({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
           <div className="flex flex-col justify-end md:col-span-8">
             <h1
-              className="mb-6 text-4xl uppercase leading-none tracking-tight md:text-6xl lg:text-7xl"
+              className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl lg:text-7xl"
               style={{
-                fontFamily:
-                  "var(--font-builders-display, 'Jost', sans-serif)",
+                fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
                 fontWeight: 300,
                 color: "var(--builders-ink, #131313)",
               }}
@@ -435,8 +427,7 @@ export async function BuildersTestimonialsPage({
           <p
             className="mb-8 max-w-md text-base"
             style={{
-              fontFamily:
-                "var(--font-builders-body, 'Agdasima', sans-serif)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               color: "var(--builders-ink, #131313)",
               opacity: 0.6,
             }}
@@ -449,8 +440,7 @@ export async function BuildersTestimonialsPage({
             style={{
               background: "var(--builders-accent, #FFC5B6)",
               color: "var(--builders-accent-ink, #31130A)",
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               letterSpacing: "0.08em",
             }}
           >
@@ -473,10 +463,9 @@ export async function BuildersTestimonialsPage({
           }}
         >
           <h2
-            className="mb-4 text-3xl uppercase leading-tight md:text-4xl"
+            className="mb-4 text-3xl leading-tight uppercase md:text-4xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 300,
               color: "var(--builders-ink, #131313)",
             }}
@@ -487,8 +476,7 @@ export async function BuildersTestimonialsPage({
             <p
               className="mx-auto mb-8 max-w-lg text-base"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
                 color: "var(--builders-ink, #131313)",
                 opacity: 0.7,
               }}
@@ -502,8 +490,7 @@ export async function BuildersTestimonialsPage({
             style={{
               background: "var(--builders-accent, #FFC5B6)",
               color: "var(--builders-accent-ink, #31130A)",
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               letterSpacing: "0.08em",
             }}
           >
@@ -511,6 +498,6 @@ export async function BuildersTestimonialsPage({
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

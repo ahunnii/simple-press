@@ -2,9 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
-
 import type { DefaultFooterTemplateProps } from "../../types";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const mainMenuLinks = [
   { label: "Home", href: "/" },

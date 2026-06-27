@@ -164,7 +164,11 @@ export function ViiProductPage({
           <Link
             href="/"
             className="vii-nav-link"
-            style={{ color: "inherit", textDecoration: "none", position: "relative" }}
+            style={{
+              color: "inherit",
+              textDecoration: "none",
+              position: "relative",
+            }}
           >
             Home
           </Link>
@@ -172,7 +176,11 @@ export function ViiProductPage({
           <Link
             href="/shop"
             className="vii-nav-link"
-            style={{ color: "inherit", textDecoration: "none", position: "relative" }}
+            style={{
+              color: "inherit",
+              textDecoration: "none",
+              position: "relative",
+            }}
           >
             Shop
           </Link>
@@ -417,7 +425,7 @@ export function ViiProductPage({
           >
             <div
               ref={related.ref}
-              className={`vii-reveal-group${related.visible ? " is-visible" : ""}`}
+              className={`vii-reveal-group${related.visible ? "is-visible" : ""}`}
             >
               {/* Header */}
               <div
@@ -455,7 +463,10 @@ export function ViiProductPage({
                   >
                     You may also{" "}
                     <em
-                      style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+                      style={{
+                        fontStyle: "italic",
+                        color: "var(--vii-copper)",
+                      }}
                     >
                       like
                     </em>
@@ -496,7 +507,9 @@ export function ViiProductPage({
                   <div
                     key={p.id}
                     className="vii-reveal-item"
-                    style={{ "--i": Math.min(index + 1, 7) } as React.CSSProperties}
+                    style={
+                      { "--i": Math.min(index + 1, 7) } as React.CSSProperties
+                    }
                   >
                     <ViiProductCard
                       product={p as unknown as Product}

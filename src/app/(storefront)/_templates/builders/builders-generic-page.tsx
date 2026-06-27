@@ -4,8 +4,8 @@ import { FadeIn, PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
-import { resolveFields } from "./index";
 import { BuildersCtaSection } from "./homepage/builders-cta-section";
+import { resolveFields } from "./index";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
@@ -29,10 +29,10 @@ export function BuildersGenericPage({ business, page }: Props) {
         <FadeIn className="mx-auto w-full max-w-[1280px]">
           {/* Eyebrow / overline — Agdasima, peach, all-caps */}
           <p
-            className="mb-5 text-[11px] font-bold uppercase tracking-[0.22em]"
+            className="mb-5 text-[11px] font-bold tracking-[0.22em] uppercase"
             style={{
               fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
-              color: "#FFC5B6",
+              color: "var(--builders-ink)",
             }}
           >
             {eyebrow}
@@ -40,11 +40,10 @@ export function BuildersGenericPage({ business, page }: Props) {
 
           {/* Title — Jost light, uppercase, large display size */}
           <h1
-            className="text-[clamp(2.4rem,6vw,4.5rem)] font-light uppercase leading-none tracking-[-0.02em]"
+            className="text-[clamp(2.4rem,6vw,4.5rem)] leading-none font-light tracking-[-0.02em] [overflow-wrap:anywhere] break-words uppercase"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
-              color: "#131313",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
+              color: "var(--builders-ink)",
             }}
           >
             {page.title}
@@ -56,9 +55,8 @@ export function BuildersGenericPage({ business, page }: Props) {
               className="mt-6 max-w-2xl border-l-2 pl-5 text-[17px] leading-relaxed"
               style={{
                 borderColor: "#FFC5B6",
-                color: "#4a4a4a",
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                color: "var(--builders-muted)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               }}
             >
               {page.excerpt}
@@ -104,21 +102,21 @@ export function BuildersGenericPage({ business, page }: Props) {
                 // Paragraphs — muted ink, Agdasima via inheritance
                 "prose-p:text-[15px]",
                 "prose-p:leading-[1.85]",
-                "prose-p:text-[#4a4a4a]",
+                "prose-p:text-[#6B7280]",
                 "prose-p:mb-5",
                 // Emphasis
                 "prose-strong:font-semibold",
                 "prose-strong:text-[#131313]",
-                "prose-em:text-[#4a4a4a]",
-                // Links
+                "prose-em:text-[#6B7280]",
+                // Links — ink text stays ink on hover; thicker underline signals interaction
                 "prose-a:text-[#131313]",
                 "prose-a:underline",
                 "prose-a:underline-offset-4",
-                "hover:prose-a:text-[#FFC5B6]",
+                "hover:prose-a:decoration-2",
                 // Lists — muted body ink
                 "prose-li:text-[15px]",
                 "prose-li:leading-[1.85]",
-                "prose-li:text-[#4a4a4a]",
+                "prose-li:text-[#6B7280]",
                 "prose-ul:my-4",
                 "prose-ol:my-4",
                 // Blockquote — peach left border (pull-quote aesthetic)
@@ -139,7 +137,7 @@ export function BuildersGenericPage({ business, page }: Props) {
                 "prose-th:font-medium",
                 "prose-th:tracking-[0.1em]",
                 "prose-th:uppercase",
-                "prose-th:text-[#4a4a4a]",
+                "prose-th:text-[#6B7280]",
                 // Disable the max-width cap that prose adds by default
                 "max-w-none",
               ].join(" ")}

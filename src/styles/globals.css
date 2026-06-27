@@ -2943,7 +2943,7 @@
     color: var(--sl-coral-aa);
   }
   .maplibregl-popup-content {
-    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+    @apply rounded-none! bg-transparent! p-0! shadow-none!;
   }
   .maplibregl-popup-tip {
     @apply hidden!;
@@ -3105,24 +3105,24 @@
    Scoped to .vii so they never bleed into other templates.                 */
 
 .vii {
-  --vii-cream: #ede3ce;       /* body background */
-  --vii-paper: #fbf8f1;       /* cards / surfaces */
-  --vii-navy: #1e3540;        /* foreground text + dark sections */
-  --vii-slate: #384f65;       /* secondary dark */
-  --vii-copper: #b35e2f;      /* accent: italic display words on light bg (large text only) */
+  --vii-cream: #ede3ce; /* body background */
+  --vii-paper: #fbf8f1; /* cards / surfaces */
+  --vii-navy: #1e3540; /* foreground text + dark sections */
+  --vii-slate: #384f65; /* secondary dark */
+  --vii-copper: #b35e2f; /* accent: italic display words on light bg (large text only) */
   --vii-copper-deep: #a85525; /* darker copper for small text on copper button fills (AA: ~4.9:1 on paper) */
-  --vii-copper-light: #d98a5b;/* lightened copper for accents on dark/navy bg (AA contrast) */
+  --vii-copper-light: #d98a5b; /* lightened copper for accents on dark/navy bg (AA contrast) */
   --vii-clay: #a47a60;
   --vii-tan: #c1aa91;
   --vii-glacier: #9fc8d0;
-  --vii-ink-soft: #4a5560;    /* secondary text */
+  --vii-ink-soft: #4a5560; /* secondary text */
   --vii-hairline: color-mix(in srgb, var(--vii-navy) 20%, transparent);
   --vii-hairline-strong: color-mix(in srgb, var(--vii-navy) 25%, transparent);
   /* Semantic state colors — error/success for forms (kept distinct from copper accent) */
-  --vii-error: #b91c1c;       /* AA on --vii-error-bg (~5.9:1) */
-  --vii-error-bg: #fdf2f1;    /* faint warm-red tint that reads against cream/paper */
+  --vii-error: #b91c1c; /* AA on --vii-error-bg (~5.9:1) */
+  --vii-error-bg: #fdf2f1; /* faint warm-red tint that reads against cream/paper */
   --vii-error-border: #f0c9c4;
-  --vii-success: #166534;     /* AA on --vii-success-bg */
+  --vii-success: #166534; /* AA on --vii-success-bg */
   --vii-success-bg: #f0f7f1;
   --vii-success-border: #c2dbc8;
   /* Sticky offset = approx header height; centralizes the cart summary's sticky top */
@@ -3130,7 +3130,12 @@
   --radius: 0.2rem;
   /* Motion — one shared soft ease-out is the template's signature curve. */
   --vii-ease: cubic-bezier(0.16, 1, 0.3, 1); /* reveals, settles, sheens */
-  --vii-ease-strong: cubic-bezier(0.22, 1, 0.36, 1); /* header / nav micro-interactions */
+  --vii-ease-strong: cubic-bezier(
+    0.22,
+    1,
+    0.36,
+    1
+  ); /* header / nav micro-interactions */
   --font-serif: var(--font-vii-serif), "Playfair Display", serif;
   --font-sans: var(--font-vii-sans), "Jost", sans-serif;
   background: var(--vii-cream);
@@ -3189,7 +3194,8 @@
 }
 
 /* Form fields: calm boxed inputs on a cream fill, hairline border, copper focus. */
-.vii-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.vii-account
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
 .vii-account textarea,
 .vii-account [data-slot="select-trigger"] {
   background: var(--vii-cream);
@@ -3198,7 +3204,10 @@
   color: var(--vii-navy);
 }
 
-.vii-account input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):focus-visible,
+.vii-account
+  input:not([type="checkbox"]):not([type="radio"]):not(
+    [type="submit"]
+  ):focus-visible,
 .vii-account textarea:focus-visible,
 .vii-account [data-slot="select-trigger"]:focus-visible {
   border-color: var(--vii-copper);
@@ -3261,9 +3270,15 @@
 /* One-shot emphasis pulse — reused by the add-to-bag confirmation and the
    header cart badge. */
 @keyframes vii-pulse {
-  0% { transform: scale(1); }
-  45% { transform: scale(1.06); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Hero CTA sheen — a single soft highlight sweeps across on hover. The button
@@ -3331,8 +3346,12 @@
 
 /* Marquee keyframe — used by the continuous brands marquee (vii-marquee-track) */
 @keyframes vii-marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* Continuous horizontal brand-logo marquee track.
@@ -3378,8 +3397,14 @@
    async result (conditional checkout sections, discount + error messages),
    where a scroll IntersectionObserver doesn't apply. One-shot on mount. */
 @keyframes vii-fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .vii .vii-fade-up {
@@ -3655,15 +3680,15 @@
    Scoped to .builders so tokens never bleed into other templates.          */
 
 .builders {
-  --builders-bg: #F8F9FA;
+  --builders-bg: #f8f9fa;
   --builders-surface: #ffffff;
-  --builders-alt: #F1F3F5;
+  --builders-alt: #f1f3f5;
   --builders-ink: #131313;
-  --builders-accent: #FFC5B6;
-  --builders-accent-hover: #F2B9AB;
-  --builders-accent-ink: #31130A;
+  --builders-accent: #ffc5b6;
+  --builders-accent-hover: #f2b9ab;
+  --builders-accent-ink: #31130a;
   --builders-rule: #e5e7eb;
-  --builders-muted: #53433f;
+  --builders-muted: #6b7280; /* canonical cool-gray muted role (Tailwind gray-500) */
   --radius: 0;
   /* Map template fonts onto the shared Tailwind vars so font-sans / font-serif
      work inside components without extra inline styles.                     */
@@ -3687,6 +3712,12 @@
 .builders *:focus-visible {
   outline: 2px solid var(--builders-ink);
   outline-offset: 2px;
+}
+
+/* Focus ring over dark imagery (hero, header-over-hero) — black outline is invisible there */
+.builders .builders-on-dark *:focus-visible,
+.builders .builders-on-dark:focus-visible {
+  outline-color: #ffffff;
 }
 
 /* Headings default to display font (Jost) */

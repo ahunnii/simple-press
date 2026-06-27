@@ -60,7 +60,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
               </div>
             ) : (
               <span
-                className="text-base font-bold uppercase tracking-[0.2em]"
+                className="text-base font-bold tracking-[0.2em] uppercase"
                 style={{
                   fontFamily:
                     "var(--font-builders-display, 'Jost', sans-serif)",
@@ -89,7 +89,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.instagram && (
                   <a
                     href={socialLinks.instagram}
-                    className="-m-2 flex items-center justify-center p-2 text-gray-400 transition-colors hover:text-gray-700"
+                    className="-m-3 flex items-center justify-center p-3 text-gray-600 transition-colors hover:text-gray-700"
                     aria-label="Instagram"
                   >
                     <InstagramIcon className="h-4 w-4" />
@@ -98,7 +98,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.facebook && (
                   <a
                     href={socialLinks.facebook}
-                    className="-m-2 flex items-center justify-center p-2 text-gray-400 transition-colors hover:text-gray-700"
+                    className="-m-3 flex items-center justify-center p-3 text-gray-600 transition-colors hover:text-gray-700"
                     aria-label="Facebook"
                   >
                     <FacebookIcon className="h-4 w-4" />
@@ -107,7 +107,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.twitter && (
                   <a
                     href={socialLinks.twitter}
-                    className="-m-2 flex items-center justify-center p-2 text-gray-400 transition-colors hover:text-gray-700"
+                    className="-m-3 flex items-center justify-center p-3 text-gray-600 transition-colors hover:text-gray-700"
                     aria-label="X / Twitter"
                   >
                     <TwitterLogoIcon className="h-4 w-4" />
@@ -116,7 +116,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.tiktok && (
                   <a
                     href={socialLinks.tiktok}
-                    className="-m-2 flex items-center justify-center p-2 text-gray-400 transition-colors hover:text-gray-700"
+                    className="-m-3 flex items-center justify-center p-3 text-gray-600 transition-colors hover:text-gray-700"
                     aria-label="TikTok"
                   >
                     <TikTokIcon className="h-4 w-4" />
@@ -125,7 +125,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
                 {socialLinks?.youtube && (
                   <a
                     href={socialLinks.youtube}
-                    className="-m-2 flex items-center justify-center p-2 text-gray-400 transition-colors hover:text-gray-700"
+                    className="-m-3 flex items-center justify-center p-3 text-gray-600 transition-colors hover:text-gray-700"
                     aria-label="YouTube"
                   >
                     <YouTubeIcon className="h-4 w-4" />
@@ -139,7 +139,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
           {(email ?? phone) && (
             <div>
               <h2
-                className="mb-5 text-[11px] font-bold uppercase tracking-[0.18em] text-gray-400"
+                className="mb-5 text-[11px] font-bold tracking-[0.18em] text-gray-700 uppercase"
                 style={{
                   fontFamily:
                     "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -172,7 +172,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
         }}
       >
         <span
-          className="text-xs uppercase tracking-[0.12em] text-gray-400"
+          className="text-xs tracking-[0.12em] text-gray-600 uppercase"
           style={{
             fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
           }}
@@ -181,7 +181,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
         </span>
 
         <div
-          className="flex flex-wrap gap-6 text-xs uppercase tracking-widest text-gray-400"
+          className="flex flex-wrap gap-6 text-xs tracking-widest text-gray-600 uppercase"
           style={{
             fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
           }}
@@ -189,14 +189,14 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
           {privacyPolicy ? (
             <Link
               href={`/${privacyPolicy.slug}`}
-              className="transition-colors hover:text-gray-700"
+              className="inline-block py-2 transition-colors hover:text-gray-700"
             >
               Privacy Policy
             </Link>
           ) : (
             <Link
               href="/platform/policies/privacy-policy"
-              className="transition-colors hover:text-gray-700"
+              className="inline-block py-2 transition-colors hover:text-gray-700"
             >
               Privacy Policy
             </Link>
@@ -204,21 +204,21 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
           {termsOfService ? (
             <Link
               href={`/${termsOfService.slug}`}
-              className="transition-colors hover:text-gray-700"
+              className="inline-block py-2 transition-colors hover:text-gray-700"
             >
               Terms of Service
             </Link>
           ) : (
             <Link
               href="/platform/policies/terms-of-service"
-              className="transition-colors hover:text-gray-700"
+              className="inline-block py-2 transition-colors hover:text-gray-700"
             >
               Terms of Service
             </Link>
           )}
           <Link
             href="/platform/policies/"
-            className="transition-colors hover:text-gray-700"
+            className="inline-block py-2 transition-colors hover:text-gray-700"
           >
             Platform Policies
           </Link>

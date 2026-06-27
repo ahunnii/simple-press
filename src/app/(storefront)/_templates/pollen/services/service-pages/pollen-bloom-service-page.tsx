@@ -5,11 +5,17 @@ import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   getListFieldValue,
-  parseTemplateImageListRows,
   parseTemplateIframeValue,
+  parseTemplateImageListRows,
 } from "~/lib/template-fields";
-import { parseServicePriceTiers, parseServiceAddOns } from "~/lib/validators/services";
+import {
+  parseServiceAddOns,
+  parseServicePriceTiers,
+} from "~/lib/validators/services";
 import { buttonVariants } from "~/components/ui/button";
+import { EmbedDialog } from "~/components/embed-dialog";
+import { EmbedFrame } from "~/components/embed-frame";
+import { EmbedReveal } from "~/components/embed-reveal";
 import {
   FadeIn,
   StaggerContainer,
@@ -17,9 +23,6 @@ import {
 } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { EmbedDialog } from "~/components/embed-dialog";
-import { EmbedFrame } from "~/components/embed-frame";
-import { EmbedReveal } from "~/components/embed-reveal";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
@@ -178,7 +181,7 @@ export function PollenBloomServicePage({
               </p>
             )}
             {(introVideoSrc || introImage) && (
-              <div className="mt-8 mx-auto max-w-xl">
+              <div className="mx-auto mt-8 max-w-xl">
                 <ServiceSectionMedia
                   imageSrc={introImage || undefined}
                   videoSrc={introVideoSrc || undefined}
@@ -246,7 +249,8 @@ export function PollenBloomServicePage({
                   href={ctaLink}
                   className={buttonVariants({
                     size: "lg",
-                    className: "border border-[#d4e8d4] bg-transparent! text-white hover:bg-[#d4e8d4]/10!",
+                    className:
+                      "border border-[#d4e8d4] bg-transparent! text-white hover:bg-[#d4e8d4]/10!",
                   })}
                 >
                   {ctaText}
@@ -262,14 +266,15 @@ export function PollenBloomServicePage({
                         src={embed.src}
                         height={embed.height}
                         title={embed.title ?? "Book"}
-                        className="rounded-xl overflow-hidden"
+                        className="overflow-hidden rounded-xl"
                         triggerLabel={embed.title ?? "Book Now"}
                         aspectRatio={embed.aspectRatio}
                         maxWidth={embed.maxWidth}
                         triggerClassName={buttonVariants({
                           variant: "outline",
                           size: "lg",
-                          className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                          className:
+                            "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
                         })}
                       />
                     </div>
@@ -280,7 +285,9 @@ export function PollenBloomServicePage({
                         title={embed.title ?? "Book"}
                         aspectRatio={embed.aspectRatio}
                         height={embed.height}
-                        triggerLabel={embed.triggerLabel ?? embed.title ?? "Book"}
+                        triggerLabel={
+                          embed.triggerLabel ?? embed.title ?? "Book"
+                        }
                       />
                     </div>
                   ) : (
@@ -288,7 +295,7 @@ export function PollenBloomServicePage({
                       src={embed.src}
                       height={embed.height}
                       title={embed.title ?? "Book"}
-                      className="rounded-xl overflow-hidden"
+                      className="overflow-hidden rounded-xl"
                       aspectRatio={embed.aspectRatio}
                       maxWidth={embed.maxWidth}
                     />
@@ -302,7 +309,8 @@ export function PollenBloomServicePage({
                       className={buttonVariants({
                         variant: "outline",
                         size: "lg",
-                        className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                        className:
+                          "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
                       })}
                     >
                       {embed.title ?? "Book Now"} ↗
@@ -366,19 +374,28 @@ function PollenBloomItemCard({
 
         {/* Compare-at price in text body */}
         {item.compareAtPriceLabel && (
-          <p className="text-xs text-[#9ca3af] line-through">{item.compareAtPriceLabel}</p>
+          <p className="text-xs text-[#9ca3af] line-through">
+            {item.compareAtPriceLabel}
+          </p>
         )}
 
         {/* Price tiers */}
         {tiers.length > 0 && (
           <div className="space-y-1">
             {tiers.map((tier, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs text-[#4b5563]">
+              <div
+                key={i}
+                className="flex items-center gap-2 text-xs text-[#4b5563]"
+              >
                 <span className="font-medium">{tier.label}</span>
                 <span className="text-[#9ca3af]">—</span>
-                <span className="font-semibold text-[#2a351f]">{tier.priceLabel}</span>
+                <span className="font-semibold text-[#2a351f]">
+                  {tier.priceLabel}
+                </span>
                 {tier.compareAtPriceLabel && (
-                  <span className="text-[#9ca3af] line-through">{tier.compareAtPriceLabel}</span>
+                  <span className="text-[#9ca3af] line-through">
+                    {tier.compareAtPriceLabel}
+                  </span>
                 )}
               </div>
             ))}
@@ -387,17 +404,22 @@ function PollenBloomItemCard({
 
         {/* Add-ons */}
         {addOns.length > 0 && (
-          <div className="border-t border-[#d4e8d4] pt-3 mt-3">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#5e8b4a]">Add-ons</p>
+          <div className="mt-3 border-t border-[#d4e8d4] pt-3">
+            <p className="mb-1 text-xs font-semibold tracking-wide text-[#5e8b4a] uppercase">
+              Add-ons
+            </p>
             <div className="space-y-1">
               {addOns.map((addOn, i) => (
                 <div key={i} className="text-xs text-[#4b5563]">
                   <span className="font-medium">{addOn.name}</span>
                   {addOn.priceLabel && (
-                    <span className="text-[#9ca3af]"> · {addOn.priceLabel}</span>
+                    <span className="text-[#9ca3af]">
+                      {" "}
+                      · {addOn.priceLabel}
+                    </span>
                   )}
                   {addOn.description && (
-                    <p className="text-[#9ca3af] mt-0.5">{addOn.description}</p>
+                    <p className="mt-0.5 text-[#9ca3af]">{addOn.description}</p>
                   )}
                 </div>
               ))}

@@ -103,8 +103,7 @@ export const buildersGlobalFieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.authentication",
     title: "Authentication",
-    description:
-      "Image and logo settings shown on sign-in and sign-up pages.",
+    description: "Image and logo settings shown on sign-in and sign-up pages.",
     icon: "🔐",
     columns: 2,
   },

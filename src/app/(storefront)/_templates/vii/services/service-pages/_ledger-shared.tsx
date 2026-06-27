@@ -7,16 +7,18 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { isContentEmpty } from "~/lib/template-fields";
+import {
+  parseServiceAddOns,
+  parseServicePriceTiers,
+} from "~/lib/validators/services";
+import { api } from "~/trpc/react";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
-import { isContentEmpty } from "~/lib/template-fields";
-import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
-import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-
-import { api } from "~/trpc/react";
 
 import { ViiProductRail } from "../../homepage/vii-product-rail";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
@@ -137,7 +139,11 @@ export function LedgerHero({
           }}
         >
           {overline && (
-            <ViiOverline tone="dark" align="left" style={{ ...revealStyle(0), marginBottom: 16 }}>
+            <ViiOverline
+              tone="dark"
+              align="left"
+              style={{ ...revealStyle(0), marginBottom: 16 }}
+            >
               {overline}
             </ViiOverline>
           )}
@@ -183,7 +189,11 @@ export function LedgerHero({
     >
       <div style={{ maxWidth: 860 }}>
         {overline && (
-          <ViiOverline tone="light" align="left" style={{ ...revealStyle(0), marginBottom: 28 }}>
+          <ViiOverline
+            tone="light"
+            align="left"
+            style={{ ...revealStyle(0), marginBottom: 28 }}
+          >
             {overline}
           </ViiOverline>
         )}
@@ -271,9 +281,16 @@ export function LedgerIntro({
       }}
     >
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-        <div ref={headRef} className={`vii-reveal${headVisible ? " is-visible" : ""}`}>
+        <div
+          ref={headRef}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+        >
           {overline && (
-            <ViiOverline tone="light" align="center" style={{ marginBottom: 16 }}>
+            <ViiOverline
+              tone="light"
+              align="center"
+              style={{ marginBottom: 16 }}
+            >
               {overline}
             </ViiOverline>
           )}
@@ -304,7 +321,7 @@ export function LedgerIntro({
         {!bodyEmpty && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             <div
@@ -322,7 +339,10 @@ export function LedgerIntro({
         )}
 
         {(Boolean(introImageSrc) || Boolean(introVideoSrc)) && (
-          <div ref={mediaRef} className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}>
+          <div
+            ref={mediaRef}
+            className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          >
             <ServiceSectionMedia
               imageSrc={introImageSrc}
               videoSrc={introVideoSrc}
@@ -381,23 +401,29 @@ export function LedgerNotes({
         }
       `}</style>
 
-      <div style={{
-        maxWidth: 1100,
-        margin: "0 auto",
-        borderTop: "1px solid color-mix(in srgb, var(--vii-paper) 18%, transparent)",
-        paddingTop: "clamp(28px, 3.5vw, 40px)",
-      }}>
-        <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
+      <div
+        style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          borderTop:
+            "1px solid color-mix(in srgb, var(--vii-paper) 18%, transparent)",
+          paddingTop: "clamp(28px, 3.5vw, 40px)",
+        }}
+      >
+        <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
           {hasHeading && (
-            <h2 id="ledger-notes-heading" style={{
-              fontFamily: "var(--font-serif)",
-              fontWeight: 400,
-              fontStyle: "italic",
-              fontSize: "clamp(22px, 3vw, 30px)",
-              lineHeight: 1.15,
-              color: "var(--vii-paper)",
-              margin: "0 0 clamp(20px, 3vw, 32px)",
-            }}>
+            <h2
+              id="ledger-notes-heading"
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 400,
+                fontStyle: "italic",
+                fontSize: "clamp(22px, 3vw, 30px)",
+                lineHeight: 1.15,
+                color: "var(--vii-paper)",
+                margin: "0 0 clamp(20px, 3vw, 32px)",
+              }}
+            >
               {heading}
             </h2>
           )}
@@ -405,10 +431,28 @@ export function LedgerNotes({
           <div className="vii-ledger-notes-grid">
             {gratuity && (
               <div>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-light)", margin: "0 0 8px" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 11,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--vii-copper-light)",
+                    margin: "0 0 8px",
+                  }}
+                >
                   Gratuity
                 </p>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(16px, 1.8vw, 20px)", lineHeight: 1.6, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "clamp(16px, 1.8vw, 20px)",
+                    lineHeight: 1.6,
+                    color:
+                      "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))",
+                    margin: 0,
+                  }}
+                >
                   {gratuity}
                 </p>
               </div>
@@ -416,10 +460,28 @@ export function LedgerNotes({
 
             {cancellation && (
               <div>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--vii-copper-light)", margin: "0 0 8px" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 11,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--vii-copper-light)",
+                    margin: "0 0 8px",
+                  }}
+                >
                   Cancellations
                 </p>
-                <p style={{ fontFamily: "var(--font-sans)", fontSize: "clamp(16px, 1.8vw, 20px)", lineHeight: 1.6, color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))", margin: 0 }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "clamp(16px, 1.8vw, 20px)",
+                    lineHeight: 1.6,
+                    color:
+                      "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))",
+                    margin: 0,
+                  }}
+                >
                   {cancellation}
                 </p>
               </div>
@@ -470,7 +532,9 @@ export function LedgerProductRail({
       heading={heading}
       ctaText={ctaText}
       ctaHref={ctaHref}
-      products={products as unknown as Parameters<typeof ViiProductRail>[0]["products"]}
+      products={
+        products as unknown as Parameters<typeof ViiProductRail>[0]["products"]
+      }
     />
   );
 }
@@ -527,29 +591,40 @@ export function TreatmentListRow({
     >
       {/* Left: name + meta */}
       <div>
-        <h3 style={{
-          fontFamily: "var(--font-serif)",
-          fontWeight: 400,
-          fontSize: "clamp(20px, 2.5vw, 30px)",
-          lineHeight: 1.15,
-          color: nameColor,
-          margin: "0 0 14px",
-        }}>
+        <h3
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontSize: "clamp(20px, 2.5vw, 30px)",
+            lineHeight: 1.15,
+            color: nameColor,
+            margin: "0 0 14px",
+          }}
+        >
           {item.name}
         </h3>
 
         {item.durationLabel && (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <span style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 10,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: secondaryColor,
-              padding: "3px 10px",
-              border: `1px solid ${pillBorderColor}`,
-              borderRadius: "var(--radius)",
-            }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 10,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: secondaryColor,
+                padding: "3px 10px",
+                border: `1px solid ${pillBorderColor}`,
+                borderRadius: "var(--radius)",
+              }}
+            >
               {item.durationLabel}
             </span>
           </div>
@@ -557,25 +632,55 @@ export function TreatmentListRow({
 
         {priceTiers.length > 0 && (
           <div style={{ marginTop: 14 }}>
-            <p style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: 9,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              color: secondaryColor,
-              marginBottom: 6,
-            }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: secondaryColor,
+                marginBottom: 6,
+              }}
+            >
               Pricing
             </p>
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 4,
+              }}
+            >
               {priceTiers.map((tier, i) => (
-                <li key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--font-sans)", fontSize: 12, color: secondaryColor }}>
+                <li
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: secondaryColor,
+                  }}
+                >
                   <span>{tier.label}</span>
-                  <span aria-hidden="true" style={{ color: separatorColor, flexShrink: 0 }}>—</span>
+                  <span
+                    aria-hidden="true"
+                    style={{ color: separatorColor, flexShrink: 0 }}
+                  >
+                    —
+                  </span>
                   {tier.compareAtPriceLabel && (
-                    <span style={{ textDecoration: "line-through" }}>{tier.compareAtPriceLabel}</span>
+                    <span style={{ textDecoration: "line-through" }}>
+                      {tier.compareAtPriceLabel}
+                    </span>
                   )}
-                  <span style={{ color: priceEmphasisColor, fontWeight: 500 }}>{tier.priceLabel}</span>
+                  <span style={{ color: priceEmphasisColor, fontWeight: 500 }}>
+                    {tier.priceLabel}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -584,23 +689,34 @@ export function TreatmentListRow({
 
         {/* Single price figure — left column, under the title (mirrors tiers placement) */}
         {priceTiers.length === 0 && item.priceLabel && (
-          <div style={{ marginTop: 14, display: "flex", alignItems: "baseline", gap: 8 }}>
+          <div
+            style={{
+              marginTop: 14,
+              display: "flex",
+              alignItems: "baseline",
+              gap: 8,
+            }}
+          >
             {item.compareAtPriceLabel && (
-              <span style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "clamp(12px, 1.2vw, 14px)",
-                color: secondaryColor,
-                textDecoration: "line-through",
-              }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(12px, 1.2vw, 14px)",
+                  color: secondaryColor,
+                  textDecoration: "line-through",
+                }}
+              >
                 {item.compareAtPriceLabel}
               </span>
             )}
-            <span style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "clamp(15px, 1.6vw, 20px)",
-              fontWeight: 500,
-              color: priceEmphasisColor,
-            }}>
+            <span
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "clamp(15px, 1.6vw, 20px)",
+                fontWeight: 500,
+                color: priceEmphasisColor,
+              }}
+            >
               {item.priceLabel}
             </span>
           </div>
@@ -608,36 +724,88 @@ export function TreatmentListRow({
       </div>
 
       {/* Right: description + add-ons + footer row (price + book) */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 16,
+        }}
+      >
         {item.description && (
-          <p style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "clamp(13px, 1.2vw, 15px)",
-            lineHeight: 1.8,
-            color: secondaryColor,
-            margin: 0,
-          }}>
+          <p
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "clamp(13px, 1.2vw, 15px)",
+              lineHeight: 1.8,
+              color: secondaryColor,
+              margin: 0,
+            }}
+          >
             {item.description}
           </p>
         )}
 
         {addOns.length > 0 && (
           <div>
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", color: secondaryColor, marginBottom: 6 }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: 9,
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                color: secondaryColor,
+                marginBottom: 6,
+              }}
+            >
               Add-ons
             </p>
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+            <ul
+              style={{
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
               {addOns.map((addon, i) => (
-                <li key={i} style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: secondaryColor }}>
+                <li
+                  key={i}
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 12,
+                    color: secondaryColor,
+                  }}
+                >
                   <span>{addon.name}</span>
                   {addon.priceLabel && (
                     <>
-                      <span aria-hidden="true" style={{ margin: "0 4px", color: separatorColor }}>·</span>
-                      <span style={{ color: priceEmphasisColor, fontWeight: 500 }}>{addon.priceLabel}</span>
+                      <span
+                        aria-hidden="true"
+                        style={{ margin: "0 4px", color: separatorColor }}
+                      >
+                        ·
+                      </span>
+                      <span
+                        style={{ color: priceEmphasisColor, fontWeight: 500 }}
+                      >
+                        {addon.priceLabel}
+                      </span>
                     </>
                   )}
                   {addon.description && (
-                    <span style={{ display: "block", fontSize: 11, opacity: 0.65, marginTop: 1 }}>{addon.description}</span>
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 11,
+                        opacity: 0.65,
+                        marginTop: 1,
+                      }}
+                    >
+                      {addon.description}
+                    </span>
                   )}
                 </li>
               ))}

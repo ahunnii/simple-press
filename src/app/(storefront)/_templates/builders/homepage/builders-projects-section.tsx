@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
@@ -54,18 +52,16 @@ export function BuildersProjectsSection({
   };
 
   return (
-    <section
-      {...sectionAttrs}
-      className="px-4 py-24 md:px-12"
-    >
+    <section {...sectionAttrs} className="px-4 py-24 md:px-12">
       <div className="mx-auto max-w-[1280px]">
         {/* Section header */}
         <div className="mb-12 flex items-end justify-between border-b border-gray-200 pb-4">
           <h2
-            className="text-3xl font-semibold uppercase text-gray-900 md:text-[40px] md:leading-tight"
+            className="text-3xl font-semibold uppercase md:text-[40px] md:leading-tight"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               letterSpacing: "-0.01em",
+              color: "var(--builders-ink, #131313)",
             }}
           >
             {heading}
@@ -73,10 +69,10 @@ export function BuildersProjectsSection({
           {viewAllHref && (
             <Link
               href={viewAllHref}
-              className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest transition-colors hover:opacity-70"
+              className="flex items-center gap-1 text-xs font-bold tracking-widest uppercase transition-colors hover:opacity-70"
               style={{
                 fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
-                color: "var(--builders-accent, #FFC5B6)",
+                color: "var(--builders-ink, #131313)",
               }}
               aria-label="View all projects"
             >
@@ -85,11 +81,15 @@ export function BuildersProjectsSection({
                 className="h-3 w-3"
                 viewBox="0 0 16 16"
                 fill="none"
-                stroke="currentColor"
+                stroke="var(--builders-accent, #FFC5B6)"
                 strokeWidth="2"
                 aria-hidden="true"
               >
-                <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M3 8h10M9 4l4 4-4 4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </Link>
           )}
@@ -98,13 +98,12 @@ export function BuildersProjectsSection({
         {/* Bento grid — only shown when there are projects */}
         {projects.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:h-[800px] md:grid-cols-4 md:grid-rows-2">
-
             {/* ── Large feature card (col-span-2 row-span-2) ── */}
             {featured &&
               (() => {
                 const featuredHref = getStr(featured, "href");
                 const cardClasses = [
-                  "group relative overflow-hidden border border-gray-200 bg-gray-50 md:col-span-2 md:row-span-2",
+                  "group relative aspect-[4/3] overflow-hidden border border-gray-200 bg-gray-50 md:aspect-auto md:col-span-2 md:row-span-2",
                   featuredHref ? "cursor-pointer" : "",
                 ]
                   .filter(Boolean)
@@ -116,6 +115,8 @@ export function BuildersProjectsSection({
                         src={getStr(featured, "image")}
                         alt={getStr(featured, "title")}
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gray-200" />
@@ -129,7 +130,7 @@ export function BuildersProjectsSection({
                     <div className="absolute bottom-0 left-0 w-full p-8">
                       {getStr(featured, "category") && (
                         <span
-                          className="mb-4 inline-block border bg-black/50 px-2 py-1 text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm"
+                          className="mb-4 inline-block border bg-black/50 px-2 py-1 text-[11px] font-bold tracking-widest uppercase backdrop-blur-sm"
                           style={{
                             fontFamily:
                               "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -141,7 +142,7 @@ export function BuildersProjectsSection({
                         </span>
                       )}
                       <h3
-                        className="mb-2 text-2xl font-medium uppercase text-white"
+                        className="mb-2 text-2xl font-medium text-white uppercase"
                         style={{
                           fontFamily:
                             "var(--font-builders-display, 'Jost', sans-serif)",
@@ -172,7 +173,7 @@ export function BuildersProjectsSection({
             {rest.slice(0, 2).map((project, i) => {
               const projectHref = getStr(project, "href");
               const cardClasses = [
-                "group relative overflow-hidden border border-gray-200 bg-gray-50 md:col-span-1 md:row-span-1",
+                "group relative aspect-[4/3] overflow-hidden border border-gray-200 bg-gray-50 md:aspect-auto md:col-span-1 md:row-span-1",
                 projectHref ? "cursor-pointer" : "",
               ]
                 .filter(Boolean)
@@ -184,17 +185,19 @@ export function BuildersProjectsSection({
                       src={getStr(project, "image")}
                       alt={getStr(project, "title")}
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gray-200" />
                   )}
                   <div
-                    className="absolute inset-0 bg-black/40 transition-all duration-700 group-hover:bg-black/10"
+                    className="absolute inset-0 bg-black/40 transition-colors duration-700 group-hover:bg-black/10"
                     aria-hidden="true"
                   />
                   <div className="absolute bottom-0 left-0 p-6">
                     <h3
-                      className="text-xl font-semibold uppercase text-white drop-shadow-md"
+                      className="text-xl font-semibold text-white uppercase drop-shadow-md"
                       style={{
                         fontFamily:
                           "var(--font-builders-display, 'Jost', sans-serif)",
@@ -208,7 +211,11 @@ export function BuildersProjectsSection({
                 </>
               );
               return projectHref ? (
-                <Link key={project._id ?? i} href={projectHref} className={cardClasses}>
+                <Link
+                  key={project._id ?? i}
+                  href={projectHref}
+                  className={cardClasses}
+                >
                   {inner}
                 </Link>
               ) : (
@@ -222,12 +229,12 @@ export function BuildersProjectsSection({
             {rest.length >= 3 ? (
               <Link
                 href={getStr(rest[2]!, "href") || viewAllHref}
-                className="group relative flex cursor-pointer flex-col items-start justify-center overflow-hidden border border-gray-200 bg-white p-8 transition-all duration-700 md:col-span-2 md:row-span-1"
+                className="group relative flex cursor-pointer flex-col items-start justify-center overflow-hidden border border-gray-200 bg-white p-8 md:col-span-2 md:row-span-1"
               >
                 {/* Subtle texture bg */}
                 {getStr(rest[2]!, "image") && (
                   <div
-                    className="pointer-events-none absolute right-0 top-0 h-full w-1/2 opacity-10"
+                    className="pointer-events-none absolute top-0 right-0 h-full w-1/2 opacity-10"
                     style={{
                       backgroundImage: `url(${getStr(rest[2]!, "image")})`,
                       backgroundSize: "cover",
@@ -237,7 +244,7 @@ export function BuildersProjectsSection({
                 )}
                 {getStr(rest[2]!, "category") && (
                   <span
-                    className="relative z-10 mb-4 inline-block border border-gray-300 px-2 py-1 text-[11px] font-bold uppercase tracking-widest text-gray-500"
+                    className="relative z-10 mb-4 inline-block border border-gray-300 px-2 py-1 text-[11px] font-bold tracking-widest text-gray-500 uppercase"
                     style={{
                       fontFamily:
                         "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -272,7 +279,7 @@ export function BuildersProjectsSection({
                   aria-hidden="true"
                 >
                   <span
-                    className="text-xs uppercase tracking-widest text-gray-300"
+                    className="text-xs tracking-widest text-gray-300 uppercase"
                     style={{
                       fontFamily:
                         "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -288,10 +295,9 @@ export function BuildersProjectsSection({
           /* Empty state */
           <div className="flex h-64 items-center justify-center border border-dashed border-gray-200">
             <p
-              className="text-xs uppercase tracking-widest text-gray-400"
+              className="text-xs tracking-widest text-gray-600 uppercase"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               }}
             >
               Add projects in your admin dashboard

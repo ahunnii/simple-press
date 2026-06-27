@@ -204,7 +204,8 @@ const homepageProjectsData: TemplateField[] = [
         label: "Card Link (optional)",
         type: "url",
         placeholder: "/projects/fisher-block",
-        description: "If set, the card becomes a link with a hover arrow button.",
+        description:
+          "If set, the card becomes a link with a hover arrow button.",
       },
     ],
   },

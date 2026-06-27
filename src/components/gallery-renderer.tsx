@@ -313,6 +313,18 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
 }
 
 // Masonry Layout
+// Maps the stored column count (1–5) to a responsive Tailwind `columns-*` ladder so
+// masonry reflows down to a single column on small screens. Full class strings are
+// listed literally so Tailwind's scanner keeps them.
+function masonryColumnsClass(columns: number): string {
+  if (columns >= 5)
+    return "columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5";
+  if (columns === 4) return "columns-1 sm:columns-2 md:columns-3 lg:columns-4";
+  if (columns === 3) return "columns-1 sm:columns-2 md:columns-3";
+  if (columns === 2) return "columns-1 sm:columns-2";
+  return "columns-1";
+}
+
 function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
   const captionStyle = gallery.captionStyle ?? "overlay";
   const isBelow = captionStyle === "below";
@@ -320,8 +332,8 @@ function MasonryLayout({ gallery, onImageClick }: LayoutProps) {
 
   return (
     <div
+      className={masonryColumnsClass(gallery.columns)}
       style={{
-        columnCount: gallery.columns,
         columnGap: `${gallery.gap}px`,
       }}
     >
@@ -470,9 +482,8 @@ function CollageLayout({ gallery, onImageClick }: LayoutProps) {
 
   return (
     <div
-      className="grid"
+      className="grid grid-cols-2 sm:grid-cols-3"
       style={{
-        gridTemplateColumns: "repeat(3, 1fr)",
         gap: `${gap}px`,
       }}
     >

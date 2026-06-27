@@ -13,14 +13,13 @@
  *    (resolved server-side and passed in as `galleryImages`).
  * 4. Closing CTA — ViiContactCtaSection wired from vii.services.cta-* fields.
  */
-
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { PageTransition } from "~/components/page-animations";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
+import { parseTemplateIframeValue } from "~/lib/template-fields";
+import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
@@ -196,7 +195,9 @@ function ServicesHero({
             }}
           >
             {displayHeading}{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper-light)" }}>
+            <em
+              style={{ fontStyle: "italic", color: "var(--vii-copper-light)" }}
+            >
               {displayAccent}
             </em>
           </h1>
@@ -208,7 +209,8 @@ function ServicesHero({
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.4vw, 17px)",
                 lineHeight: 1.75,
-                color: "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))",
+                color:
+                  "color-mix(in srgb, var(--vii-paper) 85%, var(--vii-navy))",
                 maxWidth: 520,
                 margin: "16px 0 0",
                 textWrap: "pretty",
@@ -324,7 +326,7 @@ function ServicesIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline
@@ -362,7 +364,7 @@ function ServicesIntro({
           <div style={{ marginTop: 28 }}>
             <div
               ref={bodyRef}
-              className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+              className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
             >
               <p
                 style={{
@@ -400,15 +402,17 @@ function ServiceCard({
       href={`/services/${service.slug}`}
       aria-label={`Explore ${service.name}`}
       className="vii-services-card"
-      style={{
-        display: "block",
-        position: "relative",
-        aspectRatio: "4 / 5",
-        overflow: "hidden",
-        borderRadius: "var(--radius)",
-        textDecoration: "none",
-        "--i": Math.min(index, 7),
-      } as React.CSSProperties}
+      style={
+        {
+          display: "block",
+          position: "relative",
+          aspectRatio: "4 / 5",
+          overflow: "hidden",
+          borderRadius: "var(--radius)",
+          textDecoration: "none",
+          "--i": Math.min(index, 7),
+        } as React.CSSProperties
+      }
     >
       {service.image ? (
         <Image
@@ -493,7 +497,8 @@ function ServiceCard({
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(13px, 1.2vw, 15px)",
               lineHeight: 1.65,
-              color: "color-mix(in srgb, var(--vii-paper) 82%, var(--vii-navy))",
+              color:
+                "color-mix(in srgb, var(--vii-paper) 82%, var(--vii-navy))",
               margin: "0 0 14px",
               overflow: "hidden",
               display: "-webkit-box",
@@ -532,7 +537,7 @@ function GalleryStrip({ images }: { images: ServicesGalleryImage[] }) {
     >
       <div
         ref={ref}
-        className={`vii-services-gallery-strip vii-reveal-group${visible ? " is-visible" : ""}`}
+        className={`vii-services-gallery-strip vii-reveal-group${visible ? "is-visible" : ""}`}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${shown.length}, 1fr)`,
@@ -589,7 +594,7 @@ function EmptyServicesState() {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 560, margin: "0 auto" }}
       >
         <h2
@@ -632,8 +637,7 @@ function ServiceGrid({ services }: { services: Props["services"] }) {
       aria-label="Services"
       style={{
         background: "var(--vii-cream)",
-        padding:
-          "clamp(56px, 8vh, 96px) clamp(24px, 6vw, 96px)",
+        padding: "clamp(56px, 8vh, 96px) clamp(24px, 6vw, 96px)",
       }}
     >
       <style>{`
@@ -688,7 +692,7 @@ function ServiceGrid({ services }: { services: Props["services"] }) {
 
       <div
         ref={ref}
-        className={`vii-services-grid vii-reveal-group${visible ? " is-visible" : ""}`}
+        className={`vii-services-grid vii-reveal-group${visible ? "is-visible" : ""}`}
       >
         {services.map((service, i) => (
           <div

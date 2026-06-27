@@ -4,16 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import type { PromoHalf } from "./vii-shop-promo-band";
+import type { TemplateListRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
-import type { TemplateListRow } from "~/lib/template-fields";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
+import { ViiBrandsSection } from "../homepage/vii-brands-section";
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiProductCard } from "../shared/vii-product-card";
-import { ViiBrandsSection } from "../homepage/vii-brands-section";
-import { type PromoHalf, ViiShopPromoBand } from "./vii-shop-promo-band";
+import { ViiShopPromoBand } from "./vii-shop-promo-band";
 
 type Collections = RouterOutputs["collections"]["getAllPublic"];
 
@@ -66,7 +67,7 @@ export function ViiShopClient({
       >
         <div
           ref={productsReveal.ref}
-          className={`vii-reveal${productsReveal.visible ? " is-visible" : ""}`}
+          className={`vii-reveal${productsReveal.visible ? "is-visible" : ""}`}
           style={{ maxWidth: 1200, margin: "0 auto" }}
         >
           <h2 id="vii-shop-products-heading" className="sr-only">
@@ -337,7 +338,7 @@ export function ViiShopClient({
         >
           <div
             ref={collectionsReveal.ref}
-            className={`vii-reveal-group${collectionsReveal.visible ? " is-visible" : ""}`}
+            className={`vii-reveal-group${collectionsReveal.visible ? "is-visible" : ""}`}
             style={{ maxWidth: 1200, margin: "0 auto" }}
           >
             <div style={{ marginBottom: "clamp(28px, 4vw, 48px)" }}>
@@ -385,7 +386,13 @@ export function ViiShopClient({
                   key={collection.id}
                   href={`/collections/${collection.slug}`}
                   className="group vii-reveal-item"
-                  style={{ "--i": Math.min(i, 7), display: "block", textDecoration: "none" } as React.CSSProperties}
+                  style={
+                    {
+                      "--i": Math.min(i, 7),
+                      display: "block",
+                      textDecoration: "none",
+                    } as React.CSSProperties
+                  }
                 >
                   <div
                     style={{

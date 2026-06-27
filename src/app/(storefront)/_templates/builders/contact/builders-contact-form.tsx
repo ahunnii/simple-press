@@ -14,7 +14,7 @@ import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 const LABEL_CLASS =
-  "text-[11px] font-bold uppercase tracking-[0.12em] text-[#53433F]";
+  "text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--builders-muted)]";
 const BODY_FONT = "var(--font-builders-body, 'Agdasima', sans-serif)";
 
 export function BuildersContactForm() {
@@ -71,7 +71,7 @@ export function BuildersContactForm() {
             Message sent!
           </h2>
           <p
-            className="mt-2 text-xs uppercase tracking-widest"
+            className="mt-2 text-xs tracking-widest uppercase"
             style={{ fontFamily: BODY_FONT }}
           >
             We&apos;ll be in touch soon.
@@ -80,7 +80,7 @@ export function BuildersContactForm() {
         <button
           type="button"
           onClick={resetSuccess}
-          className="cursor-pointer border border-current px-6 py-2 text-[11px] uppercase tracking-[0.14em] transition-opacity hover:opacity-70"
+          className="cursor-pointer border border-current px-6 py-2 text-[11px] tracking-[0.1em] uppercase transition-opacity hover:opacity-70"
           style={{ fontFamily: BODY_FONT }}
         >
           Send another →
@@ -99,7 +99,7 @@ export function BuildersContactForm() {
         {error && (
           <Alert variant="destructive" className="rounded-none">
             <AlertDescription
-              className="text-xs uppercase tracking-[0.1em]"
+              className="text-xs tracking-[0.1em] uppercase"
               style={{ fontFamily: BODY_FONT }}
             >
               {error}
@@ -167,7 +167,7 @@ export function BuildersContactForm() {
           <button
             type="submit"
             disabled={isSubmitting || !captchaToken}
-            className="flex items-center gap-3 px-8 py-4 text-xs uppercase tracking-widest transition-colors disabled:opacity-40"
+            className="flex items-center gap-3 px-8 py-4 text-xs tracking-widest uppercase transition-colors disabled:opacity-40"
             style={{
               fontFamily: BODY_FONT,
               background: "var(--builders-accent, #FFC5B6)",

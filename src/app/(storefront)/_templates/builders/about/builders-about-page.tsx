@@ -2,8 +2,8 @@ import type { DefaultAboutPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
-import { resolveFields } from "..";
 import { DEFAULT_TEAM_MEMBERS } from ".";
+import { resolveFields } from "..";
 
 export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
@@ -22,8 +22,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
   // Parse the team-members list field from raw customFields (it's an array, not a string)
   const rawTeamMembers =
-    customFields &&
-    Array.isArray(customFields["builders.about.team-members"])
+    customFields && Array.isArray(customFields["builders.about.team-members"])
       ? customFields["builders.about.team-members"]
       : [];
   const parsedMembers = parseTemplateListRows(rawTeamMembers);
@@ -36,11 +35,12 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
   const storyHeading = f["builders.about.story-heading"] ?? "Our Detroit Story";
   const storyBody1 = f["builders.about.story-body-1"] ?? "";
   const storyBody2 = f["builders.about.story-body-2"] ?? "";
-  const teamHeading = f["builders.about.team-heading"] ?? "Meet the Cooperative";
+  const teamHeading =
+    f["builders.about.team-heading"] ?? "Meet the Cooperative";
 
   return (
-    <main
-      className="mx-auto w-full max-w-[1280px] px-4 pb-24 pt-32 md:px-12 md:pb-32 md:pt-48"
+    <div
+      className="mx-auto w-full max-w-[1280px] px-4 pt-32 pb-24 md:px-12 md:pt-48 md:pb-32"
       style={{ background: "var(--builders-bg, #F8F9FA)" }}
     >
       {/* ── 1. Hero ─────────────────────────────────────────────────────────── */}
@@ -51,10 +51,9 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
         {/* Left: headline + subtitle */}
         <div className="flex flex-col justify-end md:col-span-8">
           <h1
-            className="mb-6 text-4xl uppercase leading-none tracking-tight md:text-6xl lg:text-7xl"
+            className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl lg:text-7xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 300,
               color: "var(--builders-ink, #131313)",
             }}
@@ -66,8 +65,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <p
               className="max-w-2xl border-l-2 pl-6 text-lg leading-relaxed md:text-xl"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
                 borderColor: "var(--builders-accent, #FFC5B6)",
                 color: "var(--builders-ink, #131313)",
                 opacity: 0.75,
@@ -86,6 +84,8 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
               alt=""
               className="h-64 w-full border object-cover md:h-full"
               style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
+              loading="lazy"
+              decoding="async"
             />
           ) : (
             <div
@@ -101,10 +101,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* ── 2. Our Detroit Story ─────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("about", "story")}
-        className="mb-32"
-      >
+      <section {...sectionGroupAttr("about", "story")} className="mb-32">
         <div
           className="grid grid-cols-1 gap-6 border-t pt-16 md:grid-cols-12"
           style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
@@ -112,10 +109,9 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
           {/* Left: heading + accent bar */}
           <div className="md:col-span-4">
             <h2
-              className="mb-4 text-3xl uppercase leading-tight md:text-4xl"
+              className="mb-4 text-3xl leading-tight uppercase md:text-4xl"
               style={{
-                fontFamily:
-                  "var(--font-builders-display, 'Jost', sans-serif)",
+                fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
                 fontWeight: 600,
                 color: "var(--builders-ink, #131313)",
               }}
@@ -123,7 +119,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
               {storyHeading}
             </h2>
             <span
-              className="inline-block h-1 w-12 mb-8"
+              className="mb-8 inline-block h-1 w-12"
               style={{ background: "var(--builders-accent, #FFC5B6)" }}
               aria-hidden="true"
             />
@@ -169,10 +165,9 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
           style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
         >
           <h2
-            className="mb-4 text-3xl uppercase leading-tight md:text-4xl"
+            className="mb-4 text-3xl leading-tight uppercase md:text-4xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 600,
               color: "var(--builders-ink, #131313)",
             }}
@@ -216,6 +211,8 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
                       src={image}
                       alt={name}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ) : (
@@ -241,7 +238,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
                 {/* Role */}
                 <p
-                  className="mb-4 text-xs uppercase tracking-widest"
+                  className="mb-4 text-xs tracking-widest uppercase"
                   style={{
                     fontFamily:
                       "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -271,6 +268,6 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
           })}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

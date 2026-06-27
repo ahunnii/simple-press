@@ -1,5 +1,4 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
 
 type BuildersHeroSectionProps = {
@@ -28,24 +27,31 @@ export function BuildersHeroSection({
   return (
     <section
       {...sectionAttrs}
-      className="relative flex min-h-[90vh] w-full items-center bg-cover bg-center px-4 py-24 md:px-12"
-      style={
-        hasBg
-          ? { backgroundImage: `url(${bgImage})` }
-          : { background: "#1a1a1a" }
-      }
+      className="relative flex min-h-[90vh] w-full items-center px-4 py-24 md:px-12"
+      style={{ background: "var(--builders-ink, #131313)" }}
     >
+      {/* LCP background image */}
+      {hasBg && (
+        <Image
+          src={bgImage}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+      )}
+
       {/* Overlay */}
-      <div className="absolute inset-0 z-0 bg-black/50" aria-hidden="true" />
+      <div className="absolute inset-0 z-10 bg-black/50" aria-hidden="true" />
 
       {/* Content */}
-      <div className="relative z-10 mx-auto w-full max-w-[1280px] pt-20">
-        <div className="w-full max-w-2xl flex flex-col gap-6 bg-black/20 p-8 backdrop-blur-sm">
+      <div className="relative z-20 mx-auto w-full max-w-[1280px] pt-20">
+        <div className="builders-on-dark flex w-full max-w-2xl flex-col gap-6 bg-black/20 p-8 backdrop-blur-sm">
           <h1
-            className="text-4xl font-light uppercase leading-none tracking-tighter text-white md:text-6xl lg:text-7xl"
+            className="text-4xl leading-none font-light tracking-tighter [overflow-wrap:anywhere] break-words text-white uppercase md:text-6xl lg:text-7xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
             }}
           >
             {title}
@@ -66,25 +72,10 @@ export function BuildersHeroSection({
             {cta1Label && (
               <Link
                 href={cta1Href || "/contact"}
-                className="inline-block border px-8 py-4 text-xs font-bold uppercase tracking-[0.14em] transition-colors"
+                className="inline-block border border-[var(--builders-accent)] bg-[var(--builders-accent)] px-8 py-4 text-xs font-bold tracking-[0.1em] text-[var(--builders-accent-ink)] uppercase transition-colors hover:border-[var(--builders-accent-hover)] hover:bg-[var(--builders-accent-hover)]"
                 style={{
                   fontFamily:
                     "var(--font-builders-body, 'Agdasima', sans-serif)",
-                  background: "var(--builders-accent, #FFC5B6)",
-                  borderColor: "var(--builders-accent, #FFC5B6)",
-                  color: "var(--builders-accent-ink, #31130A)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background =
-                    "var(--builders-accent-hover, #F2B9AB)";
-                  e.currentTarget.style.borderColor =
-                    "var(--builders-accent-hover, #F2B9AB)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background =
-                    "var(--builders-accent, #FFC5B6)";
-                  e.currentTarget.style.borderColor =
-                    "var(--builders-accent, #FFC5B6)";
                 }}
               >
                 {cta1Label}
@@ -94,7 +85,7 @@ export function BuildersHeroSection({
             {cta2Label && (
               <Link
                 href={cta2Href || "/about"}
-                className="inline-block border border-white/50 bg-transparent px-8 py-4 text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-white/10"
+                className="inline-block border border-white/50 bg-transparent px-8 py-4 text-xs font-bold tracking-[0.1em] text-white uppercase transition-colors hover:bg-white/10"
                 style={{
                   fontFamily:
                     "var(--font-builders-body, 'Agdasima', sans-serif)",

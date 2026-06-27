@@ -2,11 +2,11 @@ import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { YouTubeIcon } from "~/components/icons/youtube-icon";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
 import { BuildersContactForm } from "./builders-contact-form";
@@ -33,8 +33,7 @@ export function BuildersContactPage({
     parseBusinessHours(business.businessHours),
   );
 
-  const contactHeader =
-    f["builders.contact.header"] ?? "Let's build together.";
+  const contactHeader = f["builders.contact.header"] ?? "Let's build together.";
   const contactSubheader =
     f["builders.contact.subheader"] ??
     "Whether you have a specific restoration project in mind, want to learn more about our cooperative model, or just want to say hello, we're here. We believe in direct, honest communication—no corporate speak, just real people doing hard work.";
@@ -60,7 +59,7 @@ export function BuildersContactPage({
       >
         <header className="max-w-3xl">
           <h1
-            className="mb-6 text-4xl uppercase leading-none tracking-tight md:text-6xl"
+            className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 300,
@@ -74,7 +73,7 @@ export function BuildersContactPage({
             style={{
               fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               borderColor: "var(--builders-accent, #FFC5B6)",
-              color: "var(--builders-muted, #53433F)",
+              color: "var(--builders-muted, #6B7280)",
             }}
           >
             {contactSubheader}
@@ -117,11 +116,11 @@ export function BuildersContactPage({
                   {shopLabel}
                 </h2>
                 <address
-                  className="not-italic flex flex-col gap-1 text-base leading-relaxed"
+                  className="flex flex-col gap-1 text-base leading-relaxed not-italic"
                   style={{
                     fontFamily:
                       "var(--font-builders-body, 'Agdasima', sans-serif)",
-                    color: "var(--builders-muted, #53433F)",
+                    color: "var(--builders-muted, #6B7280)",
                     whiteSpace: "pre-wrap",
                   }}
                 >
@@ -151,13 +150,13 @@ export function BuildersContactPage({
                   style={{
                     fontFamily:
                       "var(--font-builders-body, 'Agdasima', sans-serif)",
-                    color: "var(--builders-muted, #53433F)",
+                    color: "var(--builders-muted, #6B7280)",
                   }}
                 >
                   {email && (
                     <a
                       href={`mailto:${email}`}
-                      className="transition-colors hover:text-[#D98A78]"
+                      className="transition-colors hover:text-[var(--builders-accent-ink)]"
                     >
                       {email}
                     </a>
@@ -165,7 +164,7 @@ export function BuildersContactPage({
                   {phone && (
                     <a
                       href={`tel:${phone.replace(/\D/g, "")}`}
-                      className="transition-colors hover:text-[#D98A78]"
+                      className="transition-colors hover:text-[var(--builders-accent-ink)]"
                     >
                       {phone}
                     </a>
@@ -195,7 +194,7 @@ export function BuildersContactPage({
                   style={{
                     fontFamily:
                       "var(--font-builders-body, 'Agdasima', sans-serif)",
-                    color: "var(--builders-muted, #53433F)",
+                    color: "var(--builders-muted, #6B7280)",
                   }}
                 >
                   {hourRows.map((row) => (
@@ -204,7 +203,6 @@ export function BuildersContactPage({
                       className="flex justify-between"
                       style={{
                         maxWidth: "220px",
-                        ...(row.value === "Closed" ? { opacity: 0.5 } : {}),
                       }}
                     >
                       <dt>{row.label}</dt>

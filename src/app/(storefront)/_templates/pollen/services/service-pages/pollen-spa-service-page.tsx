@@ -2,7 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
+import { parseTemplateIframeValue } from "~/lib/template-fields";
+import {
+  parseServiceAddOns,
+  parseServicePriceTiers,
+} from "~/lib/validators/services";
 import { buttonVariants } from "~/components/ui/button";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
@@ -14,13 +20,6 @@ import {
 } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
-import {
-  parseServicePriceTiers,
-  parseServiceAddOns,
-  type ServicePriceTier,
-  type ServiceAddOn,
-} from "~/lib/validators/services";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
@@ -231,7 +230,7 @@ export function PollenSpaServicePage({
                         src={embed.src}
                         height={embed.height}
                         title={embed.title ?? "Book"}
-                        className="rounded-xl overflow-hidden"
+                        className="overflow-hidden rounded-xl"
                         triggerLabel={embed.title ?? "Book Now"}
                         aspectRatio={embed.aspectRatio}
                         maxWidth={embed.maxWidth}
@@ -250,7 +249,9 @@ export function PollenSpaServicePage({
                         title={embed.title ?? "Book"}
                         aspectRatio={embed.aspectRatio}
                         height={embed.height}
-                        triggerLabel={embed.triggerLabel ?? embed.title ?? "Book"}
+                        triggerLabel={
+                          embed.triggerLabel ?? embed.title ?? "Book"
+                        }
                       />
                     </div>
                   ) : (
@@ -258,7 +259,7 @@ export function PollenSpaServicePage({
                       src={embed.src}
                       height={embed.height}
                       title={embed.title ?? "Book"}
-                      className="rounded-xl overflow-hidden"
+                      className="overflow-hidden rounded-xl"
                       aspectRatio={embed.aspectRatio}
                       maxWidth={embed.maxWidth}
                     />
@@ -374,7 +375,7 @@ function PollenSpaItemCard({
           {/* Add-ons */}
           {addOns.length > 0 && (
             <div className="mt-3 border-t border-[#d4e8d4] pt-3">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#5e8b4a]">
+              <p className="mb-1 text-xs font-semibold tracking-wide text-[#5e8b4a] uppercase">
                 Add-ons
               </p>
               <div className="space-y-1">
@@ -382,10 +383,15 @@ function PollenSpaItemCard({
                   <div key={i} className="text-xs text-[#4b5563]">
                     <span className="font-medium">{addOn.name}</span>
                     {addOn.priceLabel && (
-                      <span className="text-[#9ca3af]"> · {addOn.priceLabel}</span>
+                      <span className="text-[#9ca3af]">
+                        {" "}
+                        · {addOn.priceLabel}
+                      </span>
                     )}
                     {addOn.description && (
-                      <p className="mt-0.5 text-[#9ca3af]">{addOn.description}</p>
+                      <p className="mt-0.5 text-[#9ca3af]">
+                        {addOn.description}
+                      </p>
                     )}
                   </div>
                 ))}

@@ -84,8 +84,16 @@ export function embedWidthClass(value?: string): string {
 // ---------------------------------------------------------------------------
 
 /** Returns a valid `EmbedAspectRatio` or `undefined`. */
-export function coerceEmbedAspectRatio(v: unknown): EmbedAspectRatio | undefined {
-  if (v === "16:9" || v === "4:3" || v === "1:1" || v === "9:16" || v === "fit") {
+export function coerceEmbedAspectRatio(
+  v: unknown,
+): EmbedAspectRatio | undefined {
+  if (
+    v === "16:9" ||
+    v === "4:3" ||
+    v === "1:1" ||
+    v === "9:16" ||
+    v === "fit"
+  ) {
     return v;
   }
   return undefined;
@@ -100,7 +108,9 @@ export function coerceEmbedWidth(v: unknown): EmbedWidth | undefined {
 }
 
 /** Returns a valid `EmbedDisplayMode` or `undefined`. */
-export function coerceEmbedDisplayMode(v: unknown): EmbedDisplayMode | undefined {
+export function coerceEmbedDisplayMode(
+  v: unknown,
+): EmbedDisplayMode | undefined {
   if (v === "inline" || v === "dialog") {
     return v;
   }

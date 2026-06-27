@@ -3,20 +3,27 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import type { RouterOutputs } from "~/trpc/react";
 import type { DayCode } from "~/lib/business-hours";
+import type { RouterOutputs } from "~/trpc/react";
 import {
   DAY_CODES,
   formatBusinessHours,
   parseBusinessHours,
 } from "~/lib/business-hours";
-import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { cn } from "~/lib/utils";
+import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { Button } from "~/components/ui/button";
@@ -214,11 +221,11 @@ export function BusinessHoursSettings({ business }: Props) {
                   return (
                     <div
                       key={field.id}
-                      className="rounded-lg border bg-card p-4 space-y-4"
+                      className="bg-card space-y-4 rounded-lg border p-4"
                     >
                       {/* Row header: reorder + remove */}
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium text-muted-foreground">
+                        <span className="text-muted-foreground text-sm font-medium">
                           Row {i + 1}
                         </span>
                         <div className="flex items-center gap-1">
@@ -248,7 +255,7 @@ export function BusinessHoursSettings({ business }: Props) {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive h-7 w-7"
                             onClick={() => remove(i)}
                             aria-label="Remove row"
                           >
@@ -263,7 +270,7 @@ export function BusinessHoursSettings({ business }: Props) {
                         name={`rows.${i}.days`}
                         render={({ field: daysField }) => (
                           <FormItem>
-                            <FormLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                            <FormLabel className="text-muted-foreground text-xs tracking-wide uppercase">
                               Days
                             </FormLabel>
                             <FormControl>
@@ -285,7 +292,7 @@ export function BusinessHoursSettings({ business }: Props) {
                                       }}
                                       className={cn(
                                         "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
-                                        "border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                        "focus-visible:ring-ring border focus-visible:ring-2 focus-visible:outline-none",
                                         selected
                                           ? "bg-primary text-primary-foreground border-primary"
                                           : "bg-background text-muted-foreground border-input hover:bg-accent hover:text-accent-foreground",
@@ -338,16 +345,14 @@ export function BusinessHoursSettings({ business }: Props) {
                             control={form.control}
                             name={`rows.${i}.open`}
                             render={({ field: openField }) => (
-                              <FormItem className="flex-1 min-w-[140px]">
+                              <FormItem className="min-w-[140px] flex-1">
                                 <FormLabel>Opens</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="time"
                                     value={openField.value ?? ""}
                                     onChange={(e) =>
-                                      openField.onChange(
-                                        e.target.value || null,
-                                      )
+                                      openField.onChange(e.target.value || null)
                                     }
                                     disabled={isClosed}
                                   />
@@ -360,7 +365,7 @@ export function BusinessHoursSettings({ business }: Props) {
                             control={form.control}
                             name={`rows.${i}.close`}
                             render={({ field: closeField }) => (
-                              <FormItem className="flex-1 min-w-[140px]">
+                              <FormItem className="min-w-[140px] flex-1">
                                 <FormLabel>Closes</FormLabel>
                                 <FormControl>
                                   <Input
@@ -383,7 +388,7 @@ export function BusinessHoursSettings({ business }: Props) {
 
                       {/* Row-level errors (days array duplicate, etc.) */}
                       {form.formState.errors.rows?.[i]?.days && (
-                        <p className="text-sm font-medium text-destructive">
+                        <p className="text-destructive text-sm font-medium">
                           {form.formState.errors.rows[i]?.days?.message}
                         </p>
                       )}
@@ -393,7 +398,7 @@ export function BusinessHoursSettings({ business }: Props) {
 
                 {/* Array-level root error (duplicate days across rows) */}
                 {form.formState.errors.rows?.root?.message && (
-                  <p className="text-sm font-medium text-destructive">
+                  <p className="text-destructive text-sm font-medium">
                     {form.formState.errors.rows.root.message}
                   </p>
                 )}

@@ -31,7 +31,8 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.hero-video",
     label: "Hero Background Video",
-    description: "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
+    description:
+      "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
     type: "video",
     page: "homepage",
     group: "pollen-spa.hero",
@@ -87,7 +88,8 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.intro-video",
     label: "Intro Accent Video",
-    description: "Optional video for the intro accent column; takes precedence over the accent image when set.",
+    description:
+      "Optional video for the intro accent column; takes precedence over the accent image when set.",
     type: "video",
     page: "homepage",
     group: "pollen-spa.intro",
@@ -144,7 +146,8 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.cta-embed",
     label: "Booking Embed",
-    description: "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
+    description:
+      "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
     type: "iframe",
     page: "homepage",
     group: "pollen-spa.cta",
@@ -153,7 +156,8 @@ const pollenSpaFields: TemplateField[] = [
   {
     key: "pollen-spa.cta-embed-reveal",
     label: "Reveal booking behind a button",
-    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
     type: "boolean",
     page: "homepage",
     group: "pollen-spa.cta",
@@ -228,7 +232,8 @@ const pollenBloomFields: TemplateField[] = [
   {
     key: "pollen-bloom.hero-video",
     label: "Hero Video Band",
-    description: "Optional background video; takes precedence over the hero image. Displayed as a full-width band before the gallery when set.",
+    description:
+      "Optional background video; takes precedence over the hero image. Displayed as a full-width band before the gallery when set.",
     type: "video",
     page: "homepage",
     group: "pollen-bloom.gallery",
@@ -281,7 +286,8 @@ const pollenBloomFields: TemplateField[] = [
   {
     key: "pollen-bloom.intro-video",
     label: "Intro Accent Video",
-    description: "Optional video shown in the intro section; takes precedence over the intro image when set.",
+    description:
+      "Optional video shown in the intro section; takes precedence over the intro image when set.",
     type: "video",
     page: "homepage",
     group: "pollen-bloom.intro",
@@ -327,7 +333,8 @@ const pollenBloomFields: TemplateField[] = [
   {
     key: "pollen-bloom.cta-embed",
     label: "Booking Embed",
-    description: "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
+    description:
+      "Optional iframe embed (e.g. booking widget) shown in the closing CTA section.",
     type: "iframe",
     page: "homepage",
     group: "pollen-bloom.cta",
@@ -336,7 +343,8 @@ const pollenBloomFields: TemplateField[] = [
   {
     key: "pollen-bloom.cta-embed-reveal",
     label: "Reveal booking behind a button",
-    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
     type: "boolean",
     page: "homepage",
     group: "pollen-bloom.cta",
@@ -395,7 +403,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.hero-video",
     label: "Hero Background Video",
-    description: "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
+    description:
+      "Optional background video; takes precedence over the hero image. Use .mp4 or .webm.",
     type: "video",
     page: "homepage",
     group: "pollen-list.hero",
@@ -440,7 +449,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.intro-image",
     label: "Intro Accent Image",
-    description: "Optional supporting image shown beside or below the intro text.",
+    description:
+      "Optional supporting image shown beside or below the intro text.",
     type: "image",
     page: "homepage",
     group: "pollen-list.intro",
@@ -449,7 +459,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.intro-video",
     label: "Intro Accent Video",
-    description: "Optional video for the intro section; takes precedence over the intro image when set.",
+    description:
+      "Optional video for the intro section; takes precedence over the intro image when set.",
     type: "video",
     page: "homepage",
     group: "pollen-list.intro",
@@ -495,7 +506,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.cta-embed",
     label: "Booking Embed",
-    description: "Optional iframe embed (e.g. booking widget) shown in the closing CTA band.",
+    description:
+      "Optional iframe embed (e.g. booking widget) shown in the closing CTA band.",
     type: "iframe",
     page: "homepage",
     group: "pollen-list.cta",
@@ -504,7 +516,8 @@ const pollenListFields: TemplateField[] = [
   {
     key: "pollen-list.cta-embed-reveal",
     label: "Reveal booking behind a button",
-    description: "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
+    description:
+      "When on, the booking widget is hidden until the visitor clicks a button, then expands open.",
     type: "boolean",
     page: "homepage",
     group: "pollen-list.cta",

@@ -26,16 +26,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
-import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import type { ServicePriceTier } from "~/lib/validators/services";
 import {
   parseTemplateIframeValue,
   parseTemplateListRows,
   parseTemplateRichtext,
 } from "~/lib/template-fields";
 import { parseServicePriceTiers } from "~/lib/validators/services";
-import type { ServicePriceTier } from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
+import { ServiceBookingDialog } from "~/components/service-booking-dialog";
+import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
@@ -99,7 +99,7 @@ function CollectionListHeader({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-ledger-list-row${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-ledger-list-row${visible ? "is-visible" : ""}`}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1.4fr",
@@ -364,7 +364,7 @@ function SignatureFeature({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-signature-feature-grid${visible ? " is-visible" : ""}`}
+      className={`vii-reveal vii-signature-feature-grid${visible ? "is-visible" : ""}`}
       style={{
         maxWidth: 1100,
         margin: "0 auto",
@@ -496,9 +496,7 @@ function SignatureFeature({
                       {tier.compareAtPriceLabel}
                     </span>
                   )}
-                  <span
-                    style={{ color: "var(--vii-navy)", fontWeight: 500 }}
-                  >
+                  <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
                     {tier.priceLabel}
                   </span>
                 </li>
@@ -607,9 +605,7 @@ function Chapter({
         : { "aria-label": "More treatments" })}
       style={{
         marginTop: isFirst ? 0 : "clamp(48px, 7vw, 72px)",
-        paddingTop: isFirst
-          ? 0
-          : "clamp(48px, 7vw, 72px)",
+        paddingTop: isFirst ? 0 : "clamp(48px, 7vw, 72px)",
         borderTop: isFirst ? "none" : "1px solid var(--vii-tan)",
         scrollMarginTop:
           "calc(var(--vii-collection-header-h, var(--vii-header-offset)) + var(--vii-collection-nav-h, 45px) + 8px)",
@@ -619,7 +615,7 @@ function Chapter({
       {(label || hasDescription || hasMedia) && (
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
           style={{
             marginBottom: "clamp(20px, 3vw, 32px)",
             paddingBottom: "clamp(16px, 2vw, 28px)",
@@ -724,7 +720,7 @@ function Chapter({
       {items.length > 0 && (
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+          className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
         >
           {items.map((item, i) => (
             <TreatmentListRow
@@ -790,8 +786,7 @@ function SlateRoom({
         : { "aria-label": "Signature Collection" })}
       style={{
         background: "var(--vii-slate)",
-        padding:
-          "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
+        padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
         scrollMarginTop:
           "calc(var(--vii-collection-header-h, var(--vii-header-offset)) + var(--vii-collection-nav-h, 45px) + 8px)",
       }}
@@ -800,7 +795,7 @@ function SlateRoom({
         {/* Chapter header */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
           style={{
             marginBottom: "clamp(20px, 3vw, 32px)",
             paddingBottom: "clamp(16px, 2vw, 28px)",
@@ -819,7 +814,12 @@ function SlateRoom({
               margin: "0 0 14px",
             }}
           >
-            <span aria-hidden="true" style={{ color: "var(--vii-copper-light)" }}>✦</span>{" "}
+            <span
+              aria-hidden="true"
+              style={{ color: "var(--vii-copper-light)" }}
+            >
+              ✦
+            </span>{" "}
             Signature Collection
           </p>
 
@@ -857,7 +857,8 @@ function SlateRoom({
                     fontFamily: "var(--font-sans)",
                     fontSize: "clamp(13px, 1.2vw, 15px)",
                     lineHeight: 1.75,
-                    color: "color-mix(in srgb, var(--vii-paper) 80%, var(--vii-slate))",
+                    color:
+                      "color-mix(in srgb, var(--vii-paper) 80%, var(--vii-slate))",
                     margin: "4px 0 0",
                     maxWidth: "60ch",
                   }}
@@ -920,7 +921,7 @@ function SlateRoom({
         {items.length > 0 && (
           <div
             ref={rowsRef}
-            className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+            className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
           >
             {items.map((item, i) => (
               <TreatmentListRow
@@ -1105,8 +1106,7 @@ function CollectionList({
         <div
           style={{
             background: "var(--vii-paper)",
-            padding:
-              "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
+            padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
           }}
         >
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -1140,7 +1140,7 @@ function CollectionList({
             >
               <div
                 ref={fallbackRef}
-                className={`vii-reveal-group${fallbackVisible ? " is-visible" : ""}`}
+                className={`vii-reveal-group${fallbackVisible ? "is-visible" : ""}`}
               >
                 {flatRowItems.map((item, i) => (
                   <TreatmentListRow
@@ -1235,7 +1235,8 @@ function CollectionList({
                   style={{
                     background: "var(--vii-paper)",
                     display: "flow-root",
-                    padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px) 0",
+                    padding:
+                      "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px) 0",
                   }}
                 >
                   <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -1351,7 +1352,9 @@ export function ViiCollectionServicePage({
     "vii-collection.cta-show-email",
   ]);
 
-  const introBodyJson = parseTemplateRichtext(cf?.["vii-collection.intro-body"]);
+  const introBodyJson = parseTemplateRichtext(
+    cf?.["vii-collection.intro-body"],
+  );
 
   const ctaEmbed = parseTemplateIframeValue(f["vii-collection.cta-embed"]);
   const ctaEmbedReveal = f["vii-collection.cta-embed-reveal"] === "true";

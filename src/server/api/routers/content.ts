@@ -248,7 +248,9 @@ export const contentRouter = createTRPCRouter({
         },
       });
 
-      return page ? { ...page, createdAt: page.publishedAt ?? page.createdAt } : page;
+      return page
+        ? { ...page, createdAt: page.publishedAt ?? page.createdAt }
+        : page;
     }),
 
   getBlogPages: publicProcedure
@@ -270,7 +272,10 @@ export const contentRouter = createTRPCRouter({
         ],
       });
 
-      return pages.map((p) => ({ ...p, createdAt: p.publishedAt ?? p.createdAt }));
+      return pages.map((p) => ({
+        ...p,
+        createdAt: p.publishedAt ?? p.createdAt,
+      }));
     }),
 
   // Create page

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-
 import { AnimatePresence, motion } from "motion/react";
 
+import { cn } from "~/lib/utils";
 import { buttonVariants } from "~/components/ui/button";
 import { EmbedFrame } from "~/components/embed-frame";
-import { cn } from "~/lib/utils";
 
 type EmbedRevealProps = {
   src: string;
@@ -52,7 +51,14 @@ export function EmbedReveal({
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <EmbedFrame src={src} height={height} title={title} aspectRatio={aspectRatio} maxWidth={maxWidth} className="w-full" />
+            <EmbedFrame
+              src={src}
+              height={height}
+              title={title}
+              aspectRatio={aspectRatio}
+              maxWidth={maxWidth}
+              className="w-full"
+            />
           </motion.div>
         ) : (
           <button

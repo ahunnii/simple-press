@@ -342,7 +342,7 @@ export function ViiOrderConfirmation({
       >
         <div
           ref={ref}
-          className={`vii-reveal-group${visible ? " is-visible" : ""}`}
+          className={`vii-reveal-group${visible ? "is-visible" : ""}`}
           style={{
             maxWidth: 720,
             margin: "0 auto",
@@ -370,7 +370,11 @@ export function ViiOrderConfirmation({
               className="vii-reveal-item"
               style={{ "--i": 1 } as React.CSSProperties}
             >
-              <ViiOverline tone="dark" align="center" style={{ marginBottom: 24 }}>
+              <ViiOverline
+                tone="dark"
+                align="center"
+                style={{ marginBottom: 24 }}
+              >
                 {overline}
               </ViiOverline>
             </div>

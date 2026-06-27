@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
 import {
   getListFieldValue,
@@ -9,22 +10,20 @@ import {
   parseTemplateIframeValue,
 } from "~/lib/template-fields";
 import {
-  parseServicePriceTiers,
   parseServiceAddOns,
-  type ServicePriceTier,
-  type ServiceAddOn,
+  parseServicePriceTiers,
 } from "~/lib/validators/services";
-import { buttonVariants } from "~/components/ui/button";
 import { db } from "~/server/db";
+import { buttonVariants } from "~/components/ui/button";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { ServiceHeroVideo } from "../_shared/service-hero-video";
-import { ServiceSectionMedia } from "../_shared/service-section-media";
 
 import { resolveFields } from ".";
+import { ServiceHeroVideo } from "../_shared/service-hero-video";
+import { ServiceSectionMedia } from "../_shared/service-section-media";
 
 type Service = RouterOutputs["services"]["getBySlug"];
 type ServiceItem = Service["items"][number];
@@ -270,10 +269,7 @@ export async function ServiceTemplateTwo({
             )}
             {ctaLink && ctaText && (
               <div className="mb-8">
-                <Link
-                  href={ctaLink}
-                  className={buttonVariants({ size: "lg" })}
-                >
+                <Link href={ctaLink} className={buttonVariants({ size: "lg" })}>
                   {ctaText}
                 </Link>
               </div>
@@ -295,7 +291,9 @@ export async function ServiceTemplateTwo({
                     title={ctaEmbed.title || "Book"}
                     aspectRatio={ctaEmbed.aspectRatio}
                     height={ctaEmbed.height}
-                    triggerLabel={ctaEmbed.triggerLabel ?? ctaEmbed.title ?? "Book"}
+                    triggerLabel={
+                      ctaEmbed.triggerLabel ?? ctaEmbed.title ?? "Book"
+                    }
                   />
                 ) : (
                   <EmbedFrame
@@ -394,7 +392,7 @@ function ServiceItemCard({
         {/* Add-ons */}
         {addOns.length > 0 && (
           <div className="mt-2 text-xs">
-            <p className="text-muted-foreground mb-1 font-semibold uppercase tracking-wide">
+            <p className="text-muted-foreground mb-1 font-semibold tracking-wide uppercase">
               Add-ons
             </p>
             <ul className="space-y-1">

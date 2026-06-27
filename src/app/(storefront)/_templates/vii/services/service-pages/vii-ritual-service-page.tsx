@@ -25,8 +25,14 @@ import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { parseTemplateIframeValue, parseTemplateRichtext } from "~/lib/template-fields";
-import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
+import {
+  parseTemplateIframeValue,
+  parseTemplateRichtext,
+} from "~/lib/template-fields";
+import {
+  parseServiceAddOns,
+  parseServicePriceTiers,
+} from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -179,7 +185,11 @@ function RitualHero({
       >
         {/* Overline — cascade beat 0 */}
         {overline && (
-          <ViiOverline tone="dark" align="center" style={{ ...revealStyle(0), marginBottom: 20 }}>
+          <ViiOverline
+            tone="dark"
+            align="center"
+            style={{ ...revealStyle(0), marginBottom: 20 }}
+          >
             {overline}
           </ViiOverline>
         )}
@@ -279,7 +289,7 @@ function RitualPhilosophy({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}
       >
         {overline && (
@@ -340,7 +350,7 @@ function RitualPhilosophy({
       {(Boolean(philosophyImageSrc) || Boolean(philosophyVideoSrc)) && (
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
         >
           <ServiceSectionMedia
             imageSrc={philosophyImageSrc}
@@ -363,10 +373,7 @@ function RitualPhilosophy({
 function StepsGroup({ children }: { children: React.ReactNode }) {
   const { ref, visible } = useViiReveal(0.05);
   return (
-    <div
-      ref={ref}
-      className={`vii-reveal-group${visible ? " is-visible" : ""}`}
-    >
+    <div ref={ref} className={`vii-reveal-group${visible ? "is-visible" : ""}`}>
       {children}
     </div>
   );
@@ -389,7 +396,7 @@ function RitualStep({
 
   return (
     <div
-      className={`vii-reveal-item vii-ritual-step${isReversed ? " is-reversed" : ""}`}
+      className={`vii-reveal-item vii-ritual-step${isReversed ? "is-reversed" : ""}`}
       style={
         {
           "--i": Math.min(index, 7),
@@ -412,10 +419,7 @@ function RitualStep({
         {item.image ? (
           /* group wrapper lets the scale transition be clipped by the
              parent's overflow:hidden without an extra positioning layer */
-          <div
-            className="group"
-            style={{ position: "absolute", inset: 0 }}
-          >
+          <div className="group" style={{ position: "absolute", inset: 0 }}>
             <Image
               src={item.image}
               alt={item.name}
@@ -473,7 +477,9 @@ function RitualStep({
         }}
       >
         {/* Duration + price + compare-at chips */}
-        {(item.durationLabel ?? item.priceLabel ?? item.compareAtPriceLabel) && (
+        {(item.durationLabel ??
+          item.priceLabel ??
+          item.compareAtPriceLabel) && (
           <div
             style={{
               display: "flex",
@@ -606,7 +612,9 @@ function RitualStep({
                     —
                   </span>
                   {tier.compareAtPriceLabel && (
-                    <span style={{ textDecoration: "line-through", opacity: 0.55 }}>
+                    <span
+                      style={{ textDecoration: "line-through", opacity: 0.55 }}
+                    >
                       {tier.compareAtPriceLabel}
                     </span>
                   )}
@@ -658,11 +666,16 @@ function RitualStep({
                     <>
                       <span
                         aria-hidden="true"
-                        style={{ margin: "0 4px", color: "var(--vii-copper-light)" }}
+                        style={{
+                          margin: "0 4px",
+                          color: "var(--vii-copper-light)",
+                        }}
                       >
                         ·
                       </span>
-                      <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                      <span
+                        style={{ color: "var(--vii-navy)", fontWeight: 500 }}
+                      >
                         {addon.priceLabel}
                       </span>
                     </>
@@ -776,7 +789,9 @@ export function ViiRitualServicePage({
   ]);
 
   // Parse richtext philosophy body directly from service.customFields
-  const philosophyBodyJson = parseTemplateRichtext(cf?.["vii-ritual.philosophy-body"]);
+  const philosophyBodyJson = parseTemplateRichtext(
+    cf?.["vii-ritual.philosophy-body"],
+  );
 
   // Parse CTA embed
   const ctaEmbed = parseTemplateIframeValue(f["vii-ritual.cta-embed"]);
@@ -812,14 +827,14 @@ export function ViiRitualServicePage({
         <section aria-label="Treatment rituals">
           <RitualStepStyles />
           <StepsGroup>
-          {publishedItems.map((item, i) => (
-            <RitualStep
-              key={item.id}
-              item={item}
-              index={i}
-              embedsEnabled={embedsEnabled}
-            />
-          ))}
+            {publishedItems.map((item, i) => (
+              <RitualStep
+                key={item.id}
+                item={item}
+                index={i}
+                embedsEnabled={embedsEnabled}
+              />
+            ))}
           </StepsGroup>
         </section>
       )}

@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
 import { Loader2 } from "lucide-react";
 
-import { Skeleton } from "~/components/ui/skeleton";
 import {
+  aspectRatioToCss,
   DEFAULT_EMBED_HEIGHT,
   EMBED_SANDBOX,
-  aspectRatioToCss,
   embedWidthClass,
   isVideoEmbed,
   sanitizeEmbedSrc,
 } from "~/lib/embed";
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { cn } from "~/lib/utils";
+import { Skeleton } from "~/components/ui/skeleton";
 
 /**
  * Maximum dwell time (seconds) we'll record per engagement session.
@@ -110,7 +109,7 @@ export function EmbedFrame({
   const loadingOverlay = !loaded && (
     <>
       <Skeleton className="absolute inset-0 h-full w-full" />
-      <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+      <div className="text-muted-foreground absolute inset-0 flex items-center justify-center gap-2 text-sm">
         <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
         <span>Loading…</span>
       </div>

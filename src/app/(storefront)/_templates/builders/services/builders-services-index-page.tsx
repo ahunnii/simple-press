@@ -27,8 +27,8 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
   const ctaButtonHref = f["builders.services.cta-button-href"] ?? "/contact";
 
   return (
-    <main
-      className="mx-auto w-full max-w-[1280px] px-4 pb-24 pt-32 md:px-12 md:pb-32 md:pt-48"
+    <div
+      className="mx-auto w-full max-w-[1280px] px-4 pt-32 pb-24 md:px-12 md:pt-48 md:pb-32"
       style={{ background: "var(--builders-bg, #F8F9FA)" }}
     >
       {/* ── 1. Hero ─────────────────────────────────────────────────────────── */}
@@ -38,10 +38,9 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
       >
         <div className="flex flex-col justify-end md:col-span-8">
           <h1
-            className="mb-6 text-4xl uppercase leading-none tracking-tight md:text-6xl lg:text-7xl"
+            className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl lg:text-7xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 300,
               color: "var(--builders-ink, #131313)",
             }}
@@ -53,8 +52,7 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
             <p
               className="max-w-2xl border-l-2 pl-6 text-lg leading-relaxed md:text-xl"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
                 borderColor: "var(--builders-accent, #FFC5B6)",
                 color: "var(--builders-ink, #131313)",
                 opacity: 0.75,
@@ -67,20 +65,16 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
       </section>
 
       {/* ── 2. Service Grid ─────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("services", "list")}
-        className="mb-32"
-      >
+      <section {...sectionGroupAttr("services", "list")} className="mb-32">
         {services.length === 0 ? (
           <div
             className="flex items-center justify-center border py-24 text-center"
             style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
           >
             <p
-              className="text-base uppercase tracking-widest"
+              className="text-base tracking-widest uppercase"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
                 color: "var(--builders-ink, #131313)",
                 opacity: 0.5,
               }}
@@ -111,6 +105,8 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
                       src={service.image}
                       alt={service.name}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 ) : (
@@ -126,7 +122,7 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
 
                 {/* Service name */}
                 <h2
-                  className="mb-4 text-2xl uppercase tracking-wide"
+                  className="mb-4 text-2xl tracking-wide uppercase"
                   style={{
                     fontFamily:
                       "var(--font-builders-display, 'Jost', sans-serif)",
@@ -164,10 +160,9 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
         style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
       >
         <h2
-          className="mb-8 text-3xl uppercase tracking-tight md:text-5xl"
+          className="mb-8 text-3xl tracking-tight uppercase md:text-5xl"
           style={{
-            fontFamily:
-              "var(--font-builders-display, 'Jost', sans-serif)",
+            fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
             fontWeight: 600,
             color: "var(--builders-ink, #131313)",
           }}
@@ -177,18 +172,16 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
 
         <a
           href={ctaButtonHref}
-          className="border-2 px-8 py-4 text-xs uppercase tracking-widest transition-colors duration-200 hover:bg-transparent"
+          className="border-2 bg-[var(--builders-accent)] px-8 py-4 text-xs tracking-widest uppercase transition-colors duration-200 hover:bg-[var(--builders-accent-hover)]"
           style={{
-            background: "var(--builders-accent, #FFC5B6)",
             borderColor: "var(--builders-accent, #FFC5B6)",
             color: "var(--builders-accent-ink, #31130A)",
-            fontFamily:
-              "var(--font-builders-body, 'Agdasima', sans-serif)",
+            fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
           }}
         >
           {ctaButtonLabel}
         </a>
       </section>
-    </main>
+    </div>
   );
 }

@@ -26,8 +26,8 @@ import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { RouterOutputs } from "~/trpc/react";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
+import type { RouterOutputs } from "~/trpc/react";
 import { isCategoryAwareServiceTemplate } from "~/lib/service-templates";
 import { serviceItemFormSchema } from "~/lib/validators/services";
 import { api } from "~/trpc/react";
@@ -41,13 +41,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -75,6 +68,13 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 
@@ -297,9 +297,9 @@ function ServiceItemFormDialog({
   const onSubmit = (data: z.input<typeof serviceItemFormSchema>) => {
     // Normalize the "no section" sentinel to null so the DB column is cleared.
     const category = categoryAware
-      ? (data.category === SECTION_NONE || !data.category
-          ? null
-          : data.category)
+      ? data.category === SECTION_NONE || !data.category
+        ? null
+        : data.category
       : undefined;
 
     if (item?.id) {
@@ -506,7 +506,7 @@ function ServiceItemFormDialog({
             {/* Price tiers */}
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium leading-none">
+                <p className="text-sm leading-none font-medium">
                   Price options
                 </p>
                 <p className="text-muted-foreground mt-1 text-xs">
@@ -606,7 +606,7 @@ function ServiceItemFormDialog({
             {/* Add-ons */}
             <div className="space-y-3">
               <div>
-                <p className="text-sm font-medium leading-none">Add-ons</p>
+                <p className="text-sm leading-none font-medium">Add-ons</p>
                 <p className="text-muted-foreground mt-1 text-xs">
                   Optional extras shown under this service.
                 </p>
@@ -959,7 +959,9 @@ export function ServiceItemsEditor({
               <div className="space-y-2">
                 {items.map((item) => {
                   const sectionLabel = categoryAware
-                    ? asStr(sections.find((s) => s._id === item.category)?.label)
+                    ? asStr(
+                        sections.find((s) => s._id === item.category)?.label,
+                      )
                     : "";
                   return (
                     <SortableItemRow

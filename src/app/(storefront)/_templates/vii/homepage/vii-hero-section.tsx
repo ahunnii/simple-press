@@ -257,7 +257,8 @@ export function ViiHeroSection({
                 textTransform: "uppercase",
                 textDecoration: "none",
                 borderRadius: "var(--radius)",
-                transition: "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
+                transition:
+                  "background 0.3s var(--vii-ease), opacity 0.3s var(--vii-ease)",
               }}
               className="vii-cta-btn"
             >

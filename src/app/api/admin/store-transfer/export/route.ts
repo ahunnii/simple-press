@@ -20,7 +20,6 @@ import type {
   StoreTransferManifest,
   StoreTransferMediaEntry,
 } from "~/lib/store-transfer/types";
-import pkg from "../../../../../../package.json";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import {
   FEATURE_REGISTRY,
@@ -34,6 +33,8 @@ import { collectStoreContent } from "~/lib/store-transfer/export";
 import { STORE_TRANSFER_FORMAT_VERSION } from "~/lib/store-transfer/types";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
+
+import pkg from "../../../../../../package.json";
 
 // Package version — resolved from package.json via resolveJsonModule
 const APP_VERSION: string = pkg.version;
