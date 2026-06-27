@@ -11,6 +11,34 @@ type BuildersProjectsSectionProps = {
   sectionAttrs?: Record<string, string>;
 };
 
+/** Wordless accent-circle arrow button — hidden by default, revealed on group hover */
+function ArrowButton({ position }: { position: "bottom-right" | "top-right" }) {
+  const posClass =
+    position === "bottom-right" ? "bottom-6 right-6" : "top-4 right-4";
+  return (
+    <div
+      className={`absolute ${posClass} z-10 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100`}
+      style={{ background: "var(--builders-accent, #FFC5B6)" }}
+      aria-hidden="true"
+    >
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="var(--builders-ink, #131313)"
+        strokeWidth="2"
+        aria-hidden="true"
+      >
+        <path
+          d="M3 8h10M9 4l4 4-4 4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
 export function BuildersProjectsSection({
   heading,
   viewAllHref,
@@ -70,92 +98,132 @@ export function BuildersProjectsSection({
         {/* Bento grid — only shown when there are projects */}
         {projects.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:h-[800px] md:grid-cols-4 md:grid-rows-2">
+
             {/* ── Large feature card (col-span-2 row-span-2) ── */}
-            {featured && (
-              <div className="group relative cursor-pointer overflow-hidden border border-gray-200 bg-gray-50 grayscale transition-all duration-700 hover:grayscale-0 md:col-span-2 md:row-span-2">
-                {getStr(featured, "image") ? (
-                  <img
-                    src={getStr(featured, "image")}
-                    alt={getStr(featured, "title")}
-                    className="absolute inset-0 h-full w-full object-cover mix-blend-luminosity transition-all duration-700 group-hover:mix-blend-normal"
-                  />
+            {featured &&
+              (() => {
+                const featuredHref = getStr(featured, "href");
+                const cardClasses = [
+                  "group relative overflow-hidden border border-gray-200 bg-gray-50 md:col-span-2 md:row-span-2",
+                  featuredHref ? "cursor-pointer" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+                const inner = (
+                  <>
+                    {getStr(featured, "image") ? (
+                      <img
+                        src={getStr(featured, "image")}
+                        alt={getStr(featured, "title")}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gray-200" />
+                    )}
+                    {/* Gradient overlay */}
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"
+                      aria-hidden="true"
+                    />
+                    {/* Card content */}
+                    <div className="absolute bottom-0 left-0 w-full p-8">
+                      {getStr(featured, "category") && (
+                        <span
+                          className="mb-4 inline-block border bg-black/50 px-2 py-1 text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm"
+                          style={{
+                            fontFamily:
+                              "var(--font-builders-body, 'Agdasima', sans-serif)",
+                            borderColor: "var(--builders-accent, #FFC5B6)",
+                            color: "var(--builders-accent, #FFC5B6)",
+                          }}
+                        >
+                          {getStr(featured, "category")}
+                        </span>
+                      )}
+                      <h3
+                        className="mb-2 text-2xl font-medium uppercase text-white"
+                        style={{
+                          fontFamily:
+                            "var(--font-builders-display, 'Jost', sans-serif)",
+                        }}
+                      >
+                        {getStr(featured, "title") || "Featured Project"}
+                      </h3>
+                      {getStr(featured, "description") && (
+                        <p className="line-clamp-2 max-w-md text-sm leading-relaxed text-gray-300">
+                          {getStr(featured, "description")}
+                        </p>
+                      )}
+                    </div>
+                    {/* Wordless hover button — bottom-right, above text content */}
+                    {featuredHref && <ArrowButton position="bottom-right" />}
+                  </>
+                );
+                return featuredHref ? (
+                  <Link href={featuredHref} className={cardClasses}>
+                    {inner}
+                  </Link>
                 ) : (
-                  <div className="absolute inset-0 bg-gray-200" />
-                )}
-                {/* Gradient overlay */}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"
-                  aria-hidden="true"
-                />
-                {/* Card content */}
-                <div className="absolute bottom-0 left-0 w-full p-8">
-                  {getStr(featured, "category") && (
-                    <span
-                      className="mb-4 inline-block border bg-black/50 px-2 py-1 text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm"
-                      style={{
-                        fontFamily:
-                          "var(--font-builders-body, 'Agdasima', sans-serif)",
-                        borderColor: "var(--builders-accent, #FFC5B6)",
-                        color: "var(--builders-accent, #FFC5B6)",
-                      }}
-                    >
-                      {getStr(featured, "category")}
-                    </span>
-                  )}
-                  <h3
-                    className="mb-2 text-2xl font-medium uppercase text-white"
-                    style={{
-                      fontFamily:
-                        "var(--font-builders-display, 'Jost', sans-serif)",
-                    }}
-                  >
-                    {getStr(featured, "title") || "Featured Project"}
-                  </h3>
-                  {getStr(featured, "description") && (
-                    <p className="line-clamp-2 max-w-md text-sm leading-relaxed text-gray-300">
-                      {getStr(featured, "description")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
+                  <div className={cardClasses}>{inner}</div>
+                );
+              })()}
 
             {/* ── Secondary cards ── */}
-            {rest.slice(0, 2).map((project, i) => (
-              <div
-                key={project._id ?? i}
-                className="group relative cursor-pointer overflow-hidden border border-gray-200 bg-gray-50 grayscale transition-all duration-700 hover:grayscale-0 md:col-span-1 md:row-span-1"
-              >
-                {getStr(project, "image") ? (
-                  <img
-                    src={getStr(project, "image")}
-                    alt={getStr(project, "title")}
-                    className="absolute inset-0 h-full w-full object-cover mix-blend-luminosity transition-all duration-700 group-hover:mix-blend-normal"
+            {rest.slice(0, 2).map((project, i) => {
+              const projectHref = getStr(project, "href");
+              const cardClasses = [
+                "group relative overflow-hidden border border-gray-200 bg-gray-50 md:col-span-1 md:row-span-1",
+                projectHref ? "cursor-pointer" : "",
+              ]
+                .filter(Boolean)
+                .join(" ");
+              const inner = (
+                <>
+                  {getStr(project, "image") ? (
+                    <img
+                      src={getStr(project, "image")}
+                      alt={getStr(project, "title")}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gray-200" />
+                  )}
+                  <div
+                    className="absolute inset-0 bg-black/40 transition-all duration-700 group-hover:bg-black/10"
+                    aria-hidden="true"
                   />
-                ) : (
-                  <div className="absolute inset-0 bg-gray-200" />
-                )}
-                <div
-                  className="absolute inset-0 bg-black/40 transition-all duration-700 group-hover:bg-black/10"
-                  aria-hidden="true"
-                />
-                <div className="absolute bottom-0 left-0 p-6">
-                  <h3
-                    className="text-xl font-semibold uppercase text-white drop-shadow-md"
-                    style={{
-                      fontFamily:
-                        "var(--font-builders-display, 'Jost', sans-serif)",
-                    }}
-                  >
-                    {getStr(project, "title") || `Project ${i + 2}`}
-                  </h3>
+                  <div className="absolute bottom-0 left-0 p-6">
+                    <h3
+                      className="text-xl font-semibold uppercase text-white drop-shadow-md"
+                      style={{
+                        fontFamily:
+                          "var(--font-builders-display, 'Jost', sans-serif)",
+                      }}
+                    >
+                      {getStr(project, "title") || `Project ${i + 2}`}
+                    </h3>
+                  </div>
+                  {/* Wordless hover button — top-right */}
+                  {projectHref && <ArrowButton position="top-right" />}
+                </>
+              );
+              return projectHref ? (
+                <Link key={project._id ?? i} href={projectHref} className={cardClasses}>
+                  {inner}
+                </Link>
+              ) : (
+                <div key={project._id ?? i} className={cardClasses}>
+                  {inner}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-            {/* ── Wide text card (last slot, col-span-2) ── */}
+            {/* ── Wide text card (last slot, col-span-2) — always a link ── */}
             {rest.length >= 3 ? (
-              <div className="group relative cursor-pointer overflow-hidden border border-gray-200 bg-white p-8 grayscale transition-all duration-700 hover:grayscale-0 md:col-span-2 md:row-span-1 flex flex-col justify-center items-start">
+              <Link
+                href={getStr(rest[2]!, "href") || viewAllHref}
+                className="group relative flex cursor-pointer flex-col items-start justify-center overflow-hidden border border-gray-200 bg-white p-8 transition-all duration-700 md:col-span-2 md:row-span-1"
+              >
                 {/* Subtle texture bg */}
                 {getStr(rest[2]!, "image") && (
                   <div
@@ -193,7 +261,9 @@ export function BuildersProjectsSection({
                     {getStr(rest[2]!, "description")}
                   </p>
                 )}
-              </div>
+                {/* Wordless hover button — always shown since this card always links */}
+                <ArrowButton position="bottom-right" />
+              </Link>
             ) : (
               /* Fill the fourth grid cell when fewer than 4 projects */
               featured && (

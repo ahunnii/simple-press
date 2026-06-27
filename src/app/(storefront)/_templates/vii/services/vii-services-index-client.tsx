@@ -285,6 +285,105 @@ function ServicesHero({
   );
 }
 
+// ─── ServicesIntro ────────────────────────────────────────────────────────────
+
+function ServicesIntro({
+  overline,
+  heading,
+  headingAccent,
+  body,
+}: {
+  overline: string;
+  heading: string;
+  headingAccent: string;
+  body: string;
+}) {
+  const { ref: headRef, visible: headVisible } = useViiReveal(0.1);
+  const { ref: bodyRef, visible: bodyVisible } = useViiReveal(0.1);
+
+  if (
+    !overline.trim() &&
+    !heading.trim() &&
+    !headingAccent.trim() &&
+    !body.trim()
+  ) {
+    return null;
+  }
+
+  const hasHeading = !!(heading.trim() || headingAccent.trim());
+
+  return (
+    <section
+      aria-label="About our services"
+      style={{
+        background: "var(--vii-cream)",
+        padding:
+          "clamp(64px, 9vh, 104px) clamp(24px, 6vw, 96px) clamp(8px, 2vh, 24px)",
+      }}
+    >
+      <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
+        <div
+          ref={headRef}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+        >
+          {overline && (
+            <ViiOverline
+              align="center"
+              tone="light"
+              style={{ marginBottom: 14 }}
+            >
+              {overline}
+            </ViiOverline>
+          )}
+
+          {hasHeading && (
+            <h2
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontWeight: 400,
+                fontSize: "clamp(34px, 5vw, 64px)",
+                lineHeight: 1.05,
+                color: "var(--vii-navy)",
+                margin: 0,
+              }}
+            >
+              {heading}
+              {heading && headingAccent ? " " : ""}
+              {headingAccent && (
+                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+                  {headingAccent}
+                </em>
+              )}
+            </h2>
+          )}
+        </div>
+
+        {body && (
+          <div style={{ marginTop: 28 }}>
+            <div
+              ref={bodyRef}
+              className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+            >
+              <p
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "clamp(15px, 1.4vw, 17px)",
+                  lineHeight: 1.8,
+                  color: "var(--vii-ink-soft)",
+                  margin: "0 auto",
+                  maxWidth: "62ch",
+                }}
+              >
+                {body}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ─── ServiceCard ──────────────────────────────────────────────────────────────
 
 function ServiceCard({
@@ -623,6 +722,10 @@ export function ViiServicesIndexClient({
     "vii.services.hero-heading",
     "vii.services.hero-heading-accent",
     "vii.services.hero-intro",
+    "vii.services.intro-overline",
+    "vii.services.intro-heading",
+    "vii.services.intro-heading-accent",
+    "vii.services.intro-body",
     "vii.services.cta-image",
     "vii.services.cta-heading",
     "vii.services.cta-subheading",
@@ -651,17 +754,25 @@ export function ViiServicesIndexClient({
         intro={f["vii.services.hero-intro"] ?? ""}
       />
 
-      {/* 2. Service-group grid — or empty state */}
+      {/* 2. Intro — centered overline / split heading / body (hidden when all fields blank) */}
+      <ServicesIntro
+        overline={f["vii.services.intro-overline"] ?? ""}
+        heading={f["vii.services.intro-heading"] ?? ""}
+        headingAccent={f["vii.services.intro-heading-accent"] ?? ""}
+        body={f["vii.services.intro-body"] ?? ""}
+      />
+
+      {/* 3. Service-group grid — or empty state */}
       {services.length > 0 ? (
         <ServiceGrid services={services} />
       ) : (
         <EmptyServicesState />
       )}
 
-      {/* 3. Gallery strip — only when the selected gallery has images */}
+      {/* 4. Gallery strip — only when the selected gallery has images */}
       <GalleryStrip images={galleryImages} />
 
-      {/* 4. Closing CTA */}
+      {/* 5. Closing CTA */}
       <ViiContactCtaSection
         contactImage={f["vii.services.cta-image"] ?? undefined}
         heading={f["vii.services.cta-heading"] ?? ""}

@@ -24,14 +24,14 @@ export function BuildersStorySection({
         {/* Image column */}
         <div className="group md:col-span-5">
           <div
-            className="relative h-[420px] overflow-hidden border border-gray-200 bg-gray-50 grayscale transition-all duration-700 hover:grayscale-0 md:h-[500px]"
+            className="relative h-[420px] overflow-hidden border border-gray-200 bg-gray-50 md:h-[500px]"
             aria-hidden={!image ? "true" : undefined}
           >
             {image ? (
               <img
                 src={image}
                 alt=""
-                className="h-full w-full object-cover mix-blend-luminosity transition-all duration-700 group-hover:mix-blend-normal"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
               /* Placeholder when no image is set */

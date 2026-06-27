@@ -1,5 +1,11 @@
+import { TwitterLogoIcon } from "@radix-ui/react-icons";
+
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { FacebookIcon } from "~/components/icons/facebook-icon";
+import { InstagramIcon } from "~/components/icons/instagram-icon";
+import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
@@ -16,6 +22,7 @@ export function BuildersContactPage({
     "builders.contact.header",
     "builders.contact.subheader",
     "builders.contact.shop-label",
+    "builders.contact.socials-label",
   ]);
 
   const address = business.businessAddress;
@@ -32,6 +39,17 @@ export function BuildersContactPage({
     f["builders.contact.subheader"] ??
     "Whether you have a specific restoration project in mind, want to learn more about our cooperative model, or just want to say hello, we're here. We believe in direct, honest communication—no corporate speak, just real people doing hard work.";
   const shopLabel = f["builders.contact.shop-label"] ?? "The Shop";
+  const socialsLabel = f["builders.contact.socials-label"] ?? "";
+
+  const socialLinks = business.siteContent?.socialLinks as
+    | {
+        instagram?: string;
+        facebook?: string;
+        twitter?: string;
+        tiktok?: string;
+        youtube?: string;
+      }
+    | undefined;
 
   return (
     <div className="flex flex-col gap-24 pb-24">
@@ -194,6 +212,76 @@ export function BuildersContactPage({
                     </div>
                   ))}
                 </dl>
+              </div>
+            )}
+
+            {/* Follow us on socials */}
+            {(socialLinks?.instagram ??
+              socialLinks?.facebook ??
+              socialLinks?.twitter ??
+              socialLinks?.tiktok ??
+              socialLinks?.youtube) && (
+              <div
+                className="flex flex-col gap-4 border-l pl-8"
+                style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
+              >
+                <h2
+                  className="text-xl font-semibold"
+                  style={{
+                    fontFamily:
+                      "var(--font-builders-display, 'Jost', sans-serif)",
+                    color: "var(--builders-ink, #131313)",
+                  }}
+                >
+                  {socialsLabel || "Follow Along"}
+                </h2>
+                <div className="flex gap-4">
+                  {socialLinks?.instagram && (
+                    <a
+                      href={socialLinks.instagram}
+                      className="-m-2 flex items-center justify-center p-2 text-gray-500 transition-colors hover:text-gray-900"
+                      aria-label="Instagram"
+                    >
+                      <InstagramIcon className="h-5 w-5" />
+                    </a>
+                  )}
+                  {socialLinks?.facebook && (
+                    <a
+                      href={socialLinks.facebook}
+                      className="-m-2 flex items-center justify-center p-2 text-gray-500 transition-colors hover:text-gray-900"
+                      aria-label="Facebook"
+                    >
+                      <FacebookIcon className="h-5 w-5" />
+                    </a>
+                  )}
+                  {socialLinks?.twitter && (
+                    <a
+                      href={socialLinks.twitter}
+                      className="-m-2 flex items-center justify-center p-2 text-gray-500 transition-colors hover:text-gray-900"
+                      aria-label="X / Twitter"
+                    >
+                      <TwitterLogoIcon className="h-5 w-5" />
+                    </a>
+                  )}
+                  {socialLinks?.tiktok && (
+                    <a
+                      href={socialLinks.tiktok}
+                      className="-m-2 flex items-center justify-center p-2 text-gray-500 transition-colors hover:text-gray-900"
+                      aria-label="TikTok"
+                    >
+                      <TikTokIcon className="h-5 w-5" />
+                    </a>
+                  )}
+                  {socialLinks?.youtube && (
+                    <a
+                      href={socialLinks.youtube}
+                      className="-m-2 flex items-center justify-center p-2 text-gray-500 transition-colors hover:text-gray-900"
+                      aria-label="YouTube"
+                    >
+                      <YouTubeIcon className="h-5 w-5" />
+                    </a>
+                  )}
+                </div>
               </div>
             )}
           </div>

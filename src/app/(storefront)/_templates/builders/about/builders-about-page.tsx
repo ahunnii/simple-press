@@ -211,11 +211,13 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
               >
                 {/* Member photo */}
                 {image ? (
-                  <img
-                    src={image}
-                    alt={name}
-                    className="mb-6 h-48 w-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0"
-                  />
+                  <div className="mb-6 h-48 w-full overflow-hidden">
+                    <img
+                      src={image}
+                      alt={name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
                 ) : (
                   <div
                     className="mb-6 h-48 w-full"

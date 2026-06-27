@@ -15,6 +15,7 @@ import {
   buildersTestimonialsData,
   buildersTestimonialsFieldGroups,
 } from "./testimonials";
+import { buildersGlobalData, buildersGlobalFieldGroups } from "./global";
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
@@ -25,6 +26,7 @@ export const buildersData: { builders: TemplateField[] } = {
     ...buildersContactData,
     ...buildersServicesData,
     ...buildersTestimonialsData,
+    ...buildersGlobalData,
   ],
 };
 
@@ -35,6 +37,7 @@ export const buildersFieldGroups: { builders: TemplateFieldGroup[] } = {
     ...buildersContactFieldGroups,
     ...buildersServicesFieldGroups,
     ...buildersTestimonialsFieldGroups,
+    ...buildersGlobalFieldGroups,
   ],
 };
 
