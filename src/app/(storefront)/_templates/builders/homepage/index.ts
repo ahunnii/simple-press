@@ -124,7 +124,7 @@ const homepageStoryData: TemplateField[] = [
     key: "builders.homepage.story-image",
     label: "Story Image",
     description:
-      "Portrait or candid image for the story section (grayscale by default, color on hover)",
+      "Portrait or candid image for the story section. Shown in full color; gently zooms on hover.",
     type: "image",
     page: "homepage",
     group: "homepage.story",
@@ -198,6 +198,13 @@ const homepageProjectsData: TemplateField[] = [
         label: "Featured (2×2 large card)",
         type: "boolean",
         placeholder: "true",
+      },
+      {
+        key: "href",
+        label: "Card Link (optional)",
+        type: "url",
+        placeholder: "/projects/fisher-block",
+        description: "If set, the card becomes a link with a hover arrow button.",
       },
     ],
   },

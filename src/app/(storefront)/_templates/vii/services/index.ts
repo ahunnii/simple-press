@@ -71,6 +71,57 @@ const servicesHeroData: TemplateField[] = [
   },
 ];
 
+// ─── Intro Section ────────────────────────────────────────────────────────────
+
+const servicesIntroData: TemplateField[] = [
+  {
+    key: "vii.services.intro-overline",
+    label: "Intro Overline",
+    description:
+      "Small all-caps eyebrow shown above the intro heading. Leave blank to hide it.",
+    type: "text",
+    page: "services",
+    group: "vii.services.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "The VII Approach",
+  },
+  {
+    key: "vii.services.intro-heading",
+    label: "Intro Heading",
+    description: "Plain part of the two-part intro heading.",
+    type: "text",
+    page: "services",
+    group: "vii.services.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "Care, crafted",
+  },
+  {
+    key: "vii.services.intro-heading-accent",
+    label: "Intro Heading Accent",
+    description:
+      "Italic copper accent word completing the intro heading (e.g. 'around you.').",
+    type: "text",
+    page: "services",
+    group: "vii.services.intro",
+    gridColumn: "col-span-1",
+    defaultValue: "around you.",
+  },
+  {
+    key: "vii.services.intro-body",
+    label: "Intro Body",
+    description:
+      "Short inviting paragraph shown beneath the intro heading. Leave blank to hide.",
+    type: "textarea",
+    page: "services",
+    group: "vii.services.intro",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Every treatment begins with a conversation. Explore our full menu of services below, each designed to meet your skin exactly where it is.",
+    placeholder:
+      "Invite guests to explore — describe your philosophy or approach in a sentence or two.",
+  },
+];
+
 // ─── Closing Gallery Strip ─────────────────────────────────────────────────────
 
 const servicesGalleryData: TemplateField[] = [
@@ -207,6 +258,7 @@ const servicesCtaData: TemplateField[] = [
 
 export const viiServicesData: TemplateField[] = [
   ...servicesHeroData,
+  ...servicesIntroData,
   ...servicesGalleryData,
   ...servicesCtaData,
 ];
@@ -218,6 +270,14 @@ export const viiServicesFieldGroups: TemplateFieldGroup[] = [
     description:
       "Overline, split heading, optional intro paragraph, and optional background image or video for the services index hero",
     icon: "🎬",
+    columns: 2,
+  },
+  {
+    id: "vii.services.intro",
+    title: "Intro Section",
+    description:
+      "Centered overline, split heading, and paragraph shown between the hero and the service cards. Leave all fields blank to hide the section.",
+    icon: "✦",
     columns: 2,
   },
   {

@@ -158,7 +158,7 @@ export const buildersAboutFieldGroups: TemplateFieldGroup[] = [
     id: "about.team",
     title: "Team Members",
     description:
-      "Cooperative member card grid (grayscale → color on hover). Falls back to built-in defaults when empty.",
+      "Cooperative member card grid. Photos shown in full color; gently zoom on hover. Falls back to built-in defaults when empty.",
     icon: "🤝",
     columns: 1,
   },

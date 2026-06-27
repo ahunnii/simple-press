@@ -4,20 +4,23 @@ import { FadeIn, PageTransition } from "~/components/page-animations";
 import { PlatformPolicyNotice } from "~/components/platform-policy-notice";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
+import { resolveFields } from "./index";
+import { BuildersCtaSection } from "./homepage/builders-cta-section";
+
 type Props = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
   page: NonNullable<RouterOutputs["content"]["getPageBySlug"]>;
 };
 
-function formatUpdated(date: Date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-export function BuildersGenericPage({ page }: Props) {
+export function BuildersGenericPage({ business, page }: Props) {
   const eyebrow = page.type === "policy" ? "Legal" : "Content";
+
+  const f = resolveFields(business.siteContent?.customFields, [
+    "builders.global.cta-heading",
+    "builders.global.cta-body",
+    "builders.global.cta-button-label",
+    "builders.global.cta-button-href",
+  ]);
 
   return (
     <PageTransition>
@@ -61,24 +64,13 @@ export function BuildersGenericPage({ page }: Props) {
               {page.excerpt}
             </p>
           )}
-
-          {/* Last updated — small Agdasima overline */}
-          <p
-            className="mt-5 text-[11px] uppercase tracking-[0.14em]"
-            style={{
-              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
-              color: "#9a9a9a",
-            }}
-          >
-            Last updated · {formatUpdated(page.updatedAt)}
-          </p>
         </FadeIn>
       </section>
 
-      {/* ── Body content: constrained prose, builders-themed ── */}
+      {/* ── Body content: full-width prose, builders-themed ── */}
       <section className="px-4 pt-16 pb-24 md:px-12">
         <FadeIn className="mx-auto w-full max-w-[1280px]">
-          <article className="max-w-2xl">
+          <article className="max-w-none">
             {/*
              * Prose theming — inline modifier approach (same as default-generic-page).
              * Hex literals are required because Tailwind JIT can't resolve CSS vars
@@ -157,6 +149,15 @@ export function BuildersGenericPage({ page }: Props) {
           </article>
         </FadeIn>
       </section>
+
+      {page.type !== "policy" && (
+        <BuildersCtaSection
+          heading={f["builders.global.cta-heading"] ?? ""}
+          body={f["builders.global.cta-body"] ?? ""}
+          buttonLabel={f["builders.global.cta-button-label"] ?? ""}
+          buttonHref={f["builders.global.cta-button-href"] ?? ""}
+        />
+      )}
     </PageTransition>
   );
 }

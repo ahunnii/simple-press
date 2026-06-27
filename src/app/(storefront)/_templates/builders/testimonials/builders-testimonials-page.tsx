@@ -240,7 +240,7 @@ function PhotoHybridCard({ t }: { t: Testimonial }) {
       <img
         src={photo}
         alt=""
-        className="absolute inset-0 h-full w-full object-cover grayscale opacity-10 transition-opacity duration-500 group-hover:opacity-20"
+        className="absolute inset-0 h-full w-full object-cover opacity-10 transition-all duration-500 group-hover:scale-105 group-hover:opacity-20"
       />
       <div
         className="relative z-10 flex h-full flex-col justify-end p-8"

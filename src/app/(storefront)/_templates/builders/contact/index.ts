@@ -34,6 +34,16 @@ export const buildersContactData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "The Shop",
   },
+  {
+    key: "builders.contact.socials-label",
+    label: "Socials Heading",
+    description:
+      "Heading for the follow-us social links block on the contact page.",
+    type: "text",
+    page: "contact",
+    group: "contact.info",
+    defaultValue: "Follow Along",
+  },
 ];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────

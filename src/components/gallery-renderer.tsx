@@ -166,7 +166,7 @@ export function GalleryRenderer({
     lightboxIndex !== null ? gallery.images[lightboxIndex] : null;
 
   return (
-    <div className="gallery-container">
+    <div className="not-prose gallery-container">
       {/* Title & Description */}
       {(showTitle || showDescription) && (
         <div className="gallery-header mb-6">

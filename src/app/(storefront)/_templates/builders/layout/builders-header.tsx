@@ -164,12 +164,12 @@ export function BuildersHeader({
   const closeMobileMenu = () => setMobileOpen(false);
 
   const brand = logoUrl ? (
-    <div className="relative h-10 w-24">
+    <div className="relative h-[3.125rem] w-[7.5rem]">
       <Image
         src={logoUrl}
         alt={businessName}
         fill
-        sizes="96px"
+        sizes="120px"
         className="object-contain object-left"
       />
     </div>
@@ -287,33 +287,35 @@ export function BuildersHeader({
             </div>
 
             {/* Cart */}
-            <button
-              onClick={() => setIsOpen(true)}
-              aria-label={
-                itemCount > 0
-                  ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                  : "Open cart"
-              }
-              className={cn(
-                "relative -m-2 flex items-center p-2 transition-opacity hover:opacity-60",
-                solid ? "text-gray-700" : "text-white",
-              )}
-            >
-              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
-              {itemCount > 0 && (
-                <span
-                  aria-hidden="true"
-                  className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center text-[9px] font-bold"
-                  style={{
-                    background: "var(--builders-accent, #FFC5B6)",
-                    color: "var(--builders-accent-ink, #31130A)",
-                    minWidth: "16px",
-                  }}
-                >
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            {isEnabled("cart") && (
+              <button
+                onClick={() => setIsOpen(true)}
+                aria-label={
+                  itemCount > 0
+                    ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "Open cart"
+                }
+                className={cn(
+                  "relative -m-2 flex items-center p-2 transition-opacity hover:opacity-60",
+                  solid ? "text-gray-700" : "text-white",
+                )}
+              >
+                <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                {itemCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center text-[9px] font-bold"
+                    style={{
+                      background: "var(--builders-accent, #FFC5B6)",
+                      color: "var(--builders-accent-ink, #31130A)",
+                      minWidth: "16px",
+                    }}
+                  >
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -448,32 +450,36 @@ export function BuildersHeader({
 
               {/* Cart + account row */}
               <div className="flex items-center justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeMobileMenu();
-                    setIsOpen(true);
-                  }}
-                  aria-label={
-                    itemCount > 0
-                      ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                      : "Open cart"
-                  }
-                  className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-[var(--builders-ink)]"
-                  style={{
-                    color: "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
-                    fontFamily:
-                      "var(--font-builders-body, 'Agdasima', sans-serif)",
-                  }}
-                >
-                  <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
-                  Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-                </button>
+                {isEnabled("cart") && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeMobileMenu();
+                        setIsOpen(true);
+                      }}
+                      aria-label={
+                        itemCount > 0
+                          ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                          : "Open cart"
+                      }
+                      className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-[var(--builders-ink)]"
+                      style={{
+                        color: "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
+                        fontFamily:
+                          "var(--font-builders-body, 'Agdasima', sans-serif)",
+                      }}
+                    >
+                      <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
+                      Cart{itemCount > 0 ? ` (${itemCount})` : ""}
+                    </button>
 
-                <span
-                  aria-hidden="true"
-                  className="h-4 w-px bg-[var(--builders-rule)]"
-                />
+                    <span
+                      aria-hidden="true"
+                      className="h-4 w-px bg-[var(--builders-rule)]"
+                    />
+                  </>
+                )}
 
                 {session?.user ? (
                   <div className="flex items-center justify-center">
