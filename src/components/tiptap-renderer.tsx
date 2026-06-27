@@ -80,7 +80,7 @@ function GalleryBlock({ galleryId }: { galleryId: string }) {
   if (!gallery) return null;
 
   return (
-    <div className="my-6 rounded-lg">
+    <div className="not-prose my-6 rounded-lg">
       <GalleryRenderer
         gallery={{
           name: gallery.name,
