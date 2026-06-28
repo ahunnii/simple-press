@@ -28,6 +28,7 @@ import {
   SHIPPING_TYPES,
   shippingConfigFromBusiness,
 } from "~/lib/shipping-utils";
+import { shouldPinPaymentIntentShipping } from "~/lib/checkout/shipping";
 import { stripeClient } from "~/lib/stripe/client";
 import { checkoutSessionSchema } from "~/lib/validators/checkout";
 import { db } from "~/server/db";
@@ -575,10 +576,19 @@ export async function POST(req: NextRequest) {
             },
           }
         : {}),
-      // Locked zone_weight order: bind the priced destination to the PaymentIntent
-      // so the webhook records it and Stripe Tax (if enabled) uses it. The shopper
-      // cannot change it on Stripe, so the charged rate always matches the address.
-      ...(lockShippingAddress && sa
+      // Locked zone_weight order: bind the priced destination to the PaymentIntent so the
+      // webhook can record it (resolver tier 2). When auto tax is enabled we CANNOT send
+      // `payment_intent_data.shipping` — Stripe rejects the combination with "You cannot
+      // enable automatic tax calculation with payment_intent_data[shipping] set". When auto
+      // tax is on, the locked address still reaches the webhook via `metadata.shipping*`
+      // (resolver tier 3), and Stripe Tax derives the destination from the attached Customer's
+      // shipping address (set above). The address stays locked because
+      // `shipping_address_collection` is omitted either way.
+      ...(shouldPinPaymentIntentShipping({
+        lockShippingAddress,
+        hasShippingAddress: !!sa,
+        autoTaxEnabled: business.stripeAutoTaxEnabled,
+      }) && sa
         ? {
             payment_intent_data: {
               shipping: {

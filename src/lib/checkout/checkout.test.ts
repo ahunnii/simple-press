@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 import { computeSubtotalCents } from "./pricing";
-import { resolveCheckoutShipping } from "./shipping";
+import { resolveCheckoutShipping, shouldPinPaymentIntentShipping } from "./shipping";
 import { checkCartAvailability, computePoolDemand } from "./validate-cart";
 
 function makeItem(overrides: Partial<CartLineItem> = {}): CartLineItem {
@@ -369,5 +369,50 @@ describe("resolveCheckoutShipping", () => {
       country: "US",
       nameForAddress: "Billing Name",
     });
+  });
+});
+
+describe("shouldPinPaymentIntentShipping", () => {
+  it("returns true when locked, has address, and auto tax is OFF (zone_weight lock preserved)", () => {
+    expect(
+      shouldPinPaymentIntentShipping({
+        lockShippingAddress: true,
+        hasShippingAddress: true,
+        autoTaxEnabled: false,
+      }),
+    ).toBe(true);
+  });
+
+  it("returns false when locked, has address, and auto tax is ON — THE FIX: Stripe rejects payment_intent_data[shipping] together with automatic_tax", () => {
+    // Regression guard: businesses using zone_weight shipping AND stripeAutoTaxEnabled must
+    // NOT have payment_intent_data.shipping set, or Stripe returns:
+    // "You cannot enable automatic tax calculation with payment_intent_data[shipping] set."
+    expect(
+      shouldPinPaymentIntentShipping({
+        lockShippingAddress: true,
+        hasShippingAddress: true,
+        autoTaxEnabled: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false when not locked (e.g. flat/free shipping)", () => {
+    expect(
+      shouldPinPaymentIntentShipping({
+        lockShippingAddress: false,
+        hasShippingAddress: true,
+        autoTaxEnabled: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("returns false when locked but no shipping address is present", () => {
+    expect(
+      shouldPinPaymentIntentShipping({
+        lockShippingAddress: true,
+        hasShippingAddress: false,
+        autoTaxEnabled: false,
+      }),
+    ).toBe(false);
   });
 });

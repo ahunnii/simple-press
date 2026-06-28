@@ -102,3 +102,22 @@ export function resolveCheckoutShipping(
     nameForAddress: null,
   };
 }
+
+/**
+ * Decide whether to pin the destination on the PaymentIntent (`payment_intent_data.shipping`).
+ *
+ * We pin it to lock the destination for zone_weight orders so a shopper can't switch to a
+ * cheaper shipping zone on Stripe's page. BUT Stripe rejects `payment_intent_data[shipping]`
+ * when `automatic_tax` is enabled ("You cannot enable automatic tax calculation with
+ * payment_intent_data[shipping] set"). When auto tax is on we therefore do NOT pin it — the
+ * locked address still reaches the webhook via `metadata.shipping*` (resolver tier 3), and
+ * Stripe Tax derives the destination from the attached Customer's shipping address. The address
+ * stays locked because `shipping_address_collection` remains omitted either way.
+ */
+export function shouldPinPaymentIntentShipping(opts: {
+  lockShippingAddress: boolean;
+  hasShippingAddress: boolean;
+  autoTaxEnabled: boolean;
+}): boolean {
+  return opts.lockShippingAddress && opts.hasShippingAddress && !opts.autoTaxEnabled;
+}
