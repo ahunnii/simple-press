@@ -703,9 +703,7 @@ export function ViiHeader({
             style={{
               paddingTop: solid ? "14px" : "22px",
               paddingBottom: solid ? "14px" : "22px",
-              transition: reduced
-                ? "none"
-                : `padding 0.5s ${ease}`,
+              transition: reduced ? "none" : `padding 0.5s ${ease}`,
             }}
           >
             {/* ── Left: hamburger (mobile) + wordmark ── */}

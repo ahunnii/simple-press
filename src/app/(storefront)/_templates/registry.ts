@@ -13,15 +13,6 @@
 import type { ComponentType } from "react";
 
 // ---------------------------------------------------------------------------
-// Builders
-// ---------------------------------------------------------------------------
-import { BuildersLayout } from "./builders/layout/builders-layout";
-import { BuildersAboutPage } from "./builders/about/builders-about-page";
-import { BuildersContactPage } from "./builders/contact/builders-contact-page";
-import { BuildersGenericPage } from "./builders/builders-generic-page";
-import { BuildersServicesIndexPage } from "./builders/services/builders-services-index-page";
-import { BuildersTestimonialsPage } from "./builders/testimonials/builders-testimonials-page";
-// ---------------------------------------------------------------------------
 // Bamboo
 // ---------------------------------------------------------------------------
 import { BambooAboutPage } from "./bamboo/about/bamboo-about-page";
@@ -44,6 +35,15 @@ import { BambooLayout } from "./bamboo/layout/bamboo-general-layout";
 import { BambooProductPage } from "./bamboo/products/bamboo-product-page";
 import { BambooShopPage } from "./bamboo/shop/bamboo-shop-page";
 import { BambooTestimonialsPage } from "./bamboo/testimonials/bamboo-testimonials-page";
+import { BuildersAboutPage } from "./builders/about/builders-about-page";
+import { BuildersGenericPage } from "./builders/builders-generic-page";
+import { BuildersContactPage } from "./builders/contact/builders-contact-page";
+// ---------------------------------------------------------------------------
+// Builders
+// ---------------------------------------------------------------------------
+import { BuildersLayout } from "./builders/layout/builders-layout";
+import { BuildersServicesIndexPage } from "./builders/services/builders-services-index-page";
+import { BuildersTestimonialsPage } from "./builders/testimonials/builders-testimonials-page";
 // ---------------------------------------------------------------------------
 // Dark Trend
 // ---------------------------------------------------------------------------
@@ -252,9 +252,9 @@ import { ViiContactPage } from "./vii/contact/vii-contact-page";
 import { ViiGenericPage } from "./vii/generic/vii-generic-page";
 import { ViiLayout } from "./vii/layout/vii-layout";
 import { ViiProductPage } from "./vii/products/vii-product-page";
+import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 import { ViiShopPage } from "./vii/shop/vii-shop-page";
 import { ViiTestimonialsPage } from "./vii/testimonials/vii-testimonials-page";
-import { ViiServicesIndexPage } from "./vii/services/vii-services-index-page";
 
 // ---------------------------------------------------------------------------
 // Types

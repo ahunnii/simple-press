@@ -49,14 +49,17 @@ export function ViiProductRail({
     >
       <div
         ref={ref}
-        className={`vii-reveal-group${visible ? " is-visible" : ""}`}
+        className={`vii-reveal-group${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 1200, margin: "0 auto" }}
       >
         {/* Header — left-aligned label + heading with a hairline rule */}
         <div
           className="vii-reveal-item"
           style={
-            { "--i": 0, marginBottom: "clamp(32px, 4.5vw, 52px)" } as React.CSSProperties
+            {
+              "--i": 0,
+              marginBottom: "clamp(32px, 4.5vw, 52px)",
+            } as React.CSSProperties
           }
         >
           {overline && (

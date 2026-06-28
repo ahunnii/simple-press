@@ -851,8 +851,7 @@ export const viiLedgerFields: TemplateField[] = [
   {
     key: "vii-ledger.hero-image",
     label: "Hero Image",
-    description:
-      "Optional full-bleed hero image, used when no video is set.",
+    description: "Optional full-bleed hero image, used when no video is set.",
     type: "image",
     page: "homepage",
     group: "vii-ledger.hero",
@@ -982,8 +981,7 @@ export const viiLedgerFields: TemplateField[] = [
   {
     key: "vii-ledger.notes-gratuity",
     label: "Gratuity Note",
-    description:
-      "Short note about gratuity policy. Clear to hide this item.",
+    description: "Short note about gratuity policy. Clear to hide this item.",
     type: "textarea",
     page: "homepage",
     group: "vii-ledger.notes",
@@ -1256,8 +1254,7 @@ export const viiCollectionFields: TemplateField[] = [
   {
     key: "vii-collection.hero-image",
     label: "Hero Image",
-    description:
-      "Optional full-bleed hero image, used when no video is set.",
+    description: "Optional full-bleed hero image, used when no video is set.",
     type: "image",
     page: "homepage",
     group: "vii-collection.hero",
@@ -1351,18 +1348,32 @@ export const viiCollectionFields: TemplateField[] = [
     key: "vii-collection.sections",
     label: "Service Sections",
     description:
-      "Group your services into sections (e.g. Facials, Needling). Each section can have an optional description and an image or video. Assign items to sections in the \"Specific services\" tab.",
+      'Group your services into sections (e.g. Facials, Needling). Each section can have an optional description and an image or video. Assign items to sections in the "Specific services" tab.',
     type: "list",
     page: "homepage",
     group: "vii-collection.sections",
     gridColumn: "col-span-full",
     maxItems: 4,
     itemSchema: [
-      { key: "label", label: "Section name", type: "text", placeholder: "e.g. Facials" },
-      { key: "description", label: "Description", type: "textarea", placeholder: "Optional intro for this section…" },
+      {
+        key: "label",
+        label: "Section name",
+        type: "text",
+        placeholder: "e.g. Facials",
+      },
+      {
+        key: "description",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Optional intro for this section…",
+      },
       { key: "image", label: "Image", type: "image" },
       { key: "video", label: "Video", type: "video" },
-      { key: "premium", label: "Feature as signature collection", type: "boolean" },
+      {
+        key: "premium",
+        label: "Feature as signature collection",
+        type: "boolean",
+      },
     ],
     defaultValue: "",
   },
@@ -1408,8 +1419,7 @@ export const viiCollectionFields: TemplateField[] = [
   {
     key: "vii-collection.notes-gratuity",
     label: "Gratuity Note",
-    description:
-      "Short note about gratuity policy. Clear to hide this item.",
+    description: "Short note about gratuity policy. Clear to hide this item.",
     type: "textarea",
     page: "homepage",
     group: "vii-collection.notes",

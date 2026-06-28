@@ -1,6 +1,5 @@
-"use client";
-
 import Link from "next/link";
+import { Wrench } from "lucide-react";
 
 type BuildersCtaSectionProps = {
   heading: string;
@@ -25,16 +24,14 @@ export function BuildersCtaSection({
     >
       <div className="mx-auto flex max-w-[1280px] flex-col items-center px-4 text-center md:px-12">
         {/* Icon */}
-        <div
-          className="mb-6 text-6xl leading-none"
+        <Wrench
+          className="mb-6 h-14 w-14"
           style={{ color: "var(--builders-accent, #FFC5B6)" }}
           aria-hidden="true"
-        >
-          ⚙
-        </div>
+        />
 
         <h2
-          className="mb-6 text-4xl font-light uppercase leading-tight tracking-tighter md:text-6xl lg:text-7xl"
+          className="mb-6 text-4xl leading-tight font-light tracking-tighter [overflow-wrap:anywhere] break-words uppercase md:text-6xl lg:text-7xl"
           style={{
             fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
             color: "var(--builders-ink, #131313)",
@@ -52,24 +49,9 @@ export function BuildersCtaSection({
         {buttonLabel && (
           <Link
             href={buttonHref || "/contact"}
-            className="inline-block border px-12 py-5 text-xs font-bold uppercase tracking-[0.14em] transition-all duration-300"
+            className="inline-block border border-[var(--builders-accent)] bg-[var(--builders-accent)] px-12 py-5 text-xs font-bold tracking-[0.1em] text-[var(--builders-accent-ink)] uppercase transition-all duration-300 hover:border-[var(--builders-accent-hover)] hover:bg-[var(--builders-accent-hover)] hover:shadow-[0_0_15px_rgba(255,197,182,0.6)]"
             style={{
               fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
-              background: "var(--builders-accent, #FFC5B6)",
-              borderColor: "var(--builders-accent, #FFC5B6)",
-              color: "var(--builders-accent-ink, #31130A)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "var(--builders-accent-hover, #F2B9AB)";
-              e.currentTarget.style.borderColor =
-                "var(--builders-accent-hover, #F2B9AB)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background =
-                "var(--builders-accent, #FFC5B6)";
-              e.currentTarget.style.borderColor =
-                "var(--builders-accent, #FFC5B6)";
             }}
           >
             {buttonLabel}

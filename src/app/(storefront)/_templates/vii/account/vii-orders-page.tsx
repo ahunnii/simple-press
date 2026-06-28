@@ -143,13 +143,15 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
             <article
               key={order.id}
               className="vii-reveal-item vii-lift"
-              style={{
-                "--i": Math.min(i, 7),
-                background: "var(--vii-paper)",
-                border: "1px solid var(--vii-hairline-strong)",
-                borderRadius: "var(--radius)",
-                padding: 24,
-              } as React.CSSProperties}
+              style={
+                {
+                  "--i": Math.min(i, 7),
+                  background: "var(--vii-paper)",
+                  border: "1px solid var(--vii-hairline-strong)",
+                  borderRadius: "var(--radius)",
+                  padding: 24,
+                } as React.CSSProperties
+              }
             >
               <div
                 style={{
@@ -258,9 +260,8 @@ export function ViiOrdersPage({ orders }: OrdersPageTemplateProps) {
                       }}
                     >
                       {item.productName}
-                      {item.variantName
-                        ? ` — ${item.variantName}`
-                        : ""} × {item.quantity}
+                      {item.variantName ? ` — ${item.variantName}` : ""} ×{" "}
+                      {item.quantity}
                     </span>
                   ))}
                   {order.items.length > 3 && (

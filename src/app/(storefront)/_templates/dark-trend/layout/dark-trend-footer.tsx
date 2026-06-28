@@ -2,10 +2,9 @@ import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
-
 import type { DefaultFooterTemplateProps } from "../../types";
 import { api } from "~/trpc/server";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 export async function DarkTrendFooter({
   business,

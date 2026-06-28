@@ -499,7 +499,8 @@ export function NavigationBuilder({
                         Add Services menu
                         {(services?.length ?? 0) > 0 && (
                           <span className="text-muted-foreground ml-auto text-xs">
-                            {services!.length} service{services!.length !== 1 ? "s" : ""}
+                            {services!.length} service
+                            {services!.length !== 1 ? "s" : ""}
                           </span>
                         )}
                       </Button>

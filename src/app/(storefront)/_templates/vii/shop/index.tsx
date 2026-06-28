@@ -90,7 +90,7 @@ const shopBeyondData: TemplateField[] = [
     key: "vii.shop.promo-left-heading",
     label: "Left Panel Heading",
     description:
-      "Plain heading text for the navy panel (e.g. \"Give the gift of\"). Pairs with the accent word.",
+      'Plain heading text for the navy panel (e.g. "Give the gift of"). Pairs with the accent word.',
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -101,7 +101,7 @@ const shopBeyondData: TemplateField[] = [
     key: "vii.shop.promo-left-accent",
     label: "Left Panel Accent Word",
     description:
-      "Italic copper-light accent word completing the navy panel heading (e.g. \"ritual\").",
+      'Italic copper-light accent word completing the navy panel heading (e.g. "ritual").',
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -134,7 +134,8 @@ const shopBeyondData: TemplateField[] = [
   {
     key: "vii.shop.promo-left-button-label",
     label: "Left Panel Button Label",
-    description: "CTA button label for the navy panel (e.g. \"Buy a gift card\").",
+    description:
+      'CTA button label for the navy panel (e.g. "Buy a gift card").',
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -144,7 +145,7 @@ const shopBeyondData: TemplateField[] = [
   {
     key: "vii.shop.promo-left-button-link",
     label: "Left Panel Button Link",
-    description: "Destination URL for the navy panel CTA (e.g. \"/gift-cards\").",
+    description: 'Destination URL for the navy panel CTA (e.g. "/gift-cards").',
     type: "url",
     page: "shop",
     group: "shop.beyond",
@@ -168,7 +169,7 @@ const shopBeyondData: TemplateField[] = [
     key: "vii.shop.promo-right-heading",
     label: "Right Panel Heading",
     description:
-      "Plain heading text for the cream panel (e.g. \"The products we\"). Pairs with the accent word.",
+      'Plain heading text for the cream panel (e.g. "The products we"). Pairs with the accent word.',
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -179,7 +180,7 @@ const shopBeyondData: TemplateField[] = [
     key: "vii.shop.promo-right-accent",
     label: "Right Panel Accent Word",
     description:
-      "Italic copper accent word completing the cream panel heading (e.g. \"trust\").",
+      'Italic copper accent word completing the cream panel heading (e.g. "trust").',
     type: "text",
     page: "shop",
     group: "shop.beyond",
@@ -212,7 +213,7 @@ const shopBeyondData: TemplateField[] = [
   {
     key: "vii.shop.promo-right-button-label",
     label: "Right Panel Button Label",
-    description: "CTA button label for the cream panel (e.g. \"Shop haircare\").",
+    description: 'CTA button label for the cream panel (e.g. "Shop haircare").',
     type: "text",
     page: "shop",
     group: "shop.beyond",

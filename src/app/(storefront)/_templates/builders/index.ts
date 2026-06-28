@@ -1,21 +1,15 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
-import {
-  buildersHomepageData,
-  buildersHomepageFieldGroups,
-} from "./homepage";
 import { buildersAboutData, buildersAboutFieldGroups } from "./about";
 import { buildersContactData, buildersContactFieldGroups } from "./contact";
-import {
-  buildersServicesData,
-  buildersServicesFieldGroups,
-} from "./services";
+import { buildersGlobalData, buildersGlobalFieldGroups } from "./global";
+import { buildersHomepageData, buildersHomepageFieldGroups } from "./homepage";
+import { buildersServicesData, buildersServicesFieldGroups } from "./services";
 import {
   buildersTestimonialsData,
   buildersTestimonialsFieldGroups,
 } from "./testimonials";
-import { buildersGlobalData, buildersGlobalFieldGroups } from "./global";
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 

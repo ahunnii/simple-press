@@ -70,7 +70,7 @@ export function ViiStorySection({
         {/* ── Left: text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
         >
           <h2
             id="story-heading"
@@ -129,7 +129,9 @@ export function ViiStorySection({
                   borderRadius: "var(--radius)",
                   overflow: "hidden",
                   background: "var(--vii-slate)",
-                  transition: reducedMotion ? "none" : "opacity 0.4s var(--vii-ease)",
+                  transition: reducedMotion
+                    ? "none"
+                    : "opacity 0.4s var(--vii-ease)",
                 }}
               >
                 {cards.map((card, i) => {

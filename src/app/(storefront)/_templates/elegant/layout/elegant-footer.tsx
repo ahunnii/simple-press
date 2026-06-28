@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
-
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const BRAND_LINKS = [
   { href: "/testimonials", label: "Reviews" },
@@ -23,7 +22,12 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
     | undefined;
 
   const socialLinks = business?.siteContent?.socialLinks as
-    | { instagram?: string; facebook?: string; twitter?: string; youtube?: string }
+    | {
+        instagram?: string;
+        facebook?: string;
+        twitter?: string;
+        youtube?: string;
+      }
     | undefined;
 
   const DEFAULT_NAV_LINKS = [

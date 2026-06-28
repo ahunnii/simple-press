@@ -102,7 +102,9 @@ export function ViiBrandsSection({
         borderTop: "1px solid var(--vii-hairline)",
       }}
     >
-      <div style={{ maxWidth: useMarquee ? undefined : 1100, margin: "0 auto" }}>
+      <div
+        style={{ maxWidth: useMarquee ? undefined : 1100, margin: "0 auto" }}
+      >
         {/* Header */}
         <div
           style={{
@@ -158,7 +160,11 @@ export function ViiBrandsSection({
               >
                 {/* Primary (real) set */}
                 {logos.map((logo, i) => (
-                  <LogoItem key={`primary-${logo._id ?? i}`} logo={logo} index={i} />
+                  <LogoItem
+                    key={`primary-${logo._id ?? i}`}
+                    logo={logo}
+                    index={i}
+                  />
                 ))}
                 {/* Duplicate set — aria-hidden so AT/keyboard only hit the real set */}
                 {logos.map((logo, i) => (
@@ -176,7 +182,9 @@ export function ViiBrandsSection({
             <button
               type="button"
               onClick={() => setPaused((p) => !p)}
-              aria-label={paused ? "Play brand animation" : "Pause brand animation"}
+              aria-label={
+                paused ? "Play brand animation" : "Pause brand animation"
+              }
               aria-pressed={paused}
               style={{
                 position: "absolute",
@@ -207,7 +215,7 @@ export function ViiBrandsSection({
           </div>
         ) : (
           /* ── Static mode (default — unchanged behaviour) ───────────────── */
-          <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
+          <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
             <ul
               className="vii-brands-grid"
               style={{

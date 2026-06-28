@@ -4,12 +4,16 @@ import { Leaf } from "lucide-react";
 import { z } from "zod";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import type { EmbedAspectRatio, EmbedDisplayMode, EmbedWidth } from "~/lib/embed";
+import type {
+  EmbedAspectRatio,
+  EmbedDisplayMode,
+  EmbedWidth,
+} from "~/lib/embed";
 import {
-  DEFAULT_EMBED_HEIGHT,
   coerceEmbedAspectRatio,
   coerceEmbedDisplayMode,
   coerceEmbedWidth,
+  DEFAULT_EMBED_HEIGHT,
   sanitizeEmbedSrc,
 } from "~/lib/embed";
 import { getLucideTemplateIcon } from "~/lib/lucide-template-icons";

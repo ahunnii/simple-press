@@ -1,5 +1,3 @@
-"use client";
-
 type BuildersStorySectionProps = {
   heading: string;
   body1: string;
@@ -32,11 +30,13 @@ export function BuildersStorySection({
                 src={image}
                 alt=""
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                decoding="async"
               />
             ) : (
               /* Placeholder when no image is set */
               <div className="flex h-full w-full items-center justify-center bg-gray-100">
-                <span className="text-xs uppercase tracking-widest text-gray-400">
+                <span className="text-xs tracking-widest text-gray-600 uppercase">
                   Story Image
                 </span>
               </div>
@@ -50,10 +50,11 @@ export function BuildersStorySection({
         {/* Text column */}
         <div className="flex flex-col gap-6 md:col-span-6">
           <h2
-            className="text-3xl font-semibold uppercase text-gray-900 md:text-[40px] md:leading-tight"
+            className="text-3xl font-semibold uppercase md:text-[40px] md:leading-tight"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               letterSpacing: "-0.01em",
+              color: "var(--builders-ink, #131313)",
             }}
           >
             {heading}
@@ -67,13 +68,13 @@ export function BuildersStorySection({
           />
 
           {body1 && (
-            <p className="text-base leading-relaxed text-gray-700 text-justify">
+            <p className="text-justify text-base leading-relaxed text-gray-700">
               {body1}
             </p>
           )}
 
           {body2 && (
-            <p className="text-base leading-relaxed text-gray-700 text-justify">
+            <p className="text-justify text-base leading-relaxed text-gray-700">
               {body2}
             </p>
           )}

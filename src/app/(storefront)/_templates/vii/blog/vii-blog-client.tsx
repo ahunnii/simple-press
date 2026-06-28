@@ -270,7 +270,11 @@ function JournalRow({
                     alt=""
                     fill
                     sizes="400px"
-                    style={{ objectFit: "contain", opacity: 0.9, padding: "10%" }}
+                    style={{
+                      objectFit: "contain",
+                      opacity: 0.9,
+                      padding: "10%",
+                    }}
                   />
                 ) : (
                   <span
@@ -298,7 +302,12 @@ function JournalRow({
 
 // ─── Main client component ────────────────────────────────────────────────────
 
-export function ViiBlogClient({ pages, coverImage, logoUrl, businessName }: Props) {
+export function ViiBlogClient({
+  pages,
+  coverImage,
+  logoUrl,
+  businessName,
+}: Props) {
   const [query, setQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
 
@@ -410,7 +419,7 @@ export function ViiBlogClient({ pages, coverImage, logoUrl, businessName }: Prop
             {cover && (
               <div
                 ref={coverRef}
-                className={`vii-reveal${coverVisible ? " is-visible" : ""}`}
+                className={`vii-reveal${coverVisible ? "is-visible" : ""}`}
                 style={{ marginBottom: "clamp(48px, 7vw, 88px)" }}
               >
                 <CoverStory post={cover} image={coverImage} />
@@ -445,7 +454,7 @@ export function ViiBlogClient({ pages, coverImage, logoUrl, businessName }: Prop
 
                 <div
                   ref={rowsRef}
-                  className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+                  className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
                 >
                   {rows.map((post, i) => (
                     <JournalRow

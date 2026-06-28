@@ -57,7 +57,9 @@ export function ServiceHeroVideo({
       <button
         type="button"
         onClick={toggleVideo}
-        aria-label={videoPaused ? "Play background video" : "Pause background video"}
+        aria-label={
+          videoPaused ? "Play background video" : "Pause background video"
+        }
         className={buttonClassName}
         style={{
           position: "absolute",

@@ -13,8 +13,8 @@ import {
   viiOrderFieldGroups,
 } from "./cart-checkout/order-fields";
 import { viiContactData, viiContactFieldGroups } from "./contact";
-import { viiServicesData, viiServicesFieldGroups } from "./services";
 import { viiHomepageData, viiHomepageFieldGroups } from "./homepage";
+import { viiServicesData, viiServicesFieldGroups } from "./services";
 import { viiShopData, viiShopFieldGroups } from "./shop";
 import {
   viiTestimonialsData,

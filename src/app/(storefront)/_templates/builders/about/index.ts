@@ -17,7 +17,8 @@ const aboutHeroData: TemplateField[] = [
   {
     key: "builders.about.hero-subtitle",
     label: "Hero Subtitle",
-    description: "Introductory paragraph below the hero headline (left-bordered)",
+    description:
+      "Introductory paragraph below the hero headline (left-bordered)",
     type: "textarea",
     page: "about",
     group: "about.hero",

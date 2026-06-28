@@ -7,6 +7,16 @@ type Props = {
   aspectRatio?: string;
 };
 
+// Mirrors the storefront masonry ladder so the preview reflows the same way.
+function masonryColumnsClass(columns: number): string {
+  if (columns >= 5)
+    return "columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5";
+  if (columns === 4) return "columns-1 sm:columns-2 md:columns-3 lg:columns-4";
+  if (columns === 3) return "columns-1 sm:columns-2 md:columns-3";
+  if (columns === 2) return "columns-1 sm:columns-2";
+  return "columns-1";
+}
+
 function aspectClass(ratio: string | undefined): string {
   switch (ratio) {
     case "4:3":
@@ -53,8 +63,8 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
   if (layout === "masonry") {
     return (
       <div
+        className={masonryColumnsClass(columns)}
         style={{
-          columnCount: columns,
           columnGap: `${gap}px`,
         }}
       >
@@ -77,9 +87,8 @@ export function LayoutPreview({ layout, columns, gap, aspectRatio }: Props) {
   if (layout === "collage") {
     return (
       <div
-        className="grid"
+        className="grid grid-cols-2 sm:grid-cols-3"
         style={{
-          gridTemplateColumns: "repeat(3, 1fr)",
           gap: `${gap}px`,
         }}
       >

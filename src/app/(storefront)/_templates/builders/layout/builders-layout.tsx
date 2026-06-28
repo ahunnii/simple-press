@@ -4,7 +4,6 @@ import { Agdasima, Jost } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
 
 import { BuildersFooter } from "./builders-footer";
@@ -26,13 +25,7 @@ export async function BuildersLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const [session, { isEnabled }] = await Promise.all([
-    getSession(),
-    getBusinessFlags(),
-  ]);
-
-  // Banner resolved but currently unused — wire in if a banner component is added later
-  const _banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const [session] = await Promise.all([getSession(), getBusinessFlags()]);
 
   return (
     <div

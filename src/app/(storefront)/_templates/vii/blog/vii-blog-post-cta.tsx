@@ -19,7 +19,13 @@ type Props = {
  * Replaces the heavy navy ViiContactCtaSection with a quiet centered block
  * that sits naturally after "More from the Blog." No phone/email/image.
  */
-export function ViiBlogPostCta({ overline, heading, body, buttonText, buttonLink }: Props) {
+export function ViiBlogPostCta({
+  overline,
+  heading,
+  body,
+  buttonText,
+  buttonLink,
+}: Props) {
   const { ref, visible } = useViiReveal(0.1);
 
   return (
@@ -32,7 +38,7 @@ export function ViiBlogPostCta({ overline, heading, body, buttonText, buttonLink
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{
           maxWidth: 640,
           margin: "0 auto",

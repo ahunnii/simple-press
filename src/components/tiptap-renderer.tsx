@@ -198,12 +198,27 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
       }
       if (isEmbedNode(node) && node.attrs.src) {
         const src = String(node.attrs.src);
-        const height = node.attrs.height ? Number(node.attrs.height) : undefined;
-        const title = typeof node.attrs.title === "string" ? node.attrs.title : "";
-        const aspectRatio = typeof node.attrs.aspectRatio === "string" ? node.attrs.aspectRatio : undefined;
-        const maxWidth = typeof node.attrs.maxWidth === "string" ? node.attrs.maxWidth : undefined;
-        const displayMode = typeof node.attrs.displayMode === "string" ? node.attrs.displayMode : undefined;
-        const triggerLabel = typeof node.attrs.triggerLabel === "string" ? node.attrs.triggerLabel : undefined;
+        const height = node.attrs.height
+          ? Number(node.attrs.height)
+          : undefined;
+        const title =
+          typeof node.attrs.title === "string" ? node.attrs.title : "";
+        const aspectRatio =
+          typeof node.attrs.aspectRatio === "string"
+            ? node.attrs.aspectRatio
+            : undefined;
+        const maxWidth =
+          typeof node.attrs.maxWidth === "string"
+            ? node.attrs.maxWidth
+            : undefined;
+        const displayMode =
+          typeof node.attrs.displayMode === "string"
+            ? node.attrs.displayMode
+            : undefined;
+        const triggerLabel =
+          typeof node.attrs.triggerLabel === "string"
+            ? node.attrs.triggerLabel
+            : undefined;
 
         if (displayMode === "dialog") {
           return (

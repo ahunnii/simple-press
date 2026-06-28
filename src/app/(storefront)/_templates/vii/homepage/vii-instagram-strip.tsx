@@ -95,7 +95,9 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
 
         {/* Follow button */}
         {handle && (
-          <div style={{ textAlign: "center", marginTop: "clamp(24px, 4vw, 40px)" }}>
+          <div
+            style={{ textAlign: "center", marginTop: "clamp(24px, 4vw, 40px)" }}
+          >
             <a
               href={`https://instagram.com/${handle.replace(/^@/, "")}`}
               target="_blank"

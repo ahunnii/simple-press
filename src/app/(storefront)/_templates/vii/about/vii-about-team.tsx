@@ -124,7 +124,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
     >
       <div
         ref={headRef}
-        className={`vii-reveal-group${headVisible ? " is-visible" : ""}`}
+        className={`vii-reveal-group${headVisible ? "is-visible" : ""}`}
         style={{ maxWidth: 1100, margin: "0 auto" }}
       >
         {/* Header */}

@@ -48,8 +48,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           <div
             style={{
               background: "var(--vii-navy)",
-              padding:
-                "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 72px)",
+              padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 72px)",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -57,7 +56,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           >
             <div
               ref={leftRef}
-              className={`vii-reveal${leftVisible ? " is-visible" : ""}`}
+              className={`vii-reveal${leftVisible ? "is-visible" : ""}`}
               style={{ maxWidth: 440 }}
             >
               {left.image.trim() && (
@@ -76,7 +75,10 @@ export function ViiShopPromoBand({ left, right }: Props) {
                     alt=""
                     fill
                     sizes="200px"
-                    style={{ objectFit: "contain", objectPosition: "left center" }}
+                    style={{
+                      objectFit: "contain",
+                      objectPosition: "left center",
+                    }}
                   />
                 </div>
               )}
@@ -93,21 +95,26 @@ export function ViiShopPromoBand({ left, right }: Props) {
 
               <h2
                 id="vii-shop-promo-left-heading"
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontWeight: 400,
-                  fontSize: "clamp(28px, 3.6vw, 48px)",
-                  lineHeight: 1.1,
-                  color: "var(--vii-paper)",
-                  margin: 0,
-                  textWrap: "balance",
-                } as React.CSSProperties}
+                style={
+                  {
+                    fontFamily: "var(--font-serif)",
+                    fontWeight: 400,
+                    fontSize: "clamp(28px, 3.6vw, 48px)",
+                    lineHeight: 1.1,
+                    color: "var(--vii-paper)",
+                    margin: 0,
+                    textWrap: "balance",
+                  } as React.CSSProperties
+                }
               >
                 {left.heading}
                 {left.heading && left.accent ? " " : ""}
                 {left.accent && (
                   <em
-                    style={{ fontStyle: "italic", color: "var(--vii-copper-light)" }}
+                    style={{
+                      fontStyle: "italic",
+                      color: "var(--vii-copper-light)",
+                    }}
                   >
                     {left.accent}
                   </em>
@@ -164,8 +171,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           <div
             style={{
               background: "var(--vii-cream)",
-              padding:
-                "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 72px)",
+              padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 72px)",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -173,7 +179,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           >
             <div
               ref={rightRef}
-              className={`vii-reveal${rightVisible ? " is-visible" : ""}`}
+              className={`vii-reveal${rightVisible ? "is-visible" : ""}`}
               style={{ maxWidth: 440 }}
             >
               {right.image.trim() && (
@@ -192,7 +198,10 @@ export function ViiShopPromoBand({ left, right }: Props) {
                     alt={right.heading}
                     fill
                     sizes="200px"
-                    style={{ objectFit: "contain", objectPosition: "left center" }}
+                    style={{
+                      objectFit: "contain",
+                      objectPosition: "left center",
+                    }}
                   />
                 </div>
               )}
@@ -209,15 +218,17 @@ export function ViiShopPromoBand({ left, right }: Props) {
 
               <h2
                 id="vii-shop-promo-right-heading"
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontWeight: 400,
-                  fontSize: "clamp(28px, 3.6vw, 48px)",
-                  lineHeight: 1.1,
-                  color: "var(--vii-navy)",
-                  margin: 0,
-                  textWrap: "balance",
-                } as React.CSSProperties}
+                style={
+                  {
+                    fontFamily: "var(--font-serif)",
+                    fontWeight: 400,
+                    fontSize: "clamp(28px, 3.6vw, 48px)",
+                    lineHeight: 1.1,
+                    color: "var(--vii-navy)",
+                    margin: 0,
+                    textWrap: "balance",
+                  } as React.CSSProperties
+                }
               >
                 {right.heading}
                 {right.heading && right.accent ? " " : ""}

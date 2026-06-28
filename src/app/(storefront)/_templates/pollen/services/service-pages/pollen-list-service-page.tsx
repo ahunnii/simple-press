@@ -3,6 +3,11 @@ import Link from "next/link";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
+import { parseTemplateIframeValue } from "~/lib/template-fields";
+import {
+  parseServiceAddOns,
+  parseServicePriceTiers,
+} from "~/lib/validators/services";
 import { buttonVariants } from "~/components/ui/button";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
@@ -10,8 +15,6 @@ import { EmbedReveal } from "~/components/embed-reveal";
 import { FadeIn } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { parseTemplateIframeValue } from "~/lib/template-fields";
-import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
@@ -103,7 +106,11 @@ export function PollenListServicePage({
       <div className="h-1.5 w-full" style={{ backgroundColor: accentColor }} />
 
       {/* ── Centered intro ───────────────────────────────────────────────── */}
-      {(introLabel || introHeading || introImage || introVideoSrc || introBodyRaw) && (
+      {(introLabel ||
+        introHeading ||
+        introImage ||
+        introVideoSrc ||
+        introBodyRaw) && (
         <section className="bg-white py-20 md:py-28">
           <div className="mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
             <FadeIn direction="up">
@@ -129,7 +136,7 @@ export function PollenListServicePage({
                 <p className="leading-relaxed text-[#4b5563]">{introBodyRaw}</p>
               )}
               {(introVideoSrc || introImage) && (
-                <div className="mt-8 mx-auto max-w-xl">
+                <div className="mx-auto mt-8 max-w-xl">
                   <ServiceSectionMedia
                     imageSrc={introImage || undefined}
                     videoSrc={introVideoSrc || undefined}
@@ -175,7 +182,7 @@ export function PollenListServicePage({
       {((ctaLink && ctaText) || !!embed) && (
         <section className="bg-[#2a351f] py-16 md:py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            {(ctaLink && ctaText) && (
+            {ctaLink && ctaText && (
               <FadeIn direction="up" className="mb-10 text-center">
                 <p className="mb-2 text-sm font-semibold tracking-wider text-[#A8D081] uppercase">
                   Ready to begin?
@@ -204,14 +211,15 @@ export function PollenListServicePage({
                         src={embed.src}
                         height={embed.height}
                         title={embed.title ?? "Book"}
-                        className="rounded-xl overflow-hidden"
+                        className="overflow-hidden rounded-xl"
                         triggerLabel={embed.title ?? "Book Now"}
                         aspectRatio={embed.aspectRatio}
                         maxWidth={embed.maxWidth}
                         triggerClassName={buttonVariants({
                           variant: "outline",
                           size: "lg",
-                          className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                          className:
+                            "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
                         })}
                       />
                     </div>
@@ -222,7 +230,9 @@ export function PollenListServicePage({
                         title={embed.title ?? "Book"}
                         aspectRatio={embed.aspectRatio}
                         height={embed.height}
-                        triggerLabel={embed.triggerLabel ?? embed.title ?? "Book"}
+                        triggerLabel={
+                          embed.triggerLabel ?? embed.title ?? "Book"
+                        }
                       />
                     </div>
                   ) : (
@@ -230,7 +240,7 @@ export function PollenListServicePage({
                       src={embed.src}
                       height={embed.height}
                       title={embed.title ?? "Book"}
-                      className="rounded-xl overflow-hidden"
+                      className="overflow-hidden rounded-xl"
                       aspectRatio={embed.aspectRatio}
                       maxWidth={embed.maxWidth}
                     />
@@ -244,7 +254,8 @@ export function PollenListServicePage({
                       className={buttonVariants({
                         variant: "outline",
                         size: "lg",
-                        className: "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
+                        className:
+                          "border-[#A8D081] text-[#A8D081] hover:bg-[#A8D081]/10!",
                       })}
                     >
                       {embed.title ?? "Book Now"} ↗
@@ -331,12 +342,19 @@ function PollenListItemRow({
           return (
             <div className="mb-4 space-y-1">
               {tiers.map((tier, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-[#4b5563]">
+                <div
+                  key={i}
+                  className="flex items-center gap-2 text-xs text-[#4b5563]"
+                >
                   <span className="font-medium">{tier.label}</span>
                   <span className="text-[#9ca3af]">—</span>
-                  <span className="font-semibold text-[#2a351f]">{tier.priceLabel}</span>
+                  <span className="font-semibold text-[#2a351f]">
+                    {tier.priceLabel}
+                  </span>
                   {tier.compareAtPriceLabel && (
-                    <span className="text-[#9ca3af] line-through">{tier.compareAtPriceLabel}</span>
+                    <span className="text-[#9ca3af] line-through">
+                      {tier.compareAtPriceLabel}
+                    </span>
                   )}
                 </div>
               ))}
@@ -350,16 +368,23 @@ function PollenListItemRow({
           if (!addOns.length) return null;
           return (
             <div className="mb-4 border-t border-[#d4e8d4] pt-3">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#5e8b4a]">Add-ons</p>
+              <p className="mb-1 text-xs font-semibold tracking-wide text-[#5e8b4a] uppercase">
+                Add-ons
+              </p>
               <div className="space-y-1">
                 {addOns.map((addOn, i) => (
                   <div key={i} className="text-xs text-[#4b5563]">
                     <span className="font-medium">{addOn.name}</span>
                     {addOn.priceLabel && (
-                      <span className="text-[#9ca3af]"> · {addOn.priceLabel}</span>
+                      <span className="text-[#9ca3af]">
+                        {" "}
+                        · {addOn.priceLabel}
+                      </span>
                     )}
                     {addOn.description && (
-                      <p className="text-[#9ca3af] mt-0.5">{addOn.description}</p>
+                      <p className="mt-0.5 text-[#9ca3af]">
+                        {addOn.description}
+                      </p>
                     )}
                   </div>
                 ))}

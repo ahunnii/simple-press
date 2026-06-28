@@ -30,8 +30,8 @@ export function BuildersCraftServicePage({
   const publishedItems = items.filter((it) => it.published !== false);
 
   return (
-    <main
-      className="mx-auto w-full max-w-[1280px] px-4 pb-24 pt-32 md:px-12 md:pb-32 md:pt-48"
+    <div
+      className="mx-auto w-full max-w-[1280px] px-4 pt-32 pb-24 md:px-12 md:pt-48 md:pb-32"
       style={{ background: "var(--builders-bg, #F8F9FA)" }}
     >
       {/* ── 1. Hero ─────────────────────────────────────────────────────────── */}
@@ -41,10 +41,9 @@ export function BuildersCraftServicePage({
       >
         <div className="flex flex-col justify-end md:col-span-8">
           <h1
-            className="mb-6 text-4xl uppercase leading-none tracking-wider md:text-6xl lg:text-7xl"
+            className="mb-6 text-4xl leading-none tracking-wider uppercase md:text-6xl lg:text-7xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               fontWeight: 300,
               color: "var(--builders-ink, #131313)",
             }}
@@ -56,8 +55,7 @@ export function BuildersCraftServicePage({
             <p
               className="max-w-2xl border-l-2 pl-6 text-lg leading-relaxed md:text-xl"
               style={{
-                fontFamily:
-                  "var(--font-builders-body, 'Agdasima', sans-serif)",
+                fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
                 borderColor: "var(--builders-accent, #FFC5B6)",
                 color: "var(--builders-ink, #131313)",
                 opacity: 0.75,
@@ -79,10 +77,9 @@ export function BuildersCraftServicePage({
           {/* Section label */}
           <h2
             id="sub-services-heading"
-            className="mb-8 border-b pb-2 text-xs uppercase tracking-widest"
+            className="mb-8 border-b pb-2 text-xs tracking-widest uppercase"
             style={{
-              fontFamily:
-                "var(--font-builders-body, 'Agdasima', sans-serif)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               fontWeight: 700,
               letterSpacing: "0.1em",
               borderColor: "var(--builders-rule, #e5e7eb)",
@@ -102,7 +99,7 @@ export function BuildersCraftServicePage({
                 style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
               >
                 <h3
-                  className="mb-3 text-lg uppercase tracking-wide"
+                  className="mb-3 text-lg tracking-wide uppercase"
                   style={{
                     fontFamily:
                       "var(--font-builders-display, 'Jost', sans-serif)",
@@ -137,15 +134,14 @@ export function BuildersCraftServicePage({
       {/* ── 3. CTA ──────────────────────────────────────────────────────────── */}
       <section
         {...sectionGroupAttr("service", "cta")}
-        className="border-t py-24 flex flex-col items-center text-center"
+        className="flex flex-col items-center border-t py-24 text-center"
         style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
       >
         {ctaHeading && (
           <h2
-            className="mb-8 text-3xl uppercase tracking-tight font-light md:text-5xl"
+            className="mb-8 text-3xl font-light tracking-tight uppercase md:text-5xl"
             style={{
-              fontFamily:
-                "var(--font-builders-display, 'Jost', sans-serif)",
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
               color: "var(--builders-ink, #131313)",
             }}
           >
@@ -156,13 +152,11 @@ export function BuildersCraftServicePage({
         {ctaButtonLabel && (
           <a
             href={ctaButtonHref}
-            className="inline-flex items-center gap-2 border-2 px-8 py-4 text-xs uppercase tracking-widest transition-colors duration-200 hover:bg-transparent"
+            className="inline-flex items-center gap-2 border-2 bg-[var(--builders-accent)] px-8 py-4 text-xs tracking-widest uppercase transition-colors duration-200 hover:bg-[var(--builders-accent-hover)]"
             style={{
-              fontFamily:
-                "var(--font-builders-body, 'Agdasima', sans-serif)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
               fontWeight: 700,
               letterSpacing: "0.1em",
-              background: "var(--builders-accent, #FFC5B6)",
               borderColor: "var(--builders-accent, #FFC5B6)",
               color: "var(--builders-accent-ink, #31130A)",
             }}
@@ -172,6 +166,6 @@ export function BuildersCraftServicePage({
           </a>
         )}
       </section>
-    </main>
+    </div>
   );
 }

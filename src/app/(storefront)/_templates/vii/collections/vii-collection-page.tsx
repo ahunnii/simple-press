@@ -300,7 +300,13 @@ export function ViiCollectionPage({
                   key={col.id}
                   href={`/collections/${col.slug}`}
                   className="group vii-reveal-item"
-                  style={{ "--i": Math.min(i, 7), display: "block", textDecoration: "none" } as React.CSSProperties}
+                  style={
+                    {
+                      "--i": Math.min(i, 7),
+                      display: "block",
+                      textDecoration: "none",
+                    } as React.CSSProperties
+                  }
                 >
                   <div
                     style={{

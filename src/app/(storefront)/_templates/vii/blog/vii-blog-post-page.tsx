@@ -45,10 +45,8 @@ export function ViiBlogPostPage({
 
   // Closing CTA — owner-configurable via template fields.
   const ctaEnabled = (f["vii.blog.cta-enabled"] ?? "true") !== "false";
-  const ctaOverline =
-    (f["vii.blog.cta-overline"] ?? "").trim() || "The Studio";
-  const ctaHeading =
-    (f["vii.blog.cta-heading"] ?? "").trim() || "Come see us";
+  const ctaOverline = (f["vii.blog.cta-overline"] ?? "").trim() || "The Studio";
+  const ctaHeading = (f["vii.blog.cta-heading"] ?? "").trim() || "Come see us";
   const ctaBody =
     (f["vii.blog.cta-body"] ?? "").trim() ||
     "Book a facial or reach out — we'd love to help you find your glow.";

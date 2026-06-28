@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
-import { useViiReveal } from "../hooks/use-vii-reveal";
 
+import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
 const NAV_ITEMS = [
@@ -48,7 +48,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
         >
           <div
             ref={heroRef}
-            className={`vii-reveal${heroVisible ? " is-visible" : ""}`}
+            className={`vii-reveal${heroVisible ? "is-visible" : ""}`}
           >
             <ViiOverline style={{ marginBottom: 16 }}>Account</ViiOverline>
             <h1

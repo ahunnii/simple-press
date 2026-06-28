@@ -30,8 +30,7 @@ export const buildersTestimonialsData: TemplateField[] = [
   {
     key: "builders.testimonials.empty-state-text",
     label: "Empty State Text",
-    description:
-      "Text shown when no testimonials have been published yet",
+    description: "Text shown when no testimonials have been published yet",
     type: "textarea",
     page: "testimonials",
     group: "testimonials.page",
@@ -83,8 +82,7 @@ export const buildersTestimonialsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "testimonials.page",
     title: "Testimonials Page",
-    description:
-      "Heading, intro, empty state, and the submit call-to-action.",
+    description: "Heading, intro, empty state, and the submit call-to-action.",
     icon: "💬",
     columns: 1,
   },

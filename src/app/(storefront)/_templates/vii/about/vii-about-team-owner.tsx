@@ -48,7 +48,7 @@ export function ViiAboutTeamOwner({
         {/* Text */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline align="left" tone="light" style={{ marginBottom: 14 }}>
@@ -106,7 +106,7 @@ export function ViiAboutTeamOwner({
         {/* Image */}
         <div
           ref={imgRef}
-          className={`vii-reveal${imgVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${imgVisible ? "is-visible" : ""}`}
           style={{
             position: "relative",
             aspectRatio: "4/5",

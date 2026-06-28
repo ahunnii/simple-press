@@ -23,7 +23,9 @@ export function ViiCollectionsPage({
             "calc(var(--vii-header-offset) + clamp(40px, 6vw, 72px)) clamp(24px, 6vw, 96px) clamp(40px, 5vw, 64px)",
         }}
       >
-        <ViiReveal style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <ViiReveal
+          style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}
+        >
           <ViiOverline align="center" style={{ marginBottom: 14 }}>
             Shop by collection
           </ViiOverline>
@@ -98,7 +100,13 @@ export function ViiCollectionsPage({
                   key={collection.id}
                   href={`/collections/${collection.slug}`}
                   className="group vii-reveal-item"
-                  style={{ "--i": Math.min(i, 7), display: "block", textDecoration: "none" } as React.CSSProperties}
+                  style={
+                    {
+                      "--i": Math.min(i, 7),
+                      display: "block",
+                      textDecoration: "none",
+                    } as React.CSSProperties
+                  }
                 >
                   <div
                     style={{

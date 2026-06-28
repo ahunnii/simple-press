@@ -69,7 +69,9 @@ export async function BuildersHomepage({
       {/* 3. Recent Projects bento grid */}
       <BuildersProjectsSection
         heading={f["builders.homepage.projects-heading"] ?? ""}
-        viewAllHref={f["builders.homepage.projects-view-all-href"] ?? "/contact"}
+        viewAllHref={
+          f["builders.homepage.projects-view-all-href"] ?? "/contact"
+        }
         projects={projects}
         sectionAttrs={sectionGroupAttr("homepage", "projects")}
       />

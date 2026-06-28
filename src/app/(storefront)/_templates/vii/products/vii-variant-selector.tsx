@@ -155,7 +155,8 @@ export function ViiVariantSelector({
                   fontSize: 14,
                   cursor: outOfStock ? "not-allowed" : "pointer",
                   opacity: outOfStock ? 0.4 : 1,
-                  transition: "border-color 0.2s var(--vii-ease), background 0.2s var(--vii-ease)",
+                  transition:
+                    "border-color 0.2s var(--vii-ease), background 0.2s var(--vii-ease)",
                 }}
               >
                 {variant.name}

@@ -248,7 +248,9 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         <ViiInstagramStrip
           handle={f["vii.homepage.instagram-handle"] ?? ""}
           images={instagramImages}
-          ctaText={f["vii.homepage.instagram-cta-text"] ?? "Follow on Instagram"}
+          ctaText={
+            f["vii.homepage.instagram-cta-text"] ?? "Follow on Instagram"
+          }
         />
 
         {/* 12. Rooted in Detroit */}

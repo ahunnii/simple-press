@@ -5,22 +5,25 @@ import { useState } from "react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { Frame, X } from "lucide-react";
 
-import type { EmbedAspectRatio, EmbedDisplayMode, EmbedWidth } from "~/lib/embed";
 import type { EmbedOptions } from "./index";
+import type {
+  EmbedAspectRatio,
+  EmbedDisplayMode,
+  EmbedWidth,
+} from "~/lib/embed";
 import {
-  DEFAULT_EMBED_HEIGHT,
-  EMBED_ASPECT_RATIOS,
-  EMBED_WIDTH_PRESETS,
   coerceEmbedAspectRatio,
   coerceEmbedDisplayMode,
   coerceEmbedWidth,
+  DEFAULT_EMBED_HEIGHT,
+  EMBED_ASPECT_RATIOS,
+  EMBED_WIDTH_PRESETS,
   isVideoEmbed,
   parseEmbedInput,
 } from "~/lib/embed";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -28,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Textarea } from "~/components/ui/textarea";
 import { EmbedFrame } from "~/components/embed-frame";
 
 export function EmbedNodeView({
@@ -68,7 +72,9 @@ export function EmbedNodeView({
   );
 
   const storedMaxWidth = coerceEmbedWidth(node.attrs.maxWidth);
-  const [maxWidth, setMaxWidth] = useState<EmbedWidth>(storedMaxWidth ?? "full");
+  const [maxWidth, setMaxWidth] = useState<EmbedWidth>(
+    storedMaxWidth ?? "full",
+  );
 
   const storedDisplayMode = coerceEmbedDisplayMode(node.attrs.displayMode);
   const [displayMode, setDisplayMode] = useState<EmbedDisplayMode>(
@@ -115,10 +121,12 @@ export function EmbedNodeView({
       src: result.src,
       title: titleInput.trim(),
       aspectRatio,
-      height: aspectRatio === "fit" ? (result.height ?? heightInput) : undefined,
+      height:
+        aspectRatio === "fit" ? (result.height ?? heightInput) : undefined,
       maxWidth,
       displayMode,
-      triggerLabel: displayMode === "dialog" ? (triggerLabel.trim() || "Open") : undefined,
+      triggerLabel:
+        displayMode === "dialog" ? triggerLabel.trim() || "Open" : undefined,
     });
     setIsEditing(false);
   };
@@ -209,7 +217,10 @@ export function EmbedNodeView({
               {/* Sizing controls */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <Label htmlFor="embed-aspect-ratio" className="text-sm font-medium">
+                  <Label
+                    htmlFor="embed-aspect-ratio"
+                    className="text-sm font-medium"
+                  >
                     Aspect ratio
                   </Label>
                   <Select
@@ -230,7 +241,10 @@ export function EmbedNodeView({
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="embed-max-width" className="text-sm font-medium">
+                  <Label
+                    htmlFor="embed-max-width"
+                    className="text-sm font-medium"
+                  >
                     Width
                   </Label>
                   <Select
@@ -271,19 +285,27 @@ export function EmbedNodeView({
 
               {/* Display mode */}
               <div className="space-y-1">
-                <Label htmlFor="embed-display-mode" className="text-sm font-medium">
+                <Label
+                  htmlFor="embed-display-mode"
+                  className="text-sm font-medium"
+                >
                   Display mode
                 </Label>
                 <Select
                   value={displayMode}
                   onValueChange={(v) => setDisplayMode(v as EmbedDisplayMode)}
                 >
-                  <SelectTrigger id="embed-display-mode" className="w-full max-w-xs">
+                  <SelectTrigger
+                    id="embed-display-mode"
+                    className="w-full max-w-xs"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="inline">Inline</SelectItem>
-                    <SelectItem value="dialog">Dialog (opens in a modal)</SelectItem>
+                    <SelectItem value="dialog">
+                      Dialog (opens in a modal)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -291,7 +313,10 @@ export function EmbedNodeView({
               {/* Trigger label — only shown when display mode is "dialog" */}
               {displayMode === "dialog" && (
                 <div className="space-y-1">
-                  <Label htmlFor="embed-trigger-label" className="text-sm font-medium">
+                  <Label
+                    htmlFor="embed-trigger-label"
+                    className="text-sm font-medium"
+                  >
                     Button label
                   </Label>
                   <Input

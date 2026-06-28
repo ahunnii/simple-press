@@ -25,8 +25,14 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import { parseTemplateIframeValue, parseTemplateListRows } from "~/lib/template-fields";
-import { parseServiceAddOns, parseServicePriceTiers } from "~/lib/validators/services";
+import {
+  parseTemplateIframeValue,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
+import {
+  parseServiceAddOns,
+  parseServicePriceTiers,
+} from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_shared/service-hero-video";
@@ -271,7 +277,11 @@ function AtelierMosaic({
         }}
       >
         {overline && (
-          <ViiOverline tone="dark" align="left" style={{ ...revealStyle(0), marginBottom: 16 }}>
+          <ViiOverline
+            tone="dark"
+            align="left"
+            style={{ ...revealStyle(0), marginBottom: 16 }}
+          >
             {overline}
           </ViiOverline>
         )}
@@ -325,7 +335,7 @@ function PullQuote({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={`vii-reveal${visible ? "is-visible" : ""}`}
         style={{ maxWidth: 760, margin: "0 auto" }}
       >
         {/* Opening quotation mark */}
@@ -379,7 +389,7 @@ function PullQuote({
       {/* Optional media beneath the quote — contained within the navy band */}
       <div
         ref={mediaRef}
-        className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+        className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
       >
         <ServiceSectionMedia
           imageSrc={quoteImageSrc}
@@ -414,15 +424,17 @@ function TreatmentListRow({
   return (
     <div
       className="vii-reveal-item vii-atelier-list-row"
-      style={{
-        "--i": Math.min(index, 7),
-        display: "grid",
-        gridTemplateColumns: "1fr 1.4fr",
-        gap: "clamp(24px, 4vw, 56px)",
-        padding: "clamp(28px, 4vw, 48px) 0",
-        borderBottom: isLast ? "none" : "1px solid var(--vii-tan)",
-        alignItems: "start",
-      } as React.CSSProperties & { "--i": number }}
+      style={
+        {
+          "--i": Math.min(index, 7),
+          display: "grid",
+          gridTemplateColumns: "1fr 1.4fr",
+          gap: "clamp(24px, 4vw, 56px)",
+          padding: "clamp(28px, 4vw, 48px) 0",
+          borderBottom: isLast ? "none" : "1px solid var(--vii-tan)",
+          alignItems: "start",
+        } as React.CSSProperties & { "--i": number }
+      }
     >
       {/* Left: name + meta */}
       <div>
@@ -440,7 +452,14 @@ function TreatmentListRow({
         </h3>
 
         {/* Duration + compare-at + price chips */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
           {item.durationLabel && (
             <span
               style={{
@@ -536,7 +555,9 @@ function TreatmentListRow({
                     —
                   </span>
                   {tier.compareAtPriceLabel && (
-                    <span style={{ textDecoration: "line-through", opacity: 0.55 }}>
+                    <span
+                      style={{ textDecoration: "line-through", opacity: 0.55 }}
+                    >
                       {tier.compareAtPriceLabel}
                     </span>
                   )}
@@ -612,11 +633,16 @@ function TreatmentListRow({
                     <>
                       <span
                         aria-hidden="true"
-                        style={{ margin: "0 4px", color: "var(--vii-copper-light)" }}
+                        style={{
+                          margin: "0 4px",
+                          color: "var(--vii-copper-light)",
+                        }}
                       >
                         ·
                       </span>
-                      <span style={{ color: "var(--vii-navy)", fontWeight: 500 }}>
+                      <span
+                        style={{ color: "var(--vii-navy)", fontWeight: 500 }}
+                      >
                         {addon.priceLabel}
                       </span>
                     </>
@@ -819,7 +845,7 @@ function AtelierList({
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
+          className={`vii-reveal vii-atelier-list-row${headVisible ? "is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",
@@ -869,7 +895,7 @@ function AtelierList({
         {/* Treatment rows — stagger group: one observer, per-item --i cascade */}
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+          className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
         >
           {items.map((item, i) => (
             <TreatmentListRow

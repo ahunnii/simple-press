@@ -5,10 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
-import {
-  IconLayoutDashboard,
-  IconPackage,
-} from "@tabler/icons-react";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ArrowRight, Menu, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -137,10 +134,7 @@ export function BuildersHeader({
 
   const navLinks: NavLink[] = customNav ?? [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Our Work" }] : []),
-    ...DEFAULT_NAV.filter(
-      (l) =>
-        l.href !== "/blog" || isEnabled("blog"),
-    ),
+    ...DEFAULT_NAV.filter((l) => l.href !== "/blog" || isEnabled("blog")),
   ];
 
   const businessName = business?.name ?? "";
@@ -175,7 +169,7 @@ export function BuildersHeader({
     </div>
   ) : (
     <span
-      className="text-sm font-bold uppercase tracking-[0.2em]"
+      className="text-sm font-bold tracking-[0.2em] uppercase"
       style={{ fontFamily: "var(--font-builders-display, 'Jost', sans-serif)" }}
     >
       {businessName || "Builders"}
@@ -221,15 +215,16 @@ export function BuildersHeader({
 
   // Header is transparent + absolute when at top of page (for hero overlap),
   // solid white + sticky when scrolled
-  const headerBase =
-    "w-full z-50 transition-all duration-300";
+  const headerBase = "w-full z-50 transition-all duration-300";
   const headerScrolled = solid
     ? "sticky top-0 bg-white border-b border-gray-200 shadow-none"
     : "absolute top-0 left-0 bg-transparent border-b border-white/20";
 
   return (
     <>
-      <header className={cn(headerBase, headerScrolled)}>
+      <header
+        className={cn(headerBase, headerScrolled, !solid && "builders-on-dark")}
+      >
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 py-5 md:px-12">
           {/* Brand / logo */}
           <Link
@@ -237,7 +232,7 @@ export function BuildersHeader({
             aria-label="Home"
             className={cn(
               "flex items-center transition-opacity hover:opacity-80",
-              solid ? "text-gray-900" : "text-white",
+              solid ? "text-[var(--builders-ink)]" : "text-white",
             )}
           >
             {brand}
@@ -256,11 +251,11 @@ export function BuildersHeader({
                 rel={link.external ? "noopener noreferrer" : undefined}
                 aria-current={isActive(link.href) ? "page" : undefined}
                 className={cn(
-                  "text-sm font-bold uppercase tracking-widest transition-colors",
+                  "text-sm font-bold tracking-widest uppercase transition-colors",
                   solid
                     ? isActive(link.href)
-                      ? "text-gray-900"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "text-[var(--builders-ink)]"
+                      : "text-gray-600 hover:text-[var(--builders-ink)]"
                     : isActive(link.href)
                       ? "text-white"
                       : "text-white/80 hover:text-white",
@@ -296,7 +291,7 @@ export function BuildersHeader({
                     : "Open cart"
                 }
                 className={cn(
-                  "relative -m-2 flex items-center p-2 transition-opacity hover:opacity-60",
+                  "relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60",
                   solid ? "text-gray-700" : "text-white",
                 )}
               >
@@ -304,7 +299,7 @@ export function BuildersHeader({
                 {itemCount > 0 && (
                   <span
                     aria-hidden="true"
-                    className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center text-[9px] font-bold"
+                    className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center text-[9px] font-bold"
                     style={{
                       background: "var(--builders-accent, #FFC5B6)",
                       color: "var(--builders-accent-ink, #31130A)",
@@ -322,7 +317,7 @@ export function BuildersHeader({
               ref={hamburgerButtonRef}
               type="button"
               className={cn(
-                "flex h-10 w-10 items-center justify-center border transition-opacity hover:opacity-70 md:hidden",
+                "flex h-11 w-11 items-center justify-center border transition-opacity hover:opacity-70 md:hidden",
                 solid
                   ? "border-gray-200 text-gray-700"
                   : "border-white/40 text-white",
@@ -352,7 +347,7 @@ export function BuildersHeader({
           aria-label="Mobile navigation"
           className="fixed inset-0 z-[60] flex flex-col md:hidden"
           style={{
-            background: "#f9f9f7",
+            background: "var(--builders-surface, #ffffff)",
             color: "var(--builders-ink, #131313)",
           }}
         >
@@ -365,7 +360,7 @@ export function BuildersHeader({
               href="/"
               onClick={closeMobileMenu}
               aria-label="Home"
-              className="flex items-center text-gray-900 transition-opacity hover:opacity-80"
+              className="flex items-center text-[var(--builders-ink)] transition-opacity hover:opacity-80"
             >
               {brand}
             </Link>
@@ -374,7 +369,7 @@ export function BuildersHeader({
               type="button"
               onClick={closeMobileMenu}
               aria-label="Close menu"
-              className="p-2 text-[var(--builders-ink)] transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--builders-ink)]"
+              className="p-3 text-[var(--builders-ink)] transition-colors hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--builders-ink)]"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -399,7 +394,7 @@ export function BuildersHeader({
                       className={cn(
                         "group flex items-center gap-4 text-4xl leading-tight transition-all",
                         active
-                          ? "scale-105 -ml-4 border-l-4 pl-4 font-bold text-[var(--builders-ink)]"
+                          ? "border-b-2 pb-1 font-bold text-[var(--builders-ink)]"
                           : "text-[var(--builders-ink)]/70 hover:text-[var(--builders-ink)]",
                       )}
                       style={{
@@ -407,7 +402,7 @@ export function BuildersHeader({
                           "var(--font-builders-display, 'Jost', sans-serif)",
                         fontWeight: active ? 700 : 300,
                         ...(active
-                          ? { borderColor: "var(--builders-accent-hover)" }
+                          ? { borderColor: "var(--builders-accent)" }
                           : {}),
                       }}
                     >
@@ -417,7 +412,7 @@ export function BuildersHeader({
                       )}
                       <ArrowRight
                         aria-hidden
-                        className="-translate-x-4 h-7 w-7 text-[var(--builders-accent-hover)] opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                        className="h-7 w-7 -translate-x-4 text-[var(--builders-accent-hover)] opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
                       />
                     </Link>
                   </li>
@@ -443,7 +438,7 @@ export function BuildersHeader({
                     "var(--font-builders-body, 'Agdasima', sans-serif)",
                 }}
               >
-                <span className="text-xs font-bold uppercase tracking-widest">
+                <span className="text-xs font-bold tracking-widest uppercase">
                   Contact
                 </span>
               </Link>
@@ -463,9 +458,10 @@ export function BuildersHeader({
                           ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
                           : "Open cart"
                       }
-                      className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-[var(--builders-ink)]"
+                      className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
                       style={{
-                        color: "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
+                        color:
+                          "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
                         fontFamily:
                           "var(--font-builders-body, 'Agdasima', sans-serif)",
                       }}
@@ -489,7 +485,7 @@ export function BuildersHeader({
                   <Link
                     href="/auth/sign-in"
                     onClick={closeMobileMenu}
-                    className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-[var(--builders-ink)]"
+                    className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
                     style={{
                       color:
                         "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
@@ -505,7 +501,7 @@ export function BuildersHeader({
 
               {/* Business name / location label */}
               <div
-                className="text-center text-xs font-bold uppercase tracking-[0.2em]"
+                className="text-center text-xs font-bold tracking-[0.2em] uppercase"
                 style={{
                   color:
                     "color-mix(in srgb, var(--builders-ink) 50%, transparent)",

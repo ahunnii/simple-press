@@ -1,15 +1,16 @@
 "use client";
 
+import { FacebookIcon } from "~/components/icons/facebook-icon";
+import { InstagramIcon } from "~/components/icons/instagram-icon";
+import { LinkedinIcon } from "~/components/icons/linkedin-icon";
+import { PinterestIcon } from "~/components/icons/pinterest-icon";
+import { TikTokIcon } from "~/components/icons/tiktok-icon";
+import { TwitterIcon } from "~/components/icons/twitter-icon";
+import { YouTubeIcon } from "~/components/icons/youtube-icon";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 import { ViiContactForm } from "./vii-contact-form";
-import { InstagramIcon } from "~/components/icons/instagram-icon";
-import { FacebookIcon } from "~/components/icons/facebook-icon";
-import { TwitterIcon } from "~/components/icons/twitter-icon";
-import { TikTokIcon } from "~/components/icons/tiktok-icon";
-import { YouTubeIcon } from "~/components/icons/youtube-icon";
-import { LinkedinIcon } from "~/components/icons/linkedin-icon";
-import { PinterestIcon } from "~/components/icons/pinterest-icon";
 
 type Props = {
   overline: string;
@@ -107,14 +108,10 @@ export function ViiContactMain({
         {/* Left — intro + info */}
         <div
           ref={infoRef}
-          className={`vii-reveal${infoVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${infoVisible ? "is-visible" : ""}`}
         >
           {overline && (
-            <ViiOverline
-              align="left"
-              tone="light"
-              style={{ marginBottom: 14 }}
-            >
+            <ViiOverline align="left" tone="light" style={{ marginBottom: 14 }}>
               {overline}
             </ViiOverline>
           )}
@@ -186,7 +183,9 @@ export function ViiContactMain({
             )}
             {hourRows.length > 0 && (
               <InfoBlock label="Hours">
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 4 }}
+                >
                   {hourRows.map((row) => (
                     <div
                       key={row.label}
@@ -201,7 +200,9 @@ export function ViiContactMain({
                       }}
                     >
                       <span>{row.label}</span>
-                      <span style={{ color: "var(--vii-ink-soft)" }}>{row.value}</span>
+                      <span style={{ color: "var(--vii-ink-soft)" }}>
+                        {row.value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -236,7 +237,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="Instagram"
                   >
                     <InstagramIcon className="h-4 w-4" />
@@ -248,7 +252,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="Facebook"
                   >
                     <FacebookIcon className="h-4 w-4" />
@@ -260,7 +267,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="X (Twitter)"
                   >
                     <TwitterIcon className="h-4 w-4" />
@@ -272,7 +282,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="TikTok"
                   >
                     <TikTokIcon className="h-4 w-4" />
@@ -284,7 +297,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="YouTube"
                   >
                     <YouTubeIcon className="h-4 w-4" />
@@ -296,7 +312,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="LinkedIn"
                   >
                     <LinkedinIcon className="h-4 w-4" />
@@ -308,7 +327,10 @@ export function ViiContactMain({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-m-3 flex items-center justify-center p-3 hover:opacity-70"
-                    style={{ color: "var(--vii-ink-soft)", transition: "opacity 0.4s var(--vii-ease)" }}
+                    style={{
+                      color: "var(--vii-ink-soft)",
+                      transition: "opacity 0.4s var(--vii-ease)",
+                    }}
                     aria-label="Pinterest"
                   >
                     <PinterestIcon className="h-4 w-4" />
@@ -322,7 +344,7 @@ export function ViiContactMain({
         {/* Right — form card */}
         <div
           ref={formRef}
-          className={`vii-reveal${formVisible ? " is-visible" : ""}`}
+          className={`vii-reveal${formVisible ? "is-visible" : ""}`}
           style={{
             background: "var(--vii-paper)",
             borderRadius: "var(--radius)",

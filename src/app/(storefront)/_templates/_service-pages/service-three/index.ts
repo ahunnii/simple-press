@@ -178,8 +178,7 @@ export const serviceThreeFieldGroups: TemplateFieldGroup[] = [
   {
     id: "service-three.quote",
     title: "Pull Quote",
-    description:
-      "A standout quote or testimonial excerpt with optional media",
+    description: "A standout quote or testimonial excerpt with optional media",
     icon: "💬",
     columns: 1,
   },

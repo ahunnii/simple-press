@@ -6,14 +6,12 @@
  * to the client body. Mirrors the gallery-resolution pattern in
  * `homepage/vii-homepage.tsx` (Instagram strip).
  */
+import type { ServicesGalleryImage } from "./vii-services-index-client";
 import type { RouterOutputs } from "~/trpc/react";
 import { db } from "~/server/db";
 
 import { resolveFields } from "..";
-import {
-  ViiServicesIndexClient,
-  type ServicesGalleryImage,
-} from "./vii-services-index-client";
+import { ViiServicesIndexClient } from "./vii-services-index-client";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;

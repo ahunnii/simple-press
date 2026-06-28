@@ -5,8 +5,12 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 "use client";
 
-import MapLibreGL, { type PopupOptions, type MarkerOptions } from "maplibre-gl";
+import type { MarkerOptions, PopupOptions } from "maplibre-gl";
+import MapLibreGL from "maplibre-gl";
+
 import "maplibre-gl/dist/maplibre-gl.css";
+
+import type { ReactNode } from "react";
 import {
   createContext,
   forwardRef,
@@ -18,10 +22,9 @@ import {
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
+import { Loader2, Locate, Maximize, Minus, Plus, X } from "lucide-react";
 import { createPortal } from "react-dom";
-import { X, Minus, Plus, Locate, Maximize, Loader2 } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 

@@ -25,12 +25,16 @@ import {
 import { toast } from "sonner";
 
 import type {
+  EmbedAspectRatio,
+  EmbedDisplayMode,
+  EmbedWidth,
+} from "~/lib/embed";
+import type {
   TemplateField,
   TemplateFieldGroup,
   TemplateListItemField,
   TemplateListRow,
 } from "~/lib/template-fields";
-import type { EmbedAspectRatio, EmbedDisplayMode, EmbedWidth } from "~/lib/embed";
 import {
   DEFAULT_EMBED_HEIGHT,
   EMBED_ASPECT_RATIOS,
@@ -617,7 +621,9 @@ export function IframeFieldEditor({
       setParseError(null);
       // Auto-pick a sensible default when no ratio is saved yet.
       if (!parsed?.aspectRatio) {
-        const auto: EmbedAspectRatio = isVideoEmbed(result.src) ? "16:9" : "fit";
+        const auto: EmbedAspectRatio = isVideoEmbed(result.src)
+          ? "16:9"
+          : "fit";
         setAspectRatioState(auto);
         emitChange(
           result.src,
@@ -670,14 +676,30 @@ export function IframeFieldEditor({
   const handleHeightChange = (h: number) => {
     setHeightState(h);
     if (currentSrc && titleState) {
-      emitChange(currentSrc, h, titleState, aspectRatioState, maxWidthState, displayModeState, triggerLabelState);
+      emitChange(
+        currentSrc,
+        h,
+        titleState,
+        aspectRatioState,
+        maxWidthState,
+        displayModeState,
+        triggerLabelState,
+      );
     }
   };
 
   const handleTitleChange = (t: string) => {
     setTitleState(t);
     if (currentSrc && t) {
-      emitChange(currentSrc, heightState, t, aspectRatioState, maxWidthState, displayModeState, triggerLabelState);
+      emitChange(
+        currentSrc,
+        heightState,
+        t,
+        aspectRatioState,
+        maxWidthState,
+        displayModeState,
+        triggerLabelState,
+      );
     } else if (!t) {
       onChange("");
     }
@@ -687,7 +709,15 @@ export function IframeFieldEditor({
     const ar = v as EmbedAspectRatio;
     setAspectRatioState(ar);
     if (currentSrc && titleState) {
-      emitChange(currentSrc, heightState, titleState, ar, maxWidthState, displayModeState, triggerLabelState);
+      emitChange(
+        currentSrc,
+        heightState,
+        titleState,
+        ar,
+        maxWidthState,
+        displayModeState,
+        triggerLabelState,
+      );
     }
   };
 
@@ -695,7 +725,15 @@ export function IframeFieldEditor({
     const mw = v as EmbedWidth;
     setMaxWidthState(mw);
     if (currentSrc && titleState) {
-      emitChange(currentSrc, heightState, titleState, aspectRatioState, mw, displayModeState, triggerLabelState);
+      emitChange(
+        currentSrc,
+        heightState,
+        titleState,
+        aspectRatioState,
+        mw,
+        displayModeState,
+        triggerLabelState,
+      );
     }
   };
 
@@ -703,14 +741,30 @@ export function IframeFieldEditor({
     const dm = v as EmbedDisplayMode;
     setDisplayModeState(dm);
     if (currentSrc && titleState) {
-      emitChange(currentSrc, heightState, titleState, aspectRatioState, maxWidthState, dm, triggerLabelState);
+      emitChange(
+        currentSrc,
+        heightState,
+        titleState,
+        aspectRatioState,
+        maxWidthState,
+        dm,
+        triggerLabelState,
+      );
     }
   };
 
   const handleTriggerLabelChange = (t: string) => {
     setTriggerLabelState(t);
     if (currentSrc && titleState) {
-      emitChange(currentSrc, heightState, titleState, aspectRatioState, maxWidthState, displayModeState, t);
+      emitChange(
+        currentSrc,
+        heightState,
+        titleState,
+        aspectRatioState,
+        maxWidthState,
+        displayModeState,
+        t,
+      );
     }
   };
 
