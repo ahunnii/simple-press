@@ -3136,6 +3136,13 @@
     0.36,
     1
   ); /* header / nav micro-interactions */
+  /* Layout & scrim scale (vii refactor) */
+  --vii-section-pad-y: clamp(64px, 9vw, 112px);
+  --vii-section-pad-x: clamp(24px, 6vw, 96px);
+  --vii-container: 1200px;
+  --vii-scrim-strong: 82%;
+  --vii-scrim-medium: 25%;
+  --vii-scrim-soft: 10%;
   --font-serif: var(--font-vii-serif), "Playfair Display", serif;
   --font-sans: var(--font-vii-sans), "Jost", sans-serif;
   background: var(--vii-cream);

@@ -206,7 +206,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
               >
                 {/* Member photo */}
                 {image ? (
-                  <div className="mb-6 h-48 w-full overflow-hidden">
+                  <div className="mb-6 aspect-square w-full overflow-hidden">
                     <img
                       src={image}
                       alt={name}
@@ -217,7 +217,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
                   </div>
                 ) : (
                   <div
-                    className="mb-6 h-48 w-full"
+                    className="mb-6 aspect-square w-full"
                     style={{ background: "var(--builders-alt, #F1F3F5)" }}
                     aria-hidden="true"
                   />
