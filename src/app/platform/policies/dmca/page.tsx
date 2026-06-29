@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "DMCA Policy | SimplePress",
+  description: "How to submit a copyright takedown notice or counter-notice under the DMCA.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/dmca`,
+  },
+};
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??

@@ -85,6 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    keywords: service.metaKeywords ?? undefined,
     ...(business && {
       alternates: {
         canonical: getCanonicalUrl(business, `/services/${slug}`),

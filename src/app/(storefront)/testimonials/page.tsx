@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import { buildPageMetadata } from "~/lib/seo";
 import { api } from "~/trpc/server";
 
 import { getTemplate } from "../_templates/registry";
@@ -16,13 +16,10 @@ export default async function TestimonialsPage() {
 
 export async function generateMetadata() {
   const business = await api.business.simplifiedGet();
-  return {
+  return buildPageMetadata({
+    business,
+    path: "/testimonials",
     title: "Testimonials",
     description: "Customer testimonials",
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, "/testimonials"),
-      },
-    }),
-  };
+  });
 }

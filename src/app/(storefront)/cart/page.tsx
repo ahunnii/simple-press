@@ -15,4 +15,5 @@ export default async function CartPage() {
 
 export const metadata = {
   title: "Cart",
+  robots: { index: false, follow: false },
 };

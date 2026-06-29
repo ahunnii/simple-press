@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import { JsonLd } from "~/components/json-ld";
+import { buildPageMetadata } from "~/lib/seo";
+import { buildItemListSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 
 import { getTemplate } from "../_templates/registry";
@@ -12,17 +14,21 @@ export default async function ProductsPage() {
 
   const t = getTemplate(business.templateId);
 
-  return <t.ShopPage business={business} />;
+  const items = business.products.map((p) => ({
+    name: p.name,
+    path: `/shop/${p.slug}`,
+    image: p.images[0]?.url ?? null,
+  }));
+
+  return (
+    <>
+      <JsonLd data={buildItemListSchema(business, items)} />
+      <t.ShopPage business={business} />
+    </>
+  );
 }
 
 export async function generateMetadata() {
   const business = await api.business.simplifiedGet();
-  return {
-    title: "Shop",
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, "/shop"),
-      },
-    }),
-  };
+  return buildPageMetadata({ business, path: "/shop", title: "Shop" });
 }

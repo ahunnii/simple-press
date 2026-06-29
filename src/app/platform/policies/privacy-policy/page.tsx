@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | SimplePress",
+  description: "How SimplePress collects, uses, and protects your personal information.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/privacy-policy`,
+  },
+};
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??

@@ -28,9 +28,11 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
+  const reviews = await api.review.listByProduct({ productId: product.id }).catch(() => []);
+
   const t = getTemplate(business.templateId);
 
-  const productSchema = buildProductSchema(product, business);
+  const productSchema = buildProductSchema(product, business, reviews.slice(0, 20));
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },

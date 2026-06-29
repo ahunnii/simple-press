@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "Acceptable Use Policy | SimplePress",
+  description: "Prohibited products, content, and conduct on the SimplePress platform.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/acceptable-use`,
+  },
+};
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??

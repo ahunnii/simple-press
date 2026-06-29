@@ -80,8 +80,17 @@ interface PageForBlogPosting {
   slug: string;
   excerpt?: string | null;
   ogImage?: string | null;
+  publishedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface ReviewForSchema {
+  rating: number;
+  title?: string | null;
+  comment: string;
+  customerName: string;
+  reviewDate: Date;
 }
 
 // ---------------------------------------------------------------------------
@@ -159,6 +168,7 @@ function parseSameAs(socialLinks: unknown): string[] | undefined {
 export function buildProductSchema(
   product: ProductForSchema,
   business: CanonicalBusiness & { name: string },
+  reviews: ReviewForSchema[] = [],
 ): Record<string, unknown> {
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
   const firstImage = toAbsoluteUrl(product.images[0]?.url);
@@ -204,6 +214,22 @@ export function buildProductSchema(
       ratingValue: product.averageRating.toFixed(1),
       reviewCount: product.reviewCount,
     };
+  }
+
+  if (reviews.length > 0) {
+    schema.review = reviews.map((r) => ({
+      "@type": "Review",
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      author: { "@type": "Person", name: r.customerName },
+      datePublished: r.reviewDate.toISOString(),
+      ...(r.title ? { name: r.title } : {}),
+      reviewBody: r.comment,
+    }));
   }
 
   return schema;
@@ -293,6 +319,47 @@ export function buildBreadcrumbSchema(
       name: item.name,
       item: getCanonicalUrl(business, item.path || "/"),
     })),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Builder: ItemList (standalone — for shop pages, search results, etc.)
+// ---------------------------------------------------------------------------
+
+interface ItemListEntry {
+  name: string;
+  /** Path starting with "/" — e.g. "/shop/foo" */
+  path: string;
+  image?: string | null;
+}
+
+/**
+ * Build a standalone schema.org ItemList for pages that list products or
+ * other content items (e.g. the shop index page).
+ *
+ * Each entry becomes a ListItem with position, name, url, and optional image.
+ * Image is omitted when absent (matches file-wide "omit empty optional keys" convention).
+ */
+export function buildItemListSchema(
+  business: CanonicalBusiness,
+  items: ItemListEntry[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: items.map((item, index) => {
+      const entry: Record<string, unknown> = {
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.name,
+        url: getCanonicalUrl(business, item.path),
+      };
+      const image = toAbsoluteUrl(item.image);
+      if (image) {
+        entry.image = image;
+      }
+      return entry;
+    }),
   };
 }
 
@@ -406,7 +473,7 @@ export function buildLocalBusinessSchema(
   }
 
   if (business.businessAddress) {
-    schema.address = business.businessAddress;
+    schema.address = { "@type": "PostalAddress", streetAddress: business.businessAddress };
   }
 
   const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
@@ -572,7 +639,7 @@ export function buildBlogPostingSchema(
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: page.title,
-    datePublished: page.createdAt.toISOString(),
+    datePublished: (page.publishedAt ?? page.createdAt).toISOString(),
     dateModified: page.updatedAt.toISOString(),
     author: {
       "@type": "Organization",

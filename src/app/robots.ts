@@ -34,7 +34,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     (agent) => ({
       userAgent: agent,
       ...(business === null || business.allowAiCrawlers
-        ? { allow: "/", disallow: ["/admin", "/api", "/platform"] }
+        ? { allow: "/", disallow: ["/admin", "/api", "/platform", "/cart", "/checkout", "/account", "/order"] }
         : { disallow: "/" }),
     }),
   );
@@ -44,7 +44,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api", "/platform"],
+        disallow: ["/admin", "/api", "/platform", "/cart", "/checkout", "/account", "/order"],
       },
       ...aiCrawlerRules,
     ],
