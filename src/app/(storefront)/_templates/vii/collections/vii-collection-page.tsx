@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { DefaultCollectionPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
 
+import { ViiBreadcrumb } from "../shared/vii-breadcrumb";
 import { ViiProductCard } from "../shared/vii-product-card";
 import { ViiReveal, ViiRevealGroup } from "../shared/vii-reveal";
 
@@ -33,57 +34,14 @@ export function ViiCollectionPage({
       >
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <ViiReveal>
-            <nav
-              aria-label="Breadcrumb"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 20,
-                fontFamily: "var(--font-sans)",
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--vii-ink-soft)",
-              }}
-            >
-              <Link
-                href="/"
-                className="vii-nav-link"
-                style={{
-                  position: "relative",
-                  color: "inherit",
-                  textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  paddingBlock: 8,
-                  marginBlock: -8,
-                }}
-              >
-                Home
-              </Link>
-              <span aria-hidden="true">/</span>
-              <Link
-                href="/collections"
-                className="vii-nav-link"
-                style={{
-                  position: "relative",
-                  color: "inherit",
-                  textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  paddingBlock: 8,
-                  marginBlock: -8,
-                }}
-              >
-                Collections
-              </Link>
-              <span aria-hidden="true">/</span>
-              <span aria-current="page" style={{ color: "var(--vii-navy)" }}>
-                {collection.name}
-              </span>
-            </nav>
+            <ViiBreadcrumb
+              items={[
+                { label: "Home", href: "/" },
+                { label: "Collections", href: "/collections" },
+                { label: collection.name },
+              ]}
+              style={{ marginBottom: 20 }}
+            />
 
             <h1
               id="vii-collection-heading"

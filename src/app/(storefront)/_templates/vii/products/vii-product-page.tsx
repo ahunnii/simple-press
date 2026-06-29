@@ -22,68 +22,10 @@ import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-p
 
 import { resolveFields } from "..";
 import { useViiReveal } from "../hooks/use-vii-reveal";
+import { ViiAccordion, ViiAccordionItem } from "../shared/vii-accordion";
 import { ViiOverline } from "../shared/vii-overline";
-import { ViiProductCard } from "../shared/vii-product-card";
+import { ViiProductGrid } from "../shared/vii-product-grid";
 import { ViiProductActions } from "./vii-product-actions";
-
-function AccordionItem({
-  summary,
-  children,
-  defaultOpen,
-}: {
-  summary: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) {
-  return (
-    <details
-      open={defaultOpen}
-      className="group"
-      style={{
-        borderBottom: "1px solid var(--vii-hairline)",
-        padding: "20px 0",
-      }}
-    >
-      <summary
-        className="[&::-webkit-details-marker]:hidden"
-        style={{
-          display: "flex",
-          cursor: "pointer",
-          listStyle: "none",
-          alignItems: "center",
-          justifyContent: "space-between",
-          userSelect: "none",
-          fontFamily: "var(--font-sans)",
-          fontSize: 13,
-          fontWeight: 500,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: "var(--vii-navy)",
-        }}
-      >
-        {summary}
-        <span
-          aria-hidden="true"
-          className="transition-transform duration-200 group-open:rotate-45"
-          style={{ fontSize: 20, fontWeight: 300, color: "var(--vii-copper)" }}
-        >
-          +
-        </span>
-      </summary>
-      <div
-        style={{
-          paddingTop: 14,
-          fontFamily: "var(--font-sans)",
-          fontSize: 14,
-          lineHeight: 1.7,
-          color: "var(--vii-ink-soft)",
-        }}
-      >
-        {children}
-      </div>
-    </details>
-  );
-}
 
 export function ViiProductPage({
   product,
@@ -350,23 +292,18 @@ export function ViiProductPage({
             )}
 
             {/* Accordion */}
-            <div
-              style={{
-                marginTop: 8,
-                borderTop: "1px solid var(--vii-hairline)",
-              }}
-            >
+            <ViiAccordion style={{ marginTop: 8 }}>
               {!isAdditionalEmpty && (
-                <AccordionItem summary="Details" defaultOpen>
+                <ViiAccordionItem title="Details" defaultOpen>
                   <TiptapRenderer
                     content={
                       additionalFields?.additionalInformation as TiptapJSON
                     }
                     className="prose prose-sm max-w-none"
                   />
-                </AccordionItem>
+                </ViiAccordionItem>
               )}
-              <AccordionItem summary="Shipping &amp; returns">
+              <ViiAccordionItem title="Shipping &amp; returns">
                 {f["vii.global.product-shipping-description"] && (
                   <p style={{ margin: "0 0 8px" }}>
                     {f["vii.global.product-shipping-description"]}
@@ -385,8 +322,8 @@ export function ViiProductPage({
                     View shipping policy
                   </Link>
                 </p>
-              </AccordionItem>
-            </div>
+              </ViiAccordionItem>
+            </ViiAccordion>
 
             {/* Ask a question — inline */}
             {f["vii.global.product-question-description"] && (
@@ -496,28 +433,9 @@ export function ViiProductPage({
               </div>
 
               {/* Product grid */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                  gap: "clamp(20px, 3vw, 36px)",
-                }}
-              >
-                {relatedProducts?.map((p, index) => (
-                  <div
-                    key={p.id}
-                    className="vii-reveal-item"
-                    style={
-                      { "--i": Math.min(index + 1, 7) } as React.CSSProperties
-                    }
-                  >
-                    <ViiProductCard
-                      product={p as unknown as Product}
-                      index={index}
-                    />
-                  </div>
-                ))}
-              </div>
+              <ViiProductGrid
+                products={(relatedProducts ?? []) as unknown as Product[]}
+              />
             </div>
           </section>
         )}

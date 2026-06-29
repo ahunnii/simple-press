@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
 import { ViiOverline } from "../shared/vii-overline";
+import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../hooks/use-vii-hero-motion";
 
 type Props = {
   heroVideo?: string;
@@ -25,26 +26,16 @@ export function ViiHeroSection({
   heroCtaLink,
 }: Props) {
   const [videoPaused, setVideoPaused] = useState(false);
-  const [shown, setShown] = useState(false);
-  const [reduced, setReduced] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { shown, reduced } = useViiHeroMotion();
 
-  // Entrance animation
+  // Pause video when user prefers reduced motion
   useEffect(() => {
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Honour prefers-reduced-motion: pause video + skip entrance motion
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) {
-      setReduced(true);
+    if (reduced) {
       setVideoPaused(true);
       videoRef.current?.pause();
     }
-  }, []);
+  }, [reduced]);
 
   const toggleVideo = () => {
     const video = videoRef.current;
@@ -60,38 +51,6 @@ export function ViiHeroSection({
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
-
-  const easeOut = "var(--vii-ease)";
-
-  // Staggered fade-rise for overline + CTA. Reduced-motion users land on the
-  // final, fully-visible state with no transition.
-  const revealStyle = (delay: number): React.CSSProperties =>
-    reduced
-      ? { opacity: 1 }
-      : {
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-        };
-
-  // Heading wipes up behind a clip-path mask — a touch more cinematic than a
-  // plain fade-rise, on the same 0.15s beat.
-  const headingStyle: React.CSSProperties = reduced
-    ? { opacity: 1 }
-    : {
-        opacity: shown ? 1 : 0,
-        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
-        transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition: `opacity 0.95s ${easeOut} 0.15s, clip-path 0.95s ${easeOut} 0.15s, transform 0.95s ${easeOut} 0.15s`,
-      };
-
-  // Slow Ken-Burns scale-settle on the background media as the hero loads.
-  const mediaStyle: React.CSSProperties = reduced
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: `transform 2.2s ${easeOut}`,
-      };
 
   return (
     <section
@@ -113,7 +72,7 @@ export function ViiHeroSection({
           position: "absolute",
           inset: 0,
           overflow: "hidden",
-          ...mediaStyle,
+          ...heroMediaStyle(shown, reduced),
         }}
       >
         {hasVideo ? (
@@ -215,7 +174,7 @@ export function ViiHeroSection({
       >
         {/* Overline */}
         {heroOverline && (
-          <div style={{ ...revealStyle(0), marginBottom: 20 }}>
+          <div style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 20 }}>
             <ViiOverline tone="dark">{heroOverline}</ViiOverline>
           </div>
         )}
@@ -224,7 +183,7 @@ export function ViiHeroSection({
         {heroHeading && (
           <h1
             style={{
-              ...headingStyle,
+              ...heroHeadingStyle(shown, reduced),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(18px, 2.4vw, 28px)",
               lineHeight: 1.55,
@@ -240,7 +199,7 @@ export function ViiHeroSection({
 
         {/* CTA */}
         {heroCtaText && (
-          <div style={revealStyle(0.3)}>
+          <div style={heroRevealStyle(shown, reduced, 0.3)}>
             <Link
               href={heroCtaLink}
               style={{

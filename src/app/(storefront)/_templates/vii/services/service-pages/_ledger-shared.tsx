@@ -4,7 +4,6 @@
  * Shared sub-components extracted from vii-ledger-service-page.tsx.
  * Used by both ViiLedgerServicePage and ViiCollectionServicePage.
  */
-import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -22,6 +21,7 @@ import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-page
 
 import { ViiProductRail } from "../../homepage/vii-product-rail";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
+import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../../hooks/use-vii-hero-motion";
 import { ViiOverline } from "../../shared/vii-overline";
 
 // ─── LedgerHero ───────────────────────────────────────────────────────────────
@@ -39,49 +39,10 @@ export function LedgerHero({
   serviceDescription?: string | null;
   overline: string;
 }) {
-  const [shown, setShown] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setReduceMotion(true);
-      setShown(true);
-      return;
-    }
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
+  const { shown, reduced } = useViiHeroMotion();
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
-
-  const revealStyle = (delay: number): React.CSSProperties =>
-    reduceMotion
-      ? {}
-      : {
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.95s var(--vii-ease) ${delay}s, transform 0.95s var(--vii-ease) ${delay}s`,
-        };
-
-  const headingStyle: React.CSSProperties = reduceMotion
-    ? {}
-    : {
-        opacity: shown ? 1 : 0,
-        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
-        transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition: `opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s`,
-      };
-
-  const mediaStyle: React.CSSProperties = reduceMotion
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: `transform 2.2s var(--vii-ease)`,
-      };
 
   if (hasVideo || hasImage) {
     return (
@@ -100,11 +61,11 @@ export function LedgerHero({
             <ServiceHeroVideo
               src={heroVideo!}
               buttonClassName="vii-ledger-video-btn"
-              style={mediaStyle}
+              style={heroMediaStyle(shown, reduced)}
             />
           </div>
         ) : (
-          <div style={{ position: "absolute", inset: 0, ...mediaStyle }}>
+          <div style={{ position: "absolute", inset: 0, ...heroMediaStyle(shown, reduced) }}>
             <Image
               src={heroImage!}
               alt=""
@@ -142,7 +103,7 @@ export function LedgerHero({
             <ViiOverline
               tone="dark"
               align="left"
-              style={{ ...revealStyle(0), marginBottom: 16 }}
+              style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 16 }}
             >
               {overline}
             </ViiOverline>
@@ -150,7 +111,7 @@ export function LedgerHero({
 
           <h1
             style={{
-              ...headingStyle,
+              ...heroHeadingStyle(shown, reduced),
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
               fontSize: "clamp(52px, 9vw, 120px)",
@@ -192,7 +153,7 @@ export function LedgerHero({
           <ViiOverline
             tone="light"
             align="left"
-            style={{ ...revealStyle(0), marginBottom: 28 }}
+            style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 28 }}
           >
             {overline}
           </ViiOverline>
@@ -200,7 +161,7 @@ export function LedgerHero({
 
         <h1
           style={{
-            ...headingStyle,
+            ...heroHeadingStyle(shown, reduced),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontStyle: "italic",
@@ -220,7 +181,7 @@ export function LedgerHero({
         {serviceDescription && (
           <p
             style={{
-              ...revealStyle(0.25),
+              ...heroRevealStyle(shown, reduced, 0.25),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.4vw, 17px)",
               lineHeight: 1.75,

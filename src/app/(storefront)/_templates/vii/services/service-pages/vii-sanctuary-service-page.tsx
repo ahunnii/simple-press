@@ -14,7 +14,7 @@
  *    and a copper "Book" CTA.
  * 5. Closing contact CTA section (reuses ViiContactCtaSection).
  */
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 
@@ -35,6 +35,12 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
 import { ViiOverline } from "../../shared/vii-overline";
 import { resolveSanctuaryFields } from "./fields";
@@ -55,24 +61,8 @@ function SanctuaryHero({
   overline: string;
 }) {
   const [videoPaused, setVideoPaused] = useState(false);
-  const [shown, setShown] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const { shown, reduced: reduceMotion } = useViiHeroMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Entrance reveal on mount — skipped entirely when the user prefers reduced
-  // motion (mirrors useViiReveal's behaviour for the rest of the template).
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setReduceMotion(true);
-      setShown(true);
-      return;
-    }
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
@@ -88,34 +78,6 @@ function SanctuaryHero({
       setVideoPaused(true);
     }
   };
-
-  // entrance reveal styles — no animation under reduced-motion
-  const revealStyle = (delay: number): React.CSSProperties =>
-    reduceMotion
-      ? {}
-      : {
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.95s var(--vii-ease) ${delay}s, transform 0.95s var(--vii-ease) ${delay}s`,
-        };
-
-  // Heading clip-path line-reveal — more cinematic than a plain fade-rise.
-  const headingStyle: React.CSSProperties = reduceMotion
-    ? {}
-    : {
-        opacity: shown ? 1 : 0,
-        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
-        transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition: `opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s`,
-      };
-
-  // Ken-Burns scale-settle on the background media layer.
-  const mediaStyle: React.CSSProperties = reduceMotion
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: `transform 2.2s var(--vii-ease)`,
-      };
 
   return (
     <section
@@ -139,7 +101,7 @@ function SanctuaryHero({
           position: "absolute",
           inset: 0,
           overflow: "hidden",
-          ...mediaStyle,
+          ...heroMediaStyle(shown, reduceMotion),
         }}
       >
         {hasVideo ? (
@@ -220,7 +182,7 @@ function SanctuaryHero({
           <ViiOverline
             tone="dark"
             align="left"
-            style={{ ...revealStyle(0), marginBottom: 18 }}
+            style={{ ...heroRevealStyle(shown, reduceMotion, 0), marginBottom: 18 }}
           >
             {overline}
           </ViiOverline>
@@ -228,7 +190,7 @@ function SanctuaryHero({
 
         <h1
           style={{
-            ...headingStyle,
+            ...heroHeadingStyle(shown, reduceMotion),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontStyle: "italic",
@@ -248,7 +210,7 @@ function SanctuaryHero({
         {serviceDescription && (
           <p
             style={{
-              ...revealStyle(0.25),
+              ...heroRevealStyle(shown, reduceMotion, 0.25),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.4vw, 17px)",
               lineHeight: 1.75,

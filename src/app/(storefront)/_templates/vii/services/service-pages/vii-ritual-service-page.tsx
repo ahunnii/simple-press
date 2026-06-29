@@ -20,7 +20,7 @@
  * 4. Full-bleed navy closing CTA with background image, optional button, and
  *    optional booking embed.
  */
-import { useEffect, useState } from "react";
+import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../../hooks/use-vii-hero-motion";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -59,53 +59,7 @@ function RitualHero({
   serviceName: string;
   serviceDescription?: string | null;
 }) {
-  const [shown, setShown] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  // Entrance animation — fire ~60 ms after mount so the browser has painted once
-  useEffect(() => {
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Honour prefers-reduced-motion: skip all entrance animation
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) setReduced(true);
-  }, []);
-
-  const easeOut = "var(--vii-ease)";
-
-  // Staggered fade-rise for overline, copper rule, and description.
-  // Reduced-motion users land on the final visible state immediately.
-  const revealStyle = (delay: number): React.CSSProperties =>
-    reduced
-      ? { opacity: 1 }
-      : {
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.9s ${easeOut} ${delay}s, transform 0.9s ${easeOut} ${delay}s`,
-        };
-
-  // Heading wipes up behind a clip-path mask — cinematic, same 0.15s beat as
-  // vii-hero-section.
-  const headingStyle: React.CSSProperties = reduced
-    ? { opacity: 1 }
-    : {
-        opacity: shown ? 1 : 0,
-        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
-        transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition: `opacity 0.95s ${easeOut} 0.15s, clip-path 0.95s ${easeOut} 0.15s, transform 0.95s ${easeOut} 0.15s`,
-      };
-
-  // Slow Ken-Burns scale-settle on the background media layer.
-  const mediaStyle: React.CSSProperties = reduced
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: `transform 2.2s ${easeOut}`,
-      };
+  const { shown, reduced } = useViiHeroMotion();
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
@@ -139,7 +93,7 @@ function RitualHero({
           <ServiceHeroVideo
             src={heroVideo ?? ""}
             buttonClassName="vii-ritual-video-btn"
-            style={mediaStyle}
+            style={heroMediaStyle(shown, reduced)}
           />
         ) : hasImage ? (
           <Image
@@ -148,7 +102,7 @@ function RitualHero({
             fill
             priority
             sizes="100vw"
-            style={{ objectFit: "cover", opacity: 0.35, ...mediaStyle }}
+            style={{ objectFit: "cover", opacity: 0.35, ...heroMediaStyle(shown, reduced) }}
           />
         ) : (
           <div
@@ -188,7 +142,7 @@ function RitualHero({
           <ViiOverline
             tone="dark"
             align="center"
-            style={{ ...revealStyle(0), marginBottom: 20 }}
+            style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 20 }}
           >
             {overline}
           </ViiOverline>
@@ -197,7 +151,7 @@ function RitualHero({
         {/* Service name — clip-path wipe, beat 0.15s */}
         <h1
           style={{
-            ...headingStyle,
+            ...heroHeadingStyle(shown, reduced),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(42px, 7.5vw, 96px)",
@@ -216,7 +170,7 @@ function RitualHero({
         <div
           aria-hidden="true"
           style={{
-            ...revealStyle(0.3),
+            ...heroRevealStyle(shown, reduced, 0.3),
             width: 56,
             height: 1,
             background: "var(--vii-copper-light)",
@@ -228,7 +182,7 @@ function RitualHero({
         {serviceDescription && (
           <p
             style={{
-              ...revealStyle(0.3),
+              ...heroRevealStyle(shown, reduced, 0.3),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.4vw, 16px)",
               lineHeight: 1.8,

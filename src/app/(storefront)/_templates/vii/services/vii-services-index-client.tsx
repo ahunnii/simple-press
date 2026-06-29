@@ -13,7 +13,6 @@
  *    (resolved server-side and passed in as `galleryImages`).
  * 4. Closing CTA — ViiContactCtaSection wired from vii.services.cta-* fields.
  */
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -23,6 +22,12 @@ import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
 import { ViiContactCtaSection } from "../homepage/vii-contact-cta-section";
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -54,49 +59,10 @@ function ServicesHero({
   overline: string;
   intro: string;
 }) {
-  const [shown, setShown] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      setReduceMotion(true);
-      setShown(true);
-      return;
-    }
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
+  const { shown, reduced } = useViiHeroMotion();
 
   const hasVideo = !!heroVideo?.trim();
   const hasImage = !!heroImage?.trim();
-
-  const revealStyle = (delay: number): React.CSSProperties =>
-    reduceMotion
-      ? {}
-      : {
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.95s var(--vii-ease) ${delay}s, transform 0.95s var(--vii-ease) ${delay}s`,
-        };
-
-  const headingRevealStyle: React.CSSProperties = reduceMotion
-    ? {}
-    : {
-        opacity: shown ? 1 : 0,
-        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
-        transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition: `opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s`,
-      };
-
-  const mediaStyle: React.CSSProperties = reduceMotion
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: `transform 2.2s var(--vii-ease)`,
-      };
 
   const displayHeading = heading.trim() || "Our";
   const displayAccent = headingAccent.trim() || "services.";
@@ -115,7 +81,7 @@ function ServicesHero({
       >
         {hasVideo ? (
           <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, ...mediaStyle }}>
+            <div style={{ position: "absolute", inset: 0, ...heroMediaStyle(shown, reduced) }}>
               <video
                 autoPlay
                 muted
@@ -134,7 +100,7 @@ function ServicesHero({
             </div>
           </div>
         ) : (
-          <div style={{ position: "absolute", inset: 0, ...mediaStyle }}>
+          <div style={{ position: "absolute", inset: 0, ...heroMediaStyle(shown, reduced) }}>
             <Image
               src={heroImage!}
               alt=""
@@ -174,7 +140,7 @@ function ServicesHero({
             <ViiOverline
               tone="dark"
               align="left"
-              style={{ ...revealStyle(0), marginBottom: 16 }}
+              style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 16 }}
             >
               {overline}
             </ViiOverline>
@@ -182,7 +148,7 @@ function ServicesHero({
 
           <h1
             style={{
-              ...headingRevealStyle,
+              ...heroHeadingStyle(shown, reduced),
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
               fontSize: "clamp(52px, 9vw, 120px)",
@@ -205,7 +171,7 @@ function ServicesHero({
           {intro && (
             <p
               style={{
-                ...revealStyle(0.3),
+                ...heroRevealStyle(shown, reduced, 0.3),
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.4vw, 17px)",
                 lineHeight: 1.75,
@@ -239,7 +205,7 @@ function ServicesHero({
           <ViiOverline
             tone="light"
             align="left"
-            style={{ ...revealStyle(0), marginBottom: 28 }}
+            style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 28 }}
           >
             {overline}
           </ViiOverline>
@@ -247,7 +213,7 @@ function ServicesHero({
 
         <h1
           style={{
-            ...headingRevealStyle,
+            ...heroHeadingStyle(shown, reduced),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(44px, 7vw, 88px)",
@@ -269,7 +235,7 @@ function ServicesHero({
         {intro && (
           <p
             style={{
-              ...revealStyle(0.25),
+              ...heroRevealStyle(shown, reduced, 0.25),
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.4vw, 17px)",
               lineHeight: 1.75,

@@ -13,7 +13,7 @@ import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 import { ViiBrandsSection } from "../homepage/vii-brands-section";
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
-import { ViiProductCard } from "../shared/vii-product-card";
+import { ViiProductGrid } from "../shared/vii-product-grid";
 import { ViiShopPromoBand } from "./vii-shop-promo-band";
 
 type Collections = RouterOutputs["collections"]["getAllPublic"];
@@ -217,22 +217,7 @@ export function ViiShopClient({
                   </p>
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(220px, 1fr))",
-                    gap: "clamp(20px, 3vw, 36px)",
-                  }}
-                >
-                  {paginated.map((product, index) => (
-                    <ViiProductCard
-                      key={product.id}
-                      product={product}
-                      index={index}
-                    />
-                  ))}
-                </div>
+                <ViiProductGrid products={paginated} revealItems={false} />
               )}
 
               {/* Pagination */}
