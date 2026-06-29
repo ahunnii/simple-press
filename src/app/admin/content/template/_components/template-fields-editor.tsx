@@ -422,10 +422,7 @@ export function TemplateFieldsEditor({
   const hasUnsavedChanges = useCallback(() => {
     // Check modified template fields
     if (modifiedFields.size > 0) {
-      console.log("Unsaved: modifiedFields present", modifiedFields);
       return true;
-    } else {
-      console.log("No modifiedFields");
     }
 
     // Check if custom pairs changed
@@ -435,40 +432,25 @@ export function TemplateFieldsEditor({
 
     // Different number of custom fields
     if (currentCustomKeys.size !== initialState.customPairsKeys.size) {
-      console.log(
-        "Unsaved: custom field key count mismatch",
-        { currentCustomKeys: Array.from(currentCustomKeys) },
-        { initialCustomPairsKeys: Array.from(initialState.customPairsKeys) },
-      );
       return true;
-    } else {
-      console.log("Custom field key count matches");
     }
 
     // Check if any custom field keys are different
     for (const key of currentCustomKeys) {
       if (!initialState.customPairsKeys.has(key)) {
-        console.log("Unsaved: Found new custom key", key);
         return true;
       }
     }
-    console.log("No new custom keys");
 
     // Check if any custom field values changed
     for (const pair of customPairs) {
       if (pair.key && pair.value) {
         const initialValue = initialState.fields[pair.key];
         if (initialValue !== pair.value) {
-          console.log("Unsaved: custom value changed", {
-            key: pair.key,
-            initialValue,
-            currentValue: pair.value,
-          });
           return true;
         }
       }
     }
-    console.log("No custom values changed");
 
     return false;
   }, [modifiedFields, customPairs, initialState]);
@@ -881,16 +863,6 @@ export function TemplateFieldsEditor({
                           )}
 
                         {templateFields.length > 0 && <Separator />}
-
-                        {/* Custom Fields for this page - unchanged */}
-                        {/* <CustomFieldsSection
-                      page={page}
-                      customPairs={pagePairs}
-                      allCustomPairs={customPairs}
-                      onAdd={() => addCustomPair(page)}
-                      onUpdate={updateCustomPair}
-                      onDelete={deleteCustomPair}
-                    /> */}
 
                         {/* Empty state */}
                         {templateFields.length === 0 &&

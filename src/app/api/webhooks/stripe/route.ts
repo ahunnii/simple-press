@@ -57,10 +57,6 @@ export async function POST(req: NextRequest) {
         webhookSecret,
       );
     } catch (err: unknown) {
-      console.error(
-        "[Webhook] Signature verification failed:",
-        err instanceof Error ? err.message : "Unknown error",
-      );
       Sentry.captureException(err, {
         tags: { "webhook.step": "signature-verification" },
       });
@@ -77,7 +73,6 @@ export async function POST(req: NextRequest) {
         const discountCodeId = session.metadata?.discountCodeId;
 
         if (!businessId) {
-          console.error("[Webhook] No businessId in session metadata");
           Sentry.captureMessage(
             `[Webhook] Missing businessId in checkout session metadata: ${session.id}`,
             { level: "warning", tags: { "webhook.step": "metadata-check" } },
@@ -91,9 +86,6 @@ export async function POST(req: NextRequest) {
           select: { id: true },
         });
         if (existingOrder) {
-          console.log(
-            `[Webhook] Duplicate event for session ${session.id} — skipping`,
-          );
           return NextResponse.json({ received: true });
         }
 
@@ -120,9 +112,6 @@ export async function POST(req: NextRequest) {
         });
 
         if (!business?.stripeAccountId) {
-          console.error(
-            `[Webhook] Business ${businessId} not found or no Stripe account`,
-          );
           Sentry.captureMessage(
             `[Webhook] Business ${businessId} not found or missing Stripe account`,
             {
@@ -221,16 +210,6 @@ export async function POST(req: NextRequest) {
               userId: existingUser?.id ?? undefined,
             },
           });
-
-          console.log(
-            `[Webhook] Customer upserted: ${customer.id}${existingUser ? " - linked to user" : ""}`,
-          );
-        }
-
-        if (!customer) {
-          console.error(
-            "[Webhook] Failed to create/find customer - will create order without customer link",
-          );
         }
 
         // Create or reuse shipping address if provided (see resolveCheckoutShipping)
@@ -256,10 +235,6 @@ export async function POST(req: NextRequest) {
             country: resolved.country,
             phone: resolved.phone,
           });
-        } else if (resolved.addressLine1 && !customer) {
-          console.warn(
-            "[Webhook] Shipping details provided but no customer - cannot create address",
-          );
         }
 
         const rawMetaDiscountId =
@@ -295,10 +270,6 @@ export async function POST(req: NextRequest) {
         // notes and InventoryHistory records.
         const orderNumber = order.orderNumber;
 
-        console.log(
-          `[Webhook] Order created: ${order.id} for business ${business.id}`,
-        );
-
         // Update customer metrics
         if (customer) {
           try {
@@ -309,14 +280,7 @@ export async function POST(req: NextRequest) {
                 orderCount: { increment: 1 },
               },
             });
-            console.log(
-              `[Webhook] Updated customer metrics for ${customer.id}`,
-            );
           } catch (customerError) {
-            console.error(
-              "[Webhook] Failed to update customer metrics:",
-              customerError,
-            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "customer-metrics");
               scope.setTag("businessId", businessId);
@@ -347,10 +311,6 @@ export async function POST(req: NextRequest) {
               },
             });
           } catch (discountError) {
-            console.error(
-              "[Webhook] Failed to update discount code:",
-              discountError,
-            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "discount-increment");
               scope.setTag("businessId", businessId);
@@ -399,8 +359,15 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (!variant) {
-                  console.warn(
-                    `[Webhook] Variant ${item.productVariantId} not found`,
+                  Sentry.captureMessage(
+                    `[Webhook] Variant ${item.productVariantId} not found — may have been deleted after checkout`,
+                    {
+                      level: "warning",
+                      tags: {
+                        "webhook.step": "inventory-variant-not-found",
+                        businessId,
+                      },
+                    },
                   );
                   continue;
                 }
@@ -451,8 +418,15 @@ export async function POST(req: NextRequest) {
                   });
 
                   if (result.count === 0) {
-                    console.warn(
+                    Sentry.captureMessage(
                       `[Webhook] Oversell for variant ${variant.id} on order ${orderNumber}`,
+                      {
+                        level: "warning",
+                        tags: {
+                          "webhook.step": "inventory-oversell",
+                          businessId,
+                        },
+                      },
                     );
                     await tx.inventoryHistory.create({
                       data: {
@@ -515,7 +489,16 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (!product) {
-                  console.warn(`[Webhook] Product ${item.productId} not found`);
+                  Sentry.captureMessage(
+                    `[Webhook] Product ${item.productId} not found — may have been deleted after checkout`,
+                    {
+                      level: "warning",
+                      tags: {
+                        "webhook.step": "inventory-product-not-found",
+                        businessId,
+                      },
+                    },
+                  );
                   continue;
                 }
 
@@ -576,8 +559,15 @@ export async function POST(req: NextRequest) {
                   });
 
                   if (result.count === 0) {
-                    console.warn(
+                    Sentry.captureMessage(
                       `[Webhook] Oversell for product ${product.id} on order ${orderNumber}`,
+                      {
+                        level: "warning",
+                        tags: {
+                          "webhook.step": "inventory-oversell",
+                          businessId,
+                        },
+                      },
                     );
                     await tx.inventoryHistory.create({
                       data: {
@@ -658,10 +648,6 @@ export async function POST(req: NextRequest) {
                 });
               }
             } catch (reservationErr) {
-              console.error(
-                "[Webhook] Failed to release reservation on checkout.session.completed:",
-                reservationErr,
-              );
               Sentry.withScope((scope) => {
                 scope.setTag("webhook.step", "reservation-release-completed");
                 scope.setTag("businessId", businessId);
@@ -670,13 +656,7 @@ export async function POST(req: NextRequest) {
               // Non-fatal — inventory deduction and order creation still succeed
             }
           });
-
-          console.log(`[Webhook] Inventory deducted for order ${order.id}`);
         } catch (inventoryError) {
-          console.error(
-            "[Webhook] Failed to deduct inventory:",
-            inventoryError,
-          );
           Sentry.withScope((scope) => {
             scope.setTag("webhook.step", "inventory-deduction");
             scope.setTag("businessId", businessId);
@@ -755,14 +735,7 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
-            console.log(
-              `[Webhook] Inventory notifications processed for order ${order.id}`,
-            );
           } catch (notifyError) {
-            console.error(
-              "[Webhook] Failed to send inventory notification:",
-              notifyError,
-            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "inventory-notification");
               scope.setTag("businessId", businessId);
@@ -819,14 +792,7 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
-            console.log(
-              `[Webhook] Pool notifications processed for order ${order.id}`,
-            );
           } catch (poolNotifyError) {
-            console.error(
-              "[Webhook] Failed to send pool inventory notification:",
-              poolNotifyError,
-            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "pool-inventory-notification");
               scope.setTag("businessId", businessId);
@@ -837,9 +803,6 @@ export async function POST(req: NextRequest) {
 
         // Send order confirmation email (skip if customer email is unknown)
         if (customerEmail === "unknown@example.com") {
-          console.warn(
-            `[Webhook] Skipping order confirmation email for order #${order.orderNumber} — no customer email`,
-          );
         } else
           try {
             // Fetch shipping address for email if available
@@ -899,15 +862,7 @@ export async function POST(req: NextRequest) {
               },
               idempotencyKey: `order-confirmation-${session.id}`,
             });
-
-            console.log(
-              `[Webhook] Order confirmation email sent for order ${order.id}`,
-            );
           } catch (emailError) {
-            console.error(
-              "[Webhook] Failed to send order confirmation email:",
-              emailError,
-            );
             Sentry.withScope((scope) => {
               scope.setTag("webhook.step", "order-confirmation-email");
               scope.setTag("businessId", businessId);
@@ -944,14 +899,7 @@ export async function POST(req: NextRequest) {
             },
             idempotencyKey: `owner-notification-${session.id}`,
           });
-          console.log(
-            `[Webhook] New order notification sent for order ${order.id} (business ${business.id})`,
-          );
         } catch (ownerEmailError) {
-          console.error(
-            "[Webhook] Failed to send owner new-order notification:",
-            ownerEmailError,
-          );
           Sentry.withScope((scope) => {
             scope.setTag("webhook.step", "owner-notification-email");
             scope.setTag("businessId", businessId);
@@ -971,13 +919,9 @@ export async function POST(req: NextRequest) {
             (f) => f === "stripeSessionId" || f === "Order_stripeSessionId_key",
           )
         ) {
-          console.log(
-            "[Webhook] Duplicate checkout.session.completed event detected — idempotency guard (P2002 on stripeSessionId)",
-          );
           return NextResponse.json({ received: true });
         }
 
-        console.error("[Webhook] Error processing order:", orderError);
         Sentry.withScope((scope) => {
           scope.setTag("webhook.step", "order-processing");
           scope.setTag("eventType", event.type);
@@ -1019,15 +963,8 @@ export async function POST(req: NextRequest) {
               data: { status: "released" },
             });
           });
-          console.log(
-            `[Webhook] Released reservation ${reservation.id} on session expiry ${expiredSession.id}`,
-          );
         }
       } catch (expiredErr) {
-        console.error(
-          "[Webhook] Failed to release reservation on checkout.session.expired:",
-          expiredErr,
-        );
         Sentry.captureException(expiredErr, {
           tags: { "webhook.step": "reservation-release-expired" },
         });
@@ -1046,10 +983,6 @@ export async function POST(req: NextRequest) {
         });
 
         if (business) {
-          console.log(
-            `[Webhook] Account updated for business ${business.id}: charges_enabled=${account.charges_enabled}, payouts_enabled=${account.payouts_enabled}`,
-          );
-
           // Optional: Store account status in database
           // await db.business.update({
           //   where: { id: business.id },
@@ -1060,7 +993,6 @@ export async function POST(req: NextRequest) {
           // });
         }
       } catch (error) {
-        console.error("[Webhook] Error processing account.updated:", error);
         Sentry.captureException(error, {
           tags: { "webhook.step": "account-updated" },
         });
@@ -1074,16 +1006,11 @@ export async function POST(req: NextRequest) {
       const account = event.data.object;
 
       try {
-        const result = await db.business.updateMany({
+        await db.business.updateMany({
           where: { stripeAccountId: account.id },
           data: { stripeAccountId: null },
         });
-
-        console.log(
-          `[Webhook] Account ${account.id} deauthorized (${result.count} businesses updated)`,
-        );
       } catch (error) {
-        console.error("[Webhook] Error processing deauthorization:", error);
         Sentry.captureException(error, {
           tags: { "webhook.step": "account-deauthorized" },
         });
@@ -1093,10 +1020,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Unknown event type
-    console.log(`[Webhook] Unhandled event type: ${event.type}`);
     return NextResponse.json({ received: true });
   } catch (error: unknown) {
-    console.error("[Webhook] Error:", error);
     Sentry.captureException(error, {
       tags: { "webhook.step": "handler" },
     });

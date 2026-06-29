@@ -13,6 +13,7 @@ import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
 import { faqRouter } from "./routers/faq";
 import { featuresRouter } from "./routers/featues";
+import { marketingRouter } from "./routers/marketing";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
@@ -23,6 +24,7 @@ import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
 import { serviceRouter } from "./routers/service";
 import { shippingRouter } from "./routers/shipping";
+import { teamRouter } from "./routers/team";
 import { testimonialRouter } from "./routers/testimonials";
 import { uploadRouter } from "./routers/upload";
 
@@ -61,6 +63,8 @@ export const appRouter = createTRPCRouter({
 
   external: externalRouter,
   faq: faqRouter,
+  marketing: marketingRouter,
+  team: teamRouter,
 
   upload: uploadRouter,
 });

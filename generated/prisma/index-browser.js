@@ -700,6 +700,19 @@ exports.Prisma.PlatformInviteScalarFieldEnum = {
   createdBy: 'createdBy'
 };
 
+exports.Prisma.TeamInviteScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  email: 'email',
+  code: 'code',
+  role: 'role',
+  used: 'used',
+  usedAt: 'usedAt',
+  businessId: 'businessId',
+  createdBy: 'createdBy'
+};
+
 exports.Prisma.PlatformConfigScalarFieldEnum = {
   id: 'id',
   maintenanceMode: 'maintenanceMode',
@@ -802,6 +815,7 @@ exports.Prisma.ModelName = {
   ProductReview: 'ProductReview',
   ReviewVote: 'ReviewVote',
   PlatformInvite: 'PlatformInvite',
+  TeamInvite: 'TeamInvite',
   PlatformConfig: 'PlatformConfig',
   ShippingZone: 'ShippingZone',
   ShippingRate: 'ShippingRate'

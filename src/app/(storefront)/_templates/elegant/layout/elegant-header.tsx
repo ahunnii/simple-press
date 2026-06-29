@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import {
   LayoutDashboardIcon,
@@ -26,11 +26,15 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { setIsOpen, itemCount } = useCart();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const pathname = usePathname();
+  const router = useRouter();
 
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
@@ -60,6 +64,30 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
+
+  // Auto-focus search input when opened
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [searchOpen]);
+
+  function openSearch() {
+    setSearchOpen(true);
+    setSearchValue("");
+  }
+
+  function closeSearch() {
+    setSearchOpen(false);
+    setSearchValue("");
+  }
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchValue.trim();
+    closeSearch();
+    router.push(q ? `/shop?q=${encodeURIComponent(q)}` : "/shop");
+  }
 
   const DEFAULT_NAV_LINKS = [
     { href: "/shop", label: "Shop" },
@@ -238,14 +266,55 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               gap: 2,
             }}
           >
-            <Link
-              href="/shop"
-              aria-label="Search products"
-              style={iconBtnStyle}
-              className="el-icon-btn"
-            >
-              <Search aria-hidden={true} style={{ width: 17, height: 17 }} />
-            </Link>
+            {searchOpen ? (
+              <form
+                onSubmit={handleSearchSubmit}
+                style={{ display: "flex", alignItems: "center", gap: 4 }}
+              >
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Escape" && closeSearch()}
+                  aria-label="Search products"
+                  placeholder="Search…"
+                  style={{
+                    width: 140,
+                    height: 30,
+                    padding: "0 10px",
+                    fontSize: 13,
+                    fontFamily: "var(--font-sans, Manrope, sans-serif)",
+                    letterSpacing: "0.02em",
+                    color: "var(--el-ink, #1c1a17)",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "1px solid var(--el-ink, #1c1a17)",
+                    outline: "none",
+                    borderRadius: 0,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={closeSearch}
+                  aria-label="Close search"
+                  style={iconBtnStyle}
+                  className="el-icon-btn"
+                >
+                  <X aria-hidden={true} style={{ width: 16, height: 16 }} />
+                </button>
+              </form>
+            ) : (
+              <button
+                type="button"
+                onClick={openSearch}
+                aria-label="Search products"
+                style={iconBtnStyle}
+                className="el-icon-btn"
+              >
+                <Search aria-hidden={true} style={{ width: 17, height: 17 }} />
+              </button>
+            )}
 
             {isPending ? (
               <div

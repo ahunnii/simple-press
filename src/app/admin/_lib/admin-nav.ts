@@ -8,6 +8,7 @@ import {
   IconFolder,
   IconImageInPicture,
   IconLanguage,
+  IconMailFast,
   IconMessageStar,
   IconPackage,
   IconPackages,
@@ -179,6 +180,14 @@ export const NAV_ITEMS: NavItem[] = [
     section: "marketing",
     featureKey: "galleries",
   },
+  {
+    key: "marketing",
+    title: "Email Broadcasts",
+    href: "/admin/marketing",
+    icon: IconMailFast,
+    section: "marketing",
+    featureKey: "emailMarketing",
+  },
 
   // Content
   {
@@ -302,6 +311,16 @@ export const HUB_CARDS: HubCard[] = [
     color: "emerald",
     icon: IconTransfer,
     featureKey: "storeTransfer",
+  },
+  {
+    key: "settings-team",
+    title: "Team",
+    description: "Staff and collaborators",
+    body: "Invite team members and manage their roles",
+    href: "/admin/settings/team",
+    hub: "settings",
+    color: "violet",
+    icon: IconUsers,
   },
 
   // Content hub

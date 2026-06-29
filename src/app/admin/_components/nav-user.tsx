@@ -5,9 +5,6 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { SidebarMenu, SidebarMenuItem } from "~/components/ui/sidebar";
 
 export function NavUser() {
-  // const { isMobile } = useSidebar();
-  // const { data: session } = useSession();
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>

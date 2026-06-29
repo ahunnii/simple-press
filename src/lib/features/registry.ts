@@ -234,6 +234,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  emailMarketing: {
+    key: "emailMarketing",
+    label: "Email Marketing",
+    description:
+      "Send one-off announcement and newsletter emails to customers who opted in to marketing",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["marketing"],
+  },
 };
 
 // Ordered category labels for display

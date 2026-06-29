@@ -207,6 +207,7 @@ model Business {
   testimonials          Testimonial[]
   testimonialInvites    TestimonialInvite[]
   platformInvites       PlatformInvite[]
+  teamInvites           TeamInvite[]
   memberships           BusinessMembership[]
   zones                 ShippingZone[]
   faqItems              FaqItem[]
@@ -1165,6 +1166,27 @@ model PlatformInvite {
   @@index([email])
   @@index([code])
   @@index([businessId])
+}
+
+model TeamInvite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  email  String
+  code   String       @unique
+  role   BusinessRole
+  used   Boolean      @default(false)
+  usedAt DateTime?
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdBy String?
+
+  @@index([businessId])
+  @@index([code])
+  @@index([email])
 }
 
 // ============================================

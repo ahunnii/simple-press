@@ -13,6 +13,7 @@ import type {
   ZoneWeightFormValues,
 } from "~/lib/validators/shipping";
 import type { RouterOutputs } from "~/trpc/react";
+import type { z } from "zod";
 import { COUNTRY_LABELS } from "~/lib/geo/regions";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { cn } from "~/lib/utils";
@@ -172,9 +173,12 @@ export function ShippingSettings({ business }: Props) {
   const pickupEnabled = form.watch("offersInStorePickup");
 
   // ── Zone + weight form ────────────────────────────────────────────────────
-  const zoneForm = useForm<ZoneWeightFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    resolver: zodResolver(zoneWeightFormSchema) as any,
+  const zoneForm = useForm<
+    z.input<typeof zoneWeightFormSchema>,
+    unknown,
+    ZoneWeightFormValues
+  >({
+    resolver: zodResolver(zoneWeightFormSchema),
     defaultValues: hydrateZoneWeightDefaults(business),
   });
 

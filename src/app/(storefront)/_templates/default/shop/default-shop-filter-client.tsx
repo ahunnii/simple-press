@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 
 import type { Product } from "~/types";
 import {
@@ -9,6 +9,8 @@ import {
   SORT_LABELS,
   useShopFilters,
 } from "~/hooks/use-shop-filters";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 
 import { DefaultProductCard } from "../shared/default-product-card";
 
@@ -31,6 +33,8 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
     collections,
     clearFilters,
     hasActiveFilters,
+    search,
+    setSearch,
   } = useShopFilters(products, { pageSize: 12 });
 
   const totalInStock = products.filter(isInStock).length;
@@ -40,6 +44,38 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
       aria-label="Product filters"
       className="flex flex-col divide-y divide-[#e8e8e8]"
     >
+      {/* Search */}
+      <div className="pb-6">
+        <h2 className="mb-3.5 text-[11px] font-medium tracking-[0.16em] text-[#6b6b6b] uppercase">
+          Search
+        </h2>
+        <div className="relative">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#6b6b6b]"
+          />
+          <Input
+            placeholder="Search products…"
+            aria-label="Search products"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9 border-[#e8e8e8] pl-9 pr-8 text-sm focus:border-[#0a0a0a] focus:ring-0"
+          />
+          {search && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Clear search"
+              onClick={() => setSearch("")}
+              className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 text-[#6b6b6b] hover:text-[#0a0a0a]"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </Button>
+          )}
+        </div>
+      </div>
+
       {/* Collections */}
       {collections.length > 0 && (
         <div className="pt-0 pb-6">

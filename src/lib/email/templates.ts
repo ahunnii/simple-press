@@ -13,6 +13,8 @@ import OrderShippedEmail from "~/emails/order-shipped";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
+import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
+import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
@@ -593,5 +595,70 @@ export async function sendTestimonialInviteEmail({
       logoUrl,
       ownerEmail,
     }),
+  });
+}
+
+export async function sendMarketingBroadcast({
+  to,
+  subject,
+  business,
+  body,
+  unsubscribeUrl,
+}: {
+  to: string;
+  subject: string;
+  business: {
+    name: string;
+    ownerEmail?: string | null;
+    siteContent?: { logoUrl?: string | null } | null;
+  };
+  body: string;
+  unsubscribeUrl: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: business.name,
+    to,
+    replyTo: business.ownerEmail ?? undefined,
+    subject,
+    react: MarketingBroadcastEmail({
+      businessName: business.name,
+      logoUrl: business.siteContent?.logoUrl ?? undefined,
+      body,
+      unsubscribeUrl,
+    }),
+    tags: [{ name: "category", value: "marketing_broadcast" }],
+  });
+}
+
+export async function sendTeamInviteEmail({
+  to,
+  businessName,
+  inviteUrl,
+  role,
+  logoUrl,
+  ownerEmail,
+}: {
+  to: string;
+  businessName: string;
+  inviteUrl: string;
+  role: "OWNER" | "MANAGER";
+  logoUrl?: string;
+  ownerEmail?: string;
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: businessName,
+    to,
+    replyTo: ownerEmail,
+    subject: `You've been invited to join ${businessName}`,
+    react: TeamInviteEmail({
+      businessName,
+      inviteUrl,
+      role,
+      logoUrl,
+      ownerEmail,
+    }),
+    tags: [{ name: "category", value: "team_invite" }],
   });
 }

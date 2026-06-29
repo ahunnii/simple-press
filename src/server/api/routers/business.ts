@@ -4,11 +4,13 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { TEMPLATES } from "~/lib/constants";
 import {
   getPlatformMaintenance,
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
@@ -1011,5 +1013,45 @@ export const businessRouter = createTRPCRouter({
       });
 
       return { message: "Shipping settings updated successfully" };
+    }),
+
+  updateTemplate: ownerAdminProcedure
+    .input(
+      z.object({
+        templateId: z.enum(
+          TEMPLATES.map((t) => t.id) as [string, ...string[]],
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: { subdomain: true, templateId: true },
+      });
+      if (!business) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+      }
+
+      // Commercial templates are locked to their owning subdomain. Allow only
+      // templates available to this business (free templates + ones it owns),
+      // plus its currently-active template so an existing assignment is never
+      // lost. Never trust the client — re-validate ownership server-side.
+      const allowed =
+        input.templateId === business.templateId ||
+        isTemplateAvailableForSubdomain(input.templateId, business.subdomain);
+      if (!allowed) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This template is not available for your store.",
+        });
+      }
+
+      await ctx.db.business.update({
+        where: { id: businessId },
+        data: { templateId: input.templateId },
+      });
+      return { success: true };
     }),
 });

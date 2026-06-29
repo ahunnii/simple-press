@@ -82,6 +82,21 @@ export const getCommercialTemplateSubdomains = (): string[] => {
   );
 };
 
+// Template ids that are free / generic and may be offered to any business
+// (e.g. in onboarding and the public marketing showcase). Excludes every
+// client-owned commercial template.
+export const getFreeTemplateIds = (): string[] =>
+  AVAILABLE_FREE_TEMPLATES.map((t) => t.value);
+
+// Whether a given business (identified by its subdomain) is allowed to use a
+// template. Free templates are always allowed; commercial templates only for
+// their owning subdomain. Mirrors getAvailableTemplates (all allowed in dev).
+export const isTemplateAvailableForSubdomain = (
+  templateId: string,
+  subdomain: string,
+): boolean =>
+  getAvailableTemplates(subdomain).some((t) => t.value === templateId);
+
 export const getAvailableTemplates = (subdomain: string) => {
   // In development, show all templates
   if (process.env.NODE_ENV === "development") {

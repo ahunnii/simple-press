@@ -268,7 +268,6 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-        onChange={() => console.log(form.formState.errors)}
         className="bg-muted/40 min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>

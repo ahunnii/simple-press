@@ -199,6 +199,65 @@ export const ownerAdminProcedure = t.procedure
   });
 
 /**
+ * Owner-Only procedure
+ *
+ * Like ownerAdminProcedure but only allows OWNER role (not MANAGER).
+ * Use this for mutations that managers must NOT be able to perform,
+ * such as inviting staff, changing roles, or removing members.
+ * PLATFORM_ADMIN still bypasses the membership check.
+ */
+export const ownerOnlyProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const headersList = await headers();
+    const hostname = headersList.get("host") ?? "";
+
+    const domain = hostname.split(":")[0];
+
+    const business = await ctx.db.business.findFirst({
+      where: {
+        OR: [
+          { customDomain: domain },
+          { subdomain: domain?.split(".")[0] },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (!business) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    const user = ctx.session.user;
+
+    if (user.platformRole !== "PLATFORM_ADMIN") {
+      const membership = await ctx.db.businessMembership.findUnique({
+        where: {
+          userId_businessId: { userId: user.id, businessId: business.id },
+        },
+        select: { role: true },
+      });
+      if (membership?.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Owner access required",
+        });
+      }
+    }
+
+    return next({
+      ctx: {
+        session: { ...ctx.session, user: ctx.session.user },
+        businessId: business.id,
+      },
+    });
+  });
+
+/**
  * Platform Admin procedure
  *
  * For platform-wide administration tasks. Only accessible to users with PLATFORM_ADMIN role.
