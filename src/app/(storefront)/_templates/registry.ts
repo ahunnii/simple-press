@@ -89,6 +89,7 @@ import { DefaultContactPage } from "./default/contact/default-contact-page";
 import { DefaultGenericPage } from "./default/default-generic-page";
 import { DefaultLayout } from "./default/layout/default-layout";
 import { DefaultProductPage } from "./default/products/default-product-page";
+import { DefaultServicesIndexPage } from "./default/services/default-services-index-page";
 import { DefaultProductsPage } from "./default/shop/default-shop-page";
 import { DefaultTestimonialsPage } from "./default/testimonials/default-testimonials-page";
 // ---------------------------------------------------------------------------
@@ -330,7 +331,7 @@ const defaultEntry: TemplateComponentSet = {
   OrderDetailPage: DefaultOrderDetailPage,
   OrdersPage: DefaultOrdersPage,
   PreferencesPage: DefaultPreferencesFallback,
-  // default has no ServicesPage — will be undefined (notFound)
+  ServicesIndexPage: DefaultServicesIndexPage,
 };
 
 const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
