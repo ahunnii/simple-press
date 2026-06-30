@@ -34,6 +34,12 @@ export default async function AdminDashboardPage() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
   const [
     totalRevenue,
     totalOrders,
@@ -43,6 +49,13 @@ export default async function AdminDashboardPage() {
     revenueByDay,
     recentOversells,
     topProducts,
+    ordersToFulfillCount,
+    awaitingPaymentCount,
+    todayRevenue,
+    sevenDayRevenue,
+    sevenDayOrders,
+    thirtyDayRevenue,
+    thirtyDayPaidOrders,
   ] = await Promise.all([
     // Total revenue (all time, paid orders that are not fully refunded)
     // Subtract refundAmountCents from partial-refund orders so the stat
@@ -200,6 +213,72 @@ export default async function AdminDashboardPage() {
       },
       take: 5,
     }),
+
+    // Orders needing fulfillment (paid, not yet fully fulfilled, not cancelled/refunded)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        fulfillmentStatus: { in: ["unfulfilled", "partially_fulfilled"] },
+        status: { notIn: ["cancelled", "refunded"] },
+      },
+    }),
+
+    // Orders awaiting payment (pending, not cancelled/refunded)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "pending",
+        status: { notIn: ["cancelled", "refunded"] },
+      },
+    }),
+
+    // Today's revenue (paid orders created since midnight)
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: todayStart },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Last 7 days revenue
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: sevenDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Last 7 days total order count
+    db.order.count({
+      where: {
+        businessId: business.id,
+        createdAt: { gte: sevenDaysAgo },
+      },
+    }),
+
+    // Last 30 days paid revenue (for AOV numerator)
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Last 30 days paid order count (for AOV denominator)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: thirtyDaysAgo },
+      },
+    }),
   ]);
 
   // Get product details for top products
@@ -255,7 +334,20 @@ export default async function AdminDashboardPage() {
           totalOrders,
           totalProducts: businessData!._count.products,
           totalCustomers: businessData!._count.customers,
+          todayRevenue:
+            (todayRevenue._sum.total ?? 0) -
+            (todayRevenue._sum.refundAmountCents ?? 0),
+          sevenDayRevenue:
+            (sevenDayRevenue._sum.total ?? 0) -
+            (sevenDayRevenue._sum.refundAmountCents ?? 0),
+          sevenDayOrders,
+          thirtyDayRevenue:
+            (thirtyDayRevenue._sum.total ?? 0) -
+            (thirtyDayRevenue._sum.refundAmountCents ?? 0),
+          thirtyDayPaidOrders,
         }}
+        ordersToFulfillCount={ordersToFulfillCount}
+        awaitingPaymentCount={awaitingPaymentCount}
         recentOrders={
           recentOrders as Array<{
             id: string;

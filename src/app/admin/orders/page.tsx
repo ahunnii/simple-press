@@ -19,6 +19,8 @@ type Props = {
   searchParams: Promise<{
     status?: string;
     search?: string;
+    fulfillment?: string;
+    paymentStatus?: string;
   }>;
 };
 
@@ -30,6 +32,8 @@ export default async function OrdersPage({ searchParams }: Props) {
     .getAll({
       status: params.status,
       search: params.search,
+      fulfillment: params.fulfillment,
+      paymentStatus: params.paymentStatus,
     })
     .catch(rethrowTrpcForErrorBoundary);
 

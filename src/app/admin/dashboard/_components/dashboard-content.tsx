@@ -5,9 +5,16 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  CalendarDays,
+  Clock,
   DollarSign,
+  ExternalLink,
   Package,
+  Palette,
+  Plus,
   ShoppingCart,
+  TrendingUp,
+  Truck,
   Users,
 } from "lucide-react";
 import {
@@ -30,13 +37,21 @@ type DashboardContentProps = {
     id: string;
     name: string;
     subdomain: string;
+    customDomain: string | null;
   };
   stats: {
     totalRevenue: number;
     totalOrders: number;
     totalProducts: number;
     totalCustomers: number;
+    todayRevenue: number;
+    sevenDayRevenue: number;
+    sevenDayOrders: number;
+    thirtyDayRevenue: number;
+    thirtyDayPaidOrders: number;
   };
+  ordersToFulfillCount: number;
+  awaitingPaymentCount: number;
   recentOrders: Array<{
     id: string;
     orderNumber: number;
@@ -85,6 +100,8 @@ type DashboardContentProps = {
 export function DashboardContent({
   business,
   stats,
+  ordersToFulfillCount,
+  awaitingPaymentCount,
   recentOrders,
   lowStockProducts,
   lowStockPools,
@@ -145,75 +162,183 @@ export function DashboardContent({
     revenue: (item._sum.total ?? 0) / 100,
   }));
 
+  // Average order value: 30-day paid revenue ÷ 30-day paid order count
+  const aov =
+    stats.thirtyDayPaidOrders > 0
+      ? Math.round(stats.thirtyDayRevenue / stats.thirtyDayPaidOrders)
+      : 0;
+
+  // Live storefront URL — prefer custom domain if configured
+  const storefrontUrl = business.customDomain
+    ? `https://${business.customDomain}`
+    : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? ""}`;
+
+  const hasAttentionItems = ordersToFulfillCount > 0 || awaitingPaymentCount > 0;
+
   return (
     <div className="bg-muted min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-foreground text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back! Here&apos;s what&apos;s happening with {business.name}
-          </p>
+        {/* Header + Quick Actions */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-foreground text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Welcome back! Here&apos;s what&apos;s happening with{" "}
+              {business.name}
+            </p>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-2 sm:shrink-0">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/products/new">
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add Product
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/orders/new">
+                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                New Order
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/content/template">
+                <Palette className="mr-1.5 h-3.5 w-3.5" />
+                Customize
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={storefrontUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                View Store
+              </a>
+            </Button>
+          </div>
         </div>
+
+        {/* Needs-Attention Strip */}
+        {hasAttentionItems && (
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {ordersToFulfillCount > 0 && (
+              <Link
+                href="/admin/orders?fulfillment=unfulfilled&paymentStatus=paid"
+                className="group"
+              >
+                <div className="flex items-center gap-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 transition-colors group-hover:bg-amber-100">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 group-hover:bg-amber-200">
+                    <Truck className="h-4 w-4 text-amber-700" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-amber-900">
+                      {ordersToFulfillCount}{" "}
+                      {ordersToFulfillCount === 1 ? "order" : "orders"} to
+                      fulfill
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Paid but not yet shipped
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-amber-600 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )}
+            {awaitingPaymentCount > 0 && (
+              <Link
+                href="/admin/orders?paymentStatus=pending"
+                className="group"
+              >
+                <div className="flex items-center gap-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 transition-colors group-hover:bg-blue-100">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200">
+                    <Clock className="h-4 w-4 text-blue-700" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-blue-900">
+                      {awaitingPaymentCount}{" "}
+                      {awaitingPaymentCount === 1 ? "order" : "orders"} awaiting
+                      payment
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Pending payment confirmation
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-blue-600 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {/* Revenue */}
+          {/* Revenue Today */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Total Revenue
+                Revenue Today
               </CardTitle>
               <DollarSign className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(stats.totalRevenue)}
+                {formatCurrency(stats.todayRevenue)}
               </div>
-              <p className="text-muted-foreground mt-1 text-xs">All time</p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                All time:{" "}
+                <span className="font-medium">
+                  {formatCurrency(stats.totalRevenue)}
+                </span>
+              </p>
             </CardContent>
           </Card>
 
-          {/* Orders */}
+          {/* Revenue 7 days */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Total Orders
+                Revenue (7 Days)
               </CardTitle>
-              <ShoppingCart className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="text-muted-foreground mt-1 text-xs">All time</p>
+              <div className="text-2xl font-bold">
+                {formatCurrency(stats.sevenDayRevenue)}
+              </div>
+              <p className="text-muted-foreground mt-1 text-xs">
+                Last 7 days, paid orders
+              </p>
             </CardContent>
           </Card>
 
-          {/* Products */}
+          {/* Orders 7 days */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Products
+                Orders (7 Days)
               </CardTitle>
-              <Package className="h-4 w-4 text-purple-600" />
+              <CalendarDays className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProducts}</div>
-              <p className="text-muted-foreground mt-1 text-xs">In catalog</p>
+              <div className="text-2xl font-bold">{stats.sevenDayOrders}</div>
+              <p className="text-muted-foreground mt-1 text-xs">
+                All time:{" "}
+                <span className="font-medium">{stats.totalOrders}</span>
+              </p>
             </CardContent>
           </Card>
 
-          {/* Customers */}
+          {/* AOV 30 days */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Customers
+                Avg. Order Value
               </CardTitle>
               <Users className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCustomers}</div>
+              <div className="text-2xl font-bold">{formatCurrency(aov)}</div>
               <p className="text-muted-foreground mt-1 text-xs">
-                Total customers
+                30-day avg · {stats.thirtyDayPaidOrders} paid orders
               </p>
             </CardContent>
           </Card>

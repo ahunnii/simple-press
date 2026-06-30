@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useMemo } from "react";
 import Link from "next/link";
 import {
+  IconCompass,
   IconHelp,
   IconMail,
   IconSettings,
   IconTerminal,
 } from "@tabler/icons-react";
-import { Building2, Globe, Users } from "lucide-react";
 
 import type { NavSection } from "~/app/admin/_lib/admin-nav";
 import type { Session } from "~/server/better-auth/config";
@@ -39,55 +38,28 @@ const NAV_SECTION_ORDER: NavSection[] = [
   "insights",
 ];
 
-const getNavData = (session: Session | null) => {
-  const navPlatformAdmin:
-    | {
-        title: string;
-        url: string;
-        icon: React.ComponentType<any>;
-      }[]
-    | [] =
-    session?.user.platformRole === "PLATFORM_ADMIN"
-      ? [
-          {
-            title: "Platform Users",
-            url: "/admin/platform/users",
-            icon: Users,
-          },
-          {
-            title: "Platform Businesses",
-            url: "/admin/platform/businesses",
-            icon: Building2,
-          },
-          {
-            title: "Platform Domains",
-            url: "/admin/platform/domains",
-            icon: Globe,
-          },
-        ]
-      : [];
-
-  return {
-    navPlatformAdmin,
-    navSecondary: [
-      {
-        title: "Settings",
-        url: "/admin/settings",
-        icon: IconSettings,
-      },
-      {
-        title: "Emails",
-        url: "/admin/emails",
-        icon: IconMail,
-      },
-      {
-        title: "Get Help",
-        url: env.NEXT_PUBLIC_HELP_URL,
-        icon: IconHelp,
-      },
-    ],
-  };
-};
+const navSecondary = [
+  {
+    title: "Settings",
+    url: "/admin/settings",
+    icon: IconSettings,
+  },
+  {
+    title: "Email Templates",
+    url: "/admin/emails",
+    icon: IconMail,
+  },
+  {
+    title: "Setup Guide",
+    url: "/admin/welcome",
+    icon: IconCompass,
+  },
+  {
+    title: "Get Help",
+    url: env.NEXT_PUBLIC_HELP_URL,
+    icon: IconHelp,
+  },
+];
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   session?: Session | null;
@@ -104,8 +76,6 @@ export function AppSidebar({
   const { isEnabled, isDisabledByDependency } = useFeatureFlags({
     flags: featureData?.flags ?? {},
   });
-
-  const navData = getNavData(session ?? null);
 
   const groupedNav = useMemo(() => {
     return NAV_SECTION_ORDER.map((section) => {
@@ -124,6 +94,17 @@ export function AppSidebar({
       return { section, label: NAV_SECTION_LABELS[section], items };
     }).filter((group) => group.items.length > 0);
   }, [isEnabled, isDisabledByDependency]);
+
+  const platformItems = useMemo(() => {
+    if (session?.user.platformRole !== "PLATFORM_ADMIN") return [];
+    return NAV_ITEMS.filter((item) => item.section === "platform").map(
+      (item) => ({
+        title: item.title,
+        url: item.href,
+        icon: item.icon,
+      }),
+    );
+  }, [session?.user.platformRole]);
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -155,10 +136,10 @@ export function AppSidebar({
             label={group.label}
           />
         ))}
-        {navData.navPlatformAdmin.length > 0 && (
-          <NavMain items={navData.navPlatformAdmin} label="Platform" />
+        {platformItems.length > 0 && (
+          <NavMain items={platformItems} label={NAV_SECTION_LABELS.platform} />
         )}
-        <NavSecondary items={navData.navSecondary} className="mt-auto" />
+        <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <WelcomeNotification />

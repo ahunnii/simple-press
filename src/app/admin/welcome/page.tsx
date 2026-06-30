@@ -1,9 +1,12 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { env } from "~/env";
 import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
+import { Button } from "~/components/ui/button";
 
 import { TrailHeader } from "../_components/trail-header";
 import { QuickActions } from "./_components/quick-actions";
@@ -29,13 +32,26 @@ export default async function AdminWelcomePage() {
     return notFound();
   }
 
-  // Calculate setup completion
+  // Determine whether the storefront has been customized:
+  // logo set OR any custom template fields saved.
+  const siteContent = business.siteContent;
+  const customFields = siteContent?.customFields;
+  const storefrontCustomized =
+    Boolean(siteContent?.logoUrl) ||
+    (customFields !== null &&
+      customFields !== undefined &&
+      typeof customFields === "object" &&
+      !Array.isArray(customFields) &&
+      Object.keys(customFields as Record<string, unknown>).length > 0);
+
+  // Calculate setup completion.
+  // domainConfigured requires an actual custom domain — the subdomain is temporary.
   const setupSteps = {
     businessCreated: true,
     stripeConnected: !!business.stripeAccountId,
-    domainConfigured:
-      business.domainStatus === "ACTIVE" || business.subdomain !== null,
+    domainConfigured: Boolean(business.customDomain),
     firstProductAdded: business._count.products > 0,
+    storefrontCustomized,
   };
 
   const completedSteps = Object.values(setupSteps).filter(Boolean).length;
@@ -52,7 +68,17 @@ export default async function AdminWelcomePage() {
           isComplete={isComplete}
         />
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-3">
+        {/* Escape hatch: let owners operate the store while finishing setup */}
+        <div className="mt-4 flex justify-end">
+          <Button variant="ghost" asChild>
+            <Link href="/admin/dashboard">
+              Continue to dashboard
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="mt-4 grid gap-8 lg:grid-cols-3">
           {/* Main Setup Checklist */}
           <div className="lg:col-span-2">
             <SetupChecklist

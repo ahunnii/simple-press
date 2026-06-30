@@ -77,6 +77,8 @@ export const orderFiltersSchema = z
   .object({
     status: z.string().optional(),
     search: z.string().optional(),
+    fulfillment: z.string().optional(),
+    paymentStatus: z.string().optional(),
   })
   .optional();
 

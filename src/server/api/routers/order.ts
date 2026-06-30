@@ -463,6 +463,8 @@ export const orderRouter = createTRPCRouter({
 
       const statusFilter = input?.status;
       const searchQuery = input?.search;
+      const fulfillmentFilter = input?.fulfillment;
+      const paymentStatusFilter = input?.paymentStatus;
 
       const where: Prisma.OrderWhereInput = {
         businessId,
@@ -470,6 +472,14 @@ export const orderRouter = createTRPCRouter({
 
       if (statusFilter && statusFilter !== "all") {
         where.status = statusFilter;
+      }
+
+      if (fulfillmentFilter && fulfillmentFilter !== "all") {
+        where.fulfillmentStatus = fulfillmentFilter;
+      }
+
+      if (paymentStatusFilter && paymentStatusFilter !== "all") {
+        where.paymentStatus = paymentStatusFilter;
       }
 
       if (searchQuery) {

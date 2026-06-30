@@ -73,6 +73,16 @@ export function ContentDashboard({ pages }: Props) {
 
   return (
     <>
+      {/* Explainer: three editing surfaces at a glance */}
+      <div className="mb-6 rounded-lg border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Template Fields</span>
+        {" — edit your storefront's built-in sections (hero, homepage) with live preview. "}
+        <span className="font-medium text-foreground">Pages</span>
+        {" — create standalone CMS pages (About, Contact). "}
+        <span className="font-medium text-foreground">Brand Identity</span>
+        {" — upload a logo and choose your theme."}
+      </div>
+
       {/* Main Content Sections */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {contentCards.map((card) => {
@@ -237,8 +247,18 @@ export function ContentDashboard({ pages }: Props) {
               <h3 className="text-foreground mb-2 text-lg font-medium">
                 No pages yet
               </h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-2">
                 Get started by creating your first page or policy
+              </p>
+              <p className="text-muted-foreground mb-6 text-xs">
+                To edit homepage sections or hero content, use{" "}
+                <Link
+                  href="/admin/content/template"
+                  className="text-primary underline underline-offset-2"
+                >
+                  Template Fields
+                </Link>{" "}
+                instead.
               </p>
               <div className="flex justify-center gap-3">
                 <Button asChild>

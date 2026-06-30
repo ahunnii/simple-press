@@ -21,6 +21,7 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import {
+  Building2,
   Clock,
   FileText,
   Globe,
@@ -31,6 +32,7 @@ import {
   PowerOff,
   Search,
   Shield,
+  Users,
   Wrench,
 } from "lucide-react";
 
@@ -41,7 +43,8 @@ export type NavSection =
   | "catalog"
   | "marketing"
   | "content"
-  | "insights";
+  | "insights"
+  | "platform";
 
 export type NavHub = "settings" | "content";
 
@@ -76,6 +79,7 @@ export const NAV_SECTION_LABELS: Record<NavSection, string> = {
   marketing: "Marketing",
   content: "Content",
   insights: "Insights",
+  platform: "Platform",
 };
 
 // ─── Main nav items ───────────────────────────────────────────────────────────
@@ -215,6 +219,29 @@ export const NAV_ITEMS: NavItem[] = [
     section: "insights",
     featureKey: "analytics",
   },
+
+  // Platform (PLATFORM_ADMIN only — gated in sidebar rendering)
+  {
+    key: "platform-users",
+    title: "Platform Users",
+    href: "/admin/platform/users",
+    icon: Users,
+    section: "platform",
+  },
+  {
+    key: "platform-businesses",
+    title: "Platform Businesses",
+    href: "/admin/platform/businesses",
+    icon: Building2,
+    section: "platform",
+  },
+  {
+    key: "platform-domains",
+    title: "Platform Domains",
+    href: "/admin/platform/domains",
+    icon: Globe,
+    section: "platform",
+  },
 ];
 
 // ─── Hub cards ────────────────────────────────────────────────────────────────
@@ -323,10 +350,10 @@ export const HUB_CARDS: HubCard[] = [
     icon: IconUsers,
   },
 
-  // Content hub
+  // Content hub — Brand Identity and Template Fields first
   {
     key: "content-branding",
-    title: "Brand Identity ",
+    title: "Brand Identity",
     description: "Personality of your site",
     body: "Edit your logo, template selection, socials, and more",
     href: "/admin/content/branding",
@@ -335,9 +362,19 @@ export const HUB_CARDS: HubCard[] = [
     icon: Home,
   },
   {
+    key: "content-template",
+    title: "Template Fields",
+    description: "Edit your storefront sections",
+    body: "Customize your homepage, hero, and other built-in storefront sections with live preview",
+    href: "/admin/content/template",
+    hub: "content",
+    color: "indigo",
+    icon: Globe,
+  },
+  {
     key: "content-pages",
     title: "Pages",
-    description: "Pages",
+    description: "Standalone pages (About, Contact, FAQ)",
     body: "About, Contact, FAQ, and custom pages",
     href: "/admin/content/pages",
     hub: "content",
@@ -357,7 +394,7 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "content-policies",
     title: "Policies",
-    description: "Policies",
+    description: "Privacy, Terms, Refunds, Shipping",
     body: "Privacy, Terms, Refunds, Shipping",
     href: "/admin/content/policies",
     hub: "content",
@@ -393,16 +430,6 @@ export const HUB_CARDS: HubCard[] = [
     hub: "content",
     color: "teal",
     icon: FileText,
-  },
-  {
-    key: "content-template",
-    title: "Template Fields",
-    description: "Custom content",
-    body: "Template-specific custom fields",
-    href: "/admin/content/template",
-    hub: "content",
-    color: "indigo",
-    icon: Globe,
   },
   {
     key: "content-announcements",
