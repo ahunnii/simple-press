@@ -216,8 +216,14 @@ export function BlogPostEditor({
       image:
         data !== undefined ? (data.image ?? null) : (page?.image ?? undefined),
       imageFile: undefined,
+      ogImage:
+        data !== undefined
+          ? (data.ogImage ?? null)
+          : (page?.ogImage ?? undefined),
+      ogImageFile: undefined,
     });
     if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+    if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
   };
 
   const createPage = api.content.createPage.useMutation({

@@ -261,15 +261,22 @@ export function PageEditor({
       published: data.published,
       metaTitle: data.metaTitle ?? "",
       metaDescription: data.metaDescription ?? "",
-      type: "page" as const,
-      template: "default" as const,
-      sortOrder: 0,
     };
 
     if (page?.id) {
+      // Update path: omit type/template/sortOrder — this editor doesn't
+      // manage those fields, and sending them would clobber records
+      // (e.g. blog posts) that were created with different values.
       updatePage.mutate({ id: page.id, data: pageData });
     } else {
-      createPage.mutate({ data: pageData });
+      createPage.mutate({
+        data: {
+          ...pageData,
+          type: "page" as const,
+          template: "default" as const,
+          sortOrder: 0,
+        },
+      });
     }
   };
 
