@@ -60,7 +60,7 @@ export async function notifyDiscordDomainRemoved({
   const platformDomain =
     process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "simplepress.co";
   const subdomainUrl = `${subdomain}.${platformDomain}`;
-  const adminUrl = `https://${platformDomain}/admin/platform/domains`;
+  const adminUrl = `https://platform.${platformDomain}/domains`;
 
   await fetch(webhookUrl, {
     method: "POST",
@@ -129,7 +129,7 @@ export async function notifyDiscordNewDomain({
   const platformDomain =
     process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "simplepress.co";
   const subdomainUrl = `${subdomain}.${platformDomain}`;
-  const adminUrl = `https://${platformDomain}/admin/platform/domains`;
+  const adminUrl = `https://platform.${platformDomain}/domains`;
 
   await fetch(webhookUrl, {
     method: "POST",

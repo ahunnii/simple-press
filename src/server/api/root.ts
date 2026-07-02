@@ -13,7 +13,7 @@ import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
 import { faqRouter } from "./routers/faq";
-import { featuresRouter } from "./routers/featues";
+import { featuresRouter } from "./routers/features";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";

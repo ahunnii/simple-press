@@ -7,46 +7,34 @@ import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 
 type Props = {
-  businesses: RouterOutputs["platform"]["listBusinesses"]["businesses"];
+  users: RouterOutputs["platform"]["listUsers"]["users"];
 };
 
-export function BusinessesTable({ businesses }: Props) {
+export function UsersTable({ users }: Props) {
   return (
     <Card>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <caption className="sr-only">Platform businesses</caption>
+          <caption className="sr-only">Platform users</caption>
           <thead className="border-b">
             <tr>
               <th
                 scope="col"
                 className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
               >
-                Business
+                User
               </th>
               <th
                 scope="col"
                 className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
               >
-                Domain
+                Platform Role
               </th>
               <th
                 scope="col"
                 className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
               >
-                Status
-              </th>
-              <th
-                scope="col"
-                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-              >
-                Members
-              </th>
-              <th
-                scope="col"
-                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-              >
-                Owner
+                Memberships
               </th>
               <th
                 scope="col"
@@ -57,44 +45,38 @@ export function BusinessesTable({ businesses }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {businesses.map((business) => (
-              <tr key={business.id} className="hover:bg-muted/50">
+            {users.map((user) => (
+              <tr key={user.id} className="hover:bg-muted/50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Link href={`/admin/platform/businesses/${business.id}`}>
-                    <div className="text-foreground font-medium">
-                      {business.name}
+                  <Link href={`/users/${user.id}`}>
+                    <div>
+                      <div className="text-foreground font-medium">
+                        {user.name}
+                      </div>
+                      <div className="text-muted-foreground text-sm">
+                        {user.email}
+                      </div>
                     </div>
                   </Link>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm">
-                    <div className="text-foreground">{business.subdomain}</div>
-                    {business.customDomain && (
-                      <div className="text-muted-foreground">
-                        {business.customDomain}
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
                   <Badge
                     variant={
-                      business.status === "active" ? "default" : "secondary"
+                      user.platformRole === "PLATFORM_ADMIN"
+                        ? "default"
+                        : "secondary"
                     }
                   >
-                    {business.status}
+                    {user.platformRole}
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-foreground text-sm">
-                    {business._count.memberships}
+                    {user._count.memberships}
                   </span>
                 </td>
                 <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
-                  {business.ownerEmail}
-                </td>
-                <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
-                  {new Date(business.createdAt).toLocaleDateString()}
+                  {new Date(user.createdAt).toLocaleDateString()}
                 </td>
               </tr>
             ))}

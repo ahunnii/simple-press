@@ -22,7 +22,6 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import {
-  Building2,
   Clock,
   FileText,
   Globe,
@@ -38,6 +37,8 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
+
+import { getPlatformHubUrl } from "~/lib/domain-utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -105,6 +106,13 @@ export interface NavItem {
   roles?: AdminRole[];
   /** Keyword synonyms for command palette matching. */
   keywords?: string[];
+  /**
+   * True when `href` is an absolute URL to a different host (e.g. the
+   * `platform.*` subdomain). Consumers must not `router.push()` these —
+   * use a plain navigation (`<Link>` renders a real `<a>` for absolute
+   * URLs; the command palette falls back to `window.location.href`).
+   */
+  external?: boolean;
 }
 
 /** A card entry shown on a hub index page (Settings or Content). */
@@ -304,27 +312,18 @@ export const NAV_ITEMS: NavItem[] = [
     keywords: ["stats", "traffic", "visitors", "reports"],
   },
 
-  // Platform (PLATFORM_ADMIN only — gated in sidebar rendering)
+  // Platform (PLATFORM_ADMIN only — gated in sidebar rendering). Points at
+  // the dedicated platform-admin subdomain (src/app/platform-hub), which
+  // owns users/businesses/domains management — those pages no longer live
+  // inside tenant /admin.
   {
-    key: "platform-users",
-    title: "Platform Users",
-    href: "/admin/platform/users",
-    icon: Users,
+    key: "platform-hub",
+    title: "Platform Hub",
+    href: getPlatformHubUrl("/dashboard"),
+    icon: Shield,
     section: "platform",
-  },
-  {
-    key: "platform-businesses",
-    title: "Platform Businesses",
-    href: "/admin/platform/businesses",
-    icon: Building2,
-    section: "platform",
-  },
-  {
-    key: "platform-domains",
-    title: "Platform Domains",
-    href: "/admin/platform/domains",
-    icon: Globe,
-    section: "platform",
+    external: true,
+    keywords: ["users", "businesses", "domains", "platform admin"],
   },
 ];
 

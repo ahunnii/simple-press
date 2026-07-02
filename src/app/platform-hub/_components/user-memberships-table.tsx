@@ -27,10 +27,10 @@ import { DeleteMembershipDialog } from "./delete-membership-dialog";
 import { EditMembershipDialog } from "./edit-membership-dialog";
 
 type Props = {
-  memberships: RouterOutputs["platform"]["getBusiness"]["memberships"];
+  memberships: RouterOutputs["platform"]["getUser"]["memberships"];
 };
 
-export function BusinessMembersTable({ memberships }: Props) {
+export function UserMembershipsTable({ memberships }: Props) {
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -55,9 +55,8 @@ export function BusinessMembersTable({ memberships }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Platform Role</TableHead>
-            <TableHead>Business Role</TableHead>
+            <TableHead>Business</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead>Member Since</TableHead>
             <TableHead className="w-[70px]"></TableHead>
           </TableRow>
@@ -67,25 +66,14 @@ export function BusinessMembersTable({ memberships }: Props) {
             <TableRow key={membership.id}>
               <TableCell>
                 <Link
-                  href={`/admin/platform/users/${membership.user.id}`}
+                  href={`/businesses/${membership.business.id}`}
                   className="font-medium hover:underline"
                 >
-                  {membership.user.name}
+                  {membership.business.name}
                 </Link>
                 <div className="text-muted-foreground text-sm">
-                  {membership.user.email}
+                  {membership.business.subdomain}
                 </div>
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    membership.user.platformRole === "PLATFORM_ADMIN"
-                      ? "default"
-                      : "secondary"
-                  }
-                >
-                  {membership.user.platformRole}
-                </Badge>
               </TableCell>
               <TableCell>
                 <Badge
@@ -104,7 +92,7 @@ export function BusinessMembersTable({ memberships }: Props) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">
                       <MoreVertical className="h-4 w-4" />
-                      <span className="sr-only">Member actions</span>
+                      <span className="sr-only">Membership actions</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -141,7 +129,7 @@ export function BusinessMembersTable({ memberships }: Props) {
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
             membershipId={selectedMembership.id}
-            userName={selectedMembership.user.name}
+            businessName={selectedMembership.business.name}
             onSuccess={handleDelete}
           />
           <EditMembershipDialog
@@ -149,7 +137,7 @@ export function BusinessMembersTable({ memberships }: Props) {
             onOpenChange={setEditDialogOpen}
             membershipId={selectedMembership.id}
             currentRole={selectedMembership.role}
-            userName={selectedMembership.user.name}
+            businessName={selectedMembership.business.name}
             onSuccess={handleEdit}
           />
         </>

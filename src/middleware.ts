@@ -67,14 +67,7 @@ export async function middleware(req: NextRequest) {
 
     const url = req.nextUrl.clone();
 
-    // Strip the /admin/platform prefix so existing component links (e.g. hrefs
-    // like /admin/platform/users inside UsersTable) resolve correctly here.
-    let targetPath = pathname;
-    if (pathname.startsWith("/admin/platform")) {
-      targetPath = pathname.slice("/admin/platform".length) || "/";
-    }
-
-    url.pathname = `/platform-hub${targetPath === "/" ? "" : targetPath}`;
+    url.pathname = `/platform-hub${pathname === "/" ? "" : pathname}`;
     return finalize(
       NextResponse.rewrite(url, { request: { headers: requestHeaders } }),
     );

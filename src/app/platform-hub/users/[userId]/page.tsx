@@ -9,10 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { AddMembershipButton } from "~/app/admin/platform/_components/add-membership-button";
-import { UserMembershipsTable } from "~/app/admin/platform/_components/user-memberships-table";
-
+import { AddMembershipButton } from "../../_components/add-membership-button";
 import { PlatformTrailHeader } from "../../_components/platform-trail-header";
+import { UserMembershipsTable } from "../../_components/user-memberships-table";
 
 type Props = {
   params: Promise<{ userId: string }>;
@@ -33,6 +32,9 @@ export default async function PlatformUserDetailPage({ params }: Props) {
       />
       <div className="admin-container">
         <div className="space-y-6">
+          <div className="admin-header">
+            <h1 className="text-2xl font-bold">{user.name}</h1>
+          </div>
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">

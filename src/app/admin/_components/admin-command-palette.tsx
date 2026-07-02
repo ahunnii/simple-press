@@ -138,10 +138,16 @@ export function AdminCommandPalette({
   );
 
   const go = useCallback(
-    (href: string) => {
+    (href: string, external?: boolean) => {
       setOpen(false);
       setQuery("");
       setDebouncedQuery("");
+      // Absolute cross-host URLs (e.g. the platform.* subdomain) can't be
+      // handled by the Next.js router — force a full navigation instead.
+      if (external) {
+        window.location.href = href;
+        return;
+      }
       router.push(href);
     },
     [router],
@@ -215,7 +221,7 @@ export function AdminCommandPalette({
                   key={item.key}
                   value={`nav:${item.key} ${item.title}`}
                   keywords={item.keywords}
-                  onSelect={() => go(item.href)}
+                  onSelect={() => go(item.href, item.external)}
                 >
                   <Icon />
                   <span>{item.title}</span>

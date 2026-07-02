@@ -68,7 +68,7 @@ export function CreateBusinessButton() {
       setOpen(false);
       form.reset(defaultValues);
       setSubdomainEdited(false);
-      router.push(`/admin/platform/businesses/${data.id}`);
+      router.push(`/businesses/${data.id}`);
     },
   });
 
