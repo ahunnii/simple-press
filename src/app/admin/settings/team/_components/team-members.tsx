@@ -44,6 +44,14 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Form } from "~/components/ui/form";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "~/components/ui/table";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { SelectFormField } from "~/components/inputs/select-form-field";
 
@@ -247,34 +255,36 @@ export function TeamMembers({
           </p>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="px-6 py-3 text-left font-medium">Name</th>
-                <th className="px-6 py-3 text-left font-medium">Email</th>
-                <th className="px-6 py-3 text-left font-medium">Role</th>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-6 py-3">Name</TableHead>
+                <TableHead className="px-6 py-3">Email</TableHead>
+                <TableHead className="px-6 py-3">Role</TableHead>
                 {isOwner && (
-                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                  <TableHead className="px-6 py-3 text-right">
+                    Actions
+                  </TableHead>
                 )}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {memberships.map((m) => {
                 const isCurrentUser = m.user.id === currentUserId;
                 return (
-                  <tr key={m.id} className="border-b last:border-0">
-                    <td className="px-6 py-3 font-medium">
+                  <TableRow key={m.id}>
+                    <TableCell className="px-6 py-3 font-medium">
                       {m.user.name ?? m.user.email}
                       {isCurrentUser && (
                         <span className="text-muted-foreground ml-2 text-xs">
                           (you)
                         </span>
                       )}
-                    </td>
-                    <td className="text-muted-foreground px-6 py-3">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground px-6 py-3">
                       {m.user.email}
-                    </td>
-                    <td className="px-6 py-3">
+                    </TableCell>
+                    <TableCell className="px-6 py-3">
                       {isOwner && !isCurrentUser ? (
                         <Select
                           value={m.role}
@@ -313,9 +323,9 @@ export function TeamMembers({
                           )}
                         </Badge>
                       )}
-                    </td>
+                    </TableCell>
                     {isOwner && (
-                      <td className="px-6 py-3 text-right">
+                      <TableCell className="px-6 py-3 text-right">
                         {!isCurrentUser && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -350,13 +360,13 @@ export function TeamMembers({
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
@@ -367,33 +377,33 @@ export function TeamMembers({
             <CardTitle>Pending Invitations</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-6 py-3 text-left font-medium">Email</th>
-                  <th className="px-6 py-3 text-left font-medium">Role</th>
-                  <th className="px-6 py-3 text-left font-medium">Expires</th>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-6 py-3">Email</TableHead>
+                  <TableHead className="px-6 py-3">Role</TableHead>
+                  <TableHead className="px-6 py-3">Expires</TableHead>
                   {isOwner && (
-                    <th className="px-6 py-3 text-right font-medium">
+                    <TableHead className="px-6 py-3 text-right">
                       Actions
-                    </th>
+                    </TableHead>
                   )}
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {pendingInvites.map((inv) => (
-                  <tr key={inv.id} className="border-b last:border-0">
-                    <td className="px-6 py-3">{inv.email}</td>
-                    <td className="px-6 py-3">
+                  <TableRow key={inv.id}>
+                    <TableCell className="px-6 py-3">{inv.email}</TableCell>
+                    <TableCell className="px-6 py-3">
                       <Badge variant="outline">
                         {ROLE_LABELS[inv.role as TeamRole] ?? inv.role}
                       </Badge>
-                    </td>
-                    <td className="text-muted-foreground px-6 py-3">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground px-6 py-3">
                       {new Date(inv.expiresAt).toLocaleDateString()}
-                    </td>
+                    </TableCell>
                     {isOwner && (
-                      <td className="px-6 py-3 text-right">
+                      <TableCell className="px-6 py-3 text-right">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -407,12 +417,12 @@ export function TeamMembers({
                         >
                           Revoke
                         </Button>
-                      </td>
+                      </TableCell>
                     )}
-                  </tr>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       )}

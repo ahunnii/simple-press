@@ -28,6 +28,14 @@ import type {
   UmamiStats,
 } from "~/lib/umami/client";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "~/components/ui/table";
 
 // ─── Stat cards ───────────────────────────────────────────────────────────────
 
@@ -77,24 +85,29 @@ function MetricTable({
             No data for this period
           </p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="pb-2 text-left font-medium">{label}</th>
-                <th className="pb-2 text-right font-medium">Views</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="pb-2">{label}</TableHead>
+                <TableHead className="pb-2 text-right">Views</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((row, i) => (
-                <tr key={i} className="border-b last:border-0">
-                  <td className="max-w-[200px] truncate py-2 pr-4 font-mono text-xs">
+                <TableRow key={i}>
+                  <TableCell
+                    className="max-w-[240px] truncate py-2 pr-4 font-mono text-xs"
+                    title={row.x || "(direct)"}
+                  >
                     {row.x || "(direct)"}
-                  </td>
-                  <td className="py-2 text-right">{row.y.toLocaleString()}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="py-2 text-right">
+                    {row.y.toLocaleString()}
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
@@ -155,24 +168,26 @@ function EventsSection({
             <CardTitle>All Custom Events</CardTitle>
           </CardHeader>
           <CardContent>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="pb-2 text-left font-medium">Event</th>
-                  <th className="pb-2 text-right font-medium">Count</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pb-2">Event</TableHead>
+                  <TableHead className="pb-2 text-right">Count</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {rows.map((row, i) => (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-2 pr-4 font-mono text-xs">{row.x}</td>
-                    <td className="py-2 text-right">
+                  <TableRow key={i}>
+                    <TableCell className="py-2 pr-4 font-mono text-xs">
+                      {row.x}
+                    </TableCell>
+                    <TableCell className="py-2 text-right">
                       {row.y.toLocaleString()}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       )}
