@@ -70,7 +70,7 @@ export default async function OrdersPage({ searchParams }: Props) {
         </div>
 
         {/* Stats */}
-        {!params.status && !params.search && (
+        {!hasActiveFilters && (
           <div className="mb-8 grid gap-6 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">

@@ -423,16 +423,17 @@ function ManualRefundDialog({ order }: { order: Order }) {
 // ─── Public export ────────────────────────────────────────────────────────────
 
 export function RefundHandler({ order }: Props) {
+  // Gate on paymentStatus "paid" — that's the only state where refundable
+  // money is held. This includes partially-refunded orders (they stay
+  // "paid"; the server supports refunding the remainder) and excludes
+  // fully-refunded/disputed/unpaid orders. Deliberately does NOT exclude
+  // cancelled orders — a paid-then-cancelled order must remain refundable,
+  // and the server mutations allow it.
   const canStripeRefund =
-    (order.status === "paid" || order.status === "fulfilled") &&
-    !!order.stripePaymentIntentId;
+    order.paymentStatus === "paid" && !!order.stripePaymentIntentId;
 
   const canManualRefund =
-    (order.status === "paid" ||
-      order.status === "fulfilled" ||
-      order.paymentStatus === "paid") &&
-    !order.stripePaymentIntentId &&
-    order.status !== "refunded";
+    order.paymentStatus === "paid" && !order.stripePaymentIntentId;
 
   if (canStripeRefund) return <StripeRefundDialog order={order} />;
   if (canManualRefund) return <ManualRefundDialog order={order} />;

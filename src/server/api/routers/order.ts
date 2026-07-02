@@ -684,7 +684,7 @@ export const orderRouter = createTRPCRouter({
       const skip = (page - 1) * pageSize;
 
       // Stats are computed over the FULL filtered set (not just the page).
-      // Revenue excludes fully refunded orders and subtracts partial refunds.
+      // Revenue counts paid orders only and subtracts refunds.
       const [orders, totalCount, paidOrders, revenueAgg] =
         await ctx.db.$transaction([
           ctx.db.order.findMany({
@@ -706,7 +706,7 @@ export const orderRouter = createTRPCRouter({
             where: { AND: [where, { paymentStatus: "paid" }] },
           }),
           ctx.db.order.aggregate({
-            where: { AND: [where, { paymentStatus: { not: "refunded" } }] },
+            where: { AND: [where, { paymentStatus: "paid" }] },
             _sum: { total: true, refundAmountCents: true },
           }),
         ]);
