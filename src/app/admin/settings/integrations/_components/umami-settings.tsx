@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle,
@@ -105,7 +106,17 @@ export function UmamiSettings({ business }: Props) {
               <div>
                 <CardTitle>Umami Analytics</CardTitle>
                 <CardDescription>
-                  Privacy-focused website analytics
+                  Tracks visits, page views, referrers, and on-site events
+                  (product views, add-to-cart, embed engagement) on your
+                  storefront — without third-party cookies or ad-network
+                  tracking. Once enabled, results appear on your{" "}
+                  <Link
+                    href="/admin/analytics"
+                    className="underline underline-offset-2"
+                  >
+                    Analytics dashboard
+                  </Link>
+                  .
                 </CardDescription>
               </div>
               {umamiEnabled && umamiWebsiteId ? (
@@ -145,7 +156,9 @@ export function UmamiSettings({ business }: Props) {
                 </p>
               ) : (
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Your Umami website tracking ID
+                  Found on the website&apos;s Settings page in your Umami
+                  account after you add your storefront domain there — not
+                  your Umami account ID or API key.
                 </p>
               )}
             </div>
@@ -154,7 +167,9 @@ export function UmamiSettings({ business }: Props) {
               <div>
                 <Label htmlFor="umamiEnabled">Enable Analytics</Label>
                 <p className="text-muted-foreground text-sm">
-                  Track visitor data on your storefront
+                  Adds the tracking script to every storefront page and turns
+                  on the admin Analytics dashboard. Leave off to keep both
+                  disabled even if a Website ID is saved above.
                 </p>
               </div>
               <Switch

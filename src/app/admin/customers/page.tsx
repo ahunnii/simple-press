@@ -1,3 +1,5 @@
+import { Users } from "lucide-react";
+
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import {
@@ -7,6 +9,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { AdminEmpty } from "../_components/admin-empty";
 import { TrailHeader } from "../_components/trail-header";
 import { CustomerFilters } from "./_components/customer-filters";
 import { CustomersPagination } from "./_components/customers-pagination";
@@ -62,16 +65,12 @@ export default async function CustomersPage({ searchParams }: Props) {
         <CustomerFilters customerCount={totalCount} />
 
         {customers.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No customers found</CardTitle>
-              <CardDescription>
-                {params.search
-                  ? "Try a different search term."
-                  : "Customers will appear here once orders are placed."}
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <AdminEmpty
+            icon={Users}
+            title={params.search ? "No matching customers" : "No customers yet"}
+            description={params.search ? "No customers match your search." : "Customers appear here after their first order or when they create an account on your storefront."}
+            filtered={!!params.search}
+          />
         ) : (
           <>
             <CustomersTable customers={customers} />

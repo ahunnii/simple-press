@@ -131,7 +131,9 @@ export function StripeSettings({
               <CreditCard className="h-4 w-4" /> Stripe Connect
             </CardTitle>
             <CardDescription>
-              Accept payments from your customers
+              Required to process orders — customers cannot check out until a
+              Stripe account is connected. Payouts go directly to this
+              account; SimplePress never holds your funds.
             </CardDescription>
           </div>
           {stripeAccountId ? (
@@ -158,8 +160,9 @@ export function StripeSettings({
             </div>
 
             <p className="text-muted-foreground text-sm">
-              Your Stripe account is connected. Payments will be deposited
-              directly to your Stripe account.
+              Your Stripe account is connected and checkout is live. Payments
+              are deposited directly to this Stripe account on Stripe&apos;s
+              payout schedule — SimplePress never holds your funds.
             </p>
 
             <div className="flex gap-3">
@@ -199,8 +202,11 @@ export function StripeSettings({
                   </Label>
                   <p className="text-muted-foreground text-sm">
                     Automatically calculate and collect sales tax at checkout
-                    via Stripe Tax. Requires active tax registrations on your
-                    Stripe account.{" "}
+                    via Stripe Tax, based on the customer&apos;s address.
+                    Requires an active Stripe Tax registration on your
+                    connected account — enable it in your Stripe dashboard
+                    first, or this toggle will reject the change and tell you
+                    why.{" "}
                     <Link
                       href="/admin/settings/tax"
                       className="underline underline-offset-2"
@@ -255,8 +261,10 @@ export function StripeSettings({
         ) : (
           <>
             <p className="text-muted-foreground text-sm">
-              Connect your Stripe account to start accepting payments. Stripe
-              handles all payment processing securely.
+              Connect a Stripe account to start accepting payments —
+              until then, checkout is disabled and customers can&apos;t place
+              orders. Stripe handles card details and payment processing
+              directly; SimplePress never sees or stores card numbers.
             </p>
             <Button onClick={handleConnect}>Connect with Stripe</Button>
           </>

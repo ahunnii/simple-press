@@ -57,6 +57,38 @@ export type AdminRole = "OWNER" | "MANAGER" | "STAFF";
 /** Roles a nav item is visible to when it declares no explicit `roles`. */
 export const DEFAULT_NAV_ROLES: AdminRole[] = ["OWNER", "MANAGER"];
 
+/**
+ * Human-readable capability summary for each admin role. Used to explain
+ * roles in the team invite dialog and members table.
+ *
+ * Source of truth: `ownerOnlyProcedure` (src/server/api/trpc.ts) restricts
+ * team invite/remove/role-change to OWNER (see src/server/api/routers/team.ts).
+ * `ownerAdminProcedure` — which gates products, orders, payments, content,
+ * and settings mutations — allows both OWNER and MANAGER. `staffProcedure`
+ * additionally allows STAFF, but is only used for fulfillment procedures
+ * (orders, customers); see `STAFF_ALLOWED_PATH_PREFIXES` below.
+ */
+export const ROLE_DESCRIPTIONS: Record<
+  AdminRole,
+  { label: string; summary: string }
+> = {
+  OWNER: {
+    label: "Owner",
+    summary:
+      "Full access, including team management, payments, and store settings.",
+  },
+  MANAGER: {
+    label: "Manager",
+    summary:
+      "Everything an Owner can do except team management — products, orders, payments, content, and settings.",
+  },
+  STAFF: {
+    label: "Staff",
+    summary:
+      "Fulfillment access only — can view and manage orders and customers.",
+  },
+};
+
 /** A top-level sidebar navigation item. */
 export interface NavItem {
   key: string;

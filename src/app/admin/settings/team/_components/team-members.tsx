@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { InviteMemberFormData } from "~/lib/validators/team";
+import { ROLE_DESCRIPTIONS } from "~/app/admin/_lib/admin-nav";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { inviteMemberFormSchema } from "~/lib/validators/team";
 import { type RouterOutputs, api } from "~/trpc/react";
@@ -185,32 +186,26 @@ export function TeamMembers({
                       placeholder="teammate@example.com"
                       required
                     />
-                    <div>
-                      <SelectFormField
-                        form={inviteForm}
-                        name="role"
-                        label="Role"
-                        values={[
-                          {
-                            value: "MANAGER",
-                            label: "Manager — operational access",
-                          },
-                          {
-                            value: "STAFF",
-                            label: "Staff — fulfillment only",
-                          },
-                          {
-                            value: "OWNER",
-                            label: "Owner — full control",
-                          },
-                        ]}
-                      />
-                      <p className="text-muted-foreground mt-1 text-xs">
-                        {inviteRole === "STAFF"
-                          ? "Can view and fulfill orders only."
-                          : "Managers can manage orders, products, and content but cannot invite or remove team members."}
-                      </p>
-                    </div>
+                    <SelectFormField
+                      form={inviteForm}
+                      name="role"
+                      label="Role"
+                      description={ROLE_DESCRIPTIONS[inviteRole]?.summary}
+                      values={[
+                        {
+                          value: "MANAGER",
+                          label: "Manager — operational access",
+                        },
+                        {
+                          value: "STAFF",
+                          label: "Staff — fulfillment only",
+                        },
+                        {
+                          value: "OWNER",
+                          label: "Owner — full control",
+                        },
+                      ]}
+                    />
                   </div>
                   <DialogFooter>
                     <Button
@@ -245,6 +240,11 @@ export function TeamMembers({
       <Card>
         <CardHeader>
           <CardTitle>Members</CardTitle>
+          <p className="text-muted-foreground text-xs">
+            {Object.values(ROLE_DESCRIPTIONS)
+              .map(({ label, summary }) => `${label}: ${summary}`)
+              .join(" · ")}
+          </p>
         </CardHeader>
         <CardContent className="p-0">
           <table className="w-full text-sm">

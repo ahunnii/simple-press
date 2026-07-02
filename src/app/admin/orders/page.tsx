@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, ShoppingCart } from "lucide-react";
 
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { AdminEmpty } from "../_components/admin-empty";
 import { TrailHeader } from "../_components/trail-header";
 import { ExportOrdersButton } from "./_components/export-orders-button";
 import { OrderFilters } from "./_components/order-filters";
@@ -29,6 +30,9 @@ type Props = {
 
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
+  const hasActiveFilters = Boolean(
+    params.status ?? params.search ?? params.fulfillment ?? params.paymentStatus,
+  );
   const page = params.page ? Math.max(1, parseInt(params.page, 10)) : undefined;
 
   // Get orders for this business (paginated; stats cover the full filtered set)
@@ -98,14 +102,24 @@ export default async function OrdersPage({ searchParams }: Props) {
 
         {/* Orders List */}
         {orders.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No orders yet</CardTitle>
-              <CardDescription>
-                Orders will appear here when customers make purchases
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <AdminEmpty
+            icon={ShoppingCart}
+            title={hasActiveFilters ? "No matching orders" : "No orders yet"}
+            description={
+              hasActiveFilters
+                ? "No orders match your current filters."
+                : "Orders appear here when customers check out on your storefront. You can also create one manually for phone or in-person sales."
+            }
+            filtered={hasActiveFilters}
+            action={
+              <Button asChild>
+                <Link href="/admin/orders/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Manual Order
+                </Link>
+              </Button>
+            }
+          />
         ) : (
           <>
             <OrdersTable orders={orders} />
