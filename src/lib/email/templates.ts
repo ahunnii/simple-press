@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import DisputeAlertEmail from "~/emails/dispute-alert";
@@ -11,6 +12,7 @@ import OrderFulfilledEmail from "~/emails/order-fulfilled";
 import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
+import OrderStatusLinkEmail from "~/emails/order-status-link";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
@@ -20,6 +22,19 @@ import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
 import { getBusinessUrl } from "~/lib/business-url";
+import { createOrderStatusToken } from "~/lib/order-status-token";
+
+/**
+ * Build a signed guest order-status URL for an order, or undefined
+ * when no orderId is available (older call sites).
+ */
+function buildOrderStatusUrl(
+  businessUrl: string,
+  orderId?: string,
+): string | undefined {
+  if (!orderId) return undefined;
+  return `${businessUrl}/order-status/${createOrderStatusToken(orderId)}`;
+}
 
 import { EMAIL_FROM, sendEmail } from "./send";
 
@@ -48,9 +63,12 @@ export async function sendOrderConfirmation(params: {
     customDomain?: string | null;
     domainStatus?: string | null;
   };
+  /** When provided, a signed "View order status" link is included in the email. */
+  orderId?: string;
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
+  const orderStatusUrl = buildOrderStatusUrl(businessUrl, params.orderId);
   const isPickup = params.deliveryMethod === "pickup";
 
   return sendEmail({
@@ -77,6 +95,7 @@ export async function sendOrderConfirmation(params: {
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
+      orderStatusUrl,
     }),
     tags: [
       { name: "category", value: "order_confirmation" },
@@ -163,8 +182,15 @@ export async function sendOrderShipped(params: {
       logoUrl?: string | null;
     } | null;
     subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
   };
+  /** When provided, a signed "View order status" link is included in the email. */
+  orderId?: string;
 }) {
+  const businessUrl = getBusinessUrl(params.business);
+  const orderStatusUrl = buildOrderStatusUrl(businessUrl, params.orderId);
+
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name, // ← NEW
@@ -180,6 +206,7 @@ export async function sendOrderShipped(params: {
       estimatedDelivery: params.estimatedDelivery,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      orderStatusUrl,
     }),
     tags: [
       { name: "category", value: "order_shipped" },
@@ -353,6 +380,80 @@ export async function sendOrderCancelled(params: {
       { name: "category", value: "order_cancelled" },
       { name: "business", value: params.business.subdomain },
     ],
+  });
+}
+
+// Guest order-status link (customer)
+export async function sendOrderStatusLink(params: {
+  to: string;
+  orderNumber: number;
+  customerName: string;
+  orderStatusUrl: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+  };
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `Your order status link for order #${params.orderNumber}`,
+    react: OrderStatusLinkEmail({
+      orderNumber: params.orderNumber,
+      customerName: params.customerName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      orderStatusUrl: params.orderStatusUrl,
+    }),
+    tags: [
+      { name: "category", value: "order_status_link" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Abandoned Checkout Recovery (customer) — sent from the
+// checkout.session.expired webhook when the business has opted in.
+export async function sendAbandonedCheckoutEmail(params: {
+  to: string;
+  customerName?: string | null;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const businessUrl = getBusinessUrl(params.business);
+
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `You left items in your cart at ${params.business.name}`,
+    react: AbandonedCheckoutEmail({
+      customerName: params.customerName ?? undefined,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      businessUrl,
+    }),
+    tags: [
+      { name: "category", value: "abandoned_checkout" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
   });
 }
 

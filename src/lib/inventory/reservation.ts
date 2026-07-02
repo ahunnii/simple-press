@@ -1,6 +1,6 @@
 import { Prisma } from "generated/prisma";
 
-import type { TxClient } from "~/server/db";
+import type { DbClient, TxClient } from "~/server/db";
 
 type Tx = TxClient;
 
@@ -71,6 +71,41 @@ export async function reserveInventory(
   }
 
   return { ok: true };
+}
+
+/**
+ * Release any stale reservations — rows still "active" past their expiresAt —
+ * so they stop inflating reservedQty. Each reservation is released in its own
+ * transaction so one failure doesn't block the rest.
+ *
+ * Optionally scoped to a single business (the create-session lazy sweep);
+ * unscoped it sweeps platform-wide (the cron job).
+ *
+ * Returns the number of reservations released.
+ */
+export async function sweepStaleReservations(
+  db: DbClient,
+  opts: { businessId?: string; take?: number } = {},
+): Promise<number> {
+  const stale = await db.inventoryReservation.findMany({
+    where: {
+      ...(opts.businessId ? { businessId: opts.businessId } : {}),
+      status: "active",
+      expiresAt: { lt: new Date() },
+    },
+    take: opts.take ?? 50,
+  });
+  for (const staleRes of stale) {
+    await db.$transaction(async (tx) => {
+      const entries = staleRes.items as ReservationEntry[];
+      await releaseReservation(tx, { items: entries });
+      await tx.inventoryReservation.update({
+        where: { id: staleRes.id },
+        data: { status: "released" },
+      });
+    });
+  }
+  return stale.length;
 }
 
 /**

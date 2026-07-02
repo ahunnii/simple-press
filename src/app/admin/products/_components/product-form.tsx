@@ -79,6 +79,15 @@ type Props = {
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 
+/** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
+function toDatetimeLocalInput(value: Date | string | null | undefined): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function parseStoredAdditionalFields(raw: unknown) {
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
     return null;
@@ -282,6 +291,7 @@ export function ProductForm({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       published: product?.published ?? true,
+      scheduledPublishAt: toDatetimeLocalInput(product?.scheduledPublishAt),
       name: product?.name ?? "",
       slug: product?.slug ?? "",
       description: product?.description ?? undefined,
@@ -519,6 +529,10 @@ export function ProductForm({
         price: priceInCents,
         compareAtPrice: compareAtPriceInCents,
         published: data.published,
+        scheduledPublishAt:
+          !data.published && data.scheduledPublishAt
+            ? new Date(data.scheduledPublishAt)
+            : null,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
@@ -590,6 +604,10 @@ export function ProductForm({
         description: data.description ?? undefined,
         price: priceInCents,
         published: data.published,
+        scheduledPublishAt:
+          !data.published && data.scheduledPublishAt
+            ? new Date(data.scheduledPublishAt)
+            : null,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
@@ -881,6 +899,33 @@ export function ProductForm({
                           placeholder="Describe your product..."
                           rows={4}
                         />
+
+                        {/* Schedule publish (only while unpublished) */}
+                        {!form.watch("published") && (
+                          <FormField
+                            control={form.control}
+                            name="scheduledPublishAt"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Schedule publish</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="datetime-local"
+                                    className="w-auto"
+                                    value={field.value ?? ""}
+                                    onChange={field.onChange}
+                                    onBlur={field.onBlur}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  {field.value
+                                    ? `Scheduled for ${new Date(field.value).toLocaleString()}`
+                                    : "Optional — publish this product automatically at a future date and time."}
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </CardContent>
                     </Card>
 

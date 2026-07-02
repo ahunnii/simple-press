@@ -208,6 +208,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   onboardingComplete: 'onboardingComplete',
   localBusinessEnabled: 'localBusinessEnabled',
   allowAiCrawlers: 'allowAiCrawlers',
+  sendAbandonedCheckoutEmails: 'sendAbandonedCheckoutEmails',
   featureFlags: 'featureFlags',
   shippingType: 'shippingType',
   shippingFlatRate: 'shippingFlatRate',
@@ -293,6 +294,7 @@ exports.Prisma.ProductScalarFieldEnum = {
   weightUnit: 'weightUnit',
   published: 'published',
   featured: 'featured',
+  scheduledPublishAt: 'scheduledPublishAt',
   sortOrder: 'sortOrder',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
@@ -410,6 +412,7 @@ exports.Prisma.CustomerScalarFieldEnum = {
   orderCount: 'orderCount',
   deletionRequestedAt: 'deletionRequestedAt',
   anonymizedAt: 'anonymizedAt',
+  notes: 'notes',
   userId: 'userId',
   businessId: 'businessId'
 };
@@ -508,6 +511,7 @@ exports.Prisma.DiscountCodeScalarFieldEnum = {
   active: 'active',
   usageLimit: 'usageLimit',
   usageCount: 'usageCount',
+  perCustomerLimit: 'perCustomerLimit',
   startsAt: 'startsAt',
   expiresAt: 'expiresAt',
   minPurchase: 'minPurchase',
@@ -572,6 +576,7 @@ exports.Prisma.PageScalarFieldEnum = {
   ogImage: 'ogImage',
   published: 'published',
   sortOrder: 'sortOrder',
+  scheduledPublishAt: 'scheduledPublishAt',
   type: 'type',
   template: 'template',
   businessId: 'businessId'

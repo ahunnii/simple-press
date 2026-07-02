@@ -21,6 +21,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 import { NoiseOrderSummary } from "./noise-order-summary";
 
@@ -347,6 +351,29 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
                 ? "We price shipping from this address. Make changes here before continuing to payment."
                 : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
+
+            <SavedAddressPicker
+              className="text-[color:var(--vn-steel,inherit)]"
+              legendClassName="font-mono text-[10px] font-normal tracking-[0.14em] uppercase"
+              optionClassName="rounded-none border-[color:var(--vn-hairline,currentColor)]"
+              accentColor="var(--vn-steel, currentColor)"
+              onSelect={(address) =>
+                applySavedAddressToForm(
+                  {
+                    setName,
+                    setPhone,
+                    setAddressLine1,
+                    setAddressLine2,
+                    setCity,
+                    setState,
+                    setPostalCode,
+                    setCountry,
+                    allowedCountries,
+                  },
+                  address,
+                )
+              }
+            />
 
             <div className="flex flex-col gap-1.5">
               <Label

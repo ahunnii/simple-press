@@ -4,6 +4,7 @@ import { z } from "zod";
 import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discounts";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { discountLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 import { discountFormSchema } from "~/lib/validators/discounts";
 import {
   createTRPCRouter,
@@ -68,6 +69,8 @@ export const discountRouter = createTRPCRouter({
           value: input.value,
           active: input.active,
           usageLimit: input.usageLimit,
+          perCustomerLimit: input.perCustomerLimit,
+          startsAt: input.startsAt ?? undefined,
           expiresAt: input.expiresAt ?? undefined,
           minPurchase: input.minPurchase,
           maxDiscount: input.maxDiscount,
@@ -111,6 +114,8 @@ export const discountRouter = createTRPCRouter({
           value: input.value,
           active: input.active,
           usageLimit: input.usageLimit ?? undefined,
+          perCustomerLimit: input.perCustomerLimit ?? null,
+          startsAt: input.startsAt ?? null,
           expiresAt: input.expiresAt ?? undefined,
           minPurchase: input.minPurchase ?? undefined,
           maxDiscount: input.maxDiscount ?? undefined,
@@ -134,6 +139,10 @@ export const discountRouter = createTRPCRouter({
       z.object({
         code: z.string().min(1),
         cartTotal: z.number().int().min(0),
+        // Optional: when the checkout form knows the shopper's email, pass it
+        // so per-customer limits can be enforced early. create-session enforces
+        // this authoritatively either way.
+        email: z.string().email().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -165,7 +174,27 @@ export const discountRouter = createTRPCRouter({
         });
       }
 
-      const result = validateAndComputeDiscount(discount, cartTotal);
+      // Per-customer limit: only enforceable here when the form supplied an
+      // email. create-session re-checks this server-side with the checkout
+      // email, so this is a best-effort early rejection.
+      let customerUsageCount: number | undefined;
+      if (discount.perCustomerLimit != null && input.email) {
+        customerUsageCount = await ctx.db.order.count({
+          where: {
+            businessId,
+            discountCodeId: discount.id,
+            customerEmail: normalizeEmail(input.email),
+            status: { not: "cancelled" },
+          },
+        });
+      }
+
+      // Shipping isn't known at validate time, so a free_shipping code
+      // reports discountAmount 0 — the `freeShipping` flag tells the UI to
+      // show a "Free shipping" label instead of a dollar amount.
+      const result = validateAndComputeDiscount(discount, cartTotal, {
+        customerUsageCount,
+      });
       if (!result.ok) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -181,6 +210,7 @@ export const discountRouter = createTRPCRouter({
           type: discount.type,
           value: discount.value,
           discountAmount: result.discountAmountCents,
+          freeShipping: discount.type === "free_shipping",
         },
       };
     }),

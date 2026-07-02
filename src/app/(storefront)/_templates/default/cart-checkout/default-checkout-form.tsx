@@ -23,6 +23,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -220,6 +224,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       ? "We price shipping from this address. Make changes here before continuing to payment."
                       : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                   </p>
+                  <SavedAddressPicker
+                    accentColor={primaryColor}
+                    className="text-[#0a0a0a]"
+                    onSelect={(address) => applySavedAddressToForm(f, address)}
+                  />
                   <div>
                     <Label htmlFor="address-line1">
                       Address line 1 <span aria-hidden="true">*</span>

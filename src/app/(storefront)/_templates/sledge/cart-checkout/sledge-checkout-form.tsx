@@ -20,6 +20,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 import { SledgeOrderSummary } from "./sledge-order-summary";
 
@@ -278,6 +282,29 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
                 ? "We price shipping from this address. Make changes here before continuing to payment."
                 : "Pre-filled at Stripe — you can confirm or edit before paying."}
             </p>
+
+            <SavedAddressPicker
+              className="text-[color:var(--sl-ink,inherit)]"
+              legendClassName="font-sans text-xs font-normal tracking-[0.12em] text-[var(--sl-ink-soft)] uppercase"
+              optionClassName="rounded-none"
+              accentColor="var(--sl-coral-aa, currentColor)"
+              onSelect={(address) =>
+                applySavedAddressToForm(
+                  {
+                    setName,
+                    setPhone,
+                    setAddressLine1,
+                    setAddressLine2,
+                    setCity,
+                    setState,
+                    setPostalCode,
+                    setCountry,
+                    allowedCountries,
+                  },
+                  address,
+                )
+              }
+            />
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="address-line1" className={LBL}>

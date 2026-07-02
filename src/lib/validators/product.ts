@@ -39,6 +39,9 @@ export const productFormSchema = z.object({
   price: z.coerce.number().nonnegative(),
   compareAtPrice: z.coerce.number().nonnegative().optional(),
   published: z.boolean(),
+  // Form-level value: datetime-local string ("" = no schedule). Router schemas
+  // override this with a real Date.
+  scheduledPublishAt: z.string().optional().nullable(),
   trackInventory: z.boolean(),
   allowBackorders: z.boolean(),
   inventoryQty: z.coerce.number().int().nonnegative().optional(),
@@ -64,6 +67,7 @@ export const productCreateSchema = productFormSchema
     variants: z.array(variantSchema),
     weight: z.number().nonnegative().nullable().optional(),
     weightUnit: z.enum(["lb", "kg"]).optional(),
+    scheduledPublishAt: z.date().nullable().optional(),
   });
 
 export const productUpdateSchema = productFormSchema
@@ -75,6 +79,7 @@ export const productUpdateSchema = productFormSchema
     variants: z.array(variantSchema),
     weight: z.number().nonnegative().nullable().optional(),
     weightUnit: z.enum(["lb", "kg"]).optional(),
+    scheduledPublishAt: z.date().nullable().optional(),
   });
 
 export const productListFiltersSchema = z

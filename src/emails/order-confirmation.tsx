@@ -35,6 +35,7 @@ type OrderConfirmationEmailProps = {
   businessLogoUrl?: string;
   businessUrl: string;
   trackingUrl?: string;
+  orderStatusUrl?: string;
 };
 
 export default function OrderConfirmationEmail({
@@ -54,6 +55,7 @@ export default function OrderConfirmationEmail({
   businessLogoUrl,
   businessUrl,
   trackingUrl,
+  orderStatusUrl,
 }: OrderConfirmationEmailProps) {
   const isPickup = deliveryMethod === "pickup";
   const formatPrice = (cents: number) => {
@@ -197,10 +199,23 @@ export default function OrderConfirmationEmail({
           <Button href={trackingUrl} style={button}>
             Track Your Order
           </Button>
+        ) : orderStatusUrl ? (
+          <Button href={orderStatusUrl} style={button}>
+            View Order Status
+          </Button>
         ) : (
           <Button href={businessUrl} style={button}>
             Visit Store
           </Button>
+        )}
+        {trackingUrl && orderStatusUrl && (
+          <Text style={statusLinkText}>
+            You can also{" "}
+            <a href={orderStatusUrl} style={statusLink}>
+              view your order status
+            </a>{" "}
+            at any time.
+          </Text>
         )}
       </Section>
 
@@ -334,6 +349,18 @@ const addressText = {
 const buttonSection = {
   textAlign: "center" as const,
   marginBottom: "24px",
+};
+
+const statusLinkText = {
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#6b7280",
+  margin: "12px 0 0 0",
+};
+
+const statusLink = {
+  color: "#3b82f6",
+  textDecoration: "underline",
 };
 
 const button = {

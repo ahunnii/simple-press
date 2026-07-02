@@ -108,4 +108,5 @@ export const pageSchema = z.object({
   template: z.enum(["default", "sidebar", "full-width"]).default("default"),
   image: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
   publishedAt: z.union([z.coerce.date(), z.null()]).optional(),
+  scheduledPublishAt: z.union([z.coerce.date(), z.null()]).optional(),
 });

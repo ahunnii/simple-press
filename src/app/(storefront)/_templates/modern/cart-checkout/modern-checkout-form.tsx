@@ -13,6 +13,10 @@ import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -308,6 +312,17 @@ export function ModernCheckoutForm({ business }: Props) {
                   ? "We price shipping from this address. Make changes here before continuing to payment."
                   : "This is sent to Stripe Checkout prefilled so you can confirm or edit before paying."}
               </p>
+              <SavedAddressPicker
+                className="text-foreground mt-6"
+                accentColor="var(--primary)"
+                onSelect={(address) => {
+                  // Modern renders first/last name as separate local inputs —
+                  // keep them in sync with the composed f.name the helper sets.
+                  setFirstName(address.firstName);
+                  setLastName(address.lastName);
+                  applySavedAddressToForm(f, address);
+                }}
+              />
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label htmlFor="address" className={labelClass}>

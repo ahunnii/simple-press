@@ -18,6 +18,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -524,6 +528,14 @@ export function ViiCheckoutForm({
                     ? "We price shipping from this address. Make changes here before continuing to payment."
                     : "This is sent to Stripe Checkout prefilled so you can confirm or edit your address before paying."}
                 </p>
+
+                <SavedAddressPicker
+                  className="[font-family:var(--font-sans)] text-[color:var(--vii-ink,inherit)]"
+                  legendClassName="text-[11px] font-normal tracking-[0.18em] uppercase text-[color:var(--vii-ink-soft,inherit)]"
+                  optionClassName="rounded-[var(--radius)] border-[color:var(--vii-hairline,currentColor)]"
+                  accentColor="var(--vii-navy)"
+                  onSelect={(address) => applySavedAddressToForm(f, address)}
+                />
 
                 {/* Address line 1 */}
                 <div

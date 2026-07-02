@@ -282,6 +282,7 @@ export const productRouter = createTRPCRouter({
         price,
         compareAtPrice,
         published,
+        scheduledPublishAt,
         trackInventory,
         allowBackorders,
         inventoryQty,
@@ -323,6 +324,8 @@ export const productRouter = createTRPCRouter({
           price,
           compareAtPrice: compareAtPrice ?? null,
           published,
+          // A schedule only makes sense for unpublished products.
+          scheduledPublishAt: published ? null : (scheduledPublishAt ?? null),
           // When pool is set, force trackInventory off — pool manages stock
           trackInventory: baseInventoryUnitId ? false : trackInventory,
           allowBackorders,
@@ -375,6 +378,7 @@ export const productRouter = createTRPCRouter({
         price,
         compareAtPrice,
         published,
+        scheduledPublishAt,
         trackInventory,
         allowBackorders,
         inventoryQty,
@@ -437,6 +441,8 @@ export const productRouter = createTRPCRouter({
           price,
           compareAtPrice: compareAtPrice ?? null,
           published,
+          // A schedule only makes sense for unpublished products.
+          scheduledPublishAt: published ? null : (scheduledPublishAt ?? null),
           // When pool is set, force trackInventory off — pool manages stock
           trackInventory: baseInventoryUnitId ? false : trackInventory,
           allowBackorders,

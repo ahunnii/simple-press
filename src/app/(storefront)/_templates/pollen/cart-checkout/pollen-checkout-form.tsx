@@ -20,6 +20,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 const inputClass =
   "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
@@ -241,6 +245,10 @@ export function PollenCheckoutForm({ business }: Props) {
                 ? "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
+            <SavedAddressPicker
+              className="mb-4 text-gray-900"
+              onSelect={(address) => applySavedAddressToForm(f, address)}
+            />
             <div className="space-y-4">
               <div>
                 <label htmlFor="address-line1" className={labelClass}>

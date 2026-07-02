@@ -807,12 +807,19 @@ export const businessRouter = createTRPCRouter({
         supportEmail: z.string().optional(),
         businessAddress: z.string().optional(),
         phoneNumber: z.string().optional(),
+        sendAbandonedCheckoutEmails: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { name, ownerEmail, supportEmail, businessAddress, phoneNumber } =
-        input;
+      const {
+        name,
+        ownerEmail,
+        supportEmail,
+        businessAddress,
+        phoneNumber,
+        sendAbandonedCheckoutEmails,
+      } = input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -822,6 +829,7 @@ export const businessRouter = createTRPCRouter({
           supportEmail,
           businessAddress,
           phoneNumber,
+          sendAbandonedCheckoutEmails,
         },
       });
       return {

@@ -100,7 +100,10 @@ export const orderRouter = createTRPCRouter({
                 ownerEmail: order.business.ownerEmail,
                 siteContent: order.business.siteContent,
                 subdomain: order.business.subdomain,
+                customDomain: order.business.customDomain,
+                domainStatus: order.business.domainStatus,
               },
+              orderId: order.id,
             });
           }
           console.log(
@@ -254,7 +257,10 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: order.business.ownerEmail,
               siteContent: order.business.siteContent,
               subdomain: order.business.subdomain,
+              customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
             },
+            orderId: order.id,
           });
           console.log(
             `[Orders] Additional shipped email sent for order #${order.orderNumber}`,
@@ -374,6 +380,7 @@ export const orderRouter = createTRPCRouter({
               customDomain: business.customDomain,
               domainStatus: business.domainStatus,
             },
+            orderId: order.id,
           });
           break;
         }
@@ -405,7 +412,10 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: business.ownerEmail,
               siteContent: business.siteContent,
               subdomain: business.subdomain,
+              customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
+            orderId: order.id,
           });
           break;
         }
@@ -1264,6 +1274,7 @@ export const orderRouter = createTRPCRouter({
               customDomain: business.customDomain ?? undefined,
               domainStatus: business.domainStatus,
             },
+            orderId: order.id,
           });
           console.log(
             `[Manual Order] Confirmation email sent to ${input.customerEmail}`,

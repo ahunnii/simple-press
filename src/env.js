@@ -38,6 +38,10 @@ export const env = createEnv({
     ARTISANAL_FUTURES_API_URL: z.string().url(),
     REDIS_URL: z.string().url().optional(),
 
+    // Shared secret for the /api/cron endpoint (Bearer token). Optional: when
+    // unset, the cron endpoint refuses all requests.
+    CRON_SECRET: z.string().min(16).optional(),
+
     // PII field-level encryption key for prisma-field-encryption.
     // Format: k1.aesgcm256.<44-char base64> (AES-GCM-256).
     PRISMA_FIELD_ENCRYPTION_KEY: z.string().min(50),
@@ -130,6 +134,7 @@ export const env = createEnv({
     HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
     REDIS_URL: process.env.REDIS_URL,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,

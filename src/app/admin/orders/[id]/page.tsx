@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Package, ReceiptText } from "lucide-react";
 
 import { formatDate } from "~/lib/format-date";
 import { getAllowedCountries } from "~/lib/geo/regions";
@@ -126,6 +126,18 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
 
         <div className="toolbar-actions">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/orders/${order.id}/packing-slip`}>
+              <Package className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Packing Slip</span>
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/orders/${order.id}/invoice`}>
+              <ReceiptText className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Invoice</span>
+            </Link>
+          </Button>
           <OrderMoreOptions order={order} />
         </div>
       </div>

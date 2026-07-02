@@ -10733,6 +10733,7 @@ export namespace Prisma {
     onboardingComplete: boolean | null
     localBusinessEnabled: boolean | null
     allowAiCrawlers: boolean | null
+    sendAbandonedCheckoutEmails: boolean | null
     shippingType: string | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
@@ -10772,6 +10773,7 @@ export namespace Prisma {
     onboardingComplete: boolean | null
     localBusinessEnabled: boolean | null
     allowAiCrawlers: boolean | null
+    sendAbandonedCheckoutEmails: boolean | null
     shippingType: string | null
     shippingFlatRate: number | null
     freeShippingThreshold: number | null
@@ -10811,6 +10813,7 @@ export namespace Prisma {
     onboardingComplete: number
     localBusinessEnabled: number
     allowAiCrawlers: number
+    sendAbandonedCheckoutEmails: number
     featureFlags: number
     shippingType: number
     shippingFlatRate: number
@@ -10870,6 +10873,7 @@ export namespace Prisma {
     onboardingComplete?: true
     localBusinessEnabled?: true
     allowAiCrawlers?: true
+    sendAbandonedCheckoutEmails?: true
     shippingType?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
@@ -10909,6 +10913,7 @@ export namespace Prisma {
     onboardingComplete?: true
     localBusinessEnabled?: true
     allowAiCrawlers?: true
+    sendAbandonedCheckoutEmails?: true
     shippingType?: true
     shippingFlatRate?: true
     freeShippingThreshold?: true
@@ -10948,6 +10953,7 @@ export namespace Prisma {
     onboardingComplete?: true
     localBusinessEnabled?: true
     allowAiCrawlers?: true
+    sendAbandonedCheckoutEmails?: true
     featureFlags?: true
     shippingType?: true
     shippingFlatRate?: true
@@ -11078,6 +11084,7 @@ export namespace Prisma {
     onboardingComplete: boolean
     localBusinessEnabled: boolean
     allowAiCrawlers: boolean
+    sendAbandonedCheckoutEmails: boolean
     featureFlags: JsonValue
     shippingType: string
     shippingFlatRate: number | null
@@ -11140,6 +11147,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -11205,6 +11213,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -11248,6 +11257,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -11291,6 +11301,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: boolean
     shippingType?: boolean
     shippingFlatRate?: boolean
@@ -11306,7 +11317,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11387,6 +11398,7 @@ export namespace Prisma {
       onboardingComplete: boolean
       localBusinessEnabled: boolean
       allowAiCrawlers: boolean
+      sendAbandonedCheckoutEmails: boolean
       featureFlags: Prisma.JsonValue
       shippingType: string
       shippingFlatRate: number | null
@@ -11871,6 +11883,7 @@ export namespace Prisma {
     readonly onboardingComplete: FieldRef<"Business", 'Boolean'>
     readonly localBusinessEnabled: FieldRef<"Business", 'Boolean'>
     readonly allowAiCrawlers: FieldRef<"Business", 'Boolean'>
+    readonly sendAbandonedCheckoutEmails: FieldRef<"Business", 'Boolean'>
     readonly featureFlags: FieldRef<"Business", 'Json'>
     readonly shippingType: FieldRef<"Business", 'String'>
     readonly shippingFlatRate: FieldRef<"Business", 'Int'>
@@ -15341,6 +15354,7 @@ export namespace Prisma {
     weightUnit: string | null
     published: boolean | null
     featured: boolean | null
+    scheduledPublishAt: Date | null
     sortOrder: number | null
     metaTitle: string | null
     metaDescription: string | null
@@ -15377,6 +15391,7 @@ export namespace Prisma {
     weightUnit: string | null
     published: boolean | null
     featured: boolean | null
+    scheduledPublishAt: Date | null
     sortOrder: number | null
     metaTitle: string | null
     metaDescription: string | null
@@ -15413,6 +15428,7 @@ export namespace Prisma {
     weightUnit: number
     published: number
     featured: number
+    scheduledPublishAt: number
     sortOrder: number
     metaTitle: number
     metaDescription: number
@@ -15480,6 +15496,7 @@ export namespace Prisma {
     weightUnit?: true
     published?: true
     featured?: true
+    scheduledPublishAt?: true
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
@@ -15516,6 +15533,7 @@ export namespace Prisma {
     weightUnit?: true
     published?: true
     featured?: true
+    scheduledPublishAt?: true
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
@@ -15552,6 +15570,7 @@ export namespace Prisma {
     weightUnit?: true
     published?: true
     featured?: true
+    scheduledPublishAt?: true
     sortOrder?: true
     metaTitle?: true
     metaDescription?: true
@@ -15676,6 +15695,7 @@ export namespace Prisma {
     weightUnit: string | null
     published: boolean
     featured: boolean
+    scheduledPublishAt: Date | null
     sortOrder: number
     metaTitle: string | null
     metaDescription: string | null
@@ -15732,6 +15752,7 @@ export namespace Prisma {
     weightUnit?: boolean
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: boolean
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
@@ -15778,6 +15799,7 @@ export namespace Prisma {
     weightUnit?: boolean
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: boolean
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
@@ -15817,6 +15839,7 @@ export namespace Prisma {
     weightUnit?: boolean
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: boolean
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
@@ -15856,6 +15879,7 @@ export namespace Prisma {
     weightUnit?: boolean
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: boolean
     sortOrder?: boolean
     metaTitle?: boolean
     metaDescription?: boolean
@@ -15867,7 +15891,7 @@ export namespace Prisma {
     additionalFields?: boolean
   }
 
-  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "reservedQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
+  export type ProductOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "excerpt" | "description" | "price" | "compareAtPrice" | "cost" | "sku" | "barcode" | "trackInventory" | "inventoryQty" | "reservedQty" | "allowBackorders" | "lowInventoryThreshold" | "lowInventoryAlertSent" | "outOfStockAlertSent" | "baseInventoryUnitId" | "baseUnitsConsumed" | "weight" | "weightUnit" | "published" | "featured" | "scheduledPublishAt" | "sortOrder" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "businessId" | "averageRating" | "reviewCount" | "additionalFields", ExtArgs["result"]["product"]>
   export type ProductInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     baseInventoryUnit?: boolean | Product$baseInventoryUnitArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -15926,6 +15950,7 @@ export namespace Prisma {
       weightUnit: string | null
       published: boolean
       featured: boolean
+      scheduledPublishAt: Date | null
       sortOrder: number
       metaTitle: string | null
       metaDescription: string | null
@@ -16391,6 +16416,7 @@ export namespace Prisma {
     readonly weightUnit: FieldRef<"Product", 'String'>
     readonly published: FieldRef<"Product", 'Boolean'>
     readonly featured: FieldRef<"Product", 'Boolean'>
+    readonly scheduledPublishAt: FieldRef<"Product", 'DateTime'>
     readonly sortOrder: FieldRef<"Product", 'Int'>
     readonly metaTitle: FieldRef<"Product", 'String'>
     readonly metaDescription: FieldRef<"Product", 'String'>
@@ -24329,6 +24355,7 @@ export namespace Prisma {
     orderCount: number | null
     deletionRequestedAt: Date | null
     anonymizedAt: Date | null
+    notes: string | null
     userId: string | null
     businessId: string | null
   }
@@ -24346,6 +24373,7 @@ export namespace Prisma {
     orderCount: number | null
     deletionRequestedAt: Date | null
     anonymizedAt: Date | null
+    notes: string | null
     userId: string | null
     businessId: string | null
   }
@@ -24363,6 +24391,7 @@ export namespace Prisma {
     orderCount: number
     deletionRequestedAt: number
     anonymizedAt: number
+    notes: number
     userId: number
     businessId: number
     _all: number
@@ -24392,6 +24421,7 @@ export namespace Prisma {
     orderCount?: true
     deletionRequestedAt?: true
     anonymizedAt?: true
+    notes?: true
     userId?: true
     businessId?: true
   }
@@ -24409,6 +24439,7 @@ export namespace Prisma {
     orderCount?: true
     deletionRequestedAt?: true
     anonymizedAt?: true
+    notes?: true
     userId?: true
     businessId?: true
   }
@@ -24426,6 +24457,7 @@ export namespace Prisma {
     orderCount?: true
     deletionRequestedAt?: true
     anonymizedAt?: true
+    notes?: true
     userId?: true
     businessId?: true
     _all?: true
@@ -24530,6 +24562,7 @@ export namespace Prisma {
     orderCount: number
     deletionRequestedAt: Date | null
     anonymizedAt: Date | null
+    notes: string | null
     userId: string | null
     businessId: string
     _count: CustomerCountAggregateOutputType | null
@@ -24566,6 +24599,7 @@ export namespace Prisma {
     orderCount?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
+    notes?: boolean
     userId?: boolean
     businessId?: boolean
     user?: boolean | Customer$userArgs<ExtArgs>
@@ -24591,6 +24625,7 @@ export namespace Prisma {
     orderCount?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
+    notes?: boolean
     userId?: boolean
     businessId?: boolean
     user?: boolean | Customer$userArgs<ExtArgs>
@@ -24610,6 +24645,7 @@ export namespace Prisma {
     orderCount?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
+    notes?: boolean
     userId?: boolean
     businessId?: boolean
     user?: boolean | Customer$userArgs<ExtArgs>
@@ -24629,11 +24665,12 @@ export namespace Prisma {
     orderCount?: boolean
     deletionRequestedAt?: boolean
     anonymizedAt?: boolean
+    notes?: boolean
     userId?: boolean
     businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "deletionRequestedAt" | "anonymizedAt" | "userId" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "email" | "firstName" | "lastName" | "phone" | "acceptsMarketing" | "totalSpent" | "orderCount" | "deletionRequestedAt" | "anonymizedAt" | "notes" | "userId" | "businessId", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Customer$userArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -24680,6 +24717,7 @@ export namespace Prisma {
       orderCount: number
       deletionRequestedAt: Date | null
       anonymizedAt: Date | null
+      notes: string | null
       userId: string | null
       businessId: string
     }, ExtArgs["result"]["customer"]>
@@ -25124,6 +25162,7 @@ export namespace Prisma {
     readonly orderCount: FieldRef<"Customer", 'Int'>
     readonly deletionRequestedAt: FieldRef<"Customer", 'DateTime'>
     readonly anonymizedAt: FieldRef<"Customer", 'DateTime'>
+    readonly notes: FieldRef<"Customer", 'String'>
     readonly userId: FieldRef<"Customer", 'String'>
     readonly businessId: FieldRef<"Customer", 'String'>
   }
@@ -31918,6 +31957,7 @@ export namespace Prisma {
     value: number | null
     usageLimit: number | null
     usageCount: number | null
+    perCustomerLimit: number | null
     minPurchase: number | null
     maxDiscount: number | null
   }
@@ -31926,6 +31966,7 @@ export namespace Prisma {
     value: number | null
     usageLimit: number | null
     usageCount: number | null
+    perCustomerLimit: number | null
     minPurchase: number | null
     maxDiscount: number | null
   }
@@ -31941,6 +31982,7 @@ export namespace Prisma {
     active: boolean | null
     usageLimit: number | null
     usageCount: number | null
+    perCustomerLimit: number | null
     startsAt: Date | null
     expiresAt: Date | null
     minPurchase: number | null
@@ -31958,6 +32000,7 @@ export namespace Prisma {
     active: boolean | null
     usageLimit: number | null
     usageCount: number | null
+    perCustomerLimit: number | null
     startsAt: Date | null
     expiresAt: Date | null
     minPurchase: number | null
@@ -31975,6 +32018,7 @@ export namespace Prisma {
     active: number
     usageLimit: number
     usageCount: number
+    perCustomerLimit: number
     startsAt: number
     expiresAt: number
     minPurchase: number
@@ -31987,6 +32031,7 @@ export namespace Prisma {
     value?: true
     usageLimit?: true
     usageCount?: true
+    perCustomerLimit?: true
     minPurchase?: true
     maxDiscount?: true
   }
@@ -31995,6 +32040,7 @@ export namespace Prisma {
     value?: true
     usageLimit?: true
     usageCount?: true
+    perCustomerLimit?: true
     minPurchase?: true
     maxDiscount?: true
   }
@@ -32010,6 +32056,7 @@ export namespace Prisma {
     active?: true
     usageLimit?: true
     usageCount?: true
+    perCustomerLimit?: true
     startsAt?: true
     expiresAt?: true
     minPurchase?: true
@@ -32027,6 +32074,7 @@ export namespace Prisma {
     active?: true
     usageLimit?: true
     usageCount?: true
+    perCustomerLimit?: true
     startsAt?: true
     expiresAt?: true
     minPurchase?: true
@@ -32044,6 +32092,7 @@ export namespace Prisma {
     active?: true
     usageLimit?: true
     usageCount?: true
+    perCustomerLimit?: true
     startsAt?: true
     expiresAt?: true
     minPurchase?: true
@@ -32148,6 +32197,7 @@ export namespace Prisma {
     active: boolean
     usageLimit: number | null
     usageCount: number
+    perCustomerLimit: number | null
     startsAt: Date | null
     expiresAt: Date | null
     minPurchase: number | null
@@ -32184,6 +32234,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: boolean
     usageCount?: boolean
+    perCustomerLimit?: boolean
     startsAt?: boolean
     expiresAt?: boolean
     minPurchase?: boolean
@@ -32204,6 +32255,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: boolean
     usageCount?: boolean
+    perCustomerLimit?: boolean
     startsAt?: boolean
     expiresAt?: boolean
     minPurchase?: boolean
@@ -32222,6 +32274,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: boolean
     usageCount?: boolean
+    perCustomerLimit?: boolean
     startsAt?: boolean
     expiresAt?: boolean
     minPurchase?: boolean
@@ -32240,13 +32293,14 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: boolean
     usageCount?: boolean
+    perCustomerLimit?: boolean
     startsAt?: boolean
     expiresAt?: boolean
     minPurchase?: boolean
     maxDiscount?: boolean
   }
 
-  export type DiscountCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "code" | "type" | "value" | "active" | "usageLimit" | "usageCount" | "startsAt" | "expiresAt" | "minPurchase" | "maxDiscount", ExtArgs["result"]["discountCode"]>
+  export type DiscountCodeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "code" | "type" | "value" | "active" | "usageLimit" | "usageCount" | "perCustomerLimit" | "startsAt" | "expiresAt" | "minPurchase" | "maxDiscount", ExtArgs["result"]["discountCode"]>
   export type DiscountCodeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     orders?: boolean | DiscountCode$ordersArgs<ExtArgs>
@@ -32276,6 +32330,7 @@ export namespace Prisma {
       active: boolean
       usageLimit: number | null
       usageCount: number
+      perCustomerLimit: number | null
       startsAt: Date | null
       expiresAt: Date | null
       minPurchase: number | null
@@ -32715,6 +32770,7 @@ export namespace Prisma {
     readonly active: FieldRef<"DiscountCode", 'Boolean'>
     readonly usageLimit: FieldRef<"DiscountCode", 'Int'>
     readonly usageCount: FieldRef<"DiscountCode", 'Int'>
+    readonly perCustomerLimit: FieldRef<"DiscountCode", 'Int'>
     readonly startsAt: FieldRef<"DiscountCode", 'DateTime'>
     readonly expiresAt: FieldRef<"DiscountCode", 'DateTime'>
     readonly minPurchase: FieldRef<"DiscountCode", 'Int'>
@@ -36873,6 +36929,7 @@ export namespace Prisma {
     ogImage: string | null
     published: boolean | null
     sortOrder: number | null
+    scheduledPublishAt: Date | null
     type: string | null
     template: string | null
     businessId: string | null
@@ -36893,6 +36950,7 @@ export namespace Prisma {
     ogImage: string | null
     published: boolean | null
     sortOrder: number | null
+    scheduledPublishAt: Date | null
     type: string | null
     template: string | null
     businessId: string | null
@@ -36914,6 +36972,7 @@ export namespace Prisma {
     ogImage: number
     published: number
     sortOrder: number
+    scheduledPublishAt: number
     type: number
     template: number
     businessId: number
@@ -36944,6 +37003,7 @@ export namespace Prisma {
     ogImage?: true
     published?: true
     sortOrder?: true
+    scheduledPublishAt?: true
     type?: true
     template?: true
     businessId?: true
@@ -36964,6 +37024,7 @@ export namespace Prisma {
     ogImage?: true
     published?: true
     sortOrder?: true
+    scheduledPublishAt?: true
     type?: true
     template?: true
     businessId?: true
@@ -36985,6 +37046,7 @@ export namespace Prisma {
     ogImage?: true
     published?: true
     sortOrder?: true
+    scheduledPublishAt?: true
     type?: true
     template?: true
     businessId?: true
@@ -37093,6 +37155,7 @@ export namespace Prisma {
     ogImage: string | null
     published: boolean
     sortOrder: number
+    scheduledPublishAt: Date | null
     type: string
     template: string
     businessId: string
@@ -37133,6 +37196,7 @@ export namespace Prisma {
     ogImage?: boolean
     published?: boolean
     sortOrder?: boolean
+    scheduledPublishAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
@@ -37155,6 +37219,7 @@ export namespace Prisma {
     ogImage?: boolean
     published?: boolean
     sortOrder?: boolean
+    scheduledPublishAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
@@ -37177,6 +37242,7 @@ export namespace Prisma {
     ogImage?: boolean
     published?: boolean
     sortOrder?: boolean
+    scheduledPublishAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
@@ -37199,12 +37265,13 @@ export namespace Prisma {
     ogImage?: boolean
     published?: boolean
     sortOrder?: boolean
+    scheduledPublishAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "publishedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "publishedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "scheduledPublishAt" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -37236,6 +37303,7 @@ export namespace Prisma {
       ogImage: string | null
       published: boolean
       sortOrder: number
+      scheduledPublishAt: Date | null
       type: string
       template: string
       businessId: string
@@ -37678,6 +37746,7 @@ export namespace Prisma {
     readonly ogImage: FieldRef<"Page", 'String'>
     readonly published: FieldRef<"Page", 'Boolean'>
     readonly sortOrder: FieldRef<"Page", 'Int'>
+    readonly scheduledPublishAt: FieldRef<"Page", 'DateTime'>
     readonly type: FieldRef<"Page", 'String'>
     readonly template: FieldRef<"Page", 'String'>
     readonly businessId: FieldRef<"Page", 'String'>
@@ -52170,6 +52239,7 @@ export namespace Prisma {
     onboardingComplete: 'onboardingComplete',
     localBusinessEnabled: 'localBusinessEnabled',
     allowAiCrawlers: 'allowAiCrawlers',
+    sendAbandonedCheckoutEmails: 'sendAbandonedCheckoutEmails',
     featureFlags: 'featureFlags',
     shippingType: 'shippingType',
     shippingFlatRate: 'shippingFlatRate',
@@ -52264,6 +52334,7 @@ export namespace Prisma {
     weightUnit: 'weightUnit',
     published: 'published',
     featured: 'featured',
+    scheduledPublishAt: 'scheduledPublishAt',
     sortOrder: 'sortOrder',
     metaTitle: 'metaTitle',
     metaDescription: 'metaDescription',
@@ -52402,6 +52473,7 @@ export namespace Prisma {
     orderCount: 'orderCount',
     deletionRequestedAt: 'deletionRequestedAt',
     anonymizedAt: 'anonymizedAt',
+    notes: 'notes',
     userId: 'userId',
     businessId: 'businessId'
   };
@@ -52518,6 +52590,7 @@ export namespace Prisma {
     active: 'active',
     usageLimit: 'usageLimit',
     usageCount: 'usageCount',
+    perCustomerLimit: 'perCustomerLimit',
     startsAt: 'startsAt',
     expiresAt: 'expiresAt',
     minPurchase: 'minPurchase',
@@ -52594,6 +52667,7 @@ export namespace Prisma {
     ogImage: 'ogImage',
     published: 'published',
     sortOrder: 'sortOrder',
+    scheduledPublishAt: 'scheduledPublishAt',
     type: 'type',
     template: 'template',
     businessId: 'businessId'
@@ -53390,6 +53464,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFilter<"Business"> | boolean
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
     allowAiCrawlers?: BoolFilter<"Business"> | boolean
+    sendAbandonedCheckoutEmails?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
     shippingType?: StringFilter<"Business"> | string
     shippingFlatRate?: IntNullableFilter<"Business"> | number | null
@@ -53454,6 +53529,7 @@ export namespace Prisma {
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
     allowAiCrawlers?: SortOrder
+    sendAbandonedCheckoutEmails?: SortOrder
     featureFlags?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrderInput | SortOrder
@@ -53521,6 +53597,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFilter<"Business"> | boolean
     localBusinessEnabled?: BoolFilter<"Business"> | boolean
     allowAiCrawlers?: BoolFilter<"Business"> | boolean
+    sendAbandonedCheckoutEmails?: BoolFilter<"Business"> | boolean
     featureFlags?: JsonFilter<"Business">
     shippingType?: StringFilter<"Business"> | string
     shippingFlatRate?: IntNullableFilter<"Business"> | number | null
@@ -53585,6 +53662,7 @@ export namespace Prisma {
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
     allowAiCrawlers?: SortOrder
+    sendAbandonedCheckoutEmails?: SortOrder
     featureFlags?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrderInput | SortOrder
@@ -53636,6 +53714,7 @@ export namespace Prisma {
     onboardingComplete?: BoolWithAggregatesFilter<"Business"> | boolean
     localBusinessEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     allowAiCrawlers?: BoolWithAggregatesFilter<"Business"> | boolean
+    sendAbandonedCheckoutEmails?: BoolWithAggregatesFilter<"Business"> | boolean
     featureFlags?: JsonWithAggregatesFilter<"Business">
     shippingType?: StringWithAggregatesFilter<"Business"> | string
     shippingFlatRate?: IntNullableWithAggregatesFilter<"Business"> | number | null
@@ -53932,6 +54011,7 @@ export namespace Prisma {
     weightUnit?: StringNullableFilter<"Product"> | string | null
     published?: BoolFilter<"Product"> | boolean
     featured?: BoolFilter<"Product"> | boolean
+    scheduledPublishAt?: DateTimeNullableFilter<"Product"> | Date | string | null
     sortOrder?: IntFilter<"Product"> | number
     metaTitle?: StringNullableFilter<"Product"> | string | null
     metaDescription?: StringNullableFilter<"Product"> | string | null
@@ -53977,6 +54057,7 @@ export namespace Prisma {
     weightUnit?: SortOrderInput | SortOrder
     published?: SortOrder
     featured?: SortOrder
+    scheduledPublishAt?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
@@ -54026,6 +54107,7 @@ export namespace Prisma {
     weightUnit?: StringNullableFilter<"Product"> | string | null
     published?: BoolFilter<"Product"> | boolean
     featured?: BoolFilter<"Product"> | boolean
+    scheduledPublishAt?: DateTimeNullableFilter<"Product"> | Date | string | null
     sortOrder?: IntFilter<"Product"> | number
     metaTitle?: StringNullableFilter<"Product"> | string | null
     metaDescription?: StringNullableFilter<"Product"> | string | null
@@ -54071,6 +54153,7 @@ export namespace Prisma {
     weightUnit?: SortOrderInput | SortOrder
     published?: SortOrder
     featured?: SortOrder
+    scheduledPublishAt?: SortOrderInput | SortOrder
     sortOrder?: SortOrder
     metaTitle?: SortOrderInput | SortOrder
     metaDescription?: SortOrderInput | SortOrder
@@ -54116,6 +54199,7 @@ export namespace Prisma {
     weightUnit?: StringNullableWithAggregatesFilter<"Product"> | string | null
     published?: BoolWithAggregatesFilter<"Product"> | boolean
     featured?: BoolWithAggregatesFilter<"Product"> | boolean
+    scheduledPublishAt?: DateTimeNullableWithAggregatesFilter<"Product"> | Date | string | null
     sortOrder?: IntWithAggregatesFilter<"Product"> | number
     metaTitle?: StringNullableWithAggregatesFilter<"Product"> | string | null
     metaDescription?: StringNullableWithAggregatesFilter<"Product"> | string | null
@@ -54731,6 +54815,7 @@ export namespace Prisma {
     orderCount?: IntFilter<"Customer"> | number
     deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    notes?: StringNullableFilter<"Customer"> | string | null
     userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -54755,6 +54840,7 @@ export namespace Prisma {
     orderCount?: SortOrder
     deletionRequestedAt?: SortOrderInput | SortOrder
     anonymizedAt?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -54783,6 +54869,7 @@ export namespace Prisma {
     orderCount?: IntFilter<"Customer"> | number
     deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    notes?: StringNullableFilter<"Customer"> | string | null
     userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -54807,6 +54894,7 @@ export namespace Prisma {
     orderCount?: SortOrder
     deletionRequestedAt?: SortOrderInput | SortOrder
     anonymizedAt?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     _count?: CustomerCountOrderByAggregateInput
@@ -54832,6 +54920,7 @@ export namespace Prisma {
     orderCount?: IntWithAggregatesFilter<"Customer"> | number
     deletionRequestedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
+    notes?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     userId?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     businessId?: StringWithAggregatesFilter<"Customer"> | string
   }
@@ -55374,6 +55463,7 @@ export namespace Prisma {
     active?: BoolFilter<"DiscountCode"> | boolean
     usageLimit?: IntNullableFilter<"DiscountCode"> | number | null
     usageCount?: IntFilter<"DiscountCode"> | number
+    perCustomerLimit?: IntNullableFilter<"DiscountCode"> | number | null
     startsAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableFilter<"DiscountCode"> | number | null
@@ -55393,6 +55483,7 @@ export namespace Prisma {
     active?: SortOrder
     usageLimit?: SortOrderInput | SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrderInput | SortOrder
     startsAt?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
     minPurchase?: SortOrderInput | SortOrder
@@ -55416,6 +55507,7 @@ export namespace Prisma {
     active?: BoolFilter<"DiscountCode"> | boolean
     usageLimit?: IntNullableFilter<"DiscountCode"> | number | null
     usageCount?: IntFilter<"DiscountCode"> | number
+    perCustomerLimit?: IntNullableFilter<"DiscountCode"> | number | null
     startsAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableFilter<"DiscountCode"> | number | null
@@ -55435,6 +55527,7 @@ export namespace Prisma {
     active?: SortOrder
     usageLimit?: SortOrderInput | SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrderInput | SortOrder
     startsAt?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
     minPurchase?: SortOrderInput | SortOrder
@@ -55460,6 +55553,7 @@ export namespace Prisma {
     active?: BoolWithAggregatesFilter<"DiscountCode"> | boolean
     usageLimit?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
     usageCount?: IntWithAggregatesFilter<"DiscountCode"> | number
+    perCustomerLimit?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
     startsAt?: DateTimeNullableWithAggregatesFilter<"DiscountCode"> | Date | string | null
     expiresAt?: DateTimeNullableWithAggregatesFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableWithAggregatesFilter<"DiscountCode"> | number | null
@@ -55765,6 +55859,7 @@ export namespace Prisma {
     ogImage?: StringNullableFilter<"Page"> | string | null
     published?: BoolFilter<"Page"> | boolean
     sortOrder?: IntFilter<"Page"> | number
+    scheduledPublishAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     type?: StringFilter<"Page"> | string
     template?: StringFilter<"Page"> | string
     businessId?: StringFilter<"Page"> | string
@@ -55787,6 +55882,7 @@ export namespace Prisma {
     ogImage?: SortOrderInput | SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
+    scheduledPublishAt?: SortOrderInput | SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -55813,6 +55909,7 @@ export namespace Prisma {
     ogImage?: StringNullableFilter<"Page"> | string | null
     published?: BoolFilter<"Page"> | boolean
     sortOrder?: IntFilter<"Page"> | number
+    scheduledPublishAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     type?: StringFilter<"Page"> | string
     template?: StringFilter<"Page"> | string
     businessId?: StringFilter<"Page"> | string
@@ -55835,6 +55932,7 @@ export namespace Prisma {
     ogImage?: SortOrderInput | SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
+    scheduledPublishAt?: SortOrderInput | SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -55864,6 +55962,7 @@ export namespace Prisma {
     ogImage?: StringNullableWithAggregatesFilter<"Page"> | string | null
     published?: BoolWithAggregatesFilter<"Page"> | boolean
     sortOrder?: IntWithAggregatesFilter<"Page"> | number
+    scheduledPublishAt?: DateTimeNullableWithAggregatesFilter<"Page"> | Date | string | null
     type?: StringWithAggregatesFilter<"Page"> | string
     template?: StringWithAggregatesFilter<"Page"> | string
     businessId?: StringWithAggregatesFilter<"Page"> | string
@@ -57350,6 +57449,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -57414,6 +57514,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -57478,6 +57579,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -57542,6 +57644,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -57606,6 +57709,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -57649,6 +57753,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -57692,6 +57797,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -58038,6 +58144,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -58082,6 +58189,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -58124,6 +58232,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58168,6 +58277,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58211,6 +58321,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -58247,6 +58358,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58283,6 +58395,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58966,6 +59079,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -58988,6 +59102,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -59010,6 +59125,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -59032,6 +59148,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -59054,6 +59171,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
   }
@@ -59071,6 +59189,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CustomerUncheckedUpdateManyInput = {
@@ -59086,6 +59205,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
@@ -59692,6 +59812,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -59711,6 +59832,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -59728,6 +59850,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -59747,6 +59870,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -59765,6 +59889,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -59781,6 +59906,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -59798,6 +59924,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -60114,6 +60241,7 @@ export namespace Prisma {
     ogImage?: string | null
     published?: boolean
     sortOrder?: number
+    scheduledPublishAt?: Date | string | null
     type?: string
     template?: string
     business: BusinessCreateNestedOneWithoutPagesInput
@@ -60135,6 +60263,7 @@ export namespace Prisma {
     ogImage?: string | null
     published?: boolean
     sortOrder?: number
+    scheduledPublishAt?: Date | string | null
     type?: string
     template?: string
     businessId: string
@@ -60156,6 +60285,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
     business?: BusinessUpdateOneRequiredWithoutPagesNestedInput
@@ -60177,6 +60307,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
@@ -60198,6 +60329,7 @@ export namespace Prisma {
     ogImage?: string | null
     published?: boolean
     sortOrder?: number
+    scheduledPublishAt?: Date | string | null
     type?: string
     template?: string
     businessId: string
@@ -60219,6 +60351,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -60239,6 +60372,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
@@ -62056,6 +62190,7 @@ export namespace Prisma {
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
     allowAiCrawlers?: SortOrder
+    sendAbandonedCheckoutEmails?: SortOrder
     featureFlags?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrder
@@ -62106,6 +62241,7 @@ export namespace Prisma {
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
     allowAiCrawlers?: SortOrder
+    sendAbandonedCheckoutEmails?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
@@ -62145,6 +62281,7 @@ export namespace Prisma {
     onboardingComplete?: SortOrder
     localBusinessEnabled?: SortOrder
     allowAiCrawlers?: SortOrder
+    sendAbandonedCheckoutEmails?: SortOrder
     shippingType?: SortOrder
     shippingFlatRate?: SortOrder
     freeShippingThreshold?: SortOrder
@@ -62497,6 +62634,7 @@ export namespace Prisma {
     weightUnit?: SortOrder
     published?: SortOrder
     featured?: SortOrder
+    scheduledPublishAt?: SortOrder
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
@@ -62548,6 +62686,7 @@ export namespace Prisma {
     weightUnit?: SortOrder
     published?: SortOrder
     featured?: SortOrder
+    scheduledPublishAt?: SortOrder
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
@@ -62584,6 +62723,7 @@ export namespace Prisma {
     weightUnit?: SortOrder
     published?: SortOrder
     featured?: SortOrder
+    scheduledPublishAt?: SortOrder
     sortOrder?: SortOrder
     metaTitle?: SortOrder
     metaDescription?: SortOrder
@@ -63038,6 +63178,7 @@ export namespace Prisma {
     orderCount?: SortOrder
     deletionRequestedAt?: SortOrder
     anonymizedAt?: SortOrder
+    notes?: SortOrder
     userId?: SortOrder
     businessId?: SortOrder
   }
@@ -63060,6 +63201,7 @@ export namespace Prisma {
     orderCount?: SortOrder
     deletionRequestedAt?: SortOrder
     anonymizedAt?: SortOrder
+    notes?: SortOrder
     userId?: SortOrder
     businessId?: SortOrder
   }
@@ -63077,6 +63219,7 @@ export namespace Prisma {
     orderCount?: SortOrder
     deletionRequestedAt?: SortOrder
     anonymizedAt?: SortOrder
+    notes?: SortOrder
     userId?: SortOrder
     businessId?: SortOrder
   }
@@ -63436,6 +63579,7 @@ export namespace Prisma {
     active?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrder
     startsAt?: SortOrder
     expiresAt?: SortOrder
     minPurchase?: SortOrder
@@ -63446,6 +63590,7 @@ export namespace Prisma {
     value?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrder
     minPurchase?: SortOrder
     maxDiscount?: SortOrder
   }
@@ -63461,6 +63606,7 @@ export namespace Prisma {
     active?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrder
     startsAt?: SortOrder
     expiresAt?: SortOrder
     minPurchase?: SortOrder
@@ -63478,6 +63624,7 @@ export namespace Prisma {
     active?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrder
     startsAt?: SortOrder
     expiresAt?: SortOrder
     minPurchase?: SortOrder
@@ -63488,6 +63635,7 @@ export namespace Prisma {
     value?: SortOrder
     usageLimit?: SortOrder
     usageCount?: SortOrder
+    perCustomerLimit?: SortOrder
     minPurchase?: SortOrder
     maxDiscount?: SortOrder
   }
@@ -63666,6 +63814,7 @@ export namespace Prisma {
     ogImage?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
+    scheduledPublishAt?: SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -63690,6 +63839,7 @@ export namespace Prisma {
     ogImage?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
+    scheduledPublishAt?: SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -63710,6 +63860,7 @@ export namespace Prisma {
     ogImage?: SortOrder
     published?: SortOrder
     sortOrder?: SortOrder
+    scheduledPublishAt?: SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -67874,6 +68025,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -67895,6 +68047,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -68117,6 +68270,7 @@ export namespace Prisma {
     orderCount?: IntFilter<"Customer"> | number
     deletionRequestedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
     anonymizedAt?: DateTimeNullableFilter<"Customer"> | Date | string | null
+    notes?: StringNullableFilter<"Customer"> | string | null
     userId?: StringNullableFilter<"Customer"> | string | null
     businessId?: StringFilter<"Customer"> | string
   }
@@ -68254,6 +68408,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -68317,6 +68472,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -68439,6 +68595,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68502,6 +68659,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -68722,6 +68880,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -68765,6 +68924,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -68976,6 +69136,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -68997,6 +69158,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -69126,6 +69288,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -69143,6 +69306,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -69288,6 +69452,7 @@ export namespace Prisma {
     ogImage?: string | null
     published?: boolean
     sortOrder?: number
+    scheduledPublishAt?: Date | string | null
     type?: string
     template?: string
   }
@@ -69308,6 +69473,7 @@ export namespace Prisma {
     ogImage?: string | null
     published?: boolean
     sortOrder?: number
+    scheduledPublishAt?: Date | string | null
     type?: string
     template?: string
   }
@@ -69683,6 +69849,7 @@ export namespace Prisma {
     weightUnit?: StringNullableFilter<"Product"> | string | null
     published?: BoolFilter<"Product"> | boolean
     featured?: BoolFilter<"Product"> | boolean
+    scheduledPublishAt?: DateTimeNullableFilter<"Product"> | Date | string | null
     sortOrder?: IntFilter<"Product"> | number
     metaTitle?: StringNullableFilter<"Product"> | string | null
     metaDescription?: StringNullableFilter<"Product"> | string | null
@@ -69971,6 +70138,7 @@ export namespace Prisma {
     active?: BoolFilter<"DiscountCode"> | boolean
     usageLimit?: IntNullableFilter<"DiscountCode"> | number | null
     usageCount?: IntFilter<"DiscountCode"> | number
+    perCustomerLimit?: IntNullableFilter<"DiscountCode"> | number | null
     startsAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     expiresAt?: DateTimeNullableFilter<"DiscountCode"> | Date | string | null
     minPurchase?: IntNullableFilter<"DiscountCode"> | number | null
@@ -70092,6 +70260,7 @@ export namespace Prisma {
     ogImage?: StringNullableFilter<"Page"> | string | null
     published?: BoolFilter<"Page"> | boolean
     sortOrder?: IntFilter<"Page"> | number
+    scheduledPublishAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     type?: StringFilter<"Page"> | string
     template?: StringFilter<"Page"> | string
     businessId?: StringFilter<"Page"> | string
@@ -70388,6 +70557,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -70451,6 +70621,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -70530,6 +70701,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70593,6 +70765,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70656,6 +70829,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -70719,6 +70893,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -70798,6 +70973,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70861,6 +71037,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -70961,6 +71138,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -71024,6 +71202,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -71376,6 +71555,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71439,6 +71619,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -71667,6 +71848,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -71710,6 +71892,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -71841,6 +72024,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71884,6 +72068,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -71960,6 +72145,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72023,6 +72209,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72124,6 +72311,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72187,6 +72375,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72302,6 +72491,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -72345,6 +72535,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -72447,6 +72638,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72490,6 +72682,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72534,6 +72727,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72597,6 +72791,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -72728,6 +72923,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72791,6 +72987,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -72984,6 +73181,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -73027,6 +73225,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -73076,6 +73275,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73139,6 +73339,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73215,6 +73416,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73258,6 +73460,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73313,6 +73516,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73376,6 +73580,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73476,6 +73681,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73539,6 +73745,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -73925,6 +74132,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -73988,6 +74196,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74137,6 +74346,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -74158,6 +74368,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -74275,6 +74486,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -74296,6 +74508,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -74348,6 +74561,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -74411,6 +74625,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -74464,6 +74679,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     shippingAddresses?: ShippingAddressCreateNestedManyWithoutCustomerInput
@@ -74485,6 +74701,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
     shippingAddresses?: ShippingAddressUncheckedCreateNestedManyWithoutCustomerInput
@@ -74549,6 +74766,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -74567,6 +74785,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -74777,6 +74996,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74840,6 +75060,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -74899,6 +75120,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -74920,6 +75142,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -74996,6 +75219,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75014,6 +75238,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75278,6 +75503,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -75321,6 +75547,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -75492,6 +75719,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75535,6 +75763,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75705,6 +75934,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -75768,6 +75998,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -75927,6 +76158,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -75990,6 +76222,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76105,6 +76338,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -76148,6 +76382,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -76234,6 +76469,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -76297,6 +76533,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -76530,6 +76767,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76573,6 +76811,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76671,6 +76910,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76734,6 +76974,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -76921,6 +77162,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -76984,6 +77226,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -77049,6 +77292,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -77091,6 +77335,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -77197,6 +77442,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77260,6 +77506,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77355,6 +77602,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -77418,6 +77666,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -77497,6 +77746,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77560,6 +77810,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77623,6 +77874,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -77686,6 +77938,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -77765,6 +78018,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77828,6 +78082,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -77891,6 +78146,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -77954,6 +78210,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -78033,6 +78290,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78096,6 +78354,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78159,6 +78418,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -78222,6 +78482,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -78333,6 +78594,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78396,6 +78658,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78574,6 +78837,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -78637,6 +78901,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -78690,6 +78955,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -78711,6 +78977,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -78763,6 +79030,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78826,6 +79094,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -78885,6 +79154,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -78906,6 +79176,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -78942,6 +79213,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -79005,6 +79277,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -79058,6 +79331,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -79079,6 +79353,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -79131,6 +79406,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -79194,6 +79470,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -79253,6 +79530,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -79274,6 +79552,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -79307,6 +79586,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -79350,6 +79630,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -79384,6 +79665,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     user?: UserCreateNestedOneWithoutCustomersInput
     business: BusinessCreateNestedOneWithoutCustomersInput
     orders?: OrderCreateNestedManyWithoutCustomerInput
@@ -79405,6 +79687,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
     businessId: string
     orders?: OrderUncheckedCreateNestedManyWithoutCustomerInput
@@ -79555,6 +79838,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79598,6 +79882,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79638,6 +79923,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
@@ -79659,6 +79945,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
@@ -79916,6 +80203,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -79979,6 +80267,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -80095,6 +80384,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80158,6 +80448,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80264,6 +80555,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -80327,6 +80619,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -80406,6 +80699,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80469,6 +80763,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80532,6 +80827,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -80595,6 +80891,7 @@ export namespace Prisma {
     onboardingComplete?: boolean
     localBusinessEnabled?: boolean
     allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: string
     shippingFlatRate?: number | null
@@ -80696,6 +80993,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80759,6 +81057,7 @@ export namespace Prisma {
     onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
     localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
     allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
     featureFlags?: JsonNullValueInput | InputJsonValue
     shippingType?: StringFieldUpdateOperationsInput | string
     shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
@@ -80917,6 +81216,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     businessId: string
   }
 
@@ -81069,6 +81369,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -81090,6 +81391,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -81111,6 +81413,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -81224,6 +81527,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -81312,6 +81616,7 @@ export namespace Prisma {
     orderCount?: number
     deletionRequestedAt?: Date | string | null
     anonymizedAt?: Date | string | null
+    notes?: string | null
     userId?: string | null
   }
 
@@ -81336,6 +81641,7 @@ export namespace Prisma {
     active?: boolean
     usageLimit?: number | null
     usageCount?: number
+    perCustomerLimit?: number | null
     startsAt?: Date | string | null
     expiresAt?: Date | string | null
     minPurchase?: number | null
@@ -81397,6 +81703,7 @@ export namespace Prisma {
     ogImage?: string | null
     published?: boolean
     sortOrder?: number
+    scheduledPublishAt?: Date | string | null
     type?: string
     template?: string
   }
@@ -81537,6 +81844,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81580,6 +81888,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81622,6 +81931,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81852,6 +82162,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutCustomersNestedInput
     orders?: OrderUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUpdateManyWithoutCustomerNestedInput
@@ -81873,6 +82184,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     orders?: OrderUncheckedUpdateManyWithoutCustomerNestedInput
     shippingAddresses?: ShippingAddressUncheckedUpdateManyWithoutCustomerNestedInput
@@ -81894,6 +82206,7 @@ export namespace Prisma {
     orderCount?: IntFieldUpdateOperationsInput | number
     deletionRequestedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     anonymizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -81940,6 +82253,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -81957,6 +82271,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -81974,6 +82289,7 @@ export namespace Prisma {
     active?: BoolFieldUpdateOperationsInput | boolean
     usageLimit?: NullableIntFieldUpdateOperationsInput | number | null
     usageCount?: IntFieldUpdateOperationsInput | number
+    perCustomerLimit?: NullableIntFieldUpdateOperationsInput | number | null
     startsAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     minPurchase?: NullableIntFieldUpdateOperationsInput | number | null
@@ -82117,6 +82433,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -82137,6 +82454,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -82157,6 +82475,7 @@ export namespace Prisma {
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -83991,6 +84310,7 @@ export namespace Prisma {
     weightUnit?: string | null
     published?: boolean
     featured?: boolean
+    scheduledPublishAt?: Date | string | null
     sortOrder?: number
     metaTitle?: string | null
     metaDescription?: string | null
@@ -84042,6 +84362,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84084,6 +84405,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84126,6 +84448,7 @@ export namespace Prisma {
     weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sortOrder?: IntFieldUpdateOperationsInput | number
     metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
     metaDescription?: NullableStringFieldUpdateOperationsInput | string | null

@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/card";
 
 import { TrailHeader } from "../_components/trail-header";
+import { ExportOrdersButton } from "./_components/export-orders-button";
 import { OrderFilters } from "./_components/order-filters";
 import { OrdersPagination } from "./_components/orders-pagination";
 import { OrdersTable } from "./_components/orders-table";
@@ -53,12 +54,15 @@ export default async function OrdersPage({ searchParams }: Props) {
             <h1>Orders</h1>
             <p>Manage your customer orders</p>
           </div>
-          <Button asChild>
-            <Link href="/admin/orders/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Manual Order
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportOrdersButton />
+            <Button asChild>
+              <Link href="/admin/orders/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Manual Order
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}

@@ -60,13 +60,15 @@ export function DiscountForm({ initialDiscount }: Props) {
 
   const defaultValues: DiscountFormSchema = {
     code: initialDiscount?.code ?? "",
-    type: (initialDiscount?.type as "percentage" | "fixed") ?? "percentage",
+    type: (initialDiscount?.type as DiscountFormSchema["type"]) ?? "percentage",
     value:
       initialDiscount?.type === "fixed"
         ? (initialDiscount.value ?? 0) / 100
         : (initialDiscount?.value ?? 0),
     active: initialDiscount?.active ?? true,
     usageLimit: initialDiscount?.usageLimit ?? undefined,
+    perCustomerLimit: initialDiscount?.perCustomerLimit ?? undefined,
+    startsAt: initialDiscount?.startsAt ?? undefined,
     expiresAt: initialDiscount?.expiresAt ?? undefined,
     minPurchase: initialDiscount?.minPurchase
       ? initialDiscount?.minPurchase / 100
@@ -121,7 +123,7 @@ export function DiscountForm({ initialDiscount }: Props) {
     onSuccess: ({ data, message }) => {
       toast.dismiss();
       toast.success(message);
-      handleReset({ ...data, type: data.type as "percentage" | "fixed" });
+      handleReset({ ...data, type: data.type as DiscountFormSchema["type"] });
       router.refresh();
     },
     onError: (err) => {
@@ -161,6 +163,12 @@ export function DiscountForm({ initialDiscount }: Props) {
 
     if (type === "fixed") {
       discountValue = Math.round(discountValue * 100);
+    }
+
+    // Free shipping codes have no numeric value — the discount equals the
+    // shipping cost, computed at checkout time.
+    if (type === "free_shipping") {
+      discountValue = 0;
     }
 
     const minPurchaseCents = minPurchase
@@ -341,50 +349,62 @@ export function DiscountForm({ initialDiscount }: Props) {
                       options={[
                         { label: "Percentage (%)", value: "percentage" },
                         { label: "Fixed Amount ($)", value: "fixed" },
+                        { label: "Free shipping", value: "free_shipping" },
                       ]}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="value"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {type === "percentage"
-                              ? "Percentage"
-                              : "Amount (USD)"}{" "}
-                            <span className="text-destructive">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              {type === "fixed" && (
-                                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                  $
-                                </span>
-                              )}
+                    {type === "free_shipping" && (
+                      <p className="text-muted-foreground text-sm">
+                        The shipping cost is waived at checkout — no amount to
+                        set.
+                      </p>
+                    )}
 
-                              <NumberInput
-                                step={type === "percentage" ? "1" : "0.01"}
-                                min="0"
-                                max={type === "percentage" ? "100" : undefined}
-                                placeholder={
-                                  type === "percentage" ? "20" : "10.00"
-                                }
-                                className={type === "fixed" ? "pl-7" : ""}
-                                required
-                                {...field}
-                              />
-                              {type === "percentage" && (
-                                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
-                                  %
-                                </span>
-                              )}
-                            </div>
-                          </FormControl>
-                          <FormDescription>Base price in USD</FormDescription>
-                        </FormItem>
-                      )}
-                    />
+                    {type !== "free_shipping" && (
+                      <FormField
+                        control={form.control}
+                        name="value"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {type === "percentage"
+                                ? "Percentage"
+                                : "Amount (USD)"}{" "}
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                {type === "fixed" && (
+                                  <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                                    $
+                                  </span>
+                                )}
+
+                                <NumberInput
+                                  step={type === "percentage" ? "1" : "0.01"}
+                                  min="0"
+                                  max={
+                                    type === "percentage" ? "100" : undefined
+                                  }
+                                  placeholder={
+                                    type === "percentage" ? "20" : "10.00"
+                                  }
+                                  className={type === "fixed" ? "pl-7" : ""}
+                                  required
+                                  {...field}
+                                />
+                                {type === "percentage" && (
+                                  <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
+                                    %
+                                  </span>
+                                )}
+                              </div>
+                            </FormControl>
+                            <FormDescription>Base price in USD</FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </CardContent>
                 </Card>
 
@@ -416,6 +436,37 @@ export function DiscountForm({ initialDiscount }: Props) {
                           </FormDescription>
                         </FormItem>
                       )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="perCustomerLimit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Limit uses per customer</FormLabel>
+                          <FormControl>
+                            <NumberInput
+                              step="1"
+                              min="1"
+                              placeholder="Unlimited"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Leave blank for unlimited uses per customer
+                          </FormDescription>
+                        </FormItem>
+                      )}
+                    />
+
+                    <DateTimeFormField
+                      form={form}
+                      name="startsAt"
+                      label=""
+                      dateLabel="Start Date"
+                      timeLabel="Start Time"
+                      includeTime={false}
+                      description="Leave blank to start immediately"
                     />
 
                     <DateTimeFormField
@@ -456,33 +507,35 @@ export function DiscountForm({ initialDiscount }: Props) {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="maxDiscount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel> Maximum discount (USD)</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                $
-                              </span>
-                              <NumberInput
-                                step="0.01"
-                                min="0"
-                                placeholder="No cap"
-                                className="pl-7"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormDescription>
-                            Caps the discount amount (especially useful for
-                            percentage codes)
-                          </FormDescription>
-                        </FormItem>
-                      )}
-                    />
+                    {type !== "free_shipping" && (
+                      <FormField
+                        control={form.control}
+                        name="maxDiscount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel> Maximum discount (USD)</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+                                  $
+                                </span>
+                                <NumberInput
+                                  step="0.01"
+                                  min="0"
+                                  placeholder="No cap"
+                                  className="pl-7"
+                                  {...field}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Caps the discount amount (especially useful for
+                              percentage codes)
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </div>

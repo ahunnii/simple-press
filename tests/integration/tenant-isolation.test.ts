@@ -45,7 +45,7 @@ describe("multi-tenant isolation", () => {
 
     // Listing returns only A's orders, never B's.
     const all = await callerA.order.getAll({});
-    expect(all.map((o) => o.id)).toEqual([orderA.id]);
+    expect(all.orders.map((o) => o.id)).toEqual([orderA.id]);
   });
 
   it("blocks a user who is not a member of the resolved business", async () => {

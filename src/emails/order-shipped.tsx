@@ -11,6 +11,7 @@ type OrderShippedEmailProps = {
   estimatedDelivery?: string;
   businessName: string;
   businessLogoUrl?: string;
+  orderStatusUrl?: string;
 };
 
 export default function OrderShippedEmail({
@@ -22,6 +23,7 @@ export default function OrderShippedEmail({
   estimatedDelivery,
   businessName,
   businessLogoUrl,
+  orderStatusUrl,
 }: OrderShippedEmailProps) {
   return (
     <EmailLayout
@@ -52,6 +54,15 @@ export default function OrderShippedEmail({
         <Button href={trackingUrl} style={button}>
           Track Your Package
         </Button>
+        {orderStatusUrl && (
+          <Text style={statusLinkText}>
+            You can also{" "}
+            <a href={orderStatusUrl} style={statusLink}>
+              view your order status
+            </a>{" "}
+            at any time.
+          </Text>
+        )}
       </Section>
 
       <Text style={note}>
@@ -115,6 +126,18 @@ const estimatedText = {
 const buttonSection = {
   textAlign: "center" as const,
   marginBottom: "24px",
+};
+
+const statusLinkText = {
+  fontSize: "14px",
+  lineHeight: "20px",
+  color: "#6b7280",
+  margin: "12px 0 0 0",
+};
+
+const statusLink = {
+  color: "#3b82f6",
+  textDecoration: "underline",
 };
 
 const button = {

@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
+import Papa from "papaparse";
 import { z } from "zod";
 
 import { sendMarketingBroadcast } from "~/lib/email/templates";
@@ -32,6 +33,65 @@ export const marketingRouter = createTRPCRouter({
       },
     });
     return { count };
+  }),
+
+  /**
+   * Export the opted-in marketing list as a CSV. Like listRecipients, this is
+   * not featureGated — the owner's opt-in list is their data regardless of
+   * whether the broadcast feature is enabled.
+   */
+  exportRecipients: ownerAdminProcedure.mutation(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const customers = await ctx.db.customer.findMany({
+      where: {
+        businessId,
+        acceptsMarketing: true,
+        anonymizedAt: null,
+        NOT: { email: "" },
+      },
+      select: {
+        email: true,
+        firstName: true,
+        lastName: true,
+        orderCount: true,
+        totalSpent: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (customers.length === 0) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No opted-in customers to export",
+      });
+    }
+
+    const rows = customers.map((c) => ({
+      Email: c.email,
+      "First Name": c.firstName ?? "",
+      "Last Name": c.lastName ?? "",
+      "Order Count": c.orderCount,
+      "Total Spent": (c.totalSpent / 100).toFixed(2),
+      "Customer Since": c.createdAt.toISOString(),
+    }));
+
+    const csv = Papa.unparse(rows, { quotes: true, header: true });
+
+    const business = await ctx.db.business.findUnique({
+      where: { id: businessId },
+      select: { name: true },
+    });
+
+    const slug = (business?.name ?? "store").toLowerCase().replace(/\s+/g, "-");
+    const date = new Date().toISOString().split("T")[0];
+
+    return {
+      csv,
+      filename: `marketing-list-${slug}-${date}.csv`,
+      count: customers.length,
+    };
   }),
 
   /**

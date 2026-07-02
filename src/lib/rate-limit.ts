@@ -99,6 +99,13 @@ export const testimonialSubmitLimiter = makeLazy({
   keyPrefix: "rl:testimonial-submit",
 });
 
+// 5 attempts per 15 minutes per IP — for guest order-status link requests
+export const orderLookupLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:order-lookup",
+});
+
 // 10 attempts per minute per IP — for review votes
 export const reviewVoteLimiter = makeLazy({
   points: 10,

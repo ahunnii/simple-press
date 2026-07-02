@@ -42,6 +42,25 @@ export function mapStripeLineItemsToOrderItems(
   );
 }
 
+/**
+ * Free-shipping discount codes: create-session zeroes the shipping option on
+ * Stripe (so `amount_shipping` is 0) and records the original shipping cost in
+ * session metadata as `freeShippingDiscountCents`. This parses it back out.
+ *
+ * Pure function — returns 0 for missing/malformed/non-positive values.
+ */
+export function parseFreeShippingDiscountCents(
+  session: Stripe.Checkout.Session,
+  fullSession: Stripe.Checkout.Session,
+): number {
+  const raw =
+    session.metadata?.freeShippingDiscountCents ??
+    fullSession.metadata?.freeShippingDiscountCents ??
+    "";
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
 export type CreateOrderParams = {
   business: { id: string };
   customer: { id: string } | null;
@@ -81,6 +100,14 @@ export async function createOrderFromCheckout(
     deliveryMethod = "ship",
   } = params;
 
+  // Free-shipping discount codes: record the order with shipping AND discount
+  // at the original shipping value so totals reconcile:
+  //   subtotal + shipping(S) - discount(S) = amount_total.
+  const freeShippingDiscountCents = parseFreeShippingDiscountCents(
+    session,
+    fullSession,
+  );
+
   // Generate order number and create order. Retry up to 3 times on a
   // unique-constraint conflict for orderNumber — two concurrent webhook
   // deliveries for different sessions can race and produce the same number.
@@ -115,8 +142,10 @@ export async function createOrderFromCheckout(
             // Amounts in cents
             subtotal: session.amount_subtotal ?? 0,
             tax: fullSession.total_details?.amount_tax ?? 0,
-            shipping: fullSession.total_details?.amount_shipping ?? 0,
-            discount: discountAmount,
+            shipping:
+              (fullSession.total_details?.amount_shipping ?? 0) +
+              freeShippingDiscountCents,
+            discount: discountAmount + freeShippingDiscountCents,
             total: session.amount_total ?? 0,
 
             // currency: session.currency ?? "usd",

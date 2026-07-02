@@ -21,6 +21,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -401,6 +405,10 @@ export function ElegantCheckoutForm({ business }: Props) {
         {f.deliveryMethod === "ship" && (
           <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
             {eyebrow("Shipping address")}
+            <SavedAddressPicker
+              className="mb-5"
+              onSelect={(address) => applySavedAddressToForm(f, address)}
+            />
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               <ElegantField
                 label="Address line 1 *"

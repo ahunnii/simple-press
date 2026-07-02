@@ -24,6 +24,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -206,6 +210,11 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     ? "We price shipping from this address. Make changes here before continuing to payment."
                     : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                 </p>
+                <SavedAddressPicker
+                  className="text-white"
+                  optionClassName="border-white/20"
+                  onSelect={(address) => applySavedAddressToForm(f, address)}
+                />
                 <div>
                   <Label htmlFor="address-line1" className="text-white">
                     Address line 1 *

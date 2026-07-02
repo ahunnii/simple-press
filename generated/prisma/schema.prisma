@@ -167,8 +167,9 @@ model Business {
   onboardingComplete Boolean @default(false)
 
   // SEO / AEO / GEO controls
-  localBusinessEnabled Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
-  allowAiCrawlers      Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
+  localBusinessEnabled        Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
+  allowAiCrawlers             Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
+  sendAbandonedCheckoutEmails Boolean @default(false) // recovery email to shoppers who abandon a Stripe checkout (needs their email on the expired session)
 
   // Features
   featureFlags Json @default("{}") // Record<string, boolean>
@@ -335,9 +336,10 @@ model Product {
   weightUnit String? @default("lb") // lb | kg
 
   // Organization
-  published Boolean @default(false)
-  featured  Boolean @default(false)
-  sortOrder Int     @default(0)
+  published          Boolean   @default(false)
+  featured           Boolean   @default(false)
+  scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
+  sortOrder          Int       @default(0)
 
   // SEO
   metaTitle       String?
@@ -568,6 +570,9 @@ model Customer {
   deletionRequestedAt DateTime?
   anonymizedAt        DateTime?
 
+  // Owner-facing CRM notes (never shown to the customer)
+  notes String? @db.Text
+
   // Link to authenticated user (if they've signed in)
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -760,8 +765,9 @@ model DiscountCode {
   active Boolean @default(true)
 
   // Usage limits
-  usageLimit Int? // null = unlimited
-  usageCount Int  @default(0)
+  usageLimit       Int? // null = unlimited (total redemptions)
+  usageCount       Int  @default(0)
+  perCustomerLimit Int? // null = unlimited; enforced by counting the customer's prior orders using this code
 
   // Validity period
   startsAt  DateTime?
@@ -902,8 +908,9 @@ model Page {
   ogImage         String?
 
   // Status
-  published Boolean @default(true)
-  sortOrder Int     @default(0)
+  published          Boolean   @default(true)
+  sortOrder          Int       @default(0)
+  scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
 
   // Page type
   type     String @default("page") // page | policy | blog | custom

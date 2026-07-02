@@ -17,6 +17,9 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
     if (type === "percentage") {
       return `${value}% off`;
     }
+    if (type === "free_shipping") {
+      return "Free shipping";
+    }
     return `$${(value / 100).toFixed(2)} off`;
   };
 
@@ -32,6 +35,11 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
   const isExpired = (date: Date | null) => {
     if (!date) return false;
     return new Date(date) < new Date();
+  };
+
+  const isScheduled = (date: Date | null) => {
+    if (!date) return false;
+    return new Date(date) > new Date();
   };
 
   return (
@@ -106,9 +114,15 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
                   )}
                 </td>
                 <td className="px-6 py-4">
-                  <Badge variant={discount.active ? "default" : "secondary"}>
-                    {discount.active ? "Active" : "Inactive"}
-                  </Badge>
+                  {discount.active && isScheduled(discount.startsAt) ? (
+                    <Badge variant="outline">
+                      Scheduled · {formatDate(discount.startsAt)}
+                    </Badge>
+                  ) : (
+                    <Badge variant={discount.active ? "default" : "secondary"}>
+                      {discount.active ? "Active" : "Inactive"}
+                    </Badge>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">

@@ -610,6 +610,34 @@ export const customerRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // Owner-facing CRM notes about a customer (never shown to the customer)
+  updateNotes: ownerAdminProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+        notes: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const customer = await ctx.db.customer.findFirst({
+        where: { id: input.customerId, businessId },
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      return ctx.db.customer.update({
+        where: { id: input.customerId },
+        data: { notes: input.notes },
+      });
+    }),
+
   getById: ownerAdminProcedure
     .input(z.string())
     .query(async ({ ctx, input: id }) => {

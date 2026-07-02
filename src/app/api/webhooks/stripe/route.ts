@@ -12,6 +12,7 @@ import { getBusinessUrl } from "~/lib/business-url";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import {
+  sendAbandonedCheckoutEmail,
   sendBackorderAlert,
   sendDisputeAlert,
   sendLowInventoryAlert,
@@ -862,6 +863,7 @@ export async function POST(req: NextRequest) {
                 customDomain: business.customDomain,
                 domainStatus: business.domainStatus,
               },
+              orderId: order.id,
               idempotencyKey: `order-confirmation-${session.id}`,
             });
           } catch (emailError) {
@@ -969,6 +971,48 @@ export async function POST(req: NextRequest) {
       } catch (expiredErr) {
         Sentry.captureException(expiredErr, {
           tags: { "webhook.step": "reservation-release-expired" },
+        });
+      }
+
+      // Abandoned-checkout recovery email — only when the business has opted
+      // in and Stripe captured an email before the session expired. The
+      // shopper's cart lives in their browser localStorage, so linking back to
+      // /cart restores exactly what they left. Note: the expired-session event
+      // payload does not include line_items (requires expansion), so the email
+      // stays generic — no item names. Stripe sends checkout.session.expired
+      // once per session, so no extra idempotency guard is needed; the Resend
+      // idempotency key covers redelivered webhook events. Failures never fail
+      // the webhook.
+      try {
+        const abandonedBusinessId = expiredSession.metadata?.businessId;
+        const abandonedEmail =
+          expiredSession.customer_details?.email ??
+          expiredSession.customer_email;
+        if (abandonedBusinessId && abandonedEmail) {
+          const abandonedBusiness = await db.business.findUnique({
+            where: { id: abandonedBusinessId },
+            select: {
+              name: true,
+              ownerEmail: true,
+              subdomain: true,
+              customDomain: true,
+              domainStatus: true,
+              sendAbandonedCheckoutEmails: true,
+              siteContent: { select: { logoUrl: true } },
+            },
+          });
+          if (abandonedBusiness?.sendAbandonedCheckoutEmails) {
+            await sendAbandonedCheckoutEmail({
+              to: abandonedEmail,
+              customerName: expiredSession.customer_details?.name ?? undefined,
+              business: abandonedBusiness,
+              idempotencyKey: `abandoned-checkout-${expiredSession.id}`,
+            });
+          }
+        }
+      } catch (abandonedErr) {
+        Sentry.captureException(abandonedErr, {
+          tags: { "webhook.step": "abandoned-checkout-email" },
         });
       }
       return NextResponse.json({ received: true });

@@ -1,7 +1,10 @@
 import type Stripe from "stripe";
 import { describe, expect, it } from "vitest";
 
-import { mapStripeLineItemsToOrderItems } from "./create-order";
+import {
+  mapStripeLineItemsToOrderItems,
+  parseFreeShippingDiscountCents,
+} from "./create-order";
 
 /**
  * Build a minimal fake Stripe.Checkout.Session for testing
@@ -180,5 +183,49 @@ describe("mapStripeLineItemsToOrderItems", () => {
     expect(items[0]?.productId).toBe("pa");
     expect(items[1]?.productId).toBe("pb");
     expect(items[1]?.quantity).toBe(3);
+  });
+});
+
+describe("parseFreeShippingDiscountCents", () => {
+  const withMetadata = (metadata: Record<string, string> | null) =>
+    ({ metadata }) as unknown as Stripe.Checkout.Session;
+
+  it("reads the free-shipping discount recorded by create-session", () => {
+    expect(
+      parseFreeShippingDiscountCents(
+        withMetadata({ freeShippingDiscountCents: "799" }),
+        withMetadata(null),
+      ),
+    ).toBe(799);
+  });
+
+  it("falls back to the expanded session's metadata", () => {
+    expect(
+      parseFreeShippingDiscountCents(
+        withMetadata(null),
+        withMetadata({ freeShippingDiscountCents: "500" }),
+      ),
+    ).toBe(500);
+  });
+
+  it("returns 0 when the metadata key is absent", () => {
+    expect(
+      parseFreeShippingDiscountCents(withMetadata({}), withMetadata(null)),
+    ).toBe(0);
+  });
+
+  it("returns 0 for malformed or non-positive values", () => {
+    expect(
+      parseFreeShippingDiscountCents(
+        withMetadata({ freeShippingDiscountCents: "banana" }),
+        withMetadata(null),
+      ),
+    ).toBe(0);
+    expect(
+      parseFreeShippingDiscountCents(
+        withMetadata({ freeShippingDiscountCents: "-100" }),
+        withMetadata(null),
+      ),
+    ).toBe(0);
   });
 });

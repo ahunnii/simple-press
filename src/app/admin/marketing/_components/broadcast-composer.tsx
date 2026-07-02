@@ -23,6 +23,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 
+import { ExportRecipientsButton } from "./export-recipients-button";
+
 interface BroadcastComposerProps {
   recipientCount: number;
 }
@@ -72,15 +74,18 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="text-sm tabular-nums">
-              {recipientCount.toLocaleString()}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {recipientCount === 1
-                ? "customer opted in to marketing emails"
-                : "customers opted in to marketing emails"}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-sm tabular-nums">
+                {recipientCount.toLocaleString()}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                {recipientCount === 1
+                  ? "customer opted in to marketing emails"
+                  : "customers opted in to marketing emails"}
+              </span>
+            </div>
+            <ExportRecipientsButton disabled={recipientCount === 0} />
           </div>
           {recipientCount === 0 && (
             <p className="mt-3 text-sm text-muted-foreground">

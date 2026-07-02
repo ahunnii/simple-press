@@ -17,9 +17,11 @@ import { getAllowedCountries } from "~/lib/geo/regions";
 import {
   releaseReservation,
   reserveInventory,
+  sweepStaleReservations,
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 import { buildZoneWeightConfig } from "~/lib/shipping-config";
 import {
   calculateShipping,
@@ -114,24 +116,7 @@ export async function POST(req: NextRequest) {
     // Lazy sweeper: release any stale reservations for this business before
     // running availability checks so they don't inflate reservedQty.
     try {
-      const stale = await db.inventoryReservation.findMany({
-        where: {
-          businessId: business.id,
-          status: "active",
-          expiresAt: { lt: new Date() },
-        },
-        take: 50,
-      });
-      for (const stalRes of stale) {
-        await db.$transaction(async (tx) => {
-          const entries = stalRes.items as ReservationEntry[];
-          await releaseReservation(tx, { items: entries });
-          await tx.inventoryReservation.update({
-            where: { id: stalRes.id },
-            data: { status: "released" },
-          });
-        });
-      }
+      await sweepStaleReservations(db, { businessId: business.id, take: 50 });
     } catch (sweeperErr) {
       // Non-fatal — availability check will be slightly conservative at worst
       console.warn(
@@ -324,6 +309,7 @@ export async function POST(req: NextRequest) {
 
     let discountCents = 0;
     let verifiedDiscountCodeId: string | null = null;
+    let verifiedDiscountType: string | null = null;
 
     if (rawDiscountId) {
       const discountRow = await db.discountCode.findFirst({
@@ -340,13 +326,33 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const computed = validateAndComputeDiscount(discountRow, subtotalCents);
+      // Per-customer limit: count this shopper's prior (non-cancelled) orders
+      // that used this code. Authoritative check — the storefront validate
+      // endpoint may not have known the email.
+      let customerUsageCount: number | undefined;
+      if (discountRow.perCustomerLimit != null) {
+        customerUsageCount = await db.order.count({
+          where: {
+            businessId: business.id,
+            discountCodeId: discountRow.id,
+            customerEmail: normalizeEmail(customerInfo.email),
+            status: { not: "cancelled" },
+          },
+        });
+      }
+
+      // Shipping isn't computed yet: free_shipping codes yield 0 here and are
+      // applied to the shipping amount below once it's known.
+      const computed = validateAndComputeDiscount(discountRow, subtotalCents, {
+        customerUsageCount,
+      });
       if (!computed.ok) {
         return NextResponse.json({ error: computed.error }, { status: 400 });
       }
 
       discountCents = computed.discountAmountCents;
       verifiedDiscountCodeId = discountRow.id;
+      verifiedDiscountType = discountRow.type;
     }
 
     const shippingConfig = shippingConfigFromBusiness({
@@ -412,6 +418,23 @@ export async function POST(req: NextRequest) {
       shippingCents = calculateShipping(subtotalCents, shippingConfig);
       shippingDisplayName =
         shippingCents === 0 ? "Free shipping" : "Standard shipping";
+    }
+
+    // Free-shipping discount codes: the discount amount IS the computed
+    // shipping cost. Rather than a coupon/negative line item, the shipping
+    // option presented to Stripe becomes free ($0). The original shipping
+    // value travels in metadata (`freeShippingDiscountCents`) so the order
+    // records shipping + discount at that value and totals reconcile:
+    //   subtotal + shipping(S) - discount(S) = amount_total.
+    let freeShippingDiscountCents = 0;
+    if (
+      verifiedDiscountType === "free_shipping" &&
+      deliveryMethod === "ship" &&
+      shippingCents > 0
+    ) {
+      freeShippingDiscountCents = shippingCents;
+      shippingCents = 0;
+      shippingDisplayName = "Free shipping";
     }
 
     // Initialize Stripe with platform account
@@ -614,6 +637,9 @@ export async function POST(req: NextRequest) {
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
         discountCodeId: verifiedDiscountCodeId ?? "",
+        ...(freeShippingDiscountCents > 0
+          ? { freeShippingDiscountCents: String(freeShippingDiscountCents) }
+          : {}),
         deliveryMethod,
         ...(hasFullShipping && sa
           ? {

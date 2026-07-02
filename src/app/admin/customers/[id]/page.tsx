@@ -18,6 +18,7 @@ import {
 
 import { TrailHeader } from "../../_components/trail-header";
 import { OrdersTable } from "../../orders/_components/orders-table";
+import { CustomerNotes } from "./_components/customer-notes";
 import { CustomerPrivacyActions } from "./_components/customer-privacy-actions";
 
 type Props = {
@@ -144,6 +145,8 @@ export default async function CustomerDetailPage({ params }: Props) {
                 </div>
               </CardContent>
             </Card>
+
+            <CustomerNotes customerId={customer.id} notes={customer.notes} />
 
             <CustomerPrivacyActions
               customer={{

@@ -22,6 +22,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 import { HappyBambooOrderSummary } from "./happy-bamboo-order-summary";
 
@@ -299,6 +303,26 @@ export function HappyBambooCheckoutForm({ business }: CheckoutFormProps) {
                 ? "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
+            <SavedAddressPicker
+              className="text-foreground"
+              accentColor="var(--primary)"
+              onSelect={(address) =>
+                applySavedAddressToForm(
+                  {
+                    setName,
+                    setPhone,
+                    setAddressLine1,
+                    setAddressLine2,
+                    setCity,
+                    setState,
+                    setPostalCode,
+                    setCountry,
+                    allowedCountries,
+                  },
+                  address,
+                )
+              }
+            />
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="address-line1">
