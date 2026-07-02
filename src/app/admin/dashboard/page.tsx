@@ -32,6 +32,13 @@ export default async function AdminDashboardPage() {
     },
   });
 
+  // Cheap lookup for the "Finish setting up" card — mirrors the completion
+  // logic in /admin/welcome/page.tsx (same 5 setup steps).
+  const siteContentForSetup = await db.siteContent.findUnique({
+    where: { businessId: business.id },
+    select: { logoUrl: true, customFields: true },
+  });
+
   // Get stats for the dashboard
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -390,6 +397,54 @@ export default async function AdminDashboardPage() {
     };
   });
 
+  // "Finish setting up" card — mirrors the 5-step completion logic in
+  // /admin/welcome/page.tsx (businessCreated is always true post-onboarding).
+  const setupCustomFields = siteContentForSetup?.customFields;
+  const storefrontCustomized =
+    Boolean(siteContentForSetup?.logoUrl) ||
+    (setupCustomFields !== null &&
+      setupCustomFields !== undefined &&
+      typeof setupCustomFields === "object" &&
+      !Array.isArray(setupCustomFields) &&
+      Object.keys(setupCustomFields as Record<string, unknown>).length > 0);
+
+  const setupSteps: Array<{ done: boolean; label: string; href: string }> = [
+    { done: true, label: "Store created", href: "/admin/welcome" },
+    {
+      done: Boolean(businessData?.stripeAccountId),
+      label: "Connect payment processing",
+      href: "/admin/welcome",
+    },
+    {
+      done: Boolean(businessData?.customDomain),
+      label: "Connect a custom domain",
+      href: "/admin/welcome",
+    },
+    {
+      done: (businessData?._count.products ?? 0) > 0,
+      label: "Add your first product",
+      href: "/admin/products/new",
+    },
+    {
+      done: storefrontCustomized,
+      label: "Customize your storefront",
+      href: "/admin/content/template",
+    },
+  ];
+  const setupCompletedSteps = setupSteps.filter((s) => s.done).length;
+  const setupTotalSteps = setupSteps.length;
+  const nextSetupStep = setupSteps.find((s) => !s.done) ?? null;
+  const setupProgress =
+    setupCompletedSteps === setupTotalSteps
+      ? null
+      : {
+          completed: setupCompletedSteps,
+          total: setupTotalSteps,
+          nextStep: nextSetupStep
+            ? { label: nextSetupStep.label, href: nextSetupStep.href }
+            : null,
+        };
+
   return (
     <>
       <TrailHeader breadcrumbs={[]} />
@@ -406,6 +461,7 @@ export default async function AdminDashboardPage() {
       )}
       <DashboardContent
         business={businessData!}
+        setupProgress={setupProgress}
         stats={{
           totalRevenue:
             (totalRevenue._sum.total ?? 0) -

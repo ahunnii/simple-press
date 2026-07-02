@@ -24,6 +24,7 @@ import { orderLookupRouter } from "./routers/order-lookup";
 import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
+import { searchRouter } from "./routers/search";
 import { serviceRouter } from "./routers/service";
 import { shippingRouter } from "./routers/shipping";
 import { teamRouter } from "./routers/team";
@@ -71,6 +72,7 @@ export const appRouter = createTRPCRouter({
   team: teamRouter,
 
   upload: uploadRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

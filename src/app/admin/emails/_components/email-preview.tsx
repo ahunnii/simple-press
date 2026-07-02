@@ -448,7 +448,7 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
     <div className="admin-container">
       <div className="admin-header">
         <div>
-          <h1>Email Templates</h1>
+          <h1>Notification Emails</h1>
           <p>
             Preview your transactional emails and customize the subject line
             and intro text of customer-facing ones

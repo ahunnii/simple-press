@@ -9,6 +9,7 @@ import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
+import { AdminCommandPalette } from "~/app/admin/_components/admin-command-palette";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 
 type Props = {
@@ -96,6 +97,11 @@ export default async function AdminLayout({ children }: Props) {
         <SidebarInset>
           <div className="bg-muted min-h-screen">{children}</div>
         </SidebarInset>
+        <AdminCommandPalette
+          session={session}
+          featureData={featureData}
+          membershipRole={membershipRole}
+        />
       </SidebarProvider>
     </HydrateClient>
   );

@@ -11,7 +11,7 @@ export default async function EmailPreviewPage() {
 
   return (
     <>
-      <TrailHeader breadcrumbs={[{ label: "Email Templates" }]} />
+      <TrailHeader breadcrumbs={[{ label: "Notification Emails" }]} />
       <EmailPreview
         business={business}
         sampleOrder={sampleOrder}
@@ -22,5 +22,5 @@ export default async function EmailPreviewPage() {
 }
 
 export const metadata = {
-  title: "Email Templates",
+  title: "Notification Emails",
 };

@@ -31,6 +31,7 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Progress } from "~/components/ui/progress";
 
 type DashboardContentProps = {
   business: {
@@ -64,6 +65,12 @@ type DashboardContentProps = {
   };
   /** Optional Suspense-wrapped conversion-rate card (server-rendered). */
   conversionCard?: React.ReactNode;
+  /** Onboarding progress from /admin/welcome; null when setup is complete. */
+  setupProgress: {
+    completed: number;
+    total: number;
+    nextStep: { label: string; href: string } | null;
+  } | null;
   ordersToFulfillCount: number;
   awaitingPaymentCount: number;
   recentOrders: Array<{
@@ -155,6 +162,7 @@ export function DashboardContent({
   business,
   stats,
   conversionCard,
+  setupProgress,
   ordersToFulfillCount,
   awaitingPaymentCount,
   recentOrders,
@@ -276,6 +284,40 @@ export function DashboardContent({
             </Button>
           </div>
         </div>
+
+        {/* Finish Setting Up */}
+        {setupProgress && (
+          <Card className="mb-6">
+            <CardContent className="flex flex-col gap-4 py-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between gap-4 sm:justify-start">
+                  <h2 className="text-foreground text-sm font-semibold">
+                    Finish setting up your store
+                  </h2>
+                  <span className="text-muted-foreground text-xs">
+                    {setupProgress.completed} of {setupProgress.total} steps
+                    complete
+                  </span>
+                </div>
+                <Progress
+                  value={(setupProgress.completed / setupProgress.total) * 100}
+                  className="mt-2 h-1.5 max-w-sm"
+                />
+                {setupProgress.nextStep && (
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    Next: {setupProgress.nextStep.label}
+                  </p>
+                )}
+              </div>
+              <Button asChild size="sm" className="shrink-0">
+                <Link href="/admin/welcome">
+                  Continue setup
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Needs-Attention Strip */}
         {hasAttentionItems && (

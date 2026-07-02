@@ -30,11 +30,13 @@ import {
   Megaphone,
   Menu,
   Package,
+  Plus,
   PowerOff,
   Search,
   Shield,
   Users,
   Wrench,
+  Zap,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -69,6 +71,8 @@ export interface NavItem {
    * (orders, customers). PLATFORM_ADMIN always sees everything.
    */
   roles?: AdminRole[];
+  /** Keyword synonyms for command palette matching. */
+  keywords?: string[];
 }
 
 /** A card entry shown on a hub index page (Settings or Content). */
@@ -84,6 +88,23 @@ export interface HubCard {
   icon: LucideIcon | TablerIcon;
   /** Feature flag key — when set and disabled, the card is hidden from its hub. */
   featureKey?: string;
+  /** Keyword synonyms for command palette matching. */
+  keywords?: string[];
+}
+
+/** A quick action for the command palette. */
+export interface PaletteAction {
+  key: string;
+  title: string;
+  href: string;
+  icon: TablerIcon | LucideIcon;
+  keywords?: string[];
+  featureKey?: string;
+  /**
+   * Membership roles that can see this action. Defaults to OWNER + MANAGER
+   * (`DEFAULT_NAV_ROLES`). PLATFORM_ADMIN always sees everything.
+   */
+  roles?: AdminRole[];
 }
 
 export const NAV_SECTION_LABELS: Record<NavSection, string> = {
@@ -114,6 +135,7 @@ export const NAV_ITEMS: NavItem[] = [
     section: "sell",
     featureKey: "orders",
     roles: ["OWNER", "MANAGER", "STAFF"],
+    keywords: ["sales", "purchases", "fulfillment"],
   },
   {
     key: "customers",
@@ -122,6 +144,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconUsers,
     section: "sell",
     roles: ["OWNER", "MANAGER", "STAFF"],
+    keywords: ["buyers", "shoppers"],
   },
   {
     key: "payments",
@@ -130,6 +153,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconCreditCard,
     section: "sell",
     featureKey: "payments",
+    keywords: ["stripe", "payouts", "balance"],
   },
 
   // Catalog
@@ -140,6 +164,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPackage,
     section: "catalog",
     featureKey: "products",
+    keywords: ["items", "catalog", "listings", "sku"],
   },
   {
     key: "inventory",
@@ -174,6 +199,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconDiscount,
     section: "marketing",
     featureKey: "coupons",
+    keywords: ["coupon", "promo", "promotion", "code", "sale"],
   },
   {
     key: "testimonials",
@@ -201,11 +227,12 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     key: "marketing",
-    title: "Email Broadcasts",
+    title: "Email Marketing",
     href: "/admin/marketing",
     icon: IconMailFast,
     section: "marketing",
     featureKey: "emailMarketing",
+    keywords: ["newsletter", "broadcast", "campaign", "email blast"],
   },
 
   // Content
@@ -223,13 +250,15 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPhoto,
     section: "content",
     featureKey: "media",
+    keywords: ["images", "files", "uploads", "library"],
   },
   {
     key: "emails",
-    title: "Email Templates",
+    title: "Notification Emails",
     href: "/admin/emails",
     icon: IconMail,
     section: "content",
+    keywords: ["notification", "transactional", "order emails"],
   },
 
   // Insights
@@ -240,6 +269,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconChartBar,
     section: "insights",
     featureKey: "analytics",
+    keywords: ["stats", "traffic", "visitors", "reports"],
   },
 
   // Platform (PLATFORM_ADMIN only — gated in sidebar rendering)
@@ -319,6 +349,7 @@ export const HUB_CARDS: HubCard[] = [
     hub: "settings",
     color: "orange",
     icon: Shield,
+    keywords: ["url", "website address", "dns"],
   },
   {
     key: "settings-features",
@@ -370,6 +401,7 @@ export const HUB_CARDS: HubCard[] = [
     hub: "settings",
     color: "violet",
     icon: IconUsers,
+    keywords: ["staff", "members", "invite", "roles", "permissions"],
   },
 
   // Content hub — Brand Identity and Template Fields first
@@ -505,3 +537,61 @@ export function isPathAllowedForRole(
 export function getHubCards(hub: NavHub): HubCard[] {
   return HUB_CARDS.filter((card) => card.hub === hub);
 }
+
+// ─── Palette actions ────────────────────────────────────────────────────────
+
+export const PALETTE_ACTIONS: PaletteAction[] = [
+  {
+    key: "add-product",
+    title: "Add product",
+    href: "/admin/products/new",
+    icon: Plus,
+    featureKey: "products",
+    keywords: ["create", "new", "product"],
+  },
+  {
+    key: "create-discount",
+    title: "Create discount",
+    href: "/admin/discounts/new",
+    icon: Plus,
+    featureKey: "coupons",
+    keywords: ["coupon", "promo", "code"],
+  },
+  {
+    key: "create-order",
+    title: "Create manual order",
+    href: "/admin/orders/new",
+    icon: Plus,
+    featureKey: "orders",
+    keywords: ["order", "manual"],
+  },
+  {
+    key: "invite-team",
+    title: "Invite team member",
+    href: "/admin/settings/team",
+    icon: Users,
+    keywords: ["staff", "member", "invite"],
+  },
+  {
+    key: "send-broadcast",
+    title: "Send email marketing",
+    href: "/admin/marketing",
+    icon: Zap,
+    featureKey: "emailMarketing",
+    keywords: ["broadcast", "newsletter", "campaign"],
+  },
+  {
+    key: "setup-guide",
+    title: "View setup guide",
+    href: "/admin/welcome",
+    icon: Home,
+    keywords: ["onboarding", "help", "tutorial"],
+  },
+  {
+    key: "business-settings",
+    title: "Business settings",
+    href: "/admin/settings/general",
+    icon: Wrench,
+    keywords: ["general", "info", "business"],
+  },
+];

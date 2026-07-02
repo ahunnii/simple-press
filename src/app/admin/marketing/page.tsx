@@ -8,11 +8,11 @@ export default async function MarketingPage() {
 
   return (
     <>
-      <TrailHeader breadcrumbs={[{ label: "Email Broadcasts" }]} />
+      <TrailHeader breadcrumbs={[{ label: "Email Marketing" }]} />
       <div className="admin-container">
         <div className="admin-header">
           <div>
-            <h1>Email Broadcasts</h1>
+            <h1>Email Marketing</h1>
             <p>Send a one-off announcement or newsletter to your opted-in customers.</p>
           </div>
         </div>
@@ -24,5 +24,5 @@ export default async function MarketingPage() {
 }
 
 export const metadata = {
-  title: "Email Broadcasts",
+  title: "Email Marketing",
 };
