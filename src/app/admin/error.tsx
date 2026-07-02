@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle, Settings } from "lucide-react";
 
+import { FEATURE_REGISTRY } from "~/lib/features/registry";
 import { parseTrpcFromBoundaryMessage } from "~/lib/trpc/boundary-error";
 import { Button } from "~/components/ui/button";
 import { RefreshButton } from "~/app/_components/refresh-button";
@@ -23,6 +24,21 @@ export default function AdminError({ error, reset }: Props) {
   const isFeatureDisabled =
     trpc?.code === "FORBIDDEN" &&
     trpc?.message.includes("feature is not enabled");
+
+  const parseFeatureKey = (message: string): string | null => {
+    const match = /^The (\w+) feature is not enabled/.exec(message);
+    return match?.[1] ?? null;
+  };
+
+  const featureKey = isFeatureDisabled
+    ? parseFeatureKey(trpc?.message ?? "")
+    : null;
+  const featureLabel = featureKey
+    ? (FEATURE_REGISTRY[featureKey]?.label ?? featureKey)
+    : null;
+  const buttonLabel = featureLabel
+    ? `Enable ${featureLabel}`
+    : "Enable features";
   return (
     <div className="bg-background relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4">
       <div
@@ -83,7 +99,7 @@ export default function AdminError({ error, reset }: Props) {
             <Button size="lg" className="gap-2" asChild>
               <Link href="/admin/settings/features">
                 <Settings className="size-4 shrink-0" aria-hidden />
-                Enable collections
+                {buttonLabel}
               </Link>
             </Button>
           ) : null}

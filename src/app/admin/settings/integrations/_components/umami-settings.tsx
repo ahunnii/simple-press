@@ -36,7 +36,6 @@ const UMAMI_WEBSITE_ID_REGEX = /^[a-zA-Z0-9-]+$/;
 
 export function UmamiSettings({ business }: Props) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
 
   // Form state
   const [umamiWebsiteId, setUmamiWebsiteId] = useState(
@@ -89,7 +88,6 @@ export function UmamiSettings({ business }: Props) {
       return;
     }
     setWebsiteIdError(null);
-    setIsSaving(true);
 
     updateIntegrationsMutation.mutate({
       umamiWebsiteId: umamiWebsiteId ?? undefined,
@@ -201,8 +199,8 @@ export function UmamiSettings({ business }: Props) {
             </div>
 
             <div className="border-t pt-4">
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? (
+              <Button type="submit" disabled={updateIntegrationsMutation.isPending}>
+                {updateIntegrationsMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...

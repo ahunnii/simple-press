@@ -165,7 +165,7 @@ function EventsSection({
       {otherRows.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>All Custom Events</CardTitle>
+            <CardTitle>Other Custom Events</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -176,7 +176,7 @@ function EventsSection({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row, i) => (
+                {otherRows.map((row, i) => (
                   <TableRow key={i}>
                     <TableCell className="py-2 pr-4 font-mono text-xs">
                       {row.x}
