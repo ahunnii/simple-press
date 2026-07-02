@@ -12,7 +12,7 @@ import {
 export interface AdminEmptyProps {
   icon: LucideIcon;
   title: string;
-  description: string;
+  description?: string;
   action?: React.ReactNode;
   filtered?: boolean;
   className?: string;
@@ -33,7 +33,7 @@ export function AdminEmpty({
           <Icon />
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
+        {description && <EmptyDescription>{description}</EmptyDescription>}
       </EmptyHeader>
       {filtered ? (
         <div className="text-muted-foreground text-xs">
