@@ -103,11 +103,10 @@ type DashboardContentProps = {
     order: { id: string; orderNumber: number } | null;
     previousQty: number;
   }>;
+  /** One entry per local calendar day, pre-bucketed server-side; `revenue` is in cents. */
   revenueByDay: Array<{
-    createdAt: Date;
-    _sum: {
-      total: number | null;
-    };
+    date: Date;
+    revenue: number;
   }>;
   topProducts: Array<{
     productId: string | null;
@@ -201,12 +200,10 @@ export function DashboardContent({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "paid":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "processing":
+      case "open":
         return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
       case "cancelled":
         return "bg-gray-100 text-gray-800";
       case "refunded":
@@ -216,13 +213,13 @@ export function DashboardContent({
     }
   };
 
-  // Process revenue data for chart
+  // Process revenue data for chart (already bucketed per local day server-side)
   const chartData = revenueByDay.map((item) => ({
-    date: new Date(item.createdAt).toLocaleDateString("en-US", {
+    date: new Date(item.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     }),
-    revenue: (item._sum.total ?? 0) / 100,
+    revenue: item.revenue / 100,
   }));
 
   // Average order value: 30-day net paid revenue ÷ 30-day paid order count,

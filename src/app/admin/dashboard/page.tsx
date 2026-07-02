@@ -7,6 +7,7 @@ import { db } from "~/server/db";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { ConversionCard } from "~/app/admin/dashboard/_components/conversion-card";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
+import { bucketRevenueByDay } from "~/app/admin/dashboard/_lib/revenue-by-day";
 
 import { TrailHeader } from "../_components/trail-header";
 
@@ -57,13 +58,19 @@ export default async function AdminDashboardPage() {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
+  // The revenue chart labels whole calendar days, so its window starts at
+  // local midnight — otherwise the first bar would silently cover a partial
+  // day. Other 30-day stats keep the rolling `thirtyDaysAgo` window.
+  const chartWindowStart = new Date(thirtyDaysAgo);
+  chartWindowStart.setHours(0, 0, 0, 0);
+
   const [
     totalRevenue,
     totalOrders,
     recentOrders,
     lowStockProducts,
     lowStockPools,
-    revenueByDay,
+    revenueOrders,
     recentOversells,
     topProducts,
     ordersToFulfillCount,
@@ -173,21 +180,20 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Revenue by day (last 30 days)
-    db.order.groupBy({
-      by: ["createdAt"],
+    // Revenue by day (last 30 days) — raw rows, bucketed into local
+    // calendar days below (Prisma's groupBy(["createdAt"]) groups by the
+    // full timestamp, i.e. one row per order, not per day).
+    db.order.findMany({
       where: {
         businessId: business.id,
         paymentStatus: "paid",
         createdAt: {
-          gte: thirtyDaysAgo,
+          gte: chartWindowStart,
         },
       },
-      _sum: {
+      select: {
+        createdAt: true,
         total: true,
-      },
-      orderBy: {
-        createdAt: "asc",
       },
     }),
 
@@ -342,6 +348,14 @@ export default async function AdminDashboardPage() {
       },
     }),
   ]);
+
+  // Bucket raw revenue rows into one total per local calendar day, filling
+  // zero-revenue days so the chart axis is continuous.
+  const revenueByDay = bucketRevenueByDay(
+    revenueOrders,
+    chartWindowStart,
+    todayStart,
+  );
 
   // Get product details for top products
   const topProductIds = topProducts
