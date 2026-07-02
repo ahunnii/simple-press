@@ -612,13 +612,18 @@ export const businessRouter = createTRPCRouter({
       select: { stripeAccountId: true },
     });
 
-    // Annual order stats — current calendar year, exclude refunded/cancelled
+    // Annual order stats — current calendar year. INFORM Act thresholds
+    // measure transactions conducted, not revenue currently retained: an
+    // order that was paid counts even if it was later refunded or disputed,
+    // while an order that was never paid (pending/unpaid/failed) does not.
+    // This is gross, not net of refunds — deliberately different from the
+    // dashboard's revenue convention (paid-only, net of refunds).
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
     const orderStats = await ctx.db.order.aggregate({
       where: {
         businessId,
         createdAt: { gte: startOfYear },
-        status: { notIn: ["refunded", "cancelled"] },
+        paymentStatus: { in: ["paid", "refunded", "disputed"] },
       },
       _count: { id: true },
       _sum: { total: true },
@@ -808,7 +813,7 @@ export const businessRouter = createTRPCRouter({
 
       const include = {
         ...(input?.includePages
-          ? { pages: { orderBy: { sortOrder: "asc" } } }
+          ? { pages: { where: { type: "page" }, orderBy: { sortOrder: "asc" } } }
           : {}),
         ...(input?.includeSiteContent
           ? {

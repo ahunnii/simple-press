@@ -242,7 +242,8 @@ export function PaymentsOverview({ data }: { data: Data }) {
           </div>
 
           <p className="text-muted-foreground text-xs">
-            Figures reflect the current calendar year (paid orders only).
+            Figures reflect the current calendar year (orders that were paid,
+            including any later refunded or disputed).
             Thresholds trigger when either condition is met.{" "}
             <a
               href="https://www.ftc.gov/business-guidance/blog/2023/06/inform-act"
