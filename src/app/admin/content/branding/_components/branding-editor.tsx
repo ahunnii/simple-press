@@ -82,6 +82,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
   // Form Setup
   const form = useForm<BrandingFormSchema>({
     resolver: zodResolver(brandingFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       footerText: siteContent.footerText ?? "",
       socialLinks: {

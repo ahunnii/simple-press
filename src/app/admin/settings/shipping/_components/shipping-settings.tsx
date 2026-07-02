@@ -156,6 +156,8 @@ export function ShippingSettings({ business }: Props) {
 
   const form = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       shippingType: initialShippingType,
       shippingFlatRateDollars: centsToDollarsString(business.shippingFlatRate),
@@ -179,6 +181,8 @@ export function ShippingSettings({ business }: Props) {
     ZoneWeightFormValues
   >({
     resolver: zodResolver(zoneWeightFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: hydrateZoneWeightDefaults(business),
   });
 

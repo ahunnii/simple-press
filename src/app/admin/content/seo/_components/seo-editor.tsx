@@ -68,6 +68,8 @@ export function SEOEditor({ business, siteContent }: Props) {
   // Form Setup
   const form = useForm<SeoFormValues>({
     resolver: zodResolver(seoFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       metaTitle: siteContent.metaTitle ?? "",
       metaDescription: siteContent.metaDescription ?? "",

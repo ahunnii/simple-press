@@ -45,6 +45,8 @@ export function GeneralSettings({ business }: Props) {
   // Form Setup
   const form = useForm<GeneralBusinessFormSchema>({
     resolver: zodResolver(generalBusinessFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       name: business.name ?? "",
       ownerEmail: business.ownerEmail ?? "",

@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Mail, Send, Users } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { api } from "~/trpc/react";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,19 +23,43 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
+import { Form } from "~/components/ui/form";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 import { ExportRecipientsButton } from "./export-recipients-button";
+
+// Mirrors marketingRouter.sendBroadcast's input schema (src/server/api/routers/marketing.ts)
+// so client-side validation agrees with the server.
+const broadcastComposerSchema = z.object({
+  subject: z
+    .string()
+    .min(1, "Subject is required")
+    .max(200, "Subject must be 200 characters or fewer"),
+  body: z
+    .string()
+    .min(1, "Message is required")
+    .max(5000, "Message must be 5,000 characters or fewer"),
+});
+
+type BroadcastComposerFormData = z.infer<typeof broadcastComposerSchema>;
 
 interface BroadcastComposerProps {
   recipientCount: number;
 }
 
 export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  const form = useForm<BroadcastComposerFormData>({
+    resolver: zodResolver(broadcastComposerSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: {
+      subject: "",
+      body: "",
+    },
+  });
+
+  useDirtyForm(form.formState.isDirty);
 
   const sendMutation = api.marketing.sendBroadcast.useMutation({
     onSuccess: (data) => {
@@ -41,155 +69,168 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
         toast.success(
           `Broadcast sent — ${data.sent.toString()} delivered${data.failed > 0 ? `, ${data.failed.toString()} failed` : ""}.`,
         );
-        setSubject("");
-        setBody("");
+        form.reset({ subject: "", body: "" });
       }
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to send broadcast.");
+      applyTrpcErrorToForm(form, error);
     },
   });
 
-  const isValid = subject.trim().length > 0 && body.trim().length > 0;
   const isPending = sendMutation.isPending;
+  const subjectValue = form.watch("subject") ?? "";
+  const bodyValue = form.watch("body") ?? "";
 
-  function handleTestSend() {
-    if (!isValid) return;
-    sendMutation.mutate({ subject: subject.trim(), body: body.trim(), testOnly: true });
-  }
+  const handleTestSend = form.handleSubmit((data) => {
+    sendMutation.mutate({
+      subject: data.subject.trim(),
+      body: data.body.trim(),
+      testOnly: true,
+    });
+  });
 
-  function handleRealSend() {
-    if (!isValid) return;
-    sendMutation.mutate({ subject: subject.trim(), body: body.trim(), testOnly: false });
-  }
+  const handleRealSend = form.handleSubmit((data) => {
+    sendMutation.mutate({
+      subject: data.subject.trim(),
+      body: data.body.trim(),
+      testOnly: false,
+    });
+  });
 
   return (
-    <div className="space-y-6">
-      {/* Audience summary */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base font-medium">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            Audience
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm tabular-nums">
-                {recipientCount.toLocaleString()}
-              </Badge>
-              <span className="text-sm text-muted-foreground">
-                {recipientCount === 1
-                  ? "customer opted in to marketing emails"
-                  : "customers opted in to marketing emails"}
-              </span>
+    <Form {...form}>
+      <div className="space-y-6">
+        {/* Audience summary */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              Audience
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="text-sm tabular-nums">
+                  {recipientCount.toLocaleString()}
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {recipientCount === 1
+                    ? "customer opted in to marketing emails"
+                    : "customers opted in to marketing emails"}
+                </span>
+              </div>
+              <ExportRecipientsButton disabled={recipientCount === 0} />
             </div>
-            <ExportRecipientsButton disabled={recipientCount === 0} />
-          </div>
-          {recipientCount === 0 && (
-            <p className="mt-3 text-sm text-muted-foreground">
-              No customers have opted in yet. Customers can enable marketing
-              emails from their account preferences page.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {recipientCount === 0 && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                No customers have opted in yet. Customers can enable marketing
+                emails from their account preferences page.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Composer */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base font-medium">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            Compose
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="broadcast-subject">Subject</Label>
-            <Input
-              id="broadcast-subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+        {/* Composer */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base font-medium">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              Compose
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <InputFormField
+              form={form}
+              name="subject"
+              label="Subject"
               placeholder="Your monthly update from us"
-              maxLength={200}
               disabled={isPending}
+              required
+              description={`${subjectValue.length.toString()}/200 characters`}
+              descriptionClassName="text-xs"
             />
-            <p className="text-xs text-muted-foreground">
-              {subject.length}/200 characters
-            </p>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="broadcast-body">Message</Label>
-            <Textarea
-              id="broadcast-body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
+            <TextareaFormField
+              form={form}
+              name="body"
+              label="Message"
               placeholder={"Hi there,\n\nHere's what's new this month…"}
               rows={10}
-              maxLength={5000}
               disabled={isPending}
-              className="resize-y font-[inherit] text-sm leading-relaxed"
+              required
+              textareaClassName="resize-y font-[inherit] text-sm leading-relaxed"
+              description={`${bodyValue.length.toString()}/5,000 characters · Plain text only — each paragraph becomes its own line in the email.`}
+              descriptionClassName="text-xs"
             />
-            <p className="text-xs text-muted-foreground">
-              {body.length}/5,000 characters · Plain text only — each paragraph
-              becomes its own line in the email.
-            </p>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            {/* Test send */}
-            <Button
-              variant="outline"
-              onClick={handleTestSend}
-              disabled={!isValid || isPending}
-            >
-              {isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="mr-2 h-4 w-4" />
-              )}
-              Send test to myself
-            </Button>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {/* Test send */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleTestSend()}
+                disabled={!form.formState.isValid || isPending}
+              >
+                {isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="mr-2 h-4 w-4" />
+                )}
+                Send test to myself
+              </Button>
 
-            {/* Real send — confirm dialog */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button disabled={!isValid || isPending || recipientCount === 0}>
-                  {isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="mr-2 h-4 w-4" />
-                  )}
-                  Send to {recipientCount.toLocaleString()}{" "}
-                  {recipientCount === 1 ? "customer" : "customers"}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Send this broadcast?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will send &ldquo;{subject || "your email"}&rdquo; to{" "}
-                    <strong>
-                      {recipientCount.toLocaleString()}{" "}
-                      {recipientCount === 1 ? "customer" : "customers"}
-                    </strong>{" "}
-                    who opted in to marketing emails. This action cannot be
-                    undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleRealSend}>
-                    Send broadcast
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              {/* Real send — confirm dialog */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    disabled={
+                      !form.formState.isValid ||
+                      isPending ||
+                      recipientCount === 0
+                    }
+                  >
+                    {isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="mr-2 h-4 w-4" />
+                    )}
+                    Send to {recipientCount.toLocaleString()}{" "}
+                    {recipientCount === 1 ? "customer" : "customers"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Send this broadcast?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will send &ldquo;{subjectValue || "your email"}
+                      &rdquo; to{" "}
+                      <strong>
+                        {recipientCount.toLocaleString()}{" "}
+                        {recipientCount === 1 ? "customer" : "customers"}
+                      </strong>{" "}
+                      who opted in to marketing emails. This action cannot be
+                      undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isPending}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => void handleRealSend()}
+                      disabled={isPending}
+                    >
+                      Send broadcast
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Form>
   );
 }

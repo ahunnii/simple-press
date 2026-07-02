@@ -134,6 +134,8 @@ export function BlogPostEditor({
   // Initialize form with TipTap content
   const form = useForm<PageFormValues>({
     resolver: zodResolver(pageFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       title: page?.title ?? "",
       slug: page?.slug ?? "",

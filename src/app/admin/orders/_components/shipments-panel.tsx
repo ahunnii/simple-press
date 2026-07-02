@@ -259,6 +259,8 @@ function ShipmentForm({
 }) {
   const form = useForm<ShipmentFormValues>({
     resolver: zodResolver(shipmentFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues,
   });
 

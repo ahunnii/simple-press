@@ -2,10 +2,15 @@
 
 import type { Product, ProductReview } from "generated/prisma";
 import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Loader2, Star } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { OwnerReviewFormData } from "~/lib/validators/reviews";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { ownerReviewFormSchema } from "~/lib/validators/reviews";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -16,17 +21,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
-import { Textarea } from "~/components/ui/textarea";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { SelectFormField } from "~/components/inputs/select-form-field";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
   review?: ProductReview & { product: Product }; // If provided → edit mode
@@ -34,6 +34,47 @@ type Props = {
   onClose: () => void;
   onSuccess: () => void;
 };
+
+/** Collapses an optional/blank string field to `undefined` for the mutation payload. */
+function trimmedOrUndefined(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty string must also collapse to undefined, not just null/undefined
+  return trimmed ? trimmed : undefined;
+}
+
+function buildDefaultValues(
+  review?: ProductReview & { product: Product },
+): OwnerReviewFormData {
+  if (review) {
+    return {
+      productId: review.productId,
+      customerName: review.customerName ?? "",
+      customerEmail: review.customerEmail ?? "",
+      customerTitle: review.customerTitle ?? "",
+      rating: review.rating ?? 5,
+      title: review.title ?? "",
+      comment: review.comment ?? "",
+      verifiedPurchase: review.verifiedPurchase ?? false,
+      isApproved: review.isApproved ?? true,
+      reviewDate: format(
+        new Date(review.reviewDate ?? review.createdAt),
+        "yyyy-MM-dd",
+      ),
+    };
+  }
+  return {
+    productId: "",
+    customerName: "",
+    customerEmail: "",
+    customerTitle: "",
+    rating: 5,
+    title: "",
+    comment: "",
+    verifiedPurchase: false,
+    isApproved: true,
+    reviewDate: format(new Date(), "yyyy-MM-dd"),
+  };
+}
 
 export function OwnerReviewDialog({
   review,
@@ -48,57 +89,31 @@ export function OwnerReviewDialog({
     enabled: isOpen && !isEditing,
   });
 
-  // Form state
-  const [productId, setProductId] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerTitle, setCustomerTitle] = useState("");
-  const [rating, setRating] = useState(5);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [title, setTitle] = useState("");
-  const [comment, setComment] = useState("");
-  const [verifiedPurchase, setVerifiedPurchase] = useState(false);
-  const [isApproved, setIsApproved] = useState(true);
-  const [reviewDate, setReviewDate] = useState(
-    format(new Date(), "yyyy-MM-dd"),
-  );
 
-  // Populate form when editing
+  const form = useForm<OwnerReviewFormData>({
+    resolver: zodResolver(ownerReviewFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: buildDefaultValues(review),
+  });
+
+  // Populate/reset form whenever the dialog opens or the target review changes.
   useEffect(() => {
     if (!isOpen) return;
-
-    if (review) {
-      setCustomerName(review.customerName ?? "");
-      setCustomerEmail(review.customerEmail ?? "");
-      setCustomerTitle(review.customerTitle ?? "");
-      setRating(review.rating ?? 5);
-      setTitle(review.title ?? "");
-      setComment(review.comment ?? "");
-      setVerifiedPurchase(review.verifiedPurchase ?? false);
-      setIsApproved(review.isApproved ?? true);
-      setReviewDate(
-        format(new Date(review.reviewDate ?? review.createdAt), "yyyy-MM-dd"),
-      );
-    } else {
-      setProductId("");
-      setCustomerName("");
-      setCustomerEmail("");
-      setCustomerTitle("");
-      setRating(5);
-      setTitle("");
-      setComment("");
-      setVerifiedPurchase(false);
-      setIsApproved(true);
-      setReviewDate(format(new Date(), "yyyy-MM-dd"));
-    }
-  }, [review, isOpen]);
+    form.reset(buildDefaultValues(review));
+    setHoveredRating(0);
+  }, [review, isOpen, form]);
 
   const createMutation = api.review.ownerCreate.useMutation({
     onSuccess: () => {
       toast.success("Review added");
       onSuccess();
     },
-    onError: (e) => toast.error(e.message || "Failed to add review"),
+    onError: (e) =>
+      applyTrpcErrorToForm(form, e, {
+        fallbackMessage: "Failed to add review",
+      }),
   });
 
   const updateMutation = api.review.ownerUpdate.useMutation({
@@ -106,243 +121,223 @@ export function OwnerReviewDialog({
       toast.success("Review updated");
       onSuccess();
     },
-    onError: (e) => toast.error(e.message || "Failed to update review"),
+    onError: (e) =>
+      applyTrpcErrorToForm(form, e, {
+        fallbackMessage: "Failed to update review",
+      }),
   });
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isEditing && !productId) {
-      toast.error("Please select a product");
-      return;
-    }
-    if (!customerName.trim()) {
-      toast.error("Customer name is required");
-      return;
-    }
-    if (!comment.trim()) {
-      toast.error("Review comment is required");
-      return;
-    }
-
+  const onSubmit = (data: OwnerReviewFormData) => {
     const payload = {
-      customerName: customerName.trim(),
-      customerEmail: customerEmail.trim() || undefined,
-      customerTitle: customerTitle.trim() || undefined,
-      rating,
-      title: title.trim() || undefined,
-      comment: comment.trim(),
-      verifiedPurchase,
-      isApproved,
-      reviewDate,
+      customerName: data.customerName.trim(),
+      customerEmail: trimmedOrUndefined(data.customerEmail),
+      customerTitle: trimmedOrUndefined(data.customerTitle),
+      rating: data.rating,
+      title: trimmedOrUndefined(data.title),
+      comment: data.comment.trim(),
+      verifiedPurchase: data.verifiedPurchase,
+      isApproved: data.isApproved,
+      reviewDate: data.reviewDate,
     };
 
     if (isEditing) {
       updateMutation.mutate({ id: review.id, ...payload });
     } else {
-      createMutation.mutate({ productId, ...payload });
+      createMutation.mutate({ productId: data.productId, ...payload });
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>
-              {isEditing ? "Edit Review" : "Add Review"}
-            </DialogTitle>
-            <DialogDescription>
-              {isEditing
-                ? `Editing owner-added review for "${review?.product?.name}"`
-                : "Manually add a review imported from another source"}
-            </DialogDescription>
-          </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
+            <DialogHeader>
+              <DialogTitle>
+                {isEditing ? "Edit Review" : "Add Review"}
+              </DialogTitle>
+              <DialogDescription>
+                {isEditing
+                  ? `Editing owner-added review for "${review?.product?.name}"`
+                  : "Manually add a review imported from another source"}
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-5 py-4">
-            {/* Product selector — create only */}
-            {!isEditing && (
-              <div>
-                <Label htmlFor="product">
-                  Product <span className="text-destructive">*</span>
-                </Label>
-                <Select value={productId} onValueChange={setProductId}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select a product..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products?.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-5 py-4">
+              {/* Product selector — create only */}
+              {!isEditing && (
+                <SelectFormField
+                  form={form}
+                  name="productId"
+                  label="Product"
+                  placeholder="Select a product..."
+                  required
+                  values={
+                    products?.map((p) => ({ value: p.id, label: p.name })) ??
+                    []
+                  }
+                />
+              )}
 
-            {/* Attribution */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="customerName">
-                  Reviewer Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="customerName"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+              {/* Attribution */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <InputFormField
+                  form={form}
+                  name="customerName"
+                  label="Reviewer Name"
                   placeholder="Jane Doe"
-                  className="mt-2"
                   required
                 />
-              </div>
-              <div>
-                <Label htmlFor="customerEmail">Email (Optional)</Label>
-                <Input
-                  id="customerEmail"
+                <InputFormField
+                  form={form}
+                  name="customerEmail"
+                  label="Email (Optional)"
                   type="email"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder="jane@example.com"
-                  className="mt-2"
                 />
               </div>
-            </div>
 
-            {/* Title & Date */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="customerTitle">Reviewer Title (Optional)</Label>
-                <Input
-                  id="customerTitle"
-                  value={customerTitle}
-                  onChange={(e) => setCustomerTitle(e.target.value)}
+              {/* Title & Date */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <InputFormField
+                  form={form}
+                  name="customerTitle"
+                  label="Reviewer Title (Optional)"
                   placeholder="Verified Buyer, Professional Chef…"
-                  className="mt-2"
                 />
-              </div>
-              <div>
-                <Label htmlFor="reviewDate">Review Date</Label>
-                <Input
-                  id="reviewDate"
+                <InputFormField
+                  form={form}
+                  name="reviewDate"
+                  label="Review Date"
                   type="date"
-                  value={reviewDate}
-                  onChange={(e) => setReviewDate(e.target.value)}
-                  className="mt-2"
+                  description="Backdate if importing"
                 />
-                <p className="text-muted-foreground mt-1 text-xs">
-                  Backdate if importing
-                </p>
               </div>
-            </div>
 
-            {/* Rating */}
-            <div>
-              <Label>
-                Rating <span className="text-destructive">*</span>
-              </Label>
-              <div className="mt-2 flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    title={`Rate ${star} stars`}
-                    key={star}
-                    type="button"
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoveredRating(star)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                  >
-                    <Star
-                      className={`h-7 w-7 transition-colors ${
-                        star <= (hoveredRating || rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-muted-foreground/40"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Review title */}
-            <div>
-              <Label htmlFor="title">Review Headline (Optional)</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Best product I've ever used!"
-                className="mt-2"
+              {/* Rating */}
+              <FormField
+                control={form.control}
+                name="rating"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Rating <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          title={`Rate ${star} stars`}
+                          key={star}
+                          type="button"
+                          onClick={() => field.onChange(star)}
+                          onMouseEnter={() => setHoveredRating(star)}
+                          onMouseLeave={() => setHoveredRating(0)}
+                        >
+                          <Star
+                            className={`h-7 w-7 transition-colors ${
+                              star <= (hoveredRating || field.value)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-muted-foreground/40"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Comment */}
-            <div>
-              <Label htmlFor="comment">
-                Review Text <span className="text-destructive">*</span>
-              </Label>
-              <Textarea
-                id="comment"
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
+              {/* Review title */}
+              <InputFormField
+                form={form}
+                name="title"
+                label="Review Headline (Optional)"
+                placeholder="Best product I've ever used!"
+              />
+
+              {/* Comment */}
+              <TextareaFormField
+                form={form}
+                name="comment"
+                label="Review Text"
                 placeholder="Write the review content here..."
                 rows={5}
-                className="mt-2"
                 required
               />
-            </div>
 
-            {/* Toggles */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <Label htmlFor="verifiedPurchase">Verified Purchase</Label>
-                  <p className="text-muted-foreground mt-0.5 text-xs">
-                    Mark this reviewer as a verified buyer
-                  </p>
-                </div>
-                <Switch
-                  id="verifiedPurchase"
-                  checked={verifiedPurchase}
-                  onCheckedChange={setVerifiedPurchase}
+              {/* Toggles */}
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="verifiedPurchase"
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                      <div>
+                        <Label htmlFor="verifiedPurchase">
+                          Verified Purchase
+                        </Label>
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          Mark this reviewer as a verified buyer
+                        </p>
+                      </div>
+                      <Switch
+                        id="verifiedPurchase"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </div>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isApproved"
+                  render={({ field }) => (
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                      <div>
+                        <Label htmlFor="isApproved">Publish Immediately</Label>
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          Show this review on the storefront right away
+                        </p>
+                      </div>
+                      <Switch
+                        id="isApproved"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </div>
+                  )}
                 />
               </div>
-
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <Label htmlFor="isApproved">Publish Immediately</Label>
-                  <p className="text-muted-foreground mt-0.5 text-xs">
-                    Show this review on the storefront right away
-                  </p>
-                </div>
-                <Switch
-                  id="isApproved"
-                  checked={isApproved}
-                  onCheckedChange={setIsApproved}
-                />
-              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditing ? "Saving..." : "Adding..."}
-                </>
-              ) : isEditing ? (
-                "Save Changes"
-              ) : (
-                "Add Review"
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isEditing ? "Saving..." : "Adding..."}
+                  </>
+                ) : isEditing ? (
+                  "Save Changes"
+                ) : (
+                  "Add Review"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -69,6 +69,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
   // Initialize form with react-hook-form
   const form = useForm<ManualOrderFormSchema>({
     resolver: zodResolver(manualOrderFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       customerName: "",
       customerEmail: "",

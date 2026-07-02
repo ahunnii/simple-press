@@ -45,6 +45,9 @@ type DomainSettingsProps = {
   vpsIp: string;
 };
 
+const DOMAIN_REGEX =
+  /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/i;
+
 export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
   const router = useRouter();
   const [isAdding, setIsAdding] = useState(false);
@@ -52,6 +55,16 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [customDomain, setCustomDomain] = useState("");
+  const [fieldError, setFieldError] = useState<string | null>(null);
+
+  const validateDomain = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Please enter a domain";
+    if (!DOMAIN_REGEX.test(trimmed)) {
+      return "Enter a valid domain like shop.example.com";
+    }
+    return null;
+  };
 
   const isDev = process.env.NODE_ENV === "development";
   const platformDomain =
@@ -131,10 +144,12 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    if (!customDomain.trim()) {
-      setError("Please enter a domain");
+    const validationError = validateDomain(customDomain);
+    if (validationError) {
+      setFieldError(validationError);
       return;
     }
+    setFieldError(null);
     setIsAdding(true);
     addDomainMutation.mutate(customDomain.trim().toLowerCase());
   };
@@ -307,13 +322,27 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
                         id="customDomain"
                         type="text"
                         value={customDomain}
-                        onChange={(e) => setCustomDomain(e.target.value)}
+                        onChange={(e) => {
+                          setCustomDomain(e.target.value);
+                          if (fieldError) setFieldError(null);
+                        }}
+                        onBlur={(e) => {
+                          if (!e.target.value.trim()) return;
+                          setFieldError(validateDomain(e.target.value));
+                        }}
                         placeholder="example.com"
+                        aria-invalid={!!fieldError}
                       />
-                      <p className="text-muted-foreground mt-1 text-sm">
-                        Enter your domain without &quot;http://&quot; or
-                        &quot;www&quot;
-                      </p>
+                      {fieldError ? (
+                        <p className="text-destructive text-sm" role="alert">
+                          {fieldError}
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          Enter your domain without &quot;http://&quot; or
+                          &quot;www&quot;
+                        </p>
+                      )}
                     </div>
 
                     <Button type="submit" disabled={isAdding}>

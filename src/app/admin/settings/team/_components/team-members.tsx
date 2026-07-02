@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Loader2,
   Mail,
@@ -9,8 +10,12 @@ import {
   Trash2,
   UserPlus,
 } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { InviteMemberFormData } from "~/lib/validators/team";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { inviteMemberFormSchema } from "~/lib/validators/team";
 import { type RouterOutputs, api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -30,8 +35,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -39,6 +42,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Form } from "~/components/ui/form";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { SelectFormField } from "~/components/inputs/select-form-field";
 
 type TeamList = RouterOutputs["team"]["list"];
 type Membership = TeamList["memberships"][number];
@@ -83,18 +89,37 @@ export function TeamMembers({
 
   // Invite dialog state
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<TeamRole>("MANAGER");
+
+  const inviteDefaultValues: InviteMemberFormData = {
+    email: "",
+    role: "MANAGER",
+  };
+
+  const inviteForm = useForm<InviteMemberFormData>({
+    resolver: zodResolver(inviteMemberFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: inviteDefaultValues,
+  });
+
+  const inviteRole = inviteForm.watch("role");
+
+  const handleInviteOpenChange = (open: boolean) => {
+    setInviteOpen(open);
+    inviteForm.reset(inviteDefaultValues);
+  };
 
   const inviteMutation = api.team.invite.useMutation({
     onSuccess: () => {
       toast.success("Invitation sent!");
       setInviteOpen(false);
-      setInviteEmail("");
-      setInviteRole("MANAGER");
+      inviteForm.reset(inviteDefaultValues);
       invalidate();
     },
-    onError: (err) => toast.error(err.message ?? "Failed to send invite"),
+    onError: (err) =>
+      applyTrpcErrorToForm(inviteForm, err, {
+        fieldMap: { email: "email" },
+      }),
   });
 
   const changeRoleMutation = api.team.changeRole.useMutation({
@@ -121,13 +146,8 @@ export function TeamMembers({
     onError: (err) => toast.error(err.message ?? "Failed to revoke invite"),
   });
 
-  const handleInviteSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inviteEmail.trim()) {
-      toast.error("Please enter an email address");
-      return;
-    }
-    inviteMutation.mutate({ email: inviteEmail.trim(), role: inviteRole });
+  const onInviteSubmit = (data: InviteMemberFormData) => {
+    inviteMutation.mutate({ email: data.email.trim(), role: data.role });
   };
 
   return (
@@ -140,7 +160,7 @@ export function TeamMembers({
           </p>
         </div>
         {isOwner && (
-          <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+          <Dialog open={inviteOpen} onOpenChange={handleInviteOpenChange}>
             <DialogTrigger asChild>
               <Button>
                 <UserPlus className="mr-2 h-4 w-4" />
@@ -148,80 +168,74 @@ export function TeamMembers({
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <form onSubmit={handleInviteSubmit}>
-                <DialogHeader>
-                  <DialogTitle>Invite Team Member</DialogTitle>
-                  <DialogDescription>
-                    Send an email invitation to add someone to your team.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div>
-                    <Label htmlFor="invite-email">
-                      Email Address{" "}
-                      <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="invite-email"
+              <Form {...inviteForm}>
+                <form onSubmit={inviteForm.handleSubmit(onInviteSubmit)}>
+                  <DialogHeader>
+                    <DialogTitle>Invite Team Member</DialogTitle>
+                    <DialogDescription>
+                      Send an email invitation to add someone to your team.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <InputFormField
+                      form={inviteForm}
+                      name="email"
+                      label="Email Address"
                       type="email"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
                       placeholder="teammate@example.com"
-                      className="mt-2"
                       required
                     />
+                    <div>
+                      <SelectFormField
+                        form={inviteForm}
+                        name="role"
+                        label="Role"
+                        values={[
+                          {
+                            value: "MANAGER",
+                            label: "Manager — operational access",
+                          },
+                          {
+                            value: "STAFF",
+                            label: "Staff — fulfillment only",
+                          },
+                          {
+                            value: "OWNER",
+                            label: "Owner — full control",
+                          },
+                        ]}
+                      />
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        {inviteRole === "STAFF"
+                          ? "Can view and fulfill orders only."
+                          : "Managers can manage orders, products, and content but cannot invite or remove team members."}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="invite-role">Role</Label>
-                    <Select
-                      value={inviteRole}
-                      onValueChange={(v) => setInviteRole(v as TeamRole)}
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleInviteOpenChange(false)}
                     >
-                      <SelectTrigger id="invite-role" className="mt-2">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="MANAGER">
-                          Manager — operational access
-                        </SelectItem>
-                        <SelectItem value="STAFF">
-                          Staff — fulfillment only
-                        </SelectItem>
-                        <SelectItem value="OWNER">
-                          Owner — full control
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      {inviteRole === "STAFF"
-                        ? "Can view and fulfill orders only."
-                        : "Managers can manage orders, products, and content but cannot invite or remove team members."}
-                    </p>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setInviteOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={inviteMutation.isPending}>
-                    {inviteMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="mr-2 h-4 w-4" />
-                        Send Invite
-                      </>
-                    )}
-                  </Button>
-                </DialogFooter>
-              </form>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={inviteMutation.isPending}>
+                      {inviteMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail className="mr-2 h-4 w-4" />
+                          Send Invite
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
             </DialogContent>
           </Dialog>
         )}

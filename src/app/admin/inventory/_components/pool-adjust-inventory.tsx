@@ -58,6 +58,8 @@ export function PoolAdjustInventory({ pool, open, onOpenChange }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       quantity: pool.inventoryQty,
       reason: "adjustment",

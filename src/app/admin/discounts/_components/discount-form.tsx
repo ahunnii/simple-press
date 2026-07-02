@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { DiscountFormSchema } from "~/lib/validators/discounts";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { cn } from "~/lib/utils";
 import { discountFormSchema } from "~/lib/validators/discounts";
 import { api } from "~/trpc/react";
@@ -80,6 +81,8 @@ export function DiscountForm({ initialDiscount }: Props) {
 
   const form = useForm<DiscountFormSchema>({
     resolver: zodResolver(discountFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues,
   });
 
@@ -112,7 +115,10 @@ export function DiscountForm({ initialDiscount }: Props) {
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message ?? "Failed to create discount");
+      applyTrpcErrorToForm(form, err, {
+        fieldMap: { "already exists": "code" },
+        fallbackMessage: "Failed to create discount",
+      });
     },
     onMutate: () => {
       toast.loading("Creating discount...");
@@ -128,7 +134,10 @@ export function DiscountForm({ initialDiscount }: Props) {
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message ?? "Failed to update discount");
+      applyTrpcErrorToForm(form, err, {
+        fieldMap: { "already exists": "code" },
+        fallbackMessage: "Failed to update discount",
+      });
     },
     onMutate: () => {
       toast.loading("Updating discount...");

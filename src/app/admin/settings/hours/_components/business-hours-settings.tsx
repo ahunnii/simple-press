@@ -81,6 +81,8 @@ export function BusinessHoursSettings({ business }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       rows: initial.length
         ? initial

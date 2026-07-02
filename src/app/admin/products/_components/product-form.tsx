@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
@@ -289,6 +290,8 @@ export function ProductForm({
   // Initialize form with react-hook-form
   const form = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       published: product?.published ?? true,
       scheduledPublishAt: toDatetimeLocalInput(product?.scheduledPublishAt),
@@ -406,7 +409,10 @@ export function ProductForm({
   const createProductMutation = api.product.create.useMutation({
     onError: (error) => {
       toast.dismiss();
-      toast.error(error.message ?? "Failed to create product");
+      applyTrpcErrorToForm(form, error, {
+        fieldMap: { slug: "slug" },
+        fallbackMessage: "Failed to create product",
+      });
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -421,7 +427,10 @@ export function ProductForm({
   const updateProductMutation = api.product.update.useMutation({
     onError: (error) => {
       toast.dismiss();
-      toast.error(error.message ?? "Failed to update product");
+      applyTrpcErrorToForm(form, error, {
+        fieldMap: { slug: "slug" },
+        fallbackMessage: "Failed to update product",
+      });
     },
     onSuccess: (data) => {
       toast.dismiss();

@@ -30,6 +30,9 @@ type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
 };
 
+// Umami website IDs are UUIDs (e.g. "abc123-def456-...").
+const UMAMI_WEBSITE_ID_REGEX = /^[a-zA-Z0-9-]+$/;
+
 export function UmamiSettings({ business }: Props) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -39,6 +42,23 @@ export function UmamiSettings({ business }: Props) {
     business.umamiWebsiteId ?? "",
   );
   const [umamiEnabled, setUmamiEnabled] = useState(business.umamiEnabled);
+  const [websiteIdError, setWebsiteIdError] = useState<string | null>(null);
+
+  const validateWebsiteId = (
+    value: string,
+    enabled: boolean,
+  ): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return enabled
+        ? "Website ID is required to enable analytics"
+        : null;
+    }
+    if (!UMAMI_WEBSITE_ID_REGEX.test(trimmed)) {
+      return "Enter a valid Umami website ID";
+    }
+    return null;
+  };
 
   const updateIntegrationsMutation =
     api.business.updateIntegrations.useMutation({
@@ -61,6 +81,13 @@ export function UmamiSettings({ business }: Props) {
 
   const handleSaveUmami = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const validationError = validateWebsiteId(umamiWebsiteId, umamiEnabled);
+    if (validationError) {
+      setWebsiteIdError(validationError);
+      return;
+    }
+    setWebsiteIdError(null);
     setIsSaving(true);
 
     updateIntegrationsMutation.mutate({
@@ -100,12 +127,27 @@ export function UmamiSettings({ business }: Props) {
               <Input
                 id="umamiWebsiteId"
                 value={umamiWebsiteId}
-                onChange={(e) => setUmamiWebsiteId(e.target.value)}
+                onChange={(e) => {
+                  setUmamiWebsiteId(e.target.value);
+                  if (websiteIdError) setWebsiteIdError(null);
+                }}
+                onBlur={(e) =>
+                  setWebsiteIdError(
+                    validateWebsiteId(e.target.value, umamiEnabled),
+                  )
+                }
                 placeholder="abc123-def456-ghi789"
+                aria-invalid={!!websiteIdError}
               />
-              <p className="text-muted-foreground mt-1 text-sm">
-                Your Umami website tracking ID
-              </p>
+              {websiteIdError ? (
+                <p className="text-destructive text-sm" role="alert">
+                  {websiteIdError}
+                </p>
+              ) : (
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Your Umami website tracking ID
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
@@ -118,7 +160,12 @@ export function UmamiSettings({ business }: Props) {
               <Switch
                 id="umamiEnabled"
                 checked={umamiEnabled}
-                onCheckedChange={setUmamiEnabled}
+                onCheckedChange={(checked) => {
+                  setUmamiEnabled(checked);
+                  setWebsiteIdError(
+                    validateWebsiteId(umamiWebsiteId, checked),
+                  );
+                }}
               />
             </div>
 

@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { SupportedCountry } from "~/lib/geo/regions";
+import type { updateShippingAddressSchema } from "~/lib/validators/order";
+import type { z } from "zod";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
+import { updateShippingAddressSchema as shippingAddressFormSchema } from "~/lib/validators/order";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,15 +24,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Form } from "~/components/ui/form";
+import { InputFormField } from "~/components/inputs/input-form-field";
+import { SelectFormField } from "~/components/inputs/select-form-field";
 
 type ShippingAddress = {
   firstName: string;
@@ -48,18 +48,26 @@ type Props = {
   allowedCountries: SupportedCountry[];
 };
 
-const EMPTY: ShippingAddress = {
-  firstName: "",
-  lastName: "",
-  company: "",
-  address1: "",
-  address2: "",
-  city: "",
-  province: "",
-  zip: "",
-  country: "",
-  phone: "",
-};
+type ShippingAddressFormData = z.infer<typeof updateShippingAddressSchema>;
+
+function buildDefaultValues(
+  orderId: string,
+  address: ShippingAddress | null,
+): ShippingAddressFormData {
+  return {
+    orderId,
+    firstName: address?.firstName ?? "",
+    lastName: address?.lastName ?? "",
+    company: address?.company ?? "",
+    address1: address?.address1 ?? "",
+    address2: address?.address2 ?? "",
+    city: address?.city ?? "",
+    province: address?.province ?? "",
+    zip: address?.zip ?? "",
+    country: (address?.country ?? "") || "US",
+    phone: address?.phone ?? "",
+  };
+}
 
 export function EditShippingAddressDialog({
   orderId,
@@ -70,9 +78,15 @@ export function EditShippingAddressDialog({
   const router = useRouter();
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState<ShippingAddress>(address ?? EMPTY);
 
-  const selectedCountry = (form.country || "US") as SupportedCountry;
+  const form = useForm<ShippingAddressFormData>({
+    resolver: zodResolver(shippingAddressFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: buildDefaultValues(orderId, address),
+  });
+
+  const selectedCountry = (form.watch("country") || "US") as SupportedCountry;
   const regionOptions = getRegionOptions(selectedCountry);
 
   const mutation = api.order.updateShippingAddress.useMutation({
@@ -85,38 +99,21 @@ export function EditShippingAddressDialog({
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message ?? "Failed to update shipping address");
+      applyTrpcErrorToForm(form, err, {
+        fallbackMessage: "Failed to update shipping address",
+      });
     },
     onMutate: () => {
       toast.loading("Saving address...");
     },
   });
 
-  const field = (key: keyof ShippingAddress) => ({
-    value: form[key] ?? "",
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((prev) => ({ ...prev, [key]: e.target.value })),
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    mutation.mutate({
-      orderId,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      company: form.company ?? null,
-      address1: form.address1,
-      address2: form.address2 ?? null,
-      city: form.city,
-      province: form.province ?? null,
-      zip: form.zip,
-      country: form.country,
-      phone: form.phone ?? null,
-    });
+  const onSubmit = (data: ShippingAddressFormData) => {
+    mutation.mutate(data);
   };
 
   const onOpenChange = (open: boolean) => {
-    if (open) setForm(address ?? EMPTY);
+    if (open) form.reset(buildDefaultValues(orderId, address));
     setIsOpen(open);
   };
 
@@ -140,105 +137,104 @@ export function EditShippingAddressDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="sa-firstName">First Name</Label>
-              <Input id="sa-firstName" required {...field("firstName")} />
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-2"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <InputFormField
+                form={form}
+                name="firstName"
+                label="First Name"
+                required
+              />
+              <InputFormField
+                form={form}
+                name="lastName"
+                label="Last Name"
+                required
+              />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="sa-lastName">Last Name</Label>
-              <Input id="sa-lastName" required {...field("lastName")} />
-            </div>
-          </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="sa-company">Company (optional)</Label>
-            <Input id="sa-company" {...field("company")} />
-          </div>
+            <InputFormField
+              form={form}
+              name="company"
+              label="Company (optional)"
+            />
 
-          <div className="space-y-1.5">
-            <Label htmlFor="sa-address1">Address</Label>
-            <Input id="sa-address1" required {...field("address1")} />
-          </div>
+            <InputFormField
+              form={form}
+              name="address1"
+              label="Address"
+              required
+            />
 
-          <div className="space-y-1.5">
-            <Label htmlFor="sa-address2">Apt, suite, etc. (optional)</Label>
-            <Input id="sa-address2" {...field("address2")} />
-          </div>
+            <InputFormField
+              form={form}
+              name="address2"
+              label="Apt, suite, etc. (optional)"
+            />
 
-          <div className="space-y-1.5">
-            <Label htmlFor="sa-country">Country</Label>
-            <Select
-              value={form.country || "US"}
-              onValueChange={(val) =>
-                setForm((prev) => ({ ...prev, country: val, province: "" }))
+            <SelectFormField
+              form={form}
+              name="country"
+              label="Country"
+              values={allowedCountries.map((code) => ({
+                value: code,
+                label: COUNTRY_LABELS[code],
+              }))}
+              onValueChange={() =>
+                form.setValue("province", "", {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
               }
-            >
-              <SelectTrigger id="sa-country">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {allowedCountries.map((code) => (
-                  <SelectItem key={code} value={code}>
-                    {COUNTRY_LABELS[code]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            />
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="sa-city">City</Label>
-              <Input id="sa-city" required {...field("city")} />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <InputFormField form={form} name="city" label="City" required />
+              <SelectFormField
+                form={form}
+                name="province"
+                label="State / Province"
+                placeholder="Select…"
+                values={regionOptions.map((opt) => ({
+                  value: opt.code,
+                  label: opt.name,
+                }))}
+              />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="sa-province">State / Province</Label>
-              <Select
-                value={form.province ?? ""}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, province: val }))
-                }
+
+            <InputFormField
+              form={form}
+              name="zip"
+              label="ZIP / Postal Code"
+              required
+            />
+
+            <InputFormField
+              form={form}
+              name="phone"
+              label="Phone (optional)"
+              type="tel"
+            />
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                disabled={mutation.isPending}
               >
-                <SelectTrigger id="sa-province">
-                  <SelectValue placeholder="Select…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {regionOptions.map((opt) => (
-                    <SelectItem key={opt.code} value={opt.code}>
-                      {opt.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="sa-zip">ZIP / Postal Code</Label>
-            <Input id="sa-zip" required {...field("zip")} />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="sa-phone">Phone (optional)</Label>
-            <Input id="sa-phone" type="tel" {...field("phone")} />
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              disabled={mutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              Save Address
-            </Button>
-          </DialogFooter>
-        </form>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={mutation.isPending}>
+                Save Address
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

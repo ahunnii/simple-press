@@ -51,6 +51,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [restockItems, setRestockItems] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
@@ -63,6 +64,15 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const isValidAmount =
     !isNaN(amountCents) && amountCents > 0 && amountCents <= order.total;
   const isPartial = isValidAmount && amountCents < order.total;
+
+  const validateAmount = (value: string): string | null => {
+    if (!value.trim()) return "Amount is required";
+    const cents = Math.round(parseFloat(value) * 100);
+    if (isNaN(cents) || cents <= 0 || cents > order.total) {
+      return `Amount must be between $0.01 and ${formatPrice(order.total)}`;
+    }
+    return null;
+  };
 
   const refundMutation = api.order.refund.useMutation({
     onSuccess: () => {
@@ -85,7 +95,12 @@ function StripeRefundDialog({ order }: { order: Order }) {
   });
 
   const handleRefund = () => {
-    if (!isValidAmount) return;
+    const validationError = validateAmount(amountDollars);
+    if (validationError) {
+      setAmountError(validationError);
+      return;
+    }
+    setAmountError(null);
     refundMutation.mutate({
       orderId: order.id,
       amount: amountCents,
@@ -97,8 +112,17 @@ function StripeRefundDialog({ order }: { order: Order }) {
 
   const isProcessing = refundMutation.isPending;
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setIsOpen(nextOpen);
+    if (!nextOpen) {
+      setError(null);
+      setAmountError(null);
+      setAmountDollars((order.total / 100).toFixed(2));
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" />
@@ -141,17 +165,22 @@ function StripeRefundDialog({ order }: { order: Order }) {
                 step="0.01"
                 className="pl-7"
                 value={amountDollars}
-                onChange={(e) => setAmountDollars(e.target.value)}
+                onChange={(e) => {
+                  setAmountDollars(e.target.value);
+                  setAmountError(validateAmount(e.target.value));
+                }}
+                onBlur={(e) => setAmountError(validateAmount(e.target.value))}
+                aria-invalid={!!amountError}
               />
             </div>
-            {isPartial && (
+            {isPartial && !amountError && (
               <p className="text-muted-foreground text-xs">
                 Partial refund — customer keeps the difference
               </p>
             )}
-            {!isValidAmount && amountDollars !== "" && (
-              <p className="text-destructive text-xs">
-                Enter a valid amount up to {formatPrice(order.total)}
+            {amountError && (
+              <p className="text-destructive text-sm" role="alert">
+                {amountError}
               </p>
             )}
           </div>
@@ -215,7 +244,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => setIsOpen(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isProcessing}
           >
             Cancel

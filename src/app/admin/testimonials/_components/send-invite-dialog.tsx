@@ -25,11 +25,22 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
+
 export function SendInviteDialog() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [customerId, setCustomerId] = useState<string | undefined>(undefined);
   const [maxPhotos, setMaxPhotos] = useState(3);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const validateEmail = (value: string): string | null => {
+    if (!value.trim()) return "Enter a valid email address";
+    if (!EMAIL_REGEX.test(value.trim())) {
+      return "Enter a valid email address";
+    }
+    return null;
+  };
 
   // Get customers for dropdown (first page of results)
   const { data: customerList } = api.customer.list.useQuery(
@@ -47,6 +58,7 @@ export function SendInviteDialog() {
       setEmail("");
       setCustomerId(undefined);
       setMaxPhotos(3);
+      setEmailError(null);
     },
     onError: (error) => {
       toast.error(error.message || "Failed to send invite");
@@ -56,8 +68,9 @@ export function SendInviteDialog() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim()) {
-      toast.error("Please enter an email address");
+    const validationError = validateEmail(email);
+    if (validationError) {
+      setEmailError(validationError);
       return;
     }
 
@@ -76,8 +89,15 @@ export function SendInviteDialog() {
     }
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setEmailError(null);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Mail className="mr-2 h-4 w-4" />
@@ -122,15 +142,26 @@ export function SendInviteDialog() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError(null);
+                }}
+                onBlur={(e) => setEmailError(validateEmail(e.target.value))}
                 placeholder="customer@example.com"
                 className="mt-2"
+                aria-invalid={!!emailError}
                 required
               />
-              <p className="text-muted-foreground mt-1 text-xs">
-                If this email isn&apos;t a customer, we&apos;ll create one
-                automatically
-              </p>
+              {emailError ? (
+                <p className="text-destructive text-sm" role="alert">
+                  {emailError}
+                </p>
+              ) : (
+                <p className="text-muted-foreground mt-1 text-xs">
+                  If this email isn&apos;t a customer, we&apos;ll create one
+                  automatically
+                </p>
+              )}
             </div>
 
             {/* Max Photos */}
@@ -161,7 +192,7 @@ export function SendInviteDialog() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => handleOpenChange(false)}
             >
               Cancel
             </Button>

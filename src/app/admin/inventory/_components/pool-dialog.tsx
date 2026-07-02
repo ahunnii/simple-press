@@ -59,6 +59,8 @@ export function PoolDialog({ open, onOpenChange, pool }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       name: "",
       description: "",

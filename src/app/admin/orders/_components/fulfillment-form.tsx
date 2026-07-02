@@ -54,6 +54,8 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
 
   const form = useForm<FulfillmentFormValues>({
     resolver: zodResolver(fulfillmentFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       hasTracking: true,
       shipAllRemaining: true,
