@@ -41,6 +41,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { NumberInput } from "~/components/ui/number-input";
@@ -167,7 +168,11 @@ export function DiscountForm({ initialDiscount }: Props) {
     const maxDiscount = data.maxDiscount;
 
     if (type === "percentage" && discountValue > 100) {
-      throw new Error("Percentage discount cannot exceed 100%");
+      form.setError("value", {
+        type: "manual",
+        message: "Percentage discount cannot exceed 100%",
+      });
+      return;
     }
 
     if (type === "fixed") {
@@ -410,6 +415,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                               </div>
                             </FormControl>
                             <FormDescription>Base price in USD</FormDescription>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />

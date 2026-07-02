@@ -1,18 +1,53 @@
 "use client";
 
 import type { DiscountCode } from "generated/prisma";
+import { useState } from "react";
 import Link from "next/link";
-import { Edit, Trash } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Edit, Loader2, Trash } from "lucide-react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import { api } from "~/trpc/react";
 
 type DiscountsTableProps = {
   discounts: DiscountCode[];
 };
 
 export function DiscountsTable({ discounts }: DiscountsTableProps) {
+  const router = useRouter();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const deleteMutation = api.discount.delete.useMutation({
+    onMutate: () => {
+      toast.loading("Deleting discount...");
+    },
+    onSuccess: () => {
+      toast.dismiss();
+      toast.success("Discount deleted");
+      setDeleteId(null);
+      router.refresh();
+    },
+    onError: (e) => {
+      toast.dismiss();
+      toast.error(e.message ?? "Failed to delete discount");
+    },
+  });
+
+  const deletingDiscount = discounts.find((d) => d.id === deleteId);
+
   const formatValue = (type: string, value: number) => {
     if (type === "percentage") {
       return `${value}% off`;
@@ -131,7 +166,11 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeleteId(discount.id)}
+                    >
                       <Trash className="text-destructive h-4 w-4" />
                     </Button>
                   </div>
@@ -141,6 +180,43 @@ export function DiscountsTable({ discounts }: DiscountsTableProps) {
           </tbody>
         </table>
       </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete discount code?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingDiscount
+                ? `This permanently deletes "${deletingDiscount.code}". This action cannot be undone.`
+                : "This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                // Keep the dialog open while the delete runs so the
+                // pending state is visible; onSuccess closes it.
+                e.preventDefault();
+                if (deleteId) deleteMutation.mutate(deleteId);
+              }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {deleteMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

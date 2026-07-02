@@ -138,9 +138,7 @@ export default async function CustomerDetailPage({ params }: Props) {
                 <div>
                   <p className="text-muted-foreground text-sm">Total Spent</p>
                   <p className="text-2xl font-bold">
-                    {formatPrice(
-                      customer.orders.reduce((sum, o) => sum + o.total, 0),
-                    )}
+                    {formatPrice(customer.totalSpent)}
                   </p>
                 </div>
               </CardContent>
