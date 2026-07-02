@@ -13,6 +13,7 @@ import { AddMemberButton } from "~/app/admin/platform/_components/add-member-but
 import { BusinessMembersTable } from "~/app/admin/platform/_components/business-members-table";
 
 import { PlatformTrailHeader } from "../../_components/platform-trail-header";
+import { BusinessFeatureFlags } from "./_components/business-feature-flags";
 
 type Props = {
   params: Promise<{ businessId: string }>;
@@ -25,6 +26,8 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
   if (!business) {
     notFound();
   }
+
+  const { flags } = await api.platform.getBusinessFlags({ businessId });
 
   return (
     <>
@@ -145,6 +148,8 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
               )}
             </CardContent>
           </Card>
+
+          <BusinessFeatureFlags businessId={business.id} initialFlags={flags} />
         </div>
       </div>
     </>

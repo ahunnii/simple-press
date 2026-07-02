@@ -7,6 +7,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -200,6 +201,18 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
           )}
         </button>
       </div>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && isAddDisabled && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          message="Get notified when this option is back in stock."
+          messageClassName="sl-eyebrow font-sans text-xs tracking-[0.12em] uppercase"
+          inputClassName="rounded-sm border-[var(--sl-border-input)] font-sans"
+          buttonClassName="rounded-sm border-[var(--sl-ink)] font-sans text-xs tracking-[0.16em] uppercase"
+        />
+      )}
     </div>
   );
 }

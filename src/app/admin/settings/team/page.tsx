@@ -9,7 +9,11 @@ import { TeamMembers } from "./_components/team-members";
 export default async function TeamSettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const currentUserRole =
-    (session?.session?.membershipRole as "OWNER" | "MANAGER" | null) ?? null;
+    (session?.session?.membershipRole as
+      | "OWNER"
+      | "MANAGER"
+      | "STAFF"
+      | null) ?? null;
   const currentUserId = session?.user?.id ?? null;
 
   const data = await api.team.list();

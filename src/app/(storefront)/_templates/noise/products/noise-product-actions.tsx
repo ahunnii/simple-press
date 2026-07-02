@@ -6,6 +6,7 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
 import { formatPrice } from "~/lib/prices";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { NoiseVariantSelector } from "./noise-variant-selector";
 
@@ -101,18 +102,27 @@ export function NoiseProductActions({
           </p>
         </div>
       ) : !inStock ? (
-        <button
-          aria-disabled="true"
-          onClick={(e) => e.preventDefault()}
-          className="w-full cursor-not-allowed py-4 font-mono text-[11px] tracking-[0.24em] uppercase opacity-40"
-          style={{
-            background: "var(--vn-ink)",
-            color: "var(--vn-bone)",
-            border: "1.5px solid var(--vn-ink)",
-          }}
-        >
-          Sold Out
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            aria-disabled="true"
+            onClick={(e) => e.preventDefault()}
+            className="w-full cursor-not-allowed py-4 font-mono text-[11px] tracking-[0.24em] uppercase opacity-40"
+            style={{
+              background: "var(--vn-ink)",
+              color: "var(--vn-bone)",
+              border: "1.5px solid var(--vn-ink)",
+            }}
+          >
+            Sold Out
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            messageClassName="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--vn-steel)]"
+            inputClassName="rounded-none border-[var(--vn-ink)] font-sans"
+            buttonClassName="rounded-none font-mono text-[11px] tracking-[0.24em] uppercase"
+          />
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           {canAddMore && (

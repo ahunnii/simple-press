@@ -158,7 +158,7 @@ export const teamRouter = createTRPCRouter({
     .input(
       z.object({
         email: z.string().email(),
-        role: z.enum(["OWNER", "MANAGER"]),
+        role: z.enum(["OWNER", "MANAGER", "STAFF"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -243,7 +243,7 @@ export const teamRouter = createTRPCRouter({
     .input(
       z.object({
         membershipId: z.string(),
-        role: z.enum(["OWNER", "MANAGER"]),
+        role: z.enum(["OWNER", "MANAGER", "STAFF"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {

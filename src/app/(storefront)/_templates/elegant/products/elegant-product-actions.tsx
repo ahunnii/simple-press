@@ -5,6 +5,7 @@ import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { ElegantVariantSelector } from "./elegant-variant-selector";
 
@@ -79,29 +80,40 @@ export function ElegantProductActions({
 
   if (!inStock) {
     return (
-      <button
-        type="button"
-        aria-disabled="true"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          padding: "16px 28px",
-          borderRadius: 999,
-          fontSize: 13,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          fontWeight: 500,
-          background: "var(--el-cream-3, #e0d9c8)",
-          color: "var(--el-ink-soft, #6b6659)",
-          border: "none",
-          cursor: "not-allowed",
-          fontFamily: "var(--font-sans, sans-serif)",
-        }}
-      >
-        Out of Stock
-      </button>
+      <div style={{ marginBottom: 24 }}>
+        <button
+          type="button"
+          aria-disabled="true"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            padding: "16px 28px",
+            borderRadius: 999,
+            fontSize: 13,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontWeight: 500,
+            background: "var(--el-cream-3, #e0d9c8)",
+            color: "var(--el-ink-soft, #6b6659)",
+            border: "none",
+            cursor: "not-allowed",
+            fontFamily: "var(--font-sans, sans-serif)",
+          }}
+        >
+          Out of Stock
+        </button>
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariantId}
+          className="mt-4"
+          message="Get notified when it's back in stock."
+          messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
+          inputClassName="rounded-full border-[var(--el-line)] px-4"
+          buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
+        />
+      </div>
     );
   }
 

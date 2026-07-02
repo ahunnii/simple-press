@@ -20,7 +20,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   membershipId: string;
-  currentRole: "OWNER" | "MANAGER";
+  currentRole: "OWNER" | "MANAGER" | "STAFF";
   businessName?: string;
   userName?: string;
   onSuccess: () => void;
@@ -35,7 +35,7 @@ export function EditMembershipDialog({
   userName,
   onSuccess,
 }: Props) {
-  const [role, setRole] = useState<"OWNER" | "MANAGER">(currentRole);
+  const [role, setRole] = useState<"OWNER" | "MANAGER" | "STAFF">(currentRole);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const updateMembership = api.platform.updateMembership.useMutation({
@@ -72,7 +72,7 @@ export function EditMembershipDialog({
           <div className="py-4">
             <RadioGroup
               value={role}
-              onValueChange={(v) => setRole(v as "OWNER" | "MANAGER")}
+              onValueChange={(v) => setRole(v as "OWNER" | "MANAGER" | "STAFF")}
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="OWNER" id="owner" />
@@ -92,6 +92,17 @@ export function EditMembershipDialog({
                     <div className="font-medium">Manager</div>
                     <div className="text-muted-foreground text-sm">
                       Operational access to the business
+                    </div>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="STAFF" id="staff" />
+                <Label htmlFor="staff" className="font-normal">
+                  <div>
+                    <div className="font-medium">Staff</div>
+                    <div className="text-muted-foreground text-sm">
+                      Can view and fulfill orders only
                     </div>
                   </div>
                 </Label>

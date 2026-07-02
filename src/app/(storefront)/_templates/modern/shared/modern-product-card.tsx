@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -61,7 +62,7 @@ export function ModernProductCard({ product }: Props) {
   };
 
   return (
-    <div className="group">
+    <div className="group relative">
       <Link href={`/shop/${product.slug}`} className="block">
         <div className="bg-muted relative aspect-square overflow-hidden rounded-sm">
           <Image
@@ -78,6 +79,16 @@ export function ModernProductCard({ product }: Props) {
           )}
         </div>
       </Link>
+      <WishlistButton
+        item={{
+          productId: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: productStatus.displayPrice,
+          imageUrl: product.images[0]?.url ?? null,
+        }}
+        className="border-border absolute top-3 right-3 z-10 border bg-white/85"
+      />
       <div className="mt-4 flex items-start justify-between">
         <div>
           <Link href={`/shop/${product.slug}`}>

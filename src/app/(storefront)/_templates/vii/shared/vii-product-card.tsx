@@ -9,6 +9,7 @@ import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -115,6 +116,19 @@ export function ViiProductCard({ product, index }: Props) {
             {productStatus.badgeLabel}
           </div>
         )}
+
+        {/* Wishlist heart — top-right (badge is top-left); z-10 keeps it
+            above the stretched title link (z-[1]) */}
+        <WishlistButton
+          item={{
+            productId: product.id,
+            name: product.name,
+            slug: product.slug,
+            price: productStatus.displayPrice,
+            imageUrl: product.images[0]?.url ?? null,
+          }}
+          className="absolute top-3 right-3 z-10 rounded-none bg-[var(--vii-paper)] text-[var(--vii-navy)]"
+        />
 
         {/* Add-to-cart bar — slides up on hover/focus, hidden at rest */}
         {!productStatus.disableCart && (

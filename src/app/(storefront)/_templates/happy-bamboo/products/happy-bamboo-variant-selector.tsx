@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -186,6 +187,18 @@ export function HappyBambooVariantSelector({
       >
         {isAdded ? "Added to cart" : ""}
       </span>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && addToCartDisabled && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          message="Get notified when this option is back in stock."
+          messageClassName="text-muted-foreground text-sm"
+          inputClassName="border-border rounded-lg"
+          buttonClassName="rounded-lg"
+        />
+      )}
     </div>
   );
 }

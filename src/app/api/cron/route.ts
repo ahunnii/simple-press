@@ -4,6 +4,7 @@
 //   1. staleReservations   — release "active" inventory reservations past their expiresAt
 //   2. scheduledProducts   — publish products whose scheduledPublishAt has arrived
 //   3. scheduledPages      — publish pages/blog posts whose scheduledPublishAt has arrived
+//   4. backInStock         — email shoppers whose requested product/variant is purchasable again
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401.
@@ -19,7 +20,10 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { getBusinessUrl } from "~/lib/business-url";
+import { sendBackInStockEmail } from "~/lib/email/templates";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
+import { parseCardAdditionalFields } from "~/lib/products";
 import { db } from "~/server/db";
 
 function isAuthorized(request: Request): boolean {
@@ -91,6 +95,131 @@ async function handle(request: Request) {
       data: { published: true, scheduledPublishAt: null },
     });
     return withoutDate.count + withDate.count;
+  });
+
+  // 4. Back-in-stock notifications: email pending requests whose target
+  //    product/variant is purchasable again. Semantics mirror the storefront
+  //    `isInStock` helper (src/hooks/use-shop-filters.ts) plus the checkout
+  //    validation's `comingSoon` guard. Per-request try/catch — a failed send
+  //    leaves notifiedAt null so it retries on the next run. Requests whose
+  //    product/variant no longer exists are retired (notifiedAt set) without
+  //    an email.
+  results.backInStock = await runJob("back-in-stock", async () => {
+    const requests = await db.backInStockRequest.findMany({
+      where: { notifiedAt: null },
+      orderBy: { createdAt: "asc" },
+      take: 300,
+    });
+    if (requests.length === 0) return 0;
+
+    const productIds = [...new Set(requests.map((r) => r.productId))];
+    const products = await db.product.findMany({
+      where: { id: { in: productIds } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        businessId: true,
+        published: true,
+        trackInventory: true,
+        allowBackorders: true,
+        inventoryQty: true,
+        additionalFields: true,
+        baseInventoryUnit: {
+          select: { inventoryQty: true, allowBackorders: true },
+        },
+        variants: { select: { id: true, name: true, inventoryQty: true } },
+      },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    const businessIds = [...new Set(products.map((p) => p.businessId))];
+    const businesses = await db.business.findMany({
+      where: { id: { in: businessIds } },
+      select: {
+        id: true,
+        name: true,
+        ownerEmail: true,
+        subdomain: true,
+        customDomain: true,
+        domainStatus: true,
+        siteContent: { select: { logoUrl: true } },
+      },
+    });
+    const businessMap = new Map(businesses.map((b) => [b.id, b]));
+
+    type RestockProduct = (typeof products)[number];
+    type RestockVariant = RestockProduct["variants"][number];
+
+    const isPurchasable = (
+      product: RestockProduct,
+      variant: RestockVariant | null,
+    ): boolean => {
+      if (!product.published) return false;
+      // Coming-soon products are blocked at checkout even with inventory.
+      if (parseCardAdditionalFields(product.additionalFields)?.comingSoon)
+        return false;
+      if (!product.trackInventory) return true;
+      if (product.allowBackorders) return true;
+      if (product.baseInventoryUnit) {
+        return (
+          product.baseInventoryUnit.allowBackorders ||
+          product.baseInventoryUnit.inventoryQty > 0
+        );
+      }
+      if (variant) return variant.inventoryQty > 0;
+      if (product.variants.length > 0) {
+        return product.variants.some((v) => v.inventoryQty > 0);
+      }
+      return (product.inventoryQty ?? 0) > 0;
+    };
+
+    let sent = 0;
+    for (const request of requests) {
+      try {
+        const product = productMap.get(request.productId);
+        const variant = request.variantId
+          ? (product?.variants.find((v) => v.id === request.variantId) ?? null)
+          : null;
+        const business = product
+          ? businessMap.get(product.businessId)
+          : undefined;
+
+        // Product (or its requested variant, or its business) is gone —
+        // retire the request so it doesn't retry forever.
+        if (!product || !business || (request.variantId && !variant)) {
+          await db.backInStockRequest.update({
+            where: { id: request.id },
+            data: { notifiedAt: new Date() },
+          });
+          continue;
+        }
+
+        // Still not purchasable — leave pending for a future run.
+        if (!isPurchasable(product, variant)) continue;
+
+        await sendBackInStockEmail({
+          to: request.email,
+          productName: product.name,
+          variantName: variant?.name,
+          productUrl: `${getBusinessUrl(business)}/shop/${product.slug}`,
+          business,
+        });
+
+        await db.backInStockRequest.update({
+          where: { id: request.id },
+          data: { notifiedAt: new Date() },
+        });
+        sent++;
+      } catch (err) {
+        // Failed send: notifiedAt stays null, retried next run.
+        Sentry.captureException(err, {
+          tags: { "cron.job": "back-in-stock" },
+          extra: { requestId: request.id, productId: request.productId },
+        });
+      }
+    }
+    return sent;
   });
 
   return NextResponse.json(results);

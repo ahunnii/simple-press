@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { db } from "~/server/db";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { ConversionCard } from "~/app/admin/dashboard/_components/conversion-card";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
 
 import { TrailHeader } from "../_components/trail-header";
@@ -37,6 +39,14 @@ export default async function AdminDashboardPage() {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  // Prior-period windows for period-over-period deltas:
+  // days 14–8 (vs last 7) and days 60–31 (vs last 30).
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  const sixtyDaysAgo = new Date();
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
 
@@ -56,6 +66,10 @@ export default async function AdminDashboardPage() {
     sevenDayOrders,
     thirtyDayRevenue,
     thirtyDayPaidOrders,
+    prevSevenDayRevenue,
+    prevSevenDayOrders,
+    prevThirtyDayRevenue,
+    prevThirtyDayPaidOrders,
   ] = await Promise.all([
     // Total revenue (all time, paid orders that are not fully refunded)
     // Subtract refundAmountCents from partial-refund orders so the stat
@@ -243,11 +257,14 @@ export default async function AdminDashboardPage() {
       _sum: { total: true, refundAmountCents: true },
     }),
 
-    // Last 7 days revenue
+    // Last 7 days revenue.
+    // Includes fully-refunded orders ("refunded" status) so the gross and
+    // refunded components are complete; net (total − refundAmountCents) is
+    // unchanged because full refunds store refundAmountCents = total.
     db.order.aggregate({
       where: {
         businessId: business.id,
-        paymentStatus: "paid",
+        paymentStatus: { in: ["paid", "refunded"] },
         createdAt: { gte: sevenDaysAgo },
       },
       _sum: { total: true, refundAmountCents: true },
@@ -261,11 +278,12 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Last 30 days paid revenue (for AOV numerator)
+    // Last 30 days revenue (gross / refunded / net; net feeds the AOV
+    // numerator). Same paid+refunded scoping rationale as the 7-day query.
     db.order.aggregate({
       where: {
         businessId: business.id,
-        paymentStatus: "paid",
+        paymentStatus: { in: ["paid", "refunded"] },
         createdAt: { gte: thirtyDaysAgo },
       },
       _sum: { total: true, refundAmountCents: true },
@@ -277,6 +295,43 @@ export default async function AdminDashboardPage() {
         businessId: business.id,
         paymentStatus: "paid",
         createdAt: { gte: thirtyDaysAgo },
+      },
+    }),
+
+    // Prior 7-day window revenue (days 14–8) for the period-over-period delta
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: { in: ["paid", "refunded"] },
+        createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Prior 7-day window total order count
+    db.order.count({
+      where: {
+        businessId: business.id,
+        createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+      },
+    }),
+
+    // Prior 30-day window revenue (days 60–31) for delta + prior AOV numerator
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: { in: ["paid", "refunded"] },
+        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Prior 30-day window paid order count (prior AOV denominator)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
       },
     }),
   ]);
@@ -299,6 +354,30 @@ export default async function AdminDashboardPage() {
       },
     },
   });
+
+  // Gross / refunded / net breakdowns for the trailing windows. The cards
+  // display gross with a "− $X refunded" line; deltas compare net to net so
+  // trends stay honest when refunds land.
+  const sevenDayGross = sevenDayRevenue._sum.total ?? 0;
+  const sevenDayRefunded = sevenDayRevenue._sum.refundAmountCents ?? 0;
+  const thirtyDayGross = thirtyDayRevenue._sum.total ?? 0;
+  const thirtyDayRefunded = thirtyDayRevenue._sum.refundAmountCents ?? 0;
+
+  const prevSevenDayNet =
+    (prevSevenDayRevenue._sum.total ?? 0) -
+    (prevSevenDayRevenue._sum.refundAmountCents ?? 0);
+  const prevThirtyDayNet =
+    (prevThirtyDayRevenue._sum.total ?? 0) -
+    (prevThirtyDayRevenue._sum.refundAmountCents ?? 0);
+
+  // Conversion card renders only when analytics is fully configured for this
+  // business; it streams in behind its own Suspense boundary so Umami latency
+  // (or an outage) never blocks the dashboard.
+  const umamiWebsiteId = businessData?.umamiWebsiteId ?? null;
+  const showConversionCard =
+    flags.isEnabled("analytics") &&
+    !!businessData?.umamiEnabled &&
+    umamiWebsiteId !== null;
 
   const topProductsWithDetails = topProducts.map((item) => {
     const product = productDetails.find((p) => p.id === item.productId);
@@ -337,15 +416,29 @@ export default async function AdminDashboardPage() {
           todayRevenue:
             (todayRevenue._sum.total ?? 0) -
             (todayRevenue._sum.refundAmountCents ?? 0),
-          sevenDayRevenue:
-            (sevenDayRevenue._sum.total ?? 0) -
-            (sevenDayRevenue._sum.refundAmountCents ?? 0),
+          sevenDayRevenue: sevenDayGross - sevenDayRefunded,
+          sevenDayGrossRevenue: sevenDayGross,
+          sevenDayRefunded,
+          prevSevenDayRevenue: prevSevenDayNet,
           sevenDayOrders,
-          thirtyDayRevenue:
-            (thirtyDayRevenue._sum.total ?? 0) -
-            (thirtyDayRevenue._sum.refundAmountCents ?? 0),
+          prevSevenDayOrders,
+          thirtyDayRevenue: thirtyDayGross - thirtyDayRefunded,
+          thirtyDayGrossRevenue: thirtyDayGross,
+          thirtyDayRefunded,
+          prevThirtyDayRevenue: prevThirtyDayNet,
           thirtyDayPaidOrders,
+          prevThirtyDayPaidOrders,
         }}
+        conversionCard={
+          showConversionCard && umamiWebsiteId ? (
+            <Suspense fallback={null}>
+              <ConversionCard
+                websiteId={umamiWebsiteId}
+                paidOrders={thirtyDayPaidOrders}
+              />
+            </Suspense>
+          ) : undefined
+        }
         ordersToFulfillCount={ordersToFulfillCount}
         awaitingPaymentCount={awaitingPaymentCount}
         recentOrders={

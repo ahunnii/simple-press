@@ -6,6 +6,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -178,6 +179,18 @@ export function ModernVariantSelector({
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {isAdded ? `${product.name} added to cart` : ""}
       </span>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && effectiveMax === 0 && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          message="Get notified when this option is back in stock."
+          messageClassName="text-muted-foreground text-sm"
+          inputClassName="border-border rounded-none"
+          buttonClassName="rounded-none tracking-wide"
+        />
+      )}
     </div>
   );
 }

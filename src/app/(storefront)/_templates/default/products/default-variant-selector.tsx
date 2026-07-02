@@ -6,6 +6,7 @@ import { Check } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -208,6 +209,19 @@ export function DefaultVariantSelector({
                   ? `${selectedVariant.inventoryQty} available`
                   : null}
             </p>
+          )}
+
+          {/* Notify me when the selected variant is back in stock */}
+          {addToCartDisabled && (
+            <NotifyMeForm
+              productId={product.id}
+              variantId={selectedVariant.id}
+              className="mt-1"
+              message="Get notified when this option is back in stock."
+              messageClassName="text-sm text-[#6b6b6b]"
+              inputClassName="rounded-[var(--radius)] border-[#e8e8e8]"
+              buttonClassName="rounded-[var(--radius)] border-[#0a0a0a]"
+            />
           )}
         </div>
       )}

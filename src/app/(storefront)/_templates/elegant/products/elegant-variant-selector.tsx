@@ -6,6 +6,7 @@ import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type VariantSelectorProps = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -294,6 +295,19 @@ export function ElegantVariantSelector({
         <span className="sr-only" aria-live="polite" aria-atomic="true">
           {isAdded ? "Added to bag" : ""}
         </span>
+
+        {/* Notify me when the selected variant is back in stock */}
+        {selectedVariant && effectiveMax === 0 && (
+          <NotifyMeForm
+            productId={product.id}
+            variantId={selectedVariant.id}
+            className="mt-4"
+            message="Get notified when this option is back in stock."
+            messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
+            inputClassName="rounded-full border-[var(--el-line)] px-4"
+            buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
+          />
+        )}
       </div>
     </div>
   );

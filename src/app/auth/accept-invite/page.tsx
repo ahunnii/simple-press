@@ -18,7 +18,7 @@ export default async function AcceptInvitePage({ searchParams }: Props) {
   let invite: {
     businessName: string;
     email: string;
-    role: "OWNER" | "MANAGER";
+    role: "OWNER" | "MANAGER" | "STAFF";
   } | null = null;
   let errorMessage: string | null = null;
 

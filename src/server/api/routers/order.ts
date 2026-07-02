@@ -33,6 +33,7 @@ import {
   createTRPCRouter,
   featureGate,
   ownerAdminProcedure,
+  staffProcedure,
 } from "~/server/api/trpc";
 
 const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
@@ -41,8 +42,56 @@ const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   fraudulent: "Fraudulent order",
 };
 
+type ShipmentItemRequest = { orderItemId: string; quantity: number };
+
+/**
+ * Validates requested per-item shipment quantities against what is still
+ * unfulfilled on the order — cumulatively across every shipment in the
+ * request, so two packages can't both claim the same remaining unit.
+ * Returns the aggregated requested quantity per orderItemId.
+ * Throws BAD_REQUEST naming the offending item.
+ */
+function aggregateAndValidateShipmentItems(
+  orderItems: {
+    id: string;
+    productName: string;
+    quantity: number;
+    fulfilledQuantity: number;
+  }[],
+  shipmentItemLists: ShipmentItemRequest[][],
+): Map<string, number> {
+  const itemMap = new Map(orderItems.map((item) => [item.id, item]));
+  const requested = new Map<string, number>();
+
+  for (const items of shipmentItemLists) {
+    for (const entry of items) {
+      const orderItem = itemMap.get(entry.orderItemId);
+      if (!orderItem) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Item ${entry.orderItemId} does not belong to this order`,
+        });
+      }
+      const alreadyRequested = requested.get(entry.orderItemId) ?? 0;
+      const remaining = Math.max(
+        0,
+        orderItem.quantity - orderItem.fulfilledQuantity - alreadyRequested,
+      );
+      if (entry.quantity > remaining) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Cannot ship ${entry.quantity} × ${orderItem.productName} — only ${remaining} unit${remaining === 1 ? "" : "s"} remaining to fulfill`,
+        });
+      }
+      requested.set(entry.orderItemId, alreadyRequested + entry.quantity);
+    }
+  }
+
+  return requested;
+}
+
 export const orderRouter = createTRPCRouter({
-  markAsFulfilled: ownerAdminProcedure
+  markAsFulfilled: staffProcedure
     .use(featureGate("orders"))
     .input(markAsFulfilledSchema)
     .mutation(async ({ ctx, input }) => {
@@ -64,26 +113,92 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      const updatedOrder = await ctx.db.order.update({
-        where: { id: input.orderId },
-        data: {
-          status: order.paymentStatus === "paid" ? "completed" : "open",
-          fulfillmentStatus: "fulfilled",
-          shipments: {
-            create: input.shipments.map((s) => ({
-              carrier: s.carrier?.trim() ?? null,
-              trackingNumber: s.trackingNumber?.trim() ?? null,
-              trackingUrl: s.trackingUrl?.trim() ?? null,
-            })),
-          },
-        },
-        include: { shipments: { orderBy: { shippedAt: "asc" } } },
-      });
+      // Shipments carrying explicit line items drive partial fulfillment.
+      // A request with no itemized shipments is the legacy path: everything
+      // on the order is considered shipped.
+      const { createdShipments, updatedOrder } = await ctx.db.$transaction(
+        async (tx) => {
+          const orderItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+          });
 
-      const shipmentsWithTracking = updatedOrder.shipments.filter(
+          const itemizedShipments = input.shipments.filter(
+            (s): s is typeof s & { items: ShipmentItemRequest[] } =>
+              !!s.items && s.items.length > 0,
+          );
+
+          // Validate + aggregate requested quantities (throws BAD_REQUEST).
+          const requested = aggregateAndValidateShipmentItems(
+            orderItems,
+            itemizedShipments.map((s) => s.items),
+          );
+
+          const createdShipments = [];
+          for (const s of input.shipments) {
+            createdShipments.push(
+              await tx.orderShipment.create({
+                data: {
+                  orderId: input.orderId,
+                  carrier: s.carrier?.trim() ?? null,
+                  trackingNumber: s.trackingNumber?.trim() ?? null,
+                  trackingUrl: s.trackingUrl?.trim() ?? null,
+                  ...(s.items && s.items.length > 0 && { items: s.items }),
+                },
+              }),
+            );
+          }
+
+          if (itemizedShipments.length > 0) {
+            for (const [orderItemId, qty] of requested) {
+              await tx.orderItem.update({
+                where: { id: orderItemId },
+                data: { fulfilledQuantity: { increment: qty } },
+              });
+            }
+          } else {
+            // Legacy whole-order fulfillment: everything ships.
+            for (const item of orderItems) {
+              if (item.fulfilledQuantity !== item.quantity) {
+                await tx.orderItem.update({
+                  where: { id: item.id },
+                  data: { fulfilledQuantity: item.quantity },
+                });
+              }
+            }
+          }
+
+          const finalItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+            select: { quantity: true, fulfilledQuantity: true },
+          });
+          const fullyFulfilled = finalItems.every(
+            (i) => i.fulfilledQuantity >= i.quantity,
+          );
+
+          const updatedOrder = await tx.order.update({
+            where: { id: input.orderId },
+            data: fullyFulfilled
+              ? {
+                  status: order.paymentStatus === "paid" ? "completed" : "open",
+                  fulfillmentStatus: "fulfilled",
+                }
+              : { fulfillmentStatus: "partially_fulfilled" },
+            include: { shipments: { orderBy: { shippedAt: "asc" } } },
+          });
+
+          return { createdShipments, updatedOrder };
+        },
+      );
+
+      // Only email about the shipments created in THIS request — a partially
+      // fulfilled order can be fulfilled again later, and we must not re-send
+      // tracking emails for its earlier shipments.
+      const shipmentsWithTracking = createdShipments.filter(
         (s) => s.trackingNumber,
       );
       const anyTracking = shipmentsWithTracking.length > 0;
+      const becameFullyFulfilled =
+        updatedOrder.fulfillmentStatus === "fulfilled";
 
       try {
         if (anyTracking) {
@@ -109,7 +224,9 @@ export const orderRouter = createTRPCRouter({
           console.log(
             `[Orders] Shipped email(s) sent for order #${order.orderNumber}`,
           );
-        } else {
+        } else if (becameFullyFulfilled) {
+          // The "fulfilled" (no-tracking) email is only correct when the
+          // whole order is now fulfilled — skip it for partial shipments.
           await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
@@ -140,7 +257,7 @@ export const orderRouter = createTRPCRouter({
       return updatedOrder;
     }),
 
-  markReadyForPickup: ownerAdminProcedure
+  markReadyForPickup: staffProcedure
     .use(featureGate("orders"))
     .input(z.object({ orderId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -215,7 +332,7 @@ export const orderRouter = createTRPCRouter({
       return updatedOrder;
     }),
 
-  addShipment: ownerAdminProcedure
+  addShipment: staffProcedure
     .use(featureGate("orders"))
     .input(addShipmentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -234,14 +351,71 @@ export const orderRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
       }
 
-      const shipment = await ctx.db.orderShipment.create({
-        data: {
-          orderId: input.orderId,
-          carrier: input.carrier?.trim() ?? null,
-          trackingNumber: input.trackingNumber?.trim() ?? null,
-          trackingUrl: input.trackingUrl?.trim() ?? null,
+      const { shipment, updatedOrder } = await ctx.db.$transaction(
+        async (tx) => {
+          const orderItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+          });
+
+          const hasItems = !!input.items && input.items.length > 0;
+          // Validate + aggregate requested quantities (throws BAD_REQUEST).
+          const requested = hasItems
+            ? aggregateAndValidateShipmentItems(orderItems, [input.items!])
+            : null;
+
+          const shipment = await tx.orderShipment.create({
+            data: {
+              orderId: input.orderId,
+              carrier: input.carrier?.trim() ?? null,
+              trackingNumber: input.trackingNumber?.trim() ?? null,
+              trackingUrl: input.trackingUrl?.trim() ?? null,
+              ...(hasItems && { items: input.items }),
+            },
+          });
+
+          if (requested) {
+            for (const [orderItemId, qty] of requested) {
+              await tx.orderItem.update({
+                where: { id: orderItemId },
+                data: { fulfilledQuantity: { increment: qty } },
+              });
+            }
+          } else {
+            // Legacy path: a shipment without line items ships everything
+            // remaining on the order.
+            for (const item of orderItems) {
+              if (item.fulfilledQuantity !== item.quantity) {
+                await tx.orderItem.update({
+                  where: { id: item.id },
+                  data: { fulfilledQuantity: item.quantity },
+                });
+              }
+            }
+          }
+
+          const finalItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+            select: { quantity: true, fulfilledQuantity: true },
+          });
+          const fullyFulfilled = finalItems.every(
+            (i) => i.fulfilledQuantity >= i.quantity,
+          );
+
+          const updatedOrder = await tx.order.update({
+            where: { id: input.orderId },
+            data: fullyFulfilled
+              ? {
+                  fulfillmentStatus: "fulfilled",
+                  ...(order.paymentStatus === "paid" && {
+                    status: "completed",
+                  }),
+                }
+              : { fulfillmentStatus: "partially_fulfilled" },
+          });
+
+          return { shipment, updatedOrder };
         },
-      });
+      );
 
       try {
         if (shipment.trackingNumber) {
@@ -265,11 +439,15 @@ export const orderRouter = createTRPCRouter({
           console.log(
             `[Orders] Additional shipped email sent for order #${order.orderNumber}`,
           );
-        } else if (order.fulfillmentStatus !== "fulfilled") {
-          // Only send "fulfilled" email if this is the first time the order is
-          // being marked fulfilled. Calling addShipment on an already-fulfilled
+        } else if (
+          order.fulfillmentStatus !== "fulfilled" &&
+          updatedOrder.fulfillmentStatus === "fulfilled"
+        ) {
+          // Only send "fulfilled" email if this shipment just completed the
+          // order for the first time. Calling addShipment on an already-fulfilled
           // order (e.g. to add a second package with no tracking) would otherwise
-          // send a duplicate "your order has been fulfilled" email.
+          // send a duplicate "your order has been fulfilled" email, and a partial
+          // shipment with no tracking shouldn't claim the order is fulfilled.
           await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
@@ -297,7 +475,7 @@ export const orderRouter = createTRPCRouter({
       return shipment;
     }),
 
-  updateShipment: ownerAdminProcedure
+  updateShipment: staffProcedure
     .use(featureGate("orders"))
     .input(updateShipmentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -465,7 +643,7 @@ export const orderRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getAll: ownerAdminProcedure
+  getAll: staffProcedure
     .use(featureGate("orders"))
     .input(orderFiltersSchema)
     .query(async ({ ctx, input }) => {
@@ -554,7 +732,7 @@ export const orderRouter = createTRPCRouter({
       };
     }),
 
-  getById: ownerAdminProcedure
+  getById: staffProcedure
     .use(featureGate("orders"))
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
@@ -1290,7 +1468,7 @@ export const orderRouter = createTRPCRouter({
       return order;
     }),
 
-  updateFulfillment: ownerAdminProcedure
+  updateFulfillment: staffProcedure
     .use(featureGate("orders"))
     .input(updateFulfillmentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1318,18 +1496,42 @@ export const orderRouter = createTRPCRouter({
         derivedStatus = "open";
       }
 
-      const updatedOrder = await ctx.db.order.update({
-        where: { id: input.orderId, businessId },
-        data: {
-          fulfillmentStatus: input.fulfillmentStatus,
-          ...(derivedStatus !== undefined && { status: derivedStatus }),
-        },
+      const updatedOrder = await ctx.db.$transaction(async (tx) => {
+        // Keep per-item fulfillment counters coherent with manual overrides:
+        // "fulfilled" means every unit shipped, "unfulfilled" means none.
+        // "partially_fulfilled" leaves the existing per-item counts alone.
+        if (
+          input.fulfillmentStatus === "fulfilled" ||
+          input.fulfillmentStatus === "unfulfilled"
+        ) {
+          const items = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+          });
+          for (const item of items) {
+            const target =
+              input.fulfillmentStatus === "fulfilled" ? item.quantity : 0;
+            if (item.fulfilledQuantity !== target) {
+              await tx.orderItem.update({
+                where: { id: item.id },
+                data: { fulfilledQuantity: target },
+              });
+            }
+          }
+        }
+
+        return tx.order.update({
+          where: { id: input.orderId, businessId },
+          data: {
+            fulfillmentStatus: input.fulfillmentStatus,
+            ...(derivedStatus !== undefined && { status: derivedStatus }),
+          },
+        });
       });
 
       return updatedOrder;
     }),
 
-  updateNote: ownerAdminProcedure
+  updateNote: staffProcedure
     .use(featureGate("orders"))
     .input(
       z.object({

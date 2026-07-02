@@ -10,6 +10,7 @@ import {
   createTRPCRouter,
   ownerAdminProcedure,
   protectedProcedure,
+  staffProcedure,
 } from "~/server/api/trpc";
 
 export const customerRouter = createTRPCRouter({
@@ -638,7 +639,7 @@ export const customerRouter = createTRPCRouter({
       });
     }),
 
-  getById: ownerAdminProcedure
+  getById: staffProcedure
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
@@ -656,7 +657,7 @@ export const customerRouter = createTRPCRouter({
       });
     }),
 
-  list: ownerAdminProcedure
+  list: staffProcedure
     .input(
       z.object({
         search: z.string().optional(),

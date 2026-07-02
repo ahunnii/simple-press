@@ -17,10 +17,18 @@ const orderItemSchema = z.object({
   total: z.coerce.number().nonnegative(),
 });
 
+export const shipmentItemInputSchema = z.object({
+  orderItemId: z.string(),
+  quantity: z.number().int().positive(),
+});
+
 export const shipmentInputSchema = z.object({
   carrier: z.string().optional(),
   trackingNumber: z.string().optional(),
   trackingUrl: z.string().optional(),
+  // Line items contained in this shipment. Omitted/empty = legacy behavior
+  // (ship everything remaining on the order).
+  items: z.array(shipmentItemInputSchema).optional(),
 });
 
 export const manualOrderFormSchema = z.object({
@@ -93,6 +101,9 @@ export const addShipmentSchema = z.object({
   carrier: z.string().optional(),
   trackingNumber: z.string().optional(),
   trackingUrl: z.string().optional(),
+  // Line items contained in this shipment. Omitted/empty = legacy behavior
+  // (ship everything remaining on the order).
+  items: z.array(shipmentItemInputSchema).optional(),
 });
 
 export const updateShipmentSchema = z.object({
@@ -119,6 +130,7 @@ export const updateShippingAddressSchema = z.object({
 export const fulfillmentFormSchema = z
   .object({
     hasTracking: z.boolean(),
+    shipAllRemaining: z.boolean(),
     packages: z.array(
       z.object({
         carrier: z.string().optional(),
@@ -128,6 +140,16 @@ export const fulfillmentFormSchema = z
           .url("Invalid tracking URL")
           .optional()
           .or(z.literal("")),
+        // Per-item quantities for this package (used when shipAllRemaining
+        // is false). 0 = item not included in the package.
+        items: z
+          .array(
+            z.object({
+              orderItemId: z.string(),
+              quantity: z.coerce.number().int().min(0),
+            }),
+          )
+          .optional(),
       }),
     ),
   })
@@ -153,5 +175,6 @@ export const fulfillmentFormSchema = z
 
 export type FulfillmentFormValues = z.infer<typeof fulfillmentFormSchema>;
 export type ShipmentInput = z.infer<typeof shipmentInputSchema>;
+export type ShipmentItemInput = z.infer<typeof shipmentItemInputSchema>;
 export type ManualOrderFormSchema = z.infer<typeof manualOrderFormSchema>;
 export type MarkAsRefundedSchema = z.infer<typeof markAsRefundedSchema>;

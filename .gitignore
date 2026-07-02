@@ -57,3 +57,13 @@ skills/
 /playwright/.cache/
 e2e/.seed-data.json
 .env.e2e.local
+
+
+# pnpm local store cache
+.pnpm-store/
+
+# pnpm virtual store directory (if customized)
+.pnpm/
+
+# Standard dependencies folder
+node_modules/

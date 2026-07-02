@@ -252,6 +252,7 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   customFields: 'customFields',
   bannerConfig: 'bannerConfig',
   popupConfig: 'popupConfig',
+  emailOverrides: 'emailOverrides',
   previewCustomFields: 'previewCustomFields',
   previewUpdatedAt: 'previewUpdatedAt',
   businessId: 'businessId'
@@ -474,6 +475,7 @@ exports.Prisma.OrderShipmentScalarFieldEnum = {
   carrier: 'carrier',
   trackingNumber: 'trackingNumber',
   trackingUrl: 'trackingUrl',
+  items: 'items',
   orderId: 'orderId'
 };
 
@@ -485,6 +487,7 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   price: 'price',
   quantity: 'quantity',
   total: 'total',
+  fulfilledQuantity: 'fulfilledQuantity',
   productId: 'productId',
   productVariantId: 'productVariantId',
   orderId: 'orderId'
@@ -742,6 +745,16 @@ exports.Prisma.ShippingRateScalarFieldEnum = {
   priceCents: 'priceCents'
 };
 
+exports.Prisma.BackInStockRequestScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  email: 'email',
+  productId: 'productId',
+  variantId: 'variantId',
+  notifiedAt: 'notifiedAt',
+  businessId: 'businessId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -778,7 +791,8 @@ exports.PlatformRole = exports.$Enums.PlatformRole = {
 
 exports.BusinessRole = exports.$Enums.BusinessRole = {
   OWNER: 'OWNER',
-  MANAGER: 'MANAGER'
+  MANAGER: 'MANAGER',
+  STAFF: 'STAFF'
 };
 
 exports.BusinessDomainStatus = exports.$Enums.BusinessDomainStatus = {
@@ -825,7 +839,8 @@ exports.Prisma.ModelName = {
   TeamInvite: 'TeamInvite',
   PlatformConfig: 'PlatformConfig',
   ShippingZone: 'ShippingZone',
-  ShippingRate: 'ShippingRate'
+  ShippingRate: 'ShippingRate',
+  BackInStockRequest: 'BackInStockRequest'
 };
 
 /**

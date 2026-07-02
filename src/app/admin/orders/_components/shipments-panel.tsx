@@ -28,12 +28,38 @@ type Shipment = {
   trackingNumber: string | null;
   trackingUrl: string | null;
   shippedAt: Date;
+  /** Prisma Json column — [{ orderItemId, quantity }] or null (whole order) */
+  items?: unknown;
+};
+
+type OrderItemInfo = {
+  id: string;
+  productName: string;
+  variantName: string | null;
 };
 
 type Props = {
   orderId: string;
   shipments: Shipment[];
+  orderItems?: OrderItemInfo[];
+  /** Hide the "Add Additional Tracking" form (e.g. while the order is only
+   * partially fulfilled — remaining items ship via the fulfillment form). */
+  canAddTracking?: boolean;
 };
+
+type ShipmentItemRow = { orderItemId: string; quantity: number };
+
+function parseShipmentItems(raw: unknown): ShipmentItemRow[] | null {
+  if (!Array.isArray(raw)) return null;
+  const rows = raw.filter(
+    (row): row is ShipmentItemRow =>
+      typeof row === "object" &&
+      row !== null &&
+      typeof (row as Record<string, unknown>).orderItemId === "string" &&
+      typeof (row as Record<string, unknown>).quantity === "number",
+  );
+  return rows.length > 0 ? rows : null;
+}
 
 const shipmentFormSchema = z.object({
   carrier: z.string().optional(),
@@ -43,7 +69,12 @@ const shipmentFormSchema = z.object({
 
 type ShipmentFormValues = z.infer<typeof shipmentFormSchema>;
 
-export function ShipmentsPanel({ orderId, shipments }: Props) {
+export function ShipmentsPanel({
+  orderId,
+  shipments,
+  orderItems = [],
+  canAddTracking = true,
+}: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -81,6 +112,20 @@ export function ShipmentsPanel({ orderId, shipments }: Props) {
 
   const carrierLabel = (value: string | null) =>
     CARRIERS.find((c) => c.value === value)?.label ?? value ?? "Unknown";
+
+  const shipmentContents = (shipment: Shipment) => {
+    const rows = parseShipmentItems(shipment.items);
+    if (!rows) return null;
+    return rows
+      .map((row) => {
+        const item = orderItems.find((it) => it.id === row.orderItemId);
+        const name = item
+          ? `${item.productName}${item.variantName ? ` (${item.variantName})` : ""}`
+          : "Unknown item";
+        return `${row.quantity}× ${name}`;
+      })
+      .join(", ");
+  };
 
   return (
     <div className="mt-4 space-y-3">
@@ -142,6 +187,11 @@ export function ShipmentsPanel({ orderId, shipments }: Props) {
                     No tracking
                   </p>
                 )}
+                {shipmentContents(shipment) && (
+                  <p className="text-muted-foreground text-sm">
+                    Contains: {shipmentContents(shipment)}
+                  </p>
+                )}
               </div>
             </div>
             <Button
@@ -156,32 +206,33 @@ export function ShipmentsPanel({ orderId, shipments }: Props) {
         ),
       )}
 
-      {showAddForm ? (
-        <ShipmentForm
-          defaultValues={{ carrier: "", trackingNumber: "", trackingUrl: "" }}
-          onSubmit={(values) => {
-            addShipment.mutate({
-              orderId,
-              carrier: values.carrier,
-              trackingNumber: values.trackingNumber,
-              trackingUrl: values.trackingUrl,
-            });
-          }}
-          onCancel={() => setShowAddForm(false)}
-          isPending={addShipment.isPending}
-          submitLabel="Add & Send Email"
-        />
-      ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={() => setShowAddForm(true)}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Additional Tracking
-        </Button>
-      )}
+      {canAddTracking &&
+        (showAddForm ? (
+          <ShipmentForm
+            defaultValues={{ carrier: "", trackingNumber: "", trackingUrl: "" }}
+            onSubmit={(values) => {
+              addShipment.mutate({
+                orderId,
+                carrier: values.carrier,
+                trackingNumber: values.trackingNumber,
+                trackingUrl: values.trackingUrl,
+              });
+            }}
+            onCancel={() => setShowAddForm(false)}
+            isPending={addShipment.isPending}
+            submitLabel="Add & Send Email"
+          />
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => setShowAddForm(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Additional Tracking
+          </Button>
+        ))}
 
       {shipments.length === 0 && !showAddForm && (
         <div className="text-muted-foreground flex items-center gap-2 text-sm">

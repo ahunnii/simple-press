@@ -7,6 +7,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -214,6 +215,19 @@ export function DarkTrendVariantSelector({
           )}
         </button>
       </div>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && isCartDisabled && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          className="text-white"
+          message="Get notified when this option is back in stock."
+          messageClassName="text-sm text-white/70"
+          inputClassName="rounded-md border-white/20 placeholder:text-white/40"
+          buttonClassName="rounded-md border-white/40"
+        />
+      )}
     </div>
   );
 }

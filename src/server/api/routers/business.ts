@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
 import { TEMPLATES } from "~/lib/constants";
+import { emailOverridesSchema } from "~/lib/email/customization";
 import {
   getPlatformMaintenance,
   resolveStorefrontMaintenance,
@@ -363,6 +364,49 @@ export const businessRouter = createTRPCRouter({
     });
     return { business, sampleOrder };
   }),
+
+  // Owner-customized transactional email copy (subject + intro text).
+  getEmailOverrides: ownerAdminProcedure.query(async ({ ctx }) => {
+    const siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId: ctx.businessId },
+      select: { emailOverrides: true },
+    });
+
+    const parsed = emailOverridesSchema.safeParse(
+      siteContent?.emailOverrides ?? {},
+    );
+    return parsed.success ? parsed.data : {};
+  }),
+
+  updateEmailOverrides: ownerAdminProcedure
+    .input(emailOverridesSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Drop empty values and empty entries so cleared fields fall back to
+      // the default copy instead of persisting empty strings.
+      const cleaned: Record<string, { subject?: string; introText?: string }> =
+        {};
+      for (const [templateId, value] of Object.entries(input)) {
+        const entry: { subject?: string; introText?: string } = {};
+        if (value?.subject?.trim()) entry.subject = value.subject.trim();
+        if (value?.introText?.trim()) entry.introText = value.introText.trim();
+        if (Object.keys(entry).length > 0) cleaned[templateId] = entry;
+      }
+
+      await ctx.db.siteContent.upsert({
+        where: { businessId },
+        create: {
+          businessId,
+          emailOverrides: cleaned as Prisma.InputJsonValue,
+        },
+        update: {
+          emailOverrides: cleaned as Prisma.InputJsonValue,
+        },
+      });
+
+      return { overrides: cleaned };
+    }),
 
   get: ownerAdminProcedure
     .input(

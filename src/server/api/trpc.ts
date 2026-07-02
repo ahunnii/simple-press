@@ -192,6 +192,65 @@ export const ownerAdminProcedure = t.procedure
   });
 
 /**
+ * Staff procedure
+ *
+ * Like ownerAdminProcedure but also allows the STAFF role (fulfillment-only
+ * workers). Use this ONLY for read/fulfillment procedures a fulfillment worker
+ * needs (order lookup, marking fulfilled/shipped/ready-for-pickup, customer
+ * lookup). Anything touching money, prices, refunds, products, or settings
+ * must stay on ownerAdminProcedure (or stricter).
+ * PLATFORM_ADMIN still bypasses the membership check.
+ */
+export const staffProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const headersList = await headers();
+    const hostname = headersList.get("host") ?? "";
+
+    const business = await ctx.db.business.findFirst({
+      where: businessHostFilter(hostname),
+      select: { id: true },
+    });
+
+    if (!business) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    const user = ctx.session.user;
+
+    // PLATFORM_ADMIN bypasses membership check
+    if (user.platformRole !== "PLATFORM_ADMIN") {
+      const membership = await ctx.db.businessMembership.findUnique({
+        where: {
+          userId_businessId: { userId: user.id, businessId: business.id },
+        },
+        select: { role: true },
+      });
+      if (
+        !membership ||
+        !["OWNER", "MANAGER", "STAFF"].includes(membership.role)
+      ) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Not a business member",
+        });
+      }
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+        businessId: business.id,
+      },
+    });
+  });
+
+/**
  * Owner-Only procedure
  *
  * Like ownerAdminProcedure but only allows OWNER role (not MANAGER).

@@ -8,6 +8,7 @@ import {
   IconFolder,
   IconImageInPicture,
   IconLanguage,
+  IconMail,
   IconMailFast,
   IconMessageStar,
   IconPackage,
@@ -48,6 +49,12 @@ export type NavSection =
 
 export type NavHub = "settings" | "content";
 
+/** Business membership roles that can access the admin dashboard. */
+export type AdminRole = "OWNER" | "MANAGER" | "STAFF";
+
+/** Roles a nav item is visible to when it declares no explicit `roles`. */
+export const DEFAULT_NAV_ROLES: AdminRole[] = ["OWNER", "MANAGER"];
+
 /** A top-level sidebar navigation item. */
 export interface NavItem {
   key: string;
@@ -56,6 +63,12 @@ export interface NavItem {
   icon: TablerIcon | LucideIcon;
   section: NavSection;
   featureKey?: string;
+  /**
+   * Membership roles that can see this item. Defaults to OWNER + MANAGER
+   * (`DEFAULT_NAV_ROLES`). Include "STAFF" only for fulfillment-safe pages
+   * (orders, customers). PLATFORM_ADMIN always sees everything.
+   */
+  roles?: AdminRole[];
 }
 
 /** A card entry shown on a hub index page (Settings or Content). */
@@ -100,6 +113,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconShoppingCart,
     section: "sell",
     featureKey: "orders",
+    roles: ["OWNER", "MANAGER", "STAFF"],
   },
   {
     key: "customers",
@@ -107,6 +121,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/customers",
     icon: IconUsers,
     section: "sell",
+    roles: ["OWNER", "MANAGER", "STAFF"],
   },
   {
     key: "payments",
@@ -208,6 +223,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPhoto,
     section: "content",
     featureKey: "media",
+  },
+  {
+    key: "emails",
+    title: "Email Templates",
+    href: "/admin/emails",
+    icon: IconMail,
+    section: "content",
   },
 
   // Insights
@@ -446,6 +468,37 @@ export const HUB_CARDS: HubCard[] = [
 /** Return all nav items belonging to a section. */
 export function getNavItemsBySection(section: NavSection): NavItem[] {
   return NAV_ITEMS.filter((item) => item.section === section);
+}
+
+/**
+ * Whether a nav item is visible to the given membership role.
+ * `role === null` means PLATFORM_ADMIN (or unknown) — no role filtering.
+ */
+export function isNavItemAllowedForRole(
+  item: Pick<NavItem, "roles">,
+  role: AdminRole | null,
+): boolean {
+  if (role === null) return true;
+  return (item.roles ?? DEFAULT_NAV_ROLES).includes(role);
+}
+
+/** Path prefixes a STAFF member may visit inside /admin. */
+const STAFF_ALLOWED_PATH_PREFIXES = ["/admin/orders", "/admin/customers"];
+
+/**
+ * Whether an /admin pathname is accessible to the given role.
+ * OWNER and MANAGER can visit everything; STAFF is limited to fulfillment
+ * pages (orders + customers). Used by the admin layout as a UX guard —
+ * hard enforcement lives in the tRPC procedure roles.
+ */
+export function isPathAllowedForRole(
+  pathname: string,
+  role: AdminRole | null,
+): boolean {
+  if (role !== "STAFF") return true;
+  return STAFF_ALLOWED_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 }
 
 /** Return all hub cards for a given hub. */

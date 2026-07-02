@@ -54,6 +54,20 @@ export default async function OrderDetailPage({ params }: Props) {
     }
   };
 
+  const fulfillmentLabel = (status: string) => {
+    switch (status) {
+      case "fulfilled":
+        return "fulfilled";
+      case "partially_fulfilled":
+        return "partially fulfilled";
+      default:
+        return "unfulfilled";
+    }
+  };
+
+  const isPartiallyFulfilled =
+    order.fulfillmentStatus === "partially_fulfilled";
+
   const paymentMethodLabel = (method: string) => {
     switch (method) {
       case "card":
@@ -106,10 +120,17 @@ export default async function OrderDetailPage({ params }: Props) {
               variant={
                 order.fulfillmentStatus === "fulfilled"
                   ? "default"
-                  : "secondary"
+                  : isPartiallyFulfilled
+                    ? "outline"
+                    : "secondary"
+              }
+              className={
+                isPartiallyFulfilled
+                  ? "border-amber-300 bg-amber-50 text-amber-700"
+                  : undefined
               }
             >
-              Fulfillment: {order.fulfillmentStatus}
+              Fulfillment: {fulfillmentLabel(order.fulfillmentStatus)}
             </Badge>
 
             {order.deliveryMethod === "pickup" && (
@@ -176,6 +197,27 @@ export default async function OrderDetailPage({ params }: Props) {
                           <p className="text-muted-foreground mt-1 text-sm">
                             Qty: {item.quantity} × {formatPrice(item.price)}
                           </p>
+                          {isPartiallyFulfilled &&
+                            (item.fulfilledQuantity >= item.quantity ? (
+                              <Badge
+                                variant="outline"
+                                className="mt-2 border-green-300 bg-green-50 text-green-700"
+                              >
+                                Shipped
+                              </Badge>
+                            ) : item.fulfilledQuantity > 0 ? (
+                              <Badge
+                                variant="outline"
+                                className="mt-2 border-amber-300 bg-amber-50 text-amber-700"
+                              >
+                                {item.fulfilledQuantity} of {item.quantity}{" "}
+                                shipped
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="mt-2">
+                                Not shipped
+                              </Badge>
+                            ))}
                         </div>
                         <div className="text-right">
                           <p className="text-foreground font-semibold">
@@ -288,10 +330,22 @@ export default async function OrderDetailPage({ params }: Props) {
               order.paymentStatus === "paid" &&
               order.fulfillmentStatus !== "fulfilled" && (
                 <FulfillmentForm
+                  // Remount when per-item progress changes so the form's
+                  // default quantities reflect the latest remaining counts.
+                  key={order.items
+                    .map((item) => `${item.id}:${item.fulfilledQuantity}`)
+                    .join("|")}
                   orderId={order.id}
                   orderNumber={order.orderNumber}
                   customerEmail={order.customerEmail}
                   customerName={order.customerName ?? ""}
+                  items={order.items.map((item) => ({
+                    id: item.id,
+                    productName: item.productName,
+                    variantName: item.variantName,
+                    quantity: item.quantity,
+                    fulfilledQuantity: item.fulfilledQuantity,
+                  }))}
                 />
               )
             )}
@@ -314,21 +368,33 @@ export default async function OrderDetailPage({ params }: Props) {
                 {order.paymentStatus === "paid" &&
                   order.fulfillmentStatus !== "fulfilled" && (
                     <p className="text-muted-foreground mt-4 text-sm">
-                      Payment received. Ready to fulfill.
+                      {isPartiallyFulfilled
+                        ? "Partially fulfilled — some items still need to ship."
+                        : "Payment received. Ready to fulfill."}
                     </p>
                   )}
 
                 {order.fulfillmentStatus === "fulfilled" &&
-                  (order.deliveryMethod === "pickup" ? (
+                  order.deliveryMethod === "pickup" && (
                     <p className="text-muted-foreground mt-4 text-sm">
                       Customer notified — ready for pickup.
                     </p>
-                  ) : (
+                  )}
+
+                {order.deliveryMethod !== "pickup" &&
+                  (order.fulfillmentStatus === "fulfilled" ||
+                    order.shipments.length > 0) && (
                     <ShipmentsPanel
                       orderId={order.id}
                       shipments={order.shipments}
+                      orderItems={order.items.map((item) => ({
+                        id: item.id,
+                        productName: item.productName,
+                        variantName: item.variantName,
+                      }))}
+                      canAddTracking={order.fulfillmentStatus === "fulfilled"}
                     />
-                  ))}
+                  )}
               </CardContent>
             </Card>
 

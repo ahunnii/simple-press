@@ -5,7 +5,7 @@ import { EmailLayout } from "./components/layout";
 interface TeamInviteEmailProps {
   businessName: string;
   inviteUrl: string;
-  role: "OWNER" | "MANAGER";
+  role: "OWNER" | "MANAGER" | "STAFF";
   logoUrl?: string;
   ownerEmail?: string;
 }
@@ -17,7 +17,8 @@ export function TeamInviteEmail({
   logoUrl,
   ownerEmail,
 }: TeamInviteEmailProps) {
-  const roleLabel = role === "OWNER" ? "Owner" : "Manager";
+  const roleLabel =
+    role === "OWNER" ? "Owner" : role === "STAFF" ? "Staff" : "Manager";
 
   return (
     <EmailLayout

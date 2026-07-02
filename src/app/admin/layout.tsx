@@ -1,6 +1,9 @@
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import type { AdminRole } from "~/app/admin/_lib/admin-nav";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
+import { isPathAllowedForRole } from "~/app/admin/_lib/admin-nav";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
@@ -26,14 +29,33 @@ export default async function AdminLayout({ children }: Props) {
   }
 
   // Allow PLATFORM_ADMIN unconditionally
+  let membershipRole: AdminRole | null = null;
   if (session.user.platformRole !== "PLATFORM_ADMIN") {
     // For everyone else, check BusinessMembership
     const membership = await checkBusinessMembership(
       business.id,
       session.user.id,
     );
-    if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
+    if (
+      !membership ||
+      !["OWNER", "MANAGER", "STAFF"].includes(membership.role)
+    ) {
       redirect("/not-permitted");
+    }
+    membershipRole = membership.role as AdminRole;
+
+    // STAFF is fulfillment-only: orders + customers. Middleware exposes the
+    // requested path via x-pathname; anything outside the allowed pages sends
+    // staff back to their home page (/admin/orders). This is a UX guard —
+    // the real enforcement lives in the tRPC procedures (staffProcedure vs
+    // ownerAdminProcedure).
+    if (membershipRole === "STAFF") {
+      const headersList = await headers();
+      const rawPath = headersList.get("x-pathname");
+      const pathname = rawPath?.split("?")[0] ?? "";
+      if (pathname && !isPathAllowedForRole(pathname, "STAFF")) {
+        redirect("/admin/orders");
+      }
     }
   }
 
@@ -69,6 +91,7 @@ export default async function AdminLayout({ children }: Props) {
           session={session}
           businessName={businessName}
           featureData={featureData}
+          membershipRole={membershipRole}
         />
         <SidebarInset>
           <div className="bg-muted min-h-screen">{children}</div>

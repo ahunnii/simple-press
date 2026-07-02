@@ -27,6 +27,7 @@ enum PlatformRole {
 enum BusinessRole {
   OWNER    // Full control of one business
   MANAGER  // Operational access, scoped per membership row
+  STAFF    // Fulfillment-only: orders and customer lookup, no products/settings/money
 }
 
 
@@ -277,6 +278,10 @@ model SiteContent {
 
   bannerConfig Json? // BannerConfig — see src/lib/validators/site-banner.ts
   popupConfig  Json? // PopupConfig
+
+  // Per-email-template copy overrides, keyed by email template id:
+  // { "order-confirmation": { subject?: string, introText?: string }, ... }
+  emailOverrides Json?
 
   // Owner-only preview draft (never shipped to public visitors)
   previewCustomFields Json?
@@ -709,6 +714,10 @@ model OrderShipment {
   trackingNumber String?
   trackingUrl    String?
 
+  // Line-item contents of this shipment for partial fulfillment:
+  // [{ orderItemId: string, quantity: number }]. Null = legacy whole-order shipment.
+  items Json?
+
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
@@ -728,7 +737,10 @@ model OrderItem {
   price    Float
   quantity Int
   total    Float // price * quantity
-  
+
+  // Units already shipped across this order's shipments (partial fulfillment)
+  fulfilledQuantity Int @default(0)
+
   // Relationships (nullable in case product is deleted)
   productId        String?
   productVariantId String?
@@ -1262,4 +1274,23 @@ model ShippingRate {
 
   @@unique([zoneId, tierIndex])
   @@index([zoneId])
+}
+
+// A shopper's request to be emailed when an out-of-stock product is restocked.
+// Fulfilled by the /api/cron restock job; duplicates are prevented in code
+// (nullable variantId keeps a DB unique constraint from applying cleanly).
+model BackInStockRequest {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  email     String
+  productId String
+  variantId String?
+
+  notifiedAt DateTime?
+
+  businessId String
+
+  @@index([businessId, productId])
+  @@index([notifiedAt, productId])
 }

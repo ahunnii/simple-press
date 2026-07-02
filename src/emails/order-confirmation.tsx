@@ -36,11 +36,14 @@ type OrderConfirmationEmailProps = {
   businessUrl: string;
   trackingUrl?: string;
   orderStatusUrl?: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function OrderConfirmationEmail({
   orderNumber,
   customerName,
+  introText,
   items,
   subtotal,
   shipping,
@@ -73,6 +76,11 @@ export default function OrderConfirmationEmail({
     >
       {/* Greeting */}
       <Text style={heading}>Order Confirmed!</Text>
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
       <Text style={paragraph}>Hi {customerName},</Text>
       <Text style={paragraph}>
         Thank you for your order. We&apos;ve received your payment and will

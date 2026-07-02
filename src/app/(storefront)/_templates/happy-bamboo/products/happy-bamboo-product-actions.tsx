@@ -5,6 +5,7 @@ import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { HappyBambooVariantSelector } from "./happy-bamboo-variant-selector";
 
@@ -43,14 +44,23 @@ export function HappyBambooProductActions({
           </p>
         </div>
       ) : !inStock ? (
-        <Button
-          size="lg"
-          aria-disabled={true}
-          onClick={(e) => e.preventDefault()}
-          className="flex aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-        >
-          Out of Stock
-        </Button>
+        <div className="flex flex-col gap-4">
+          <Button
+            size="lg"
+            aria-disabled={true}
+            onClick={(e) => e.preventDefault()}
+            className="flex aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+          >
+            Out of Stock
+          </Button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            messageClassName="text-muted-foreground text-sm"
+            inputClassName="border-border rounded-lg"
+            buttonClassName="rounded-lg"
+          />
+        </div>
       ) : (
         <>
           {canAddMore && (

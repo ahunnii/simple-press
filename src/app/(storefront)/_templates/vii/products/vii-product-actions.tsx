@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { ViiVariantSelector } from "./vii-variant-selector";
 
@@ -78,27 +79,36 @@ export function ViiProductActions({
 
   if (!inStock) {
     return (
-      <button
-        type="button"
-        aria-disabled="true"
-        onClick={(e) => e.preventDefault()}
-        style={{
-          height: 48,
-          width: "100%",
-          borderRadius: "var(--radius)",
-          border: stepperBorder,
-          background: "transparent",
-          color: "var(--vii-ink-soft)",
-          fontFamily: "var(--font-sans)",
-          fontSize: 11,
-          fontWeight: 500,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          cursor: "not-allowed",
-        }}
-      >
-        Out of Stock
-      </button>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <button
+          type="button"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+          style={{
+            height: 48,
+            width: "100%",
+            borderRadius: "var(--radius)",
+            border: stepperBorder,
+            background: "transparent",
+            color: "var(--vii-ink-soft)",
+            fontFamily: "var(--font-sans)",
+            fontSize: 11,
+            fontWeight: 500,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            cursor: "not-allowed",
+          }}
+        >
+          Out of Stock
+        </button>
+        <NotifyMeForm
+          productId={product.id}
+          message="Get notified when it's back in stock."
+          messageClassName="text-sm text-[var(--vii-ink-soft)]"
+          inputClassName="rounded-[var(--radius)] border-[var(--vii-hairline-strong)] text-[var(--vii-navy)]"
+          buttonClassName="rounded-[var(--radius)] border-[var(--vii-navy)] text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--vii-navy)]"
+        />
+      </div>
     );
   }
 

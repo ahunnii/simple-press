@@ -8,6 +8,7 @@ import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { Badge } from "~/components/ui/badge";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -35,59 +36,74 @@ export function BambooProductCard({ product }: Props) {
 
   const productImage = product.images[0]?.url ?? "/placeholder.svg";
   return (
-    <Link
-      href={`/shop/${product.slug}`}
-      className="group border-border bg-card flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-lg"
-    >
-      <div className="bg-secondary relative aspect-square overflow-hidden">
-        <Image
-          src={productImage}
-          alt={product.name ?? "Product Image"}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-        {productStatus?.badgeLabel && (
-          <Badge className="bg-primary text-primary-foreground absolute top-3 left-3">
-            {productStatus.badgeLabel}
-          </Badge>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        <div>
-          <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
-            {product.name}
-          </h3>
-          <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-            {product.description?.slice(0, 100)}...
-          </p>
+    // Relative wrapper so the wishlist button is a sibling of the card link
+    // (never a <button> inside an <a>) while overlaying the image corner.
+    <div className="relative h-full">
+      <Link
+        href={`/shop/${product.slug}`}
+        className="group border-border bg-card flex h-full flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-lg"
+      >
+        <div className="bg-secondary relative aspect-square overflow-hidden">
+          <Image
+            src={productImage}
+            alt={product.name ?? "Product Image"}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+          {productStatus?.badgeLabel && (
+            <Badge className="bg-primary text-primary-foreground absolute top-3 left-3">
+              {productStatus.badgeLabel}
+            </Badge>
+          )}
         </div>
-
-        <div className="mt-auto flex items-center justify-between gap-4 pt-2">
-          <div className="flex items-baseline gap-2">
-            <span className="text-foreground items-center text-xl font-bold">
-              {formatPrice(productStatus.displayPrice)}{" "}
-              {productStatus.variablePricing && (
-                <span className="text-muted-foreground text-sm">+</span>
-              )}
-            </span>
-            {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
-              <span className="text-muted-foreground text-sm line-through">
-                <span className="sr-only">Original price: </span>
-                {formatPrice(productStatus.displayCompareAtPrice)}
-              </span>
-            )}
+        <div className="flex flex-1 flex-col gap-4 p-5">
+          <div>
+            <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
+              {product.name}
+            </h3>
+            <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+              {product.description?.slice(0, 100)}...
+            </p>
           </div>
-          <span
-            aria-hidden="true"
-            className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium"
-          >
-            <Eye className="size-4" />
-            View Product
-          </span>
+
+          <div className="mt-auto flex items-center justify-between gap-4 pt-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-foreground items-center text-xl font-bold">
+                {formatPrice(productStatus.displayPrice)}{" "}
+                {productStatus.variablePricing && (
+                  <span className="text-muted-foreground text-sm">+</span>
+                )}
+              </span>
+              {productStatus.isOnSale &&
+                productStatus.displayCompareAtPrice && (
+                  <span className="text-muted-foreground text-sm line-through">
+                    <span className="sr-only">Original price: </span>
+                    {formatPrice(productStatus.displayCompareAtPrice)}
+                  </span>
+                )}
+            </div>
+            <span
+              aria-hidden="true"
+              className="bg-primary text-primary-foreground inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium"
+            >
+              <Eye className="size-4" />
+              View Product
+            </span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+      <WishlistButton
+        item={{
+          productId: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: productStatus.displayPrice,
+          imageUrl: product.images[0]?.url ?? null,
+        }}
+        className="absolute top-3 right-3 z-10"
+      />
+    </div>
   );
 }
 

@@ -517,6 +517,17 @@ export function ProductForm({
       }
     }
 
+    // Variant images must point at a current gallery image. Remap any
+    // pending (blob:) URLs to their uploaded URL and drop references to
+    // images that were removed from the gallery.
+    const resolvedUrlByFormUrl = new Map<string, string>();
+    images.forEach((img, idx) => {
+      const resolved = resolvedImages[idx];
+      if (resolved) resolvedUrlByFormUrl.set(img.url, resolved.url);
+    });
+    const resolveVariantImageUrl = (url: string | null | undefined) =>
+      url ? (resolvedUrlByFormUrl.get(url) ?? null) : null;
+
     if (product) {
       // Update existing product
       imagesToSyncRef.current = resolvedImages;
@@ -547,7 +558,7 @@ export function ProductForm({
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
-          imageUrl: v.imageUrl ?? null,
+          imageUrl: resolveVariantImageUrl(v.imageUrl),
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -622,7 +633,7 @@ export function ProductForm({
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
-          imageUrl: v.imageUrl ?? null,
+          imageUrl: resolveVariantImageUrl(v.imageUrl),
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,

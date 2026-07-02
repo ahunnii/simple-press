@@ -203,6 +203,11 @@ export type ShippingZone = $Result.DefaultSelection<Prisma.$ShippingZonePayload>
  * 
  */
 export type ShippingRate = $Result.DefaultSelection<Prisma.$ShippingRatePayload>
+/**
+ * Model BackInStockRequest
+ * 
+ */
+export type BackInStockRequest = $Result.DefaultSelection<Prisma.$BackInStockRequestPayload>
 
 /**
  * Enums
@@ -218,7 +223,8 @@ export type PlatformRole = (typeof PlatformRole)[keyof typeof PlatformRole]
 
 export const BusinessRole: {
   OWNER: 'OWNER',
-  MANAGER: 'MANAGER'
+  MANAGER: 'MANAGER',
+  STAFF: 'STAFF'
 };
 
 export type BusinessRole = (typeof BusinessRole)[keyof typeof BusinessRole]
@@ -743,6 +749,16 @@ export class PrismaClient<
     * ```
     */
   get shippingRate(): Prisma.ShippingRateDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.backInStockRequest`: Exposes CRUD operations for the **BackInStockRequest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BackInStockRequests
+    * const backInStockRequests = await prisma.backInStockRequest.findMany()
+    * ```
+    */
+  get backInStockRequest(): Prisma.BackInStockRequestDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1221,7 +1237,8 @@ export namespace Prisma {
     TeamInvite: 'TeamInvite',
     PlatformConfig: 'PlatformConfig',
     ShippingZone: 'ShippingZone',
-    ShippingRate: 'ShippingRate'
+    ShippingRate: 'ShippingRate',
+    BackInStockRequest: 'BackInStockRequest'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1240,7 +1257,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4056,6 +4073,80 @@ export namespace Prisma {
           }
         }
       }
+      BackInStockRequest: {
+        payload: Prisma.$BackInStockRequestPayload<ExtArgs>
+        fields: Prisma.BackInStockRequestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BackInStockRequestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BackInStockRequestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>
+          }
+          findFirst: {
+            args: Prisma.BackInStockRequestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BackInStockRequestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>
+          }
+          findMany: {
+            args: Prisma.BackInStockRequestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>[]
+          }
+          create: {
+            args: Prisma.BackInStockRequestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>
+          }
+          createMany: {
+            args: Prisma.BackInStockRequestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BackInStockRequestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>[]
+          }
+          delete: {
+            args: Prisma.BackInStockRequestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>
+          }
+          update: {
+            args: Prisma.BackInStockRequestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>
+          }
+          deleteMany: {
+            args: Prisma.BackInStockRequestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BackInStockRequestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BackInStockRequestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>[]
+          }
+          upsert: {
+            args: Prisma.BackInStockRequestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BackInStockRequestPayload>
+          }
+          aggregate: {
+            args: Prisma.BackInStockRequestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBackInStockRequest>
+          }
+          groupBy: {
+            args: Prisma.BackInStockRequestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BackInStockRequestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BackInStockRequestCountArgs<ExtArgs>
+            result: $Utils.Optional<BackInStockRequestCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4190,6 +4281,7 @@ export namespace Prisma {
     platformConfig?: PlatformConfigOmit
     shippingZone?: ShippingZoneOmit
     shippingRate?: ShippingRateOmit
+    backInStockRequest?: BackInStockRequestOmit
   }
 
   /* Types for Logging */
@@ -12892,6 +12984,7 @@ export namespace Prisma {
     customFields: number
     bannerConfig: number
     popupConfig: number
+    emailOverrides: number
     previewCustomFields: number
     previewUpdatedAt: number
     businessId: number
@@ -12979,6 +13072,7 @@ export namespace Prisma {
     customFields?: true
     bannerConfig?: true
     popupConfig?: true
+    emailOverrides?: true
     previewCustomFields?: true
     previewUpdatedAt?: true
     businessId?: true
@@ -13085,6 +13179,7 @@ export namespace Prisma {
     customFields: JsonValue | null
     bannerConfig: JsonValue | null
     popupConfig: JsonValue | null
+    emailOverrides: JsonValue | null
     previewCustomFields: JsonValue | null
     previewUpdatedAt: Date | null
     businessId: string
@@ -13135,6 +13230,7 @@ export namespace Prisma {
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
+    emailOverrides?: boolean
     previewCustomFields?: boolean
     previewUpdatedAt?: boolean
     businessId?: boolean
@@ -13169,6 +13265,7 @@ export namespace Prisma {
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
+    emailOverrides?: boolean
     previewCustomFields?: boolean
     previewUpdatedAt?: boolean
     businessId?: boolean
@@ -13203,6 +13300,7 @@ export namespace Prisma {
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
+    emailOverrides?: boolean
     previewCustomFields?: boolean
     previewUpdatedAt?: boolean
     businessId?: boolean
@@ -13237,12 +13335,13 @@ export namespace Prisma {
     customFields?: boolean
     bannerConfig?: boolean
     popupConfig?: boolean
+    emailOverrides?: boolean
     previewCustomFields?: boolean
     previewUpdatedAt?: boolean
     businessId?: boolean
   }
 
-  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
+  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
   export type SiteContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -13286,6 +13385,7 @@ export namespace Prisma {
       customFields: Prisma.JsonValue | null
       bannerConfig: Prisma.JsonValue | null
       popupConfig: Prisma.JsonValue | null
+      emailOverrides: Prisma.JsonValue | null
       previewCustomFields: Prisma.JsonValue | null
       previewUpdatedAt: Date | null
       businessId: string
@@ -13740,6 +13840,7 @@ export namespace Prisma {
     readonly customFields: FieldRef<"SiteContent", 'Json'>
     readonly bannerConfig: FieldRef<"SiteContent", 'Json'>
     readonly popupConfig: FieldRef<"SiteContent", 'Json'>
+    readonly emailOverrides: FieldRef<"SiteContent", 'Json'>
     readonly previewCustomFields: FieldRef<"SiteContent", 'Json'>
     readonly previewUpdatedAt: FieldRef<"SiteContent", 'DateTime'>
     readonly businessId: FieldRef<"SiteContent", 'String'>
@@ -28620,6 +28721,7 @@ export namespace Prisma {
     carrier: number
     trackingNumber: number
     trackingUrl: number
+    items: number
     orderId: number
     _all: number
   }
@@ -28652,6 +28754,7 @@ export namespace Prisma {
     carrier?: true
     trackingNumber?: true
     trackingUrl?: true
+    items?: true
     orderId?: true
     _all?: true
   }
@@ -28735,6 +28838,7 @@ export namespace Prisma {
     carrier: string | null
     trackingNumber: string | null
     trackingUrl: string | null
+    items: JsonValue | null
     orderId: string
     _count: OrderShipmentCountAggregateOutputType | null
     _min: OrderShipmentMinAggregateOutputType | null
@@ -28762,6 +28866,7 @@ export namespace Prisma {
     carrier?: boolean
     trackingNumber?: boolean
     trackingUrl?: boolean
+    items?: boolean
     orderId?: boolean
     order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderShipment"]>
@@ -28773,6 +28878,7 @@ export namespace Prisma {
     carrier?: boolean
     trackingNumber?: boolean
     trackingUrl?: boolean
+    items?: boolean
     orderId?: boolean
     order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderShipment"]>
@@ -28784,6 +28890,7 @@ export namespace Prisma {
     carrier?: boolean
     trackingNumber?: boolean
     trackingUrl?: boolean
+    items?: boolean
     orderId?: boolean
     order?: boolean | OrderDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderShipment"]>
@@ -28795,10 +28902,11 @@ export namespace Prisma {
     carrier?: boolean
     trackingNumber?: boolean
     trackingUrl?: boolean
+    items?: boolean
     orderId?: boolean
   }
 
-  export type OrderShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "shippedAt" | "carrier" | "trackingNumber" | "trackingUrl" | "orderId", ExtArgs["result"]["orderShipment"]>
+  export type OrderShipmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "shippedAt" | "carrier" | "trackingNumber" | "trackingUrl" | "items" | "orderId", ExtArgs["result"]["orderShipment"]>
   export type OrderShipmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     order?: boolean | OrderDefaultArgs<ExtArgs>
   }
@@ -28821,6 +28929,7 @@ export namespace Prisma {
       carrier: string | null
       trackingNumber: string | null
       trackingUrl: string | null
+      items: Prisma.JsonValue | null
       orderId: string
     }, ExtArgs["result"]["orderShipment"]>
     composites: {}
@@ -29252,6 +29361,7 @@ export namespace Prisma {
     readonly carrier: FieldRef<"OrderShipment", 'String'>
     readonly trackingNumber: FieldRef<"OrderShipment", 'String'>
     readonly trackingUrl: FieldRef<"OrderShipment", 'String'>
+    readonly items: FieldRef<"OrderShipment", 'Json'>
     readonly orderId: FieldRef<"OrderShipment", 'String'>
   }
     
@@ -29683,12 +29793,14 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     total: number | null
+    fulfilledQuantity: number | null
   }
 
   export type OrderItemSumAggregateOutputType = {
     price: number | null
     quantity: number | null
     total: number | null
+    fulfilledQuantity: number | null
   }
 
   export type OrderItemMinAggregateOutputType = {
@@ -29699,6 +29811,7 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     total: number | null
+    fulfilledQuantity: number | null
     productId: string | null
     productVariantId: string | null
     orderId: string | null
@@ -29712,6 +29825,7 @@ export namespace Prisma {
     price: number | null
     quantity: number | null
     total: number | null
+    fulfilledQuantity: number | null
     productId: string | null
     productVariantId: string | null
     orderId: string | null
@@ -29725,6 +29839,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity: number
     productId: number
     productVariantId: number
     orderId: number
@@ -29736,12 +29851,14 @@ export namespace Prisma {
     price?: true
     quantity?: true
     total?: true
+    fulfilledQuantity?: true
   }
 
   export type OrderItemSumAggregateInputType = {
     price?: true
     quantity?: true
     total?: true
+    fulfilledQuantity?: true
   }
 
   export type OrderItemMinAggregateInputType = {
@@ -29752,6 +29869,7 @@ export namespace Prisma {
     price?: true
     quantity?: true
     total?: true
+    fulfilledQuantity?: true
     productId?: true
     productVariantId?: true
     orderId?: true
@@ -29765,6 +29883,7 @@ export namespace Prisma {
     price?: true
     quantity?: true
     total?: true
+    fulfilledQuantity?: true
     productId?: true
     productVariantId?: true
     orderId?: true
@@ -29778,6 +29897,7 @@ export namespace Prisma {
     price?: true
     quantity?: true
     total?: true
+    fulfilledQuantity?: true
     productId?: true
     productVariantId?: true
     orderId?: true
@@ -29878,6 +29998,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity: number
     productId: string | null
     productVariantId: string | null
     orderId: string
@@ -29910,6 +30031,7 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     total?: boolean
+    fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
     orderId?: boolean
@@ -29926,6 +30048,7 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     total?: boolean
+    fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
     orderId?: boolean
@@ -29942,6 +30065,7 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     total?: boolean
+    fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
     orderId?: boolean
@@ -29958,12 +30082,13 @@ export namespace Prisma {
     price?: boolean
     quantity?: boolean
     total?: boolean
+    fulfilledQuantity?: boolean
     productId?: boolean
     productVariantId?: boolean
     orderId?: boolean
   }
 
-  export type OrderItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productName" | "variantName" | "sku" | "price" | "quantity" | "total" | "productId" | "productVariantId" | "orderId", ExtArgs["result"]["orderItem"]>
+  export type OrderItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "productName" | "variantName" | "sku" | "price" | "quantity" | "total" | "fulfilledQuantity" | "productId" | "productVariantId" | "orderId", ExtArgs["result"]["orderItem"]>
   export type OrderItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     product?: boolean | OrderItem$productArgs<ExtArgs>
     productVariant?: boolean | OrderItem$productVariantArgs<ExtArgs>
@@ -29995,6 +30120,7 @@ export namespace Prisma {
       price: number
       quantity: number
       total: number
+      fulfilledQuantity: number
       productId: string | null
       productVariantId: string | null
       orderId: string
@@ -30431,6 +30557,7 @@ export namespace Prisma {
     readonly price: FieldRef<"OrderItem", 'Float'>
     readonly quantity: FieldRef<"OrderItem", 'Int'>
     readonly total: FieldRef<"OrderItem", 'Float'>
+    readonly fulfilledQuantity: FieldRef<"OrderItem", 'Int'>
     readonly productId: FieldRef<"OrderItem", 'String'>
     readonly productVariantId: FieldRef<"OrderItem", 'String'>
     readonly orderId: FieldRef<"OrderItem", 'String'>
@@ -52124,6 +52251,1027 @@ export namespace Prisma {
 
 
   /**
+   * Model BackInStockRequest
+   */
+
+  export type AggregateBackInStockRequest = {
+    _count: BackInStockRequestCountAggregateOutputType | null
+    _min: BackInStockRequestMinAggregateOutputType | null
+    _max: BackInStockRequestMaxAggregateOutputType | null
+  }
+
+  export type BackInStockRequestMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    email: string | null
+    productId: string | null
+    variantId: string | null
+    notifiedAt: Date | null
+    businessId: string | null
+  }
+
+  export type BackInStockRequestMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    email: string | null
+    productId: string | null
+    variantId: string | null
+    notifiedAt: Date | null
+    businessId: string | null
+  }
+
+  export type BackInStockRequestCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    email: number
+    productId: number
+    variantId: number
+    notifiedAt: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type BackInStockRequestMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    email?: true
+    productId?: true
+    variantId?: true
+    notifiedAt?: true
+    businessId?: true
+  }
+
+  export type BackInStockRequestMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    email?: true
+    productId?: true
+    variantId?: true
+    notifiedAt?: true
+    businessId?: true
+  }
+
+  export type BackInStockRequestCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    email?: true
+    productId?: true
+    variantId?: true
+    notifiedAt?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type BackInStockRequestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BackInStockRequest to aggregate.
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackInStockRequests to fetch.
+     */
+    orderBy?: BackInStockRequestOrderByWithRelationInput | BackInStockRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BackInStockRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackInStockRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackInStockRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BackInStockRequests
+    **/
+    _count?: true | BackInStockRequestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BackInStockRequestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BackInStockRequestMaxAggregateInputType
+  }
+
+  export type GetBackInStockRequestAggregateType<T extends BackInStockRequestAggregateArgs> = {
+        [P in keyof T & keyof AggregateBackInStockRequest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBackInStockRequest[P]>
+      : GetScalarType<T[P], AggregateBackInStockRequest[P]>
+  }
+
+
+
+
+  export type BackInStockRequestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BackInStockRequestWhereInput
+    orderBy?: BackInStockRequestOrderByWithAggregationInput | BackInStockRequestOrderByWithAggregationInput[]
+    by: BackInStockRequestScalarFieldEnum[] | BackInStockRequestScalarFieldEnum
+    having?: BackInStockRequestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BackInStockRequestCountAggregateInputType | true
+    _min?: BackInStockRequestMinAggregateInputType
+    _max?: BackInStockRequestMaxAggregateInputType
+  }
+
+  export type BackInStockRequestGroupByOutputType = {
+    id: string
+    createdAt: Date
+    email: string
+    productId: string
+    variantId: string | null
+    notifiedAt: Date | null
+    businessId: string
+    _count: BackInStockRequestCountAggregateOutputType | null
+    _min: BackInStockRequestMinAggregateOutputType | null
+    _max: BackInStockRequestMaxAggregateOutputType | null
+  }
+
+  type GetBackInStockRequestGroupByPayload<T extends BackInStockRequestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BackInStockRequestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BackInStockRequestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BackInStockRequestGroupByOutputType[P]>
+            : GetScalarType<T[P], BackInStockRequestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BackInStockRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    email?: boolean
+    productId?: boolean
+    variantId?: boolean
+    notifiedAt?: boolean
+    businessId?: boolean
+  }, ExtArgs["result"]["backInStockRequest"]>
+
+  export type BackInStockRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    email?: boolean
+    productId?: boolean
+    variantId?: boolean
+    notifiedAt?: boolean
+    businessId?: boolean
+  }, ExtArgs["result"]["backInStockRequest"]>
+
+  export type BackInStockRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    email?: boolean
+    productId?: boolean
+    variantId?: boolean
+    notifiedAt?: boolean
+    businessId?: boolean
+  }, ExtArgs["result"]["backInStockRequest"]>
+
+  export type BackInStockRequestSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    email?: boolean
+    productId?: boolean
+    variantId?: boolean
+    notifiedAt?: boolean
+    businessId?: boolean
+  }
+
+  export type BackInStockRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "email" | "productId" | "variantId" | "notifiedAt" | "businessId", ExtArgs["result"]["backInStockRequest"]>
+
+  export type $BackInStockRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BackInStockRequest"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      email: string
+      productId: string
+      variantId: string | null
+      notifiedAt: Date | null
+      businessId: string
+    }, ExtArgs["result"]["backInStockRequest"]>
+    composites: {}
+  }
+
+  type BackInStockRequestGetPayload<S extends boolean | null | undefined | BackInStockRequestDefaultArgs> = $Result.GetResult<Prisma.$BackInStockRequestPayload, S>
+
+  type BackInStockRequestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BackInStockRequestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BackInStockRequestCountAggregateInputType | true
+    }
+
+  export interface BackInStockRequestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BackInStockRequest'], meta: { name: 'BackInStockRequest' } }
+    /**
+     * Find zero or one BackInStockRequest that matches the filter.
+     * @param {BackInStockRequestFindUniqueArgs} args - Arguments to find a BackInStockRequest
+     * @example
+     * // Get one BackInStockRequest
+     * const backInStockRequest = await prisma.backInStockRequest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BackInStockRequestFindUniqueArgs>(args: SelectSubset<T, BackInStockRequestFindUniqueArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BackInStockRequest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BackInStockRequestFindUniqueOrThrowArgs} args - Arguments to find a BackInStockRequest
+     * @example
+     * // Get one BackInStockRequest
+     * const backInStockRequest = await prisma.backInStockRequest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BackInStockRequestFindUniqueOrThrowArgs>(args: SelectSubset<T, BackInStockRequestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BackInStockRequest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestFindFirstArgs} args - Arguments to find a BackInStockRequest
+     * @example
+     * // Get one BackInStockRequest
+     * const backInStockRequest = await prisma.backInStockRequest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BackInStockRequestFindFirstArgs>(args?: SelectSubset<T, BackInStockRequestFindFirstArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BackInStockRequest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestFindFirstOrThrowArgs} args - Arguments to find a BackInStockRequest
+     * @example
+     * // Get one BackInStockRequest
+     * const backInStockRequest = await prisma.backInStockRequest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BackInStockRequestFindFirstOrThrowArgs>(args?: SelectSubset<T, BackInStockRequestFindFirstOrThrowArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BackInStockRequests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BackInStockRequests
+     * const backInStockRequests = await prisma.backInStockRequest.findMany()
+     * 
+     * // Get first 10 BackInStockRequests
+     * const backInStockRequests = await prisma.backInStockRequest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const backInStockRequestWithIdOnly = await prisma.backInStockRequest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BackInStockRequestFindManyArgs>(args?: SelectSubset<T, BackInStockRequestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BackInStockRequest.
+     * @param {BackInStockRequestCreateArgs} args - Arguments to create a BackInStockRequest.
+     * @example
+     * // Create one BackInStockRequest
+     * const BackInStockRequest = await prisma.backInStockRequest.create({
+     *   data: {
+     *     // ... data to create a BackInStockRequest
+     *   }
+     * })
+     * 
+     */
+    create<T extends BackInStockRequestCreateArgs>(args: SelectSubset<T, BackInStockRequestCreateArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BackInStockRequests.
+     * @param {BackInStockRequestCreateManyArgs} args - Arguments to create many BackInStockRequests.
+     * @example
+     * // Create many BackInStockRequests
+     * const backInStockRequest = await prisma.backInStockRequest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BackInStockRequestCreateManyArgs>(args?: SelectSubset<T, BackInStockRequestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BackInStockRequests and returns the data saved in the database.
+     * @param {BackInStockRequestCreateManyAndReturnArgs} args - Arguments to create many BackInStockRequests.
+     * @example
+     * // Create many BackInStockRequests
+     * const backInStockRequest = await prisma.backInStockRequest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BackInStockRequests and only return the `id`
+     * const backInStockRequestWithIdOnly = await prisma.backInStockRequest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BackInStockRequestCreateManyAndReturnArgs>(args?: SelectSubset<T, BackInStockRequestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BackInStockRequest.
+     * @param {BackInStockRequestDeleteArgs} args - Arguments to delete one BackInStockRequest.
+     * @example
+     * // Delete one BackInStockRequest
+     * const BackInStockRequest = await prisma.backInStockRequest.delete({
+     *   where: {
+     *     // ... filter to delete one BackInStockRequest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BackInStockRequestDeleteArgs>(args: SelectSubset<T, BackInStockRequestDeleteArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BackInStockRequest.
+     * @param {BackInStockRequestUpdateArgs} args - Arguments to update one BackInStockRequest.
+     * @example
+     * // Update one BackInStockRequest
+     * const backInStockRequest = await prisma.backInStockRequest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BackInStockRequestUpdateArgs>(args: SelectSubset<T, BackInStockRequestUpdateArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BackInStockRequests.
+     * @param {BackInStockRequestDeleteManyArgs} args - Arguments to filter BackInStockRequests to delete.
+     * @example
+     * // Delete a few BackInStockRequests
+     * const { count } = await prisma.backInStockRequest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BackInStockRequestDeleteManyArgs>(args?: SelectSubset<T, BackInStockRequestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BackInStockRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BackInStockRequests
+     * const backInStockRequest = await prisma.backInStockRequest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BackInStockRequestUpdateManyArgs>(args: SelectSubset<T, BackInStockRequestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BackInStockRequests and returns the data updated in the database.
+     * @param {BackInStockRequestUpdateManyAndReturnArgs} args - Arguments to update many BackInStockRequests.
+     * @example
+     * // Update many BackInStockRequests
+     * const backInStockRequest = await prisma.backInStockRequest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BackInStockRequests and only return the `id`
+     * const backInStockRequestWithIdOnly = await prisma.backInStockRequest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BackInStockRequestUpdateManyAndReturnArgs>(args: SelectSubset<T, BackInStockRequestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BackInStockRequest.
+     * @param {BackInStockRequestUpsertArgs} args - Arguments to update or create a BackInStockRequest.
+     * @example
+     * // Update or create a BackInStockRequest
+     * const backInStockRequest = await prisma.backInStockRequest.upsert({
+     *   create: {
+     *     // ... data to create a BackInStockRequest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BackInStockRequest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BackInStockRequestUpsertArgs>(args: SelectSubset<T, BackInStockRequestUpsertArgs<ExtArgs>>): Prisma__BackInStockRequestClient<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BackInStockRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestCountArgs} args - Arguments to filter BackInStockRequests to count.
+     * @example
+     * // Count the number of BackInStockRequests
+     * const count = await prisma.backInStockRequest.count({
+     *   where: {
+     *     // ... the filter for the BackInStockRequests we want to count
+     *   }
+     * })
+    **/
+    count<T extends BackInStockRequestCountArgs>(
+      args?: Subset<T, BackInStockRequestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BackInStockRequestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BackInStockRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BackInStockRequestAggregateArgs>(args: Subset<T, BackInStockRequestAggregateArgs>): Prisma.PrismaPromise<GetBackInStockRequestAggregateType<T>>
+
+    /**
+     * Group by BackInStockRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BackInStockRequestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BackInStockRequestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BackInStockRequestGroupByArgs['orderBy'] }
+        : { orderBy?: BackInStockRequestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BackInStockRequestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBackInStockRequestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BackInStockRequest model
+   */
+  readonly fields: BackInStockRequestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BackInStockRequest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BackInStockRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BackInStockRequest model
+   */
+  interface BackInStockRequestFieldRefs {
+    readonly id: FieldRef<"BackInStockRequest", 'String'>
+    readonly createdAt: FieldRef<"BackInStockRequest", 'DateTime'>
+    readonly email: FieldRef<"BackInStockRequest", 'String'>
+    readonly productId: FieldRef<"BackInStockRequest", 'String'>
+    readonly variantId: FieldRef<"BackInStockRequest", 'String'>
+    readonly notifiedAt: FieldRef<"BackInStockRequest", 'DateTime'>
+    readonly businessId: FieldRef<"BackInStockRequest", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BackInStockRequest findUnique
+   */
+  export type BackInStockRequestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which BackInStockRequest to fetch.
+     */
+    where: BackInStockRequestWhereUniqueInput
+  }
+
+  /**
+   * BackInStockRequest findUniqueOrThrow
+   */
+  export type BackInStockRequestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which BackInStockRequest to fetch.
+     */
+    where: BackInStockRequestWhereUniqueInput
+  }
+
+  /**
+   * BackInStockRequest findFirst
+   */
+  export type BackInStockRequestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which BackInStockRequest to fetch.
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackInStockRequests to fetch.
+     */
+    orderBy?: BackInStockRequestOrderByWithRelationInput | BackInStockRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BackInStockRequests.
+     */
+    cursor?: BackInStockRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackInStockRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackInStockRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BackInStockRequests.
+     */
+    distinct?: BackInStockRequestScalarFieldEnum | BackInStockRequestScalarFieldEnum[]
+  }
+
+  /**
+   * BackInStockRequest findFirstOrThrow
+   */
+  export type BackInStockRequestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which BackInStockRequest to fetch.
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackInStockRequests to fetch.
+     */
+    orderBy?: BackInStockRequestOrderByWithRelationInput | BackInStockRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BackInStockRequests.
+     */
+    cursor?: BackInStockRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackInStockRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackInStockRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BackInStockRequests.
+     */
+    distinct?: BackInStockRequestScalarFieldEnum | BackInStockRequestScalarFieldEnum[]
+  }
+
+  /**
+   * BackInStockRequest findMany
+   */
+  export type BackInStockRequestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Filter, which BackInStockRequests to fetch.
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BackInStockRequests to fetch.
+     */
+    orderBy?: BackInStockRequestOrderByWithRelationInput | BackInStockRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BackInStockRequests.
+     */
+    cursor?: BackInStockRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BackInStockRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BackInStockRequests.
+     */
+    skip?: number
+    distinct?: BackInStockRequestScalarFieldEnum | BackInStockRequestScalarFieldEnum[]
+  }
+
+  /**
+   * BackInStockRequest create
+   */
+  export type BackInStockRequestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BackInStockRequest.
+     */
+    data: XOR<BackInStockRequestCreateInput, BackInStockRequestUncheckedCreateInput>
+  }
+
+  /**
+   * BackInStockRequest createMany
+   */
+  export type BackInStockRequestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BackInStockRequests.
+     */
+    data: BackInStockRequestCreateManyInput | BackInStockRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BackInStockRequest createManyAndReturn
+   */
+  export type BackInStockRequestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * The data used to create many BackInStockRequests.
+     */
+    data: BackInStockRequestCreateManyInput | BackInStockRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BackInStockRequest update
+   */
+  export type BackInStockRequestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BackInStockRequest.
+     */
+    data: XOR<BackInStockRequestUpdateInput, BackInStockRequestUncheckedUpdateInput>
+    /**
+     * Choose, which BackInStockRequest to update.
+     */
+    where: BackInStockRequestWhereUniqueInput
+  }
+
+  /**
+   * BackInStockRequest updateMany
+   */
+  export type BackInStockRequestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BackInStockRequests.
+     */
+    data: XOR<BackInStockRequestUpdateManyMutationInput, BackInStockRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which BackInStockRequests to update
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * Limit how many BackInStockRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BackInStockRequest updateManyAndReturn
+   */
+  export type BackInStockRequestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * The data used to update BackInStockRequests.
+     */
+    data: XOR<BackInStockRequestUpdateManyMutationInput, BackInStockRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which BackInStockRequests to update
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * Limit how many BackInStockRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BackInStockRequest upsert
+   */
+  export type BackInStockRequestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BackInStockRequest to update in case it exists.
+     */
+    where: BackInStockRequestWhereUniqueInput
+    /**
+     * In case the BackInStockRequest found by the `where` argument doesn't exist, create a new BackInStockRequest with this data.
+     */
+    create: XOR<BackInStockRequestCreateInput, BackInStockRequestUncheckedCreateInput>
+    /**
+     * In case the BackInStockRequest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BackInStockRequestUpdateInput, BackInStockRequestUncheckedUpdateInput>
+  }
+
+  /**
+   * BackInStockRequest delete
+   */
+  export type BackInStockRequestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Filter which BackInStockRequest to delete.
+     */
+    where: BackInStockRequestWhereUniqueInput
+  }
+
+  /**
+   * BackInStockRequest deleteMany
+   */
+  export type BackInStockRequestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BackInStockRequests to delete
+     */
+    where?: BackInStockRequestWhereInput
+    /**
+     * Limit how many BackInStockRequests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BackInStockRequest without action
+   */
+  export type BackInStockRequestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -52286,6 +53434,7 @@ export namespace Prisma {
     customFields: 'customFields',
     bannerConfig: 'bannerConfig',
     popupConfig: 'popupConfig',
+    emailOverrides: 'emailOverrides',
     previewCustomFields: 'previewCustomFields',
     previewUpdatedAt: 'previewUpdatedAt',
     businessId: 'businessId'
@@ -52544,6 +53693,7 @@ export namespace Prisma {
     carrier: 'carrier',
     trackingNumber: 'trackingNumber',
     trackingUrl: 'trackingUrl',
+    items: 'items',
     orderId: 'orderId'
   };
 
@@ -52558,6 +53708,7 @@ export namespace Prisma {
     price: 'price',
     quantity: 'quantity',
     total: 'total',
+    fulfilledQuantity: 'fulfilledQuantity',
     productId: 'productId',
     productVariantId: 'productVariantId',
     orderId: 'orderId'
@@ -52870,6 +54021,19 @@ export namespace Prisma {
   };
 
   export type ShippingRateScalarFieldEnum = (typeof ShippingRateScalarFieldEnum)[keyof typeof ShippingRateScalarFieldEnum]
+
+
+  export const BackInStockRequestScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    email: 'email',
+    productId: 'productId',
+    variantId: 'variantId',
+    notifiedAt: 'notifiedAt',
+    businessId: 'businessId'
+  };
+
+  export type BackInStockRequestScalarFieldEnum = (typeof BackInStockRequestScalarFieldEnum)[keyof typeof BackInStockRequestScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -53761,6 +54925,7 @@ export namespace Prisma {
     customFields?: JsonNullableFilter<"SiteContent">
     bannerConfig?: JsonNullableFilter<"SiteContent">
     popupConfig?: JsonNullableFilter<"SiteContent">
+    emailOverrides?: JsonNullableFilter<"SiteContent">
     previewCustomFields?: JsonNullableFilter<"SiteContent">
     previewUpdatedAt?: DateTimeNullableFilter<"SiteContent"> | Date | string | null
     businessId?: StringFilter<"SiteContent"> | string
@@ -53795,6 +54960,7 @@ export namespace Prisma {
     customFields?: SortOrderInput | SortOrder
     bannerConfig?: SortOrderInput | SortOrder
     popupConfig?: SortOrderInput | SortOrder
+    emailOverrides?: SortOrderInput | SortOrder
     previewCustomFields?: SortOrderInput | SortOrder
     previewUpdatedAt?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -53833,6 +54999,7 @@ export namespace Prisma {
     customFields?: JsonNullableFilter<"SiteContent">
     bannerConfig?: JsonNullableFilter<"SiteContent">
     popupConfig?: JsonNullableFilter<"SiteContent">
+    emailOverrides?: JsonNullableFilter<"SiteContent">
     previewCustomFields?: JsonNullableFilter<"SiteContent">
     previewUpdatedAt?: DateTimeNullableFilter<"SiteContent"> | Date | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
@@ -53866,6 +55033,7 @@ export namespace Prisma {
     customFields?: SortOrderInput | SortOrder
     bannerConfig?: SortOrderInput | SortOrder
     popupConfig?: SortOrderInput | SortOrder
+    emailOverrides?: SortOrderInput | SortOrder
     previewCustomFields?: SortOrderInput | SortOrder
     previewUpdatedAt?: SortOrderInput | SortOrder
     businessId?: SortOrder
@@ -53905,6 +55073,7 @@ export namespace Prisma {
     customFields?: JsonNullableWithAggregatesFilter<"SiteContent">
     bannerConfig?: JsonNullableWithAggregatesFilter<"SiteContent">
     popupConfig?: JsonNullableWithAggregatesFilter<"SiteContent">
+    emailOverrides?: JsonNullableWithAggregatesFilter<"SiteContent">
     previewCustomFields?: JsonNullableWithAggregatesFilter<"SiteContent">
     previewUpdatedAt?: DateTimeNullableWithAggregatesFilter<"SiteContent"> | Date | string | null
     businessId?: StringWithAggregatesFilter<"SiteContent"> | string
@@ -55242,6 +56411,7 @@ export namespace Prisma {
     carrier?: StringNullableFilter<"OrderShipment"> | string | null
     trackingNumber?: StringNullableFilter<"OrderShipment"> | string | null
     trackingUrl?: StringNullableFilter<"OrderShipment"> | string | null
+    items?: JsonNullableFilter<"OrderShipment">
     orderId?: StringFilter<"OrderShipment"> | string
     order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
   }
@@ -55253,6 +56423,7 @@ export namespace Prisma {
     carrier?: SortOrderInput | SortOrder
     trackingNumber?: SortOrderInput | SortOrder
     trackingUrl?: SortOrderInput | SortOrder
+    items?: SortOrderInput | SortOrder
     orderId?: SortOrder
     order?: OrderOrderByWithRelationInput
   }
@@ -55267,6 +56438,7 @@ export namespace Prisma {
     carrier?: StringNullableFilter<"OrderShipment"> | string | null
     trackingNumber?: StringNullableFilter<"OrderShipment"> | string | null
     trackingUrl?: StringNullableFilter<"OrderShipment"> | string | null
+    items?: JsonNullableFilter<"OrderShipment">
     orderId?: StringFilter<"OrderShipment"> | string
     order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
   }, "id">
@@ -55278,6 +56450,7 @@ export namespace Prisma {
     carrier?: SortOrderInput | SortOrder
     trackingNumber?: SortOrderInput | SortOrder
     trackingUrl?: SortOrderInput | SortOrder
+    items?: SortOrderInput | SortOrder
     orderId?: SortOrder
     _count?: OrderShipmentCountOrderByAggregateInput
     _max?: OrderShipmentMaxOrderByAggregateInput
@@ -55294,6 +56467,7 @@ export namespace Prisma {
     carrier?: StringNullableWithAggregatesFilter<"OrderShipment"> | string | null
     trackingNumber?: StringNullableWithAggregatesFilter<"OrderShipment"> | string | null
     trackingUrl?: StringNullableWithAggregatesFilter<"OrderShipment"> | string | null
+    items?: JsonNullableWithAggregatesFilter<"OrderShipment">
     orderId?: StringWithAggregatesFilter<"OrderShipment"> | string
   }
 
@@ -55308,6 +56482,7 @@ export namespace Prisma {
     price?: FloatFilter<"OrderItem"> | number
     quantity?: IntFilter<"OrderItem"> | number
     total?: FloatFilter<"OrderItem"> | number
+    fulfilledQuantity?: IntFilter<"OrderItem"> | number
     productId?: StringNullableFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableFilter<"OrderItem"> | string | null
     orderId?: StringFilter<"OrderItem"> | string
@@ -55324,6 +56499,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
     productId?: SortOrderInput | SortOrder
     productVariantId?: SortOrderInput | SortOrder
     orderId?: SortOrder
@@ -55343,6 +56519,7 @@ export namespace Prisma {
     price?: FloatFilter<"OrderItem"> | number
     quantity?: IntFilter<"OrderItem"> | number
     total?: FloatFilter<"OrderItem"> | number
+    fulfilledQuantity?: IntFilter<"OrderItem"> | number
     productId?: StringNullableFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableFilter<"OrderItem"> | string | null
     orderId?: StringFilter<"OrderItem"> | string
@@ -55359,6 +56536,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
     productId?: SortOrderInput | SortOrder
     productVariantId?: SortOrderInput | SortOrder
     orderId?: SortOrder
@@ -55380,6 +56558,7 @@ export namespace Prisma {
     price?: FloatWithAggregatesFilter<"OrderItem"> | number
     quantity?: IntWithAggregatesFilter<"OrderItem"> | number
     total?: FloatWithAggregatesFilter<"OrderItem"> | number
+    fulfilledQuantity?: IntWithAggregatesFilter<"OrderItem"> | number
     productId?: StringNullableWithAggregatesFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableWithAggregatesFilter<"OrderItem"> | string | null
     orderId?: StringWithAggregatesFilter<"OrderItem"> | string
@@ -56988,6 +58167,68 @@ export namespace Prisma {
     priceCents?: IntWithAggregatesFilter<"ShippingRate"> | number
   }
 
+  export type BackInStockRequestWhereInput = {
+    AND?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
+    OR?: BackInStockRequestWhereInput[]
+    NOT?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
+    id?: StringFilter<"BackInStockRequest"> | string
+    createdAt?: DateTimeFilter<"BackInStockRequest"> | Date | string
+    email?: StringFilter<"BackInStockRequest"> | string
+    productId?: StringFilter<"BackInStockRequest"> | string
+    variantId?: StringNullableFilter<"BackInStockRequest"> | string | null
+    notifiedAt?: DateTimeNullableFilter<"BackInStockRequest"> | Date | string | null
+    businessId?: StringFilter<"BackInStockRequest"> | string
+  }
+
+  export type BackInStockRequestOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    email?: SortOrder
+    productId?: SortOrder
+    variantId?: SortOrderInput | SortOrder
+    notifiedAt?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+  }
+
+  export type BackInStockRequestWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
+    OR?: BackInStockRequestWhereInput[]
+    NOT?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
+    createdAt?: DateTimeFilter<"BackInStockRequest"> | Date | string
+    email?: StringFilter<"BackInStockRequest"> | string
+    productId?: StringFilter<"BackInStockRequest"> | string
+    variantId?: StringNullableFilter<"BackInStockRequest"> | string | null
+    notifiedAt?: DateTimeNullableFilter<"BackInStockRequest"> | Date | string | null
+    businessId?: StringFilter<"BackInStockRequest"> | string
+  }, "id">
+
+  export type BackInStockRequestOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    email?: SortOrder
+    productId?: SortOrder
+    variantId?: SortOrderInput | SortOrder
+    notifiedAt?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    _count?: BackInStockRequestCountOrderByAggregateInput
+    _max?: BackInStockRequestMaxOrderByAggregateInput
+    _min?: BackInStockRequestMinOrderByAggregateInput
+  }
+
+  export type BackInStockRequestScalarWhereWithAggregatesInput = {
+    AND?: BackInStockRequestScalarWhereWithAggregatesInput | BackInStockRequestScalarWhereWithAggregatesInput[]
+    OR?: BackInStockRequestScalarWhereWithAggregatesInput[]
+    NOT?: BackInStockRequestScalarWhereWithAggregatesInput | BackInStockRequestScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BackInStockRequest"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"BackInStockRequest"> | Date | string
+    email?: StringWithAggregatesFilter<"BackInStockRequest"> | string
+    productId?: StringWithAggregatesFilter<"BackInStockRequest"> | string
+    variantId?: StringNullableWithAggregatesFilter<"BackInStockRequest"> | string | null
+    notifiedAt?: DateTimeNullableWithAggregatesFilter<"BackInStockRequest"> | Date | string | null
+    businessId?: StringWithAggregatesFilter<"BackInStockRequest"> | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -57841,6 +59082,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutSiteContentInput
@@ -57874,6 +59116,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: Date | string | null
     businessId: string
@@ -57907,6 +59150,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutSiteContentNestedInput
@@ -57940,6 +59184,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -57973,6 +59218,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: Date | string | null
     businessId: string
@@ -58006,6 +59252,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -58038,6 +59285,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
@@ -59582,6 +60830,7 @@ export namespace Prisma {
     carrier?: string | null
     trackingNumber?: string | null
     trackingUrl?: string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
     order: OrderCreateNestedOneWithoutShipmentsInput
   }
 
@@ -59592,6 +60841,7 @@ export namespace Prisma {
     carrier?: string | null
     trackingNumber?: string | null
     trackingUrl?: string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -59602,6 +60852,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
     order?: OrderUpdateOneRequiredWithoutShipmentsNestedInput
   }
 
@@ -59612,6 +60863,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -59622,6 +60874,7 @@ export namespace Prisma {
     carrier?: string | null
     trackingNumber?: string | null
     trackingUrl?: string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
     orderId: string
   }
 
@@ -59632,6 +60885,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderShipmentUncheckedUpdateManyInput = {
@@ -59641,6 +60895,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
     orderId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -59652,6 +60907,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     product?: ProductCreateNestedOneWithoutOrderItemsInput
     productVariant?: ProductVariantCreateNestedOneWithoutOrderItemsInput
     order: OrderCreateNestedOneWithoutItemsInput
@@ -59665,6 +60921,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
     orderId: string
@@ -59678,6 +60935,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     product?: ProductUpdateOneWithoutOrderItemsNestedInput
     productVariant?: ProductVariantUpdateOneWithoutOrderItemsNestedInput
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
@@ -59691,6 +60949,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
@@ -59704,6 +60963,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
     orderId: string
@@ -59717,6 +60977,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
   }
 
   export type OrderItemUncheckedUpdateManyInput = {
@@ -59727,6 +60988,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
@@ -61494,6 +62756,76 @@ export namespace Prisma {
     priceCents?: IntFieldUpdateOperationsInput | number
   }
 
+  export type BackInStockRequestCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    productId: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    businessId: string
+  }
+
+  export type BackInStockRequestUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    productId: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    businessId: string
+  }
+
+  export type BackInStockRequestUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BackInStockRequestUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BackInStockRequestCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    productId: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    businessId: string
+  }
+
+  export type BackInStockRequestUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BackInStockRequestUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -62422,6 +63754,7 @@ export namespace Prisma {
     customFields?: SortOrder
     bannerConfig?: SortOrder
     popupConfig?: SortOrder
+    emailOverrides?: SortOrder
     previewCustomFields?: SortOrder
     previewUpdatedAt?: SortOrder
     businessId?: SortOrder
@@ -63446,6 +64779,7 @@ export namespace Prisma {
     carrier?: SortOrder
     trackingNumber?: SortOrder
     trackingUrl?: SortOrder
+    items?: SortOrder
     orderId?: SortOrder
   }
 
@@ -63482,6 +64816,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
     productId?: SortOrder
     productVariantId?: SortOrder
     orderId?: SortOrder
@@ -63491,6 +64826,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
   }
 
   export type OrderItemMaxOrderByAggregateInput = {
@@ -63501,6 +64837,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
     productId?: SortOrder
     productVariantId?: SortOrder
     orderId?: SortOrder
@@ -63514,6 +64851,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
     productId?: SortOrder
     productVariantId?: SortOrder
     orderId?: SortOrder
@@ -63523,6 +64861,7 @@ export namespace Prisma {
     price?: SortOrder
     quantity?: SortOrder
     total?: SortOrder
+    fulfilledQuantity?: SortOrder
   }
 
   export type DomainQueueCountOrderByAggregateInput = {
@@ -64480,6 +65819,36 @@ export namespace Prisma {
   export type ShippingRateSumOrderByAggregateInput = {
     tierIndex?: SortOrder
     priceCents?: SortOrder
+  }
+
+  export type BackInStockRequestCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    email?: SortOrder
+    productId?: SortOrder
+    variantId?: SortOrder
+    notifiedAt?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type BackInStockRequestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    email?: SortOrder
+    productId?: SortOrder
+    variantId?: SortOrder
+    notifiedAt?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type BackInStockRequestMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    email?: SortOrder
+    productId?: SortOrder
+    variantId?: SortOrder
+    notifiedAt?: SortOrder
+    businessId?: SortOrder
   }
 
   export type SessionCreateNestedManyWithoutUserInput = {
@@ -69205,6 +70574,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: Date | string | null
   }
@@ -69237,6 +70607,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: Date | string | null
   }
@@ -70041,6 +71412,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -70073,6 +71445,7 @@ export namespace Prisma {
     customFields?: NullableJsonNullValueInput | InputJsonValue
     bannerConfig?: NullableJsonNullValueInput | InputJsonValue
     popupConfig?: NullableJsonNullValueInput | InputJsonValue
+    emailOverrides?: NullableJsonNullValueInput | InputJsonValue
     previewCustomFields?: NullableJsonNullValueInput | InputJsonValue
     previewUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -71349,6 +72722,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productVariant?: ProductVariantCreateNestedOneWithoutOrderItemsInput
     order: OrderCreateNestedOneWithoutItemsInput
   }
@@ -71361,6 +72735,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productVariantId?: string | null
     orderId: string
   }
@@ -71759,6 +73134,7 @@ export namespace Prisma {
     price?: FloatFilter<"OrderItem"> | number
     quantity?: IntFilter<"OrderItem"> | number
     total?: FloatFilter<"OrderItem"> | number
+    fulfilledQuantity?: IntFilter<"OrderItem"> | number
     productId?: StringNullableFilter<"OrderItem"> | string | null
     productVariantId?: StringNullableFilter<"OrderItem"> | string | null
     orderId?: StringFilter<"OrderItem"> | string
@@ -71962,6 +73338,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     product?: ProductCreateNestedOneWithoutOrderItemsInput
     order: OrderCreateNestedOneWithoutItemsInput
   }
@@ -71974,6 +73351,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productId?: string | null
     orderId: string
   }
@@ -74805,6 +76183,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     product?: ProductCreateNestedOneWithoutOrderItemsInput
     productVariant?: ProductVariantCreateNestedOneWithoutOrderItemsInput
   }
@@ -74817,6 +76196,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
   }
@@ -74936,6 +76316,7 @@ export namespace Prisma {
     carrier?: string | null
     trackingNumber?: string | null
     trackingUrl?: string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderShipmentUncheckedCreateWithoutOrderInput = {
@@ -74945,6 +76326,7 @@ export namespace Prisma {
     carrier?: string | null
     trackingNumber?: string | null
     trackingUrl?: string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderShipmentCreateOrConnectWithoutOrderInput = {
@@ -75319,6 +76701,7 @@ export namespace Prisma {
     carrier?: StringNullableFilter<"OrderShipment"> | string | null
     trackingNumber?: StringNullableFilter<"OrderShipment"> | string | null
     trackingUrl?: StringNullableFilter<"OrderShipment"> | string | null
+    items?: JsonNullableFilter<"OrderShipment">
     orderId?: StringFilter<"OrderShipment"> | string
   }
 
@@ -82857,6 +84240,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productVariantId?: string | null
     orderId: string
   }
@@ -83007,6 +84391,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productVariant?: ProductVariantUpdateOneWithoutOrderItemsNestedInput
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
   }
@@ -83019,6 +84404,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
   }
@@ -83031,6 +84417,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
   }
@@ -83174,6 +84561,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productId?: string | null
     orderId: string
   }
@@ -83231,6 +84619,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     product?: ProductUpdateOneWithoutOrderItemsNestedInput
     order?: OrderUpdateOneRequiredWithoutItemsNestedInput
   }
@@ -83243,6 +84632,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
   }
@@ -83255,6 +84645,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: StringFieldUpdateOperationsInput | string
   }
@@ -83923,6 +85314,7 @@ export namespace Prisma {
     price: number
     quantity: number
     total: number
+    fulfilledQuantity?: number
     productId?: string | null
     productVariantId?: string | null
   }
@@ -83972,6 +85364,7 @@ export namespace Prisma {
     carrier?: string | null
     trackingNumber?: string | null
     trackingUrl?: string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderItemUpdateWithoutOrderInput = {
@@ -83982,6 +85375,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     product?: ProductUpdateOneWithoutOrderItemsNestedInput
     productVariant?: ProductVariantUpdateOneWithoutOrderItemsNestedInput
   }
@@ -83994,6 +85388,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -84006,6 +85401,7 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     total?: FloatFieldUpdateOperationsInput | number
+    fulfilledQuantity?: IntFieldUpdateOperationsInput | number
     productId?: NullableStringFieldUpdateOperationsInput | string | null
     productVariantId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -84133,6 +85529,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderShipmentUncheckedUpdateWithoutOrderInput = {
@@ -84142,6 +85539,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderShipmentUncheckedUpdateManyWithoutOrderInput = {
@@ -84151,6 +85549,7 @@ export namespace Prisma {
     carrier?: NullableStringFieldUpdateOperationsInput | string | null
     trackingNumber?: NullableStringFieldUpdateOperationsInput | string | null
     trackingUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    items?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrderCreateManyDiscountCodeInput = {

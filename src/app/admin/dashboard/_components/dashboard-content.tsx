@@ -45,11 +45,25 @@ type DashboardContentProps = {
     totalProducts: number;
     totalCustomers: number;
     todayRevenue: number;
+    /** Net (gross − refunds) over the trailing 7 days. */
     sevenDayRevenue: number;
+    sevenDayGrossRevenue: number;
+    sevenDayRefunded: number;
+    /** Net revenue over the prior 7-day window (days 14–8). */
+    prevSevenDayRevenue: number;
     sevenDayOrders: number;
+    prevSevenDayOrders: number;
+    /** Net (gross − refunds) over the trailing 30 days. */
     thirtyDayRevenue: number;
+    thirtyDayGrossRevenue: number;
+    thirtyDayRefunded: number;
+    /** Net revenue over the prior 30-day window (days 60–31). */
+    prevThirtyDayRevenue: number;
     thirtyDayPaidOrders: number;
+    prevThirtyDayPaidOrders: number;
   };
+  /** Optional Suspense-wrapped conversion-rate card (server-rendered). */
+  conversionCard?: React.ReactNode;
   ordersToFulfillCount: number;
   awaitingPaymentCount: number;
   recentOrders: Array<{
@@ -97,9 +111,50 @@ type DashboardContentProps = {
   }>;
 };
 
+/**
+ * Period-over-period delta chip: green up / red down, muted em dash when the
+ * prior period is zero (no baseline) or the metric is unchanged.
+ */
+function DeltaChip({
+  current,
+  previous,
+  compareLabel,
+}: {
+  current: number;
+  previous: number;
+  compareLabel: string;
+}) {
+  const pct =
+    previous > 0 ? Math.round(((current - previous) / previous) * 100) : null;
+
+  if (pct === null || pct === 0) {
+    return (
+      <p className="text-muted-foreground mt-1 text-xs">
+        &mdash; vs {compareLabel}
+      </p>
+    );
+  }
+
+  const up = pct > 0;
+  return (
+    <p
+      className={`mt-1 text-xs font-medium ${
+        up
+          ? "text-green-600 dark:text-green-500"
+          : "text-red-600 dark:text-red-500"
+      }`}
+    >
+      <span aria-hidden="true">{up ? "▲" : "▼"}</span>
+      <span className="sr-only">{up ? "Up" : "Down"}</span> {Math.abs(pct)}% vs{" "}
+      {compareLabel}
+    </p>
+  );
+}
+
 export function DashboardContent({
   business,
   stats,
+  conversionCard,
   ordersToFulfillCount,
   awaitingPaymentCount,
   recentOrders,
@@ -162,10 +217,15 @@ export function DashboardContent({
     revenue: (item._sum.total ?? 0) / 100,
   }));
 
-  // Average order value: 30-day paid revenue ÷ 30-day paid order count
+  // Average order value: 30-day net paid revenue ÷ 30-day paid order count,
+  // plus the same figure for the prior 30-day window for the delta chip.
   const aov =
     stats.thirtyDayPaidOrders > 0
       ? Math.round(stats.thirtyDayRevenue / stats.thirtyDayPaidOrders)
+      : 0;
+  const prevAov =
+    stats.prevThirtyDayPaidOrders > 0
+      ? Math.round(stats.prevThirtyDayRevenue / stats.prevThirtyDayPaidOrders)
       : 0;
 
   // Live storefront URL — prefer custom domain if configured
@@ -302,10 +362,22 @@ export function DashboardContent({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(stats.sevenDayRevenue)}
+                {formatCurrency(stats.sevenDayGrossRevenue)}
               </div>
+              <DeltaChip
+                current={stats.sevenDayRevenue}
+                previous={stats.prevSevenDayRevenue}
+                compareLabel="prior 7 days"
+              />
               <p className="text-muted-foreground mt-1 text-xs">
                 Last 7 days, paid orders
+                {stats.sevenDayRefunded > 0 && (
+                  <>
+                    {" "}
+                    &middot; &minus;{formatCurrency(stats.sevenDayRefunded)}{" "}
+                    refunded
+                  </>
+                )}
               </p>
             </CardContent>
           </Card>
@@ -320,6 +392,11 @@ export function DashboardContent({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.sevenDayOrders}</div>
+              <DeltaChip
+                current={stats.sevenDayOrders}
+                previous={stats.prevSevenDayOrders}
+                compareLabel="prior 7 days"
+              />
               <p className="text-muted-foreground mt-1 text-xs">
                 All time:{" "}
                 <span className="font-medium">{stats.totalOrders}</span>
@@ -337,11 +414,19 @@ export function DashboardContent({
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(aov)}</div>
+              <DeltaChip
+                current={aov}
+                previous={prevAov}
+                compareLabel="prior 30 days"
+              />
               <p className="text-muted-foreground mt-1 text-xs">
                 30-day avg · {stats.thirtyDayPaidOrders} paid orders
               </p>
             </CardContent>
           </Card>
+
+          {/* Conversion Rate (streams in when analytics is configured) */}
+          {conversionCard}
         </div>
 
         {/* Two Column Layout */}
@@ -536,6 +621,26 @@ export function DashboardContent({
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Revenue (Last 30 Days)</CardTitle>
+            {chartData.length > 0 && (
+              <div>
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-2xl font-bold">
+                    {formatCurrency(stats.thirtyDayGrossRevenue)}
+                  </span>
+                  {stats.thirtyDayRefunded > 0 && (
+                    <span className="text-muted-foreground text-xs">
+                      &minus;{formatCurrency(stats.thirtyDayRefunded)} refunded
+                      &middot; {formatCurrency(stats.thirtyDayRevenue)} net
+                    </span>
+                  )}
+                </div>
+                <DeltaChip
+                  current={stats.thirtyDayRevenue}
+                  previous={stats.prevThirtyDayRevenue}
+                  compareLabel="prior 30 days"
+                />
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             {chartData.length === 0 ? (

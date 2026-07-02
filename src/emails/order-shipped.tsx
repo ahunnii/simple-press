@@ -12,11 +12,14 @@ type OrderShippedEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   orderStatusUrl?: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function OrderShippedEmail({
   orderNumber,
   customerName,
+  introText,
   trackingNumber,
   trackingUrl,
   carrier,
@@ -32,6 +35,12 @@ export default function OrderShippedEmail({
       logoUrl={businessLogoUrl}
     >
       <Text style={heading}>Your Order Has Shipped! 📦</Text>
+
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
 
       <Text style={paragraph}>Hi {customerName},</Text>
 

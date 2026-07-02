@@ -5,6 +5,7 @@ import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { DarkTrendVariantSelector } from "./dark-trend-variant-selector";
 
@@ -53,14 +54,24 @@ export function DarkTrendProductActions({
           </p>
         </div>
       ) : !inStock ? (
-        <button
-          type="button"
-          aria-disabled="true"
-          onClick={(e) => e.preventDefault()}
-          className="bg-primary hover:bg-primary/90 inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase opacity-50 transition-all"
-        >
-          Out of Stock
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={(e) => e.preventDefault()}
+            className="bg-primary hover:bg-primary/90 inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase opacity-50 transition-all"
+          >
+            Out of Stock
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            className="text-white"
+            messageClassName="text-sm text-white/70"
+            inputClassName="rounded-md border-white/20 placeholder:text-white/40"
+            buttonClassName="rounded-md border-white/40"
+          />
+        </div>
       ) : (
         <>
           {/* Visually-hidden live region for add-to-cart announcements */}

@@ -44,11 +44,19 @@ type TeamList = RouterOutputs["team"]["list"];
 type Membership = TeamList["memberships"][number];
 type PendingInvite = TeamList["pendingInvites"][number];
 
+type TeamRole = "OWNER" | "MANAGER" | "STAFF";
+
+const ROLE_LABELS: Record<TeamRole, string> = {
+  OWNER: "Owner",
+  MANAGER: "Manager",
+  STAFF: "Staff",
+};
+
 interface Props {
   memberships: Membership[];
   pendingInvites: PendingInvite[];
   currentUserId: string | null;
-  currentUserRole: "OWNER" | "MANAGER" | null;
+  currentUserRole: TeamRole | null;
 }
 
 export function TeamMembers({
@@ -76,7 +84,7 @@ export function TeamMembers({
   // Invite dialog state
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"OWNER" | "MANAGER">("MANAGER");
+  const [inviteRole, setInviteRole] = useState<TeamRole>("MANAGER");
 
   const inviteMutation = api.team.invite.useMutation({
     onSuccess: () => {
@@ -167,9 +175,7 @@ export function TeamMembers({
                     <Label htmlFor="invite-role">Role</Label>
                     <Select
                       value={inviteRole}
-                      onValueChange={(v) =>
-                        setInviteRole(v as "OWNER" | "MANAGER")
-                      }
+                      onValueChange={(v) => setInviteRole(v as TeamRole)}
                     >
                       <SelectTrigger id="invite-role" className="mt-2">
                         <SelectValue />
@@ -178,14 +184,18 @@ export function TeamMembers({
                         <SelectItem value="MANAGER">
                           Manager — operational access
                         </SelectItem>
+                        <SelectItem value="STAFF">
+                          Staff — fulfillment only
+                        </SelectItem>
                         <SelectItem value="OWNER">
                           Owner — full control
                         </SelectItem>
                       </SelectContent>
                     </Select>
                     <p className="text-muted-foreground mt-1 text-xs">
-                      Managers can manage orders, products, and content but
-                      cannot invite or remove team members.
+                      {inviteRole === "STAFF"
+                        ? "Can view and fulfill orders only."
+                        : "Managers can manage orders, products, and content but cannot invite or remove team members."}
                     </p>
                   </div>
                 </div>
@@ -257,7 +267,7 @@ export function TeamMembers({
                           onValueChange={(v) =>
                             changeRoleMutation.mutate({
                               membershipId: m.id,
-                              role: v as "OWNER" | "MANAGER",
+                              role: v as TeamRole,
                             })
                           }
                           disabled={changeRoleMutation.isPending}
@@ -268,6 +278,9 @@ export function TeamMembers({
                           <SelectContent>
                             <SelectItem value="OWNER">Owner</SelectItem>
                             <SelectItem value="MANAGER">Manager</SelectItem>
+                            <SelectItem value="STAFF">
+                              Staff — fulfillment only
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
@@ -282,7 +295,7 @@ export function TeamMembers({
                               Owner
                             </>
                           ) : (
-                            "Manager"
+                            (ROLE_LABELS[m.role as TeamRole] ?? m.role)
                           )}
                         </Badge>
                       )}
@@ -359,7 +372,7 @@ export function TeamMembers({
                     <td className="px-6 py-3">{inv.email}</td>
                     <td className="px-6 py-3">
                       <Badge variant="outline">
-                        {inv.role === "OWNER" ? "Owner" : "Manager"}
+                        {ROLE_LABELS[inv.role as TeamRole] ?? inv.role}
                       </Badge>
                     </td>
                     <td className="text-muted-foreground px-6 py-3">

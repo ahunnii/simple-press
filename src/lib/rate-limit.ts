@@ -127,6 +127,13 @@ export const checkoutLimiter = makeLazy({
   keyPrefix: "rl:checkout",
 });
 
+// 10 attempts per 15 minutes per IP — for back-in-stock notification signups
+export const backInStockLimiter = makeLazy({
+  points: 10,
+  duration: 900,
+  keyPrefix: "rl:back-in-stock",
+});
+
 /**
  * Extracts a best-effort client IP from Next.js request headers.
  * Falls back to a generic key so rate limiting always applies.

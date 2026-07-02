@@ -7,10 +7,13 @@ type AbandonedCheckoutEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   businessUrl: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function AbandonedCheckoutEmail({
   customerName,
+  introText,
   businessName,
   businessLogoUrl,
   businessUrl,
@@ -22,6 +25,12 @@ export default function AbandonedCheckoutEmail({
       logoUrl={businessLogoUrl}
     >
       <Text style={heading}>You left items in your cart</Text>
+
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
 
       <Text style={paragraph}>Hi {customerName ?? "there"},</Text>
 

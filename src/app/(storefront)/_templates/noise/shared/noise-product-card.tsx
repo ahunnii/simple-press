@@ -10,6 +10,7 @@ import { formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -135,6 +136,19 @@ export function NoiseProductCard({ product, index }: Props) {
             {productStatus?.badgeLabel}
           </div>
         )}
+
+        {/* Wishlist heart — top-right (edition stamp is top-left); sharp
+            corners + bone/ink palette; z-10 stays above the card-link ::after */}
+        <WishlistButton
+          item={{
+            productId: product.id,
+            name: product.name,
+            slug: product.slug,
+            price: productStatus.displayPrice,
+            imageUrl: product.images[0]?.url ?? null,
+          }}
+          className="absolute top-2.5 right-2.5 z-10 rounded-none bg-[var(--vn-bone)] text-[var(--vn-ink)]"
+        />
 
         {/* Add-to-cart bar — slides up on hover. z-10 keeps it above the
             stretched card link (::after) so it stays independently clickable. */}

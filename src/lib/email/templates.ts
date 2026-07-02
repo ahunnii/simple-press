@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
+import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import DisputeAlertEmail from "~/emails/dispute-alert";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
+import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
@@ -16,13 +18,16 @@ import OrderStatusLinkEmail from "~/emails/order-status-link";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
-import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
 
 import { getBusinessUrl } from "~/lib/business-url";
+import { applySubjectTemplate } from "~/lib/email/customization";
+import { getEmailOverrides } from "~/lib/email/overrides.server";
 import { createOrderStatusToken } from "~/lib/order-status-token";
+
+import { EMAIL_FROM, sendEmail } from "./send";
 
 /**
  * Build a signed guest order-status URL for an order, or undefined
@@ -35,8 +40,6 @@ function buildOrderStatusUrl(
   if (!orderId) return undefined;
   return `${businessUrl}/order-status/${createOrderStatusToken(orderId)}`;
 }
-
-import { EMAIL_FROM, sendEmail } from "./send";
 
 // Order Confirmation
 export async function sendOrderConfirmation(params: {
@@ -70,18 +73,27 @@ export async function sendOrderConfirmation(params: {
   const businessUrl = getBusinessUrl(params.business);
   const orderStatusUrl = buildOrderStatusUrl(businessUrl, params.orderId);
   const isPickup = params.deliveryMethod === "pickup";
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-confirmation"];
+  const defaultSubject = isPickup
+    ? `Order #${params.orderNumber} confirmed — pickup details inside`
+    : `Order #${params.orderNumber} Confirmed`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: isPickup
-      ? `Order #${params.orderNumber} confirmed — pickup details inside`
-      : `Order #${params.orderNumber} Confirmed`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          orderNumber: params.orderNumber,
+          businessName: params.business.name,
+        })
+      : defaultSubject,
     react: OrderConfirmationEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
+      introText: override?.introText,
       items: params.items,
       subtotal: params.subtotal,
       shipping: params.shipping,
@@ -190,16 +202,24 @@ export async function sendOrderShipped(params: {
 }) {
   const businessUrl = getBusinessUrl(params.business);
   const orderStatusUrl = buildOrderStatusUrl(businessUrl, params.orderId);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-shipped"];
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name, // ← NEW
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: `Order #${params.orderNumber} Has Shipped!`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          orderNumber: params.orderNumber,
+          businessName: params.business.name,
+        })
+      : `Order #${params.orderNumber} Has Shipped!`,
     react: OrderShippedEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
+      introText: override?.introText,
       trackingNumber: params.trackingNumber,
       trackingUrl: params.trackingUrl,
       carrier: params.carrier,
@@ -232,16 +252,24 @@ export async function sendOrderFulfilled(params: {
   };
 }) {
   const businessUrl = getBusinessUrl(params.business);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-fulfilled"];
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: `Order #${params.orderNumber} has been fulfilled`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          orderNumber: params.orderNumber,
+          businessName: params.business.name,
+        })
+      : `Order #${params.orderNumber} has been fulfilled`,
     react: OrderFulfilledEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
+      introText: override?.introText,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
@@ -274,18 +302,27 @@ export async function sendOrderRefunded(params: {
   };
 }) {
   const businessUrl = getBusinessUrl(params.business);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-refunded"];
+  const defaultSubject = params.isFullRefund
+    ? `Refund for order #${params.orderNumber}`
+    : `Partial refund for order #${params.orderNumber}`;
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: params.isFullRefund
-      ? `Refund for order #${params.orderNumber}`
-      : `Partial refund for order #${params.orderNumber}`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          orderNumber: params.orderNumber,
+          businessName: params.business.name,
+        })
+      : defaultSubject,
     react: OrderRefundedEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
+      introText: override?.introText,
       refundAmountCents: params.refundAmountCents,
       orderTotalCents: params.orderTotalCents,
       isFullRefund: params.isFullRefund,
@@ -361,16 +398,24 @@ export async function sendOrderCancelled(params: {
   };
 }) {
   const businessUrl = getBusinessUrl(params.business);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-cancelled"];
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: `Order #${params.orderNumber} has been cancelled`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          orderNumber: params.orderNumber,
+          businessName: params.business.name,
+        })
+      : `Order #${params.orderNumber} has been cancelled`,
     react: OrderCancelledEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
+      introText: override?.introText,
       reason: params.reason,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
@@ -436,15 +481,22 @@ export async function sendAbandonedCheckoutEmail(params: {
   idempotencyKey?: string;
 }) {
   const businessUrl = getBusinessUrl(params.business);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["abandoned-checkout"];
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: `You left items in your cart at ${params.business.name}`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : `You left items in your cart at ${params.business.name}`,
     react: AbandonedCheckoutEmail({
       customerName: params.customerName ?? undefined,
+      introText: override?.introText,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
@@ -691,16 +743,24 @@ export async function sendOrderReadyForPickup(params: {
   };
 }): Promise<ReturnType<typeof sendEmail>> {
   const businessUrl = getBusinessUrl(params.business);
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["order-ready-for-pickup"];
 
   return sendEmail({
     from: EMAIL_FROM.ORDERS,
     fromName: params.business.name,
     to: params.to,
     replyTo: params.business.ownerEmail,
-    subject: `Order #${params.orderNumber} is ready for pickup`,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          orderNumber: params.orderNumber,
+          businessName: params.business.name,
+        })
+      : `Order #${params.orderNumber} is ready for pickup`,
     react: OrderReadyForPickupEmail({
       orderNumber: params.orderNumber,
       customerName: params.customerName,
+      introText: override?.introText,
       businessName: params.business.name,
       businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
       businessUrl,
@@ -786,7 +846,7 @@ export async function sendTeamInviteEmail({
   to: string;
   businessName: string;
   inviteUrl: string;
-  role: "OWNER" | "MANAGER";
+  role: "OWNER" | "MANAGER" | "STAFF";
   logoUrl?: string;
   ownerEmail?: string;
 }) {
@@ -804,5 +864,46 @@ export async function sendTeamInviteEmail({
       ownerEmail,
     }),
     tags: [{ name: "category", value: "team_invite" }],
+  });
+}
+
+// Back in stock — notify a shopper who asked to hear when an item returned
+export async function sendBackInStockEmail(params: {
+  to: string;
+  productName: string;
+  variantName?: string;
+  productUrl: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+}) {
+  const displayName = params.variantName
+    ? `${params.productName} (${params.variantName})`
+    : params.productName;
+
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.ownerEmail,
+    subject: `${displayName} is back in stock`,
+    react: BackInStockEmail({
+      productName: params.productName,
+      variantName: params.variantName,
+      productUrl: params.productUrl,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "back_in_stock" },
+      { name: "business", value: params.business.subdomain },
+    ],
   });
 }

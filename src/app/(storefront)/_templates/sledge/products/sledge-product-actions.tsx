@@ -5,6 +5,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { NoiseVariantSelector } from "./noise-variant-selector";
 
@@ -132,16 +133,26 @@ export function SledgeProductActions({
 
       {/* S-8: use aria-disabled instead of disabled so it stays focusable */}
       {!inStock && (
-        <button
-          type="button"
-          aria-disabled="true"
-          onClick={() => {
-            /* no-op: item is sold out */
-          }}
-          className="w-full cursor-not-allowed rounded-sm border border-[var(--sl-border-input)] py-3 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink-soft)] uppercase"
-        >
-          Sold Out
-        </button>
+        <>
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={() => {
+              /* no-op: item is sold out */
+            }}
+            className="w-full cursor-not-allowed rounded-sm border border-[var(--sl-border-input)] py-3 font-sans text-xs tracking-[0.16em] text-[var(--sl-ink-soft)] uppercase"
+          >
+            Sold Out
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            className="mt-1"
+            message="Get notified when it's back in stock."
+            messageClassName="sl-eyebrow font-sans text-xs tracking-[0.12em] uppercase"
+            inputClassName="rounded-sm border-[var(--sl-border-input)] font-sans"
+            buttonClassName="rounded-sm border-[var(--sl-ink)] font-sans text-xs tracking-[0.16em] uppercase"
+          />
+        </>
       )}
     </div>
   );

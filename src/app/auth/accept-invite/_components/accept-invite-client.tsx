@@ -21,7 +21,7 @@ interface Props {
   invite: {
     businessName: string;
     email: string;
-    role: "OWNER" | "MANAGER";
+    role: "OWNER" | "MANAGER" | "STAFF";
   } | null;
   errorMessage: string | null;
 }
@@ -42,7 +42,12 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
     },
   });
 
-  const roleLabel = invite?.role === "OWNER" ? "Owner" : "Manager";
+  const roleLabel =
+    invite?.role === "OWNER"
+      ? "Owner"
+      : invite?.role === "STAFF"
+        ? "Staff"
+        : "Manager";
 
   // Error state
   if (errorMessage ?? !invite) {

@@ -4,6 +4,7 @@ import { Check, Minus, Plus, ShoppingBag } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { ModernVariantSelector } from "./modern-variant-selector";
 
@@ -43,14 +44,23 @@ export function ModernProductActions({ product }: Props) {
           </p>
         </div>
       ) : !inStock ? (
-        <button
-          type="button"
-          aria-disabled="true"
-          onClick={(e) => e.preventDefault()}
-          className="boty-shadow bg-primary text-primary-foreground flex flex-1 cursor-not-allowed items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide opacity-50 transition-opacity"
-        >
-          Out of Stock
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={(e) => e.preventDefault()}
+            className="boty-shadow bg-primary text-primary-foreground flex flex-1 cursor-not-allowed items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide opacity-50 transition-opacity"
+          >
+            Out of Stock
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            messageClassName="text-muted-foreground text-sm"
+            inputClassName="border-border rounded-none"
+            buttonClassName="rounded-none tracking-wide"
+          />
+        </div>
       ) : (
         <>
           {canAddMore && (

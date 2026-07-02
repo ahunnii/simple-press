@@ -34,7 +34,7 @@ export function AddMembershipButton({ userId }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [businessId, setBusinessId] = useState<string>("");
-  const [role, setRole] = useState<"OWNER" | "MANAGER">("MANAGER");
+  const [role, setRole] = useState<"OWNER" | "MANAGER" | "STAFF">("MANAGER");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: businessesData } = api.platform.listBusinesses.useQuery();
@@ -104,7 +104,9 @@ export function AddMembershipButton({ userId }: Props) {
               <Label>Role</Label>
               <RadioGroup
                 value={role}
-                onValueChange={(v) => setRole(v as "OWNER" | "MANAGER")}
+                onValueChange={(v) =>
+                  setRole(v as "OWNER" | "MANAGER" | "STAFF")
+                }
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="OWNER" id="add-owner" />
@@ -124,6 +126,17 @@ export function AddMembershipButton({ userId }: Props) {
                       <div className="font-medium">Manager</div>
                       <div className="text-muted-foreground text-sm">
                         Operational access to the business
+                      </div>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="STAFF" id="add-staff" />
+                  <Label htmlFor="add-staff" className="font-normal">
+                    <div>
+                      <div className="font-medium">Staff</div>
+                      <div className="text-muted-foreground text-sm">
+                        Can view and fulfill orders only
                       </div>
                     </div>
                   </Label>

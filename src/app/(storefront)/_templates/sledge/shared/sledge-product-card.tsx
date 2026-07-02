@@ -9,6 +9,7 @@ import { formatPrice } from "~/lib/prices";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -99,6 +100,19 @@ export function NoiseProductCard({ product, index: _index }: Props) {
           </div>
         )}
       </Link>
+
+      {/* Wishlist heart — top-right of the image (badge is top-left); sits as
+          a sibling of the image link so it's never a <button> inside an <a> */}
+      <WishlistButton
+        item={{
+          productId: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: productStatus.displayPrice,
+          imageUrl: product.images[0]?.url ?? null,
+        }}
+        className="absolute top-2.5 right-2.5 z-10"
+      />
 
       {/*
        * Single meta section — no duplicate panel.
