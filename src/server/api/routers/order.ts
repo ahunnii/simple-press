@@ -490,23 +490,58 @@ export const orderRouter = createTRPCRouter({
         ];
       }
 
-      const orders = await ctx.db.order.findMany({
-        where,
-        include: {
-          items: true,
-          _count: {
-            select: {
-              inventoryHistory: { where: { reason: "oversell" } },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      });
+      // Pagination — mirrors product.secureList
+      const pageSize = 50;
+      const page = input?.page ?? 1;
+      const skip = (page - 1) * pageSize;
 
-      return orders.map((order) => ({
-        ...order,
-        hasOversell: order._count.inventoryHistory > 0,
-      }));
+      // Stats are computed over the FULL filtered set (not just the page).
+      // Revenue excludes fully refunded orders and subtracts partial refunds.
+      const [orders, totalCount, paidOrders, revenueAgg] =
+        await ctx.db.$transaction([
+          ctx.db.order.findMany({
+            where,
+            include: {
+              items: true,
+              _count: {
+                select: {
+                  inventoryHistory: { where: { reason: "oversell" } },
+                },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: pageSize,
+          }),
+          ctx.db.order.count({ where }),
+          ctx.db.order.count({
+            where: { AND: [where, { paymentStatus: "paid" }] },
+          }),
+          ctx.db.order.aggregate({
+            where: { AND: [where, { paymentStatus: { not: "refunded" } }] },
+            _sum: { total: true, refundAmountCents: true },
+          }),
+        ]);
+
+      const totalRevenue =
+        (revenueAgg._sum.total ?? 0) - (revenueAgg._sum.refundAmountCents ?? 0);
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return {
+        orders: orders.map((order) => ({
+          ...order,
+          hasOversell: order._count.inventoryHistory > 0,
+        })),
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+        stats: {
+          totalRevenue,
+          totalOrders: totalCount,
+          paidOrders,
+        },
+      };
     }),
 
   getById: ownerAdminProcedure
@@ -610,19 +645,42 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      // The idempotency key is stable for a given (order, prior-refund-state,
+      // amount) so a double-clicked or retried mutation reuses the same Stripe
+      // refund instead of creating a second one. metadata.source lets the
+      // charge.refunded webhook skip the customer email for refunds we already
+      // email about here.
       const stripeRefund = await stripeClient.refunds.create(
         {
           payment_intent: order.stripePaymentIntentId,
           amount: input.amount,
           reason: (input.reason ??
             "requested_by_customer") as Stripe.RefundCreateParams.Reason,
+          metadata: { source: "simplepress", orderId: order.id },
         },
         {
           stripeAccount: order.business.stripeAccountId!,
+          idempotencyKey: `refund:${order.id}:${alreadyRefunded}:${input.amount}`,
         },
       );
 
-      const newTotalRefunded = alreadyRefunded + input.amount;
+      // Read the authoritative cumulative refunded amount back from the
+      // charge, so concurrent refunds can't undercount each other in the DB.
+      let newTotalRefunded = alreadyRefunded + input.amount;
+      const chargeId =
+        typeof stripeRefund.charge === "string"
+          ? stripeRefund.charge
+          : stripeRefund.charge?.id;
+      if (chargeId) {
+        try {
+          const charge = await stripeClient.charges.retrieve(chargeId, {
+            stripeAccount: order.business.stripeAccountId!,
+          });
+          newTotalRefunded = charge.amount_refunded;
+        } catch {
+          // fall back to the locally computed total
+        }
+      }
       const isFullRefund = newTotalRefunded >= order.total;
       const reasonLabel = input.reason
         ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)

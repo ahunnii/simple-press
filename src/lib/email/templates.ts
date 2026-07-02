@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
+import DisputeAlertEmail from "~/emails/dispute-alert";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
@@ -268,6 +269,48 @@ export async function sendOrderRefunded(params: {
     }),
     tags: [
       { name: "category", value: "order_refunded" },
+      { name: "business", value: params.business.subdomain },
+    ],
+  });
+}
+
+// Dispute Alert (owner)
+export async function sendDisputeAlert(params: {
+  to: string;
+  orderNumber: number;
+  disputeAmountCents: number;
+  reason: string;
+  evidenceDueBy?: Date | null;
+  business: {
+    name: string;
+    subdomain: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+  };
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.ORDERS,
+    fromName: params.business.name,
+    to: params.to,
+    subject: `Payment dispute opened on order #${params.orderNumber}`,
+    react: DisputeAlertEmail({
+      orderNumber: params.orderNumber,
+      disputeAmountFormatted: `$${(params.disputeAmountCents / 100).toFixed(2)}`,
+      reason: params.reason,
+      evidenceDueBy: params.evidenceDueBy
+        ? params.evidenceDueBy.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : undefined,
+      stripeDashboardUrl: "https://dashboard.stripe.com/disputes",
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "dispute_alert" },
       { name: "business", value: params.business.subdomain },
     ],
   });

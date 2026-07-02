@@ -9,23 +9,26 @@ import {
 
 import { TrailHeader } from "../_components/trail-header";
 import { CustomerFilters } from "./_components/customer-filters";
+import { CustomersPagination } from "./_components/customers-pagination";
 import { CustomersTable } from "./_components/customers-table";
 
 type Props = {
   searchParams: Promise<{
     search?: string;
+    page?: string;
   }>;
 };
 
 export default async function CustomersPage({ searchParams }: Props) {
   const params = await searchParams;
+  const page = params.page ? Math.max(1, parseInt(params.page, 10)) : undefined;
 
-  const customers = await api.customer
-    .list({ search: params.search })
+  const result = await api.customer
+    .list({ search: params.search, page })
     .catch(rethrowTrpcForErrorBoundary);
 
-  const totalCustomers = customers.length;
-  const marketingCount = customers.filter((c) => c.acceptsMarketing).length;
+  const { customers, totalCount, totalPages, stats } = result;
+  const { totalCustomers, marketingCount } = stats;
 
   return (
     <>
@@ -56,7 +59,7 @@ export default async function CustomersPage({ searchParams }: Props) {
           </div>
         )}
 
-        <CustomerFilters customerCount={totalCustomers} />
+        <CustomerFilters customerCount={totalCount} />
 
         {customers.length === 0 ? (
           <Card>
@@ -70,7 +73,15 @@ export default async function CustomersPage({ searchParams }: Props) {
             </CardHeader>
           </Card>
         ) : (
-          <CustomersTable customers={customers} />
+          <>
+            <CustomersTable customers={customers} />
+            <CustomersPagination
+              page={result.page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={result.pageSize}
+            />
+          </>
         )}
       </div>
     </>

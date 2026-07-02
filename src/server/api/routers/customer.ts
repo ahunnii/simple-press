@@ -1,3 +1,4 @@
+import type { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -628,25 +629,62 @@ export const customerRouter = createTRPCRouter({
     }),
 
   list: ownerAdminProcedure
-    .input(z.object({ search: z.string().optional() }))
+    .input(
+      z.object({
+        search: z.string().optional(),
+        page: z.coerce.number().int().positive().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const search = input.search?.trim();
 
-      return ctx.db.customer.findMany({
-        where: {
-          businessId,
-          ...(search
-            ? {
-                OR: [
-                  { email: { contains: search, mode: "insensitive" } },
-                  { firstName: { contains: search, mode: "insensitive" } },
-                  { lastName: { contains: search, mode: "insensitive" } },
-                ],
-              }
-            : {}),
+      const where = {
+        businessId,
+        ...(search
+          ? {
+              OR: [
+                { email: { contains: search, mode: "insensitive" } },
+                { firstName: { contains: search, mode: "insensitive" } },
+                { lastName: { contains: search, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      } satisfies Prisma.CustomerWhereInput;
+
+      // Pagination — mirrors product.secureList
+      const pageSize = 50;
+      const page = input.page ?? 1;
+      const skip = (page - 1) * pageSize;
+
+      // Stats are computed over the FULL filtered set (not just the page).
+      const [customers, totalCount, marketingCount] = await ctx.db.$transaction(
+        [
+          ctx.db.customer.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: pageSize,
+          }),
+          ctx.db.customer.count({ where }),
+          ctx.db.customer.count({
+            where: { AND: [where, { acceptsMarketing: true }] },
+          }),
+        ],
+      );
+
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return {
+        customers,
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+        stats: {
+          totalCustomers: totalCount,
+          marketingCount,
         },
-        orderBy: { createdAt: "desc" },
-      });
+      };
     }),
 });

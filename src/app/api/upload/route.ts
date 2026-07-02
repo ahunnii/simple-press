@@ -238,10 +238,13 @@ const router: Router = {
         };
       },
     }),
+    // Reachable by non-members (invite code or any logged-in shopper), so the
+    // size cap matters here more than anywhere else.
     testimonials: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
       maxFiles: 5,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, clientMetadata }) => {
         const code = (clientMetadata as { code?: string } | undefined)?.code;
         let businessId: string;

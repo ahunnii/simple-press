@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import { getBusinessUrl } from "~/lib/business-url";
+import { businessHostFilter } from "~/lib/domain-utils";
 import { formatPrice } from "~/lib/prices";
 import { db } from "~/server/db";
 
@@ -16,11 +17,10 @@ import { db } from "~/server/db";
 export async function GET() {
   const headersList = await headers();
   const hostname = headersList.get("host") ?? "";
-  const domain = hostname.split(":")[0]; // strip port
 
   const business = await db.business.findFirst({
     where: {
-      OR: [{ customDomain: domain }, { subdomain: domain?.split(".")[0] }],
+      ...businessHostFilter(hostname),
       status: "active",
     },
     select: {

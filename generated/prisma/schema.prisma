@@ -147,6 +147,8 @@ model Business {
   // Integrations
   stripeAccountId      String? @unique
   stripeAutoTaxEnabled Boolean @default(false)
+  stripeChargesEnabled Boolean @default(false) // synced from account.updated webhook
+  stripePayoutsEnabled Boolean @default(false) // synced from account.updated webhook
 
   // Testimonials
   testimonialsAutoApprove Boolean @default(false) // when true, customer submissions are auto-approved

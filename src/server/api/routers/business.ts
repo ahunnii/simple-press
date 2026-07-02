@@ -10,9 +10,9 @@ import {
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
-import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
+import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
@@ -425,38 +425,74 @@ export const businessRouter = createTRPCRouter({
       });
     }
 
-    const business = await ctx.db.business.findFirst({
-      where: {
-        id: businessId.id,
-        status: "active",
-      },
-      include: {
-        siteContent: true,
-        images: true,
-        products: {
-          where: { published: true },
-          include: {
-            images: {
-              orderBy: { sortOrder: "asc" },
-              take: 1,
-            },
-            variants: true,
-
-            collectionProducts: {
-              include: {
-                collection: {
-                  select: { id: true, name: true, slug: true },
+    const [business, publishedProductCount] = await Promise.all([
+      ctx.db.business.findFirst({
+        where: {
+          id: businessId.id,
+          status: "active",
+        },
+        include: {
+          siteContent: true,
+          images: true,
+          products: {
+            where: { published: true },
+            // Explicit select keeps the shop-page payload lean: only fields
+            // consumed by product cards, shop filter clients, and
+            // use-shop-filters. Heavy unused columns (excerpt, SEO meta,
+            // cost/barcode, alert flags, variant options JSON, etc.) are
+            // intentionally omitted.
+            select: {
+              id: true,
+              createdAt: true, // "newest" sort in use-shop-filters
+              name: true,
+              slug: true,
+              description: true, // card teaser text + client-side search
+              sku: true, // noise product card
+              price: true,
+              compareAtPrice: true,
+              trackInventory: true,
+              inventoryQty: true,
+              allowBackorders: true,
+              baseUnitsConsumed: true,
+              additionalFields: true, // comingSoon / productTagline etc.
+              images: {
+                select: { id: true, url: true, altText: true },
+                orderBy: { sortOrder: "asc" },
+                take: 1,
+              },
+              variants: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  compareAtPrice: true,
+                  inventoryQty: true,
                 },
               },
+              collectionProducts: {
+                select: {
+                  collection: {
+                    select: { id: true, name: true, slug: true },
+                  },
+                },
+              },
+              baseInventoryUnit: {
+                select: { inventoryQty: true, allowBackorders: true },
+              },
             },
-            baseInventoryUnit: {
-              select: { inventoryQty: true, allowBackorders: true },
-            },
+            orderBy: { createdAt: "desc" },
+            // Payload ceiling: the shop page serializes every product to the
+            // browser for client-side filtering. Cap at the 500 newest
+            // published products so a huge catalog can't blow up the response.
+            // Stores beyond 500 products need real server-side pagination.
+            take: 500,
           },
-          orderBy: { createdAt: "desc" },
         },
-      },
-    });
+      }),
+      ctx.db.product.count({
+        where: { businessId: businessId.id, published: true },
+      }),
+    ]);
 
     if (business && business.products && Array.isArray(business.products)) {
       // Move products with additionalFields.comingSoon === true to the bottom
@@ -494,7 +530,13 @@ export const businessRouter = createTRPCRouter({
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(sc)
       : sc;
 
-    return { ...business, siteContent: sanitizedSiteContent };
+    // Total published products (the products array above is capped at 500),
+    // so consumers can detect truncation without another query.
+    return {
+      ...business,
+      siteContent: sanitizedSiteContent,
+      publishedProductCount,
+    };
   }),
 
   getWithIntegrations: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -1018,9 +1060,7 @@ export const businessRouter = createTRPCRouter({
   updateTemplate: ownerAdminProcedure
     .input(
       z.object({
-        templateId: z.enum(
-          TEMPLATES.map((t) => t.id) as [string, ...string[]],
-        ),
+        templateId: z.enum(TEMPLATES.map((t) => t.id) as [string, ...string[]]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -1031,7 +1071,10 @@ export const businessRouter = createTRPCRouter({
         select: { subdomain: true, templateId: true },
       });
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       // Commercial templates are locked to their owning subdomain. Allow only

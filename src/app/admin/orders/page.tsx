@@ -13,6 +13,7 @@ import {
 
 import { TrailHeader } from "../_components/trail-header";
 import { OrderFilters } from "./_components/order-filters";
+import { OrdersPagination } from "./_components/orders-pagination";
 import { OrdersTable } from "./_components/orders-table";
 
 type Props = {
@@ -21,31 +22,27 @@ type Props = {
     search?: string;
     fulfillment?: string;
     paymentStatus?: string;
+    page?: string;
   }>;
 };
 
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
+  const page = params.page ? Math.max(1, parseInt(params.page, 10)) : undefined;
 
-  // Get all orders for this business
-  const orders = await api.order
+  // Get orders for this business (paginated; stats cover the full filtered set)
+  const result = await api.order
     .getAll({
       status: params.status,
       search: params.search,
       fulfillment: params.fulfillment,
       paymentStatus: params.paymentStatus,
+      page,
     })
     .catch(rethrowTrpcForErrorBoundary);
 
-  // Calculate stats — exclude fully refunded orders; subtract partial refund amounts from partial-refund orders.
-  const totalRevenue = orders
-    .filter((order) => order.paymentStatus !== "refunded")
-    .reduce(
-      (sum, order) => sum + order.total - (order.refundAmountCents ?? 0),
-      0,
-    );
-  const totalOrders = orders.length;
-  const paidOrders = orders.filter((o) => o.paymentStatus === "paid").length;
+  const { orders, totalCount, totalPages, stats } = result;
+  const { totalRevenue, totalOrders, paidOrders } = stats;
 
   return (
     <>
@@ -93,7 +90,7 @@ export default async function OrdersPage({ searchParams }: Props) {
         )}
 
         {/* Filters */}
-        <OrderFilters orderCount={totalOrders} />
+        <OrderFilters orderCount={totalCount} />
 
         {/* Orders List */}
         {orders.length === 0 ? (
@@ -106,7 +103,15 @@ export default async function OrdersPage({ searchParams }: Props) {
             </CardHeader>
           </Card>
         ) : (
-          <OrdersTable orders={orders} />
+          <>
+            <OrdersTable orders={orders} />
+            <OrdersPagination
+              page={result.page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={result.pageSize}
+            />
+          </>
         )}
       </div>
     </>

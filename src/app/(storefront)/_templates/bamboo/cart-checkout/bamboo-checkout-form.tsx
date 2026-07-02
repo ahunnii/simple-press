@@ -91,7 +91,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
       <div className="py-16 text-center">
         <p className="text-muted-foreground mb-4">Your cart is empty</p>
         <Button asChild>
-          <Link href="/products">Continue Shopping</Link>
+          <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
     );

@@ -196,6 +196,8 @@ exports.Prisma.BusinessScalarFieldEnum = {
   businessAddress: 'businessAddress',
   stripeAccountId: 'stripeAccountId',
   stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
+  stripeChargesEnabled: 'stripeChargesEnabled',
+  stripePayoutsEnabled: 'stripePayoutsEnabled',
   testimonialsAutoApprove: 'testimonialsAutoApprove',
   maintenanceMode: 'maintenanceMode',
   maintenanceVariant: 'maintenanceVariant',

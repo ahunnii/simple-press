@@ -38,6 +38,25 @@ export function extractSubdomain(domain: string): string | null {
 }
 
 /**
+ * Strict host → business matcher for Prisma `where` clauses.
+ *
+ * Platform hosts (subdomains of the main domain) match by subdomain label;
+ * any other host matches `customDomain` exactly. The two must never be OR'd
+ * together: for a custom-domain host like `bloom.florist.com`, an OR on
+ * `subdomain: "bloom"` can resolve a *different* tenant whose subdomain
+ * happens to be `bloom`.
+ */
+export function businessHostFilter(
+  hostname: string,
+): { subdomain: string } | { customDomain: string } {
+  const subdomain = extractSubdomain(hostname);
+  if (subdomain) {
+    return { subdomain };
+  }
+  return { customDomain: hostname.replace(/:\d+$/, "") };
+}
+
+/**
  * Get main platform domain
  */
 export function getMainDomain(): string {

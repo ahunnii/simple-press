@@ -1,16 +1,12 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
-import {
-  FadeIn,
-  PageTransition,
-  StaggerContainer,
-  StaggerItem,
-} from "~/components/page-animations";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { BambooProductCard } from "../shared/bamboo-product-card";
+import { BambooShopClient } from "./bamboo-shop-client";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -41,20 +37,17 @@ export async function BambooShopPage({
             </p>
           </div>
         </FadeIn>
-        <StaggerContainer
-          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          staggerDelay={0.12}
-        >
-          {business.products?.map((product, index) => (
-            <StaggerItem key={product.id}>
-              <BambooProductCard
-                key={product.id}
-                index={index}
-                product={product}
-              />
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+        {business.products?.length === 0 ? (
+          <div className="py-16 text-center">
+            <h2 className="text-muted-foreground font-sans text-lg">
+              No products available at this time.
+            </h2>
+          </div>
+        ) : (
+          <Suspense>
+            <BambooShopClient products={business.products ?? []} />
+          </Suspense>
+        )}
       </section>
     </PageTransition>
   );

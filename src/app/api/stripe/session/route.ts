@@ -42,23 +42,16 @@ export async function GET(req: NextRequest) {
       stripeAccount: business.stripeAccountId,
     });
 
-    const response = NextResponse.json({
+    // The cookie is intentionally NOT cleared here: it expires on its own
+    // (maxAge set at checkout), and keeping it lets the shopper refresh or
+    // revisit the confirmation page without the details disappearing. It is
+    // replaced as soon as they start another checkout.
+    return NextResponse.json({
       customer_email: session.customer_email,
       amount_total: session.amount_total,
       currency: session.currency,
       payment_status: session.payment_status,
     });
-
-    // Clear the cookie now that it has been consumed
-    response.cookies.set("pending_session", "", {
-      path: "/",
-      httpOnly: true,
-      maxAge: 0,
-      sameSite: "strict",
-      secure: true,
-    });
-
-    return response;
   } catch (error: unknown) {
     console.error("Retrieve session error:", error);
     return NextResponse.json(

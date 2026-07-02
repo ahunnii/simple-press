@@ -13,9 +13,11 @@ import { createOrderFromCheckout } from "~/lib/checkout/create-order";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
 import {
   sendBackorderAlert,
+  sendDisputeAlert,
   sendLowInventoryAlert,
   sendNewOrderNotification,
   sendOrderConfirmation,
+  sendOrderRefunded,
   sendOutOfStockAlert,
   sendPoolLowInventoryAlert,
   sendPoolOutOfStockAlert,
@@ -972,6 +974,213 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
+    // Handle charge.refunded — covers refunds issued from the Stripe Dashboard
+    // (or any source outside the admin `order.refund` mutation). Syncs the
+    // cumulative refunded amount onto the order. Idempotent: `amount_refunded`
+    // is cumulative, so events that don't increase it are no-ops — including
+    // the echo Stripe sends for refunds our own mutation created.
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object;
+      try {
+        const paymentIntentId =
+          typeof charge.payment_intent === "string"
+            ? charge.payment_intent
+            : charge.payment_intent?.id;
+
+        if (paymentIntentId) {
+          const order = await db.order.findFirst({
+            where: { stripePaymentIntentId: paymentIntentId },
+            include: {
+              business: {
+                select: {
+                  name: true,
+                  ownerEmail: true,
+                  subdomain: true,
+                  customDomain: true,
+                  domainStatus: true,
+                  siteContent: { select: { logoUrl: true } },
+                },
+              },
+            },
+          });
+
+          if (order) {
+            const alreadyRecorded = order.refundAmountCents ?? 0;
+            const cumulativeRefunded = charge.amount_refunded;
+
+            if (cumulativeRefunded > alreadyRecorded) {
+              const isFullRefund = cumulativeRefunded >= order.total;
+
+              await db.order.update({
+                where: { id: order.id },
+                data: {
+                  refundAmountCents: cumulativeRefunded,
+                  ...(isFullRefund && {
+                    status: "refunded",
+                    paymentStatus: "refunded",
+                  }),
+                },
+              });
+
+              // The admin mutation tags its refunds with metadata.source and
+              // sends its own customer email; only email here for refunds
+              // that originated elsewhere (e.g. the Stripe Dashboard).
+              const latestRefund = charge.refunds?.data?.[0];
+              const fromAdminMutation =
+                latestRefund?.metadata?.source === "simplepress";
+
+              if (!fromAdminMutation) {
+                try {
+                  await sendOrderRefunded({
+                    to: order.customerEmail,
+                    orderNumber: order.orderNumber,
+                    customerName: order.customerName ?? "Guest",
+                    refundAmountCents: cumulativeRefunded - alreadyRecorded,
+                    orderTotalCents: order.total,
+                    isFullRefund,
+                    reason: order.refundReason,
+                    business: order.business,
+                  });
+                } catch (emailError) {
+                  Sentry.captureException(emailError, {
+                    tags: {
+                      "webhook.step": "charge-refunded-email",
+                      businessId: order.businessId,
+                    },
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { "webhook.step": "charge-refunded" },
+        });
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    // Handle disputes (chargebacks). Created: flag the order and alert the
+    // owner — response deadlines are strict. Closed: record the outcome.
+    if (
+      event.type === "charge.dispute.created" ||
+      event.type === "charge.dispute.closed"
+    ) {
+      const dispute = event.data.object;
+      try {
+        const paymentIntentId =
+          typeof dispute.payment_intent === "string"
+            ? dispute.payment_intent
+            : dispute.payment_intent?.id;
+
+        if (paymentIntentId) {
+          const order = await db.order.findFirst({
+            where: { stripePaymentIntentId: paymentIntentId },
+            include: {
+              business: {
+                select: {
+                  name: true,
+                  ownerEmail: true,
+                  subdomain: true,
+                  siteContent: { select: { logoUrl: true } },
+                },
+              },
+            },
+          });
+
+          if (order) {
+            const stamp = new Date(event.created * 1000).toISOString();
+            const amountFormatted = `$${(dispute.amount / 100).toFixed(2)}`;
+            const appendNote = (line: string) =>
+              order.internalNote ? `${order.internalNote}\n\n${line}` : line;
+
+            if (event.type === "charge.dispute.created") {
+              const evidenceDueBy = dispute.evidence_details?.due_by
+                ? new Date(dispute.evidence_details.due_by * 1000)
+                : null;
+
+              await db.order.update({
+                where: { id: order.id },
+                data: {
+                  paymentStatus: "disputed",
+                  internalNote: appendNote(
+                    `[${stamp}] Stripe dispute opened — ${amountFormatted} (${dispute.reason}). Respond in the Stripe Dashboard${evidenceDueBy ? ` by ${evidenceDueBy.toISOString().slice(0, 10)}` : ""}.`,
+                  ),
+                },
+              });
+
+              try {
+                await sendDisputeAlert({
+                  to: order.business.ownerEmail,
+                  orderNumber: order.orderNumber,
+                  disputeAmountCents: dispute.amount,
+                  reason: dispute.reason,
+                  evidenceDueBy,
+                  business: order.business,
+                });
+              } catch (emailError) {
+                Sentry.captureException(emailError, {
+                  tags: {
+                    "webhook.step": "dispute-alert-email",
+                    businessId: order.businessId,
+                  },
+                });
+              }
+            } else {
+              // charge.dispute.closed — status is won | lost | warning_closed
+              if (dispute.status === "won") {
+                await db.order.update({
+                  where: { id: order.id },
+                  data: {
+                    ...(order.paymentStatus === "disputed" && {
+                      paymentStatus: "paid",
+                    }),
+                    internalNote: appendNote(
+                      `[${stamp}] Stripe dispute won — ${amountFormatted} returned.`,
+                    ),
+                  },
+                });
+              } else if (dispute.status === "lost") {
+                const alreadyRecorded = order.refundAmountCents ?? 0;
+                const newRefunded = Math.max(alreadyRecorded, dispute.amount);
+                await db.order.update({
+                  where: { id: order.id },
+                  data: {
+                    paymentStatus: "refunded",
+                    ...(newRefunded >= order.total && { status: "refunded" }),
+                    refundAmountCents: newRefunded,
+                    internalNote: appendNote(
+                      `[${stamp}] Stripe dispute lost — ${amountFormatted} withdrawn.`,
+                    ),
+                  },
+                });
+              } else {
+                await db.order.update({
+                  where: { id: order.id },
+                  data: {
+                    ...(order.paymentStatus === "disputed" && {
+                      paymentStatus: "paid",
+                    }),
+                    internalNote: appendNote(
+                      `[${stamp}] Stripe dispute closed (${dispute.status}).`,
+                    ),
+                  },
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { "webhook.step": "dispute" },
+        });
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     // Handle account.updated (Connect account status changes)
     if (event.type === "account.updated") {
       const account = event.data.object;
@@ -983,14 +1192,13 @@ export async function POST(req: NextRequest) {
         });
 
         if (business) {
-          // Optional: Store account status in database
-          // await db.business.update({
-          //   where: { id: business.id },
-          //   data: {
-          //     stripeChargesEnabled: account.charges_enabled,
-          //     stripePayoutsEnabled: account.payouts_enabled,
-          //   },
-          // });
+          await db.business.update({
+            where: { id: business.id },
+            data: {
+              stripeChargesEnabled: account.charges_enabled ?? false,
+              stripePayoutsEnabled: account.payouts_enabled ?? false,
+            },
+          });
         }
       } catch (error) {
         Sentry.captureException(error, {

@@ -2,16 +2,16 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
 import { getCanonicalBaseUrl } from "~/lib/canonical";
+import { businessHostFilter } from "~/lib/domain-utils";
 import { db } from "~/server/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
-  const domain = host.split(":")[0] ?? "";
 
   const business = await db.business.findFirst({
     where: {
-      OR: [{ customDomain: domain }, { subdomain: domain.split(".")[0] }],
+      ...businessHostFilter(host),
       status: "active",
     },
     select: {

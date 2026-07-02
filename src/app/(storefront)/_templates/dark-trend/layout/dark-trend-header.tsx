@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
@@ -40,10 +40,28 @@ function LogoTwoLine({ name }: { name: string }) {
 
 export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const { itemCount, total } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus the search input when the search row opens
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchValue.trim();
+    setSearchOpen(false);
+    setSearchValue("");
+    router.push(q ? `/shop?q=${encodeURIComponent(q)}` : "/shop");
+  }
 
   // Close on Escape and return focus to hamburger (WCAG 2.4.3)
   useEffect(() => {
@@ -154,6 +172,18 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
 
         {/* Right: search + cart total + cart icon */}
         <div className="flex shrink-0 items-center gap-6">
+          {/* Search toggle — ≥44px hit area via p-3 -m-3 (WCAG 2.5.5) */}
+          <button
+            ref={searchButtonRef}
+            type="button"
+            onClick={() => setSearchOpen(!searchOpen)}
+            aria-label={searchOpen ? "Close search" : "Search products"}
+            aria-expanded={searchOpen}
+            aria-controls="header-search"
+            className="-m-3 p-3 text-white/90 transition-colors hover:text-white"
+          >
+            <Search aria-hidden="true" className="h-5 w-5" />
+          </button>
           <Link
             href="/cart"
             className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
@@ -190,6 +220,45 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
           </button>
         </div>
       </nav>
+
+      {/* Search row — inert when closed so the hidden input is removed from
+          tab order and SR reading order (WCAG 2.4.3 / 4.1.2) */}
+      <div
+        id="header-search"
+        className={`overflow-hidden border-t border-white/10 transition-all duration-300 ${
+          searchOpen ? "max-h-16" : "max-h-0 border-t-0"
+        }`}
+        inert={!searchOpen || undefined}
+      >
+        <form
+          onSubmit={handleSearchSubmit}
+          className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 lg:px-6"
+          role="search"
+        >
+          <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-white/40" />
+          <input
+            ref={searchInputRef}
+            type="search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && searchValue === "") {
+                setSearchOpen(false);
+                searchButtonRef.current?.focus();
+              }
+            }}
+            placeholder="Search products…"
+            aria-label="Search products"
+            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="text-xs font-semibold tracking-wider text-white/60 uppercase transition-colors hover:text-white"
+          >
+            Search
+          </button>
+        </form>
+      </div>
 
       {/* Mobile menu — inert when closed so hidden links are removed from tab
           order and SR reading order (WCAG 2.4.3 / 4.1.2) */}

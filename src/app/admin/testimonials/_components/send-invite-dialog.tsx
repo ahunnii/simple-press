@@ -31,13 +31,14 @@ export function SendInviteDialog() {
   const [customerId, setCustomerId] = useState<string | undefined>(undefined);
   const [maxPhotos, setMaxPhotos] = useState(3);
 
-  // Get customers for dropdown
-  const { data: customers } = api.customer.list.useQuery(
+  // Get customers for dropdown (first page of results)
+  const { data: customerList } = api.customer.list.useQuery(
     {},
     {
       enabled: open,
     },
   );
+  const customers = customerList?.customers;
 
   const sendInviteMutation = api.testimonial.sendInvite.useMutation({
     onSuccess: () => {

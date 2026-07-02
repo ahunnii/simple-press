@@ -21,7 +21,6 @@ type CardProduct = Pick<
   | "name"
   | "slug"
   | "description"
-  | "images"
   | "price"
   | "compareAtPrice"
   | "trackInventory"
@@ -29,8 +28,15 @@ type CardProduct = Pick<
   | "allowBackorders"
   | "baseUnitsConsumed"
   | "additionalFields"
-  | "variants"
 > & {
+  // Structural minimums so both full rows (homepage/related) and the slimmed
+  // shop-page selection remain assignable.
+  images: { url: string }[];
+  variants: {
+    price: number | null;
+    compareAtPrice: number | null;
+    inventoryQty: number;
+  }[];
   // baseInventoryUnit is not included in getRelated, so make it optional
   baseInventoryUnit?: { inventoryQty: number; allowBackorders: boolean } | null;
 };

@@ -79,6 +79,7 @@ export const orderFiltersSchema = z
     search: z.string().optional(),
     fulfillment: z.string().optional(),
     paymentStatus: z.string().optional(),
+    page: z.coerce.number().int().positive().optional(),
   })
   .optional();
 

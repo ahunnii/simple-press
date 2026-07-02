@@ -12,6 +12,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { businessHostFilter } from "~/lib/domain-utils";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -154,16 +155,8 @@ export const ownerAdminProcedure = t.procedure
     const headersList = await headers();
     const hostname = headersList.get("host") ?? "";
 
-    // Extract subdomain or custom domain
-    const domain = hostname.split(":")[0]; // Remove port
-
     const business = await ctx.db.business.findFirst({
-      where: {
-        OR: [
-          { customDomain: domain },
-          { subdomain: domain?.split(".")[0] }, // Extract subdomain
-        ],
-      },
+      where: businessHostFilter(hostname),
       select: { id: true },
     });
 
@@ -216,15 +209,8 @@ export const ownerOnlyProcedure = t.procedure
     const headersList = await headers();
     const hostname = headersList.get("host") ?? "";
 
-    const domain = hostname.split(":")[0];
-
     const business = await ctx.db.business.findFirst({
-      where: {
-        OR: [
-          { customDomain: domain },
-          { subdomain: domain?.split(".")[0] },
-        ],
-      },
+      where: businessHostFilter(hostname),
       select: { id: true },
     });
 
@@ -308,16 +294,8 @@ export const getBusinessProcedure = () =>
     const headersList = await headers();
     const hostname = headersList.get("host") ?? "";
 
-    // Extract subdomain or custom domain
-    const domain = hostname.split(":")[0]; // Remove port
-
     const business = await ctx.db.business.findFirst({
-      where: {
-        OR: [
-          { customDomain: domain },
-          { subdomain: domain?.split(".")[0] }, // Extract subdomain
-        ],
-      },
+      where: businessHostFilter(hostname),
       select: { id: true },
     });
 

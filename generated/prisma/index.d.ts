@@ -10721,6 +10721,8 @@ export namespace Prisma {
     businessAddress: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
+    stripeChargesEnabled: boolean | null
+    stripePayoutsEnabled: boolean | null
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
@@ -10758,6 +10760,8 @@ export namespace Prisma {
     businessAddress: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean | null
+    stripeChargesEnabled: boolean | null
+    stripePayoutsEnabled: boolean | null
     testimonialsAutoApprove: boolean | null
     maintenanceMode: boolean | null
     maintenanceVariant: string | null
@@ -10795,6 +10799,8 @@ export namespace Prisma {
     businessAddress: number
     stripeAccountId: number
     stripeAutoTaxEnabled: number
+    stripeChargesEnabled: number
+    stripePayoutsEnabled: number
     testimonialsAutoApprove: number
     maintenanceMode: number
     maintenanceVariant: number
@@ -10852,6 +10858,8 @@ export namespace Prisma {
     businessAddress?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
+    stripeChargesEnabled?: true
+    stripePayoutsEnabled?: true
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
@@ -10889,6 +10897,8 @@ export namespace Prisma {
     businessAddress?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
+    stripeChargesEnabled?: true
+    stripePayoutsEnabled?: true
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
@@ -10926,6 +10936,8 @@ export namespace Prisma {
     businessAddress?: true
     stripeAccountId?: true
     stripeAutoTaxEnabled?: true
+    stripeChargesEnabled?: true
+    stripePayoutsEnabled?: true
     testimonialsAutoApprove?: true
     maintenanceMode?: true
     maintenanceVariant?: true
@@ -11054,6 +11066,8 @@ export namespace Prisma {
     businessAddress: string | null
     stripeAccountId: string | null
     stripeAutoTaxEnabled: boolean
+    stripeChargesEnabled: boolean
+    stripePayoutsEnabled: boolean
     testimonialsAutoApprove: boolean
     maintenanceMode: boolean
     maintenanceVariant: string
@@ -11114,6 +11128,8 @@ export namespace Prisma {
     businessAddress?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -11177,6 +11193,8 @@ export namespace Prisma {
     businessAddress?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -11218,6 +11236,8 @@ export namespace Prisma {
     businessAddress?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -11259,6 +11279,8 @@ export namespace Prisma {
     businessAddress?: boolean
     stripeAccountId?: boolean
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: boolean
@@ -11284,7 +11306,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11353,6 +11375,8 @@ export namespace Prisma {
       businessAddress: string | null
       stripeAccountId: string | null
       stripeAutoTaxEnabled: boolean
+      stripeChargesEnabled: boolean
+      stripePayoutsEnabled: boolean
       testimonialsAutoApprove: boolean
       maintenanceMode: boolean
       maintenanceVariant: string
@@ -11835,6 +11859,8 @@ export namespace Prisma {
     readonly businessAddress: FieldRef<"Business", 'String'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly stripeAutoTaxEnabled: FieldRef<"Business", 'Boolean'>
+    readonly stripeChargesEnabled: FieldRef<"Business", 'Boolean'>
+    readonly stripePayoutsEnabled: FieldRef<"Business", 'Boolean'>
     readonly testimonialsAutoApprove: FieldRef<"Business", 'Boolean'>
     readonly maintenanceMode: FieldRef<"Business", 'Boolean'>
     readonly maintenanceVariant: FieldRef<"Business", 'String'>
@@ -52132,6 +52158,8 @@ export namespace Prisma {
     businessAddress: 'businessAddress',
     stripeAccountId: 'stripeAccountId',
     stripeAutoTaxEnabled: 'stripeAutoTaxEnabled',
+    stripeChargesEnabled: 'stripeChargesEnabled',
+    stripePayoutsEnabled: 'stripePayoutsEnabled',
     testimonialsAutoApprove: 'testimonialsAutoApprove',
     maintenanceMode: 'maintenanceMode',
     maintenanceVariant: 'maintenanceVariant',
@@ -53350,6 +53378,8 @@ export namespace Prisma {
     businessAddress?: StringNullableFilter<"Business"> | string | null
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
+    stripeChargesEnabled?: BoolFilter<"Business"> | boolean
+    stripePayoutsEnabled?: BoolFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     maintenanceMode?: BoolFilter<"Business"> | boolean
     maintenanceVariant?: StringFilter<"Business"> | string
@@ -53412,6 +53442,8 @@ export namespace Prisma {
     businessAddress?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    stripeChargesEnabled?: SortOrder
+    stripePayoutsEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -53477,6 +53509,8 @@ export namespace Prisma {
     phoneNumber?: StringNullableFilter<"Business"> | string | null
     businessAddress?: StringNullableFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolFilter<"Business"> | boolean
+    stripeChargesEnabled?: BoolFilter<"Business"> | boolean
+    stripePayoutsEnabled?: BoolFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolFilter<"Business"> | boolean
     maintenanceMode?: BoolFilter<"Business"> | boolean
     maintenanceVariant?: StringFilter<"Business"> | string
@@ -53539,6 +53573,8 @@ export namespace Prisma {
     businessAddress?: SortOrderInput | SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    stripeChargesEnabled?: SortOrder
+    stripePayoutsEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -53588,6 +53624,8 @@ export namespace Prisma {
     businessAddress?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     stripeAutoTaxEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
+    stripeChargesEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
+    stripePayoutsEnabled?: BoolWithAggregatesFilter<"Business"> | boolean
     testimonialsAutoApprove?: BoolWithAggregatesFilter<"Business"> | boolean
     maintenanceMode?: BoolWithAggregatesFilter<"Business"> | boolean
     maintenanceVariant?: StringWithAggregatesFilter<"Business"> | string
@@ -57300,6 +57338,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -57362,6 +57402,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -57424,6 +57466,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -57486,6 +57530,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -57548,6 +57594,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -57589,6 +57637,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -57630,6 +57680,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -61992,6 +62044,8 @@ export namespace Prisma {
     businessAddress?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    stripeChargesEnabled?: SortOrder
+    stripePayoutsEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -62040,6 +62094,8 @@ export namespace Prisma {
     businessAddress?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    stripeChargesEnabled?: SortOrder
+    stripePayoutsEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -62077,6 +62133,8 @@ export namespace Prisma {
     businessAddress?: SortOrder
     stripeAccountId?: SortOrder
     stripeAutoTaxEnabled?: SortOrder
+    stripeChargesEnabled?: SortOrder
+    stripePayoutsEnabled?: SortOrder
     testimonialsAutoApprove?: SortOrder
     maintenanceMode?: SortOrder
     maintenanceVariant?: SortOrder
@@ -68184,6 +68242,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -68245,6 +68305,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -68365,6 +68427,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -68426,6 +68490,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -70310,6 +70376,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -70371,6 +70439,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -70448,6 +70518,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -70509,6 +70581,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -70570,6 +70644,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -70631,6 +70707,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -70708,6 +70786,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -70769,6 +70849,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -70867,6 +70949,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -70928,6 +71012,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -71278,6 +71364,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -71339,6 +71427,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -71858,6 +71948,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -71919,6 +72011,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -72018,6 +72112,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -72079,6 +72175,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -72424,6 +72522,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -72485,6 +72585,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -72614,6 +72716,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -72675,6 +72779,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -72958,6 +73064,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -73019,6 +73127,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -73191,6 +73301,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -73252,6 +73364,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -73350,6 +73464,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -73411,6 +73527,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -73795,6 +73913,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -73856,6 +73976,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -74214,6 +74336,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -74275,6 +74399,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -74639,6 +74765,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -74700,6 +74828,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -75563,6 +75693,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -75624,6 +75756,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -75781,6 +75915,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -75842,6 +75978,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -76084,6 +76222,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -76145,6 +76285,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -76517,6 +76659,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -76578,6 +76722,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -76763,6 +76909,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -76824,6 +76972,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77035,6 +77185,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77096,6 +77248,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77189,6 +77343,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77250,6 +77406,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77327,6 +77485,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77388,6 +77548,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77449,6 +77611,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77510,6 +77674,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77587,6 +77753,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77648,6 +77816,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77709,6 +77879,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77770,6 +77942,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -77847,6 +78021,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77908,6 +78084,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -77969,6 +78147,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -78030,6 +78210,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -78139,6 +78321,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -78200,6 +78384,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -78376,6 +78562,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -78437,6 +78625,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -78561,6 +78751,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -78622,6 +78814,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -78736,6 +78930,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -78797,6 +78993,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -78921,6 +79119,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -78982,6 +79182,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -79702,6 +79904,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -79763,6 +79967,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -79877,6 +80083,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -79938,6 +80146,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -80042,6 +80252,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -80103,6 +80315,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -80180,6 +80394,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -80241,6 +80457,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -80302,6 +80520,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -80363,6 +80583,8 @@ export namespace Prisma {
     businessAddress?: string | null
     stripeAccountId?: string | null
     stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
     testimonialsAutoApprove?: boolean
     maintenanceMode?: boolean
     maintenanceVariant?: string
@@ -80462,6 +80684,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
@@ -80523,6 +80747,8 @@ export namespace Prisma {
     businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
     testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
     maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
     maintenanceVariant?: StringFieldUpdateOperationsInput | string
