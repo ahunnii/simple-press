@@ -149,12 +149,14 @@
 }
 
 /* ── Variant selector buttons (N-5) ── */
-.bamboo .bamboo-variant-btn[aria-disabled="true"] {
+.bamboo .bamboo-variant-btn[aria-disabled="true"],
+.happy-bamboo .bamboo-variant-btn[aria-disabled="true"] {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.bamboo .bamboo-variant-btn:focus-visible {
+.bamboo .bamboo-variant-btn:focus-visible,
+.happy-bamboo .bamboo-variant-btn:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }

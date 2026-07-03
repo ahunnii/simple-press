@@ -110,7 +110,8 @@ export async function PollenServicesPage({ business }: Props) {
                   {f["pollen.services.text"]}
                 </p>
                 <Link
-                  href={f["pollen.services.contact-button-link"] ?? "#!"}
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+                  href={f["pollen.services.contact-button-link"] || "/contact"}
                   className={buttonVariants({
                     size: "lg",
                     className:
@@ -190,7 +191,10 @@ export async function PollenServicesPage({ business }: Props) {
                 </Accordion>
 
                 <Link
-                  href={f["pollen.services.faq-contact-button-link"] ?? "#!"}
+                  href={
+                    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
+                    f["pollen.services.faq-contact-button-link"] || "/contact"
+                  }
                   className={buttonVariants({
                     size: "lg",
                     variant: "outline",

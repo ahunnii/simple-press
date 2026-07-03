@@ -843,39 +843,41 @@ export function ViiHeader({
               </Link>
 
               {/* Cart — link to /cart (no vii-specific drawer in this pass) */}
-              <Link
-                href="/cart"
-                aria-label={
-                  itemCount > 0
-                    ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                    : "View cart"
-                }
-                className="relative -m-2 flex items-center justify-center p-2"
-                style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
-              >
-                <ShoppingBag
-                  className="h-[18px] w-[18px]"
-                  strokeWidth={1.4}
-                  aria-hidden="true"
-                />
-                {itemCount > 0 && (
-                  <span
+              {isEnabled("products") && (
+                <Link
+                  href="/cart"
+                  aria-label={
+                    itemCount > 0
+                      ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                      : "View cart"
+                  }
+                  className="relative -m-2 flex items-center justify-center p-2"
+                  style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
+                >
+                  <ShoppingBag
+                    className="h-[18px] w-[18px]"
+                    strokeWidth={1.4}
                     aria-hidden="true"
-                    data-vii-pulse=""
-                    className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
-                    style={{
-                      background: "var(--vii-copper-deep)",
-                      color: "var(--vii-paper)",
-                      minWidth: "16px",
-                      animation: cartBump
-                        ? "vii-pulse 0.42s var(--vii-ease)"
-                        : "none",
-                    }}
-                  >
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
+                  />
+                  {itemCount > 0 && (
+                    <span
+                      aria-hidden="true"
+                      data-vii-pulse=""
+                      className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
+                      style={{
+                        background: "var(--vii-copper-deep)",
+                        color: "var(--vii-paper)",
+                        minWidth: "16px",
+                        animation: cartBump
+                          ? "vii-pulse 0.42s var(--vii-ease)"
+                          : "none",
+                      }}
+                    >
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Book CTA — prominent copper button (desktop) */}
               <Link

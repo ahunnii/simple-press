@@ -17,7 +17,13 @@ const fmt = (cents: number) =>
   );
 
 export function DefaultCartContents({ business: _ }: { business: Business }) {
-  const { items, incrementItem, decrementItem, removeItem, total } = useCart();
+  const { items, incrementItem, decrementItem, removeItem, total, isHydrated } =
+    useCart();
+
+  // Avoid an empty→filled flash while the cart loads from localStorage
+  if (!isHydrated) {
+    return null;
+  }
 
   if (items.length === 0) {
     return (

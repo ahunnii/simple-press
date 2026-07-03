@@ -167,7 +167,7 @@ export function HappyBambooVariantSelector({
               Added to Cart
             </>
           ) : (
-            `Add ${quantity} to Cart`
+            `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
           )}
         </Button>
       </div>

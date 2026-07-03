@@ -26,7 +26,7 @@ export function BuildersHeader({
   business,
   session,
 }: DefaultHeaderTemplateProps) {
-  const { itemCount, setIsOpen } = useCart();
+  const { itemCount } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } =
     useWishlist();
   const pathname = usePathname();
@@ -311,12 +311,12 @@ export function BuildersHeader({
 
             {/* Cart */}
             {isEnabled("cart") && (
-              <button
-                onClick={() => setIsOpen(true)}
+              <Link
+                href="/cart"
                 aria-label={
                   itemCount > 0
-                    ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                    : "Open cart"
+                    ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "View cart"
                 }
                 className={cn(
                   "relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60",
@@ -337,7 +337,7 @@ export function BuildersHeader({
                     {itemCount}
                   </span>
                 )}
-              </button>
+              </Link>
             )}
 
             {/* Mobile menu toggle */}
@@ -495,16 +495,13 @@ export function BuildersHeader({
 
                 {isEnabled("cart") && (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        closeMobileMenu();
-                        setIsOpen(true);
-                      }}
+                    <Link
+                      href="/cart"
+                      onClick={closeMobileMenu}
                       aria-label={
                         itemCount > 0
-                          ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                          : "Open cart"
+                          ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                          : "View cart"
                       }
                       className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
                       style={{
@@ -516,7 +513,7 @@ export function BuildersHeader({
                     >
                       <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
                       Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-                    </button>
+                    </Link>
 
                     <span
                       aria-hidden="true"

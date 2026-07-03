@@ -49,7 +49,7 @@ export function ModernProductActions({ product }: Props) {
             type="button"
             aria-disabled="true"
             onClick={(e) => e.preventDefault()}
-            className="boty-shadow bg-primary text-primary-foreground flex flex-1 cursor-not-allowed items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide opacity-50 transition-opacity"
+            className="bg-primary text-primary-foreground flex flex-1 cursor-not-allowed items-center justify-center gap-2 px-8 py-3 text-sm font-medium tracking-wide opacity-50 transition-opacity"
           >
             Out of Stock
           </button>

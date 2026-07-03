@@ -5,6 +5,7 @@ import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
@@ -275,7 +276,7 @@ export function ElegantVariantSelector({
           ) : (
             <>
               Add {quantity > 1 ? `${quantity} ` : ""}to bag
-              {price > 0 && ` · $${((price * quantity) / 100).toFixed(0)}`}
+              {price > 0 && ` · ${formatPrice(price * quantity)}`}
               <ArrowRight
                 aria-hidden={true}
                 style={{ width: 14, height: 14 }}

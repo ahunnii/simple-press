@@ -20,9 +20,14 @@ type Props = {
 };
 
 export function ModernCartContents({ business }: Props) {
-  const { items } = useCart();
+  const { items, isHydrated } = useCart();
 
   const shippingConfig = shippingConfigFromBusiness(business);
+
+  // Avoid an empty→filled flash while the cart loads from localStorage
+  if (!isHydrated) {
+    return null;
+  }
 
   if (items.length === 0) {
     return (

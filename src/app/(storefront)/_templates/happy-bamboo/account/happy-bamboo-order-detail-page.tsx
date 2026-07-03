@@ -43,7 +43,7 @@ export function HappyBambooOrderDetailPage({
                 Home
               </Link>
               <span className="mx-2">/</span>
-              <Link href="/account/profile" className="hover:text-primary">
+              <Link href="/account/settings" className="hover:text-primary">
                 Account
               </Link>
               <span className="mx-2">/</span>

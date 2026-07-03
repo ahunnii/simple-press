@@ -423,7 +423,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                   className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800"
                   variant="outline"
                 >
-                  <Link href="/get-quote" onClick={closeMenu}>
+                  <Link href="/contact" onClick={closeMenu}>
                     <MessageSquare className="mr-1.5 h-4 w-4" />
                     Get in Touch
                   </Link>

@@ -189,7 +189,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
               Added!
             </>
           ) : (
-            `Add ${quantity} to Cart`
+            `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
           )}
         </button>
       </div>

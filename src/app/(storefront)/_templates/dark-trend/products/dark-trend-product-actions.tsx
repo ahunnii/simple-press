@@ -30,6 +30,7 @@ export function DarkTrendProductActions({
   const [liveMessage, setLiveMessage] = useState("");
 
   const addToCart = () => {
+    if (!canAddMore) return;
     handleAddToCart();
     setLiveMessage(`Added ${quantity} × ${product.name} to cart`);
     setTimeout(() => {
@@ -134,35 +135,35 @@ export function DarkTrendProductActions({
                   </div>
                 </div>
               </div>
+
+              {/* Add to Cart Buttons */}
+              <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={addToCart}
+                  className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
+                    justAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
+                  }`}
+                >
+                  {justAdded ? (
+                    <>
+                      <Check className="h-4 w-4" aria-hidden="true" />
+                      Added to Cart
+                    </>
+                  ) : (
+                    "Add to Cart"
+                  )}
+                </button>
+                {product.trackInventory &&
+                  product.allowBackorders &&
+                  (product.inventoryQty ?? 0) === 0 && (
+                    <p className="text-muted-foreground text-sm">
+                      Backordered — ships when available
+                    </p>
+                  )}
+              </div>
             </>
           )}
-
-          {/* Add to Cart Buttons */}
-          <div className="mb-10 flex flex-col gap-4 sm:flex-row">
-            <button
-              type="button"
-              onClick={addToCart}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-                justAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
-              }`}
-            >
-              {justAdded ? (
-                <>
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  Added to Cart
-                </>
-              ) : (
-                "Add to Cart"
-              )}
-            </button>
-            {product.trackInventory &&
-              product.allowBackorders &&
-              (product.inventoryQty ?? 0) === 0 && (
-                <p className="text-muted-foreground text-sm">
-                  Backordered — ships when available
-                </p>
-              )}
-          </div>
 
           {!canAddMore && inStock && (
             <p className="text-muted-foreground mt-3 text-center text-sm">
