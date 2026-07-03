@@ -116,7 +116,7 @@ export function HappyBambooHeroSection({
           <FadeIn delay={0.45}>
             <Button
               size="lg"
-              className="group bg-[#608418] px-8 text-lg text-white hover:bg-[#608418]/90"
+              className="group bg-[var(--hb-brand)] px-8 text-lg text-white hover:bg-[var(--hb-brand)]/90"
               asChild
             >
               <Link

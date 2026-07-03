@@ -7,10 +7,11 @@ import type { TemplateTheme } from "~/lib/template-themes";
  * sections, filter pills, cart/account chrome, form focus states), so
  * palettes override the full interactive-brand set: --primary/-foreground,
  * --secondary/-foreground, --muted/-foreground, --accent/-foreground,
- * --border, --ring. --background/--foreground/--card are left untouched to
- * keep the bright cream/white base consistent (the template also uses a
- * few hardcoded brand hexes like #608418 / #E3CF99 outside the CSS-var
- * system that these palettes intentionally don't try to reach).
+ * --border, --ring — plus the template's own brand tokens (--hb-brand,
+ * --hb-brand-deep, --hb-brand-muted, --hb-gold) that drive the header bar,
+ * hero CTA, and skip link. --background/--foreground/--card are left
+ * untouched to keep the bright cream/white base consistent. --hb-brand must
+ * stay dark enough for white header text (>= 4.5:1).
  *
  * Stock is a leaf green (hue ~127) — not duplicated here; the editor's
  * "Original" option covers it. These variations stay within the same
@@ -24,6 +25,10 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
         label: "Forest",
         swatch: ["oklch(0.28 0.08 145)", "oklch(0.42 0.11 145)", "oklch(0.90 0.03 145)"],
         cssVars: {
+          "--hb-brand": "oklch(0.42 0.11 145)",
+          "--hb-brand-deep": "oklch(0.30 0.09 145)",
+          "--hb-brand-muted": "oklch(0.48 0.05 145)",
+          "--hb-gold": "oklch(0.88 0.06 120)",
           "--primary": "oklch(0.42 0.11 145)",
           "--primary-foreground": "oklch(0.98 0.01 145)",
           "--secondary": "oklch(0.96 0.015 145)",
@@ -41,6 +46,10 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
         label: "Terracotta",
         swatch: ["oklch(0.32 0.10 40)", "oklch(0.48 0.13 40)", "oklch(0.90 0.04 50)"],
         cssVars: {
+          "--hb-brand": "oklch(0.48 0.13 40)",
+          "--hb-brand-deep": "oklch(0.34 0.11 40)",
+          "--hb-brand-muted": "oklch(0.52 0.06 40)",
+          "--hb-gold": "oklch(0.89 0.06 70)",
           "--primary": "oklch(0.48 0.13 40)",
           "--primary-foreground": "oklch(0.98 0.01 60)",
           "--secondary": "oklch(0.96 0.015 50)",
@@ -58,6 +67,10 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
         label: "Ocean",
         swatch: ["oklch(0.30 0.07 210)", "oklch(0.46 0.10 210)", "oklch(0.90 0.03 210)"],
         cssVars: {
+          "--hb-brand": "oklch(0.46 0.10 210)",
+          "--hb-brand-deep": "oklch(0.32 0.08 210)",
+          "--hb-brand-muted": "oklch(0.50 0.05 210)",
+          "--hb-gold": "oklch(0.89 0.05 80)",
           "--primary": "oklch(0.46 0.10 210)",
           "--primary-foreground": "oklch(0.98 0.01 210)",
           "--secondary": "oklch(0.96 0.012 210)",
@@ -75,6 +88,10 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
         label: "Honey",
         swatch: ["oklch(0.40 0.09 85)", "oklch(0.72 0.14 85)", "oklch(0.95 0.03 85)"],
         cssVars: {
+          "--hb-brand": "oklch(0.40 0.09 85)",
+          "--hb-brand-deep": "oklch(0.30 0.07 85)",
+          "--hb-brand-muted": "oklch(0.48 0.05 85)",
+          "--hb-gold": "oklch(0.93 0.06 95)",
           "--primary": "oklch(0.72 0.14 85)",
           "--primary-foreground": "oklch(0.22 0.03 85)",
           "--secondary": "oklch(0.96 0.02 85)",

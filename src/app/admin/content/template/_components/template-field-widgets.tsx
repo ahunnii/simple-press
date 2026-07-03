@@ -62,6 +62,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
@@ -1140,7 +1146,58 @@ export function TemplateImageUploadField({
           </div>
         ) : null}
 
-        <div className={cn("flex gap-2", mediaLibraryEnabled ? "flex-col sm:flex-row" : "")}>
+        {mediaLibraryEnabled ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={disabled ?? isUploading}
+                className="w-full"
+              >
+                {isUploading ? (
+                  <>
+                    <span
+                      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                      aria-hidden="true"
+                    />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {previewUrl ? "Replace image" : "Choose image"}
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-(--radix-dropdown-menu-trigger-width)"
+            >
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => triggerFileInput());
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload from device
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => setPickerOpen(true));
+                }}
+              >
+                <Images className="mr-2 h-4 w-4" />
+                Choose from library
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
           <Button
             type="button"
             variant="outline"
@@ -1164,21 +1221,7 @@ export function TemplateImageUploadField({
               </>
             )}
           </Button>
-
-          {mediaLibraryEnabled && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={disabled ?? isUploading}
-              onClick={() => setPickerOpen(true)}
-              className="w-full"
-            >
-              <Images className="mr-2 h-4 w-4" />
-              Choose from library
-            </Button>
-          )}
-        </div>
+        )}
 
         <div
           role="button"
@@ -1377,7 +1420,58 @@ export function TemplateVideoUploadField({
           </div>
         ) : null}
 
-        <div className={cn("flex gap-2", mediaLibraryEnabled ? "flex-col sm:flex-row" : "")}>
+        {mediaLibraryEnabled ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={disabled ?? isUploading}
+                className="w-full"
+              >
+                {isUploading ? (
+                  <>
+                    <span
+                      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                      aria-hidden="true"
+                    />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {previewUrl ? "Replace video" : "Choose video"}
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-(--radix-dropdown-menu-trigger-width)"
+            >
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => triggerFileInput());
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload from device
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => setPickerOpen(true));
+                }}
+              >
+                <Images className="mr-2 h-4 w-4" />
+                Choose from library
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
           <Button
             type="button"
             variant="outline"
@@ -1401,21 +1495,7 @@ export function TemplateVideoUploadField({
               </>
             )}
           </Button>
-
-          {mediaLibraryEnabled && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={disabled ?? isUploading}
-              onClick={() => setPickerOpen(true)}
-              className="w-full"
-            >
-              <Images className="mr-2 h-4 w-4" />
-              Choose from library
-            </Button>
-          )}
-        </div>
+        )}
 
         <div
           role="button"

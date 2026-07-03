@@ -162,6 +162,13 @@
 }
 
 .happy-bamboo {
+  /* Brand colors consumed by header/hero/checkout via arbitrary classes
+     (bg-[var(--hb-brand)] etc.) — theme palettes override these. Values are
+     the template's original literals, so no-selection stays pixel-identical. */
+  --hb-brand: #608418;
+  --hb-brand-deep: #3d560d;
+  --hb-brand-muted: #5a6b3a;
+  --hb-gold: #e3cf99;
   --background: oklch(1 0 0);
   --foreground: oklch(0.148 0.004 228.8);
   --card: oklch(1 0 0);
