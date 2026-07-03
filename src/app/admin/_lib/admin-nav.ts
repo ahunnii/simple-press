@@ -465,17 +465,6 @@ export const HUB_CARDS: HubCard[] = [
     icon: Home,
   },
   {
-    key: "content-template",
-    title: "Template Fields (advanced)",
-    description: "Raw field editor",
-    body: "Direct access to every template field, JSON import/export, and custom keys — platform admin only",
-    href: "/admin/content/template",
-    hub: "content",
-    color: "slate",
-    icon: Globe,
-    platformOnly: true,
-  },
-  {
     key: "content-pages",
     title: "Pages",
     description: "Standalone pages (About, Contact, FAQ)",

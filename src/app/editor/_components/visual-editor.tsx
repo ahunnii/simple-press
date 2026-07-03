@@ -49,6 +49,8 @@ export type VisualEditorProps = {
   initialPage: string;
   /** Deep-link initial section id, or null. */
   initialSection: string | null;
+  /** True for PLATFORM_ADMIN users — surfaces the advanced editor link. */
+  isPlatformAdmin: boolean;
 };
 
 // ── Pure helpers ──────────────────────────────────────────────────────────
@@ -104,6 +106,7 @@ export function VisualEditor({
   mediaEnabled,
   initialPage,
   initialSection,
+  isPlatformAdmin,
 }: VisualEditorProps) {
   // Selectable pages: page keys that have both template fields and a preview path.
   const pages: EditorTopBarPage[] = useMemo(() => {
@@ -626,6 +629,7 @@ export function VisualEditor({
           hasTheme={templateTheme !== null}
           themeActive={themeOpen}
           onSelectTheme={handleSelectTheme}
+          isPlatformAdmin={isPlatformAdmin}
         />
 
         <EditorPreview

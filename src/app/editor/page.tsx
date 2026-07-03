@@ -1,5 +1,6 @@
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getSectionsForTemplate } from "~/lib/template-sections";
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
 import { VisualEditor } from "./_components/visual-editor";
@@ -15,13 +16,15 @@ export default async function EditorPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const [business, editorState, flags] = await Promise.all([
+  const [business, editorState, flags, session] = await Promise.all([
     api.business.getWith({}),
     api.content.getEditorState(),
     getBusinessFlags(),
+    getSession(),
   ]);
 
   const sections = getSectionsForTemplate(business.templateId);
+  const isPlatformAdmin = session?.user.platformRole === "PLATFORM_ADMIN";
 
   // Deep-link support: ?page=homepage&section=homepage.hero
   const sp = await searchParams;
@@ -41,6 +44,7 @@ export default async function EditorPage({
       mediaEnabled={flags.isEnabled("media")}
       initialPage={initialPage}
       initialSection={initialSection}
+      isPlatformAdmin={isPlatformAdmin}
     />
   );
 }

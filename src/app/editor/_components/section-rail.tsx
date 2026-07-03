@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronRight, Eye, EyeOff, Palette } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, Eye, EyeOff, Palette, Wrench } from "lucide-react";
 
 import type { TemplateSection } from "~/lib/template-sections";
 import { cn } from "~/lib/utils";
@@ -24,6 +25,8 @@ export type SectionRailProps = {
   themeActive: boolean;
   /** Fired when the Theme entry is chosen. */
   onSelectTheme: () => void;
+  /** True for PLATFORM_ADMIN users — shows the pinned "Advanced editor" link. */
+  isPlatformAdmin?: boolean;
 };
 
 function SectionRow({
@@ -125,6 +128,7 @@ export function SectionRail({
   hasTheme,
   themeActive,
   onSelectTheme,
+  isPlatformAdmin,
 }: SectionRailProps) {
   return (
     <nav
@@ -207,6 +211,22 @@ export function SectionRail({
               aria-hidden="true"
             />
           </button>
+        </div>
+      )}
+
+      {isPlatformAdmin && (
+        <div className="border-t py-1 pb-2">
+          <p className="text-muted-foreground px-3 pt-3 pb-1 text-xs font-medium tracking-wide uppercase">
+            Platform
+          </p>
+          <Link
+            href="/admin/content/template"
+            title="Raw field editor — platform admin only"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted/60 mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors"
+          >
+            <Wrench className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">Advanced editor</span>
+          </Link>
         </div>
       )}
     </nav>

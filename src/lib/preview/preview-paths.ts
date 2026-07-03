@@ -10,6 +10,11 @@ export const PAGE_PREVIEW_PATHS: Record<string, string> = {
   products: "/shop",
   // happy-bamboo groups its shop listing fields under a "shop" page key.
   shop: "/shop",
+  services: "/services",
+  // "cart" and "checkout" field pages are intentionally absent: the preview
+  // iframe's cart is empty (localStorage), so those pages preview an
+  // unrepresentative state. Their fields remain editable in the advanced
+  // template editor (platform admin).
 };
 
 export type PreviewPage = keyof typeof PAGE_PREVIEW_PATHS;
