@@ -3,7 +3,7 @@
  *
  * NON-DESTRUCTIVE to existing content rows:
  *   - Switches the demo to the `default` template and fills out that template's content
- *     fields (all images use the bundled /placeholder.svg so nothing breaks).
+ *     fields (images point at the Unsplash CDN — real photos, deterministically picked).
  *   - MERGES IN the feature flags the demo content needs (never clobbers others).
  *   - Does NOT delete pre-existing products/collections/pages/etc.
  *   - Everything it creates is NAMESPACED (slug prefix `demo-seed-`, customer emails
@@ -58,9 +58,53 @@ const DEMO_FAQ: { question: string; answer: string }[] = [
   },
 ];
 
-// Use the bundled local placeholder so demo images NEVER break (no external host).
-const PLACEHOLDER_IMAGE = "/placeholder.svg";
-const img = (_seed?: string) => PLACEHOLDER_IMAGE;
+// Curated, verified Unsplash photo IDs (skincare / beauty / self-care / studio
+// themed). Served straight from the Unsplash CDN — `*.unsplash.com` is already
+// allow-listed in next.config.js's `images.remotePatterns`, so next/image renders
+// them as real photos. Using real, correctly-sized images (instead of the flat
+// /placeholder.svg) also avoids the intrinsic-size hydration mismatch that the
+// SVG placeholder produced. All 22 IDs were curl-checked to return HTTP 200.
+const UNSPLASH_IDS = [
+  "photo-1556228578-8c89e6adf883",
+  "photo-1556228720-195a672e8a03",
+  "photo-1570172619644-dfd03ed5d881",
+  "photo-1608248543803-ba4f8c70ae0b",
+  "photo-1612817288484-6f916006741a",
+  "photo-1571781926291-c477ebfd024b",
+  "photo-1620916566398-39f1143ab7be",
+  "photo-1601049541289-9b1b7bbbfe19",
+  "photo-1598440947619-2c35fc9aa908",
+  "photo-1596755094514-f87e34085b2c",
+  "photo-1522335789203-aabd1fc54bc9",
+  "photo-1512496015851-a90fb38ba796",
+  "photo-1487412947147-5cebf100ffc2",
+  "photo-1560750588-73207b1ef5b8",
+  "photo-1519014816548-bf5fe059798b",
+  "photo-1596462502278-27bfdc403348",
+  "photo-1608571423902-eed4a5ad8108",
+  "photo-1631730359585-38a4935cbec4",
+  "photo-1552693673-1bf958298935",
+  "photo-1585232351009-aa87416fca90",
+  "photo-1547793548-7a0e7dfdb24f",
+  "photo-1616394584738-fc6e612e71b9",
+];
+
+// Deterministic FNV-1a hash so the same seed always maps to the same photo:
+// re-runs are stable and distinct seeds spread across the pool.
+function hashSeed(seed: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// Build an Unsplash CDN URL for a seed (auto-formatted, cropped, quality-capped).
+const img = (seed = "demo") => {
+  const id = UNSPLASH_IDS[hashSeed(seed) % UNSPLASH_IDS.length]!;
+  return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=80`;
+};
 
 // Prices are in CENTS (matches existing seeds: e2e "$25.00" => 2500).
 const daysAgo = (n: number) => new Date(Date.now() - n * 24 * 60 * 60 * 1000);
@@ -72,7 +116,7 @@ function buildDefaultCustomFields(): Record<string, string> {
   const out: Record<string, string> = {};
   for (const field of defaultTemplateData.default) {
     if (field.type === "image") {
-      out[field.key] = PLACEHOLDER_IMAGE;
+      out[field.key] = img(field.key);
       continue;
     }
     // Skip complex/media types (list, gallery, video) — they fall back safely.
@@ -175,15 +219,15 @@ async function main() {
       "Shop demo skincare, haircare, and self-care essentials. A sample storefront " +
       "showcasing products, collections, services, and reviews on SimplePress.",
     metaKeywords: "demo store, skincare, haircare, self-care, beauty, sample storefront",
-    ogImage: PLACEHOLDER_IMAGE,
-    logoUrl: PLACEHOLDER_IMAGE,
+    ogImage: img("home-og"),
+    logoUrl: img("logo"),
   };
   await db.siteContent.upsert({
     where: { businessId },
     update: { customFields: mergedCustomFields, ...siteSeo },
     create: { businessId, customFields: mergedCustomFields, primaryColor: "#0f172a", ...siteSeo },
   });
-  console.log("✓ Default template fields + homepage SEO populated (images → /placeholder.svg)");
+  console.log("✓ Default template fields + homepage SEO populated (images → Unsplash CDN)");
 
   // ───────────────────────────────────────────────────────────────────────────
   // 2. Idempotent cleanup — removes ONLY this seed's namespaced rows
@@ -228,7 +272,7 @@ async function main() {
     metaTitle: `${name} | Demo Store`,
     metaDescription: description,
     metaKeywords: `${name.toLowerCase()}, demo store, skincare, collection`,
-    ogImage: PLACEHOLDER_IMAGE,
+    ogImage: img(`col-${name}`),
   });
 
   const bestsellers = await db.collection.create({
@@ -509,7 +553,7 @@ async function main() {
         metaTitle: `${p.name} | Demo Store`,
         metaDescription: p.excerpt,
         metaKeywords: `${keywordList}, demo store, skincare`,
-        ogImage: PLACEHOLDER_IMAGE,
+        ogImage: img(`${slug}-1`),
         published: p.published ?? true,
         featured: p.featured ?? false,
         sortOrder: 100 + i,
@@ -580,7 +624,7 @@ async function main() {
       metaDescription:
         "Book a one-on-one skincare consultation to build a routine tailored to your skin.",
       metaKeywords: "skincare consultation, booking, demo store, services",
-      ogImage: PLACEHOLDER_IMAGE,
+      ogImage: img("svc-consult"),
     },
   });
   await db.serviceItem.createMany({
@@ -623,7 +667,7 @@ async function main() {
       metaDescription:
         "Make any order gift-ready with premium hand wrapping and personalized engraving.",
       metaKeywords: "gift wrapping, engraving, demo store, services",
-      ogImage: PLACEHOLDER_IMAGE,
+      ogImage: img("svc-gift"),
     },
   });
   await db.serviceItem.create({
@@ -670,7 +714,7 @@ async function main() {
     if (!s.metaKeywords?.trim()) {
       data.metaKeywords = `${s.name.toLowerCase()}, services, demo store`;
     }
-    if (!s.ogImage?.trim()) data.ogImage = PLACEHOLDER_IMAGE;
+    if (!s.ogImage?.trim()) data.ogImage = img(`svc-${s.name}`);
     if (Object.keys(data).length > 0) {
       await db.service.update({ where: { id: s.id }, data });
       servicesSeoBackfilled++;
@@ -991,7 +1035,7 @@ async function main() {
       metaTitle: "Building Your Skincare Routine | Demo Store",
       metaDescription: "A quick guide to layering skincare products in the right order.",
       metaKeywords: "skincare routine, guide, demo store, blog",
-      ogImage: PLACEHOLDER_IMAGE,
+      ogImage: img("blog-routine"),
       published: true,
       publishedAt: daysAgo(14),
     },
@@ -1012,7 +1056,7 @@ async function main() {
       metaTitle: "Our Story | Demo Store",
       metaDescription: "Learn more about Demo Store — a sample SimplePress storefront.",
       metaKeywords: "about, our story, demo store",
-      ogImage: PLACEHOLDER_IMAGE,
+      ogImage: img("page-story"),
       published: true,
       publishedAt: daysAgo(60),
     },

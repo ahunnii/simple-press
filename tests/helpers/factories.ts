@@ -36,7 +36,7 @@ export async function createOwnerUser(
   opts: {
     email?: string;
     platformRole?: "BUSINESS_USER" | "PLATFORM_ADMIN";
-    role?: "OWNER" | "MANAGER";
+    role?: "OWNER" | "MANAGER" | "STAFF";
   } = {},
 ) {
   const user = await db.user.create({
@@ -51,6 +51,35 @@ export async function createOwnerUser(
     data: { userId: user.id, businessId, role: opts.role ?? "OWNER" },
   });
   return user;
+}
+
+/** A plain platform user with no business membership. */
+export function createUser(
+  opts: {
+    email?: string;
+    name?: string;
+    platformRole?: "BUSINESS_USER" | "PLATFORM_ADMIN";
+  } = {},
+) {
+  return db.user.create({
+    data: {
+      name: opts.name ?? "Test User",
+      email: opts.email ?? `${uniq("user")}@test.dev`,
+      emailVerified: true,
+      platformRole: opts.platformRole ?? "BUSINESS_USER",
+    },
+  });
+}
+
+/** Adds an existing user as a member of a business with the given role. */
+export function createMembership(
+  businessId: string,
+  userId: string,
+  role: "OWNER" | "MANAGER" | "STAFF" = "MANAGER",
+) {
+  return db.businessMembership.create({
+    data: { userId, businessId, role },
+  });
 }
 
 export function createProduct(
@@ -86,6 +115,30 @@ export function createProduct(
   });
 }
 
+export function createVariant(
+  productId: string,
+  opts: {
+    name?: string;
+    sku?: string | null;
+    price?: number | null;
+    inventoryQty?: number;
+    reservedQty?: number;
+    options?: Record<string, string>;
+  } = {},
+) {
+  return db.productVariant.create({
+    data: {
+      productId,
+      name: opts.name ?? "Default Variant",
+      sku: opts.sku ?? uniq("sku"),
+      price: opts.price ?? 1000,
+      inventoryQty: opts.inventoryQty ?? 10,
+      reservedQty: opts.reservedQty ?? 0,
+      options: (opts.options ?? { size: "M" }) as Prisma.InputJsonValue,
+    },
+  });
+}
+
 export function createCustomer(
   businessId: string,
   opts: { email?: string; userId?: string } = {},
@@ -100,14 +153,38 @@ export function createCustomer(
 }
 
 let orderNumber = 1000;
+
+export type CreateOrderItemInput = {
+  productId?: string | null;
+  productVariantId?: string | null;
+  productName?: string;
+  variantName?: string | null;
+  sku?: string | null;
+  price?: number;
+  quantity?: number;
+  total?: number;
+  fulfilledQuantity?: number;
+};
+
 export function createOrder(
   businessId: string,
   opts: {
     customerId?: string;
     customerEmail?: string;
+    customerName?: string;
     subtotal?: number;
     total?: number;
+    tax?: number;
+    shipping?: number;
+    discount?: number;
     orderNumber?: number;
+    status?: string;
+    paymentStatus?: string;
+    fulfillmentStatus?: string;
+    stripePaymentIntentId?: string | null;
+    stripeSessionId?: string | null;
+    refundAmountCents?: number | null;
+    items?: CreateOrderItemInput[];
   } = {},
 ) {
   const subtotal = opts.subtotal ?? 1000;
@@ -117,8 +194,87 @@ export function createOrder(
       businessId,
       customerId: opts.customerId ?? null,
       customerEmail: opts.customerEmail ?? "buyer@test.dev",
+      customerName: opts.customerName,
       subtotal,
       total: opts.total ?? subtotal,
+      tax: opts.tax ?? 0,
+      shipping: opts.shipping ?? 0,
+      discount: opts.discount ?? 0,
+      status: opts.status ?? "open",
+      paymentStatus: opts.paymentStatus ?? "paid",
+      fulfillmentStatus: opts.fulfillmentStatus ?? "unfulfilled",
+      stripePaymentIntentId:
+        opts.stripePaymentIntentId === undefined
+          ? `pi_${uniq("test")}`
+          : opts.stripePaymentIntentId,
+      stripeSessionId: opts.stripeSessionId ?? null,
+      refundAmountCents: opts.refundAmountCents ?? null,
+      ...(opts.items
+        ? {
+            items: {
+              create: opts.items.map((item) => ({
+                productId: item.productId ?? null,
+                productVariantId: item.productVariantId ?? null,
+                productName: item.productName ?? "Test Product",
+                variantName: item.variantName ?? null,
+                sku: item.sku ?? null,
+                price: item.price ?? 1000,
+                quantity: item.quantity ?? 1,
+                total: item.total ?? (item.price ?? 1000) * (item.quantity ?? 1),
+                fulfilledQuantity: item.fulfilledQuantity ?? 0,
+              })),
+            },
+          }
+        : {}),
+    },
+    include: { items: true },
+  });
+}
+
+/** Adds a line item to an existing order (for cases where items are added after order creation). */
+export function createOrderItem(orderId: string, opts: CreateOrderItemInput = {}) {
+  return db.orderItem.create({
+    data: {
+      orderId,
+      productId: opts.productId ?? null,
+      productVariantId: opts.productVariantId ?? null,
+      productName: opts.productName ?? "Test Product",
+      variantName: opts.variantName ?? null,
+      sku: opts.sku ?? null,
+      price: opts.price ?? 1000,
+      quantity: opts.quantity ?? 1,
+      total: opts.total ?? (opts.price ?? 1000) * (opts.quantity ?? 1),
+      fulfilledQuantity: opts.fulfilledQuantity ?? 0,
+    },
+  });
+}
+
+export function createDiscount(
+  businessId: string,
+  opts: {
+    code?: string;
+    type?: string;
+    value?: number;
+    active?: boolean;
+    usageLimit?: number | null;
+    usageCount?: number;
+    perCustomerLimit?: number | null;
+    minPurchase?: number | null;
+    maxDiscount?: number | null;
+  } = {},
+) {
+  return db.discountCode.create({
+    data: {
+      businessId,
+      code: opts.code ?? uniq("CODE").toUpperCase(),
+      type: opts.type ?? "percentage",
+      value: opts.value ?? 10,
+      active: opts.active ?? true,
+      usageLimit: opts.usageLimit ?? null,
+      usageCount: opts.usageCount ?? 0,
+      perCustomerLimit: opts.perCustomerLimit ?? null,
+      minPurchase: opts.minPurchase ?? null,
+      maxDiscount: opts.maxDiscount ?? null,
     },
   });
 }
