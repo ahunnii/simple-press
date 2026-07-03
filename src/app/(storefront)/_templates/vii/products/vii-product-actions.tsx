@@ -32,16 +32,6 @@ export function ViiProductActions({
 
   const stepperBorder = "1px solid var(--vii-hairline-strong)";
 
-  if (Object.keys(variantOptions).length > 0) {
-    return (
-      <ViiVariantSelector
-        product={product}
-        selectedVariantId={selectedVariantId}
-        setSelectedVariantId={setSelectedVariantId}
-      />
-    );
-  }
-
   if (additionalFields?.comingSoon) {
     return (
       <div
@@ -74,6 +64,16 @@ export function ViiProductActions({
           This product isn&apos;t available yet. Check back later!
         </p>
       </div>
+    );
+  }
+
+  if (Object.keys(variantOptions).length > 0) {
+    return (
+      <ViiVariantSelector
+        product={product}
+        selectedVariantId={selectedVariantId}
+        setSelectedVariantId={setSelectedVariantId}
+      />
     );
   }
 

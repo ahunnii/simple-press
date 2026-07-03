@@ -70,7 +70,7 @@ export function ViiStorySection({
         {/* ── Left: text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           <h2
             id="story-heading"

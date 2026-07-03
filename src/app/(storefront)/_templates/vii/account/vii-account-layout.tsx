@@ -48,7 +48,7 @@ export function ViiAccountLayout({ children, heading, breadcrumb }: Props) {
         >
           <div
             ref={heroRef}
-            className={`vii-reveal${heroVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${heroVisible ? " is-visible" : ""}`}
           >
             <ViiOverline style={{ marginBottom: 16 }}>Account</ViiOverline>
             <h1

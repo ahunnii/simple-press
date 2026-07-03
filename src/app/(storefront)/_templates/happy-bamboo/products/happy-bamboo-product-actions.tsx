@@ -29,12 +29,7 @@ export function HappyBambooProductActions({
 
   return (
     <>
-      {Object.keys(variantOptions).length > 0 ? (
-        <HappyBambooVariantSelector
-          product={product}
-          setSelectedVariantId={setSelectedVariantId}
-        />
-      ) : additionalFields?.comingSoon ? (
+      {additionalFields?.comingSoon ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
           <p className="font-semibold text-amber-700 dark:text-amber-300">
             Coming Soon
@@ -43,6 +38,11 @@ export function HappyBambooProductActions({
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
+      ) : Object.keys(variantOptions).length > 0 ? (
+        <HappyBambooVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+        />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
           <Button

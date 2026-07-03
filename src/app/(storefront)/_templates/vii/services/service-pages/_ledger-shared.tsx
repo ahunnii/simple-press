@@ -244,7 +244,7 @@ export function LedgerIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline
@@ -282,7 +282,7 @@ export function LedgerIntro({
         {!bodyEmpty && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             <div
@@ -302,7 +302,7 @@ export function LedgerIntro({
         {(Boolean(introImageSrc) || Boolean(introVideoSrc)) && (
           <div
             ref={mediaRef}
-            className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           >
             <ServiceSectionMedia
               imageSrc={introImageSrc}
@@ -371,7 +371,7 @@ export function LedgerNotes({
           paddingTop: "clamp(28px, 3.5vw, 40px)",
         }}
       >
-        <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
+        <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
           {hasHeading && (
             <h2
               id="ledger-notes-heading"

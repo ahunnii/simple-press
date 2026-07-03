@@ -362,7 +362,7 @@ export function ViiProductPage({
           >
             <div
               ref={related.ref}
-              className={`vii-reveal-group${related.visible ? "is-visible" : ""}`}
+              className={`vii-reveal-group${related.visible ? " is-visible" : ""}`}
             >
               {/* Header */}
               <div

@@ -273,7 +273,7 @@ function PullQuote({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 760, margin: "0 auto" }}
       >
         {/* Opening quotation mark */}
@@ -327,7 +327,7 @@ function PullQuote({
       {/* Optional media beneath the quote — contained within the navy band */}
       <div
         ref={mediaRef}
-        className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+        className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
       >
         <ServiceSectionMedia
           imageSrc={quoteImageSrc}
@@ -783,7 +783,7 @@ function AtelierList({
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal vii-atelier-list-row${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",
@@ -833,7 +833,7 @@ function AtelierList({
         {/* Treatment rows — stagger group: one observer, per-item --i cascade */}
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
+          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
         >
           {items.map((item, i) => (
             <TreatmentListRow

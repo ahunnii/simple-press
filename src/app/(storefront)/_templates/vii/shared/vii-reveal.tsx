@@ -28,7 +28,7 @@ export function ViiReveal({
   return (
     <div
       ref={ref}
-      className={`vii-reveal${visible ? "is-visible" : ""}${className ? ` ${className}` : ""}`}
+      className={`vii-reveal${visible ? " is-visible" : ""}${className ? ` ${className}` : ""}`}
       style={style}
     >
       {children}
@@ -51,7 +51,7 @@ export function ViiRevealGroup({
   return (
     <div
       ref={ref}
-      className={`vii-reveal-group${visible ? "is-visible" : ""}${className ? ` ${className}` : ""}`}
+      className={`vii-reveal-group${visible ? " is-visible" : ""}${className ? ` ${className}` : ""}`}
       style={style}
     >
       {children}

@@ -67,7 +67,7 @@ export function ViiShopClient({
       >
         <div
           ref={productsReveal.ref}
-          className={`vii-reveal${productsReveal.visible ? "is-visible" : ""}`}
+          className={`vii-reveal${productsReveal.visible ? " is-visible" : ""}`}
           style={{ maxWidth: 1200, margin: "0 auto" }}
         >
           <h2 id="vii-shop-products-heading" className="sr-only">
@@ -323,7 +323,7 @@ export function ViiShopClient({
         >
           <div
             ref={collectionsReveal.ref}
-            className={`vii-reveal-group${collectionsReveal.visible ? "is-visible" : ""}`}
+            className={`vii-reveal-group${collectionsReveal.visible ? " is-visible" : ""}`}
             style={{ maxWidth: 1200, margin: "0 auto" }}
           >
             <div style={{ marginBottom: "clamp(28px, 4vw, 48px)" }}>

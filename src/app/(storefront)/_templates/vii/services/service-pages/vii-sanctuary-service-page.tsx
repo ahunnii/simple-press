@@ -299,7 +299,7 @@ function SanctuaryIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline
@@ -336,7 +336,7 @@ function SanctuaryIntro({
         {(bodyJson ?? bodyFallback) && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
             style={{ marginTop: 32 }}
           >
             {bodyJson ? (
@@ -371,7 +371,7 @@ function SanctuaryIntro({
         {(Boolean(introImageSrc) || Boolean(introVideoSrc)) && (
           <div
             ref={mediaRef}
-            className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           >
             <ServiceSectionMedia
               imageSrc={introImageSrc}
@@ -405,7 +405,7 @@ function BenefitsStrip({ benefits }: { benefits: string[] }) {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{
           maxWidth: 1100,
           margin: "0 auto",
@@ -922,7 +922,7 @@ function TreatmentMenu({
         {/* Section heading */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{ marginBottom: "clamp(40px, 6vw, 64px)" }}
         >
           <ViiOverline tone="light" align="left" style={{ marginBottom: 12 }}>
@@ -955,7 +955,7 @@ function TreatmentMenu({
             each TreatmentCard cascades in as a vii-reveal-item. */}
         <div
           ref={gridRef}
-          className={`vii-sanctuary-grid vii-reveal-group${gridVisible ? "is-visible" : ""}`}
+          className={`vii-sanctuary-grid vii-reveal-group${gridVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",

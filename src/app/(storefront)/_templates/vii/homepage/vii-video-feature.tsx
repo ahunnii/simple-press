@@ -87,7 +87,7 @@ export function ViiVideoFeature({
         {/* ── Text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline tone="dark" style={{ marginBottom: 16 }}>
@@ -164,7 +164,7 @@ export function ViiVideoFeature({
         {/* ── Media column ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",

@@ -26,18 +26,18 @@ export function DefaultProductActions({
 
   return (
     <>
-      {Object.keys(variantOptions).length > 0 ? (
-        <DefaultVariantSelector
-          product={product}
-          setSelectedVariantId={setSelectedVariantId}
-        />
-      ) : additionalFields?.comingSoon ? (
+      {additionalFields?.comingSoon ? (
         <div className="rounded-[var(--radius)] border border-amber-200 bg-amber-50 px-5 py-4">
           <p className="font-medium text-amber-700">Coming Soon</p>
           <p className="mt-1 text-sm text-amber-700">
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
+      ) : Object.keys(variantOptions).length > 0 ? (
+        <DefaultVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+        />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
           <button

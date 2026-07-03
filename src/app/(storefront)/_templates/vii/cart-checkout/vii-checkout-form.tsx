@@ -133,7 +133,7 @@ export function ViiCheckoutForm({
           gridTemplateColumns: "1fr",
           alignItems: "start",
         }}
-        className={`lg:grid-cols-[1fr_360px] vii-reveal-group${visible ? "is-visible" : ""}`}
+        className={`lg:grid-cols-[1fr_360px] vii-reveal-group${visible ? " is-visible" : ""}`}
       >
         {/* ── Left: fieldsets ─────────────────────────────────────────────── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>

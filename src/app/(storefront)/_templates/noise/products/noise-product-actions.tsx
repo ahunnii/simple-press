@@ -81,12 +81,7 @@ export function NoiseProductActions({
       </div>
 
       {/* Variant selectors */}
-      {Object.keys(variantOptions).length > 0 ? (
-        <NoiseVariantSelector
-          product={product}
-          setSelectedVariantId={setSelectedVariantId}
-        />
-      ) : additionalFields?.comingSoon ? (
+      {additionalFields?.comingSoon ? (
         <div
           className="border px-5 py-4"
           style={{
@@ -101,6 +96,11 @@ export function NoiseProductActions({
             This piece isn&apos;t available yet. Check back soon.
           </p>
         </div>
+      ) : Object.keys(variantOptions).length > 0 ? (
+        <NoiseVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+        />
       ) : !inStock ? (
         <div className="flex flex-col gap-4">
           <button

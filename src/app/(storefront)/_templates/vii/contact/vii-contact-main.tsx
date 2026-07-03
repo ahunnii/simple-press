@@ -108,7 +108,7 @@ export function ViiContactMain({
         {/* Left — intro + info */}
         <div
           ref={infoRef}
-          className={`vii-reveal${infoVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${infoVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline align="left" tone="light" style={{ marginBottom: 14 }}>
@@ -344,7 +344,7 @@ export function ViiContactMain({
         {/* Right — form card */}
         <div
           ref={formRef}
-          className={`vii-reveal${formVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${formVisible ? " is-visible" : ""}`}
           style={{
             background: "var(--vii-paper)",
             borderRadius: "var(--radius)",

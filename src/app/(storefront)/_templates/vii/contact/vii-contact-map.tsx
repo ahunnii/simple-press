@@ -51,7 +51,7 @@ export function ViiContactMap({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 1180, margin: "0 auto" }}
       >
         {heading && (

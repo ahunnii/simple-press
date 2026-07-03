@@ -292,7 +292,7 @@ function ServicesIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <ViiOverline
@@ -330,7 +330,7 @@ function ServicesIntro({
           <div style={{ marginTop: 28 }}>
             <div
               ref={bodyRef}
-              className={`vii-reveal${bodyVisible ? "is-visible" : ""}`}
+              className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
             >
               <p
                 style={{
@@ -503,7 +503,7 @@ function GalleryStrip({ images }: { images: ServicesGalleryImage[] }) {
     >
       <div
         ref={ref}
-        className={`vii-services-gallery-strip vii-reveal-group${visible ? "is-visible" : ""}`}
+        className={`vii-services-gallery-strip vii-reveal-group${visible ? " is-visible" : ""}`}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${shown.length}, 1fr)`,
@@ -560,7 +560,7 @@ function EmptyServicesState() {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 560, margin: "0 auto" }}
       >
         <h2
@@ -658,7 +658,7 @@ function ServiceGrid({ services }: { services: Props["services"] }) {
 
       <div
         ref={ref}
-        className={`vii-services-grid vii-reveal-group${visible ? "is-visible" : ""}`}
+        className={`vii-services-grid vii-reveal-group${visible ? " is-visible" : ""}`}
       >
         {services.map((service, i) => (
           <div

@@ -57,7 +57,7 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
       {/* Category tiles */}
       <div
         ref={ref}
-        className={`vii-reveal-group${visible ? "is-visible" : ""}`}
+        className={`vii-reveal-group${visible ? " is-visible" : ""}`}
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",

@@ -56,7 +56,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           >
             <div
               ref={leftRef}
-              className={`vii-reveal${leftVisible ? "is-visible" : ""}`}
+              className={`vii-reveal${leftVisible ? " is-visible" : ""}`}
               style={{ maxWidth: 440 }}
             >
               {left.image.trim() && (
@@ -179,7 +179,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           >
             <div
               ref={rightRef}
-              className={`vii-reveal${rightVisible ? "is-visible" : ""}`}
+              className={`vii-reveal${rightVisible ? " is-visible" : ""}`}
               style={{ maxWidth: 440 }}
             >
               {right.image.trim() && (

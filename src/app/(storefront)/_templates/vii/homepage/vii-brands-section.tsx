@@ -215,7 +215,7 @@ export function ViiBrandsSection({
           </div>
         ) : (
           /* ── Static mode (default — unchanged behaviour) ───────────────── */
-          <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
+          <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
             <ul
               className="vii-brands-grid"
               style={{

@@ -230,7 +230,7 @@ export function ViiTestimonialsClient({
       >
         <div
           ref={heroRef}
-          className={`vii-reveal${heroVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${heroVisible ? " is-visible" : ""}`}
           style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}
         >
           {overline && (
@@ -305,7 +305,7 @@ export function ViiTestimonialsClient({
         >
           <div
             ref={featuredRef}
-            className={`vii-reveal${featuredVisible ? "is-visible" : ""}`}
+            className={`vii-reveal${featuredVisible ? " is-visible" : ""}`}
             style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}
           >
             {/* Optional photo */}
@@ -418,7 +418,7 @@ export function ViiTestimonialsClient({
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div
               ref={flowRef}
-              className={`vii-reveal-group${flowVisible ? "is-visible" : ""}`}
+              className={`vii-reveal-group${flowVisible ? " is-visible" : ""}`}
               style={{
                 columns: "320px auto",
                 columnGap: "clamp(24px, 3.5vw, 44px)",
@@ -442,7 +442,7 @@ export function ViiTestimonialsClient({
       >
         <div
           ref={ctaRef}
-          className={`vii-reveal${ctaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${ctaVisible ? " is-visible" : ""}`}
           style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}
         >
           <h2

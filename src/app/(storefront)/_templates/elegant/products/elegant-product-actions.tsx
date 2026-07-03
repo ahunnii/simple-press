@@ -32,16 +32,6 @@ export function ElegantProductActions({
 
   const additional = parseCardAdditionalFields(product.additionalFields);
 
-  if (Object.keys(variantOptions).length > 0) {
-    return (
-      <ElegantVariantSelector
-        product={product}
-        selectedVariantId={selectedVariantId}
-        setSelectedVariantId={setSelectedVariantId}
-      />
-    );
-  }
-
   if (additional?.comingSoon) {
     return (
       <div
@@ -75,6 +65,16 @@ export function ElegantProductActions({
           This product isn&apos;t available yet. Check back soon.
         </p>
       </div>
+    );
+  }
+
+  if (Object.keys(variantOptions).length > 0) {
+    return (
+      <ElegantVariantSelector
+        product={product}
+        selectedVariantId={selectedVariantId}
+        setSelectedVariantId={setSelectedVariantId}
+      />
     );
   }
 
