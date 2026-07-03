@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Eye, EyeOff } from "lucide-react";
+import { ChevronRight, Eye, EyeOff, Palette } from "lucide-react";
 
 import type { TemplateSection } from "~/lib/template-sections";
 import { cn } from "~/lib/utils";
@@ -18,6 +18,12 @@ export type SectionRailProps = {
   onSelectSection: (section: TemplateSection) => void;
   /** Fired when a hideable section's eye toggle is clicked. */
   onToggleVisibility: (section: TemplateSection) => void;
+  /** Whether this template has curated theme presets. */
+  hasTheme: boolean;
+  /** Whether the theme panel is currently open. */
+  themeActive: boolean;
+  /** Fired when the Theme entry is chosen. */
+  onSelectTheme: () => void;
 };
 
 function SectionRow({
@@ -116,6 +122,9 @@ export function SectionRail({
   hiddenSectionIds,
   onSelectSection,
   onToggleVisibility,
+  hasTheme,
+  themeActive,
+  onSelectTheme,
 }: SectionRailProps) {
   return (
     <nav
@@ -161,6 +170,43 @@ export function SectionRail({
               onToggleVisibility={onToggleVisibility}
             />
           ))}
+        </div>
+      )}
+
+      {hasTheme && (
+        <div className="border-t py-1 pb-2">
+          <p className="text-muted-foreground px-3 pt-3 pb-1 text-xs font-medium tracking-wide uppercase">
+            Design
+          </p>
+          <button
+            type="button"
+            aria-current={themeActive ? "true" : undefined}
+            onClick={onSelectTheme}
+            className={cn(
+              "group relative mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors",
+              themeActive
+                ? "bg-muted font-medium"
+                : "hover:bg-muted/60",
+            )}
+          >
+            {themeActive && (
+              <span
+                className="bg-primary absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full"
+                aria-hidden="true"
+              />
+            )}
+            <Palette className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">Theme</span>
+            <ChevronRight
+              className={cn(
+                "h-4 w-4 shrink-0 transition-opacity",
+                themeActive
+                  ? "opacity-100"
+                  : "opacity-40 group-hover:opacity-70",
+              )}
+              aria-hidden="true"
+            />
+          </button>
         </div>
       )}
     </nav>

@@ -8,7 +8,14 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
 import { PREVIEW_SOURCE } from "~/lib/preview/use-preview-bridge";
-import { getSpMeta, setSectionHidden, SP_META_KEY } from "~/lib/sp-meta";
+import {
+  getSpMeta,
+  getThemeSelection,
+  setSectionHidden,
+  setThemeSelection,
+  SP_META_KEY,
+} from "~/lib/sp-meta";
+import { getTemplateTheme } from "~/lib/template-themes";
 import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { api } from "~/trpc/react";
 
@@ -18,6 +25,7 @@ import type { EditorTopBarPage } from "./editor-top-bar";
 import { EditorTopBar } from "./editor-top-bar";
 import { FieldPanel } from "./field-panel";
 import { SectionRail } from "./section-rail";
+import { ThemePanel } from "./theme-panel";
 
 const FLUSH_DEBOUNCE_MS = 800;
 const FLUSH_RETRY_MS = 5000;
@@ -147,6 +155,7 @@ export function VisualEditor({
   const [activeSectionId, setActiveSectionId] = useState<string | null>(
     initialSectionObj?.id ?? null,
   );
+  const [themeOpen, setThemeOpen] = useState(false);
   const [device, setDevice] = useState<DeviceKind>("desktop");
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -488,6 +497,7 @@ export function VisualEditor({
 
   const handleSelectSection = useCallback(
     (section: TemplateSection) => {
+      setThemeOpen(false);
       setActiveSectionId(section.id);
       // focusGroup expects the BARE group name — the overlay rebuilds the
       // full data-sp-group value as `${page}.${group}` (see preview-overlay).
@@ -535,6 +545,28 @@ export function VisualEditor({
     [scheduleFlush],
   );
 
+  // ── Theme ──
+  const templateTheme = useMemo(
+    () => getTemplateTheme(templateId),
+    [templateId],
+  );
+  const themeSelection = useMemo(() => getThemeSelection(fields), [fields]);
+
+  const handleThemeSelect = useCallback(
+    (kind: "palette" | "fonts", presetId: string | undefined) => {
+      if (mutationPendingRef.current) return;
+      setFields((prev) => {
+        const next = setThemeSelection(prev, kind, presetId);
+        latestFieldsRef.current = next;
+        return next;
+      });
+      // Theme vars render server-side on the template root — needs a reload.
+      refreshNeededRef.current = true;
+      scheduleFlush();
+    },
+    [scheduleFlush],
+  );
+
   // Patch ack from the iframe (sp:patched).
   const handlePatched = useCallback((applied: string[], missed: string[]) => {
     for (const key of applied) unackedPatchKeysRef.current.delete(key);
@@ -551,10 +583,16 @@ export function VisualEditor({
       if (page !== activePage && page in PAGE_PREVIEW_PATHS) {
         setActivePage(page);
       }
+      setThemeOpen(false);
       setActiveSectionId(group);
     },
     [activePage],
   );
+
+  const handleSelectTheme = useCallback(() => {
+    setActiveSectionId(null);
+    setThemeOpen(true);
+  }, []);
 
   const isPublishing = publish.isPending || clearDraft.isPending;
 
@@ -584,6 +622,9 @@ export function VisualEditor({
           hiddenSectionIds={hiddenSectionIds}
           onSelectSection={handleSelectSection}
           onToggleVisibility={handleToggleVisibility}
+          hasTheme={templateTheme !== null}
+          themeActive={themeOpen}
+          onSelectTheme={handleSelectTheme}
         />
 
         <EditorPreview
@@ -595,7 +636,17 @@ export function VisualEditor({
           frameRef={previewRef}
         />
 
-        {activeSection && (
+        {themeOpen && templateTheme && (
+          <ThemePanel
+            theme={templateTheme}
+            selection={themeSelection}
+            onSelect={handleThemeSelect}
+            disabled={isPublishing}
+            onClose={() => setThemeOpen(false)}
+          />
+        )}
+
+        {!themeOpen && activeSection && (
           <FieldPanel
             section={activeSection}
             templateId={templateId}

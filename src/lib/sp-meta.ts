@@ -98,6 +98,36 @@ export function setSectionHidden(
 }
 
 /**
+ * Immutably sets (or clears, when `presetId` is undefined) one theme
+ * selection inside `customFields._sp.theme`, preserving all other keys.
+ */
+export function setThemeSelection(
+  customFields: Record<string, unknown>,
+  kind: "palette" | "fonts",
+  presetId: string | undefined,
+): Record<string, unknown> {
+  const existingSpRaw = isObjectRecord(customFields[SP_META_KEY])
+    ? customFields[SP_META_KEY]
+    : {};
+
+  const existingTheme = isSpThemeSelection(existingSpRaw.theme)
+    ? existingSpRaw.theme
+    : {};
+
+  const nextTheme: SpThemeSelection = { ...existingTheme };
+  if (presetId === undefined) delete nextTheme[kind];
+  else nextTheme[kind] = presetId;
+
+  return {
+    ...customFields,
+    [SP_META_KEY]: {
+      ...existingSpRaw,
+      theme: nextTheme,
+    },
+  };
+}
+
+/**
  * Whether a section should be rendered on the storefront. The owner's
  * stored `_sp.sections[sectionId].hidden` wins if present; otherwise falls
  * back to the section's `defaultHidden` from the section registry. Unknown

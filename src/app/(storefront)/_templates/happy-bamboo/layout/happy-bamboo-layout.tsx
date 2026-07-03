@@ -5,6 +5,7 @@ import { Outfit, Spectral } from "next/font/google";
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 
 import { HappyBambooAnnouncementBar } from "./happy-bamboo-announcement-bar";
@@ -27,9 +28,14 @@ export async function HappyBambooLayout({
     getBusinessFlags(),
   ]);
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const themeVars = resolveThemeVars(
+    "happy-bamboo",
+    business.siteContent?.customFields,
+  );
   return (
     <main
       className={`${fontSans.variable} ${fontSerif.variable} happy-bamboo dark:happy-bamboo`}
+      style={themeVars ?? undefined}
     >
       <a
         href="#main-content"
