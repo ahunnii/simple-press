@@ -7,6 +7,7 @@ import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
+import { PREVIEW_SOURCE } from "~/lib/preview/use-preview-bridge";
 import { SP_META_KEY } from "~/lib/sp-meta";
 import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { api } from "~/trpc/react";
@@ -102,6 +103,15 @@ export function VisualEditor({
       .map((key) => ({ value: key, label: pageLabel(key) }));
   }, [templateId]);
 
+  // Field type lookup — text/textarea fields get the live-patch fast path.
+  const fieldTypeByKey = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const fields of Object.values(groupFieldsByPage(templateId))) {
+      for (const field of fields) map.set(field.key, field.type);
+    }
+    return map;
+  }, [templateId]);
+
   const defaultPage = pages[0]?.value ?? "homepage";
   // Deep-link guard: if ?section= names a section on a different page than
   // ?page=, honor the SECTION's page so the panel never opens disconnected
@@ -168,6 +178,14 @@ export function VisualEditor({
   const retryCountRef = useRef(0);
   /** True once the retry budget is exhausted — surfaced in the status chip. */
   const [saveFailed, setSaveFailed] = useState(false);
+  /**
+   * True when the next flush must refresh the iframe: a non-patchable field
+   * changed, a patch couldn't be delivered, or the iframe reported a key it
+   * has no annotation for. Successfully patched text edits skip the reload.
+   */
+  const refreshNeededRef = useRef(false);
+  /** Patch keys sent but not yet acked — treated as refresh-needed at flush. */
+  const unackedPatchKeysRef = useRef<Set<string>>(new Set());
 
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
 
@@ -203,7 +221,11 @@ export function VisualEditor({
     }
     const epoch = flushEpochRef.current;
     inFlightRef.current = true;
-    setIsUpdating(true);
+    // Shimmer only when this flush will reload the iframe — successfully
+    // patched text edits should feel instant, with no overlay flash.
+    setIsUpdating(
+      refreshNeededRef.current || unackedPatchKeysRef.current.size > 0,
+    );
     let ok = false;
     const attempt = savePreviewDraft
       .mutateAsync({ customFields: latestFieldsRef.current })
@@ -229,7 +251,14 @@ export function VisualEditor({
       retryCountRef.current = 0;
       setSaveFailed(false);
       setServerHasDraft(true);
-      previewRef.current?.refresh();
+      // Only reload the iframe when something wasn't (or couldn't be) live-
+      // patched. Pure text edits that were acked keep the patched DOM as-is —
+      // the server draft now matches it, so no reload is needed.
+      const needsRefresh =
+        refreshNeededRef.current || unackedPatchKeysRef.current.size > 0;
+      refreshNeededRef.current = false;
+      unackedPatchKeysRef.current.clear();
+      if (needsRefresh) previewRef.current?.refresh();
       if (queuedRef.current) {
         // More edits arrived mid-flight — flush again with the newest values.
         queuedRef.current = false;
@@ -287,9 +316,25 @@ export function VisualEditor({
         latestFieldsRef.current = next;
         return next;
       });
+
+      // Live-patch fast path: text/textarea edits are pushed straight into
+      // the iframe DOM. Everything else reloads the preview on next flush.
+      const type = fieldTypeByKey.get(key);
+      if ((type === "text" || type === "textarea") && typeof value === "string") {
+        const sent = previewRef.current?.postMessage({
+          source: PREVIEW_SOURCE,
+          type: "sp:patch-fields",
+          fields: { [key]: value },
+        });
+        if (sent) unackedPatchKeysRef.current.add(key);
+        else refreshNeededRef.current = true;
+      } else {
+        refreshNeededRef.current = true;
+      }
+
       scheduleFlush();
     },
-    [scheduleFlush],
+    [scheduleFlush, fieldTypeByKey],
   );
 
   // ── Publish ──
@@ -303,6 +348,8 @@ export function VisualEditor({
       );
       setServerHasDraft(false);
       setSaveFailed(false);
+      refreshNeededRef.current = false;
+      unackedPatchKeysRef.current.clear();
       toast.success("Your changes are live");
       previewRef.current?.refresh();
     },
@@ -338,6 +385,8 @@ export function VisualEditor({
       latestFieldsRef.current = publishedFields;
       setServerHasDraft(false);
       setSaveFailed(false);
+      refreshNeededRef.current = false;
+      unackedPatchKeysRef.current.clear();
       toast.success("Draft discarded");
       previewRef.current?.refresh();
     },
@@ -456,6 +505,16 @@ export function VisualEditor({
     setActiveSectionId(null);
   }, []);
 
+  // Patch ack from the iframe (sp:patched).
+  const handlePatched = useCallback((applied: string[], missed: string[]) => {
+    for (const key of applied) unackedPatchKeysRef.current.delete(key);
+    for (const key of missed) {
+      unackedPatchKeysRef.current.delete(key);
+      // No annotated element for this key — fall back to reload on flush.
+      refreshNeededRef.current = true;
+    }
+  }, []);
+
   // Hotspot click inside the iframe (sp:edit-group).
   const handleEditGroup = useCallback(
     (page: string, group: string) => {
@@ -500,6 +559,7 @@ export function VisualEditor({
           width={DEVICE_WIDTHS[device]}
           isUpdating={isUpdating}
           onEditGroup={handleEditGroup}
+          onPatched={handlePatched}
           frameRef={previewRef}
         />
 

@@ -6,6 +6,7 @@ import { ArrowRight, Leaf } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 export function HappyBambooHeroSection({
   heroImage,
@@ -55,13 +56,19 @@ export function HappyBambooHeroSection({
           </FadeIn> */}
 
           <FadeIn delay={0}>
-            <h1 className="mb-2 text-5xl leading-tight font-bold text-white uppercase md:text-7xl lg:text-7xl">
+            <h1
+              className="mb-2 text-5xl leading-tight font-bold text-white uppercase md:text-7xl lg:text-7xl"
+              {...fieldAttr("happy-bamboo.homepage.hero-welcome")}
+            >
               {heroWelcome}
             </h1>
           </FadeIn>
 
           <FadeIn delay={0.15}>
-            <p className="text-primary mb-3 text-4xl leading-tight font-extrabold drop-shadow-md md:text-5xl lg:text-6xl">
+            <p
+              className="text-primary mb-3 text-4xl leading-tight font-extrabold drop-shadow-md md:text-5xl lg:text-6xl"
+              {...fieldAttr("happy-bamboo.homepage.hero-title")}
+            >
               {heroTitle}
             </p>
           </FadeIn>
@@ -73,7 +80,10 @@ export function HappyBambooHeroSection({
           </FadeIn> */}
 
           <FadeIn delay={0.25}>
-            <p className="mb-4 flex items-center gap-2 font-serif text-2xl font-semibold tracking-wide text-white/80 md:text-3xl">
+            <p
+              className="mb-4 flex items-center gap-2 font-serif text-2xl font-semibold tracking-wide text-white/80 md:text-3xl"
+              {...fieldAttr("happy-bamboo.homepage.hero-tagline")}
+            >
               <Leaf
                 className="text-primary h-5 w-5 shrink-0"
                 aria-hidden="true"
@@ -83,7 +93,10 @@ export function HappyBambooHeroSection({
           </FadeIn>
 
           <FadeIn delay={0.35}>
-            <p className="mb-10 text-xl text-white/80 md:text-2xl">
+            <p
+              className="mb-10 text-xl text-white/80 md:text-2xl"
+              {...fieldAttr("happy-bamboo.homepage.hero-description")}
+            >
               {heroDescription}
             </p>
           </FadeIn>
@@ -106,7 +119,10 @@ export function HappyBambooHeroSection({
               className="group bg-[#608418] px-8 text-lg text-white hover:bg-[#608418]/90"
               asChild
             >
-              <Link href={heroPrimaryButtonLink ?? "/shop"}>
+              <Link
+                href={heroPrimaryButtonLink ?? "/shop"}
+                {...fieldAttr("happy-bamboo.homepage.hero-primary-button-text")}
+              >
                 {heroPrimaryButtonText}
                 <ArrowRight
                   className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"

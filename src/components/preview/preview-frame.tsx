@@ -30,6 +30,8 @@ type Props = {
   path?: string;
   /** Called when the overlay inside the iframe sends sp:edit-group. */
   onEditGroup?: (page: string, group: string) => void;
+  /** Called when the iframe acks a live text patch (sp:patched). */
+  onPatched?: (applied: string[], missed: string[]) => void;
   /** Whether a draft save is in-flight — shows a shimmer over the iframe. */
   isUpdating?: boolean;
   /** Width to render the iframe wrapper at (controlled from parent). */
@@ -45,7 +47,14 @@ type Props = {
  */
 export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
   function PreviewFrame(
-    { path = "/", onEditGroup, isUpdating = false, width = "100%", className },
+    {
+      path = "/",
+      onEditGroup,
+      onPatched,
+      isUpdating = false,
+      width = "100%",
+      className,
+    },
     ref,
   ) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -83,6 +92,9 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
       }
       if (msg.type === "sp:edit-group") {
         onEditGroup?.(msg.page, msg.group);
+      }
+      if (msg.type === "sp:patched") {
+        onPatched?.(msg.applied, msg.missed);
       }
     });
 

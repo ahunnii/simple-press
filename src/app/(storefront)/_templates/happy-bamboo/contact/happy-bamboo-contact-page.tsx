@@ -4,7 +4,7 @@
 import { Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 import {
   Accordion,
@@ -87,10 +87,16 @@ export function HappyBambooContactPage({
                 <MessageSquare className="mr-1 h-3 w-3" />
                 Get in Touch
               </Badge>
-              <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+              <h1
+                className="mb-4 font-serif text-4xl font-bold md:text-5xl"
+                {...fieldAttr("happy-bamboo.contact.header")}
+              >
                 {f["happy-bamboo.contact.header"]}
               </h1>
-              <p className="text-muted-foreground text-lg">
+              <p
+                className="text-muted-foreground text-lg"
+                {...fieldAttr("happy-bamboo.contact.subheader")}
+              >
                 {f["happy-bamboo.contact.subheader"]}
               </p>
             </FadeIn>
@@ -158,11 +164,17 @@ export function HappyBambooContactPage({
       >
         <div className="container mx-auto px-4">
           <FadeIn className="mb-12 text-center">
-            <h2 className="mb-4 font-serif text-3xl font-bold md:text-4xl">
+            <h2
+              className="mb-4 font-serif text-3xl font-bold md:text-4xl"
+              {...fieldAttr("happy-bamboo.contact-faq-title")}
+            >
               {f["happy-bamboo.contact-faq-title"]}
             </h2>
             {f["happy-bamboo.contact-faq-subtitle"] && (
-              <p className="text-muted-foreground">
+              <p
+                className="text-muted-foreground"
+                {...fieldAttr("happy-bamboo.contact-faq-subtitle")}
+              >
                 {f["happy-bamboo.contact-faq-subtitle"]}
               </p>
             )}

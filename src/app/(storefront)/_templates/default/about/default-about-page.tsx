@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRichTextFieldValue, isContentEmpty } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -48,23 +48,29 @@ export async function DefaultAboutPage({
     {
       num: "One",
       title: f["default.about.pillar-1-title"] ?? "Make it well.",
+      titleField: "default.about.pillar-1-title",
       desc:
         f["default.about.pillar-1-desc"] ??
         "Better materials, fewer shortcuts.",
+      descField: "default.about.pillar-1-desc",
     },
     {
       num: "Two",
       title: f["default.about.pillar-2-title"] ?? "Price it fairly.",
+      titleField: "default.about.pillar-2-title",
       desc:
         f["default.about.pillar-2-desc"] ??
         "No hidden costs. You can see where the money goes.",
+      descField: "default.about.pillar-2-desc",
     },
     {
       num: "Three",
       title: f["default.about.pillar-3-title"] ?? "Stand behind it.",
+      titleField: "default.about.pillar-3-title",
       desc:
         f["default.about.pillar-3-desc"] ??
         "If something's wrong, write me. I'll make it right.",
+      descField: "default.about.pillar-3-desc",
     },
   ];
 
@@ -77,15 +83,24 @@ export async function DefaultAboutPage({
       >
         <div className="mx-auto max-w-[1440px]">
           {f["default.about.eyebrow"] && (
-            <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+            <span
+              className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+              {...fieldAttr("default.about.eyebrow")}
+            >
               {f["default.about.eyebrow"]}
             </span>
           )}
-          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em] text-balance">
+          <h1
+            className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em] text-balance"
+            {...fieldAttr("default.about.heading")}
+          >
             {f["default.about.heading"] ?? "Hi — I'm the one making this."}
           </h1>
           {f["default.about.hero-tagline"] && (
-            <p className="mt-4 mb-12 max-w-[560px] text-[17px] text-[#6b6b6b]">
+            <p
+              className="mt-4 mb-12 max-w-[560px] text-[17px] text-[#6b6b6b]"
+              {...fieldAttr("default.about.hero-tagline")}
+            >
               {f["default.about.hero-tagline"]}
             </p>
           )}
@@ -125,11 +140,17 @@ export async function DefaultAboutPage({
             {/* Text */}
             <div className="flex max-w-[600px] flex-col gap-6">
               {f["default.about.bio-eyebrow"] && (
-                <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                <span
+                  className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                  {...fieldAttr("default.about.bio-eyebrow")}
+                >
                   {f["default.about.bio-eyebrow"]}
                 </span>
               )}
-              <h2 className="font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em] text-balance">
+              <h2
+                className="font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em] text-balance"
+                {...fieldAttr("default.about.bio-heading")}
+              >
                 {f["default.about.bio-heading"] ?? "A few words about me."}
               </h2>
 
@@ -141,17 +162,26 @@ export async function DefaultAboutPage({
               ) : (
                 <div className="flex flex-col gap-4">
                   {f["default.about.paragraph-1"] && (
-                    <p className="text-[17px] leading-[1.65] text-[#0a0a0a]">
+                    <p
+                      className="text-[17px] leading-[1.65] text-[#0a0a0a]"
+                      {...fieldAttr("default.about.paragraph-1")}
+                    >
                       {f["default.about.paragraph-1"]}
                     </p>
                   )}
                   {f["default.about.paragraph-2"] && (
-                    <p className="text-[15px] leading-[1.7] text-[#6b6b6b]">
+                    <p
+                      className="text-[15px] leading-[1.7] text-[#6b6b6b]"
+                      {...fieldAttr("default.about.paragraph-2")}
+                    >
                       {f["default.about.paragraph-2"]}
                     </p>
                   )}
                   {f["default.about.paragraph-3"] && (
-                    <p className="text-[15px] leading-[1.7] text-[#6b6b6b]">
+                    <p
+                      className="text-[15px] leading-[1.7] text-[#6b6b6b]"
+                      {...fieldAttr("default.about.paragraph-3")}
+                    >
                       {f["default.about.paragraph-3"]}
                     </p>
                   )}
@@ -159,7 +189,10 @@ export async function DefaultAboutPage({
               )}
 
               {f["default.about.signature"] && (
-                <p className="mt-2 font-serif text-lg text-[#6b6b6b] italic">
+                <p
+                  className="mt-2 font-serif text-lg text-[#6b6b6b] italic"
+                  {...fieldAttr("default.about.signature")}
+                >
                   {f["default.about.signature"]}
                 </p>
               )}
@@ -202,10 +235,16 @@ export async function DefaultAboutPage({
                 <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
                   {p.num}
                 </span>
-                <h3 className="font-serif text-[22px] font-medium tracking-[-0.015em]">
+                <h3
+                  className="font-serif text-[22px] font-medium tracking-[-0.015em]"
+                  {...fieldAttr(p.titleField)}
+                >
                   {p.title}
                 </h3>
-                <p className="text-[14px] leading-relaxed text-[#6b6b6b]">
+                <p
+                  className="text-[14px] leading-relaxed text-[#6b6b6b]"
+                  {...fieldAttr(p.descField)}
+                >
                   {p.desc}
                 </p>
               </div>
@@ -221,17 +260,24 @@ export async function DefaultAboutPage({
       >
         <div className="mx-auto max-w-[640px]">
           {f["default.about.cta-eyebrow"] && (
-            <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+            <span
+              className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+              {...fieldAttr("default.about.cta-eyebrow")}
+            >
               {f["default.about.cta-eyebrow"]}
             </span>
           )}
-          <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
+          <h2
+            className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]"
+            {...fieldAttr("default.about.cta-heading")}
+          >
             {f["default.about.cta-heading"] ?? "I'd love to hear from you."}
           </h2>
           <div className="mt-8">
             <Link
               href={f["default.about.cta-button-link"] ?? "/contact"}
               className="inline-flex h-12 items-center justify-center rounded-(--radius) bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+              {...fieldAttr("default.about.cta-button-text")}
             >
               {f["default.about.cta-button-text"] ?? "Get in touch"}
             </Link>

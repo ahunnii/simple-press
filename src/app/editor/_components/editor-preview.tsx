@@ -21,6 +21,8 @@ export type EditorPreviewProps = {
   isUpdating: boolean;
   /** Fired when a preview hotspot is clicked inside the iframe. */
   onEditGroup: (page: string, group: string) => void;
+  /** Fired when the iframe acks a live text patch. */
+  onPatched: (applied: string[], missed: string[]) => void;
   /** Imperative handle to the underlying `PreviewFrame`. */
   frameRef: React.Ref<PreviewFrameHandle>;
 };
@@ -37,6 +39,7 @@ export function EditorPreview({
   width,
   isUpdating,
   onEditGroup,
+  onPatched,
   frameRef,
 }: EditorPreviewProps) {
   return (
@@ -47,6 +50,7 @@ export function EditorPreview({
         width={width}
         isUpdating={isUpdating}
         onEditGroup={onEditGroup}
+        onPatched={onPatched}
         className="bg-background h-full max-w-full overflow-hidden rounded-lg border shadow-sm"
       />
     </div>

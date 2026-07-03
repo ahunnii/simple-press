@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
@@ -139,11 +139,17 @@ export async function DefaultHomePage({
               <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex flex-col gap-2">
                   {f["default.homepage.collections-eyebrow"] && (
-                    <p className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                    <p
+                      className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                      {...fieldAttr("default.homepage.collections-eyebrow")}
+                    >
                       {f["default.homepage.collections-eyebrow"]}
                     </p>
                   )}
-                  <h2 className="font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+                  <h2
+                    className="font-serif text-3xl font-semibold tracking-tight md:text-4xl"
+                    {...fieldAttr("default.homepage.collections-heading")}
+                  >
                     {f["default.homepage.collections-heading"] ?? "Collections"}
                   </h2>
                 </div>
@@ -241,17 +247,26 @@ export async function DefaultHomePage({
                 {/* Text */}
                 <div className="flex flex-col gap-6 lg:max-w-[480px]">
                   {f["default.homepage.cta-eyebrow"] && (
-                    <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                    <span
+                      className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                      {...fieldAttr("default.homepage.cta-eyebrow")}
+                    >
                       {f["default.homepage.cta-eyebrow"]}
                     </span>
                   )}
                   {storyHeading && (
-                    <h2 className="font-serif text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+                    <h2
+                      className="font-serif text-3xl font-semibold tracking-tight text-balance md:text-4xl"
+                      {...fieldAttr("default.homepage.cta-heading")}
+                    >
                       {storyHeading}
                     </h2>
                   )}
                   {storyDescription && (
-                    <p className="text-[15px] leading-relaxed text-[#6b6b6b]">
+                    <p
+                      className="text-[15px] leading-relaxed text-[#6b6b6b]"
+                      {...fieldAttr("default.homepage.cta-description")}
+                    >
                       {storyDescription}
                     </p>
                   )}
@@ -301,7 +316,10 @@ export async function DefaultHomePage({
                 &ldquo;{f["default.homepage.testimonial-quote"]}&rdquo;
               </p>
               {f["default.homepage.testimonial-author"] && (
-                <p className="mt-6 text-[13px] text-[#6b6b6b]">
+                <p
+                  className="mt-6 text-[13px] text-[#6b6b6b]"
+                  {...fieldAttr("default.homepage.testimonial-author")}
+                >
                   {f["default.homepage.testimonial-author"]}
                 </p>
               )}
@@ -332,36 +350,54 @@ export async function DefaultHomePage({
             {[
               {
                 title: f["default.homepage.promise-1-title"] ?? "Free shipping",
+                titleField: "default.homepage.promise-1-title",
                 desc:
                   f["default.homepage.promise-1-desc"] ??
                   "On orders over $75 within the US.",
+                descField: "default.homepage.promise-1-desc",
               },
               {
                 title: f["default.homepage.promise-2-title"] ?? "Easy returns",
+                titleField: "default.homepage.promise-2-title",
                 desc:
                   f["default.homepage.promise-2-desc"] ??
                   "30 days, no questions asked.",
+                descField: "default.homepage.promise-2-desc",
               },
               {
                 title: f["default.homepage.promise-3-title"] ?? "Handmade",
+                titleField: "default.homepage.promise-3-title",
                 desc:
                   f["default.homepage.promise-3-desc"] ??
                   "Every item made with care.",
+                descField: "default.homepage.promise-3-desc",
               },
               {
                 title:
                   f["default.homepage.promise-4-title"] ?? "Personal service",
+                titleField: "default.homepage.promise-4-title",
                 desc:
                   f["default.homepage.promise-4-desc"] ??
                   "You'll always reach a real person.",
+                descField: "default.homepage.promise-4-desc",
               },
             ].map((item) => (
               <div
                 key={item.title}
                 className="flex flex-col gap-1.5 px-6 py-8 lg:px-8"
               >
-                <h3 className="text-sm font-medium">{item.title}</h3>
-                <p className="text-[13px] text-[#6b6b6b]">{item.desc}</p>
+                <h3
+                  className="text-sm font-medium"
+                  {...fieldAttr(item.titleField)}
+                >
+                  {item.title}
+                </h3>
+                <p
+                  className="text-[13px] text-[#6b6b6b]"
+                  {...fieldAttr(item.descField)}
+                >
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>

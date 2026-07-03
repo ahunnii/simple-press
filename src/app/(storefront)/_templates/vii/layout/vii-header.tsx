@@ -23,6 +23,7 @@ import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
@@ -277,6 +278,7 @@ export function ViiHeader({
         <em>{businessName}</em>
         {locationTag ? (
           <span
+            {...fieldAttr("vii.global.location-tag")}
             style={{
               fontFamily: "var(--font-sans)",
               fontStyle: "normal",
@@ -891,6 +893,7 @@ export function ViiHeader({
               {/* Book CTA — prominent copper button (desktop) */}
               <Link
                 href={bookCtaLink}
+                {...fieldAttr("vii.global.book-cta-text")}
                 className="hidden items-center md:inline-flex"
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -962,6 +965,7 @@ export function ViiHeader({
             <Link
               href={bookCtaLink}
               onClick={() => setMobileOpen(false)}
+              {...fieldAttr("vii.global.book-cta-text")}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -1023,6 +1027,7 @@ export function ViiHeader({
               <Link
                 href={bookCtaLink}
                 onClick={() => setMobileOpen(false)}
+                {...fieldAttr("vii.global.book-cta-text")}
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "12px",

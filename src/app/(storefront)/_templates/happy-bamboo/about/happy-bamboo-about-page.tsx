@@ -3,7 +3,7 @@ import { ExternalLink, Heart, Leaf, Star } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   isContentEmpty,
@@ -115,7 +115,10 @@ export function HappyBambooAboutPage({
                 <Leaf className="mr-1 h-3 w-3" />
                 About Us
               </Badge>
-              <h1 className="mb-6 font-serif text-4xl leading-tight font-bold md:text-5xl">
+              <h1
+                className="mb-6 font-serif text-4xl leading-tight font-bold md:text-5xl"
+                {...fieldAttr("happy-bamboo.about-hero-heading")}
+              >
                 {f["happy-bamboo.about-hero-heading"]}
               </h1>
 
@@ -124,7 +127,10 @@ export function HappyBambooAboutPage({
                   <h2 className="text-foreground mb-2 text-xl font-semibold">
                     Our Mission
                   </h2>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p
+                    className="text-muted-foreground leading-relaxed"
+                    {...fieldAttr("happy-bamboo.about-hero-mission")}
+                  >
                     {f["happy-bamboo.about-hero-mission"]}
                   </p>
                 </div>
@@ -132,13 +138,19 @@ export function HappyBambooAboutPage({
                   <h2 className="text-foreground mb-2 text-xl font-semibold">
                     Our Vision
                   </h2>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p
+                    className="text-muted-foreground leading-relaxed"
+                    {...fieldAttr("happy-bamboo.about-hero-vision")}
+                  >
                     {f["happy-bamboo.about-hero-vision"]}
                   </p>
                 </div>
               </div>
 
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p
+                className="text-muted-foreground text-sm leading-relaxed"
+                {...fieldAttr("happy-bamboo.about-hero-bamboo")}
+              >
                 {f["happy-bamboo.about-hero-bamboo"]}
               </p>
             </FadeIn>
@@ -207,10 +219,16 @@ export function HappyBambooAboutPage({
               <Heart className="mr-1 h-3 w-3" />
               What We Offer
             </Badge>
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">
+            <h2
+              className="font-serif text-3xl font-bold md:text-4xl"
+              {...fieldAttr("happy-bamboo.about-services-heading")}
+            >
               {f["happy-bamboo.about-services-heading"]}
             </h2>
-            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
+            <p
+              className="text-muted-foreground mx-auto mt-4 max-w-2xl"
+              {...fieldAttr("happy-bamboo.about-services-banner")}
+            >
               {f["happy-bamboo.about-services-banner"]}
             </p>
           </FadeIn>
@@ -250,16 +268,25 @@ export function HappyBambooAboutPage({
                   <Leaf className="mr-1 h-3 w-3" />
                   The Smart Choice
                 </Badge>
-                <h2 className="font-serif text-3xl font-bold md:text-4xl">
+                <h2
+                  className="font-serif text-3xl font-bold md:text-4xl"
+                  {...fieldAttr("happy-bamboo.about-bamboo-heading")}
+                >
                   {f["happy-bamboo.about-bamboo-heading"]}
                 </h2>
-                <p className="text-muted-foreground mt-4 text-lg">
+                <p
+                  className="text-muted-foreground mt-4 text-lg"
+                  {...fieldAttr("happy-bamboo.about-bamboo-tagline")}
+                >
                   {f["happy-bamboo.about-bamboo-tagline"]}
                 </p>
               </FadeIn>
 
               <FadeIn direction="left" className="mb-6 space-y-4">
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                <p
+                  className="text-muted-foreground leading-relaxed whitespace-pre-line"
+                  {...fieldAttr("happy-bamboo.about-bamboo-description")}
+                >
                   {f["happy-bamboo.about-bamboo-description"]}
                 </p>
               </FadeIn>
@@ -352,10 +379,16 @@ export function HappyBambooAboutPage({
               <Heart className="mr-1 h-3 w-3" />
               Stay Connected
             </Badge>
-            <h2 className="mb-4 font-serif text-3xl font-bold md:text-4xl">
+            <h2
+              className="mb-4 font-serif text-3xl font-bold md:text-4xl"
+              {...fieldAttr("happy-bamboo.about-connect-with-us-heading")}
+            >
               {f["happy-bamboo.about-connect-with-us-heading"]}
             </h2>
-            <p className="text-muted-foreground mx-auto max-w-2xl leading-relaxed">
+            <p
+              className="text-muted-foreground mx-auto max-w-2xl leading-relaxed"
+              {...fieldAttr("happy-bamboo.about-connect-with-us-text")}
+            >
               {f["happy-bamboo.about-connect-with-us-text"]}
             </p>
           </FadeIn>
@@ -370,14 +403,24 @@ export function HappyBambooAboutPage({
                       <Star className="text-primary h-7 w-7" />
                     </div>
                     <div>
-                      <h3 className="mb-2 text-xl font-semibold">
+                      <h3
+                        className="mb-2 text-xl font-semibold"
+                        {...fieldAttr(
+                          "happy-bamboo.about-connect-with-us-google-review-header",
+                        )}
+                      >
                         {
                           f[
                             "happy-bamboo.about-connect-with-us-google-review-header"
                           ]
                         }
                       </h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
+                      <p
+                        className="text-muted-foreground text-sm leading-relaxed"
+                        {...fieldAttr(
+                          "happy-bamboo.about-connect-with-us-google-review-text",
+                        )}
+                      >
                         {
                           f[
                             "happy-bamboo.about-connect-with-us-google-review-text"
@@ -428,14 +471,24 @@ export function HappyBambooAboutPage({
                       <Heart className="text-primary h-7 w-7" />
                     </div>
                     <div>
-                      <h3 className="mb-2 text-xl font-semibold">
+                      <h3
+                        className="mb-2 text-xl font-semibold"
+                        {...fieldAttr(
+                          "happy-bamboo.about-connect-with-us-social-follow-header",
+                        )}
+                      >
                         {
                           f[
                             "happy-bamboo.about-connect-with-us-social-follow-header"
                           ]
                         }
                       </h3>
-                      <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
+                      <p
+                        className="text-muted-foreground max-w-sm text-sm leading-relaxed"
+                        {...fieldAttr(
+                          "happy-bamboo.about-connect-with-us-social-follow-text",
+                        )}
+                      >
                         {
                           f[
                             "happy-bamboo.about-connect-with-us-social-follow-text"

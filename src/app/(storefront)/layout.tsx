@@ -6,6 +6,7 @@ import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
+import { PreviewFieldPatcher } from "~/components/preview/preview-field-patcher";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
 import { CartRevalidator } from "./_components/cart-revalidator";
@@ -49,6 +50,7 @@ export default async function StorefrontLayout({ children }: Props) {
         </t.Layout>
         <CartRevalidator />
         <PreviewOverlay />
+        <PreviewFieldPatcher />
         <TemplateSelectorDevTool />
       </StorefrontFlagsProvider>
     </HydrateClient>
