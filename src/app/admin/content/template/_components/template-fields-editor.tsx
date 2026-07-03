@@ -195,27 +195,48 @@ export function TemplateFieldsEditor({
   // Draft save mutation — orthogonal to publish; does NOT touch modifiedFields/initialState.
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
 
-  // Clear draft mutation — called on unmount and pagehide.
-  const clearPreviewDraft = api.content.clearPreviewDraft.useMutation();
+  // Clear draft mutation — explicit action only. Drafts are DURABLE now (the
+  // visual editor at /editor resumes them), so this editor must never clear
+  // one implicitly on unmount — that would destroy an owner's work in
+  // progress whenever a platform admin opened this page.
+  const clearPreviewDraft = api.content.clearPreviewDraft.useMutation({
+    onSuccess: () => {
+      toast.success("Preview draft cleared");
+      previewRef.current?.refresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to clear draft");
+    },
+  });
+
+  const handleClearDraft = () => {
+    if (
+      !window.confirm(
+        "Clear the saved preview draft? If the owner has unpublished changes in the Site Editor, they will be lost.",
+      )
+    ) {
+      return;
+    }
+    clearPreviewDraft.mutate();
+  };
 
   const isSaving = updateSiteContent.isPending;
 
-  // Set the preview cookie on mount; clear cookie AND draft on unmount.
+  // Set the preview cookie on mount; clear it on unmount (the cookie is the
+  // load-bearing guard for the server-side draft swap). The draft itself is
+  // intentionally NOT cleared.
   useEffect(() => {
     document.cookie = `${PREVIEW_COOKIE}=${business.id}; path=/; SameSite=Lax`;
     return () => {
       document.cookie = `${PREVIEW_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
-      clearPreviewDraft.mutate();
     };
   }, [business.id]);
 
-  // pagehide: synchronously clear the cookie (the load-bearing part) so closing
-  // the tab removes the swap signal even if the React unmount doesn't fire.
+  // pagehide: synchronously clear the cookie so closing the tab removes the
+  // swap signal even if the React unmount doesn't fire.
   useEffect(() => {
     const onPageHide = () => {
       document.cookie = `${PREVIEW_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
-      // Best-effort — may not complete on tab close, but the cookie clear above is enough.
-      clearPreviewDraft.mutate();
     };
     window.addEventListener("pagehide", onPageHide);
     return () => window.removeEventListener("pagehide", onPageHide);
@@ -577,6 +598,14 @@ export function TemplateFieldsEditor({
               <DropdownMenuItem onSelect={handleExport}>
                 <Download className="mr-2 h-4 w-4" />
                 Export JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={handleClearDraft}
+                disabled={clearPreviewDraft.isPending}
+                variant="destructive"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear preview draft
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

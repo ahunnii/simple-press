@@ -128,6 +128,12 @@ export interface HubCard {
   icon: LucideIcon | TablerIcon;
   /** Feature flag key — when set and disabled, the card is hidden from its hub. */
   featureKey?: string;
+  /**
+   * True when the card links to a platform-admin-only surface (e.g. the
+   * legacy Template Fields editor). Hidden from owners/managers everywhere;
+   * consumers must opt in via `getHubCards(hub, { includePlatformOnly })`.
+   */
+  platformOnly?: boolean;
   /** Keyword synonyms for command palette matching. */
   keywords?: string[];
 }
@@ -436,7 +442,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["staff", "members", "invite", "roles", "permissions"],
   },
 
-  // Content hub — Brand Identity and Template Fields first
+  // Content hub — Site Editor and Brand Identity first
+  {
+    key: "content-site-editor",
+    title: "Site Editor",
+    description: "Edit your site visually",
+    body: "Click any section of your live site to change its text, images, and visibility — then publish when you're happy",
+    href: "/editor",
+    hub: "content",
+    color: "indigo",
+    icon: Globe,
+    keywords: ["editor", "visual", "sections", "theme", "design", "preview"],
+  },
   {
     key: "content-branding",
     title: "Brand Identity",
@@ -449,13 +466,14 @@ export const HUB_CARDS: HubCard[] = [
   },
   {
     key: "content-template",
-    title: "Template Fields",
-    description: "Edit your storefront sections",
-    body: "Customize your homepage, hero, and other built-in storefront sections with live preview",
+    title: "Template Fields (advanced)",
+    description: "Raw field editor",
+    body: "Direct access to every template field, JSON import/export, and custom keys — platform admin only",
     href: "/admin/content/template",
     hub: "content",
-    color: "indigo",
+    color: "slate",
     icon: Globe,
+    platformOnly: true,
   },
   {
     key: "content-pages",
@@ -566,14 +584,30 @@ export function isPathAllowedForRole(
   );
 }
 
-/** Return all hub cards for a given hub. */
-export function getHubCards(hub: NavHub): HubCard[] {
-  return HUB_CARDS.filter((card) => card.hub === hub);
+/**
+ * Return all hub cards for a given hub. Platform-only cards (legacy/advanced
+ * surfaces) are excluded unless the caller opts in for a PLATFORM_ADMIN user.
+ */
+export function getHubCards(
+  hub: NavHub,
+  opts?: { includePlatformOnly?: boolean },
+): HubCard[] {
+  return HUB_CARDS.filter(
+    (card) =>
+      card.hub === hub && (!card.platformOnly || opts?.includePlatformOnly),
+  );
 }
 
 // ─── Palette actions ────────────────────────────────────────────────────────
 
 export const PALETTE_ACTIONS: PaletteAction[] = [
+  {
+    key: "edit-site",
+    title: "Edit site",
+    href: "/editor",
+    icon: Globe,
+    keywords: ["site", "editor", "visual", "design", "theme", "sections"],
+  },
   {
     key: "add-product",
     title: "Add product",

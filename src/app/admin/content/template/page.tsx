@@ -1,7 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getAvailableTemplates } from "~/lib/template-ownership";
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
@@ -10,6 +11,13 @@ import { TemplatePicker } from "./_components/template-picker";
 import { TemplateFieldsEditor } from "./_components/template-fields-editor";
 
 export default async function TemplateFieldsPage() {
+  // The raw field editor (JSON import/export, custom keys) is a platform-
+  // admin support/build tool; owners and managers use the visual editor.
+  const session = await getSession();
+  if (session?.user.platformRole !== "PLATFORM_ADMIN") {
+    redirect("/editor");
+  }
+
   const [business, flags] = await Promise.all([
     api.business.getWith({ includeSiteContent: true }),
     getBusinessFlags(),

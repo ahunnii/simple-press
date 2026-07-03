@@ -116,15 +116,18 @@ export function AdminCommandPalette({
   // HubCards carry no `roles`; the Settings/Content hubs are owner/manager
   // surfaces, so STAFF (fulfillment-only) never sees them — matching the
   // sidebar, where Settings is flagged staffAccessible: false.
+  const isPlatformAdmin = session?.user.platformRole === "PLATFORM_ADMIN";
   const settingsCards = useMemo(
     () =>
       isStaff
         ? []
         : HUB_CARDS.filter(
             (c) =>
-              c.hub === "settings" && (!c.featureKey || isEnabled(c.featureKey)),
+              c.hub === "settings" &&
+              (!c.platformOnly || isPlatformAdmin) &&
+              (!c.featureKey || isEnabled(c.featureKey)),
           ),
-    [isStaff, isEnabled],
+    [isStaff, isEnabled, isPlatformAdmin],
   );
   const contentCards = useMemo(
     () =>
@@ -132,9 +135,11 @@ export function AdminCommandPalette({
         ? []
         : HUB_CARDS.filter(
             (c) =>
-              c.hub === "content" && (!c.featureKey || isEnabled(c.featureKey)),
+              c.hub === "content" &&
+              (!c.platformOnly || isPlatformAdmin) &&
+              (!c.featureKey || isEnabled(c.featureKey)),
           ),
-    [isStaff, isEnabled],
+    [isStaff, isEnabled, isPlatformAdmin],
   );
 
   const go = useCallback(

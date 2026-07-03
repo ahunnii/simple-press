@@ -1,10 +1,15 @@
+import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import { ContentDashboard } from "~/app/admin/content/_components/content-dashboard";
 
 import { TrailHeader } from "../_components/trail-header";
 
 export default async function ContentPage() {
-  const pages = await api.content.getPages();
+  const [pages, session] = await Promise.all([
+    api.content.getPages(),
+    getSession(),
+  ]);
+  const isPlatformAdmin = session?.user.platformRole === "PLATFORM_ADMIN";
 
   return (
     <>
@@ -17,7 +22,7 @@ export default async function ContentPage() {
           </div>
         </div>
 
-        <ContentDashboard pages={pages} />
+        <ContentDashboard pages={pages} isPlatformAdmin={isPlatformAdmin} />
       </div>
     </>
   );

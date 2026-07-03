@@ -23,6 +23,8 @@ type Props = {
     published: boolean;
     updatedAt: Date;
   }>;
+  /** Shows platform-only cards (legacy Template Fields editor). */
+  isPlatformAdmin?: boolean;
 };
 
 // Tailwind color maps — must be static strings so the compiler includes them
@@ -56,7 +58,7 @@ const borderMap: Record<string, string> = {
   teal: "hover:border-teal-500",
 };
 
-export function ContentDashboard({ pages }: Props) {
+export function ContentDashboard({ pages, isPlatformAdmin = false }: Props) {
   const regularPages = pages.filter((p) => p.type === "page");
   const policyPages = pages.filter((p) => p.type === "policy");
   const blogPages = pages.filter((p) => p.type === "blog");
@@ -69,14 +71,16 @@ export function ContentDashboard({ pages }: Props) {
     "content-policies": `${policyPages.length} policies`,
   };
 
-  const contentCards = getHubCards("content");
+  const contentCards = getHubCards("content", {
+    includePlatformOnly: isPlatformAdmin,
+  });
 
   return (
     <>
       {/* Explainer: three editing surfaces at a glance */}
       <div className="mb-6 rounded-lg border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">Template Fields</span>
-        {" — edit your storefront's built-in sections (hero, homepage) with live preview. "}
+        <span className="font-medium text-foreground">Site Editor</span>
+        {" — click any section of your live site to edit its text, images, and visibility. "}
         <span className="font-medium text-foreground">Pages</span>
         {" — create standalone CMS pages (About, Contact). "}
         <span className="font-medium text-foreground">Brand Identity</span>
