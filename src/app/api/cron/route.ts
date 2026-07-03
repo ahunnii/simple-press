@@ -22,6 +22,7 @@ import * as Sentry from "@sentry/nextjs";
 import { env } from "~/env";
 import { getBusinessUrl } from "~/lib/business-url";
 import { sendBackInStockEmail } from "~/lib/email/templates";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { db } from "~/server/db";
@@ -103,7 +104,9 @@ async function handle(request: Request) {
   //    validation's `comingSoon` guard. Per-request try/catch — a failed send
   //    leaves notifiedAt null so it retries on the next run. Requests whose
   //    product/variant no longer exists are retired (notifiedAt set) without
-  //    an email.
+  //    an email. Requests for a business with the backInStock feature flag
+  //    disabled are skipped (not retired) so they resume automatically if
+  //    the flag is re-enabled.
   results.backInStock = await runJob("back-in-stock", async () => {
     const requests = await db.backInStockRequest.findMany({
       where: { notifiedAt: null },
@@ -143,10 +146,20 @@ async function handle(request: Request) {
         subdomain: true,
         customDomain: true,
         domainStatus: true,
+        featureFlags: true,
         siteContent: { select: { logoUrl: true } },
       },
     });
     const businessMap = new Map(businesses.map((b) => [b.id, b]));
+    // Cron requests arrive on the platform host, so the host-based
+    // featureGate middleware can't resolve a business here — resolve each
+    // business's flags directly instead.
+    const backInStockEnabledMap = new Map(
+      businesses.map((b) => [
+        b.id,
+        resolveFlags(b.featureFlags).isEnabled("backInStock"),
+      ]),
+    );
 
     type RestockProduct = (typeof products)[number];
     type RestockVariant = RestockProduct["variants"][number];
@@ -194,6 +207,10 @@ async function handle(request: Request) {
           });
           continue;
         }
+
+        // Feature disabled for this business — skip without retiring, so
+        // notifications resume automatically if backInStock is re-enabled.
+        if (!backInStockEnabledMap.get(business.id)) continue;
 
         // Still not purchasable — leave pending for a future run.
         if (!isPurchasable(product, variant)) continue;

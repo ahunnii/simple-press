@@ -4,7 +4,11 @@ import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
 import { backInStockLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  featureGate,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { db } from "~/server/db";
 
 export const backInStockRouter = createTRPCRouter({
@@ -16,6 +20,7 @@ export const backInStockRouter = createTRPCRouter({
    * probe which products/emails exist on a store.
    */
   subscribe: publicProcedure
+    .use(featureGate("backInStock"))
     .input(
       z.object({
         email: z.string().trim().email(),

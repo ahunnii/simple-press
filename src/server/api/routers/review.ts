@@ -9,6 +9,7 @@ import { normalizeEmail } from "~/lib/utils";
 
 import {
   createTRPCRouter,
+  featureGate,
   ownerAdminProcedure,
   protectedProcedure,
   publicProcedure,
@@ -83,6 +84,7 @@ async function updateVoteCounts(db: DbClient, reviewId: string) {
 
 export const reviewRouter = createTRPCRouter({
   listByProduct: publicProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         productId: z.string(),
@@ -127,6 +129,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   getProductStats: publicProcedure
+    .use(featureGate("reviews"))
     .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
       const business = await checkBusiness();
@@ -167,6 +170,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   vote: publicProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         reviewId: z.string(),
@@ -228,6 +232,7 @@ export const reviewRouter = createTRPCRouter({
   // ── Customer Submitted ───────────────────────────────────────────────────
 
   canReview: protectedProcedure
+    .use(featureGate("reviews"))
     .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({
@@ -268,6 +273,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   submit: protectedProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         productId: z.string(),
@@ -363,6 +369,7 @@ export const reviewRouter = createTRPCRouter({
   // ── Owner Created ────────────────────────────────────────────────────────
 
   ownerCreate: protectedProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         productId: z.string(),
@@ -412,6 +419,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   ownerUpdate: protectedProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         id: z.string(),
@@ -456,6 +464,12 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   // ── Admin (both types) ───────────────────────────────────────────────────
+  //
+  // NOTE: the moderation procedures below (listAll, approve, toggleHidden,
+  // delete) are intentionally left ungated by featureGate("reviews"). Owners
+  // must still be able to moderate/hide/delete pre-existing reviews after
+  // disabling the reviews feature — otherwise turning the flag off would trap
+  // stale or reported reviews with no way to clean them up.
 
   // List all reviews for a business across all products
   listAll: ownerAdminProcedure
