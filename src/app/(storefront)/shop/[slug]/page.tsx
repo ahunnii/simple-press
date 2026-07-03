@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
 import {
@@ -26,6 +26,11 @@ export default async function ProductDetailPage({ params }: Props) {
 
   if (!product) {
     notFound();
+  }
+
+  // Canonicalize id-based URLs (e.g. from old saved carts) to the slug URL
+  if (product.slug !== slug) {
+    redirect(`/shop/${product.slug}`);
   }
 
   const reviews = await api.review.listByProduct({ productId: product.id }).catch(() => []);
@@ -75,7 +80,7 @@ export async function generateMetadata({ params }: Props) {
     keywords: product.metaKeywords ?? undefined,
     ...(business && {
       alternates: {
-        canonical: getCanonicalUrl(business, `/shop/${slug}`),
+        canonical: getCanonicalUrl(business, `/shop/${product.slug}`),
       },
     }),
     openGraph: {

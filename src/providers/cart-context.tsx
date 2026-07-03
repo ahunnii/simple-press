@@ -26,13 +26,14 @@ export type CartItem = {
   maxInventory?: number; // Optional: for validation
 };
 
-type CartItemSnapshot = {
+export type CartItemSnapshot = {
   productId: string;
   variantId: string | null;
   available: boolean;
   price: number;
   compareAtPrice: number | null;
   maxQuantity: number | null;
+  slug?: string | null;
 };
 
 type CartContextType = {
@@ -358,6 +359,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         next.push({
           ...item,
+          productSlug: item.productSlug ?? snap.slug ?? null,
           price: newPrice,
           compareAtPrice: newCompare,
           maxInventory: newMaxInv,
@@ -371,9 +373,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         !priceChanged &&
         next.length === currentItems.length
       ) {
-        // Check quantities weren't clamped either
+        // Check quantities weren't clamped and slug wasn't backfilled either
         const unchanged = next.every(
-          (n, i) => n.quantity === currentItems[i]?.quantity,
+          (n, i) =>
+            n.quantity === currentItems[i]?.quantity &&
+            (n.productSlug ?? null) === (currentItems[i]?.productSlug ?? null),
         );
         if (unchanged) return currentItems;
       }

@@ -46,6 +46,7 @@ export function ModernProductCard({ product }: Props) {
     if (productStatus.disableCart) return;
     addItem({
       productId: product.id,
+      productSlug: product.slug,
       variantId: null,
       productName: product.name,
       variantName: null,

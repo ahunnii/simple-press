@@ -132,9 +132,9 @@ export const productRouter = createTRPCRouter({
 
       const product = await ctx.db.product.findFirst({
         where: {
-          slug,
           businessId,
           published: true,
+          OR: [{ slug }, { id: slug }],
         },
         include: {
           images: { orderBy: { sortOrder: "asc" } },
@@ -937,6 +937,7 @@ export const productRouter = createTRPCRouter({
             price: 0,
             compareAtPrice: null,
             maxQuantity: null,
+            slug: product?.slug ?? null,
           };
         }
 
@@ -953,6 +954,7 @@ export const productRouter = createTRPCRouter({
             price: 0,
             compareAtPrice: null,
             maxQuantity: null,
+            slug: product.slug,
           };
         }
 
@@ -967,6 +969,7 @@ export const productRouter = createTRPCRouter({
               price: 0,
               compareAtPrice: null,
               maxQuantity: null,
+              slug: product.slug,
             };
           }
 
@@ -994,6 +997,7 @@ export const productRouter = createTRPCRouter({
             price,
             compareAtPrice,
             maxQuantity,
+            slug: product.slug,
           };
         } else {
           // No-variant (base) item
@@ -1016,6 +1020,7 @@ export const productRouter = createTRPCRouter({
               price: product.price,
               compareAtPrice: product.compareAtPrice ?? null,
               maxQuantity,
+              slug: product.slug,
             };
           }
 
@@ -1038,6 +1043,7 @@ export const productRouter = createTRPCRouter({
             price: product.price,
             compareAtPrice: product.compareAtPrice ?? null,
             maxQuantity,
+            slug: product.slug,
           };
         }
       });

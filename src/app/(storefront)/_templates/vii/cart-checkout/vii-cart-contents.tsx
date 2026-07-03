@@ -172,9 +172,7 @@ export function ViiCartContents({
       >
         {items.map((item, index) => {
           const lineTotal = item.price * item.quantity;
-          const productPath = item.productSlug
-            ? `/shop/${item.productSlug}`
-            : "/shop";
+          const productPath = `/shop/${item.productSlug ?? item.productId}`;
 
           return (
             <div

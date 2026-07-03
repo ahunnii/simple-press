@@ -157,6 +157,7 @@ export function useProduct(
     addItem(
       {
         productId: product.id,
+        productSlug: product.slug,
         variantId: selectedVariantId,
         productName: `${product.name} ${tagline ? `- ${tagline}` : ""}`,
         variantName: selectedVariant?.name ?? null,

@@ -17,6 +17,7 @@ export function ModernCartItem({ item }: Props) {
 
   const {
     productId,
+    productSlug,
     variantId,
     productName,
     variantName,
@@ -32,7 +33,7 @@ export function ModernCartItem({ item }: Props) {
   return (
     <div className="border-border flex gap-6 border-b py-8 first:pt-0 last:border-b-0">
       <Link
-        href={`/shop/${productId}`}
+        href={`/shop/${productSlug ?? productId}`}
         tabIndex={-1}
         aria-hidden="true"
         className="bg-muted relative h-28 w-28 shrink-0 overflow-hidden rounded-sm"
@@ -50,7 +51,7 @@ export function ModernCartItem({ item }: Props) {
         <div className="flex items-start justify-between">
           <div>
             <Link
-              href={`/shop/${productId}`}
+              href={`/shop/${productSlug ?? productId}`}
               className="text-foreground hover:text-muted-foreground text-sm font-medium transition-colors"
             >
               {productName}
