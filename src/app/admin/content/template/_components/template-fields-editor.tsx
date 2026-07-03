@@ -53,6 +53,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PreviewPane } from "~/components/preview/preview-pane";
 import { ResetFormButton } from "~/components/shared/reset-form-button";
 import { SaveFormButton } from "~/components/shared/save-form-button";
+import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
+import { SP_META_KEY } from "~/lib/sp-meta";
 
 import { FieldGroup } from "./template-field-widgets";
 
@@ -60,20 +62,6 @@ export {
   TemplateImageUploadField,
   TemplateVideoUploadField,
 } from "./template-field-widgets";
-
-/** Map editor page tab keys to storefront paths for the preview iframe. */
-const PAGE_PREVIEW_PATHS: Record<string, string> = {
-  homepage: "/",
-  about: "/about",
-  blog: "/blog",
-  contact: "/contact",
-  collections: "/collections",
-  testimonials: "/testimonials",
-  // The "products" tab edits the shop/product-listing page, served at /shop.
-  products: "/shop",
-  // happy-bamboo groups its shop listing fields under a "shop" page key.
-  shop: "/shop",
-};
 
 type Props = {
   business: {
@@ -135,6 +123,7 @@ export function TemplateFieldsEditor({
       Object.entries(initialFields)
         .filter(
           ([key, value]) =>
+            key !== SP_META_KEY &&
             !allTemplateKeys.has(key) &&
             typeof value === "string" &&
             value !== "",
@@ -164,8 +153,9 @@ export function TemplateFieldsEditor({
         .flat()
         .map((f) => f.key),
     );
+    // Exclude the reserved editor-metadata key — it is not owner-editable content.
     return Object.entries(initialFields)
-      .filter(([key]) => !allTemplateKeys.has(key))
+      .filter(([key]) => key !== SP_META_KEY && !allTemplateKeys.has(key))
       .map(([key, value]) => {
         const page = key.split(".")[0] ?? "global";
         return { key, value: typeof value === "string" ? value : "", page };
@@ -405,6 +395,7 @@ export function TemplateFieldsEditor({
       Object.entries(initialFields)
         .filter(
           ([key, value]) =>
+            key !== SP_META_KEY &&
             !allTemplateKeys.has(key) &&
             typeof value === "string" &&
             value !== "",
