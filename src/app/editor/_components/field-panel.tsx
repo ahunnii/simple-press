@@ -25,6 +25,9 @@ export type FieldPanelProps = {
   onFieldChange: (key: string, value: unknown) => void;
   /** Whether the Embeds feature is enabled for this business. */
   embedsEnabled: boolean;
+  /** Whether the Media Library feature is enabled — gates the "Choose from
+   *  library" picker on image/video fields. */
+  mediaEnabled: boolean;
   /** Freeze inputs while publish/discard is settling (edits would race it). */
   disabled?: boolean;
   /** Close the panel (deselect the active section). */
@@ -42,6 +45,7 @@ export function FieldPanel({
   fields,
   onFieldChange,
   embedsEnabled,
+  mediaEnabled,
   disabled = false,
   onClose,
 }: FieldPanelProps) {
@@ -121,6 +125,7 @@ export function FieldPanel({
                     isModified={false}
                     onChange={(value) => onFieldChange(field.key, value)}
                     embedsEnabled={embedsEnabled}
+                    mediaLibraryEnabled={mediaEnabled}
                   />
                 ))}
               </div>

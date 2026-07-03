@@ -42,6 +42,7 @@ export default async function TemplateFieldsPage() {
         business={business}
         siteContent={business.siteContent}
         embedsEnabled={flags.isEnabled("embeds")}
+        mediaEnabled={flags.isEnabled("media")}
       />
     </>
   );

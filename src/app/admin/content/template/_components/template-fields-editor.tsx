@@ -72,12 +72,14 @@ type Props = {
     customFields: any;
   };
   embedsEnabled?: boolean;
+  mediaEnabled?: boolean;
 };
 
 export function TemplateFieldsEditor({
   business,
   siteContent,
   embedsEnabled,
+  mediaEnabled,
 }: Props) {
   const router = useRouter();
 
@@ -832,6 +834,7 @@ export function TemplateFieldsEditor({
                                 onFieldChange={handleFieldChange}
                                 isUngrouped={isUngrouped}
                                 embedsEnabled={embedsEnabled}
+                                mediaLibraryEnabled={mediaEnabled}
                               />
                             );
                           },

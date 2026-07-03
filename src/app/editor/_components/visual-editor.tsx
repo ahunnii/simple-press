@@ -101,6 +101,7 @@ export function VisualEditor({
   hasDraft,
   sections,
   embedsEnabled,
+  mediaEnabled,
   initialPage,
   initialSection,
 }: VisualEditorProps) {
@@ -653,6 +654,7 @@ export function VisualEditor({
             fields={fields}
             onFieldChange={applyFieldUpdate}
             embedsEnabled={embedsEnabled}
+            mediaEnabled={mediaEnabled}
             disabled={isPublishing}
             onClose={() => setActiveSectionId(null)}
           />
