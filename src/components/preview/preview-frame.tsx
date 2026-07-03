@@ -1,6 +1,12 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import {
   postToIframe,
@@ -46,6 +52,13 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
     const [isReady, setIsReady] = useState(false);
 
     const src = `${path}?__preview=1`;
+
+    // A prop-driven path change navigates the iframe: reset readiness so
+    // focusGroup() calls queue (via pendingFocusRef) instead of being posted
+    // to a document that is about to unload.
+    useEffect(() => {
+      setIsReady(false);
+    }, [src]);
 
     // Queue a focus-group message to flush once iframe reports ready.
     const pendingFocusRef = useRef<{ page: string; group: string } | null>(
