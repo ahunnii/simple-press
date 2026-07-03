@@ -76,7 +76,7 @@ export function HappyBambooHeader({
         variant="ghost"
         size="sm"
         asChild
-        className="text-background hover:bg-background/10 hover:text-[#E3CF99]"
+        className="text-background hover:bg-background/10 hover:text-[var(--hb-gold)]"
       >
         <Link href="/auth/sign-in">Log in</Link>
       </Button>
@@ -117,7 +117,7 @@ export function HappyBambooHeader({
   return (
     // <FadeIn direction="down" duration={0.5}>
     <>
-      <header className="border-border/40 sticky top-0 z-50 w-full border-b bg-[#608418] backdrop-blur supports-backdrop-filter:bg-[#608418]">
+      <header className="border-border/40 sticky top-0 z-50 w-full border-b bg-[var(--hb-brand)] backdrop-blur supports-backdrop-filter:bg-[var(--hb-brand)]">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             {business.siteContent?.logoUrl ? (
@@ -147,8 +147,8 @@ export function HappyBambooHeader({
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-background text-sm font-medium transition-colors hover:text-[#E3CF99]",
-                  pathname === link.href ? "text-[#E3CF99]" : "text-background",
+                  "text-background text-sm font-medium transition-colors hover:text-[var(--hb-gold)]",
+                  pathname === link.href ? "text-[var(--hb-gold)]" : "text-background",
                 )}
               >
                 {link.label}
@@ -164,7 +164,7 @@ export function HappyBambooHeader({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-background hover:bg-background/10 relative hover:text-[#E3CF99]"
+                className="text-background hover:bg-background/10 relative hover:text-[var(--hb-gold)]"
                 asChild
               >
                 <Link href="/wishlist" aria-label="Open wishlist">
@@ -184,7 +184,7 @@ export function HappyBambooHeader({
             <Button
               variant="ghost"
               size="icon"
-              className="text-background hover:bg-background/10 relative hover:text-[#E3CF99]"
+              className="text-background hover:bg-background/10 relative hover:text-[var(--hb-gold)]"
               onClick={() => setIsOpen(true)}
               aria-label="Open cart"
             >
@@ -206,7 +206,7 @@ export function HappyBambooHeader({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-background hover:bg-background/10 hover:text-[#E3CF99]"
+                  className="text-background hover:bg-background/10 hover:text-[var(--hb-gold)]"
                   aria-label="Open menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -215,17 +215,17 @@ export function HappyBambooHeader({
               <SheetContent
                 side="right"
                 className={cn(
-                  "flex w-[min(100vw-1rem,20rem)] flex-col gap-0 border-l border-[#608418]/20 p-0",
+                  "flex w-[min(100vw-1rem,20rem)] flex-col gap-0 border-l border-[var(--hb-brand)]/20 p-0",
                   "[&>button]:text-background [&>button]:opacity-90 [&>button]:hover:bg-white/15 [&>button]:hover:opacity-100",
                 )}
               >
-                <div className="bg-[#608418] pt-12 pr-14 pb-5 pl-4">
+                <div className="bg-[var(--hb-brand)] pt-12 pr-14 pb-5 pl-4">
                   <SheetTitle className="text-background flex items-center gap-2.5 text-left text-lg font-semibold tracking-tight">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E3CF99]/20">
-                      <Leaf className="h-5 w-5 text-[#E3CF99]" aria-hidden />
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--hb-gold)]/20">
+                      <Leaf className="h-5 w-5 text-[var(--hb-gold)]" aria-hidden />
                     </span>
                     <span className="flex min-w-0 flex-col gap-0.5">
-                      <span className="text-xs font-medium tracking-widest text-[#E3CF99]/90 uppercase">
+                      <span className="text-xs font-medium tracking-widest text-[var(--hb-gold)]/90 uppercase">
                         Explore
                       </span>
                       <span className="truncate">
@@ -253,8 +253,8 @@ export function HappyBambooHeader({
                         className={cn(
                           "flex min-h-12 items-center rounded-lg border-l-4 py-3 pr-4 pl-3 text-base font-medium transition-colors",
                           active
-                            ? "border-[#608418] bg-[#E3CF99]/40 text-[#3d560d] shadow-sm"
-                            : "text-foreground/85 border-transparent hover:bg-[#608418]/8 hover:text-[#608418] active:bg-[#608418]/12",
+                            ? "border-[var(--hb-brand)] bg-[var(--hb-gold)]/40 text-[var(--hb-brand-deep)] shadow-sm"
+                            : "text-foreground/85 border-transparent hover:bg-[var(--hb-brand)]/8 hover:text-[var(--hb-brand)] active:bg-[var(--hb-brand)]/12",
                         )}
                       >
                         {link.label}
@@ -263,7 +263,7 @@ export function HappyBambooHeader({
                   })}
                 </nav>
 
-                <div className="border-t border-[#608418]/12 bg-[#F5F0E4] px-4 py-3 text-center text-xs leading-relaxed text-[#5a6b3a]">
+                <div className="border-t border-[var(--hb-brand)]/12 bg-[#F5F0E4] px-4 py-3 text-center text-xs leading-relaxed text-[var(--hb-brand-muted)]">
                   Tree-free products · Crafted with care
                 </div>
               </SheetContent>

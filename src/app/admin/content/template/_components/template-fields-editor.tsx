@@ -53,6 +53,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PreviewPane } from "~/components/preview/preview-pane";
 import { ResetFormButton } from "~/components/shared/reset-form-button";
 import { SaveFormButton } from "~/components/shared/save-form-button";
+import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
+import { SP_META_KEY } from "~/lib/sp-meta";
 
 import { FieldGroup } from "./template-field-widgets";
 
@@ -60,20 +62,6 @@ export {
   TemplateImageUploadField,
   TemplateVideoUploadField,
 } from "./template-field-widgets";
-
-/** Map editor page tab keys to storefront paths for the preview iframe. */
-const PAGE_PREVIEW_PATHS: Record<string, string> = {
-  homepage: "/",
-  about: "/about",
-  blog: "/blog",
-  contact: "/contact",
-  collections: "/collections",
-  testimonials: "/testimonials",
-  // The "products" tab edits the shop/product-listing page, served at /shop.
-  products: "/shop",
-  // happy-bamboo groups its shop listing fields under a "shop" page key.
-  shop: "/shop",
-};
 
 type Props = {
   business: {
@@ -84,12 +72,14 @@ type Props = {
     customFields: any;
   };
   embedsEnabled?: boolean;
+  mediaEnabled?: boolean;
 };
 
 export function TemplateFieldsEditor({
   business,
   siteContent,
   embedsEnabled,
+  mediaEnabled,
 }: Props) {
   const router = useRouter();
 
@@ -135,6 +125,7 @@ export function TemplateFieldsEditor({
       Object.entries(initialFields)
         .filter(
           ([key, value]) =>
+            key !== SP_META_KEY &&
             !allTemplateKeys.has(key) &&
             typeof value === "string" &&
             value !== "",
@@ -164,8 +155,9 @@ export function TemplateFieldsEditor({
         .flat()
         .map((f) => f.key),
     );
+    // Exclude the reserved editor-metadata key — it is not owner-editable content.
     return Object.entries(initialFields)
-      .filter(([key]) => !allTemplateKeys.has(key))
+      .filter(([key]) => key !== SP_META_KEY && !allTemplateKeys.has(key))
       .map(([key, value]) => {
         const page = key.split(".")[0] ?? "global";
         return { key, value: typeof value === "string" ? value : "", page };
@@ -203,27 +195,48 @@ export function TemplateFieldsEditor({
   // Draft save mutation — orthogonal to publish; does NOT touch modifiedFields/initialState.
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
 
-  // Clear draft mutation — called on unmount and pagehide.
-  const clearPreviewDraft = api.content.clearPreviewDraft.useMutation();
+  // Clear draft mutation — explicit action only. Drafts are DURABLE now (the
+  // visual editor at /editor resumes them), so this editor must never clear
+  // one implicitly on unmount — that would destroy an owner's work in
+  // progress whenever a platform admin opened this page.
+  const clearPreviewDraft = api.content.clearPreviewDraft.useMutation({
+    onSuccess: () => {
+      toast.success("Preview draft cleared");
+      previewRef.current?.refresh();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to clear draft");
+    },
+  });
+
+  const handleClearDraft = () => {
+    if (
+      !window.confirm(
+        "Clear the saved preview draft? If the owner has unpublished changes in the Site Editor, they will be lost.",
+      )
+    ) {
+      return;
+    }
+    clearPreviewDraft.mutate();
+  };
 
   const isSaving = updateSiteContent.isPending;
 
-  // Set the preview cookie on mount; clear cookie AND draft on unmount.
+  // Set the preview cookie on mount; clear it on unmount (the cookie is the
+  // load-bearing guard for the server-side draft swap). The draft itself is
+  // intentionally NOT cleared.
   useEffect(() => {
     document.cookie = `${PREVIEW_COOKIE}=${business.id}; path=/; SameSite=Lax`;
     return () => {
       document.cookie = `${PREVIEW_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
-      clearPreviewDraft.mutate();
     };
   }, [business.id]);
 
-  // pagehide: synchronously clear the cookie (the load-bearing part) so closing
-  // the tab removes the swap signal even if the React unmount doesn't fire.
+  // pagehide: synchronously clear the cookie so closing the tab removes the
+  // swap signal even if the React unmount doesn't fire.
   useEffect(() => {
     const onPageHide = () => {
       document.cookie = `${PREVIEW_COOKIE}=; path=/; Max-Age=0; SameSite=Lax`;
-      // Best-effort — may not complete on tab close, but the cookie clear above is enough.
-      clearPreviewDraft.mutate();
     };
     window.addEventListener("pagehide", onPageHide);
     return () => window.removeEventListener("pagehide", onPageHide);
@@ -405,6 +418,7 @@ export function TemplateFieldsEditor({
       Object.entries(initialFields)
         .filter(
           ([key, value]) =>
+            key !== SP_META_KEY &&
             !allTemplateKeys.has(key) &&
             typeof value === "string" &&
             value !== "",
@@ -584,6 +598,14 @@ export function TemplateFieldsEditor({
               <DropdownMenuItem onSelect={handleExport}>
                 <Download className="mr-2 h-4 w-4" />
                 Export JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={handleClearDraft}
+                disabled={clearPreviewDraft.isPending}
+                variant="destructive"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear preview draft
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -841,6 +863,7 @@ export function TemplateFieldsEditor({
                                 onFieldChange={handleFieldChange}
                                 isUngrouped={isUngrouped}
                                 embedsEnabled={embedsEnabled}
+                                mediaLibraryEnabled={mediaEnabled}
                               />
                             );
                           },

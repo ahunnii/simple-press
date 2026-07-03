@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { permanentRedirect } from "next/navigation";
 
+import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
 import {
   buildLocalBusinessSchema,
@@ -55,12 +56,15 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
   // Canonical-host guard: redirect platform-subdomain requests to the active
   // custom domain (308 permanent). enforceCanonicalHost returns null when no
   // redirect is needed, making this loop-safe.
-  const headersList = await headers();
-  const host = headersList.get("host") ?? "";
-  const pathname = headersList.get("x-pathname") ?? "/";
-  const canonicalRedirect = enforceCanonicalHost(business, host, pathname);
-  if (canonicalRedirect) {
-    permanentRedirect(canonicalRedirect);
+  // Skipped in development so custom-domain businesses stay reachable locally.
+  if (env.NODE_ENV !== "development") {
+    const headersList = await headers();
+    const host = headersList.get("host") ?? "";
+    const pathname = headersList.get("x-pathname") ?? "/";
+    const canonicalRedirect = enforceCanonicalHost(business, host, pathname);
+    if (canonicalRedirect) {
+      permanentRedirect(canonicalRedirect);
+    }
   }
 
   if (business.maintenance?.active) {

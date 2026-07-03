@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { Button } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
@@ -90,7 +91,10 @@ export function HappyBambooAboutSection({
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
               Zaires Visions
             </span>
-            <h2 className="font-serif text-4xl leading-tight font-bold md:text-5xl">
+            <h2
+              className="font-serif text-4xl leading-tight font-bold md:text-5xl"
+              {...fieldAttr("happy-bamboo.homepage-about-heading")}
+            >
               {aboutHeading}
             </h2>
             {aboutDescription ? (
@@ -116,7 +120,10 @@ export function HappyBambooAboutSection({
               </div>
             )}
             <Button variant="outline" className="group" asChild>
-              <Link href={aboutButtonLink ?? "/about"}>
+              <Link
+                href={aboutButtonLink ?? "/about"}
+                {...fieldAttr("happy-bamboo.homepage-about-button-text")}
+              >
                 {aboutButtonText}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>

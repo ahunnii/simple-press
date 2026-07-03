@@ -48,6 +48,32 @@ export const contentRouter = createTRPCRouter({
     return siteContent;
   }),
 
+  getEditorState: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId },
+      select: {
+        customFields: true,
+        previewCustomFields: true,
+        previewUpdatedAt: true,
+      },
+    });
+
+    return {
+      customFields: (siteContent?.customFields ?? {}) as Record<
+        string,
+        unknown
+      >,
+      previewCustomFields: (siteContent?.previewCustomFields ?? null) as Record<
+        string,
+        unknown
+      > | null,
+      previewUpdatedAt: siteContent?.previewUpdatedAt ?? null,
+      hasDraft: siteContent?.previewCustomFields != null,
+    };
+  }),
+
   // Update site content
   updateSiteContent: ownerAdminProcedure
     .input(siteContentSchema)

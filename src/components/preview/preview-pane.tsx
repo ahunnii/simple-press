@@ -9,13 +9,9 @@ import {
   Tablet,
 } from "lucide-react";
 
-import {
-  postToIframe,
-  PREVIEW_SOURCE,
-  useIframeMessages,
-} from "~/lib/preview/use-preview-bridge";
-import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+
+import { PreviewFrame, type PreviewFrameHandle } from "./preview-frame";
 
 export type PreviewPaneHandle = {
   /** Reload the storefront iframe to pick up the latest preview draft. */
@@ -65,76 +61,29 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
     { onEditGroup, isUpdating = false, onRefresh, onOpenExternal, path = "/" },
     ref,
   ) {
-    const iframeRef = useRef<HTMLIFrameElement>(null);
-    const [isReady, setIsReady] = useState(false);
+    const frameRef = useRef<PreviewFrameHandle>(null);
     const [device, setDevice] = useState<DeviceWidth>("desktop");
-
-    const src = `${path}?__preview=1`;
-
-    // Queue a focus-group message to flush once iframe reports ready.
-    const pendingFocusRef = useRef<{ page: string; group: string } | null>(
-      null,
-    );
-
-    // Listen for messages from the iframe.
-    useIframeMessages((msg) => {
-      if (msg.type === "sp:ready") {
-        setIsReady(true);
-        // Flush any queued focus.
-        if (pendingFocusRef.current) {
-          const { page, group } = pendingFocusRef.current;
-          pendingFocusRef.current = null;
-          postToIframe(iframeRef, {
-            source: PREVIEW_SOURCE,
-            type: "sp:focus-group",
-            page,
-            group,
-          });
-        }
-      }
-      if (msg.type === "sp:edit-group") {
-        onEditGroup?.(msg.page, msg.group);
-      }
-    });
 
     // Expose imperative API to the parent editor.
     useImperativeHandle(
       ref,
       () => ({
         refresh() {
-          setIsReady(false);
-          if (iframeRef.current) {
-            iframeRef.current.src = src;
-          }
+          frameRef.current?.refresh();
         },
         focusGroup(page: string, group: string) {
-          if (isReady) {
-            postToIframe(iframeRef, {
-              source: PREVIEW_SOURCE,
-              type: "sp:focus-group",
-              page,
-              group,
-            });
-          } else {
-            pendingFocusRef.current = { page, group };
-          }
+          frameRef.current?.focusGroup(page, group);
         },
       }),
-      [src, isReady],
+      [],
     );
-
-    // When the iframe loads, mark as ready (catches hard reloads).
-    const handleLoad = () => setIsReady(true);
 
     const handleRefreshClick = () => {
       if (onRefresh) {
         onRefresh();
       } else {
         // Fallback: plain reload.
-        setIsReady(false);
-        if (iframeRef.current) {
-          iframeRef.current.src = src;
-        }
+        frameRef.current?.refresh();
       }
     };
 
@@ -209,30 +158,13 @@ export const PreviewPane = forwardRef<PreviewPaneHandle, Props>(
 
         {/* Iframe wrapper — device-constrained, centered */}
         <div className="bg-muted/20 relative flex flex-1 justify-center overflow-hidden rounded-lg border">
-          <div
-            className="relative h-full transition-[width] duration-300"
-            style={{ width: DEVICE_WIDTHS[device] }}
-          >
-            <iframe
-              ref={iframeRef}
-              src={src}
-              title="Live storefront preview"
-              onLoad={handleLoad}
-              className="h-full w-full border-0"
-              style={{ minHeight: "600px" }}
-            />
-
-            {/* Shimmer overlay while a draft save is in-flight */}
-            {isUpdating && (
-              <div
-                aria-hidden="true"
-                className={cn(
-                  "pointer-events-none absolute inset-0 z-10",
-                  "animate-pulse bg-white/20 backdrop-blur-[1px]",
-                )}
-              />
-            )}
-          </div>
+          <PreviewFrame
+            ref={frameRef}
+            path={path}
+            onEditGroup={onEditGroup}
+            isUpdating={isUpdating}
+            width={DEVICE_WIDTHS[device]}
+          />
         </div>
       </div>
     );

@@ -17,6 +17,7 @@ import { useUploadFile } from "@better-upload/client";
 import {
   ChevronDown,
   ChevronUp,
+  Images,
   Plus,
   Trash,
   Trash2,
@@ -61,6 +62,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
@@ -74,6 +81,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { EmbedFrame } from "~/components/embed-frame";
+import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -117,6 +125,7 @@ export function FieldGroup({
   onFieldChange,
   isUngrouped,
   embedsEnabled,
+  mediaLibraryEnabled,
 }: {
   groupId: string;
   page: string;
@@ -127,6 +136,7 @@ export function FieldGroup({
   onFieldChange: (key: string, value: unknown) => void;
   isUngrouped: boolean;
   embedsEnabled?: boolean;
+  mediaLibraryEnabled?: boolean;
 }) {
   const columns = groupMeta?.columns ?? 1;
 
@@ -170,6 +180,7 @@ export function FieldGroup({
                 isModified={modifiedFields?.has(field.key) ?? false}
                 onChange={(value) => onFieldChange(field.key, value)}
                 embedsEnabled={embedsEnabled}
+                mediaLibraryEnabled={mediaLibraryEnabled}
               />
             </div>
           ))}
@@ -187,12 +198,14 @@ export function FieldInput({
   isModified,
   onChange,
   embedsEnabled,
+  mediaLibraryEnabled,
 }: {
   field: TemplateField;
   value: unknown;
   isModified: boolean;
   onChange: (value: unknown) => void;
   embedsEnabled?: boolean;
+  mediaLibraryEnabled?: boolean;
 }) {
   const stringValue = typeof value === "string" ? value : "";
   const richTextValue = isRichTextValue(value) ? value : EMPTY_TIPTAP_DOC;
@@ -219,12 +232,14 @@ export function FieldInput({
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
           description={field.description}
+          mediaLibraryEnabled={mediaLibraryEnabled}
         />
       ) : field.type === "video" ? (
         <TemplateVideoUploadField
           value={stringValue}
           onChange={(nextValue) => onChange(nextValue)}
           description={field.description}
+          mediaLibraryEnabled={mediaLibraryEnabled}
         />
       ) : field.type === "gallery" ? (
         <GalleryFieldSelect
@@ -992,6 +1007,10 @@ type TemplateImageUploadFieldProps = {
   label?: string;
   description?: string;
   disabled?: boolean;
+  /** Show a "Choose from library" button next to the upload UI. Only pass
+   *  `true` when the `media` feature flag is enabled — the picker's query
+   *  is gated server-side and would error otherwise. */
+  mediaLibraryEnabled?: boolean;
 };
 
 export function TemplateImageUploadField({
@@ -1000,8 +1019,10 @@ export function TemplateImageUploadField({
   label,
   description,
   disabled,
+  mediaLibraryEnabled,
 }: TemplateImageUploadFieldProps) {
   const [localFile, setLocalFile] = useState<File | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploader = useUploadFile({
@@ -1125,29 +1146,82 @@ export function TemplateImageUploadField({
           </div>
         ) : null}
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={disabled ?? isUploading}
-          onClick={triggerFileInput}
-          className="w-full"
-        >
-          {isUploading ? (
-            <>
-              <span
-                className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
-                aria-hidden="true"
-              />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              {previewUrl ? "Replace image" : "Choose image"}
-            </>
-          )}
-        </Button>
+        {mediaLibraryEnabled ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={disabled ?? isUploading}
+                className="w-full"
+              >
+                {isUploading ? (
+                  <>
+                    <span
+                      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                      aria-hidden="true"
+                    />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {previewUrl ? "Replace image" : "Choose image"}
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-(--radix-dropdown-menu-trigger-width)"
+            >
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => triggerFileInput());
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload from device
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => setPickerOpen(true));
+                }}
+              >
+                <Images className="mr-2 h-4 w-4" />
+                Choose from library
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={disabled ?? isUploading}
+            onClick={triggerFileInput}
+            className="w-full"
+          >
+            {isUploading ? (
+              <>
+                <span
+                  className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                  aria-hidden="true"
+                />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                {previewUrl ? "Replace image" : "Choose image"}
+              </>
+            )}
+          </Button>
+        )}
 
         <div
           role="button"
@@ -1180,6 +1254,18 @@ export function TemplateImageUploadField({
       {description && (
         <p className="text-muted-foreground text-xs">{description}</p>
       )}
+
+      {mediaLibraryEnabled && (
+        <MediaPickerDialog
+          kind="image"
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSelect={(url) => {
+            setLocalFile(null);
+            onChange(url);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -1192,6 +1278,10 @@ type TemplateVideoUploadFieldProps = {
   label?: string;
   description?: string;
   disabled?: boolean;
+  /** Show a "Choose from library" button next to the upload UI. Only pass
+   *  `true` when the `media` feature flag is enabled — the picker's query
+   *  is gated server-side and would error otherwise. */
+  mediaLibraryEnabled?: boolean;
 };
 
 export function TemplateVideoUploadField({
@@ -1200,8 +1290,10 @@ export function TemplateVideoUploadField({
   label,
   description,
   disabled,
+  mediaLibraryEnabled,
 }: TemplateVideoUploadFieldProps) {
   const [localFile, setLocalFile] = useState<File | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploader = useUploadFile({
@@ -1328,29 +1420,82 @@ export function TemplateVideoUploadField({
           </div>
         ) : null}
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={disabled ?? isUploading}
-          onClick={triggerFileInput}
-          className="w-full"
-        >
-          {isUploading ? (
-            <>
-              <span
-                className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
-                aria-hidden="true"
-              />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              {previewUrl ? "Replace video" : "Choose video"}
-            </>
-          )}
-        </Button>
+        {mediaLibraryEnabled ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={disabled ?? isUploading}
+                className="w-full"
+              >
+                {isUploading ? (
+                  <>
+                    <span
+                      className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                      aria-hidden="true"
+                    />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {previewUrl ? "Replace video" : "Choose video"}
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-60" />
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-(--radix-dropdown-menu-trigger-width)"
+            >
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => triggerFileInput());
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload from device
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  queueMicrotask(() => setPickerOpen(true));
+                }}
+              >
+                <Images className="mr-2 h-4 w-4" />
+                Choose from library
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={disabled ?? isUploading}
+            onClick={triggerFileInput}
+            className="w-full"
+          >
+            {isUploading ? (
+              <>
+                <span
+                  className="border-background border-t-foreground mr-2 h-4 w-4 animate-spin rounded-full border-2"
+                  aria-hidden="true"
+                />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                {previewUrl ? "Replace video" : "Choose video"}
+              </>
+            )}
+          </Button>
+        )}
 
         <div
           role="button"
@@ -1382,6 +1527,18 @@ export function TemplateVideoUploadField({
       </div>
       {description && (
         <p className="text-muted-foreground text-xs">{description}</p>
+      )}
+
+      {mediaLibraryEnabled && (
+        <MediaPickerDialog
+          kind="video"
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSelect={(url) => {
+            setLocalFile(null);
+            onChange(url);
+          }}
+        />
       )}
     </div>
   );

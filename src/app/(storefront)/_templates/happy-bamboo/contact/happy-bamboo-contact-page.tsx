@@ -4,7 +4,8 @@
 import { Mail, MapPin, MessageSquare, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { getListFieldValue } from "~/lib/template-fields";
 import {
   Accordion,
@@ -87,10 +88,16 @@ export function HappyBambooContactPage({
                 <MessageSquare className="mr-1 h-3 w-3" />
                 Get in Touch
               </Badge>
-              <h1 className="mb-4 font-serif text-4xl font-bold md:text-5xl">
+              <h1
+                className="mb-4 font-serif text-4xl font-bold md:text-5xl"
+                {...fieldAttr("happy-bamboo.contact.header")}
+              >
                 {f["happy-bamboo.contact.header"]}
               </h1>
-              <p className="text-muted-foreground text-lg">
+              <p
+                className="text-muted-foreground text-lg"
+                {...fieldAttr("happy-bamboo.contact.subheader")}
+              >
                 {f["happy-bamboo.contact.subheader"]}
               </p>
             </FadeIn>
@@ -152,38 +159,50 @@ export function HappyBambooContactPage({
       </section>
 
       {/* FAQ Section */}
-      <section
-        className="bg-muted/50 py-12 md:py-20"
-        {...sectionGroupAttr("contact", "faq")}
-      >
-        <div className="container mx-auto px-4">
-          <FadeIn className="mb-12 text-center">
-            <h2 className="mb-4 font-serif text-3xl font-bold md:text-4xl">
-              {f["happy-bamboo.contact-faq-title"]}
-            </h2>
-            {f["happy-bamboo.contact-faq-subtitle"] && (
-              <p className="text-muted-foreground">
-                {f["happy-bamboo.contact-faq-subtitle"]}
-              </p>
-            )}
-          </FadeIn>
+      {isSectionVisible(
+        business?.siteContent?.customFields,
+        "happy-bamboo",
+        "contact.faq",
+      ) && (
+        <section
+          className="bg-muted/50 py-12 md:py-20"
+          {...sectionGroupAttr("contact", "faq")}
+        >
+          <div className="container mx-auto px-4">
+            <FadeIn className="mb-12 text-center">
+              <h2
+                className="mb-4 font-serif text-3xl font-bold md:text-4xl"
+                {...fieldAttr("happy-bamboo.contact-faq-title")}
+              >
+                {f["happy-bamboo.contact-faq-title"]}
+              </h2>
+              {f["happy-bamboo.contact-faq-subtitle"] && (
+                <p
+                  className="text-muted-foreground"
+                  {...fieldAttr("happy-bamboo.contact-faq-subtitle")}
+                >
+                  {f["happy-bamboo.contact-faq-subtitle"]}
+                </p>
+              )}
+            </FadeIn>
 
-          <FadeIn delay={0.1} className="mx-auto max-w-3xl">
-            <Accordion type="single" collapsible className="w-full">
-              {frequentlyAsked?.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </FadeIn>
-        </div>
-      </section>
+            <FadeIn delay={0.1} className="mx-auto max-w-3xl">
+              <Accordion type="single" collapsible className="w-full">
+                {frequentlyAsked?.map((faq, index) => (
+                  <AccordionItem key={index} value={`item-${index}`}>
+                    <AccordionTrigger className="text-left">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </FadeIn>
+          </div>
+        </section>
+      )}
     </PageTransition>
   );
 }

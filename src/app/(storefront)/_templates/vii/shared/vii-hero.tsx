@@ -47,6 +47,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 import {
   heroHeadingStyle,
   heroMediaStyle,
@@ -138,6 +140,12 @@ export type ViiHeroProps = {
    * Intended for the homepage pause/play button.
    */
   controls?: ReactNode;
+  /** Extra data attributes (e.g. `data-sp-group`) spread onto the root `<section>` for the preview overlay. */
+  sectionAttrs?: Record<string, string>;
+  /** Full template field key for `overline`, when it's a live-patchable field. */
+  overlineFieldKey?: string;
+  /** Full template field key for `heading`, when it's a live-patchable field. */
+  headingFieldKey?: string;
 };
 
 const DEFAULT_HEADING_STYLE: CSSProperties = {
@@ -166,6 +174,9 @@ export function ViiHero({
   scrimVariant = "default",
   children,
   controls,
+  sectionAttrs,
+  overlineFieldKey,
+  headingFieldKey,
 }: ViiHeroProps) {
   const { shown, reduced } = useViiHeroMotion();
 
@@ -180,6 +191,7 @@ export function ViiHero({
   return (
     <section
       aria-label={ariaLabel}
+      {...sectionAttrs}
       style={{
         position: "relative",
         width: "100%",
@@ -277,12 +289,14 @@ export function ViiHero({
               marginBottom: overlineMarginBottom,
               ...heroRevealStyle(shown, reduced, 0),
             }}
+            fieldKey={overlineFieldKey}
           >
             {overline}
           </ViiOverline>
         )}
 
         <h1
+          {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
           style={{
             ...heroHeadingStyle(shown, reduced),
             ...DEFAULT_HEADING_STYLE,

@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -19,6 +21,7 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
   return (
     <section
       aria-labelledby="about-band-heading"
+      {...sectionGroupAttr("about", "band")}
       style={{
         position: "relative",
         overflow: "hidden",
@@ -65,13 +68,19 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
         }}
       >
         {label.trim() && (
-          <ViiOverline align="center" tone="dark" style={{ marginBottom: 22 }}>
+          <ViiOverline
+            align="center"
+            tone="dark"
+            style={{ marginBottom: 22 }}
+            fieldKey="vii.about.band-label"
+          >
             {label}
           </ViiOverline>
         )}
 
         <h2
           id="about-band-heading"
+          {...fieldAttr("vii.about.band-statement")}
           style={{
             fontFamily: "var(--font-serif)",
             fontWeight: 400,

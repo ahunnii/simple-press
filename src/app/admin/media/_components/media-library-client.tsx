@@ -1,13 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Download, File, Images, Search, Trash2, Video, X } from "lucide-react";
+import { Download, Images, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
-import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -35,10 +33,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import type { MediaItem } from "~/components/media/media-grid";
+import { formatBytes, getFilename, MediaThumbnail } from "~/components/media/media-grid";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type MediaItem = RouterOutputs["media"]["list"]["items"][number];
 
 type KindFilter =
   | "all"
@@ -51,64 +49,6 @@ type KindFilter =
   | "other";
 
 type UsedFilter = "all" | "used" | "unused";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const units = ["B", "KB", "MB", "GB"];
-  const i = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1,
-  );
-  const val = bytes / Math.pow(1024, i);
-  return `${i === 0 ? val.toString() : val.toFixed(1)} ${units[i] ?? "B"}`;
-}
-
-function getFilename(key: string): string {
-  return key.split("/").pop() ?? key;
-}
-
-const IMAGE_KINDS = new Set([
-  "image",
-  "gallery",
-  "logo",
-  "favicon",
-  "testimonial",
-]);
-
-function isImageKind(kind: string): boolean {
-  return IMAGE_KINDS.has(kind);
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function MediaThumbnail({ item }: { item: MediaItem }) {
-  const filename = getFilename(item.key);
-
-  if (isImageKind(item.kind)) {
-    return (
-      <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-t-md">
-        <img
-          src={item.url}
-          alt={filename}
-          loading="lazy"
-          className="h-full w-full object-cover transition-opacity duration-200"
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-muted flex aspect-video w-full items-center justify-center rounded-t-md">
-      {item.kind === "video" ? (
-        <Video className="text-muted-foreground h-10 w-10" aria-hidden="true" />
-      ) : (
-        <File className="text-muted-foreground h-10 w-10" aria-hidden="true" />
-      )}
-    </div>
-  );
-}
 
 function UsageBadge({ item }: { item: MediaItem }) {
   const count = item.usedBy.length;

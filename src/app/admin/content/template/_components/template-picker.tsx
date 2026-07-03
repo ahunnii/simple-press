@@ -43,6 +43,7 @@ export function TemplatePicker({
     (t) =>
       availableTemplateIds.includes(t.id) || t.id === currentTemplateId,
   );
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -51,6 +52,7 @@ export function TemplatePicker({
       toast.success("Template updated. Your storefront now uses the new template.");
       setConfirmOpen(false);
       setPendingId(null);
+      setPickerOpen(false);
       router.refresh();
     },
     onError: (err) => {
@@ -75,69 +77,96 @@ export function TemplatePicker({
   return (
     <>
       <div className="mb-8">
-        <div className="mb-4 flex items-center gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Active Template</h2>
-            <p className="text-muted-foreground text-sm">
+        <Card>
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                Active template
+              </p>
+              <p className="text-base font-semibold">
+                {currentTemplate?.name ?? currentTemplateId}
+              </p>
+              {currentTemplate?.description && (
+                <p className="text-muted-foreground mt-0.5 text-sm">
+                  {currentTemplate.description}
+                </p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              className="shrink-0 sm:self-center"
+              onClick={() => setPickerOpen(true)}
+            >
+              Change template…
+            </Button>
+          </div>
+        </Card>
+      </div>
+
+      <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
+        <DialogContent className="flex max-h-[85vh] max-w-4xl flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Active Template</DialogTitle>
+            <DialogDescription>
               Select a template to switch your storefront design. Your content
               fields will be preserved, but template-specific fields may reset
               to defaults.
-            </p>
-          </div>
-        </div>
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {selectableTemplates.map((template) => {
-            const isCurrent = template.id === currentTemplateId;
-            return (
-              <Card
-                key={template.id}
-                onClick={() => handleSelect(template.id)}
-                className={cn(
-                  "relative cursor-pointer transition-all",
-                  isCurrent
-                    ? "ring-primary ring-2"
-                    : "hover:ring-muted-foreground/30 hover:ring-2",
-                )}
-              >
-                {isCurrent && (
-                  <CheckCircle2 className="text-primary absolute top-3 right-3 h-5 w-5" />
-                )}
+          <div className="grid grid-cols-1 gap-4 overflow-y-auto p-1 sm:grid-cols-2 lg:grid-cols-3">
+            {selectableTemplates.map((template) => {
+              const isCurrent = template.id === currentTemplateId;
+              return (
+                <Card
+                  key={template.id}
+                  onClick={() => handleSelect(template.id)}
+                  className={cn(
+                    "relative cursor-pointer transition-all",
+                    isCurrent
+                      ? "ring-primary ring-2"
+                      : "hover:ring-muted-foreground/30 hover:ring-2",
+                  )}
+                >
+                  {isCurrent && (
+                    <CheckCircle2 className="text-primary absolute top-3 right-3 h-5 w-5" />
+                  )}
 
-                {/* Preview image or gradient fallback */}
-                <div className="bg-muted relative aspect-video overflow-hidden rounded-t-lg">
-                  <Image
-                    src={template.previewImage}
-                    alt={`${template.name} preview`}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display =
-                        "none";
-                    }}
-                  />
-                </div>
-
-                <CardHeader className="p-4 pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold">
-                      {template.name}
-                    </CardTitle>
-                    {isCurrent && (
-                      <Badge variant="secondary" className="shrink-0 text-xs">
-                        Active
-                      </Badge>
-                    )}
+                  {/* Preview image or gradient fallback */}
+                  <div className="bg-muted relative aspect-video overflow-hidden rounded-t-lg">
+                    <Image
+                      src={template.previewImage}
+                      alt={`${template.name} preview`}
+                      fill
+                      className="object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display =
+                          "none";
+                      }}
+                    />
                   </div>
-                  <CardDescription className="text-xs leading-relaxed">
-                    {template.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
+
+                  <CardHeader className="p-4 pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-sm font-semibold">
+                        {template.name}
+                      </CardTitle>
+                      {isCurrent && (
+                        <Badge variant="secondary" className="shrink-0 text-xs">
+                          Active
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription className="text-xs leading-relaxed">
+                      {template.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>

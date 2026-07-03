@@ -11,6 +11,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 
@@ -41,9 +42,17 @@ export function HappyBambooFeaturedProducts({
             Happy Bamboo
           </span>
           <h2 className="text-foreground font-serif text-4xl font-bold tracking-tight md:text-5xl">
-            <span className="font-serif text-balance">{featuredTitle}</span>
+            <span
+              className="font-serif text-balance"
+              {...fieldAttr("happy-bamboo.homepage-featured-title")}
+            >
+              {featuredTitle}
+            </span>
           </h2>
-          <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
+          <p
+            className="text-muted-foreground mx-auto mt-4 max-w-2xl"
+            {...fieldAttr("happy-bamboo.homepage-featured-description")}
+          >
             {featuredDescription}
           </p>
         </div>
@@ -64,7 +73,10 @@ export function HappyBambooFeaturedProducts({
       <FadeIn direction="up" delay={0.3}>
         <div className="mt-12 text-center">
           <Button size="lg" asChild>
-            <Link href={featuredButtonLink ?? "/shop"}>
+            <Link
+              href={featuredButtonLink ?? "/shop"}
+              {...fieldAttr("happy-bamboo.homepage-featured-button-text")}
+            >
               {featuredButtonText}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>

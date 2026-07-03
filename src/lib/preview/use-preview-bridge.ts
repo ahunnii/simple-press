@@ -23,6 +23,17 @@ export type PreviewMessage =
       type: "sp:focus-group";
       page: string;
       group: string;
+    }
+  | {
+      source: typeof PREVIEW_SOURCE;
+      type: "sp:patch-fields";
+      fields: Record<string, string>;
+    }
+  | {
+      source: typeof PREVIEW_SOURCE;
+      type: "sp:patched";
+      applied: string[];
+      missed: string[];
     };
 
 // ---------------------------------------------------------------------------

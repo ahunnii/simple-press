@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 type GalleryImage = {
   url: string;
   altText: string;
@@ -21,6 +23,7 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
   return (
     <section
       aria-label="Instagram gallery"
+      {...sectionGroupAttr("homepage", "instagram")}
       style={{
         background: "var(--vii-cream)",
         padding: "clamp(48px, 6vw, 72px) clamp(24px, 6vw, 96px)",
@@ -30,6 +33,7 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
         {/* Handle */}
         {handle && (
           <p
+            {...fieldAttr("vii.homepage.instagram-handle")}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: 12,
@@ -103,6 +107,7 @@ export function ViiInstagramStrip({ handle, images, ctaText }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`${ctaText ?? "Follow on Instagram"} (opens in new tab)`}
+              {...fieldAttr("vii.homepage.instagram-cta-text")}
               style={{
                 display: "inline-block",
                 fontFamily: "var(--font-sans)",

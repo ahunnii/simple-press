@@ -5,6 +5,7 @@ import { Jost, Playfair_Display } from "next/font/google";
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
 
 import { ViiFooter } from "./vii-footer";
@@ -33,11 +34,15 @@ export async function ViiLayout({
   ]);
 
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const themeVars = resolveThemeVars(
+    "vii",
+    business.siteContent?.customFields,
+  );
 
   return (
     <div
       className={`${fontSerif.variable} ${fontSans.variable} vii`}
-      style={{ fontFamily: "var(--font-sans)" }}
+      style={{ fontFamily: "var(--font-sans)", ...themeVars }}
     >
       {/* Skip link — always the first focusable element */}
       <a

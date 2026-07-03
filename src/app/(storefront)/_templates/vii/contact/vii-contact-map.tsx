@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { MapViewport } from "~/components/ui/map";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   Map,
   MapMarker,
@@ -44,6 +45,7 @@ export function ViiContactMap({
   return (
     <section
       aria-labelledby="contact-map-heading"
+      {...sectionGroupAttr("contact", "map")}
       style={{
         background: "var(--vii-paper)",
         padding: "clamp(56px, 8vw, 104px) clamp(24px, 6vw, 96px)",
@@ -57,6 +59,7 @@ export function ViiContactMap({
         {heading && (
           <h2
             id="contact-map-heading"
+            {...fieldAttr("vii.contact.map-heading")}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: 12,

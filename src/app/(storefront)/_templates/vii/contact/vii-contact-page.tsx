@@ -1,5 +1,6 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -103,15 +104,16 @@ export function ViiContactPage({ business }: DefaultContactPageTemplateProps) {
       )}
 
       {/* 4. Leave a review (only when at least one URL is set) */}
-      {(googleUrl || facebookUrl) && (
-        <ViiContactReview
-          heading={f["vii.contact.review-heading"] ?? ""}
-          headingAccent={f["vii.contact.review-heading-accent"] ?? ""}
-          body={f["vii.contact.review-body"] ?? ""}
-          googleUrl={googleUrl || undefined}
-          facebookUrl={facebookUrl || undefined}
-        />
-      )}
+      {(googleUrl || facebookUrl) &&
+        isSectionVisible(customFields, "vii", "contact.review") && (
+          <ViiContactReview
+            heading={f["vii.contact.review-heading"] ?? ""}
+            headingAccent={f["vii.contact.review-heading-accent"] ?? ""}
+            body={f["vii.contact.review-body"] ?? ""}
+            googleUrl={googleUrl || undefined}
+            facebookUrl={facebookUrl || undefined}
+          />
+        )}
     </PageTransition>
   );
 }

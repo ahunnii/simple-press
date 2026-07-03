@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -20,7 +21,11 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
   if (cards.length === 0) return null;
 
   return (
-    <ViiSection tone="cream" aria-labelledby="vii-categories-heading">
+    <ViiSection
+      tone="cream"
+      aria-labelledby="vii-categories-heading"
+      sectionAttrs={sectionGroupAttr("homepage", "categories")}
+    >
       {/* Header */}
       <div
         style={{
@@ -33,13 +38,18 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
         }}
       >
         {overline && (
-          <ViiOverline tone="light" align="center">
+          <ViiOverline
+            tone="light"
+            align="center"
+            fieldKey="vii.homepage.categories-overline"
+          >
             {overline}
           </ViiOverline>
         )}
         {heading && (
           <h2
             id="vii-categories-heading"
+            {...fieldAttr("vii.homepage.categories-heading")}
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,

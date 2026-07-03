@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiCtaLink } from "../shared/vii-cta-link";
 import { ViiSection } from "../shared/vii-section";
@@ -44,6 +46,7 @@ export function ViiBlogSection({
       tone="cream"
       aria-labelledby="vii-blog-heading"
       style={{ padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)" }}
+      sectionAttrs={sectionGroupAttr("homepage", "blog")}
     >
       {/* ── Header ── */}
       <div
@@ -66,6 +69,7 @@ export function ViiBlogSection({
           {heading && headingAccent ? " " : ""}
           {headingAccent && (
             <em
+              {...fieldAttr("vii.homepage.blog-heading-accent")}
               style={{
                 fontStyle: "italic",
                 color: "var(--vii-copper)",
@@ -78,6 +82,7 @@ export function ViiBlogSection({
 
         {intro && (
           <p
+            {...fieldAttr("vii.homepage.blog-intro")}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -189,7 +194,9 @@ export function ViiBlogSection({
         <div
           style={{ textAlign: "center", marginTop: "clamp(40px, 5vw, 60px)" }}
         >
-          <ViiCtaLink href={ctaHref}>{ctaText}</ViiCtaLink>
+          <ViiCtaLink href={ctaHref} fieldKey="vii.homepage.blog-cta-text">
+            {ctaText}
+          </ViiCtaLink>
         </div>
       )}
     </ViiSection>

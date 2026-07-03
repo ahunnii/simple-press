@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
@@ -119,6 +120,7 @@ export function ViiContactForm({ heading }: Props) {
     <div className="vii-contact-form">
       <h2
         className="mb-8"
+        {...fieldAttr("vii.contact.form-heading")}
         style={{
           fontFamily: "var(--font-serif)",
           fontWeight: 400,
