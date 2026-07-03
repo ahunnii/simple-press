@@ -2,11 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
-import {
-  FEATURE_REGISTRY,
-  getDefaultFlags,
-  getDisabledDueToDependency,
-} from "~/lib/features/registry";
+import { FEATURE_REGISTRY } from "~/lib/features/registry";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 
 import {
   createTRPCRouter,
@@ -38,17 +35,12 @@ export const featuresRouter = createTRPCRouter({
       });
     }
 
-    // Merge defaults with stored overrides
-    const defaults = getDefaultFlags();
-    const stored = (business.featureFlags as Record<string, boolean>) ?? {};
-    const merged = { ...defaults, ...stored };
+    const { flags, disabledByDependency } = resolveFlags(business.featureFlags);
 
-    // Compute which flags are disabled due to dependency
-    const disabledByDependency = getDisabledDueToDependency(merged);
-
+    // Preserve the Set response shape that existing callers depend on.
     return {
-      flags: merged,
-      disabledByDependency,
+      flags,
+      disabledByDependency: new Set(disabledByDependency),
     };
   }),
 

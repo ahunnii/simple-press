@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { enforceCanonicalHost } from "~/lib/canonical";
+import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
@@ -42,12 +43,14 @@ export default async function StorefrontLayout({ children }: Props) {
 
   return (
     <HydrateClient>
-      <t.Layout business={business}>
-        <>{children}</>
-      </t.Layout>
-      <CartRevalidator />
-      <PreviewOverlay />
-      <TemplateSelectorDevTool />
+      <StorefrontFlagsProvider flags={business.featureFlags}>
+        <t.Layout business={business}>
+          <>{children}</>
+        </t.Layout>
+        <CartRevalidator />
+        <PreviewOverlay />
+        <TemplateSelectorDevTool />
+      </StorefrontFlagsProvider>
     </HydrateClient>
   );
 }
