@@ -58,7 +58,7 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
   ).filter((el) => !el.closest("[inert]"));
 }
 
-export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function SledgeHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();

@@ -9,7 +9,7 @@ import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { resolveFields } from "../index";
 
-export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
+export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";
 
   const customFields = business?.siteContent?.customFields as

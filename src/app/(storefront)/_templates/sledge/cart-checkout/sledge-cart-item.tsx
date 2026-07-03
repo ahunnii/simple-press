@@ -12,7 +12,7 @@ type Props = {
   item: CartItemType;
 };
 
-export function NoiseCartItem({ item }: Props) {
+export function SledgeCartItem({ item }: Props) {
   const { updateQuantity, removeItem } = useCart();
   const {
     productId,

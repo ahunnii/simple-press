@@ -7,7 +7,7 @@ import { cn } from "~/lib/utils";
 import { useProduct } from "~/hooks/use-product";
 import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
-import { NoiseVariantSelector } from "./noise-variant-selector";
+import { SledgeVariantSelector } from "./sledge-variant-selector";
 
 export function SledgeProductActions({
   product,
@@ -43,7 +43,7 @@ export function SledgeProductActions({
 
   if (Object.keys(variantOptions).length > 0) {
     return (
-      <NoiseVariantSelector
+      <SledgeVariantSelector
         product={product}
         setSelectedVariantId={setSelectedVariantId}
       />

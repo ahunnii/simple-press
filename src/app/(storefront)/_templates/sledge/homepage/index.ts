@@ -137,7 +137,7 @@ const homepageSubscribeData: TemplateField[] = [
   },
 ];
 
-export const noiseHomepageData = [
+export const sledgeHomepageData = [
   ...homepageHeroData,
   ...homepageGetToKnowData,
   ...homepageTestimonialsData,
@@ -146,7 +146,7 @@ export const noiseHomepageData = [
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
-export const noiseHomepageFieldGroups: TemplateFieldGroup[] = [
+export const sledgeHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.hero",
     title: "Hero Mosaic",

@@ -1,10 +1,10 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
-import { noiseAboutData, noiseAboutFieldGroups } from "./about";
-import { noiseBlogData, noiseBlogFieldGroups } from "./blog";
+import { sledgeAboutData, sledgeAboutFieldGroups } from "./about";
+import { sledgeBlogData, sledgeBlogFieldGroups } from "./blog";
 import { sledgeContactData, sledgeContactFieldGroups } from "./contact";
-import { noiseHomepageData, noiseHomepageFieldGroups } from "./homepage";
+import { sledgeHomepageData, sledgeHomepageFieldGroups } from "./homepage";
 import {
   sledgeTestimonialsData,
   sledgeTestimonialsFieldGroups,
@@ -167,9 +167,9 @@ const globalProductData: TemplateField[] = [
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
 const fieldGroups: TemplateFieldGroup[] = [
-  ...noiseHomepageFieldGroups,
-  ...noiseAboutFieldGroups,
-  ...noiseBlogFieldGroups,
+  ...sledgeHomepageFieldGroups,
+  ...sledgeAboutFieldGroups,
+  ...sledgeBlogFieldGroups,
   ...sledgeContactFieldGroups,
   ...sledgeTestimonialsFieldGroups,
   {
@@ -207,11 +207,11 @@ const fieldGroups: TemplateFieldGroup[] = [
 
 export const sledgeData = {
   sledge: [
-    ...noiseHomepageData,
-    ...noiseAboutData,
+    ...sledgeHomepageData,
+    ...sledgeAboutData,
     ...sledgeContactData,
     ...shopListingData,
-    ...noiseBlogData,
+    ...sledgeBlogData,
     ...globalBrandingData,
     ...globalAuthenticationData,
     ...globalProductData,

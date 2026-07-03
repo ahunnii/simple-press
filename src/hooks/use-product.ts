@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { parseCardAdditionalFields } from "~/lib/products";
 import {
   resolveVariantCompareAtPrice,
@@ -17,7 +18,7 @@ export function useProduct(
   const { addItem, getItemQuantity, isHydrated } = useCart();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    product.variants[0]?.id ?? null,
+    pickInitialVariant(product.variants, product)?.id ?? null,
   );
 
   const [quantity, setQuantity] = useState(1);

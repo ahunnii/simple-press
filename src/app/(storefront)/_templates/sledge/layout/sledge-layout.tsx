@@ -8,8 +8,8 @@ import { resolveBanner } from "~/lib/site-banner/resolve";
 import { getSession } from "~/server/better-auth/server";
 
 import { SledgeAnnouncementBar } from "./sledge-announcement-bar";
-import { NoiseFooter } from "./sledge-footer";
-import { NoiseHeader } from "./sledge-header";
+import { SledgeFooter } from "./sledge-footer";
+import { SledgeHeader } from "./sledge-header";
 
 const fontSans = Raleway({
   subsets: ["latin"],
@@ -41,11 +41,11 @@ export async function SledgeLayout({
         Skip to main content
       </a>
       {banner && <SledgeAnnouncementBar banner={banner} />}
-      <NoiseHeader business={business} session={session ?? null} />
+      <SledgeHeader business={business} session={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>
-      <NoiseFooter business={business} />
+      <SledgeFooter business={business} />
     </div>
   );
 }

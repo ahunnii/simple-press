@@ -46,11 +46,11 @@ const blogPostData: TemplateField[] = [
   },
 ];
 
-export const noiseBlogData = [...blogListingData, ...blogPostData];
+export const sledgeBlogData = [...blogListingData, ...blogPostData];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
-export const noiseBlogFieldGroups: TemplateFieldGroup[] = [
+export const sledgeBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.listing",
     title: "Blog Page",

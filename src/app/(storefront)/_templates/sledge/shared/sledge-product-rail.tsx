@@ -7,7 +7,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-import { NoiseProductCard } from "./sledge-product-card";
+import { SledgeProductCard } from "./sledge-product-card";
 
 type SledgeProductRailProps = {
   heading: string;
@@ -52,7 +52,7 @@ export function SledgeProductRail({
         >
           {shown.map((product, index) => (
             <StaggerItem key={product.id as string}>
-              <NoiseProductCard product={product as Product} index={index} />
+              <SledgeProductCard product={product as Product} index={index} />
             </StaggerItem>
           ))}
         </StaggerContainer>

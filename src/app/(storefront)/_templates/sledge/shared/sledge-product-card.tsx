@@ -16,7 +16,7 @@ type Props = {
   index: number;
 };
 
-export function NoiseProductCard({ product, index: _index }: Props) {
+export function SledgeProductCard({ product, index: _index }: Props) {
   const { addItem } = useCart();
   // S-2: announce add-to-cart feedback to screen readers
   const [announce, setAnnounce] = useState("");
