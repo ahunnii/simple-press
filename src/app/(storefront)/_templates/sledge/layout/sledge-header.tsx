@@ -15,6 +15,7 @@ import {
   BookUser,
   ChevronDown,
   ChevronUp,
+  Heart,
   Lock,
   Menu,
   Package,
@@ -30,6 +31,7 @@ import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -58,6 +60,7 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
 
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -563,6 +566,29 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               {session?.user ? userMenu : authLink}
             </div>
 
+            {/* Wishlist — mirrors cart icon sizing/badge treatment */}
+            <Link
+              href="/wishlist"
+              aria-label={
+                wishlistCount > 0
+                  ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                  : "View wishlist"
+              }
+              className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
+            >
+              <Heart className="h-[25px] w-[25px]" strokeWidth={1.4} />
+              {wishlistCount > 0 && (
+                <motion.span
+                  initial={shouldReduceMotion ? false : { scale: 0 }}
+                  animate={{ scale: 1 }}
+                  aria-hidden="true"
+                  className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
+                >
+                  {wishlistCount}
+                </motion.span>
+              )}
+            </Link>
+
             {/* M-8: dynamic aria-label includes item count; badge is aria-hidden */}
             <Link
               href="/cart"
@@ -729,7 +755,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   ) : null}
                 </AnimatePresence>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   {/* M-8: mobile cart link — badge is aria-hidden */}
                   <Link
                     href="/cart"
@@ -749,6 +775,29 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                         className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
                       >
                         {itemCount}
+                      </span>
+                    ) : null}
+                  </Link>
+
+                  {/* Mobile wishlist link — mirrors mobile cart link treatment */}
+                  <Link
+                    href="/wishlist"
+                    onClick={closeMobileMenu}
+                    aria-label={
+                      wishlistCount > 0
+                        ? `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                        : "Wishlist"
+                    }
+                    className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
+                  >
+                    <Heart className="h-4 w-4" aria-hidden="true" />
+                    <span aria-hidden="true">Wishlist</span>
+                    {wishlistCount > 0 ? (
+                      <span
+                        aria-hidden="true"
+                        className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+                      >
+                        {wishlistCount}
                       </span>
                     ) : null}
                   </Link>

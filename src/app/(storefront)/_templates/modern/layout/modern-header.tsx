@@ -5,13 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { Heart, Menu, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -22,6 +23,7 @@ const NAV_LINKS = [
 
 export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = authClient.useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -179,6 +181,20 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
 
           <div className="flex items-center gap-4">
             <Link
+              href="/wishlist"
+              className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
+              aria-label={`Wishlist with ${wishlistCount} items`}
+            >
+              {/* M-2: decorative icon inside an aria-labeled link */}
+              <Heart className="h-5 w-5" aria-hidden="true" />
+              {wishlistCount > 0 && (
+                <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
               href="/cart"
               className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
               aria-label={`Shopping cart with ${itemCount} items`}
@@ -272,7 +288,19 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           ))}
         </nav>
 
-        <div className="border-border border-t px-6 py-5">
+        <div className="border-border flex flex-col gap-4 border-t px-6 py-5">
+          <Link
+            href="/wishlist"
+            className="text-foreground flex items-center gap-3"
+            onClick={closeMenu}
+          >
+            {/* M-2: decorative icon, link text "Wishlist (n)" provides the name */}
+            <Heart className="h-5 w-5" aria-hidden="true" />
+            <span className="text-sm font-medium">
+              Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+            </span>
+          </Link>
+
           <Link
             href="/cart"
             className="text-foreground flex items-center gap-3"

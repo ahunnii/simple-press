@@ -14,6 +14,7 @@ import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { authClient } from "~/server/better-auth/client";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
+import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -332,6 +333,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                 Sign in
               </Link>
             )}
+            <DefaultWishlistBadge />
             <DefaultCartBadge />
           </div>
         </div>

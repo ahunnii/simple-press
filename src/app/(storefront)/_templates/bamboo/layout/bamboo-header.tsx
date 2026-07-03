@@ -6,13 +6,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 import { BambooMobileNav } from "./bamboo-mobile-nav";
 
@@ -33,6 +34,7 @@ const NAV_LINKS: NavLink[] = [
 
 export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
 
@@ -229,6 +231,21 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
           ) : (
             authActions
           )}
+          <Button variant="ghost" size="icon" asChild>
+            <Link
+              href="/wishlist"
+              aria-label={`Wishlist with ${wishlistCount} items`}
+            >
+              <span className="relative" aria-hidden="true">
+                <Heart className="size-5" />
+                {wishlistCount > 0 && (
+                  <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full text-[10px] font-bold">
+                    {wishlistCount}
+                  </span>
+                )}
+              </span>
+            </Link>
+          </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link
               href="/cart"

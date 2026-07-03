@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import {
+  Heart,
   LayoutDashboardIcon,
   MessageSquare,
   ShoppingBag,
@@ -20,6 +21,7 @@ import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -45,6 +47,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const user = session?.user;
   const shouldReduceMotion = useReducedMotion();
 
@@ -244,6 +247,20 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
             </nav>
 
             <div className="flex items-center gap-3">
+              {/* Wishlist icon — no dedicated feature flag; unconditional like product-card hearts */}
+              <Link
+                href="/wishlist"
+                className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
+                aria-label={`Wishlist with ${wishlistCount} items`}
+              >
+                <Heart className="size-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[#215935] text-[10px] font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+
               {/* Cart icon */}
 
               {isEnabled("cart") && (

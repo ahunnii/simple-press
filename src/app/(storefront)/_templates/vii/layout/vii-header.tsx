@@ -6,13 +6,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Menu, Phone, ShoppingBag, User, X } from "lucide-react";
+import {
+  ChevronDown,
+  Heart,
+  Menu,
+  Phone,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 import { resolveFields } from "../index";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
@@ -33,6 +42,7 @@ export function ViiHeader({
   banner,
 }: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -800,6 +810,37 @@ export function ViiHeader({
                   </Link>
                 )}
               </div>
+
+              {/* Wishlist — static badge (no bump animation) */}
+              <Link
+                href="/wishlist"
+                aria-label={
+                  wishlistCount > 0
+                    ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                    : "View wishlist"
+                }
+                className="relative -m-2 flex items-center justify-center p-2"
+                style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
+              >
+                <Heart
+                  className="h-[18px] w-[18px]"
+                  strokeWidth={1.4}
+                  aria-hidden="true"
+                />
+                {wishlistCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
+                    style={{
+                      background: "var(--vii-copper-deep)",
+                      color: "var(--vii-paper)",
+                      minWidth: "16px",
+                    }}
+                  >
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Cart — link to /cart (no vii-specific drawer in this pass) */}
               <Link

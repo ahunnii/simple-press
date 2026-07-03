@@ -6,13 +6,14 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { formatPrice } from "~/lib/prices";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -43,6 +44,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const { itemCount, total } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -184,6 +186,22 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
           >
             <Search aria-hidden="true" className="h-5 w-5" />
           </button>
+          <Link
+            href="/wishlist"
+            className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
+            aria-label={
+              wishlistCount > 0
+                ? `Wishlist, ${wishlistCount} saved ${wishlistCount === 1 ? "item" : "items"}`
+                : "Wishlist"
+            }
+          >
+            {wishlistCount > 0 && (
+              <span className="text-sm font-medium" aria-hidden="true">
+                {wishlistCount}
+              </span>
+            )}
+            <Heart aria-hidden="true" className="h-5 w-5" />
+          </Link>
           <Link
             href="/cart"
             className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"

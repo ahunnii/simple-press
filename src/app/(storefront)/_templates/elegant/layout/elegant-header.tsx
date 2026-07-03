@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import {
+  Heart,
   LayoutDashboardIcon,
   Menu,
   Search,
@@ -18,6 +19,7 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { authClient } from "~/server/better-auth/client";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
 
@@ -31,6 +33,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { setIsOpen, itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const pathname = usePathname();
@@ -356,6 +359,43 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 <User aria-hidden={true} style={{ width: 17, height: 17 }} />
               </Link>
             )}
+
+            <Link
+              href="/wishlist"
+              aria-label={
+                wishlistCount > 0
+                  ? `Wishlist (${wishlistCount} item${wishlistCount === 1 ? "" : "s"})`
+                  : "Wishlist"
+              }
+              style={{ ...iconBtnStyle, position: "relative" }}
+              className="el-icon-btn"
+            >
+              <Heart aria-hidden={true} style={{ width: 17, height: 17 }} />
+              <span
+                aria-hidden={true}
+                style={{
+                  position: "absolute",
+                  top: 4,
+                  right: 4,
+                  minWidth: 16,
+                  height: 16,
+                  padding: "0 4px",
+                  background: "var(--el-sage, #4a5240)",
+                  color: "var(--el-paper, #fbf8f2)",
+                  borderRadius: 999,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--font-sans, sans-serif)",
+                  transform: wishlistCount > 0 ? "scale(1)" : "scale(0)",
+                  transition: `transform 0.35s ${ease}`,
+                }}
+              >
+                {wishlistCount}
+              </span>
+            </Link>
 
             <button
               type="button"
