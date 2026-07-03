@@ -68,7 +68,32 @@ export function ProductReviews({
   };
 
   if (!stats || !reviews) {
-    return <div>Loading reviews...</div>;
+    return (
+      <div className="py-12 text-center text-sm text-gray-500">
+        Loading reviews...
+      </div>
+    );
+  }
+
+  // Inviting empty state — the common case before any approved reviews exist.
+  // Skips the (all-zero) stats overview and sort controls entirely.
+  if (stats.totalReviews === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+          <div className="flex">{renderStars(0, "lg")}</div>
+          <div className="space-y-1">
+            <p className="font-medium">No reviews yet</p>
+            <p className="text-sm text-gray-500">
+              Be the first to share your thoughts on this product.
+            </p>
+          </div>
+          {showWriteReview && onWriteReviewClick && (
+            <Button onClick={onWriteReviewClick}>Write a Review</Button>
+          )}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -199,9 +224,12 @@ function ReviewCard({
 }: {
   review: RouterOutputs["review"]["listByProduct"][number];
 }) {
+  const utils = api.useUtils();
   const voteMutation = api.review.vote.useMutation({
     onSuccess: () => {
-      // Refetch reviews to update counts
+      // Refetch reviews so helpful/not-helpful counts (and the "helpful"
+      // sort order) reflect the new vote. Stats don't depend on votes.
+      void utils.review.listByProduct.invalidate();
     },
   });
 

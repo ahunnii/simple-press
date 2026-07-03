@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
@@ -16,8 +17,12 @@ import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
 import { PageTransition } from "~/components/page-animations";
+import { ProductReviews } from "~/components/product-reviews";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductGalleryVertical } from "~/app/(storefront)/_components/product-page/product-gallery-vertical-sticky";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { resolveFields } from "..";
 import { DefaultProductCard } from "../shared/default-product-card";
@@ -65,6 +70,10 @@ export function DefaultProductPage({
     displayCompareAtPrice,
     displayTrustBadges,
   } = useProduct(product);
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
@@ -134,9 +143,21 @@ export function DefaultProductPage({
           <div className="flex flex-col gap-6">
             {/* Name + price */}
             <div className="flex flex-col gap-4">
-              <h1 className="font-serif text-[36px] leading-[1.1] font-medium tracking-[-0.02em]">
-                {product.name}
-              </h1>
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="font-serif text-[36px] leading-[1.1] font-medium tracking-[-0.02em]">
+                  {product.name}
+                </h1>
+                <WishlistButton
+                  item={{
+                    productId: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    price: displayPrice,
+                    imageUrl: product.images[0]?.url ?? null,
+                  }}
+                  className="mt-1 shrink-0 rounded-full border border-[#e8e8e8] bg-white text-[#0a0a0a]"
+                />
+              </div>
               {additionalFields?.productTagline && (
                 <p className="text-sm text-[#6b6b6b]">
                   {additionalFields.productTagline}
@@ -234,6 +255,32 @@ export function DefaultProductPage({
             </p>
           </div>
         </div>
+
+        {/* Reviews — only mounts (and only fires review queries) when the
+            reviews feature flag is enabled for this business. */}
+        {reviewsEnabled && (
+          <section className="border-t border-[#e8e8e8] pt-16 pb-24">
+            <div className="mb-10">
+              <p className="mb-1.5 text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                Reviews
+              </p>
+              <h2 className="font-serif text-3xl font-semibold tracking-tight">
+                What customers are saying
+              </h2>
+            </div>
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </section>
+        )}
 
         {/* You may also like */}
         {(relatedProducts?.length ?? 0) > 0 && (

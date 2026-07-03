@@ -441,46 +441,6 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
-  vintage: [
-    {
-      key: "vintage.tagline",
-      label: "Tagline",
-      description: "Your store's tagline",
-      type: "text",
-      page: "global",
-    },
-    {
-      key: "vintage.welcome",
-      label: "Welcome Message",
-      description: "Greeting message for visitors",
-      type: "textarea",
-      page: "global",
-    },
-    {
-      key: "vintage.signature",
-      label: "Signature",
-      description: "Personal signature or sign-off",
-      type: "text",
-      page: "global",
-    },
-  ],
-  minimal: [
-    {
-      key: "minimal.motto",
-      label: "Motto",
-      description: "Short motto or slogan",
-      type: "text",
-      page: "global",
-    },
-    {
-      key: "minimal.statement",
-      label: "Brand Statement",
-      description: "Your brand's mission statement",
-      type: "textarea",
-      page: "global",
-    },
-  ],
-
   ...bambooData,
   ...buildersData,
   ...darkTrendData,
