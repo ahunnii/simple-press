@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import type { DbClient } from "~/server/db";
 import { deleteStoredObjects } from "~/lib/s3/delete";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import {
   productCreateSchema,
   productImageSchema,
@@ -970,10 +971,7 @@ export const productRouter = createTRPCRouter({
           }
 
           // Variant price: use variant price if set & non-zero, else fall back to product price
-          const price =
-            variant.price !== null && variant.price > 0
-              ? variant.price
-              : product.price;
+          const price = resolveVariantPrice(variant.price, product.price);
           const compareAtPrice =
             variant.compareAtPrice ?? product.compareAtPrice ?? null;
 

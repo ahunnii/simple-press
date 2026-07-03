@@ -23,6 +23,7 @@ export interface VariantAvailability {
   inventoryQty: number;
   reservedQty: number;
   product: {
+    price: number;
     published: boolean;
     trackInventory: boolean;
     allowBackorders: boolean;

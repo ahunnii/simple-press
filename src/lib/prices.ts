@@ -1,4 +1,8 @@
 import type { RouterOutputs } from "~/trpc/react";
+import {
+  resolveVariantCompareAtPrice,
+  resolveVariantPrice,
+} from "~/lib/variant-price";
 
 export const formatPrice = (cents: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -45,14 +49,16 @@ type Product = {
 
 export function getEffectivePrice(product: Product): number {
   return product.variants.length > 0
-    ? (product.variants[0]?.price ?? product.price)
+    ? resolveVariantPrice(product.variants[0]?.price, product.price)
     : product.price;
 }
 
 export function getEffectiveCompareAtPrice(product: Product): number | null {
   if (product.variants.length > 0) {
-    return (
-      product.variants[0]?.compareAtPrice ?? product.compareAtPrice ?? null
+    return resolveVariantCompareAtPrice(
+      product.variants[0]?.price,
+      product.variants[0]?.compareAtPrice,
+      product.compareAtPrice,
     );
   }
   return product.compareAtPrice ?? null;

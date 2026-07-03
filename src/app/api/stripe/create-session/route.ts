@@ -33,6 +33,7 @@ import {
 import { shouldPinPaymentIntentShipping } from "~/lib/checkout/shipping";
 import { stripeClient } from "~/lib/stripe/client";
 import { checkoutSessionSchema } from "~/lib/validators/checkout";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import { db } from "~/server/db";
 
 // Thrown inside the reservation transaction to force a rollback when stock
@@ -446,7 +447,9 @@ export async function POST(req: NextRequest) {
         ? variantMap.get(item.variantId)
         : undefined;
       const productRecord = productMap.get(item.productId);
-      const serverPrice = variantRecord?.price ?? productRecord?.price;
+      const serverPrice = variantRecord
+        ? resolveVariantPrice(variantRecord.price, variantRecord.product.price)
+        : productRecord?.price;
 
       if (serverPrice == null) {
         throw new Error(`Price not found for item ${item.productId}`);
