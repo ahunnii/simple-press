@@ -2,6 +2,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -45,7 +46,8 @@ function FaqItem({
 export function DefaultContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
     "default.contact.eyebrow",
     "default.contact.heading",
     "default.contact.description",
@@ -186,34 +188,35 @@ export function DefaultContactPage({
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      {faqs.length > 0 && (
-        <section
-          {...sectionGroupAttr("contact", "faq")}
-          className="bg-[#efece8] px-6 py-20 lg:px-8"
-        >
-          <div className="mx-auto max-w-[760px]">
-            <div className="mb-12 text-center">
-              <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                Frequently asked
-              </span>
-              <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
-                Quick answers.
-              </h2>
+      {faqs.length > 0 &&
+        isSectionVisible(customFields, "default", "contact.faq") && (
+          <section
+            {...sectionGroupAttr("contact", "faq")}
+            className="bg-[#efece8] px-6 py-20 lg:px-8"
+          >
+            <div className="mx-auto max-w-[760px]">
+              <div className="mb-12 text-center">
+                <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                  Frequently asked
+                </span>
+                <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
+                  Quick answers.
+                </h2>
+              </div>
+              <div>
+                {faqs.map((item, i) => (
+                  <FaqItem
+                    key={i}
+                    question={item.q}
+                    answer={item.a}
+                    answerFieldKey={item.aField}
+                    defaultOpen={i === 0}
+                  />
+                ))}
+              </div>
             </div>
-            <div>
-              {faqs.map((item, i) => (
-                <FaqItem
-                  key={i}
-                  question={item.q}
-                  answer={item.a}
-                  answerFieldKey={item.aField}
-                  defaultOpen={i === 0}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
     </PageTransition>
   );
 }

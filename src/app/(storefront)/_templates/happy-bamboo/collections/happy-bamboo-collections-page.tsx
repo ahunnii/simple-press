@@ -6,6 +6,7 @@ import { ArrowRight, Leaf, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -122,33 +123,39 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
       </section>
 
       {/* CTA Section */}
-      <section
-        className="py-16 md:py-24"
-        {...sectionGroupAttr("collections", "cta")}
-      >
-        <div className="container mx-auto px-4">
-          <FadeIn>
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="mb-4 text-2xl font-bold md:text-3xl">
-                {ctaHeading}
-              </h2>
-              {ctaBody && (
-                <p className="text-muted-foreground mb-8 leading-relaxed">
-                  {ctaBody}
-                </p>
-              )}
-              <div className="flex flex-wrap justify-center gap-4">
-                <Button asChild size="lg">
-                  <Link href={ctaButtonLink}>
-                    {ctaButtonText}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+      {isSectionVisible(
+        business.siteContent?.customFields,
+        "happy-bamboo",
+        "collections.cta",
+      ) && (
+        <section
+          className="py-16 md:py-24"
+          {...sectionGroupAttr("collections", "cta")}
+        >
+          <div className="container mx-auto px-4">
+            <FadeIn>
+              <div className="mx-auto max-w-2xl text-center">
+                <h2 className="mb-4 text-2xl font-bold md:text-3xl">
+                  {ctaHeading}
+                </h2>
+                {ctaBody && (
+                  <p className="text-muted-foreground mb-8 leading-relaxed">
+                    {ctaBody}
+                  </p>
+                )}
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Button asChild size="lg">
+                    <Link href={ctaButtonLink}>
+                      {ctaButtonText}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+            </FadeIn>
+          </div>
+        </section>
+      )}
     </PageTransition>
   );
 }

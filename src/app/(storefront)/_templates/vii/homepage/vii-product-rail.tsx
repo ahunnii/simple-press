@@ -2,6 +2,7 @@
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiCtaLink } from "../shared/vii-cta-link";
@@ -44,6 +45,7 @@ export function ViiProductRail({
       }
       revealRef={ref}
       revealVisible={visible}
+      sectionAttrs={sectionGroupAttr("homepage", "productRail")}
     >
       {/* Header — left-aligned label + heading with a hairline rule */}
       <div
@@ -60,6 +62,8 @@ export function ViiProductRail({
           heading={heading}
           headingId="vii-product-rail-heading"
           tone="light"
+          overlineFieldKey="vii.homepage.product-rail-overline"
+          headingFieldKey="vii.homepage.product-rail-heading"
         />
       </div>
 
@@ -78,7 +82,12 @@ export function ViiProductRail({
             } as React.CSSProperties
           }
         >
-          <ViiCtaLink href={ctaHref}>{ctaText}</ViiCtaLink>
+          <ViiCtaLink
+            href={ctaHref}
+            fieldKey="vii.homepage.product-rail-cta-text"
+          >
+            {ctaText}
+          </ViiCtaLink>
         </div>
       )}
     </ViiSection>

@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 import { ViiOverline } from "./vii-overline";
 
 type Props = {
@@ -13,6 +15,10 @@ type Props = {
   rule?: boolean;
   /** Extra styles merged onto the root wrapper `<div>`. */
   style?: CSSProperties;
+  /** Full template field key for `overline`, when it's a live-patchable field. */
+  overlineFieldKey?: string;
+  /** Full template field key for `heading`, when it's a live-patchable field. */
+  headingFieldKey?: string;
 };
 
 /**
@@ -32,16 +38,23 @@ export function ViiSectionHeading({
   tone = "light",
   rule = true,
   style,
+  overlineFieldKey,
+  headingFieldKey,
 }: Props) {
   return (
     <div style={style}>
       {overline && (
-        <ViiOverline tone={tone} style={{ marginBottom: 6 }}>
+        <ViiOverline
+          tone={tone}
+          style={{ marginBottom: 6 }}
+          fieldKey={overlineFieldKey}
+        >
           {overline}
         </ViiOverline>
       )}
       <h2
         id={headingId}
+        {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
         style={{
           fontFamily: "var(--font-serif)",
           fontWeight: 400,

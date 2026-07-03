@@ -23,7 +23,7 @@ import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
@@ -684,7 +684,10 @@ export function ViiHeader({
 
   return (
     <>
-      <header className="fixed top-0 right-0 left-0 z-50 w-full">
+      <header
+        className="fixed top-0 right-0 left-0 z-50 w-full"
+        {...sectionGroupAttr("global", "branding")}
+      >
         {/* ── Announcement bar — top row, hides on scroll ── */}
         {!scrolled && banner && <ViiAnnouncementBar banner={banner} />}
 

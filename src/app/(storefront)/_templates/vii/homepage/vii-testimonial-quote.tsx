@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -20,6 +22,7 @@ export function ViiTestimonialQuote({
   return (
     <section
       aria-label="Customer testimonial"
+      {...sectionGroupAttr("homepage", "testimonial")}
       style={{
         position: "relative",
         overflow: "hidden",

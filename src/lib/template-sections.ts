@@ -1,3 +1,6 @@
+import { defaultTemplateSections } from "~/app/(storefront)/_templates/default/sections";
+import { happyBambooSections } from "~/app/(storefront)/_templates/happy-bamboo/sections";
+import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
 import type { TemplateField, TemplatePage } from "~/lib/template-fields";
 import {
   getGroupMetadata,
@@ -27,12 +30,15 @@ export type TemplateSection = {
 };
 
 /**
- * Curated section registries per template. Pilot templates will register
- * their sections here in a later phase; templates absent from this map fall
- * back to derivation from the existing field-group system (see
+ * Curated section registries per template. Templates absent from this map
+ * fall back to derivation from the existing field-group system (see
  * `getSectionsForTemplate`).
  */
-export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {};
+export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
+  ...defaultTemplateSections,
+  ...happyBambooSections,
+  ...viiSections,
+};
 
 function humanizeGroupKey(key: string): string {
   if (!key) return "";
@@ -104,14 +110,33 @@ function deriveSectionsForTemplate(templateId: string): TemplateSection[] {
 }
 
 /**
- * Returns the sections for a template: the curated `TEMPLATE_SECTIONS` entry
- * if one exists and is non-empty, otherwise a derived set built from the
- * template's field groups (one section per group per page).
+ * Returns the sections for a template. Curated `TEMPLATE_SECTIONS` entries
+ * take precedence; derived sections (one per field group per page) fill in
+ * any groups the curation does not cover, so partially-curated templates can
+ * never orphan editable fields. Templates with no curated entry get the
+ * fully derived set.
  */
 export function getSectionsForTemplate(templateId: string): TemplateSection[] {
+  const derived = deriveSectionsForTemplate(templateId);
   const curated = TEMPLATE_SECTIONS[templateId];
-  if (curated && curated.length > 0) return curated;
-  return deriveSectionsForTemplate(templateId);
+  if (!curated || curated.length === 0) return derived;
+
+  const curatedGroupIds = new Set(curated.flatMap((s) => s.groupIds));
+  const maxOrderByPage = new Map<string, number>();
+  for (const s of curated) {
+    maxOrderByPage.set(s.page, Math.max(maxOrderByPage.get(s.page) ?? -1, s.order));
+  }
+
+  // Derived fillers slot in after the curated sections of their page.
+  const extras = derived
+    .filter((s) => s.groupIds.some((g) => !curatedGroupIds.has(g)))
+    .map((s) => {
+      const base = (maxOrderByPage.get(s.page) ?? -1) + 1;
+      maxOrderByPage.set(s.page, base);
+      return { ...s, order: base };
+    });
+
+  return [...curated, ...extras];
 }
 
 /** Looks up a single section by id within a template's section list. */

@@ -20,6 +20,8 @@ type Props = {
   revealRef?: (node: HTMLDivElement | null) => void;
   /** Paired with `revealRef`. When true, appends ` is-visible` (note: leading space, fixing the bug in vii-product-rail). */
   revealVisible?: boolean;
+  /** Extra data attributes (e.g. `data-sp-group`) spread onto the root `<section>` for the preview overlay. */
+  sectionAttrs?: Record<string, string>;
 };
 
 /**
@@ -44,6 +46,7 @@ export function ViiSection({
   children,
   revealRef,
   revealVisible,
+  sectionAttrs,
 }: Props) {
   const sectionStyle: CSSProperties = {
     background: TONE_BG[tone],
@@ -62,6 +65,7 @@ export function ViiSection({
       aria-labelledby={ariaLabelledby}
       className={className}
       style={sectionStyle}
+      {...sectionAttrs}
     >
       <div
         ref={hasReveal ? revealRef : undefined}

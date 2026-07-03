@@ -2,6 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type Props = {
   href: string;
   children: ReactNode;
@@ -9,6 +11,12 @@ type Props = {
   showArrow?: boolean;
   style?: CSSProperties;
   className?: string;
+  /**
+   * Full template field key for the resolved text passed as `children`.
+   * When set, spreads `data-sp-field` onto the link so the preview overlay
+   * can live-patch this text.
+   */
+  fieldKey?: string;
 };
 
 /**
@@ -25,11 +33,13 @@ export function ViiCtaLink({
   showArrow = true,
   style,
   className,
+  fieldKey,
 }: Props) {
   return (
     <Link
       href={href}
       className={className}
+      {...(fieldKey ? fieldAttr(fieldKey) : {})}
       style={{
         display: "inline-flex",
         alignItems: "center",

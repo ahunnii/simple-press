@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { DefaultFooterTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { fieldAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
@@ -71,6 +71,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
 
   return (
     <footer
+      {...sectionGroupAttr("global", "branding")}
       style={{
         background: "var(--vii-paper)",
         color: "var(--vii-navy)",

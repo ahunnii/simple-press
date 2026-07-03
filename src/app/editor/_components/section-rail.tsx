@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Eye, EyeOff } from "lucide-react";
 
 import type { TemplateSection } from "~/lib/template-sections";
 import { cn } from "~/lib/utils";
@@ -12,30 +12,32 @@ export type SectionRailProps = {
   globalSections: TemplateSection[];
   /** Currently open section id, or null when the panel is closed. */
   activeSectionId: string | null;
+  /** Section ids currently hidden on the storefront (draft state). */
+  hiddenSectionIds: ReadonlySet<string>;
   /** Fired when a section row is chosen. */
   onSelectSection: (section: TemplateSection) => void;
+  /** Fired when a hideable section's eye toggle is clicked. */
+  onToggleVisibility: (section: TemplateSection) => void;
 };
 
 function SectionRow({
   section,
   isActive,
+  isHidden,
   onSelect,
+  onToggleVisibility,
 }: {
   section: TemplateSection;
   isActive: boolean;
+  isHidden: boolean;
   onSelect: (section: TemplateSection) => void;
+  onToggleVisibility: (section: TemplateSection) => void;
 }) {
   return (
-    <button
-      type="button"
-      title={section.description ?? undefined}
-      aria-current={isActive ? "true" : undefined}
-      onClick={() => onSelect(section)}
+    <div
       className={cn(
-        "group relative mx-2 flex w-[calc(100%-1rem)] items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors",
-        isActive
-          ? "bg-muted text-foreground font-medium"
-          : "text-foreground hover:bg-muted/60",
+        "group relative mx-2 flex w-[calc(100%-1rem)] items-center rounded-md transition-colors",
+        isActive ? "bg-muted" : "hover:bg-muted/60",
       )}
     >
       {isActive && (
@@ -44,15 +46,26 @@ function SectionRow({
           aria-hidden="true"
         />
       )}
-      <span className="min-w-0 truncate">
-        {section.title}
-        {section.description && (
-          <span className="sr-only"> — {section.description}</span>
-        )}
-      </span>
-      <span className="flex shrink-0 items-center gap-1">
-        {/* Reserved for a future per-section visibility (eye) toggle. */}
-        {section.hideable && <span className="h-4 w-4" aria-hidden="true" />}
+      <button
+        type="button"
+        title={section.description ?? undefined}
+        aria-current={isActive ? "true" : undefined}
+        onClick={() => onSelect(section)}
+        className="flex min-w-0 flex-1 items-center justify-between gap-2 px-3 py-2 text-left text-sm"
+      >
+        <span
+          className={cn(
+            "min-w-0 truncate",
+            isActive && "font-medium",
+            isHidden && "text-muted-foreground",
+          )}
+        >
+          {section.title}
+          {isHidden && <span className="sr-only"> (hidden on your site)</span>}
+          {section.description && (
+            <span className="sr-only"> — {section.description}</span>
+          )}
+        </span>
         <ChevronRight
           className={cn(
             "h-4 w-4 shrink-0 transition-opacity",
@@ -60,21 +73,49 @@ function SectionRow({
           )}
           aria-hidden="true"
         />
-      </span>
-    </button>
+      </button>
+      {section.hideable && (
+        <button
+          type="button"
+          aria-label={
+            isHidden ? `Show "${section.title}"` : `Hide "${section.title}"`
+          }
+          aria-pressed={isHidden}
+          title={isHidden ? "Hidden — click to show" : "Shown — click to hide"}
+          onClick={() => onToggleVisibility(section)}
+          className={cn(
+            "text-muted-foreground hover:text-foreground mr-1.5 shrink-0 rounded p-1 transition-opacity",
+            // Always visible when hidden (it's load-bearing state); appears
+            // on hover/focus otherwise.
+            isHidden
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+          )}
+        >
+          {isHidden ? (
+            <EyeOff className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Eye className="h-4 w-4" aria-hidden="true" />
+          )}
+        </button>
+      )}
+    </div>
   );
 }
 
 /**
  * Left rail listing the active page's sections, plus a pinned "Site-wide"
  * group for global (header/footer/announcement) sections. Selecting a row
- * opens it in the field panel and scrolls the preview to it.
+ * opens it in the field panel and scrolls the preview to it. Hideable
+ * sections get an eye toggle; hidden rows dim but stay editable.
  */
 export function SectionRail({
   sections,
   globalSections,
   activeSectionId,
+  hiddenSectionIds,
   onSelectSection,
+  onToggleVisibility,
 }: SectionRailProps) {
   return (
     <nav
@@ -96,7 +137,9 @@ export function SectionRail({
                 key={section.id}
                 section={section}
                 isActive={section.id === activeSectionId}
+                isHidden={hiddenSectionIds.has(section.id)}
                 onSelect={onSelectSection}
+                onToggleVisibility={onToggleVisibility}
               />
             ))}
           </div>
@@ -113,7 +156,9 @@ export function SectionRail({
               key={section.id}
               section={section}
               isActive={section.id === activeSectionId}
+              isHidden={hiddenSectionIds.has(section.id)}
               onSelect={onSelectSection}
+              onToggleVisibility={onToggleVisibility}
             />
           ))}
         </div>

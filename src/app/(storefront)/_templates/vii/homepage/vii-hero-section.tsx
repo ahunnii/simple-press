@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { ViiOverline } from "../shared/vii-overline";
 import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../hooks/use-vii-hero-motion";
 
@@ -55,6 +57,7 @@ export function ViiHeroSection({
   return (
     <section
       aria-label="Hero"
+      {...sectionGroupAttr("homepage", "hero")}
       style={{
         position: "relative",
         width: "100%",
@@ -175,13 +178,16 @@ export function ViiHeroSection({
         {/* Overline */}
         {heroOverline && (
           <div style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 20 }}>
-            <ViiOverline tone="dark">{heroOverline}</ViiOverline>
+            <ViiOverline tone="dark" fieldKey="vii.homepage.hero-overline">
+              {heroOverline}
+            </ViiOverline>
           </div>
         )}
 
         {/* Primary statement — the page's h1 */}
         {heroHeading && (
           <h1
+            {...fieldAttr("vii.homepage.hero-heading")}
             style={{
               ...heroHeadingStyle(shown, reduced),
               fontFamily: "var(--font-sans)",
@@ -202,6 +208,7 @@ export function ViiHeroSection({
           <div style={heroRevealStyle(shown, reduced, 0.3)}>
             <Link
               href={heroCtaLink}
+              {...fieldAttr("vii.homepage.hero-cta-text")}
               style={{
                 position: "relative",
                 overflow: "hidden",

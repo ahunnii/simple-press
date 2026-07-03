@@ -1,5 +1,7 @@
 "use client";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { GoogleIcon } from "~/components/icons/google-icon";
 import { FacebookBrandIcon } from "~/components/icons/facebook-brand-icon";
@@ -59,6 +61,7 @@ export function ViiContactReview({
   return (
     <section
       aria-labelledby="contact-review-heading"
+      {...sectionGroupAttr("contact", "review")}
       style={{
         background: "var(--vii-navy)",
         padding: "clamp(72px, 12vw, 140px) clamp(24px, 8vw, 120px)",
@@ -84,6 +87,7 @@ export function ViiContactReview({
           {heading}{" "}
           {headingAccent && (
             <em
+              {...fieldAttr("vii.contact.review-heading-accent")}
               style={{ fontStyle: "italic", color: "var(--vii-copper-light)" }}
             >
               {headingAccent}
@@ -93,6 +97,7 @@ export function ViiContactReview({
 
         {body && (
           <p
+            {...fieldAttr("vii.contact.review-body")}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.3vw, 16px)",

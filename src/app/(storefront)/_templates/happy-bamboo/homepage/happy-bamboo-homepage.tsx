@@ -1,4 +1,5 @@
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
@@ -91,26 +92,38 @@ export async function HappyBambooHomepage() {
           sectionAttrs={sectionGroupAttr("homepage", "featured")}
         />
 
-        <HappyBambooBenefitsSection
-          themeSpecificFieldsRaw={themeSpecificFields}
-          heading={themeSpecificFields?.[
-            "happy-bamboo.homepage-benefits-heading"
-          ]?.trim()}
-          intro={themeSpecificFields?.[
-            "happy-bamboo.homepage-benefits-intro"
-          ]?.trim()}
-          closing={themeSpecificFields?.[
-            "happy-bamboo.homepage-benefits-closing"
-          ]?.trim()}
-          sectionAttrs={sectionGroupAttr("homepage", "benefits")}
-        />
-        <HappyBambooTestimonialsSection
-          heading={themeSpecificFields?.[
-            "happy-bamboo.homepage-testimonials-heading"
-          ]?.trim()}
-          testimonials={testimonials}
-          sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
-        />
+        {isSectionVisible(
+          homepage?.siteContent?.customFields,
+          "happy-bamboo",
+          "homepage.benefits",
+        ) && (
+          <HappyBambooBenefitsSection
+            themeSpecificFieldsRaw={themeSpecificFields}
+            heading={themeSpecificFields?.[
+              "happy-bamboo.homepage-benefits-heading"
+            ]?.trim()}
+            intro={themeSpecificFields?.[
+              "happy-bamboo.homepage-benefits-intro"
+            ]?.trim()}
+            closing={themeSpecificFields?.[
+              "happy-bamboo.homepage-benefits-closing"
+            ]?.trim()}
+            sectionAttrs={sectionGroupAttr("homepage", "benefits")}
+          />
+        )}
+        {isSectionVisible(
+          homepage?.siteContent?.customFields,
+          "happy-bamboo",
+          "homepage.testimonials",
+        ) && (
+          <HappyBambooTestimonialsSection
+            heading={themeSpecificFields?.[
+              "happy-bamboo.homepage-testimonials-heading"
+            ]?.trim()}
+            testimonials={testimonials}
+            sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+          />
+        )}
         {/* <HappyBambooCtaSection
           heading={themeSpecificFields?.[
             "happy-bamboo.homepage-cta-heading"

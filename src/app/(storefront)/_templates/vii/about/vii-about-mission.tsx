@@ -1,5 +1,7 @@
 "use client";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -22,6 +24,7 @@ export function ViiAboutMission({
   return (
     <section
       aria-labelledby="about-mission-heading"
+      {...sectionGroupAttr("about", "mission")}
       style={{
         background: "var(--vii-paper)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -37,6 +40,7 @@ export function ViiAboutMission({
               align="center"
               tone="light"
               style={{ marginBottom: 14 }}
+              fieldKey="vii.about.mission-overline"
             >
               {overline}
             </ViiOverline>
@@ -54,7 +58,10 @@ export function ViiAboutMission({
             }}
           >
             {heading}{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+            <em
+              {...fieldAttr("vii.about.mission-heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
               {headingAccent}
             </em>
           </h2>
@@ -67,6 +74,7 @@ export function ViiAboutMission({
             style={{ marginTop: 32 }}
           >
             <p
+              {...fieldAttr("vii.about.mission-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",

@@ -8,7 +8,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
 import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
 import { PREVIEW_SOURCE } from "~/lib/preview/use-preview-bridge";
-import { SP_META_KEY } from "~/lib/sp-meta";
+import { getSpMeta, setSectionHidden, SP_META_KEY } from "~/lib/sp-meta";
 import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { api } from "~/trpc/react";
 
@@ -505,6 +505,36 @@ export function VisualEditor({
     setActiveSectionId(null);
   }, []);
 
+  // ── Section visibility ──
+  const hiddenSectionIds = useMemo(() => {
+    const meta = getSpMeta(fields);
+    const hidden = new Set<string>();
+    for (const s of sections) {
+      if (meta.sections?.[s.id]?.hidden ?? s.defaultHidden ?? false) {
+        hidden.add(s.id);
+      }
+    }
+    return hidden;
+  }, [fields, sections]);
+
+  const handleToggleVisibility = useCallback(
+    (section: TemplateSection) => {
+      if (mutationPendingRef.current) return;
+      setFields((prev) => {
+        const meta = getSpMeta(prev);
+        const currentlyHidden =
+          meta.sections?.[section.id]?.hidden ?? section.defaultHidden ?? false;
+        const next = setSectionHidden(prev, section.id, !currentlyHidden);
+        latestFieldsRef.current = next;
+        return next;
+      });
+      // Visibility renders server-side — always needs an iframe reload.
+      refreshNeededRef.current = true;
+      scheduleFlush();
+    },
+    [scheduleFlush],
+  );
+
   // Patch ack from the iframe (sp:patched).
   const handlePatched = useCallback((applied: string[], missed: string[]) => {
     for (const key of applied) unackedPatchKeysRef.current.delete(key);
@@ -551,7 +581,9 @@ export function VisualEditor({
           sections={sectionsForPage}
           globalSections={globalSections}
           activeSectionId={activeSectionId}
+          hiddenSectionIds={hiddenSectionIds}
           onSelectSection={handleSelectSection}
+          onToggleVisibility={handleToggleVisibility}
         />
 
         <EditorPreview

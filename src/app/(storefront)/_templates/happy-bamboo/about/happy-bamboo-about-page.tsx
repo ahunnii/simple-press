@@ -4,6 +4,7 @@ import { ExternalLink, Heart, Leaf, Star } from "lucide-react";
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   isContentEmpty,
@@ -256,289 +257,303 @@ export function HappyBambooAboutPage({
       </section>
 
       {/* Why Bamboo Is Better Section */}
-      <section
-        className="py-20 md:py-32"
-        {...sectionGroupAttr("about", "bamboo")}
-      >
-        <div className="container mx-auto px-4">
-          <div className="grid items-start gap-12 lg:grid-cols-5">
-            <div className="lg:col-span-3">
-              <FadeIn className="mb-6">
-                <Badge className="mb-4">
-                  <Leaf className="mr-1 h-3 w-3" />
-                  The Smart Choice
-                </Badge>
-                <h2
-                  className="font-serif text-3xl font-bold md:text-4xl"
-                  {...fieldAttr("happy-bamboo.about-bamboo-heading")}
-                >
-                  {f["happy-bamboo.about-bamboo-heading"]}
-                </h2>
-                <p
-                  className="text-muted-foreground mt-4 text-lg"
-                  {...fieldAttr("happy-bamboo.about-bamboo-tagline")}
-                >
-                  {f["happy-bamboo.about-bamboo-tagline"]}
-                </p>
-              </FadeIn>
-
-              <FadeIn direction="left" className="mb-6 space-y-4">
-                <p
-                  className="text-muted-foreground leading-relaxed whitespace-pre-line"
-                  {...fieldAttr("happy-bamboo.about-bamboo-description")}
-                >
-                  {f["happy-bamboo.about-bamboo-description"]}
-                </p>
-              </FadeIn>
-              <StaggerContainer
-                staggerDelay={0.1}
-                className="grid gap-6 sm:grid-cols-1"
-              >
-                {benefitsItems?.map((reason) => (
-                  <StaggerItem key={reason.title} className="flex gap-4">
-                    <div className="shrink-0">
-                      <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-                        <reason.icon className="text-primary h-6 w-6" />
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="mb-2 font-semibold">{reason.title}</h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {reason.description}
-                      </p>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
-            </div>
-
-            <FadeIn
-              direction="right"
-              delay={0.3}
-              className="hidden lg:col-span-2 lg:block"
-            >
-              <div className="sticky top-24 space-y-4">
-                <div className="relative aspect-video overflow-hidden rounded-2xl">
-                  <Image
-                    src={f["happy-bamboo.about-bamboo-image-1"]!}
-                    alt="Premium bamboo toilet paper"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative aspect-square overflow-hidden rounded-xl">
-                    <Image
-                      src={f["happy-bamboo.about-bamboo-image-2"]!}
-                      alt="Mega rolls bamboo toilet paper"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="relative aspect-square overflow-hidden rounded-xl">
-                    <Image
-                      src={f["happy-bamboo.about-bamboo-image-3"]!}
-                      alt="Trial pack bamboo toilet paper"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-              </div>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section with Image */}
-      <section
-        className="relative mx-auto max-w-6xl overflow-hidden"
-        {...sectionGroupAttr("about", "cta")}
-      >
-        <FadeIn
-          direction="up"
-          className="relative aspect-16/7 w-full overflow-hidden rounded-xl"
+      {isSectionVisible(
+        themeSpecificFields,
+        "happy-bamboo",
+        "about.bamboo",
+      ) && (
+        <section
+          className="py-20 md:py-32"
+          {...sectionGroupAttr("about", "bamboo")}
         >
-          <Image
-            src={f["happy-bamboo.about-cta-image"]!}
-            alt="Bamboo forest"
-            fill
-            className="object-cover object-bottom"
-          />
-        </FadeIn>
-      </section>
-      {/* Connect With Us Section */}
+          <div className="container mx-auto px-4">
+            <div className="grid items-start gap-12 lg:grid-cols-5">
+              <div className="lg:col-span-3">
+                <FadeIn className="mb-6">
+                  <Badge className="mb-4">
+                    <Leaf className="mr-1 h-3 w-3" />
+                    The Smart Choice
+                  </Badge>
+                  <h2
+                    className="font-serif text-3xl font-bold md:text-4xl"
+                    {...fieldAttr("happy-bamboo.about-bamboo-heading")}
+                  >
+                    {f["happy-bamboo.about-bamboo-heading"]}
+                  </h2>
+                  <p
+                    className="text-muted-foreground mt-4 text-lg"
+                    {...fieldAttr("happy-bamboo.about-bamboo-tagline")}
+                  >
+                    {f["happy-bamboo.about-bamboo-tagline"]}
+                  </p>
+                </FadeIn>
 
-      <section
-        className="bg-muted/50 py-20 md:py-24"
-        {...sectionGroupAttr("about", "connect-with-us")}
-      >
-        <div className="container mx-auto px-4">
-          <FadeIn className="mb-12 text-center">
-            <Badge className="mb-2">
-              <Heart className="mr-1 h-3 w-3" />
-              Stay Connected
-            </Badge>
-            <h2
-              className="mb-4 font-serif text-3xl font-bold md:text-4xl"
-              {...fieldAttr("happy-bamboo.about-connect-with-us-heading")}
-            >
-              {f["happy-bamboo.about-connect-with-us-heading"]}
-            </h2>
-            <p
-              className="text-muted-foreground mx-auto max-w-2xl leading-relaxed"
-              {...fieldAttr("happy-bamboo.about-connect-with-us-text")}
-            >
-              {f["happy-bamboo.about-connect-with-us-text"]}
-            </p>
-          </FadeIn>
+                <FadeIn direction="left" className="mb-6 space-y-4">
+                  <p
+                    className="text-muted-foreground leading-relaxed whitespace-pre-line"
+                    {...fieldAttr("happy-bamboo.about-bamboo-description")}
+                  >
+                    {f["happy-bamboo.about-bamboo-description"]}
+                  </p>
+                </FadeIn>
+                <StaggerContainer
+                  staggerDelay={0.1}
+                  className="grid gap-6 sm:grid-cols-1"
+                >
+                  {benefitsItems?.map((reason) => (
+                    <StaggerItem key={reason.title} className="flex gap-4">
+                      <div className="shrink-0">
+                        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                          <reason.icon className="text-primary h-6 w-6" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="mb-2 font-semibold">{reason.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {reason.description}
+                        </p>
+                      </div>
+                    </StaggerItem>
+                  ))}
+                </StaggerContainer>
+              </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Review Prompt */}
-            <FadeIn delay={0.1}>
-              <Card className="h-full">
-                <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-                  <div className="flex flex-col gap-4 sm:flex-1">
-                    <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
-                      <Star className="text-primary h-7 w-7" />
-                    </div>
-                    <div>
-                      <h3
-                        className="mb-2 text-xl font-semibold"
-                        {...fieldAttr(
-                          "happy-bamboo.about-connect-with-us-google-review-header",
-                        )}
-                      >
-                        {
-                          f[
-                            "happy-bamboo.about-connect-with-us-google-review-header"
-                          ]
-                        }
-                      </h3>
-                      <p
-                        className="text-muted-foreground text-sm leading-relaxed"
-                        {...fieldAttr(
-                          "happy-bamboo.about-connect-with-us-google-review-text",
-                        )}
-                      >
-                        {
-                          f[
-                            "happy-bamboo.about-connect-with-us-google-review-text"
-                          ]
-                        }
-                      </p>
-                    </div>
-                    <Button asChild className="group w-fit">
-                      <a
-                        href={
-                          f[
-                            "happy-bamboo.about-connect-with-us-google-review-link"
-                          ]
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Write a Review
-                        <ExternalLink className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </a>
-                    </Button>
+              <FadeIn
+                direction="right"
+                delay={0.3}
+                className="hidden lg:col-span-2 lg:block"
+              >
+                <div className="sticky top-24 space-y-4">
+                  <div className="relative aspect-video overflow-hidden rounded-2xl">
+                    <Image
+                      src={f["happy-bamboo.about-bamboo-image-1"]!}
+                      alt="Premium bamboo toilet paper"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-
-                  <div className="flex flex-col items-center gap-2 sm:shrink-0">
-                    <div className="rounded-lg bg-white p-3 shadow-sm">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative aspect-square overflow-hidden rounded-xl">
                       <Image
-                        src={f["happy-bamboo.about-connect-with-us-qr-code"]!}
-                        alt="QR Code to leave a Google review"
-                        width={140}
-                        height={140}
-                        className="rounded-lg"
+                        src={f["happy-bamboo.about-bamboo-image-2"]!}
+                        alt="Mega rolls bamboo toilet paper"
+                        fill
+                        className="object-cover"
                       />
                     </div>
-                    <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                      Scan to review
-                    </p>
+                    <div className="relative aspect-square overflow-hidden rounded-xl">
+                      <Image
+                        src={f["happy-bamboo.about-bamboo-image-3"]!}
+                        alt="Trial pack bamboo toilet paper"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </FadeIn>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section with Image */}
+      {isSectionVisible(themeSpecificFields, "happy-bamboo", "about.cta") && (
+        <section
+          className="relative mx-auto max-w-6xl overflow-hidden"
+          {...sectionGroupAttr("about", "cta")}
+        >
+          <FadeIn
+            direction="up"
+            className="relative aspect-16/7 w-full overflow-hidden rounded-xl"
+          >
+            <Image
+              src={f["happy-bamboo.about-cta-image"]!}
+              alt="Bamboo forest"
+              fill
+              className="object-cover object-bottom"
+            />
+          </FadeIn>
+        </section>
+      )}
+      {/* Connect With Us Section */}
+
+      {isSectionVisible(
+        themeSpecificFields,
+        "happy-bamboo",
+        "about.connect-with-us",
+      ) && (
+        <section
+          className="bg-muted/50 py-20 md:py-24"
+          {...sectionGroupAttr("about", "connect-with-us")}
+        >
+          <div className="container mx-auto px-4">
+            <FadeIn className="mb-12 text-center">
+              <Badge className="mb-2">
+                <Heart className="mr-1 h-3 w-3" />
+                Stay Connected
+              </Badge>
+              <h2
+                className="mb-4 font-serif text-3xl font-bold md:text-4xl"
+                {...fieldAttr("happy-bamboo.about-connect-with-us-heading")}
+              >
+                {f["happy-bamboo.about-connect-with-us-heading"]}
+              </h2>
+              <p
+                className="text-muted-foreground mx-auto max-w-2xl leading-relaxed"
+                {...fieldAttr("happy-bamboo.about-connect-with-us-text")}
+              >
+                {f["happy-bamboo.about-connect-with-us-text"]}
+              </p>
             </FadeIn>
 
-            {/* Social Follow */}
-            <FadeIn delay={0.2}>
-              <Card className="h-full">
-                <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-                  <div className="flex flex-col gap-4 sm:flex-1">
-                    <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
-                      <Heart className="text-primary h-7 w-7" />
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Review Prompt */}
+              <FadeIn delay={0.1}>
+                <Card className="h-full">
+                  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
+                    <div className="flex flex-col gap-4 sm:flex-1">
+                      <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
+                        <Star className="text-primary h-7 w-7" />
+                      </div>
+                      <div>
+                        <h3
+                          className="mb-2 text-xl font-semibold"
+                          {...fieldAttr(
+                            "happy-bamboo.about-connect-with-us-google-review-header",
+                          )}
+                        >
+                          {
+                            f[
+                              "happy-bamboo.about-connect-with-us-google-review-header"
+                            ]
+                          }
+                        </h3>
+                        <p
+                          className="text-muted-foreground text-sm leading-relaxed"
+                          {...fieldAttr(
+                            "happy-bamboo.about-connect-with-us-google-review-text",
+                          )}
+                        >
+                          {
+                            f[
+                              "happy-bamboo.about-connect-with-us-google-review-text"
+                            ]
+                          }
+                        </p>
+                      </div>
+                      <Button asChild className="group w-fit">
+                        <a
+                          href={
+                            f[
+                              "happy-bamboo.about-connect-with-us-google-review-link"
+                            ]
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Write a Review
+                          <ExternalLink className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </a>
+                      </Button>
                     </div>
-                    <div>
-                      <h3
-                        className="mb-2 text-xl font-semibold"
-                        {...fieldAttr(
-                          "happy-bamboo.about-connect-with-us-social-follow-header",
-                        )}
-                      >
-                        {
-                          f[
-                            "happy-bamboo.about-connect-with-us-social-follow-header"
-                          ]
-                        }
-                      </h3>
-                      <p
-                        className="text-muted-foreground max-w-sm text-sm leading-relaxed"
-                        {...fieldAttr(
-                          "happy-bamboo.about-connect-with-us-social-follow-text",
-                        )}
-                      >
-                        {
-                          f[
-                            "happy-bamboo.about-connect-with-us-social-follow-text"
-                          ]
-                        }
+
+                    <div className="flex flex-col items-center gap-2 sm:shrink-0">
+                      <div className="rounded-lg bg-white p-3 shadow-sm">
+                        <Image
+                          src={f["happy-bamboo.about-connect-with-us-qr-code"]!}
+                          alt="QR Code to leave a Google review"
+                          width={140}
+                          height={140}
+                          className="rounded-lg"
+                        />
+                      </div>
+                      <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                        Scan to review
                       </p>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </FadeIn>
 
-                  <div className="flex shrink-0 gap-3 sm:self-center">
-                    {socialLinks?.facebook && (
-                      <a
-                        href={socialLinks.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
-                        aria-label="Follow us on Facebook"
-                      >
-                        <FacebookIcon className="h-6 w-6" />
-                      </a>
-                    )}
-                    {socialLinks?.instagram && (
-                      <a
-                        href={socialLinks.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
-                        aria-label="Follow us on Instagram"
-                      >
-                        <InstagramIcon className="h-6 w-6" />
-                      </a>
-                    )}
-                    {socialLinks?.tiktok && (
-                      <a
-                        href={socialLinks.tiktok}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
-                        aria-label="Follow us on TikTok"
-                      >
-                        <TikTokIcon className="h-6 w-6" />
-                      </a>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </FadeIn>
+              {/* Social Follow */}
+              <FadeIn delay={0.2}>
+                <Card className="h-full">
+                  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
+                    <div className="flex flex-col gap-4 sm:flex-1">
+                      <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
+                        <Heart className="text-primary h-7 w-7" />
+                      </div>
+                      <div>
+                        <h3
+                          className="mb-2 text-xl font-semibold"
+                          {...fieldAttr(
+                            "happy-bamboo.about-connect-with-us-social-follow-header",
+                          )}
+                        >
+                          {
+                            f[
+                              "happy-bamboo.about-connect-with-us-social-follow-header"
+                            ]
+                          }
+                        </h3>
+                        <p
+                          className="text-muted-foreground max-w-sm text-sm leading-relaxed"
+                          {...fieldAttr(
+                            "happy-bamboo.about-connect-with-us-social-follow-text",
+                          )}
+                        >
+                          {
+                            f[
+                              "happy-bamboo.about-connect-with-us-social-follow-text"
+                            ]
+                          }
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 gap-3 sm:self-center">
+                      {socialLinks?.facebook && (
+                        <a
+                          href={socialLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
+                          aria-label="Follow us on Facebook"
+                        >
+                          <FacebookIcon className="h-6 w-6" />
+                        </a>
+                      )}
+                      {socialLinks?.instagram && (
+                        <a
+                          href={socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
+                          aria-label="Follow us on Instagram"
+                        >
+                          <InstagramIcon className="h-6 w-6" />
+                        </a>
+                      )}
+                      {socialLinks?.tiktok && (
+                        <a
+                          href={socialLinks.tiktok}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
+                          aria-label="Follow us on TikTok"
+                        >
+                          <TikTokIcon className="h-6 w-6" />
+                        </a>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </FadeIn>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </PageTransition>
   );
 }

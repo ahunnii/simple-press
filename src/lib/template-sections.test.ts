@@ -6,7 +6,11 @@ import {
   setSectionHidden,
   SP_META_KEY,
 } from "./sp-meta";
-import { TEMPLATE_FIELD_GROUPS, TEMPLATE_FIELDS } from "./template-fields";
+import {
+  groupFieldsByPage,
+  TEMPLATE_FIELD_GROUPS,
+  TEMPLATE_FIELDS,
+} from "./template-fields";
 import { getSectionById, getSectionsForTemplate } from "./template-sections";
 
 describe("getSectionsForTemplate (derived fallback)", () => {
@@ -34,14 +38,15 @@ describe("getSectionsForTemplate (derived fallback)", () => {
     }
   });
 
-  it("derives the default template homepage hero section with its real group id and title", () => {
-    const sections = getSectionsForTemplate("default");
+  it("derives a non-curated template's homepage hero with its real group id and title", () => {
+    // "modern" has no curated registry, so it exercises the derived path.
+    const sections = getSectionsForTemplate("modern");
     const hero = sections.find((s) => s.id === "homepage.hero");
     expect(hero).toBeDefined();
     expect(hero?.page).toBe("homepage");
     expect(hero?.groupIds).toEqual(["homepage.hero"]);
     // Metadata title comes from TEMPLATE_FIELD_GROUPS, not a humanized key.
-    const meta = TEMPLATE_FIELD_GROUPS.default?.find(
+    const meta = TEMPLATE_FIELD_GROUPS.modern?.find(
       (g) => g.id === "homepage.hero",
     );
     expect(hero?.title).toBe(meta?.title);
@@ -53,6 +58,29 @@ describe("getSectionsForTemplate (derived fallback)", () => {
     for (const page of pages) {
       const orders = sections.filter((s) => s.page === page).map((s) => s.order);
       expect(orders).toEqual(orders.map((_, i) => i));
+    }
+  });
+
+  it("curated registries cover every field group (no fields become unreachable)", () => {
+    // Every group that has fields must appear in some section's groupIds,
+    // otherwise those fields were editable under derived sections but are
+    // orphaned by the curated registry.
+    for (const templateId of ["default", "happy-bamboo", "vii"]) {
+      const coveredGroupIds = new Set(
+        getSectionsForTemplate(templateId).flatMap((s) => s.groupIds),
+      );
+      const missing: string[] = [];
+      for (const [page, fields] of Object.entries(
+        groupFieldsByPage(templateId),
+      )) {
+        const groups = new Set(
+          fields.map((f) => f.group ?? `${page}.__other`),
+        );
+        for (const g of groups) {
+          if (!coveredGroupIds.has(g)) missing.push(g);
+        }
+      }
+      expect(missing, `template "${templateId}" orphans groups`).toEqual([]);
     }
   });
 

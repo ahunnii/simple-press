@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue, isContentEmpty } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -13,7 +14,8 @@ import { resolveFields } from "..";
 export async function DefaultAboutPage({
   business,
 }: DefaultAboutPageTemplateProps) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
     "default.about.eyebrow",
     "default.about.heading",
     "default.about.hero-tagline",
@@ -39,7 +41,7 @@ export async function DefaultAboutPage({
   ]);
 
   const storyRichContent = getRichTextFieldValue(
-    business?.siteContent?.customFields as unknown,
+    customFields as unknown,
     "default.about.story-body",
   );
   const hasRichText = !isContentEmpty(storyRichContent as TiptapJSON);
@@ -202,88 +204,93 @@ export async function DefaultAboutPage({
       </section>
 
       {/* ── Pull quote ───────────────────────────────────────────────────── */}
-      {f["default.about.pull-quote"] && (
+      {f["default.about.pull-quote"] &&
+        isSectionVisible(customFields, "default", "about.pillars") && (
+          <section
+            {...sectionGroupAttr("about", "pillars")}
+            className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8"
+          >
+            <div className="mx-auto max-w-[1440px]">
+              <p className="max-w-[800px] font-serif text-[clamp(22px,2.8vw,36px)] leading-[1.28] tracking-[-0.015em] text-balance">
+                &ldquo;{f["default.about.pull-quote"]}&rdquo;
+              </p>
+            </div>
+          </section>
+        )}
+
+      {/* ── Three pillars ────────────────────────────────────────────────── */}
+      {isSectionVisible(customFields, "default", "about.pillars") && (
         <section
           {...sectionGroupAttr("about", "pillars")}
           className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8"
         >
           <div className="mx-auto max-w-[1440px]">
-            <p className="max-w-[800px] font-serif text-[clamp(22px,2.8vw,36px)] leading-[1.28] tracking-[-0.015em] text-balance">
-              &ldquo;{f["default.about.pull-quote"]}&rdquo;
-            </p>
+            <div className="mb-12 flex flex-col gap-2">
+              <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                What I care about
+              </span>
+              <h2 className="font-serif text-3xl font-medium tracking-tight">
+                Three things, in order.
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+              {pillars.map((p) => (
+                <div key={p.num} className="flex flex-col gap-3">
+                  <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                    {p.num}
+                  </span>
+                  <h3
+                    className="font-serif text-[22px] font-medium tracking-[-0.015em]"
+                    {...fieldAttr(p.titleField)}
+                  >
+                    {p.title}
+                  </h3>
+                  <p
+                    className="text-[14px] leading-relaxed text-[#6b6b6b]"
+                    {...fieldAttr(p.descField)}
+                  >
+                    {p.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      {/* ── Three pillars ────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("about", "pillars")}
-        className="border-t border-[#e8e8e8] px-6 py-24 lg:px-8"
-      >
-        <div className="mx-auto max-w-[1440px]">
-          <div className="mb-12 flex flex-col gap-2">
-            <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-              What I care about
-            </span>
-            <h2 className="font-serif text-3xl font-medium tracking-tight">
-              Three things, in order.
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
-            {pillars.map((p) => (
-              <div key={p.num} className="flex flex-col gap-3">
-                <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                  {p.num}
-                </span>
-                <h3
-                  className="font-serif text-[22px] font-medium tracking-[-0.015em]"
-                  {...fieldAttr(p.titleField)}
-                >
-                  {p.title}
-                </h3>
-                <p
-                  className="text-[14px] leading-relaxed text-[#6b6b6b]"
-                  {...fieldAttr(p.descField)}
-                >
-                  {p.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Bottom CTA ───────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("about", "cta")}
-        className="bg-[#efece8] px-6 py-24 text-center lg:px-8"
-      >
-        <div className="mx-auto max-w-[640px]">
-          {f["default.about.cta-eyebrow"] && (
-            <span
-              className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
-              {...fieldAttr("default.about.cta-eyebrow")}
+      {isSectionVisible(customFields, "default", "about.cta") && (
+        <section
+          {...sectionGroupAttr("about", "cta")}
+          className="bg-[#efece8] px-6 py-24 text-center lg:px-8"
+        >
+          <div className="mx-auto max-w-[640px]">
+            {f["default.about.cta-eyebrow"] && (
+              <span
+                className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+                {...fieldAttr("default.about.cta-eyebrow")}
+              >
+                {f["default.about.cta-eyebrow"]}
+              </span>
+            )}
+            <h2
+              className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]"
+              {...fieldAttr("default.about.cta-heading")}
             >
-              {f["default.about.cta-eyebrow"]}
-            </span>
-          )}
-          <h2
-            className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]"
-            {...fieldAttr("default.about.cta-heading")}
-          >
-            {f["default.about.cta-heading"] ?? "I'd love to hear from you."}
-          </h2>
-          <div className="mt-8">
-            <Link
-              href={f["default.about.cta-button-link"] ?? "/contact"}
-              className="inline-flex h-12 items-center justify-center rounded-(--radius) bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
-              {...fieldAttr("default.about.cta-button-text")}
-            >
-              {f["default.about.cta-button-text"] ?? "Get in touch"}
-            </Link>
+              {f["default.about.cta-heading"] ?? "I'd love to hear from you."}
+            </h2>
+            <div className="mt-8">
+              <Link
+                href={f["default.about.cta-button-link"] ?? "/contact"}
+                className="inline-flex h-12 items-center justify-center rounded-(--radius) bg-[#0a0a0a] px-8 text-sm font-medium text-white transition-colors hover:bg-[#2a2a2a]"
+                {...fieldAttr("default.about.cta-button-text")}
+              >
+                {f["default.about.cta-button-text"] ?? "Get in touch"}
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </PageTransition>
   );
 }

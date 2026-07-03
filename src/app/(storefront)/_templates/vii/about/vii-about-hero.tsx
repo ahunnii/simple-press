@@ -1,5 +1,7 @@
 "use client";
 
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { ViiHero } from "../shared/vii-hero";
 
 type Props = {
@@ -15,6 +17,9 @@ export function ViiAboutHero({ heroImage, overline, heading }: Props) {
       aria-label="About"
       image={heroImage}
       overline={overline}
+      sectionAttrs={sectionGroupAttr("about", "hero")}
+      overlineFieldKey="vii.about.hero-overline"
+      headingFieldKey="vii.about.hero-heading"
     />
   );
 }

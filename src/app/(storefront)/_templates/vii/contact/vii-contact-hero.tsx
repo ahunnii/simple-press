@@ -1,5 +1,7 @@
 "use client";
 
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { ViiHero } from "../shared/vii-hero";
 
 type Props = {
@@ -16,6 +18,9 @@ export function ViiContactHero({ heroImage, overline, heading }: Props) {
       image={heroImage}
       overline={overline}
       minHeight="clamp(340px, 46vw, 560px)"
+      sectionAttrs={sectionGroupAttr("contact", "hero")}
+      overlineFieldKey="vii.contact.hero-overline"
+      headingFieldKey="vii.contact.hero-heading"
     />
   );
 }

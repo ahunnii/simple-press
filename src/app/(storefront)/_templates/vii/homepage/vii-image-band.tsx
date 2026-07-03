@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 type Props = {
   bandImage?: string;
   bandHeading?: string;
@@ -61,6 +63,7 @@ export function ViiImageBand({ bandImage, bandHeading, bandText }: Props) {
     return (
       <div
         aria-hidden="true"
+        {...sectionGroupAttr("homepage", "band")}
         style={{
           width: "100%",
           height: 8,
@@ -75,6 +78,7 @@ export function ViiImageBand({ bandImage, bandHeading, bandText }: Props) {
   return (
     <div
       ref={wrapperRef}
+      {...sectionGroupAttr("homepage", "band")}
       style={{
         position: "relative",
         width: "100%",
@@ -134,6 +138,7 @@ export function ViiImageBand({ bandImage, bandHeading, bandText }: Props) {
           >
             {bandHeading?.trim() && (
               <h2
+                {...fieldAttr("vii.homepage.band-heading")}
                 style={{
                   fontFamily: "var(--font-serif)",
                   fontSize: "clamp(28px, 4vw, 56px)",
@@ -149,6 +154,7 @@ export function ViiImageBand({ bandImage, bandHeading, bandText }: Props) {
             )}
             {bandText?.trim() && (
               <p
+                {...fieldAttr("vii.homepage.band-text")}
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "clamp(13px, 1.2vw, 16px)",
