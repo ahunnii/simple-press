@@ -85,6 +85,7 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
     setDiscountFieldError,
     handleApplyDiscount,
     isValidatingDiscount,
+    couponsEnabled,
     isProcessing,
     error,
     handleSubmit,
@@ -206,72 +207,74 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
         </fieldset>
 
         {/* Discount code */}
-        <fieldset className="flex flex-col gap-4">
-          <SectionHead>Discount code</SectionHead>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Label
-                htmlFor="discount-code"
-                className={LBL}
-                style={{ color: "var(--vn-steel)" }}
+        {couponsEnabled && (
+          <fieldset className="flex flex-col gap-4">
+            <SectionHead>Discount code</SectionHead>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label
+                  htmlFor="discount-code"
+                  className={LBL}
+                  style={{ color: "var(--vn-steel)" }}
+                >
+                  Code
+                </Label>
+                <Input
+                  id="discount-code"
+                  type="text"
+                  value={discountCodeInput}
+                  onChange={(e) => {
+                    setDiscountCodeInput(e.target.value.toUpperCase());
+                    setDiscountFieldError(null);
+                  }}
+                  placeholder="VND-SUMMER-26"
+                  autoComplete="off"
+                  aria-invalid={!!discountFieldError}
+                  aria-describedby={
+                    discountFieldError ? "discount-code-error" : undefined
+                  }
+                  className={cn(INP, "font-mono tracking-[0.1em]")}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleApplyDiscount}
+                disabled={isValidatingDiscount || items.length === 0}
+                className="vn-stamp hover:bg-foreground hover:text-background flex flex-shrink-0 items-center gap-2 text-[10px] transition-all disabled:opacity-40"
+                style={{ padding: "10px 16px" }}
               >
-                Code
-              </Label>
-              <Input
-                id="discount-code"
-                type="text"
-                value={discountCodeInput}
-                onChange={(e) => {
-                  setDiscountCodeInput(e.target.value.toUpperCase());
-                  setDiscountFieldError(null);
-                }}
-                placeholder="VND-SUMMER-26"
-                autoComplete="off"
-                aria-invalid={!!discountFieldError}
-                aria-describedby={
-                  discountFieldError ? "discount-code-error" : undefined
-                }
-                className={cn(INP, "font-mono tracking-[0.1em]")}
-              />
+                {isValidatingDiscount ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Checking…
+                  </>
+                ) : discountAmount > 0 ? (
+                  "Applied ✓"
+                ) : (
+                  "Apply"
+                )}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleApplyDiscount}
-              disabled={isValidatingDiscount || items.length === 0}
-              className="vn-stamp hover:bg-foreground hover:text-background flex flex-shrink-0 items-center gap-2 text-[10px] transition-all disabled:opacity-40"
-              style={{ padding: "10px 16px" }}
-            >
-              {isValidatingDiscount ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Checking…
-                </>
-              ) : discountAmount > 0 ? (
-                "Applied ✓"
-              ) : (
-                "Apply"
-              )}
-            </button>
-          </div>
-          {discountFieldError && (
-            <p
-              id="discount-code-error"
-              role="alert"
-              className="text-destructive font-mono text-[9.5px] tracking-[0.14em] uppercase"
-            >
-              {discountFieldError}
-            </p>
-          )}
-          {discountCodeLabel && discountAmount > 0 && (
-            <p
-              role="status"
-              className="font-mono text-[9.5px] tracking-[0.14em] text-green-600 uppercase"
-            >
-              Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
-              applied.
-            </p>
-          )}
-        </fieldset>
+            {discountFieldError && (
+              <p
+                id="discount-code-error"
+                role="alert"
+                className="text-destructive font-mono text-[9.5px] tracking-[0.14em] uppercase"
+              >
+                {discountFieldError}
+              </p>
+            )}
+            {discountCodeLabel && discountAmount > 0 && (
+              <p
+                role="status"
+                className="font-mono text-[9.5px] tracking-[0.14em] text-green-600 uppercase"
+              >
+                Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
+                applied.
+              </p>
+            )}
+          </fieldset>
+        )}
 
         {/* Delivery method */}
         {shippingConfig.offersInStorePickup && (

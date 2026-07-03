@@ -15,6 +15,7 @@ import {
 import { ANALYTICS_EVENTS, track } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { useDiscountCode } from "./use-discount-code";
 
@@ -46,6 +47,7 @@ type UseCheckoutFormReturn = {
   deliveryMethod: "ship" | "pickup";
   setDeliveryMethod: (v: "ship" | "pickup") => void;
   // Discount
+  couponsEnabled: boolean;
   discountCodeInput: string;
   setDiscountCodeInput: (v: string) => void;
   discountCodeId: string | null;
@@ -75,9 +77,16 @@ type UseCheckoutFormReturn = {
 // Debounce delay (ms) for the zone+weight shipping quote.
 const QUOTE_DEBOUNCE_MS = 500;
 
+// Stands in for the apply-discount handler when the coupons flag is off.
+const noopApplyDiscount = () => {
+  // Intentionally empty — coupons are disabled for this business.
+};
+
 export function useCheckoutForm(
   business: CheckoutFormBusiness,
 ): UseCheckoutFormReturn {
+  const { isEnabled } = useStorefrontFlags();
+  const couponsEnabled = isEnabled("coupons");
   const { items, removeItem, subtotal } = useCart();
   const shippingConfig = shippingConfigFromBusiness(business);
   const isZoneWeight = business.shippingType === SHIPPING_TYPES.ZONE_WEIGHT;
@@ -108,6 +117,15 @@ export function useCheckoutForm(
   );
 
   const discount = useDiscountCode();
+  // When coupons are disabled, never let an applied/stale discount affect
+  // totals or the checkout payload — treat it as if none was applied.
+  const effectiveDiscountAmount = couponsEnabled ? discount.discountAmount : 0;
+  const effectiveDiscountCodeId = couponsEnabled
+    ? discount.discountCodeId
+    : null;
+  const handleApplyDiscount = couponsEnabled
+    ? discount.handleApplyDiscount
+    : noopApplyDiscount;
 
   // ──────────────────────────────────────────────────────────────────────────
   // Zone+weight shipping quote (debounced server call)
@@ -214,7 +232,7 @@ export function useCheckoutForm(
     shippingPending = false;
   }
 
-  const finalTotal = subtotal - discount.discountAmount + shipping;
+  const finalTotal = subtotal - effectiveDiscountAmount + shipping;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,7 +286,7 @@ export function useCheckoutForm(
                   }
                 : null,
           },
-          discountCodeId: discount.discountCodeId,
+          discountCodeId: effectiveDiscountCodeId,
         }),
       });
 
@@ -335,14 +353,15 @@ export function useCheckoutForm(
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    couponsEnabled,
     discountCodeInput: discount.discountCodeInput,
     setDiscountCodeInput: discount.setDiscountCodeInput,
-    discountCodeId: discount.discountCodeId,
-    discountAmount: discount.discountAmount,
+    discountCodeId: effectiveDiscountCodeId,
+    discountAmount: effectiveDiscountAmount,
     discountCodeLabel: discount.discountCodeLabel,
     discountFieldError: discount.discountFieldError,
     setDiscountFieldError: discount.setDiscountFieldError,
-    handleApplyDiscount: discount.handleApplyDiscount,
+    handleApplyDiscount,
     clearDiscount: discount.clearDiscount,
     isValidatingDiscount: discount.isValidating,
     isProcessing,

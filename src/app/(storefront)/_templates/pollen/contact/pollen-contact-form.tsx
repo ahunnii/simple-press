@@ -12,6 +12,7 @@ import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type Props = {
   businessName: string;
@@ -44,6 +45,9 @@ export function PollenContactForm({
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
+
+  const { isEnabled } = useStorefrontFlags();
+  if (!isEnabled("contactForm")) return null;
 
   return (
     <Form {...form}>

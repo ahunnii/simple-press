@@ -5,8 +5,9 @@ import { useId, useState } from "react";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
 import { authClient } from "~/server/better-auth/client";
+import { api } from "~/trpc/react";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /**
  * The subset of a saved `ShippingAddress` record the picker works with.
@@ -118,6 +119,7 @@ export function SavedAddressPicker({
   optionClassName,
   accentColor,
 }: SavedAddressPickerProps) {
+  const { isEnabled } = useStorefrontFlags();
   const { data: session, isPending } = authClient.useSession();
   const isLoggedIn = !isPending && !!session?.user;
 
@@ -132,7 +134,8 @@ export function SavedAddressPicker({
 
   // getMyProfile returns null when the user has never had a Customer record.
   const addresses = profile?.shippingAddresses ?? [];
-  if (!isLoggedIn || addresses.length === 0) return null;
+  if (!isEnabled("customerAccounts") || !isLoggedIn || addresses.length === 0)
+    return null;
 
   const rowClass = cn(
     "flex cursor-pointer items-start gap-3 rounded-md border border-current/25 p-3 transition-opacity",
@@ -142,9 +145,7 @@ export function SavedAddressPicker({
 
   return (
     <fieldset className={cn("m-0 min-w-0 border-0 p-0", className)}>
-      <legend
-        className={cn("mb-2 p-0 text-sm font-medium", legendClassName)}
-      >
+      <legend className={cn("mb-2 p-0 text-sm font-medium", legendClassName)}>
         Use a saved address
       </legend>
       <div className="space-y-2">

@@ -55,6 +55,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    couponsEnabled,
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
@@ -164,66 +165,68 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
-            Discount code
-          </legend>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="discount-code">Code</Label>
-              <Input
-                id="discount-code"
-                type="text"
-                value={discountCodeInput}
-                onChange={(e) =>
-                  setDiscountCodeInput(e.target.value.toUpperCase())
-                }
-                placeholder="SAVE20"
-                autoComplete="off"
-                aria-invalid={!!discountFieldError}
-                aria-describedby={
-                  discountFieldError ? "discount-error" : undefined
-                }
-              />
+        {couponsEnabled && (
+          <fieldset className="flex flex-col gap-3">
+            <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
+              Discount code
+            </legend>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label htmlFor="discount-code">Code</Label>
+                <Input
+                  id="discount-code"
+                  type="text"
+                  value={discountCodeInput}
+                  onChange={(e) =>
+                    setDiscountCodeInput(e.target.value.toUpperCase())
+                  }
+                  placeholder="SAVE20"
+                  autoComplete="off"
+                  aria-invalid={!!discountFieldError}
+                  aria-describedby={
+                    discountFieldError ? "discount-error" : undefined
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleApplyDiscount}
+                disabled={isValidatingDiscount || items.length === 0}
+              >
+                {isValidatingDiscount ? (
+                  <>
+                    <Loader2
+                      className="mr-2 size-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                    Checking…
+                  </>
+                ) : (
+                  "Apply"
+                )}
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleApplyDiscount}
-              disabled={isValidatingDiscount || items.length === 0}
-            >
-              {isValidatingDiscount ? (
-                <>
-                  <Loader2
-                    className="mr-2 size-4 animate-spin"
-                    aria-hidden="true"
-                  />
-                  Checking…
-                </>
-              ) : (
-                "Apply"
-              )}
-            </Button>
-          </div>
-          {discountFieldError && (
-            <p
-              id="discount-error"
-              className="text-destructive text-sm"
-              role="alert"
-            >
-              {discountFieldError}
-            </p>
-          )}
-          {discountCodeLabel && discountAmount > 0 && (
-            <p className="text-sm text-green-700" role="status">
-              Code{" "}
-              <span className="font-mono font-semibold">
-                {discountCodeLabel}
-              </span>{" "}
-              applied.
-            </p>
-          )}
-        </fieldset>
+            {discountFieldError && (
+              <p
+                id="discount-error"
+                className="text-destructive text-sm"
+                role="alert"
+              >
+                {discountFieldError}
+              </p>
+            )}
+            {discountCodeLabel && discountAmount > 0 && (
+              <p className="text-sm text-green-700" role="status">
+                Code{" "}
+                <span className="font-mono font-semibold">
+                  {discountCodeLabel}
+                </span>{" "}
+                applied.
+              </p>
+            )}
+          </fieldset>
+        )}
 
         {shippingConfig.offersInStorePickup && (
           <fieldset className="flex flex-col gap-3">

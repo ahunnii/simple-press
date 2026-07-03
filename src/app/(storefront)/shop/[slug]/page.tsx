@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   buildBreadcrumbSchema,
   buildProductSchema,
@@ -33,11 +34,21 @@ export default async function ProductDetailPage({ params }: Props) {
     redirect(`/shop/${product.slug}`);
   }
 
-  const reviews = await api.review.listByProduct({ productId: product.id }).catch(() => []);
+  const { isEnabled } = await getBusinessFlags();
+  const reviewsEnabled = isEnabled("reviews");
+
+  const reviews = reviewsEnabled
+    ? await api.review.listByProduct({ productId: product.id }).catch(() => [])
+    : [];
 
   const t = getTemplate(business.templateId);
 
-  const productSchema = buildProductSchema(product, business, reviews.slice(0, 20));
+  const productSchema = buildProductSchema(
+    product,
+    business,
+    reviews.slice(0, 20),
+    { includeReviews: reviewsEnabled },
+  );
   const breadcrumbSchema = buildBreadcrumbSchema(business, [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },

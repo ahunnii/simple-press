@@ -226,89 +226,94 @@ export function ElegantCheckoutForm({ business }: Props) {
         </fieldset>
 
         {/* Discount */}
-        <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-          {eyebrow("Discount code")}
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              alignItems: "flex-end",
-              flexWrap: "wrap",
-            }}
-          >
-            <ElegantField
-              label="Code"
-              htmlFor="discount-code"
-              style={{ flex: 1 }}
-            >
-              <Input
-                id="discount-code"
-                type="text"
-                value={f.discountCodeInput}
-                onChange={(e) =>
-                  f.setDiscountCodeInput(e.target.value.toUpperCase())
-                }
-                placeholder="SAVE20"
-                autoComplete="off"
-                className="el-co-input"
-              />
-            </ElegantField>
-            <button
-              type="button"
-              onClick={f.handleApplyDiscount}
-              disabled={f.isValidatingDiscount || f.items.length === 0}
+        {f.couponsEnabled && (
+          <fieldset style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+            {eyebrow("Discount code")}
+            <div
               style={{
-                padding: "10px 20px",
-                borderRadius: 999,
-                fontSize: 12,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
-                background: "transparent",
-                color: "var(--el-ink, #1c1a17)",
-                cursor: "pointer",
-                fontFamily: "var(--font-sans, sans-serif)",
-                opacity:
-                  f.isValidatingDiscount || f.items.length === 0 ? 0.5 : 1,
-                whiteSpace: "nowrap",
+                display: "flex",
+                gap: 10,
+                alignItems: "flex-end",
+                flexWrap: "wrap",
               }}
             >
-              {f.isValidatingDiscount ? (
-                <Loader2 aria-hidden={true} className="h-4 w-4 animate-spin" />
-              ) : (
-                "Apply"
-              )}
-            </button>
-          </div>
-          <div aria-live="polite" aria-atomic="true">
-            {f.discountFieldError && (
-              <p
+              <ElegantField
+                label="Code"
+                htmlFor="discount-code"
+                style={{ flex: 1 }}
+              >
+                <Input
+                  id="discount-code"
+                  type="text"
+                  value={f.discountCodeInput}
+                  onChange={(e) =>
+                    f.setDiscountCodeInput(e.target.value.toUpperCase())
+                  }
+                  placeholder="SAVE20"
+                  autoComplete="off"
+                  className="el-co-input"
+                />
+              </ElegantField>
+              <button
+                type="button"
+                onClick={f.handleApplyDiscount}
+                disabled={f.isValidatingDiscount || f.items.length === 0}
                 style={{
-                  marginTop: 8,
+                  padding: "10px 20px",
+                  borderRadius: 999,
                   fontSize: 12,
-                  color: "#c0392b",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  border: "1px solid var(--el-line, rgba(28,26,23,0.12))",
+                  background: "transparent",
+                  color: "var(--el-ink, #1c1a17)",
+                  cursor: "pointer",
                   fontFamily: "var(--font-sans, sans-serif)",
+                  opacity:
+                    f.isValidatingDiscount || f.items.length === 0 ? 0.5 : 1,
+                  whiteSpace: "nowrap",
                 }}
               >
-                {f.discountFieldError}
-              </p>
-            )}
-            {f.discountCodeLabel && f.discountAmount > 0 && (
-              <p
-                style={{
-                  marginTop: 8,
-                  fontSize: 12,
-                  color: "var(--el-sage, #4a5240)",
-                  fontFamily: "var(--font-mono, ui-monospace)",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                Code {f.discountCodeLabel} applied.
-              </p>
-            )}
-          </div>
-        </fieldset>
+                {f.isValidatingDiscount ? (
+                  <Loader2
+                    aria-hidden={true}
+                    className="h-4 w-4 animate-spin"
+                  />
+                ) : (
+                  "Apply"
+                )}
+              </button>
+            </div>
+            <div aria-live="polite" aria-atomic="true">
+              {f.discountFieldError && (
+                <p
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    color: "#c0392b",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                  }}
+                >
+                  {f.discountFieldError}
+                </p>
+              )}
+              {f.discountCodeLabel && f.discountAmount > 0 && (
+                <p
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    color: "var(--el-sage, #4a5240)",
+                    fontFamily: "var(--font-mono, ui-monospace)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  Code {f.discountCodeLabel} applied.
+                </p>
+              )}
+            </div>
+          </fieldset>
+        )}
 
         {/* Delivery method */}
         {f.shippingConfig.offersInStorePickup && (

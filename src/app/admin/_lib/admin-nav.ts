@@ -183,6 +183,7 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/customers",
     icon: IconUsers,
     section: "sell",
+    featureKey: "customerAccounts",
     roles: ["OWNER", "MANAGER", "STAFF"],
     keywords: ["buyers", "shoppers"],
   },

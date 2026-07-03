@@ -12,6 +12,7 @@ import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 export function DarkTrendContactForm() {
   const {
@@ -40,6 +41,9 @@ export function DarkTrendContactForm() {
       successAlertRef.current?.focus();
     }
   }, [isSuccess]);
+
+  const { isEnabled } = useStorefrontFlags();
+  if (!isEnabled("contactForm")) return null;
 
   if (isSuccess) {
     return (

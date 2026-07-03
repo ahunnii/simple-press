@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 
 import { WishlistPageClient } from "../_components/wishlist/wishlist-page-client";
 
@@ -17,6 +18,9 @@ export const metadata = {
 export default async function WishlistPage() {
   const business = await checkBusiness();
   if (!business) notFound();
+
+  const { isEnabled } = await getBusinessFlags();
+  if (!isEnabled("wishlist")) notFound();
 
   return <WishlistPageClient />;
 }

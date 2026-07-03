@@ -21,6 +21,7 @@ import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
@@ -46,6 +47,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const { isEnabled, isDisabledByDependency } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const user = session?.user;
@@ -248,18 +250,20 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
 
             <div className="flex items-center gap-3">
               {/* Wishlist icon — no dedicated feature flag; unconditional like product-card hearts */}
-              <Link
-                href="/wishlist"
-                className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
-                aria-label={`Wishlist with ${wishlistCount} items`}
-              >
-                <Heart className="size-5" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[#215935] text-[10px] font-bold text-white">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
+              {isStorefrontEnabled("wishlist") && (
+                <Link
+                  href="/wishlist"
+                  className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
+                  aria-label={`Wishlist with ${wishlistCount} items`}
+                >
+                  <Heart className="size-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[#215935] text-[10px] font-bold text-white">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Cart icon */}
 
@@ -292,12 +296,16 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                   </Link>
                 </Button>
 
-                {isPending ? (
-                  <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-                ) : user ? (
-                  userMenu
-                ) : (
-                  <></>
+                {isStorefrontEnabled("customerAccounts") && (
+                  <>
+                    {isPending ? (
+                      <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                    ) : user ? (
+                      userMenu
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 )}
               </div>
 

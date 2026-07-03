@@ -12,6 +12,7 @@ import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
@@ -25,6 +26,7 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = authClient.useSession();
+  const { isEnabled } = useStorefrontFlags();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Refs for focus management (C-2)
@@ -180,19 +182,21 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link
-              href="/wishlist"
-              className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
-              aria-label={`Wishlist with ${wishlistCount} items`}
-            >
-              {/* M-2: decorative icon inside an aria-labeled link */}
-              <Heart className="h-5 w-5" aria-hidden="true" />
-              {wishlistCount > 0 && (
-                <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
+            {isEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
+                aria-label={`Wishlist with ${wishlistCount} items`}
+              >
+                {/* M-2: decorative icon inside an aria-labeled link */}
+                <Heart className="h-5 w-5" aria-hidden="true" />
+                {wishlistCount > 0 && (
+                  <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             <Link
               href="/cart"
@@ -208,12 +212,16 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
               )}
             </Link>
 
-            {isPending ? (
-              <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-            ) : session?.user ? (
-              userMenu
-            ) : (
-              authActions
+            {isEnabled("customerAccounts") && (
+              <>
+                {isPending ? (
+                  <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authActions
+                )}
+              </>
             )}
 
             {/* Mobile menu toggle — C-2: aria-controls + ref */}

@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 
 import type { WishlistItem } from "~/providers/wishlist-context";
 import { cn } from "~/lib/utils";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 type WishlistButtonProps = {
@@ -32,8 +33,11 @@ export function WishlistButton({
   className,
   iconClassName,
 }: WishlistButtonProps) {
+  const { isEnabled } = useStorefrontFlags();
   const { has, toggle } = useWishlist();
   const saved = has(item.productId);
+
+  if (!isEnabled("wishlist")) return null;
 
   return (
     <button

@@ -13,6 +13,7 @@ import { formatPrice } from "~/lib/prices";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
@@ -45,6 +46,7 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const { data: session, isPending } = authClient.useSession();
   const { itemCount, total } = useCart();
   const { count: wishlistCount } = useWishlist();
+  const { isEnabled } = useStorefrontFlags();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -186,22 +188,24 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
           >
             <Search aria-hidden="true" className="h-5 w-5" />
           </button>
-          <Link
-            href="/wishlist"
-            className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
-            aria-label={
-              wishlistCount > 0
-                ? `Wishlist, ${wishlistCount} saved ${wishlistCount === 1 ? "item" : "items"}`
-                : "Wishlist"
-            }
-          >
-            {wishlistCount > 0 && (
-              <span className="text-sm font-medium" aria-hidden="true">
-                {wishlistCount}
-              </span>
-            )}
-            <Heart aria-hidden="true" className="h-5 w-5" />
-          </Link>
+          {isEnabled("wishlist") && (
+            <Link
+              href="/wishlist"
+              className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
+              aria-label={
+                wishlistCount > 0
+                  ? `Wishlist, ${wishlistCount} saved ${wishlistCount === 1 ? "item" : "items"}`
+                  : "Wishlist"
+              }
+            >
+              {wishlistCount > 0 && (
+                <span className="text-sm font-medium" aria-hidden="true">
+                  {wishlistCount}
+                </span>
+              )}
+              <Heart aria-hidden="true" className="h-5 w-5" />
+            </Link>
+          )}
           <Link
             href="/cart"
             className="flex items-center gap-2 text-white/90 transition-colors hover:text-white"
@@ -212,12 +216,16 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
             </span>
             <ShoppingBag aria-hidden="true" className="h-5 w-5" />
           </Link>
-          {isPending ? (
-            <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-          ) : session?.user ? (
-            userMenu
-          ) : (
-            authActions
+          {isEnabled("customerAccounts") && (
+            <>
+              {isPending ? (
+                <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+              ) : session?.user ? (
+                userMenu
+              ) : (
+                authActions
+              )}
+            </>
           )}
 
           {/* Hamburger — ≥44px hit area via p-3 -m-3 (WCAG 2.5.5) */}
@@ -253,7 +261,10 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
           className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 lg:px-6"
           role="search"
         >
-          <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-white/40" />
+          <Search
+            aria-hidden="true"
+            className="h-4 w-4 shrink-0 text-white/40"
+          />
           <input
             ref={searchInputRef}
             type="search"

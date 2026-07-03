@@ -21,6 +21,7 @@ import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 import { resolveFields } from "../index";
@@ -201,6 +202,8 @@ export function ViiHeader({
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   // ── Nav links ──────────────────────────────────────────────────────────────
   const DEFAULT_NAV_LINKS: NavLink[] = [
@@ -763,84 +766,90 @@ export function ViiHeader({
                 )}
               </nav>
 
-              <div className="hidden md:block">
-                {session?.user ? (
-                  <UserButton
-                    size="icon"
-                    classNames={{
-                      trigger: {
-                        base: "rounded-full w-auto h-auto p-0",
-                        avatar: {
-                          base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
+              {isStorefrontEnabled("customerAccounts") && (
+                <div className="hidden md:block">
+                  {session?.user ? (
+                    <UserButton
+                      size="icon"
+                      classNames={{
+                        trigger: {
+                          base: "rounded-full w-auto h-auto p-0",
+                          avatar: {
+                            base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
+                          },
                         },
-                      },
-                    }}
-                    additionalLinks={[
-                      {
-                        icon: <IconPackage className="h-4 w-4" />,
-                        label: "Orders",
-                        href: "/account/orders",
-                      },
-                      ...(showAdminLink
-                        ? [
-                            {
-                              icon: <IconLayoutDashboard className="h-4 w-4" />,
-                              label: "Admin",
-                              href: "/admin",
-                            },
-                          ]
-                        : []),
-                    ]}
-                  />
-                ) : (
-                  <Link
-                    href="/auth/sign-in"
-                    aria-label="Sign in to your account"
-                    className="-m-2 flex items-center justify-center p-2"
-                    style={{
-                      color: iconColor,
-                      transition: `color 0.4s ${ease}`,
-                    }}
-                  >
-                    <User
-                      className="h-[18px] w-[18px]"
-                      strokeWidth={1.4}
-                      aria-hidden="true"
+                      }}
+                      additionalLinks={[
+                        {
+                          icon: <IconPackage className="h-4 w-4" />,
+                          label: "Orders",
+                          href: "/account/orders",
+                        },
+                        ...(showAdminLink
+                          ? [
+                              {
+                                icon: (
+                                  <IconLayoutDashboard className="h-4 w-4" />
+                                ),
+                                label: "Admin",
+                                href: "/admin",
+                              },
+                            ]
+                          : []),
+                      ]}
                     />
-                  </Link>
-                )}
-              </div>
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      aria-label="Sign in to your account"
+                      className="-m-2 flex items-center justify-center p-2"
+                      style={{
+                        color: iconColor,
+                        transition: `color 0.4s ${ease}`,
+                      }}
+                    >
+                      <User
+                        className="h-[18px] w-[18px]"
+                        strokeWidth={1.4}
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  )}
+                </div>
+              )}
 
               {/* Wishlist — static badge (no bump animation) */}
-              <Link
-                href="/wishlist"
-                aria-label={
-                  wishlistCount > 0
-                    ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
-                    : "View wishlist"
-                }
-                className="relative -m-2 flex items-center justify-center p-2"
-                style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
-              >
-                <Heart
-                  className="h-[18px] w-[18px]"
-                  strokeWidth={1.4}
-                  aria-hidden="true"
-                />
-                {wishlistCount > 0 && (
-                  <span
+              {isStorefrontEnabled("wishlist") && (
+                <Link
+                  href="/wishlist"
+                  aria-label={
+                    wishlistCount > 0
+                      ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                      : "View wishlist"
+                  }
+                  className="relative -m-2 flex items-center justify-center p-2"
+                  style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
+                >
+                  <Heart
+                    className="h-[18px] w-[18px]"
+                    strokeWidth={1.4}
                     aria-hidden="true"
-                    className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
-                    style={{
-                      background: "var(--vii-copper-deep)",
-                      color: "var(--vii-paper)",
-                      minWidth: "16px",
-                    }}
-                  >
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
+                  />
+                  {wishlistCount > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
+                      style={{
+                        background: "var(--vii-copper-deep)",
+                        color: "var(--vii-paper)",
+                        minWidth: "16px",
+                      }}
+                    >
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Cart — link to /cart (no vii-specific drawer in this pass) */}
               {isEnabled("products") && (

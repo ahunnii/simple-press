@@ -132,56 +132,61 @@ export function PollenCheckoutForm({ business }: Props) {
         </section>
 
         {/* Discount Code */}
-        <section>
-          <h2 className={sectionHeadingClass}>Discount Code</h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={f.discountCodeInput}
-              onChange={(e) =>
-                f.setDiscountCodeInput(e.target.value.toUpperCase())
-              }
-              placeholder="SAVE20"
-              autoComplete="off"
-              aria-label="Discount code"
-              aria-invalid={!!f.discountFieldError}
-              aria-describedby={
-                f.discountFieldError ? "discount-error" : undefined
-              }
-              className={`${inputClass} flex-1`}
-            />
-            <button
-              type="button"
-              onClick={f.handleApplyDiscount}
-              disabled={f.isValidatingDiscount || f.items.length === 0}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              {f.isValidatingDiscount ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                "Apply"
-              )}
-            </button>
-          </div>
-          {f.discountFieldError && (
-            <p
-              id="discount-error"
-              role="alert"
-              className="mt-2 text-sm text-red-600"
-            >
-              {f.discountFieldError}
-            </p>
-          )}
-          {f.discountCodeLabel && f.discountAmount > 0 && (
-            <p role="status" className="mt-2 text-sm text-green-700">
-              Code{" "}
-              <span className="font-mono font-semibold">
-                {f.discountCodeLabel}
-              </span>{" "}
-              applied.
-            </p>
-          )}
-        </section>
+        {f.couponsEnabled && (
+          <section>
+            <h2 className={sectionHeadingClass}>Discount Code</h2>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={f.discountCodeInput}
+                onChange={(e) =>
+                  f.setDiscountCodeInput(e.target.value.toUpperCase())
+                }
+                placeholder="SAVE20"
+                autoComplete="off"
+                aria-label="Discount code"
+                aria-invalid={!!f.discountFieldError}
+                aria-describedby={
+                  f.discountFieldError ? "discount-error" : undefined
+                }
+                className={`${inputClass} flex-1`}
+              />
+              <button
+                type="button"
+                onClick={f.handleApplyDiscount}
+                disabled={f.isValidatingDiscount || f.items.length === 0}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {f.isValidatingDiscount ? (
+                  <Loader2
+                    className="h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  "Apply"
+                )}
+              </button>
+            </div>
+            {f.discountFieldError && (
+              <p
+                id="discount-error"
+                role="alert"
+                className="mt-2 text-sm text-red-600"
+              >
+                {f.discountFieldError}
+              </p>
+            )}
+            {f.discountCodeLabel && f.discountAmount > 0 && (
+              <p role="status" className="mt-2 text-sm text-green-700">
+                Code{" "}
+                <span className="font-mono font-semibold">
+                  {f.discountCodeLabel}
+                </span>{" "}
+                applied.
+              </p>
+            )}
+          </section>
+        )}
 
         {/* Delivery Method */}
         {f.shippingConfig.offersInStorePickup && (

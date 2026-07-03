@@ -172,70 +172,72 @@ export function ModernCheckoutForm({ business }: Props) {
           </fieldset>
 
           {/* Discount Code */}
-          <div className="border-border mt-10 border-t pt-10">
-            <h2
-              id="discount-code-heading"
-              className="text-foreground text-xs font-semibold tracking-widest uppercase"
-            >
-              Discount Code
-            </h2>
-            <div className="mt-6 flex gap-2">
-              <div className="flex-1">
-                <label htmlFor="discount-code" className="sr-only">
-                  Discount code
-                </label>
-                <input
-                  id="discount-code"
-                  type="text"
-                  value={f.discountCodeInput}
-                  onChange={(e) =>
-                    f.setDiscountCodeInput(e.target.value.toUpperCase())
-                  }
-                  placeholder="SAVE20"
-                  autoComplete="off"
-                  autoCapitalize="characters"
-                  aria-invalid={!!f.discountFieldError}
-                  aria-describedby={
-                    f.discountFieldError ? "discount-error" : undefined
-                  }
-                  className={`${inputClass} w-full`}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={f.handleApplyDiscount}
-                disabled={f.isValidatingDiscount || f.items.length === 0}
-                aria-label="Apply"
-                className="border-border bg-card text-foreground hover:bg-muted mt-1 inline-flex items-center gap-2 border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
+          {f.couponsEnabled && (
+            <div className="border-border mt-10 border-t pt-10">
+              <h2
+                id="discount-code-heading"
+                className="text-foreground text-xs font-semibold tracking-widest uppercase"
               >
-                {f.isValidatingDiscount && (
-                  <Loader2
-                    aria-hidden="true"
-                    className="h-4 w-4 animate-spin"
+                Discount Code
+              </h2>
+              <div className="mt-6 flex gap-2">
+                <div className="flex-1">
+                  <label htmlFor="discount-code" className="sr-only">
+                    Discount code
+                  </label>
+                  <input
+                    id="discount-code"
+                    type="text"
+                    value={f.discountCodeInput}
+                    onChange={(e) =>
+                      f.setDiscountCodeInput(e.target.value.toUpperCase())
+                    }
+                    placeholder="SAVE20"
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    aria-invalid={!!f.discountFieldError}
+                    aria-describedby={
+                      f.discountFieldError ? "discount-error" : undefined
+                    }
+                    className={`${inputClass} w-full`}
                   />
-                )}
-                Apply
-              </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={f.handleApplyDiscount}
+                  disabled={f.isValidatingDiscount || f.items.length === 0}
+                  aria-label="Apply"
+                  className="border-border bg-card text-foreground hover:bg-muted mt-1 inline-flex items-center gap-2 border px-6 py-3 text-sm font-medium tracking-wide transition-opacity disabled:opacity-50"
+                >
+                  {f.isValidatingDiscount && (
+                    <Loader2
+                      aria-hidden="true"
+                      className="h-4 w-4 animate-spin"
+                    />
+                  )}
+                  Apply
+                </button>
+              </div>
+              {f.discountFieldError && (
+                <p
+                  id="discount-error"
+                  role="alert"
+                  className="mt-2 text-sm text-red-600"
+                >
+                  {f.discountFieldError}
+                </p>
+              )}
+              {f.discountCodeLabel && f.discountAmount > 0 && (
+                <p role="status" className="mt-2 text-sm text-green-700">
+                  Code{" "}
+                  <span className="font-mono font-semibold">
+                    {f.discountCodeLabel}
+                  </span>{" "}
+                  applied.
+                </p>
+              )}
             </div>
-            {f.discountFieldError && (
-              <p
-                id="discount-error"
-                role="alert"
-                className="mt-2 text-sm text-red-600"
-              >
-                {f.discountFieldError}
-              </p>
-            )}
-            {f.discountCodeLabel && f.discountAmount > 0 && (
-              <p role="status" className="mt-2 text-sm text-green-700">
-                Code{" "}
-                <span className="font-mono font-semibold">
-                  {f.discountCodeLabel}
-                </span>{" "}
-                applied.
-              </p>
-            )}
-          </div>
+          )}
 
           {/* Delivery Method */}
           {f.shippingConfig.offersInStorePickup && (

@@ -19,6 +19,7 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { authClient } from "~/server/better-auth/client";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
@@ -42,6 +43,8 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -319,83 +322,92 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               </button>
             )}
 
-            {isPending ? (
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 999,
-                  background: "rgba(28,26,23,0.06)",
-                }}
-              />
-            ) : user ? (
-              <UserButton
-                size="icon"
-                classNames={{
-                  trigger: {
-                    base: "w-[34px] h-[34px] rounded-full",
-                    avatar: { base: "w-[34px] h-[34px]" },
-                  },
-                }}
-                additionalLinks={[
-                  ...(user.platformRole === "PLATFORM_ADMIN"
-                    ? [
-                        {
-                          icon: <LayoutDashboardIcon className="h-4 w-4" />,
-                          label: "Admin",
-                          href: "/admin",
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            ) : (
-              <Link
-                href="/auth/sign-in"
-                style={iconBtnStyle}
-                className="el-icon-btn"
-                aria-label="Sign in"
-              >
-                <User aria-hidden={true} style={{ width: 17, height: 17 }} />
-              </Link>
+            {isStorefrontEnabled("customerAccounts") && (
+              <>
+                {isPending ? (
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      background: "rgba(28,26,23,0.06)",
+                    }}
+                  />
+                ) : user ? (
+                  <UserButton
+                    size="icon"
+                    classNames={{
+                      trigger: {
+                        base: "w-[34px] h-[34px] rounded-full",
+                        avatar: { base: "w-[34px] h-[34px]" },
+                      },
+                    }}
+                    additionalLinks={[
+                      ...(user.platformRole === "PLATFORM_ADMIN"
+                        ? [
+                            {
+                              icon: <LayoutDashboardIcon className="h-4 w-4" />,
+                              label: "Admin",
+                              href: "/admin",
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                ) : (
+                  <Link
+                    href="/auth/sign-in"
+                    style={iconBtnStyle}
+                    className="el-icon-btn"
+                    aria-label="Sign in"
+                  >
+                    <User
+                      aria-hidden={true}
+                      style={{ width: 17, height: 17 }}
+                    />
+                  </Link>
+                )}
+              </>
             )}
 
-            <Link
-              href="/wishlist"
-              aria-label={
-                wishlistCount > 0
-                  ? `Wishlist (${wishlistCount} item${wishlistCount === 1 ? "" : "s"})`
-                  : "Wishlist"
-              }
-              style={{ ...iconBtnStyle, position: "relative" }}
-              className="el-icon-btn"
-            >
-              <Heart aria-hidden={true} style={{ width: 17, height: 17 }} />
-              <span
-                aria-hidden={true}
-                style={{
-                  position: "absolute",
-                  top: 4,
-                  right: 4,
-                  minWidth: 16,
-                  height: 16,
-                  padding: "0 4px",
-                  background: "var(--el-sage, #4a5240)",
-                  color: "var(--el-paper, #fbf8f2)",
-                  borderRadius: 999,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontFamily: "var(--font-sans, sans-serif)",
-                  transform: wishlistCount > 0 ? "scale(1)" : "scale(0)",
-                  transition: `transform 0.35s ${ease}`,
-                }}
+            {isStorefrontEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label={
+                  wishlistCount > 0
+                    ? `Wishlist (${wishlistCount} item${wishlistCount === 1 ? "" : "s"})`
+                    : "Wishlist"
+                }
+                style={{ ...iconBtnStyle, position: "relative" }}
+                className="el-icon-btn"
               >
-                {wishlistCount}
-              </span>
-            </Link>
+                <Heart aria-hidden={true} style={{ width: 17, height: 17 }} />
+                <span
+                  aria-hidden={true}
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    minWidth: 16,
+                    height: 16,
+                    padding: "0 4px",
+                    background: "var(--el-sage, #4a5240)",
+                    color: "var(--el-paper, #fbf8f2)",
+                    borderRadius: 999,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transform: wishlistCount > 0 ? "scale(1)" : "scale(0)",
+                    transition: `transform 0.35s ${ease}`,
+                  }}
+                >
+                  {wishlistCount}
+                </span>
+              </Link>
+            )}
 
             <button
               type="button"

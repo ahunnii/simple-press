@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getSession } from "~/server/better-auth/server";
 
 export default async function AccountLayout({
@@ -7,6 +8,9 @@ export default async function AccountLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { isEnabled } = await getBusinessFlags();
+  if (!isEnabled("customerAccounts")) notFound();
+
   const session = await getSession();
 
   if (!session) {

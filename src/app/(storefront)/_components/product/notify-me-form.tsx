@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type NotifyMeFormProps = {
   productId: string;
@@ -37,6 +38,7 @@ export function NotifyMeForm({
   buttonClassName,
   message = "Out of stock — get notified when it's back.",
 }: NotifyMeFormProps) {
+  const { isEnabled } = useStorefrontFlags();
   const inputId = useId();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -44,6 +46,8 @@ export function NotifyMeForm({
   const subscribe = api.backInStock.subscribe.useMutation({
     onSuccess: () => setSubmitted(true),
   });
+
+  if (!isEnabled("backInStock")) return null;
 
   if (submitted) {
     return (

@@ -33,6 +33,7 @@ import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
@@ -59,8 +60,7 @@ const MOBILE_ACCOUNT_LINKS = [
 
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
-  const { count: wishlistCount, isHydrated: wishlistHydrated } =
-    useWishlist();
+  const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -210,6 +210,8 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   const LEFT_NAV: NavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
@@ -608,34 +610,38 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               {links.map((link, i) => renderDesktopNavLink(link, i, "right"))}
             </nav>
 
-            <div className="hidden md:block">
-              {session?.user ? userMenu : authLink}
-            </div>
+            {isStorefrontEnabled("customerAccounts") && (
+              <div className="hidden md:block">
+                {session?.user ? userMenu : authLink}
+              </div>
+            )}
 
-            <Link
-              href="/wishlist"
-              aria-label="Open wishlist"
-              className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
-              style={{ color: "var(--vn-ink-soft)" }}
-            >
-              <Heart className="h-[18px] w-[18px]" strokeWidth={1.4} />
-              {wishlistHydrated && wishlistCount > 0 && (
-                <motion.span
-                  aria-hidden="true"
-                  initial={{ scale: reduce ? 1 : 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: reduce ? 0 : 0.2 }}
-                  className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
-                  style={{
-                    background: "var(--vn-accent)",
-                    color: "#fff",
-                    minWidth: "16px",
-                  }}
-                >
-                  {wishlistCount}
-                </motion.span>
-              )}
-            </Link>
+            {isStorefrontEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label="Open wishlist"
+                className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-ink-soft)" }}
+              >
+                <Heart className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                {wishlistHydrated && wishlistCount > 0 && (
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ scale: reduce ? 1 : 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: reduce ? 0 : 0.2 }}
+                    className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
+                    style={{
+                      background: "var(--vn-accent)",
+                      color: "#fff",
+                      minWidth: "16px",
+                    }}
+                  >
+                    {wishlistCount}
+                  </motion.span>
+                )}
+              </Link>
+            )}
 
             <button
               onClick={() => setIsOpen(true)}

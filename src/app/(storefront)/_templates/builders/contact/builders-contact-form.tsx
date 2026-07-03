@@ -12,6 +12,7 @@ import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 const LABEL_CLASS =
   "text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--builders-muted)]";
@@ -44,6 +45,9 @@ export function BuildersContactForm() {
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
+
+  const { isEnabled } = useStorefrontFlags();
+  if (!isEnabled("contactForm")) return null;
 
   if (isSuccess) {
     return (

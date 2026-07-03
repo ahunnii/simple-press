@@ -31,6 +31,7 @@ import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 type NavChild = { label: string; href: string; external?: boolean };
@@ -58,7 +59,10 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
   ).filter((el) => !el.closest("[inert]"));
 }
 
-export function SledgeHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function SledgeHeader({
+  business,
+  session,
+}: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
@@ -216,6 +220,8 @@ export function SledgeHeader({ business, session }: DefaultHeaderTemplateProps) 
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   const defaultNav: NavLink[] = [
     { href: "/", label: "Home" },
@@ -562,32 +568,36 @@ export function SledgeHeader({ business, session }: DefaultHeaderTemplateProps) 
               })}
             </nav>
 
-            <div className="hidden md:block">
-              {session?.user ? userMenu : authLink}
-            </div>
+            {isStorefrontEnabled("customerAccounts") && (
+              <div className="hidden md:block">
+                {session?.user ? userMenu : authLink}
+              </div>
+            )}
 
             {/* Wishlist — mirrors cart icon sizing/badge treatment */}
-            <Link
-              href="/wishlist"
-              aria-label={
-                wishlistCount > 0
-                  ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
-                  : "View wishlist"
-              }
-              className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
-            >
-              <Heart className="h-[25px] w-[25px]" strokeWidth={1.4} />
-              {wishlistCount > 0 && (
-                <motion.span
-                  initial={shouldReduceMotion ? false : { scale: 0 }}
-                  animate={{ scale: 1 }}
-                  aria-hidden="true"
-                  className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
-                >
-                  {wishlistCount}
-                </motion.span>
-              )}
-            </Link>
+            {isStorefrontEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label={
+                  wishlistCount > 0
+                    ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                    : "View wishlist"
+                }
+                className="relative flex items-center text-white/80 transition-opacity hover:opacity-70"
+              >
+                <Heart className="h-[25px] w-[25px]" strokeWidth={1.4} />
+                {wishlistCount > 0 && (
+                  <motion.span
+                    initial={shouldReduceMotion ? false : { scale: 0 }}
+                    animate={{ scale: 1 }}
+                    aria-hidden="true"
+                    className="sl-cart-badge absolute -top-2.5 -right-2.5 flex h-5 w-5 items-center justify-center rounded-full text-[11.25px] font-semibold"
+                  >
+                    {wishlistCount}
+                  </motion.span>
+                )}
+              </Link>
+            )}
 
             {/* M-8: dynamic aria-label includes item count; badge is aria-hidden */}
             <Link

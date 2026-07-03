@@ -4,10 +4,14 @@ import Link from "next/link";
 import { Heart } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 export function DefaultWishlistBadge() {
+  const { isEnabled } = useStorefrontFlags();
   const { count, isHydrated } = useWishlist();
+
+  if (!isEnabled("wishlist")) return null;
 
   // Don't show count until hydrated (prevents flash)
   if (!isHydrated) {

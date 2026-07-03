@@ -68,6 +68,7 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    couponsEnabled,
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
@@ -163,69 +164,71 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-4">
-          <SectionHead>Discount Code</SectionHead>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="discount-code" className={LBL}>
-                Code
-              </Label>
-              {/* S-6: link input to its error message */}
-              <Input
-                id="discount-code"
-                type="text"
-                value={discountCodeInput}
-                onChange={(e) => {
-                  setDiscountCodeInput(e.target.value.toUpperCase());
-                  setDiscountFieldError(null);
-                }}
-                placeholder="SUMMER-2026"
-                autoComplete="off"
-                aria-invalid={!!discountFieldError}
-                aria-describedby={
-                  discountFieldError ? "discount-error" : undefined
-                }
-                className={cn(INP, "tracking-[0.1em] uppercase")}
-              />
+        {couponsEnabled && (
+          <fieldset className="flex flex-col gap-4">
+            <SectionHead>Discount Code</SectionHead>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label htmlFor="discount-code" className={LBL}>
+                  Code
+                </Label>
+                {/* S-6: link input to its error message */}
+                <Input
+                  id="discount-code"
+                  type="text"
+                  value={discountCodeInput}
+                  onChange={(e) => {
+                    setDiscountCodeInput(e.target.value.toUpperCase());
+                    setDiscountFieldError(null);
+                  }}
+                  placeholder="SUMMER-2026"
+                  autoComplete="off"
+                  aria-invalid={!!discountFieldError}
+                  aria-describedby={
+                    discountFieldError ? "discount-error" : undefined
+                  }
+                  className={cn(INP, "tracking-[0.1em] uppercase")}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleApplyDiscount}
+                disabled={isValidatingDiscount || items.length === 0}
+                className="sl-btn flex flex-shrink-0 items-center gap-2 text-xs disabled:opacity-40"
+              >
+                {isValidatingDiscount ? (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Checking…
+                  </>
+                ) : discountAmount > 0 ? (
+                  "Applied ✓"
+                ) : (
+                  "Apply"
+                )}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleApplyDiscount}
-              disabled={isValidatingDiscount || items.length === 0}
-              className="sl-btn flex flex-shrink-0 items-center gap-2 text-xs disabled:opacity-40"
-            >
-              {isValidatingDiscount ? (
-                <>
-                  <Loader2 className="size-3.5 animate-spin" />
-                  Checking…
-                </>
-              ) : discountAmount > 0 ? (
-                "Applied ✓"
-              ) : (
-                "Apply"
-              )}
-            </button>
-          </div>
-          {/* S-6: error with id + role="alert"; success with role="status" + green-700 */}
-          {discountFieldError ? (
-            <p
-              id="discount-error"
-              role="alert"
-              className="text-destructive font-sans text-xs tracking-[0.12em] uppercase"
-            >
-              {discountFieldError}
-            </p>
-          ) : null}
-          {discountCodeLabel && discountAmount > 0 ? (
-            <p
-              role="status"
-              className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase"
-            >
-              Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
-              applied.
-            </p>
-          ) : null}
-        </fieldset>
+            {/* S-6: error with id + role="alert"; success with role="status" + green-700 */}
+            {discountFieldError ? (
+              <p
+                id="discount-error"
+                role="alert"
+                className="text-destructive font-sans text-xs tracking-[0.12em] uppercase"
+              >
+                {discountFieldError}
+              </p>
+            ) : null}
+            {discountCodeLabel && discountAmount > 0 ? (
+              <p
+                role="status"
+                className="font-sans text-xs tracking-[0.12em] text-green-700 uppercase"
+              >
+                Code <span className="font-semibold">{discountCodeLabel}</span>{" "}
+                applied.
+              </p>
+            ) : null}
+          </fieldset>
+        )}
 
         {shippingConfig.offersInStorePickup ? (
           <fieldset className="flex flex-col gap-4">

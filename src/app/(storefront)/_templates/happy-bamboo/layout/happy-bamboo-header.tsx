@@ -21,6 +21,7 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
 
 import { HappyBambooCartDrawer } from "../cart-checkout/happy-bamboo-cart-drawer";
@@ -37,9 +38,9 @@ export function HappyBambooHeader({
   session,
 }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
-  const { count: wishlistCount, isHydrated: wishlistHydrated } =
-    useWishlist();
+  const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
+  const { isEnabled } = useStorefrontFlags();
   // const { data: session, isPending } = authClient.useSession();
 
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -156,26 +157,30 @@ export function HappyBambooHeader({
           </nav>
 
           <div className="flex items-center gap-4">
-            {session?.user ? userMenu : authActions}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-background hover:bg-background/10 relative hover:text-[#E3CF99]"
-              asChild
-            >
-              <Link href="/wishlist" aria-label="Open wishlist">
-                <Heart className="h-5 w-5" />
-                {wishlistHydrated && wishlistCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs"
-                  >
-                    {wishlistCount}
-                  </motion.span>
-                )}
-              </Link>
-            </Button>
+            {isEnabled("customerAccounts") && (
+              <>{session?.user ? userMenu : authActions}</>
+            )}
+            {isEnabled("wishlist") && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-background hover:bg-background/10 relative hover:text-[#E3CF99]"
+                asChild
+              >
+                <Link href="/wishlist" aria-label="Open wishlist">
+                  <Heart className="h-5 w-5" />
+                  {wishlistHydrated && wishlistCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs"
+                    >
+                      {wishlistCount}
+                    </motion.span>
+                  )}
+                </Link>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"

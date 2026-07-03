@@ -17,11 +17,11 @@
  * checkout session). priceCurrency is therefore always "USD".
  */
 
-import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import {
-  parseBusinessHours,
   buildOpeningHoursSpecification,
+  parseBusinessHours,
 } from "~/lib/business-hours";
+import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 
 // ---------------------------------------------------------------------------
 // Local type aliases mirroring the shape returned by tRPC / Prisma selects.
@@ -156,6 +156,17 @@ function parseSameAs(socialLinks: unknown): string[] | undefined {
 // Builder: Product
 // ---------------------------------------------------------------------------
 
+export type BuildProductSchemaOptions = {
+  /**
+   * Whether to include review-derived fields (`aggregateRating` and
+   * `review`). Defaults to `true` to preserve existing behavior for callers
+   * that don't pass this — set to `false` when the business has the
+   * `reviews` feature flag disabled, so the schema doesn't advertise ratings
+   * the storefront no longer surfaces.
+   */
+  includeReviews?: boolean;
+};
+
 /**
  * Build a schema.org Product object for a product detail page.
  *
@@ -169,7 +180,9 @@ export function buildProductSchema(
   product: ProductForSchema,
   business: CanonicalBusiness & { name: string },
   reviews: ReviewForSchema[] = [],
+  options: BuildProductSchemaOptions = {},
 ): Record<string, unknown> {
+  const includeReviews = options.includeReviews ?? true;
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
   const firstImage = toAbsoluteUrl(product.images[0]?.url);
 
@@ -205,6 +218,7 @@ export function buildProductSchema(
 
   // AggregateRating is only valid when reviewCount > 0
   if (
+    includeReviews &&
     product.reviewCount > 0 &&
     product.averageRating !== null &&
     product.averageRating !== undefined
@@ -216,7 +230,7 @@ export function buildProductSchema(
     };
   }
 
-  if (reviews.length > 0) {
+  if (includeReviews && reviews.length > 0) {
     schema.review = reviews.map((r) => ({
       "@type": "Review",
       reviewRating: {
@@ -473,7 +487,10 @@ export function buildLocalBusinessSchema(
   }
 
   if (business.businessAddress) {
-    schema.address = { "@type": "PostalAddress", streetAddress: business.businessAddress };
+    schema.address = {
+      "@type": "PostalAddress",
+      streetAddress: business.businessAddress,
+    };
   }
 
   const logoUrl = toAbsoluteUrl(business.siteContent?.logoUrl);
