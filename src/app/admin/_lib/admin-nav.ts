@@ -465,6 +465,7 @@ export const HUB_CARDS: HubCard[] = [
     hub: "content",
     color: "green",
     icon: FileText,
+    featureKey: "pages",
   },
   {
     key: "content-blog",
