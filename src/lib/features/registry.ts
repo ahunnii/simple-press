@@ -188,6 +188,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["store-transfer"],
   },
+  wordpressExport: {
+    key: "wordpressExport",
+    label: "Export to WordPress",
+    description:
+      "Download your content, products, and records in WordPress/WooCommerce import formats",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["wordpress-export"],
+  },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
   customerAccounts: {

@@ -1,6 +1,7 @@
 import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
+  IconBrandWordpress,
   IconChartBar,
   IconCreditCard,
   IconDashboard,
@@ -429,6 +430,18 @@ export const HUB_CARDS: HubCard[] = [
     color: "emerald",
     icon: IconTransfer,
     featureKey: "storeTransfer",
+  },
+  {
+    key: "settings-wordpress-export",
+    title: "Export to WordPress",
+    description: "Move your store to WordPress/WooCommerce",
+    body: "Download your content, products, and records in WordPress/WooCommerce import formats",
+    href: "/admin/settings/wordpress-export",
+    hub: "settings",
+    color: "blue",
+    icon: IconBrandWordpress,
+    featureKey: "wordpressExport",
+    keywords: ["woocommerce", "offboard", "migrate", "leave", "cancel"],
   },
   {
     key: "settings-team",
