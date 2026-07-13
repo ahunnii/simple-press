@@ -16,6 +16,7 @@ export const TEMPLATE_IDS = {
   SLEDGE: "sledge",
   VII: "vii",
   BUILDERS: "builders",
+  COOP: "coop",
 } as const;
 
 export const TEMPLATES = [
@@ -95,6 +96,13 @@ export const TEMPLATES = [
     description:
       "Industrial Solidarity service/portfolio template for trades and construction businesses — no shop or checkout; highlights services, about, and contact",
     previewImage: "/templates/builders-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.COOP,
+    name: "Coop",
+    description:
+      "Pixel-exact replica of buildingcooperatively.com — minimal 4-page service site with a parallax hero and project photo gallery (no shop or checkout)",
+    previewImage: "/templates/coop-preview.png",
   },
 ] as const;
 

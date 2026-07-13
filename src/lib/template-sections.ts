@@ -1,12 +1,13 @@
-import { defaultTemplateSections } from "~/app/(storefront)/_templates/default/sections";
-import { happyBambooSections } from "~/app/(storefront)/_templates/happy-bamboo/sections";
-import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
 import type { TemplateField, TemplatePage } from "~/lib/template-fields";
 import {
   getGroupMetadata,
   groupFieldsByGroup,
   groupFieldsByPage,
 } from "~/lib/template-fields";
+import { coopSections } from "~/app/(storefront)/_templates/coop/sections";
+import { defaultTemplateSections } from "~/app/(storefront)/_templates/default/sections";
+import { happyBambooSections } from "~/app/(storefront)/_templates/happy-bamboo/sections";
+import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
 
 /**
  * A "section" is an owner-facing, hideable/orderable unit of a storefront
@@ -38,13 +39,12 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...defaultTemplateSections,
   ...happyBambooSections,
   ...viiSections,
+  ...coopSections,
 };
 
 function humanizeGroupKey(key: string): string {
   if (!key) return "";
-  return key
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return key.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /**
@@ -124,7 +124,10 @@ export function getSectionsForTemplate(templateId: string): TemplateSection[] {
   const curatedGroupIds = new Set(curated.flatMap((s) => s.groupIds));
   const maxOrderByPage = new Map<string, number>();
   for (const s of curated) {
-    maxOrderByPage.set(s.page, Math.max(maxOrderByPage.get(s.page) ?? -1, s.order));
+    maxOrderByPage.set(
+      s.page,
+      Math.max(maxOrderByPage.get(s.page) ?? -1, s.order),
+    );
   }
 
   // Derived fillers slot in after the curated sections of their page.

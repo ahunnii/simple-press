@@ -35,6 +35,7 @@ const TEMPLATES = [
   { id: "dark-trend", label: "Dark Trend" },
   { id: "noise", label: "Noise" },
   { id: "builders", label: "Builders" },
+  { id: "coop", label: "Coop" },
   { id: "vii", label: "Skinbar VII" },
 ];
 
@@ -81,11 +82,9 @@ export function CreateBusinessButton() {
 
   const handleSubdomainChange = (value: string) => {
     setSubdomainEdited(true);
-    form.setValue(
-      "subdomain",
-      value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
-      { shouldValidate: true },
-    );
+    form.setValue("subdomain", value.toLowerCase().replace(/[^a-z0-9-]/g, ""), {
+      shouldValidate: true,
+    });
   };
 
   const handleOpenChange = (next: boolean) => {

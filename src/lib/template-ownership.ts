@@ -38,6 +38,13 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Builders",
     subdomains: ["buildingcooperatively", "detroit-coop"],
   },
+  // Exact replica of buildingcooperatively.com (short-lived demo of their
+  // existing site; ideally they migrate to `builders`). "demo" is included so
+  // runtime QA can switch the demo business to this template.
+  coop: {
+    label: "Coop",
+    subdomains: ["buildingcooperatively", "demo"],
+  },
   sledge: {
     label: "Sledge",
     subdomains: ["judysledge"],
@@ -45,6 +52,11 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   vii: {
     label: "Skinbar VII",
     subdomains: ["skinbar-vii", "demo"],
+  },
+  // Throwaway sp-new-template skill test template — safe to delete.
+  testkit: {
+    label: "Testkit",
+    subdomains: ["testkit"],
   },
 };
 

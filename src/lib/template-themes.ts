@@ -1,7 +1,7 @@
+import { getThemeSelection } from "~/lib/sp-meta";
 import { defaultTemplateTheme } from "~/app/(storefront)/_templates/default/theme";
 import { happyBambooTheme } from "~/app/(storefront)/_templates/happy-bamboo/theme";
 import { viiTheme } from "~/app/(storefront)/_templates/vii/theme";
-import { getThemeSelection } from "~/lib/sp-meta";
 
 /**
  * Curated theme presets per template. The platform author defines a small

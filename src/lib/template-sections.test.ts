@@ -56,7 +56,9 @@ describe("getSectionsForTemplate (derived fallback)", () => {
     const sections = getSectionsForTemplate("default");
     const pages = new Set(sections.map((s) => s.page));
     for (const page of pages) {
-      const orders = sections.filter((s) => s.page === page).map((s) => s.order);
+      const orders = sections
+        .filter((s) => s.page === page)
+        .map((s) => s.order);
       expect(orders).toEqual(orders.map((_, i) => i));
     }
   });
@@ -65,7 +67,7 @@ describe("getSectionsForTemplate (derived fallback)", () => {
     // Every group that has fields must appear in some section's groupIds,
     // otherwise those fields were editable under derived sections but are
     // orphaned by the curated registry.
-    for (const templateId of ["default", "happy-bamboo", "vii"]) {
+    for (const templateId of ["default", "happy-bamboo", "vii", "coop"]) {
       const coveredGroupIds = new Set(
         getSectionsForTemplate(templateId).flatMap((s) => s.groupIds),
       );
@@ -73,9 +75,7 @@ describe("getSectionsForTemplate (derived fallback)", () => {
       for (const [page, fields] of Object.entries(
         groupFieldsByPage(templateId),
       )) {
-        const groups = new Set(
-          fields.map((f) => f.group ?? `${page}.__other`),
-        );
+        const groups = new Set(fields.map((f) => f.group ?? `${page}.__other`));
         for (const g of groups) {
           if (!coveredGroupIds.has(g)) missing.push(g);
         }

@@ -67,3 +67,5 @@ e2e/.seed-data.json
 
 # Standard dependencies folder
 node_modules/
+# coop template fonts — Adobe-licensed woff2, NEVER commit (served from MinIO; see docs/templates/coop/upload-fonts.md)
+public/templates/coop/fonts/

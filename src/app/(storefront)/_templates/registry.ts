@@ -45,6 +45,13 @@ import { BuildersLayout } from "./builders/layout/builders-layout";
 import { BuildersServicesIndexPage } from "./builders/services/builders-services-index-page";
 import { BuildersTestimonialsPage } from "./builders/testimonials/builders-testimonials-page";
 // ---------------------------------------------------------------------------
+// Coop
+// ---------------------------------------------------------------------------
+import { CoopAboutPage } from "./coop/about/coop-about-page";
+import { CoopContactPage } from "./coop/contact/coop-contact-page";
+import { CoopGenericPage } from "./coop/generic/coop-generic-page";
+import { CoopLayout } from "./coop/layout/coop-layout";
+// ---------------------------------------------------------------------------
 // Dark Trend
 // ---------------------------------------------------------------------------
 import { DarkTrendAboutPage } from "./dark-trend/about/dark-trend-about-page";
@@ -461,6 +468,15 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     TestimonialsPage: BuildersTestimonialsPage,
   },
 
+  // Pixel-exact replica of buildingcooperatively.com — service archetype,
+  // no commerce/services slots. Everything unlisted falls back to Default.
+  coop: {
+    Layout: CoopLayout,
+    AboutPage: CoopAboutPage,
+    ContactPage: CoopContactPage,
+    GenericPage: CoopGenericPage,
+  },
+
   noise: {
     Layout: NoiseLayout,
     AboutPage: NoiseAboutPage,
@@ -530,7 +546,6 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrdersPage: SledgeOrdersPage,
     PreferencesPage: SledgePreferencesPage,
   },
-
   vii: {
     Layout: ViiLayout,
     AboutPage: ViiAboutPage,
