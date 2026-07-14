@@ -73,8 +73,20 @@ export function StoreCustomizationStep({
       });
 
       if (signUpError) {
-        setError(signUpError.message ?? "Failed to create account");
-        return;
+        // Signup is two steps (create account, then create store). If the store
+        // step failed on a previous attempt, the account already exists AND the
+        // user was auto-signed-in. On retry signUp.email now errors with
+        // "already exists" — but that's this same user finishing setup, not a
+        // conflict. Only surface the error if we're NOT already signed in as
+        // this email; otherwise fall through to the onboarding call.
+        const { data: sessionData } = await authClient.getSession();
+        const signedInAsEmail =
+          sessionData?.user?.email?.toLowerCase() ===
+          formData.email.toLowerCase();
+        if (!signedInAsEmail) {
+          setError(signUpError.message ?? "Failed to create account");
+          return;
+        }
       }
 
       const response = await fetch("/api/onboarding", {

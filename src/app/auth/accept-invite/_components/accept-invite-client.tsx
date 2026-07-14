@@ -31,10 +31,13 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
   const { data: session } = authClient.useSession();
 
   const acceptMutation = api.team.acceptInvite.useMutation({
-    onSuccess: () => {
+    onSuccess: ({ adminSignInUrl }) => {
       toast.success("Invitation accepted! Redirecting to your dashboard...");
       setTimeout(() => {
-        router.push("/auth/sign-in?redirect=/admin/dashboard");
+        // adminSignInUrl points at the business's own domain (absolute in
+        // prod), so use a full navigation rather than a same-origin push —
+        // /admin on the platform domain has no tenant context.
+        window.location.href = adminSignInUrl;
       }, 1500);
     },
     onError: (err) => {

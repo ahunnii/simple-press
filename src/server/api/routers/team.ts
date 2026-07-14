@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
+import { getBusinessUrl } from "~/lib/business-url";
 import { sendTeamInviteEmail } from "~/lib/email/templates";
 
 import {
@@ -115,6 +116,22 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
+      // The invite/accept flow runs on the platform domain, but the member must
+      // land on the *business's* admin (its own subdomain/custom domain) —
+      // /admin on the platform domain has no tenant context. Build that URL so
+      // the client can send them there (they re-sign-in so the new role loads).
+      const business = await ctx.db.business.findUnique({
+        where: { id: invite.businessId },
+        select: { subdomain: true, customDomain: true, domainStatus: true },
+      });
+      const adminSignInUrl = business
+        ? `${getBusinessUrl({
+            subdomain: business.subdomain ?? "",
+            customDomain: business.customDomain,
+            domainStatus: business.domainStatus,
+          })}/auth/sign-in?redirectTo=${encodeURIComponent("/admin/dashboard")}`
+        : "/admin/dashboard";
+
       // Guard against duplicate membership
       const existing = await ctx.db.businessMembership.findUnique({
         where: {
@@ -131,7 +148,7 @@ export const teamRouter = createTRPCRouter({
           where: { id: invite.id },
           data: { used: true, usedAt: new Date() },
         });
-        return { success: true, businessId: invite.businessId };
+        return { success: true, businessId: invite.businessId, adminSignInUrl };
       }
 
       // Create membership + mark invite used in a transaction
@@ -149,7 +166,7 @@ export const teamRouter = createTRPCRouter({
         }),
       ]);
 
-      return { success: true, businessId: invite.businessId };
+      return { success: true, businessId: invite.businessId, adminSignInUrl };
     }),
 
   // ─── OWNER-ONLY MUTATIONS ─────────────────────────────────────────────────
