@@ -502,6 +502,7 @@ const aboutCTAData: TemplateField[] = [
     page: "about",
     group: "about.cta",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 

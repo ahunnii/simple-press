@@ -71,6 +71,14 @@ export const siteContentSchema = z.object({
 
   // Template-specific — shape varies per template, validated at consumption time
   customFields: z.any().optional(),
+
+  // Set by the visual editor's Publish action only — tells the server the
+  // owner's durable draft (SiteContent.previewCustomFields) has just been
+  // superseded by this save and should be cleared. Every other caller
+  // (Branding, Navigation, legacy Template Fields editor) must omit this /
+  // leave it false so an unrelated save never silently destroys an
+  // in-progress /editor draft.
+  clearPreviewDraft: z.boolean().optional(),
 });
 
 /** Max payload size for a preview draft (~1MB of JSON). */

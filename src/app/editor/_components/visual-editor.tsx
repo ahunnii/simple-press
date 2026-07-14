@@ -386,7 +386,10 @@ export function VisualEditor({
       // can re-create the server draft after updateSiteContent clears it.
       if (inFlightPromiseRef.current) await inFlightPromiseRef.current;
       setFlushPendingState(false);
-      publish.mutate({ customFields: latestFieldsRef.current });
+      publish.mutate({
+        customFields: latestFieldsRef.current,
+        clearPreviewDraft: true,
+      });
     })();
   }, [cancelPendingFlush, publish, setFlushPendingState]);
 

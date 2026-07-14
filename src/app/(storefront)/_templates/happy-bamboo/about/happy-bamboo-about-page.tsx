@@ -368,7 +368,7 @@ export function HappyBambooAboutPage({
             className="relative aspect-16/7 w-full overflow-hidden rounded-xl"
           >
             <Image
-              src={f["happy-bamboo.about-cta-image"]!}
+              src={f["happy-bamboo.about-cta-image"] ?? "/placeholder.svg"}
               alt="Bamboo forest"
               fill
               className="object-cover object-bottom"

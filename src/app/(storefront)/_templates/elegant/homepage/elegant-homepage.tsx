@@ -1,3 +1,4 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
@@ -11,7 +12,14 @@ import { ElegantTestimonials } from "./elegant-testimonials";
 import { ElegantTrustBadges } from "./elegant-trust-badges";
 
 export async function ElegantHomePage() {
-  const homepage = await api.business.getHomepage();
+  const [homepage, flags] = await Promise.all([
+    api.business.getHomepage(),
+    getBusinessFlags(),
+  ]);
+
+  const testimonials = flags.isEnabled("testimonials")
+    ? await api.testimonial.listRandom({ limit: 9 })
+    : [];
 
   const f = resolveFields(homepage?.siteContent?.customFields, [
     "elegant.homepage.hero-image",
@@ -79,7 +87,10 @@ export async function ElegantHomePage() {
         sectionAttrs={sectionGroupAttr("homepage", "about")}
       />
 
-      <ElegantTestimonials />
+      <ElegantTestimonials
+        testimonials={testimonials}
+        sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+      />
 
       <ElegantCTABanner
         homepage={homepage}

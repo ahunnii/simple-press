@@ -13,6 +13,9 @@ import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
@@ -39,6 +42,10 @@ export function ElegantProductPage({
   const [shown, setShown] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("details");
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   const { variantImageUrl } = useVariantImage();
   // Jump to the variant's image when the selected variant changes.
@@ -529,6 +536,58 @@ export function ElegantProductPage({
           </div>
         </div>
       </section>
+
+      {/* ── Reviews — only mounts (and only fires review queries) when the
+          reviews feature flag is enabled for this business. ── */}
+      {reviewsEnabled && (
+        <section
+          style={{
+            padding: "80px 40px",
+            background: "var(--el-cream, #f5f1ea)",
+          }}
+        >
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+            <div style={{ marginBottom: 48 }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  display: "block",
+                  marginBottom: 14,
+                }}
+              >
+                Reviews
+              </span>
+              <h2
+                style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontWeight: 400,
+                  fontSize: "clamp(36px, 4.5vw, 56px)",
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.01em",
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
+                What customers are saying
+              </h2>
+            </div>
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </div>
+        </section>
+      )}
 
       {/* ── Related products ── */}
       {relatedProducts && relatedProducts.length > 0 && (

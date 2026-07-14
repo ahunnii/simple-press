@@ -63,10 +63,25 @@ export async function importProducts(
     }
   }
 
+  // Tracks slugs/SKUs already claimed during this import run so that two rows
+  // in the same file (or a row colliding with one just created earlier in
+  // this same run) don't both pass the DB uniqueness check and then race
+  // each other into the unique constraint. Combined with the DB re-query in
+  // the helpers below, this covers both in-run collisions and collisions
+  // against products that already existed before the import started.
+  const usedSlugs = new Set<string>();
+  const usedSkus = new Set<string>();
+
   // Import simple products first
   for (const product of simpleProducts) {
     try {
-      await importSingleProduct(product, options, collectionMap);
+      await importSingleProduct(
+        product,
+        options,
+        collectionMap,
+        usedSlugs,
+        usedSkus,
+      );
       result.imported++;
     } catch (error) {
       result.errors.push({
@@ -88,6 +103,7 @@ export async function importProducts(
         productVariations,
         options,
         collectionMap,
+        usedSlugs,
       );
       result.imported++;
     } catch (error) {
@@ -101,12 +117,93 @@ export async function importProducts(
   return result;
 }
 
+/**
+ * Finds a slug that is unique for the given business, appending -2, -3, ...
+ * as needed. Checks the in-run `usedSlugs` set first (fast path for
+ * duplicate names within the same import) and falls back to a DB query so
+ * collisions against products that existed before this import are also
+ * caught. Mirrors the pattern used for collections/services/galleries.
+ */
+async function getUniqueProductSlug(
+  businessId: string,
+  baseSlug: string,
+  usedSlugs: Set<string>,
+): Promise<string> {
+  let counter = 1;
+  let candidate = baseSlug;
+
+  while (true) {
+    if (counter > 1000) {
+      throw new Error(`Could not generate a unique slug for "${baseSlug}".`);
+    }
+
+    if (!usedSlugs.has(candidate)) {
+      const existing = await db.product.findFirst({
+        where: { businessId, slug: candidate },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        usedSlugs.add(candidate);
+        return candidate;
+      }
+
+      usedSlugs.add(candidate);
+    }
+
+    counter++;
+    candidate = `${baseSlug}-${counter}`;
+  }
+}
+
+/**
+ * Finds a SKU that is unique for the given business, for use by the
+ * "create_new" duplicate-SKU strategy. Starts at -2 since the base SKU is
+ * already known to collide with an existing product.
+ */
+async function getUniqueProductSku(
+  businessId: string,
+  baseSku: string,
+  usedSkus: Set<string>,
+): Promise<string> {
+  let counter = 2;
+  let candidate = `${baseSku}-${counter}`;
+
+  while (true) {
+    if (counter > 1000) {
+      throw new Error(`Could not generate a unique SKU for "${baseSku}".`);
+    }
+
+    if (!usedSkus.has(candidate)) {
+      const existing = await db.product.findFirst({
+        where: { businessId, sku: candidate },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        usedSkus.add(candidate);
+        return candidate;
+      }
+
+      usedSkus.add(candidate);
+    }
+
+    counter++;
+    candidate = `${baseSku}-${counter}`;
+  }
+}
+
 async function importSingleProduct(
   product: ParsedProduct,
   options: ImportOptions,
   collectionMap: Map<string, string>,
+  usedSlugs: Set<string>,
+  usedSkus: Set<string>,
 ) {
-  const slug = slugify(product.name, { lower: true, strict: true });
+  // The SKU actually written to the new product. Defaults to the CSV value;
+  // reassigned below when onDuplicateSku === "create_new" needs a fresh,
+  // non-colliding SKU instead of reusing the one that already collided.
+  let skuToUse = product.sku;
 
   // Check for duplicate SKU
   if (product.sku) {
@@ -138,9 +235,22 @@ async function importSingleProduct(
         });
         return;
       }
-      // If "create_new", continue to create a new product
+      // If "create_new", continue to create a new product with a
+      // freshly generated, guaranteed-unique SKU.
+      skuToUse = await getUniqueProductSku(
+        options.businessId,
+        product.sku,
+        usedSkus,
+      );
     }
   }
+
+  const baseSlug = slugify(product.name, { lower: true, strict: true });
+  const slug = await getUniqueProductSlug(
+    options.businessId,
+    baseSlug,
+    usedSlugs,
+  );
 
   // Create product
   const createdProduct = await db.product.create({
@@ -149,7 +259,7 @@ async function importSingleProduct(
       name: product.name,
       slug,
       description: product.description,
-      sku: product.sku,
+      sku: skuToUse,
       price: product.price,
       compareAtPrice: product.compareAtPrice,
       trackInventory: product.trackInventory,
@@ -200,8 +310,17 @@ async function importVariableProduct(
   variations: ParsedProduct[],
   options: ImportOptions,
   collectionMap: Map<string, string>,
+  usedSlugs: Set<string>,
 ) {
-  const slug = slugify(variableProduct.name, { lower: true, strict: true });
+  const baseSlug = slugify(variableProduct.name, {
+    lower: true,
+    strict: true,
+  });
+  const slug = await getUniqueProductSlug(
+    options.businessId,
+    baseSlug,
+    usedSlugs,
+  );
 
   // Use the lowest variant price as base price
   const lowestPrice =

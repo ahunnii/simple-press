@@ -80,7 +80,7 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const { templateId, ...data } = input;
+      const { templateId, clearPreviewDraft, ...data } = input;
 
       const siteContent = await ctx.db.siteContent.upsert({
         where: { businessId },
@@ -90,9 +90,14 @@ export const contentRouter = createTRPCRouter({
         },
         update: {
           ...data,
-          // Clear the preview draft whenever the owner publishes real content.
-          previewCustomFields: Prisma.JsonNull,
-          previewUpdatedAt: null,
+          // Only clear the durable /editor draft when the caller explicitly
+          // says this save supersedes it (the visual editor's Publish
+          // action). Unrelated saves — Branding, Navigation, the legacy
+          // Template Fields editor — must never silently wipe an
+          // in-progress draft.
+          ...(clearPreviewDraft
+            ? { previewCustomFields: Prisma.JsonNull, previewUpdatedAt: null }
+            : {}),
         },
       });
 
