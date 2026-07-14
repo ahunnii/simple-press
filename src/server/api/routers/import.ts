@@ -112,6 +112,13 @@ export const importRouter = createTRPCRouter({
         });
       }
 
+      // Tenant scope: the import must belong to the business the caller is
+      // acting as. Without this any owner/admin could execute another tenant's
+      // import by id and write products into that tenant's catalog.
+      if (importRecord.businessId !== ctx.businessId) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+      }
+
       // Update status
       await ctx.db.productImport.update({
         where: { id: input.importId },

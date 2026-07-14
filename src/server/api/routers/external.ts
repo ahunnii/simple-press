@@ -3,6 +3,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
+import {
+  externalTokenLimiter,
+  getClientIpFromHeaders,
+} from "~/lib/rate-limit";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const externalRouter = createTRPCRouter({
@@ -12,14 +16,31 @@ export const externalRouter = createTRPCRouter({
    */
   verifyArtisanToken: publicProcedure
     .input(z.string().min(1))
-    .query(async ({ input: aftoken }) => {
+    .query(async ({ ctx, input: aftoken }) => {
+      // This is an unauthenticated public procedure that proxies to the partner
+      // API, so throttle per IP to prevent brute-force / PII-harvesting abuse.
+      try {
+        await externalTokenLimiter.consume(getClientIpFromHeaders(ctx.headers));
+      } catch {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many requests. Please try again later.",
+        });
+      }
+
       let fetchToken: Response;
       try {
         fetchToken = await fetch(
           `${env.ARTISANAL_FUTURES_API_URL}/simplepress?code=${encodeURIComponent(aftoken)}`,
           {
             headers: {
-              Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
+              // Use a dedicated partner token when configured; fall back to the
+              // internal hash secret only for backward compatibility. The
+              // internal secret also signs Stripe OAuth state, so it should not
+              // be shared with a third party once a distinct token is set.
+              Authorization: `Bearer ${
+                env.ARTISANAL_FUTURES_API_TOKEN ?? env.SIMPLEPRESS_HASH_SECRET
+              }`,
             },
           },
         );

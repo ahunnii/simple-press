@@ -134,6 +134,26 @@ export async function POST(req: NextRequest) {
           throw new Error("Missing Stripe connected account on event");
         }
 
+        // 🔑 Bind the order to the account that actually processed the payment.
+        // metadata.businessId is attacker-controllable by any connected merchant
+        // (they can set arbitrary metadata on their own checkout sessions), so a
+        // merchant could otherwise inject orders / decrement inventory in another
+        // tenant's store. Reject when the metadata business isn't the one that
+        // owns the connected account this event came from.
+        if (business.stripeAccountId !== stripeAccountId) {
+          Sentry.captureMessage(
+            `[Webhook] businessId/account mismatch: metadata business ${businessId} does not own connected account ${stripeAccountId}`,
+            {
+              level: "error",
+              tags: {
+                "webhook.step": "account-mismatch",
+                businessId,
+              },
+            },
+          );
+          return NextResponse.json({ received: true });
+        }
+
         // 🔑 Retrieve full session using business's Stripe account
         const fullSession = await stripeClient.checkout.sessions.retrieve(
           session.id,

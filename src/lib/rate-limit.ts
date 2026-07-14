@@ -134,6 +134,15 @@ export const backInStockLimiter = makeLazy({
   keyPrefix: "rl:back-in-stock",
 });
 
+// 10 attempts per minute per IP — for unauthenticated external token lookups
+// (Artisanal Futures). Prevents the public procedure being abused as an
+// unthrottled brute-force / harvesting oracle against the partner API.
+export const externalTokenLimiter = makeLazy({
+  points: 10,
+  duration: 60,
+  keyPrefix: "rl:external-token",
+});
+
 /**
  * Extracts a best-effort client IP from Next.js request headers.
  * Falls back to a generic key so rate limiting always applies.

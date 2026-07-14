@@ -31,7 +31,13 @@ async function assertBusinessOwner(
     return;
   }
 
-  if (!user?.memberships.some((m) => m.businessId === businessId)) {
+  // Review moderation/authoring touches store content, so it must be limited to
+  // OWNER/MANAGER — STAFF (fulfillment-only) must not approve/hide/delete or
+  // author reviews. A bare membership check would let any role through.
+  const membership = user?.memberships.find(
+    (m) => m.businessId === businessId,
+  );
+  if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
   }
 }

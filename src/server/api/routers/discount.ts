@@ -107,7 +107,7 @@ export const discountRouter = createTRPCRouter({
       }
 
       const discount = await ctx.db.discountCode.update({
-        where: { id: input.id },
+        where: { id: input.id, businessId },
         data: {
           code: input.code,
           type: input.type,
