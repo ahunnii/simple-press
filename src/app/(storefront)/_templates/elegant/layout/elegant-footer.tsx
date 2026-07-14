@@ -36,7 +36,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
       ? [{ href: "/collections", label: "Collections" }]
       : []),
     { href: "/about", label: "Our Story" },
-    { href: "/blog", label: "Journal" },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
   ];
 
   const navLinks = navigationItems ?? DEFAULT_NAV_LINKS;

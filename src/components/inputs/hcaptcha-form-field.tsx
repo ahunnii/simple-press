@@ -1,10 +1,20 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 import { env } from "~/env";
 import { Label } from "~/components/ui/label";
+
+/**
+ * Sentinel token supplied in local dev (or when the site key isn't
+ * configured) so consumers that gate submit on `!captchaToken` don't get
+ * permanently disabled. The server-side verifier
+ * (`src/lib/captcha/verify-hcaptcha.ts`) independently skips verification
+ * under the same `NODE_ENV === "development"` condition, so this token is
+ * never actually checked against hCaptcha.
+ */
+export const HCAPTCHA_DEV_BYPASS_TOKEN = "dev-bypass-no-captcha";
 
 export type HCaptchaHandle = {
   execute: () => void;
@@ -43,9 +53,22 @@ export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
   ) => {
     const captchaRef = useRef<HCaptcha>(null);
     const siteKey = env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
+    const isDevBypass = !siteKey || process.env.NODE_ENV === "development";
+
+    // Keep the latest onVerify in a ref so the bypass effect below doesn't
+    // need onVerify in its dependency array (consumers often pass an inline
+    // function, which would otherwise re-fire the effect every render).
+    const onVerifyRef = useRef(onVerify);
+    useEffect(() => {
+      onVerifyRef.current = onVerify;
+    }, [onVerify]);
 
     useImperativeHandle(ref, () => ({
       execute: () => {
+        if (isDevBypass) {
+          onVerifyRef.current(HCAPTCHA_DEV_BYPASS_TOKEN);
+          return;
+        }
         captchaRef.current?.execute();
       },
       reset: () => {
@@ -53,8 +76,19 @@ export const HCaptchaField = forwardRef<HCaptchaHandle, HCaptchaFieldProps>(
       },
     }));
 
-    if (!siteKey || process.env.NODE_ENV === "development") {
-      console.warn("NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured");
+    useEffect(() => {
+      if (isDevBypass) {
+        onVerifyRef.current(HCAPTCHA_DEV_BYPASS_TOKEN);
+      }
+      // Only re-run if the bypass condition itself changes — reading
+      // onVerifyRef.current rather than onVerify directly means this effect
+      // doesn't need onVerify in its dependency array.
+    }, [isDevBypass]);
+
+    if (isDevBypass) {
+      console.warn(
+        "NEXT_PUBLIC_HCAPTCHA_SITE_KEY not configured — using dev bypass token so captcha-gated forms remain submittable in development",
+      );
       return null;
     }
 

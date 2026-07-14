@@ -93,7 +93,30 @@ export async function CoopLayout({
   );
 
   return (
-    <div className="coop flex min-h-screen flex-col" style={themeVars ?? undefined}>
+    <div
+      className="coop default-template flex min-h-screen flex-col"
+      style={themeVars ?? undefined}
+    >
+      {/*
+       * `default-template` is added alongside `coop` so that DEFAULT-TEMPLATE
+       * FALLBACK pages (Blog, Shop, Cart, Checkout, Product, Testimonials,
+       * Account, ServicesIndex — coop is a partial template; see registry.ts
+       * `coop` entry, "everything unlisted falls back to Default") pick up
+       * the `.default-template` font/radius tokens and focus-visible ring
+       * rules defined in globals.css (~L339-364), instead of rendering
+       * unstyled with no visible keyboard focus indicator.
+       *
+       * Safe for coop's OWN pages too: they set fonts via explicit
+       * `--font-coop-*` tokens / Tailwind arbitrary properties (see `.coop`
+       * in globals.css), never `var(--font-sans)` / `var(--radius)`, so the
+       * `.default-template` tokens are inert here — only its focus-visible
+       * outline rule (`.default-template *:focus-visible`) actually applies,
+       * which is a pure a11y improvement coop had no conflicting rule for.
+       *
+       * NOTE: `builders` (the other partial/fallback template) has this same
+       * gap — `BuildersLayout` doesn't apply `.default-template` either — but
+       * is out of scope for this fix (see registry.ts `builders` entry).
+       */}
       <style dangerouslySetInnerHTML={{ __html: buildCoopFontFaceCss() }} />
 
       {/* Skip link — always the first focusable element */}

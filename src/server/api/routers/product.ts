@@ -302,6 +302,22 @@ export const productRouter = createTRPCRouter({
 
       const { businessId } = ctx;
 
+      // Verify a client-supplied inventory pool belongs to THIS business before
+      // linking it — otherwise a product could be tied to (and later deduct
+      // from) another tenant's pool.
+      if (baseInventoryUnitId) {
+        const pool = await ctx.db.baseInventoryUnit.findFirst({
+          where: { id: baseInventoryUnitId, businessId },
+          select: { id: true },
+        });
+        if (!pool) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid inventory pool",
+          });
+        }
+      }
+
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
         where: {
@@ -395,6 +411,22 @@ export const productRouter = createTRPCRouter({
         weight,
         weightUnit,
       } = input;
+
+      // Verify a client-supplied inventory pool belongs to THIS business before
+      // linking it — otherwise a product could be tied to (and later deduct
+      // from) another tenant's pool.
+      if (baseInventoryUnitId) {
+        const pool = await ctx.db.baseInventoryUnit.findFirst({
+          where: { id: baseInventoryUnitId, businessId },
+          select: { id: true },
+        });
+        if (!pool) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid inventory pool",
+          });
+        }
+      }
 
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
@@ -717,9 +749,12 @@ export const productRouter = createTRPCRouter({
       await Promise.all(
         input.images.map(async (image) => {
           if (image.id) {
-            // Update existing
-            await ctx.db.image.update({
-              where: { id: image.id },
+            // Update existing — scope to THIS product (already verified to
+            // belong to businessId above) so a client-supplied image id
+            // belonging to another product/tenant can't be written. updateMany
+            // no-ops (count 0) rather than touching a foreign row.
+            await ctx.db.image.updateMany({
+              where: { id: image.id, productId: input.productId },
               data: {
                 altText: image.altText,
                 sortOrder: image.sortOrder,

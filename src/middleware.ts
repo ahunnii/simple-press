@@ -24,8 +24,12 @@ export async function middleware(req: NextRequest) {
     return res;
   };
 
-  // Get platform domain from env
-  const platformDomain = process.env.PLATFORM_DOMAIN ?? "localhost";
+  // Get platform domain from env. Use NEXT_PUBLIC_PLATFORM_DOMAIN — the var
+  // that is declared in env.js and set everywhere else. The old PLATFORM_DOMAIN
+  // was undeclared, so it was always undefined and silently fell back to
+  // "localhost", breaking platform-vs-tenant routing in production.
+  const platformDomain =
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "localhost";
   const isDevelopment = process.env.NODE_ENV === "development";
 
   // Determine if this is the platform domain (no subdomain)

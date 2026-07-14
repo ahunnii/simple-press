@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { checkBusinessMembership } from "~/lib/check-business";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
 import { auth } from "~/server/better-auth";
@@ -12,19 +13,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // const user = await db.user.findUnique({
-    //   where: { id: session.user.id },
-    //   include: { business: true },
-    // });
-
-    // if (!user?.business?.stripeAccountId) {
-    //   return NextResponse.json({ connected: false });
-    // }
-
     const domain = getCurrentDomain(request.headers);
     const business = await getBusinessByDomain(domain);
 
-    if (!business?.stripeAccountId) {
+    if (!business) {
+      return NextResponse.json({ connected: false });
+    }
+
+    // Authorization: the connected Stripe account's email/id/country is
+    // sensitive, so only an OWNER/MANAGER of THIS business may read it. Without
+    // this check any authenticated user (e.g. a customer on the storefront)
+    // could enumerate a store's Stripe account details.
+    const membership = await checkBusinessMembership(
+      business.id,
+      session.user.id,
+    );
+    if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (!business.stripeAccountId) {
       return NextResponse.json({ connected: false });
     }
 

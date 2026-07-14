@@ -55,21 +55,28 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const [reason, setReason] = useState("");
   const [restockItems, setRestockItems] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
+  // Remaining refundable = order total minus what has already been refunded.
+  // On a partially-refunded order the remainder is the true ceiling — defaulting
+  // to order.total would over-request and the server (which caps at the
+  // remaining refundable) would reject it.
+  const alreadyRefunded = order.refundAmountCents ?? 0;
+  const remainingRefundable = order.total - alreadyRefunded;
+
   const [amountDollars, setAmountDollars] = useState(
-    (order.total / 100).toFixed(2),
+    (remainingRefundable / 100).toFixed(2),
   );
 
-  const maxDollars = order.total / 100;
+  const maxDollars = remainingRefundable / 100;
   const amountCents = Math.round(parseFloat(amountDollars) * 100);
   const isValidAmount =
-    !isNaN(amountCents) && amountCents > 0 && amountCents <= order.total;
-  const isPartial = isValidAmount && amountCents < order.total;
+    !isNaN(amountCents) && amountCents > 0 && amountCents <= remainingRefundable;
+  const isPartial = isValidAmount && amountCents < remainingRefundable;
 
   const validateAmount = (value: string): string | null => {
     if (!value.trim()) return "Amount is required";
     const cents = Math.round(parseFloat(value) * 100);
-    if (isNaN(cents) || cents <= 0 || cents > order.total) {
-      return `Amount must be between $0.01 and ${formatPrice(order.total)}`;
+    if (isNaN(cents) || cents <= 0 || cents > remainingRefundable) {
+      return `Amount must be between $0.01 and ${formatPrice(remainingRefundable)}`;
     }
     return null;
   };
@@ -117,7 +124,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
     if (!nextOpen) {
       setError(null);
       setAmountError(null);
-      setAmountDollars((order.total / 100).toFixed(2));
+      setAmountDollars((remainingRefundable / 100).toFixed(2));
     }
   };
 
@@ -150,7 +157,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
             <Label htmlFor="refund-amount">
               Refund amount{" "}
               <span className="text-muted-foreground text-xs font-normal">
-                (max {formatPrice(order.total)})
+                (max {formatPrice(remainingRefundable)})
               </span>
             </Label>
             <div className="relative">

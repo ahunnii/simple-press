@@ -22,6 +22,7 @@ import {
   parseBusinessHours,
 } from "~/lib/business-hours";
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
+import { getEffectivePrice } from "~/lib/prices";
 
 // ---------------------------------------------------------------------------
 // Local type aliases mirroring the shape returned by tRPC / Prisma selects.
@@ -186,6 +187,19 @@ export function buildProductSchema(
   const canonicalUrl = getCanonicalUrl(business, `/shop/${product.slug}`);
   const firstImage = toAbsoluteUrl(product.images[0]?.url);
 
+  // Prices in the DB are stored in cents. Use the same effective-price
+  // resolution as the rest of the app (variant-aware — a variant price of
+  // 0/null means "inherit the product base price") and convert to a decimal
+  // dollar string for the JSON-LD Offer.
+  const effectivePriceCents = getEffectivePrice({
+    price: product.price,
+    compareAtPrice: null,
+    variants: (product.variants ?? []).map((v) => ({
+      price: v.price ?? null,
+      compareAtPrice: null,
+    })),
+  });
+
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -197,7 +211,7 @@ export function buildProductSchema(
     },
     offers: {
       "@type": "Offer",
-      price: product.price.toFixed(2),
+      price: (effectivePriceCents / 100).toFixed(2),
       priceCurrency: "USD",
       availability: getAvailability(product),
       url: canonicalUrl,

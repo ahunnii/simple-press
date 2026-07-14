@@ -592,6 +592,21 @@ export const PAGE_METADATA = {
 
 export { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+/**
+ * Node types that are "leaf" content — they carry their meaning via `attrs`
+ * rather than a nested `content` array (e.g. a standalone image has no
+ * children, but is obviously not empty). Without this list, `isContentEmpty`
+ * would misreport any richtext block containing only these nodes as blank,
+ * silently hiding image-only sections/tabs.
+ */
+const LEAF_CONTENT_NODE_TYPES = new Set([
+  "image",
+  "horizontalRule",
+  "hardBreak",
+  "gallery",
+  "embed",
+]);
+
 export function isContentEmpty(content: TiptapJSON): boolean {
   if (content === null || content === undefined) {
     return true;
@@ -606,9 +621,20 @@ export function isContentEmpty(content: TiptapJSON): boolean {
     return content.every((item) => isContentEmpty(item));
   }
 
+  if (
+    typeof content.type === "string" &&
+    LEAF_CONTENT_NODE_TYPES.has(content.type)
+  ) {
+    return false;
+  }
+
+  if (typeof content.text === "string" && content.text !== "") {
+    return false;
+  }
+
   if (!content.content) {
     return true;
   }
 
-  return content.content.every((item) => !item.content);
+  return content.content.every((item) => isContentEmpty(item));
 }

@@ -25,6 +25,16 @@ type ProductReviewsProps = {
   onWriteReviewClick?: () => void;
 };
 
+/**
+ * Initial number of reviews rendered before the shopper has to click
+ * "Load more". `review.listByProduct` (src/server/api/routers/review.ts)
+ * has no server-side limit/cursor — it returns every approved review for
+ * the product — so this caps the render for popular products entirely
+ * client-side, over the already-fetched list.
+ */
+const INITIAL_REVIEW_COUNT = 10;
+const REVIEW_PAGE_SIZE = 10;
+
 export function ProductReviews({
   productId,
   showWriteReview = true,
@@ -36,6 +46,7 @@ export function ProductReviews({
   const [filterRating, setFilterRating] = useState<number | undefined>(
     undefined,
   );
+  const [visibleCount, setVisibleCount] = useState(INITIAL_REVIEW_COUNT);
 
   const { data: stats } = api.review.getProductStats.useQuery({ productId });
   const { data: reviews } = api.review.listByProduct.useQuery({
@@ -135,11 +146,12 @@ export function ProductReviews({
                 return (
                   <div key={rating} className="flex items-center gap-3">
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         setFilterRating(
                           rating === filterRating ? undefined : rating,
-                        )
-                      }
+                        );
+                        setVisibleCount(INITIAL_REVIEW_COUNT);
+                      }}
                       className="flex items-center gap-2 hover:text-blue-600"
                     >
                       <span className="w-8 text-sm font-medium">{rating}</span>
@@ -162,11 +174,10 @@ export function ProductReviews({
         <div className="flex items-center gap-4">
           <Select
             value={sortBy}
-            onValueChange={(v) =>
-              setSortBy(
-                v as "recent" | "helpful" | "rating_high" | "rating_low",
-              )
-            }
+            onValueChange={(v) => {
+              setSortBy(v as "recent" | "helpful" | "rating_high" | "rating_low");
+              setVisibleCount(INITIAL_REVIEW_COUNT);
+            }}
           >
             <SelectTrigger className="w-48">
               <SelectValue />
@@ -183,7 +194,10 @@ export function ProductReviews({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setFilterRating(undefined)}
+              onClick={() => {
+                setFilterRating(undefined);
+                setVisibleCount(INITIAL_REVIEW_COUNT);
+              }}
             >
               Clear Filter
             </Button>
@@ -209,11 +223,24 @@ export function ProductReviews({
             </CardContent>
           </Card>
         ) : (
-          reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))
+          reviews
+            .slice(0, visibleCount)
+            .map((review) => <ReviewCard key={review.id} review={review} />)
         )}
       </div>
+
+      {reviews.length > visibleCount && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() =>
+              setVisibleCount((count) => count + REVIEW_PAGE_SIZE)
+            }
+          >
+            Load more reviews ({reviews.length - visibleCount} remaining)
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

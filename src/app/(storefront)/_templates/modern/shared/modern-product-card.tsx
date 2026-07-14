@@ -8,6 +8,7 @@ import { Check, Eye, Plus } from "lucide-react";
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
@@ -124,10 +125,20 @@ export function ModernProductCard({ product }: Props) {
           <>
             <button
               type="button"
-              className="border-border text-foreground hover:bg-primary hover:text-primary-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors"
+              className={cn(
+                "border-border text-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
+                productStatus.disableCart
+                  ? "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-foreground"
+                  : "hover:bg-primary hover:text-primary-foreground",
+              )}
               onClick={handleAddToCart}
+              disabled={productStatus.disableCart}
               aria-disabled={productStatus.disableCart ? "true" : undefined}
-              aria-label={`Add ${product.name} to cart`}
+              aria-label={
+                productStatus.disableCart
+                  ? `${product.name} is unavailable`
+                  : `Add ${product.name} to cart`
+              }
             >
               {isAdded ? (
                 <Check className="h-4 w-4" aria-hidden="true" />

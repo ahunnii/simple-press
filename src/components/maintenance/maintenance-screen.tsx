@@ -15,6 +15,21 @@ export function MaintenanceScreen({ variant, message, businessName }: Props) {
 
   return (
     <>
+      {/*
+        React 19 (used by this app's Next 15 app-router build) hoists any
+        <title>/<meta>/<link> tag rendered by a component — regardless of
+        where in the tree it lives — into the document <head> at commit
+        time. Previously this tag rendered visually inside <body> with no
+        head-hoisting guarantee prior to React 19; Google only honors the
+        robots meta tag when it resolves into <head>. Keeping it as a plain
+        rendered <meta> here (rather than a `metadata` export) is
+        intentional: MaintenanceScreen is shared by three different
+        page/layout server components (src/app/page.tsx,
+        src/app/admin/layout.tsx, src/app/(storefront)/layout.tsx) that are
+        out of scope for this fix, so the tag travels with the component
+        itself instead of requiring each call site to add its own
+        `generateMetadata`/`metadata.robots`.
+      */}
       <meta name="robots" content="noindex" />
       <div className="bg-background flex min-h-dvh flex-col items-center justify-center px-4">
         <main className="flex max-w-lg flex-col items-center text-center">

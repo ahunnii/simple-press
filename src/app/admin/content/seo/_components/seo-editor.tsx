@@ -43,14 +43,18 @@ type Props = {
   };
 };
 
+// Favicon upload/persistence already has a complete, working home on the
+// Branding page (branding-editor.tsx → content.updateSiteContent →
+// siteContent.faviconUrl). business.updateSeo (the mutation this form uses)
+// never accepted or wrote faviconUrl, so a faviconFile/faviconUrl field here
+// was dead form state that was never rendered or submitted — removed rather
+// than wired up, to avoid two divergent code paths writing the same field.
 const seoFormSchema = z.object({
   metaTitle: z.string().nullable().optional(),
   metaDescription: z.string().nullable().optional(),
   metaKeywords: z.string().nullable().optional(),
   ogImage: z.string().nullable().optional(),
-  faviconUrl: z.string().nullable().optional(),
   ogImageFile: z.instanceof(File).optional().nullable(),
-  faviconFile: z.instanceof(File).optional().nullable(),
   localBusinessEnabled: z.boolean(),
   allowAiCrawlers: z.boolean(),
 });
@@ -63,7 +67,6 @@ export function SEOEditor({ business, siteContent }: Props) {
   // Refs
   const formRef = useRef<HTMLFormElement>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
-  const faviconFileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Form Setup
   const form = useForm<SeoFormValues>({
@@ -75,9 +78,7 @@ export function SEOEditor({ business, siteContent }: Props) {
       metaDescription: siteContent.metaDescription ?? "",
       metaKeywords: siteContent.metaKeywords ?? "",
       ogImage: siteContent.ogImage ?? "",
-      faviconUrl: siteContent.faviconUrl ?? "",
       ogImageFile: null,
-      faviconFile: null,
       localBusinessEnabled: business.localBusinessEnabled,
       allowAiCrawlers: business.allowAiCrawlers,
     },
@@ -98,11 +99,13 @@ export function SEOEditor({ business, siteContent }: Props) {
       toast.dismiss();
       toast.success("SEO settings updated");
       form.reset({
-        ...data.siteContent,
+        metaTitle: data.siteContent?.metaTitle,
+        metaDescription: data.siteContent?.metaDescription,
+        metaKeywords: data.siteContent?.metaKeywords,
+        ogImage: data.siteContent?.ogImage,
         localBusinessEnabled: data.localBusinessEnabled,
         allowAiCrawlers: data.allowAiCrawlers,
         ogImageFile: null,
-        faviconFile: null,
       });
     },
     onError: (error) => {
@@ -124,14 +127,11 @@ export function SEOEditor({ business, siteContent }: Props) {
       metaDescription: siteContent.metaDescription ?? "",
       metaKeywords: siteContent.metaKeywords ?? "",
       ogImage: siteContent.ogImage ?? "",
-      faviconUrl: siteContent.faviconUrl ?? "",
       ogImageFile: null,
-      faviconFile: null,
       localBusinessEnabled: business.localBusinessEnabled,
       allowAiCrawlers: business.allowAiCrawlers,
     });
     if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
-    if (faviconFileInputRef.current) faviconFileInputRef.current.value = "";
   };
 
   const handleSubmit = async (data: SeoFormValues) => {
@@ -146,7 +146,7 @@ export function SEOEditor({ business, siteContent }: Props) {
           "";
         if (fileLocation) ogImageUrl = fileLocation;
       } catch {
-        toast.error("Failed to upload favicon.");
+        toast.error("Failed to upload image.");
         return;
       }
     }

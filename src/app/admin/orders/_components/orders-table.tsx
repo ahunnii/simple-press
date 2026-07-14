@@ -100,7 +100,7 @@ export function OrdersTable({ orders }: Props) {
                   <Link href={`/admin/orders/${order.id}`}>
                     <div>
                       <div className="text-foreground text-sm font-medium">
-                        #{order.id.slice(0, 8)}
+                        #{order.orderNumber}
                       </div>
                       <div className="text-muted-foreground text-sm">
                         {formatDate(order.createdAt)}

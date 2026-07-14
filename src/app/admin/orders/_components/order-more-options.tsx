@@ -260,25 +260,40 @@ export function OrderMoreOptions({ order }: Props) {
                   <span>Payment Status</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
-                  {PAYMENT_STATUSES.map(({ value, label }) => (
-                    <DropdownMenuItem
-                      key={value}
-                      disabled={order.paymentStatus === value}
-                      onSelect={() =>
-                        updatePaymentStatus.mutate({
-                          orderId: order.id,
-                          paymentStatus: value,
-                        })
-                      }
-                    >
-                      {label}
-                      {order.paymentStatus === value && (
-                        <span className="text-muted-foreground ml-auto text-xs">
-                          current
-                        </span>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
+                  {PAYMENT_STATUSES.map(({ value, label }) => {
+                    // Flipping a refunded order back to "paid" would leave
+                    // refundAmountCents > 0 while the order reads as paid,
+                    // corrupting net-revenue math (revenue = total − refunds).
+                    // Block that transition; use the Refund panel for money.
+                    const blockedByRefund =
+                      value === "paid" && (isRefunded || hasPriorRefund);
+                    return (
+                      <DropdownMenuItem
+                        key={value}
+                        disabled={
+                          order.paymentStatus === value || blockedByRefund
+                        }
+                        onSelect={() =>
+                          updatePaymentStatus.mutate({
+                            orderId: order.id,
+                            paymentStatus: value,
+                          })
+                        }
+                      >
+                        {label}
+                        {order.paymentStatus === value && (
+                          <span className="text-muted-foreground ml-auto text-xs">
+                            current
+                          </span>
+                        )}
+                        {blockedByRefund && order.paymentStatus !== value && (
+                          <span className="text-muted-foreground ml-auto text-xs">
+                            refunded
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
 

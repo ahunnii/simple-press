@@ -138,7 +138,7 @@ export async function ModernHomePage() {
             </Link>
           </div>
           <div className="mt-12">
-            <FeaturedProductsGrid />
+            <FeaturedProductsGrid products={homepage?.products ?? []} />
           </div>
           <div className="mt-8 text-center md:hidden">
             <Link

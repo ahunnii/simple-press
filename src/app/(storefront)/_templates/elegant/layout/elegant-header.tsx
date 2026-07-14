@@ -100,8 +100,11 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
     ...(isEnabled("collections")
       ? [{ href: "/collections", label: "Collections" }]
       : []),
-    { href: "/blog", label: "Journal" },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
     { href: "/about", label: "About" },
+    ...(isEnabled("services")
+      ? [{ href: "/services", label: "Services" }]
+      : []),
   ];
 
   const links =

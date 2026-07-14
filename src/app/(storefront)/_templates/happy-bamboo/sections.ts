@@ -48,10 +48,10 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       id: "homepage.cta",
       page: "homepage",
       title: "CTA Banner",
-      description:
-        "Not currently displayed on the homepage, but its content stays editable.",
+      description: "Bottom call-to-action banner on the homepage.",
       groupIds: ["homepage.cta"],
       order: 5,
+      hideable: true,
     },
 
     // About
@@ -157,6 +157,15 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       title: "Blog Listing",
       groupIds: ["blog.listing"],
       order: 0,
+    },
+    {
+      id: "blog.post",
+      page: "blog",
+      title: "Blog Post CTA",
+      description: "Call-to-action shown at the end of every blog article.",
+      groupIds: ["blog.post"],
+      order: 1,
+      hideable: true,
     },
 
     // Global

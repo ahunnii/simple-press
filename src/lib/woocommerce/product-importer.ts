@@ -1,6 +1,8 @@
+import path from "node:path";
 import slugify from "slugify";
 
 import type { ParsedProduct } from "./csv-parser";
+import { contentAddressedKey, putStoredObject } from "~/lib/s3/put";
 import { db } from "~/server/db";
 
 export type ImportOptions = {
@@ -15,6 +17,119 @@ export type ImportResult = {
   skipped: number;
   errors: Array<{ product: string; error: string }>;
 };
+
+// ---------------------------------------------------------------------------
+// Image re-hosting
+//
+// The WooCommerce CSV/API only gives us the SOURCE site's live image URLs.
+// Storing those directly means every imported photo breaks the moment the
+// old site is taken down or its media library changes. Instead, when
+// `importImages` is enabled, each source image is downloaded and re-uploaded
+// to this platform's own S3/MinIO bucket (same helpers the store-transfer
+// import pipeline uses), and the rehosted URL is what actually gets saved.
+//
+// A failure to download/rehost a single image (network error, disallowed
+// content type, oversized file, etc.) is swallowed and that image is simply
+// skipped — it must never fail the whole product import.
+// ---------------------------------------------------------------------------
+
+const IMPORT_IMAGE_CONTENT_TYPE_EXT: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/avif": ".avif",
+};
+
+const IMPORT_IMAGE_ALLOWED_EXTS = new Set(
+  Object.values(IMPORT_IMAGE_CONTENT_TYPE_EXT),
+);
+
+/** Safety cap so one huge/misbehaving source URL can't stall or blow up an import. */
+const IMPORT_IMAGE_MAX_BYTES = 25 * 1024 * 1024;
+const IMPORT_IMAGE_FETCH_TIMEOUT_MS = 15_000;
+
+/**
+ * Downloads a single source image and re-uploads it to this business's
+ * S3/MinIO prefix, content-addressed by the file's SHA-256 (so re-running an
+ * import on the same source images is idempotent and doesn't duplicate
+ * storage). Returns the rehosted public URL, or `null` if anything about the
+ * download/upload failed — callers should skip the image, not fail the import.
+ */
+async function rehostProductImage(
+  businessId: string,
+  sourceUrl: string,
+): Promise<string | null> {
+  let parsed: URL;
+  try {
+    parsed = new URL(sourceUrl);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return null;
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      IMPORT_IMAGE_FETCH_TIMEOUT_MS,
+    );
+
+    let res: Response;
+    try {
+      res = await fetch(parsed.href, { signal: controller.signal });
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!res.ok) return null;
+
+    const contentType = res.headers
+      .get("content-type")
+      ?.split(";")[0]
+      ?.trim()
+      .toLowerCase();
+
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length === 0 || buf.length > IMPORT_IMAGE_MAX_BYTES) return null;
+
+    let ext = contentType
+      ? IMPORT_IMAGE_CONTENT_TYPE_EXT[contentType]
+      : undefined;
+    if (!ext) {
+      const pathExt = path.extname(parsed.pathname).toLowerCase();
+      ext = IMPORT_IMAGE_ALLOWED_EXTS.has(pathExt) ? pathExt : undefined;
+    }
+    if (!ext) return null;
+
+    const key = contentAddressedKey(businessId, "image", buf, ext);
+    return await putStoredObject({
+      key,
+      body: buf,
+      contentType: contentType ?? "application/octet-stream",
+    });
+  } catch (error) {
+    console.error(`Failed to rehost product image: ${sourceUrl}`, error);
+    return null;
+  }
+}
+
+/**
+ * Rehosts a batch of source image URLs, dropping any that failed. Order is
+ * preserved for the ones that succeeded (used as `sortOrder`).
+ */
+async function rehostProductImages(
+  businessId: string,
+  urls: string[],
+): Promise<string[]> {
+  const rehosted = await Promise.all(
+    urls.map((url) => rehostProductImage(businessId, url)),
+  );
+  return rehosted.filter((url): url is string => url !== null);
+}
 
 export async function importProducts(
   products: ParsedProduct[],
@@ -271,15 +386,22 @@ async function importSingleProduct(
     },
   });
 
-  // Import images
+  // Import images — downloaded and re-hosted on this platform's S3/MinIO so
+  // they keep working after the source (WooCommerce) site is decommissioned.
   if (options.importImages && product.images.length > 0) {
-    await db.image.createMany({
-      data: product.images.map((url, index) => ({
-        productId: createdProduct.id,
-        url,
-        sortOrder: index,
-      })),
-    });
+    const rehostedUrls = await rehostProductImages(
+      options.businessId,
+      product.images,
+    );
+    if (rehostedUrls.length > 0) {
+      await db.image.createMany({
+        data: rehostedUrls.map((url, index) => ({
+          productId: createdProduct.id,
+          url,
+          sortOrder: index,
+        })),
+      });
+    }
   }
 
   // Add to collections
@@ -357,15 +479,23 @@ async function importVariableProduct(
     },
   });
 
-  // Import main product images
+  // Import main product images — downloaded and re-hosted on this platform's
+  // S3/MinIO so they keep working after the source (WooCommerce) site is
+  // decommissioned.
   if (options.importImages && variableProduct.images.length > 0) {
-    await db.image.createMany({
-      data: variableProduct.images.map((url, index) => ({
-        productId: createdProduct.id,
-        url,
-        sortOrder: index,
-      })),
-    });
+    const rehostedUrls = await rehostProductImages(
+      options.businessId,
+      variableProduct.images,
+    );
+    if (rehostedUrls.length > 0) {
+      await db.image.createMany({
+        data: rehostedUrls.map((url, index) => ({
+          productId: createdProduct.id,
+          url,
+          sortOrder: index,
+        })),
+      });
+    }
   }
 
   // Create variants with individual pricing
@@ -377,6 +507,13 @@ async function importVariableProduct(
         .map(([_, value]) => value)
         .join(" / ");
 
+    // Per-variant image also comes from the source site — rehost it the same
+    // way as the main product images so it doesn't break later.
+    const variantImageUrl =
+      options.importImages && variation.images[0]
+        ? await rehostProductImage(options.businessId, variation.images[0])
+        : null;
+
     await db.productVariant.create({
       data: {
         productId: createdProduct.id,
@@ -385,7 +522,7 @@ async function importVariableProduct(
         price: variation.price, // Use variation's own price!
         compareAtPrice: variation.compareAtPrice,
         inventoryQty: variation.inventoryQty,
-        imageUrl: variation.images[0] ?? null,
+        imageUrl: variantImageUrl,
         options: variation.attributes, // Store attributes as JSON
       },
     });

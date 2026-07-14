@@ -4458,6 +4458,7 @@ export namespace Prisma {
     memberships: number
     zones: number
     faqItems: number
+    backInStockRequests: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4481,6 +4482,7 @@ export namespace Prisma {
     memberships?: boolean | BusinessCountOutputTypeCountMembershipsArgs
     zones?: boolean | BusinessCountOutputTypeCountZonesArgs
     faqItems?: boolean | BusinessCountOutputTypeCountFaqItemsArgs
+    backInStockRequests?: boolean | BusinessCountOutputTypeCountBackInStockRequestsArgs
   }
 
   // Custom InputTypes
@@ -4634,6 +4636,13 @@ export namespace Prisma {
     where?: FaqItemWhereInput
   }
 
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountBackInStockRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BackInStockRequestWhereInput
+  }
+
 
   /**
    * Count Type ProductCountOutputType
@@ -4645,6 +4654,7 @@ export namespace Prisma {
     collectionProducts: number
     orderItems: number
     inventoryHistory: number
+    backInStockRequests: number
     reviews: number
   }
 
@@ -4654,6 +4664,7 @@ export namespace Prisma {
     collectionProducts?: boolean | ProductCountOutputTypeCountCollectionProductsArgs
     orderItems?: boolean | ProductCountOutputTypeCountOrderItemsArgs
     inventoryHistory?: boolean | ProductCountOutputTypeCountInventoryHistoryArgs
+    backInStockRequests?: boolean | ProductCountOutputTypeCountBackInStockRequestsArgs
     reviews?: boolean | ProductCountOutputTypeCountReviewsArgs
   }
 
@@ -4701,6 +4712,13 @@ export namespace Prisma {
    */
   export type ProductCountOutputTypeCountInventoryHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: InventoryHistoryWhereInput
+  }
+
+  /**
+   * ProductCountOutputType without action
+   */
+  export type ProductCountOutputTypeCountBackInStockRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BackInStockRequestWhereInput
   }
 
   /**
@@ -11274,6 +11292,7 @@ export namespace Prisma {
     memberships?: boolean | Business$membershipsArgs<ExtArgs>
     zones?: boolean | Business$zonesArgs<ExtArgs>
     faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
+    backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -11432,6 +11451,7 @@ export namespace Prisma {
     memberships?: boolean | Business$membershipsArgs<ExtArgs>
     zones?: boolean | Business$zonesArgs<ExtArgs>
     faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
+    backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -11461,6 +11481,7 @@ export namespace Prisma {
       memberships: Prisma.$BusinessMembershipPayload<ExtArgs>[]
       zones: Prisma.$ShippingZonePayload<ExtArgs>[]
       faqItems: Prisma.$FaqItemPayload<ExtArgs>[]
+      backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11919,6 +11940,7 @@ export namespace Prisma {
     memberships<T extends Business$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, Business$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     zones<T extends Business$zonesArgs<ExtArgs> = {}>(args?: Subset<T, Business$zonesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShippingZonePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     faqItems<T extends Business$faqItemsArgs<ExtArgs> = {}>(args?: Subset<T, Business$faqItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    backInStockRequests<T extends Business$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Business$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12873,6 +12895,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FaqItemScalarFieldEnum | FaqItemScalarFieldEnum[]
+  }
+
+  /**
+   * Business.backInStockRequests
+   */
+  export type Business$backInStockRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    where?: BackInStockRequestWhereInput
+    orderBy?: BackInStockRequestOrderByWithRelationInput | BackInStockRequestOrderByWithRelationInput[]
+    cursor?: BackInStockRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BackInStockRequestScalarFieldEnum | BackInStockRequestScalarFieldEnum[]
   }
 
   /**
@@ -15870,6 +15916,7 @@ export namespace Prisma {
     collectionProducts?: boolean | Product$collectionProductsArgs<ExtArgs>
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
     inventoryHistory?: boolean | Product$inventoryHistoryArgs<ExtArgs>
+    backInStockRequests?: boolean | Product$backInStockRequestsArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
@@ -16001,6 +16048,7 @@ export namespace Prisma {
     collectionProducts?: boolean | Product$collectionProductsArgs<ExtArgs>
     orderItems?: boolean | Product$orderItemsArgs<ExtArgs>
     inventoryHistory?: boolean | Product$inventoryHistoryArgs<ExtArgs>
+    backInStockRequests?: boolean | Product$backInStockRequestsArgs<ExtArgs>
     reviews?: boolean | Product$reviewsArgs<ExtArgs>
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -16023,6 +16071,7 @@ export namespace Prisma {
       collectionProducts: Prisma.$CollectionProductPayload<ExtArgs>[]
       orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
+      backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
       reviews: Prisma.$ProductReviewPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -16462,6 +16511,7 @@ export namespace Prisma {
     collectionProducts<T extends Product$collectionProductsArgs<ExtArgs> = {}>(args?: Subset<T, Product$collectionProductsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectionProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     orderItems<T extends Product$orderItemsArgs<ExtArgs> = {}>(args?: Subset<T, Product$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends Product$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Product$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    backInStockRequests<T extends Product$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Product$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviews<T extends Product$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Product$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -17059,6 +17109,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: InventoryHistoryScalarFieldEnum | InventoryHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * Product.backInStockRequests
+   */
+  export type Product$backInStockRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BackInStockRequest
+     */
+    select?: BackInStockRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BackInStockRequest
+     */
+    omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    where?: BackInStockRequestWhereInput
+    orderBy?: BackInStockRequestOrderByWithRelationInput | BackInStockRequestOrderByWithRelationInput[]
+    cursor?: BackInStockRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BackInStockRequestScalarFieldEnum | BackInStockRequestScalarFieldEnum[]
   }
 
   /**
@@ -52430,6 +52504,8 @@ export namespace Prisma {
     variantId?: boolean
     notifiedAt?: boolean
     businessId?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["backInStockRequest"]>
 
   export type BackInStockRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -52440,6 +52516,8 @@ export namespace Prisma {
     variantId?: boolean
     notifiedAt?: boolean
     businessId?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["backInStockRequest"]>
 
   export type BackInStockRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -52450,6 +52528,8 @@ export namespace Prisma {
     variantId?: boolean
     notifiedAt?: boolean
     businessId?: boolean
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["backInStockRequest"]>
 
   export type BackInStockRequestSelectScalar = {
@@ -52463,10 +52543,25 @@ export namespace Prisma {
   }
 
   export type BackInStockRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "email" | "productId" | "variantId" | "notifiedAt" | "businessId", ExtArgs["result"]["backInStockRequest"]>
+  export type BackInStockRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type BackInStockRequestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type BackInStockRequestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    product?: boolean | ProductDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
 
   export type $BackInStockRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "BackInStockRequest"
-    objects: {}
+    objects: {
+      product: Prisma.$ProductPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       createdAt: Date
@@ -52869,6 +52964,8 @@ export namespace Prisma {
    */
   export interface Prisma__BackInStockRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    product<T extends ProductDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ProductDefaultArgs<ExtArgs>>): Prisma__ProductClient<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -52922,6 +53019,10 @@ export namespace Prisma {
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    /**
      * Filter, which BackInStockRequest to fetch.
      */
     where: BackInStockRequestWhereUniqueInput
@@ -52940,6 +53041,10 @@ export namespace Prisma {
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    /**
      * Filter, which BackInStockRequest to fetch.
      */
     where: BackInStockRequestWhereUniqueInput
@@ -52957,6 +53062,10 @@ export namespace Prisma {
      * Omit specific fields from the BackInStockRequest
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
     /**
      * Filter, which BackInStockRequest to fetch.
      */
@@ -53006,6 +53115,10 @@ export namespace Prisma {
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    /**
      * Filter, which BackInStockRequest to fetch.
      */
     where?: BackInStockRequestWhereInput
@@ -53054,6 +53167,10 @@ export namespace Prisma {
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    /**
      * Filter, which BackInStockRequests to fetch.
      */
     where?: BackInStockRequestWhereInput
@@ -53097,6 +53214,10 @@ export namespace Prisma {
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
+    /**
      * The data needed to create a BackInStockRequest.
      */
     data: XOR<BackInStockRequestCreateInput, BackInStockRequestUncheckedCreateInput>
@@ -53130,6 +53251,10 @@ export namespace Prisma {
      */
     data: BackInStockRequestCreateManyInput | BackInStockRequestCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -53144,6 +53269,10 @@ export namespace Prisma {
      * Omit specific fields from the BackInStockRequest
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
     /**
      * The data needed to update a BackInStockRequest.
      */
@@ -53196,6 +53325,10 @@ export namespace Prisma {
      * Limit how many BackInStockRequests to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -53210,6 +53343,10 @@ export namespace Prisma {
      * Omit specific fields from the BackInStockRequest
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
     /**
      * The filter to search for the BackInStockRequest to update in case it exists.
      */
@@ -53236,6 +53373,10 @@ export namespace Prisma {
      * Omit specific fields from the BackInStockRequest
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
     /**
      * Filter which BackInStockRequest to delete.
      */
@@ -53268,6 +53409,10 @@ export namespace Prisma {
      * Omit specific fields from the BackInStockRequest
      */
     omit?: BackInStockRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BackInStockRequestInclude<ExtArgs> | null
   }
 
 
@@ -54663,6 +54808,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipListRelationFilter
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
+    backInStockRequests?: BackInStockRequestListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -54728,6 +54874,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipOrderByRelationAggregateInput
     zones?: ShippingZoneOrderByRelationAggregateInput
     faqItems?: FaqItemOrderByRelationAggregateInput
+    backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -54796,6 +54943,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipListRelationFilter
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
+    backInStockRequests?: BackInStockRequestListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -55197,6 +55345,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductListRelationFilter
     orderItems?: OrderItemListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
+    backInStockRequests?: BackInStockRequestListRelationFilter
     reviews?: ProductReviewListRelationFilter
   }
 
@@ -55243,6 +55392,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductOrderByRelationAggregateInput
     orderItems?: OrderItemOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
+    backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
     reviews?: ProductReviewOrderByRelationAggregateInput
   }
 
@@ -55293,6 +55443,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductListRelationFilter
     orderItems?: OrderItemListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
+    backInStockRequests?: BackInStockRequestListRelationFilter
     reviews?: ProductReviewListRelationFilter
   }, "id" | "businessId_slug">
 
@@ -58178,6 +58329,8 @@ export namespace Prisma {
     variantId?: StringNullableFilter<"BackInStockRequest"> | string | null
     notifiedAt?: DateTimeNullableFilter<"BackInStockRequest"> | Date | string | null
     businessId?: StringFilter<"BackInStockRequest"> | string
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
 
   export type BackInStockRequestOrderByWithRelationInput = {
@@ -58188,6 +58341,8 @@ export namespace Prisma {
     variantId?: SortOrderInput | SortOrder
     notifiedAt?: SortOrderInput | SortOrder
     businessId?: SortOrder
+    product?: ProductOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
   }
 
   export type BackInStockRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -58201,6 +58356,8 @@ export namespace Prisma {
     variantId?: StringNullableFilter<"BackInStockRequest"> | string | null
     notifiedAt?: DateTimeNullableFilter<"BackInStockRequest"> | Date | string | null
     businessId?: StringFilter<"BackInStockRequest"> | string
+    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id">
 
   export type BackInStockRequestOrderByWithAggregationInput = {
@@ -58725,6 +58882,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -58790,6 +58948,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -58855,6 +59014,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -58920,6 +59080,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -59408,6 +59569,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -59452,6 +59614,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -59496,6 +59659,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -59540,6 +59704,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -62760,10 +62925,10 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     email: string
-    productId: string
     variantId?: string | null
     notifiedAt?: Date | string | null
-    businessId: string
+    product: ProductCreateNestedOneWithoutBackInStockRequestsInput
+    business: BusinessCreateNestedOneWithoutBackInStockRequestsInput
   }
 
   export type BackInStockRequestUncheckedCreateInput = {
@@ -62780,10 +62945,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
-    productId?: StringFieldUpdateOperationsInput | string
     variantId?: NullableStringFieldUpdateOperationsInput | string | null
     notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
+    product?: ProductUpdateOneRequiredWithoutBackInStockRequestsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutBackInStockRequestsNestedInput
   }
 
   export type BackInStockRequestUncheckedUpdateInput = {
@@ -62810,10 +62975,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
-    productId?: StringFieldUpdateOperationsInput | string
     variantId?: NullableStringFieldUpdateOperationsInput | string | null
     notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type BackInStockRequestUncheckedUpdateManyInput = {
@@ -63430,6 +63593,12 @@ export namespace Prisma {
     none?: FaqItemWhereInput
   }
 
+  export type BackInStockRequestListRelationFilter = {
+    every?: BackInStockRequestWhereInput
+    some?: BackInStockRequestWhereInput
+    none?: BackInStockRequestWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -63491,6 +63660,10 @@ export namespace Prisma {
   }
 
   export type FaqItemOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BackInStockRequestOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -66337,6 +66510,13 @@ export namespace Prisma {
     connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
   }
 
+  export type BackInStockRequestCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
+    createMany?: BackInStockRequestCreateManyBusinessInputEnvelope
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -66481,6 +66661,13 @@ export namespace Prisma {
     connectOrCreate?: FaqItemCreateOrConnectWithoutBusinessInput | FaqItemCreateOrConnectWithoutBusinessInput[]
     createMany?: FaqItemCreateManyBusinessInputEnvelope
     connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+  }
+
+  export type BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
+    createMany?: BackInStockRequestCreateManyBusinessInputEnvelope
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -66798,6 +66985,20 @@ export namespace Prisma {
     deleteMany?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
   }
 
+  export type BackInStockRequestUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
+    upsert?: BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput | BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: BackInStockRequestCreateManyBusinessInputEnvelope
+    set?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    disconnect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    delete?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    update?: BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput | BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: BackInStockRequestUpdateManyWithWhereWithoutBusinessInput | BackInStockRequestUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -67088,6 +67289,20 @@ export namespace Prisma {
     deleteMany?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
   }
 
+  export type BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
+    upsert?: BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput | BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: BackInStockRequestCreateManyBusinessInputEnvelope
+    set?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    disconnect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    delete?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    update?: BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput | BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: BackInStockRequestUpdateManyWithWhereWithoutBusinessInput | BackInStockRequestUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
     create?: XOR<BusinessCreateWithoutSiteContentInput, BusinessUncheckedCreateWithoutSiteContentInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutSiteContentInput
@@ -67171,6 +67386,13 @@ export namespace Prisma {
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
   }
 
+  export type BackInStockRequestCreateNestedManyWithoutProductInput = {
+    create?: XOR<BackInStockRequestCreateWithoutProductInput, BackInStockRequestUncheckedCreateWithoutProductInput> | BackInStockRequestCreateWithoutProductInput[] | BackInStockRequestUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutProductInput | BackInStockRequestCreateOrConnectWithoutProductInput[]
+    createMany?: BackInStockRequestCreateManyProductInputEnvelope
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+  }
+
   export type ProductReviewCreateNestedManyWithoutProductInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -67211,6 +67433,13 @@ export namespace Prisma {
     connectOrCreate?: InventoryHistoryCreateOrConnectWithoutProductInput | InventoryHistoryCreateOrConnectWithoutProductInput[]
     createMany?: InventoryHistoryCreateManyProductInputEnvelope
     connect?: InventoryHistoryWhereUniqueInput | InventoryHistoryWhereUniqueInput[]
+  }
+
+  export type BackInStockRequestUncheckedCreateNestedManyWithoutProductInput = {
+    create?: XOR<BackInStockRequestCreateWithoutProductInput, BackInStockRequestUncheckedCreateWithoutProductInput> | BackInStockRequestCreateWithoutProductInput[] | BackInStockRequestUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutProductInput | BackInStockRequestCreateOrConnectWithoutProductInput[]
+    createMany?: BackInStockRequestCreateManyProductInputEnvelope
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
   }
 
   export type ProductReviewUncheckedCreateNestedManyWithoutProductInput = {
@@ -67316,6 +67545,20 @@ export namespace Prisma {
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
   }
 
+  export type BackInStockRequestUpdateManyWithoutProductNestedInput = {
+    create?: XOR<BackInStockRequestCreateWithoutProductInput, BackInStockRequestUncheckedCreateWithoutProductInput> | BackInStockRequestCreateWithoutProductInput[] | BackInStockRequestUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutProductInput | BackInStockRequestCreateOrConnectWithoutProductInput[]
+    upsert?: BackInStockRequestUpsertWithWhereUniqueWithoutProductInput | BackInStockRequestUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: BackInStockRequestCreateManyProductInputEnvelope
+    set?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    disconnect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    delete?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    update?: BackInStockRequestUpdateWithWhereUniqueWithoutProductInput | BackInStockRequestUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: BackInStockRequestUpdateManyWithWhereWithoutProductInput | BackInStockRequestUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
+  }
+
   export type ProductReviewUpdateManyWithoutProductNestedInput = {
     create?: XOR<ProductReviewCreateWithoutProductInput, ProductReviewUncheckedCreateWithoutProductInput> | ProductReviewCreateWithoutProductInput[] | ProductReviewUncheckedCreateWithoutProductInput[]
     connectOrCreate?: ProductReviewCreateOrConnectWithoutProductInput | ProductReviewCreateOrConnectWithoutProductInput[]
@@ -67398,6 +67641,20 @@ export namespace Prisma {
     update?: InventoryHistoryUpdateWithWhereUniqueWithoutProductInput | InventoryHistoryUpdateWithWhereUniqueWithoutProductInput[]
     updateMany?: InventoryHistoryUpdateManyWithWhereWithoutProductInput | InventoryHistoryUpdateManyWithWhereWithoutProductInput[]
     deleteMany?: InventoryHistoryScalarWhereInput | InventoryHistoryScalarWhereInput[]
+  }
+
+  export type BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput = {
+    create?: XOR<BackInStockRequestCreateWithoutProductInput, BackInStockRequestUncheckedCreateWithoutProductInput> | BackInStockRequestCreateWithoutProductInput[] | BackInStockRequestUncheckedCreateWithoutProductInput[]
+    connectOrCreate?: BackInStockRequestCreateOrConnectWithoutProductInput | BackInStockRequestCreateOrConnectWithoutProductInput[]
+    upsert?: BackInStockRequestUpsertWithWhereUniqueWithoutProductInput | BackInStockRequestUpsertWithWhereUniqueWithoutProductInput[]
+    createMany?: BackInStockRequestCreateManyProductInputEnvelope
+    set?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    disconnect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    delete?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+    update?: BackInStockRequestUpdateWithWhereUniqueWithoutProductInput | BackInStockRequestUpdateWithWhereUniqueWithoutProductInput[]
+    updateMany?: BackInStockRequestUpdateManyWithWhereWithoutProductInput | BackInStockRequestUpdateManyWithWhereWithoutProductInput[]
+    deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
   }
 
   export type ProductReviewUncheckedUpdateManyWithoutProductNestedInput = {
@@ -68949,6 +69206,34 @@ export namespace Prisma {
     update?: XOR<XOR<ShippingZoneUpdateToOneWithWhereWithoutRatesInput, ShippingZoneUpdateWithoutRatesInput>, ShippingZoneUncheckedUpdateWithoutRatesInput>
   }
 
+  export type ProductCreateNestedOneWithoutBackInStockRequestsInput = {
+    create?: XOR<ProductCreateWithoutBackInStockRequestsInput, ProductUncheckedCreateWithoutBackInStockRequestsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutBackInStockRequestsInput
+    connect?: ProductWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutBackInStockRequestsInput = {
+    create?: XOR<BusinessCreateWithoutBackInStockRequestsInput, BusinessUncheckedCreateWithoutBackInStockRequestsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutBackInStockRequestsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type ProductUpdateOneRequiredWithoutBackInStockRequestsNestedInput = {
+    create?: XOR<ProductCreateWithoutBackInStockRequestsInput, ProductUncheckedCreateWithoutBackInStockRequestsInput>
+    connectOrCreate?: ProductCreateOrConnectWithoutBackInStockRequestsInput
+    upsert?: ProductUpsertWithoutBackInStockRequestsInput
+    connect?: ProductWhereUniqueInput
+    update?: XOR<XOR<ProductUpdateToOneWithWhereWithoutBackInStockRequestsInput, ProductUpdateWithoutBackInStockRequestsInput>, ProductUncheckedUpdateWithoutBackInStockRequestsInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutBackInStockRequestsNestedInput = {
+    create?: XOR<BusinessCreateWithoutBackInStockRequestsInput, BusinessUncheckedCreateWithoutBackInStockRequestsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutBackInStockRequestsInput
+    upsert?: BusinessUpsertWithoutBackInStockRequestsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutBackInStockRequestsInput, BusinessUpdateWithoutBackInStockRequestsInput>, BusinessUncheckedUpdateWithoutBackInStockRequestsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -69811,6 +70096,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -69875,6 +70161,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -69998,6 +70285,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -70062,6 +70350,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -70264,6 +70553,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -70307,6 +70597,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -71175,6 +71466,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type BackInStockRequestCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    product: ProductCreateNestedOneWithoutBackInStockRequestsInput
+  }
+
+  export type BackInStockRequestUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    productId: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+  }
+
+  export type BackInStockRequestCreateOrConnectWithoutBusinessInput = {
+    where: BackInStockRequestWhereUniqueInput
+    create: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type BackInStockRequestCreateManyBusinessInputEnvelope = {
+    data: BackInStockRequestCreateManyBusinessInput | BackInStockRequestCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -71902,6 +72221,35 @@ export namespace Prisma {
     businessId?: StringFilter<"FaqItem"> | string
   }
 
+  export type BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: BackInStockRequestWhereUniqueInput
+    update: XOR<BackInStockRequestUpdateWithoutBusinessInput, BackInStockRequestUncheckedUpdateWithoutBusinessInput>
+    create: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: BackInStockRequestWhereUniqueInput
+    data: XOR<BackInStockRequestUpdateWithoutBusinessInput, BackInStockRequestUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type BackInStockRequestUpdateManyWithWhereWithoutBusinessInput = {
+    where: BackInStockRequestScalarWhereInput
+    data: XOR<BackInStockRequestUpdateManyMutationInput, BackInStockRequestUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type BackInStockRequestScalarWhereInput = {
+    AND?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
+    OR?: BackInStockRequestScalarWhereInput[]
+    NOT?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
+    id?: StringFilter<"BackInStockRequest"> | string
+    createdAt?: DateTimeFilter<"BackInStockRequest"> | Date | string
+    email?: StringFilter<"BackInStockRequest"> | string
+    productId?: StringFilter<"BackInStockRequest"> | string
+    variantId?: StringNullableFilter<"BackInStockRequest"> | string | null
+    notifiedAt?: DateTimeNullableFilter<"BackInStockRequest"> | Date | string | null
+    businessId?: StringFilter<"BackInStockRequest"> | string
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -71964,6 +72312,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -72028,6 +72377,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -72108,6 +72458,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -72172,6 +72523,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -72236,6 +72588,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -72300,6 +72653,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -72380,6 +72734,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -72444,6 +72799,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -72545,6 +72901,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -72609,6 +72966,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -72790,6 +73148,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type BackInStockRequestCreateWithoutProductInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutBackInStockRequestsInput
+  }
+
+  export type BackInStockRequestUncheckedCreateWithoutProductInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    businessId: string
+  }
+
+  export type BackInStockRequestCreateOrConnectWithoutProductInput = {
+    where: BackInStockRequestWhereUniqueInput
+    create: XOR<BackInStockRequestCreateWithoutProductInput, BackInStockRequestUncheckedCreateWithoutProductInput>
+  }
+
+  export type BackInStockRequestCreateManyProductInputEnvelope = {
+    data: BackInStockRequestCreateManyProductInput | BackInStockRequestCreateManyProductInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductReviewCreateWithoutProductInput = {
     id?: string
     createdAt?: Date | string
@@ -72964,6 +73350,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -73028,6 +73415,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -73156,6 +73544,22 @@ export namespace Prisma {
     data: XOR<InventoryHistoryUpdateManyMutationInput, InventoryHistoryUncheckedUpdateManyWithoutProductInput>
   }
 
+  export type BackInStockRequestUpsertWithWhereUniqueWithoutProductInput = {
+    where: BackInStockRequestWhereUniqueInput
+    update: XOR<BackInStockRequestUpdateWithoutProductInput, BackInStockRequestUncheckedUpdateWithoutProductInput>
+    create: XOR<BackInStockRequestCreateWithoutProductInput, BackInStockRequestUncheckedCreateWithoutProductInput>
+  }
+
+  export type BackInStockRequestUpdateWithWhereUniqueWithoutProductInput = {
+    where: BackInStockRequestWhereUniqueInput
+    data: XOR<BackInStockRequestUpdateWithoutProductInput, BackInStockRequestUncheckedUpdateWithoutProductInput>
+  }
+
+  export type BackInStockRequestUpdateManyWithWhereWithoutProductInput = {
+    where: BackInStockRequestScalarWhereInput
+    data: XOR<BackInStockRequestUpdateManyMutationInput, BackInStockRequestUncheckedUpdateManyWithoutProductInput>
+  }
+
   export type ProductReviewUpsertWithWhereUniqueWithoutProductInput = {
     where: ProductReviewWhereUniqueInput
     update: XOR<ProductReviewUpdateWithoutProductInput, ProductReviewUncheckedUpdateWithoutProductInput>
@@ -73239,6 +73643,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -73282,6 +73687,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -73417,6 +73823,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -73460,6 +73867,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -73557,6 +73965,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -73621,6 +74030,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -73723,6 +74133,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -73787,6 +74198,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -73884,6 +74296,7 @@ export namespace Prisma {
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -73927,6 +74340,7 @@ export namespace Prisma {
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -74031,6 +74445,7 @@ export namespace Prisma {
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -74074,6 +74489,7 @@ export namespace Prisma {
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -74139,6 +74555,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -74203,6 +74620,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -74335,6 +74753,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -74399,6 +74818,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -74574,6 +74994,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -74617,6 +75038,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -74687,6 +75109,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -74751,6 +75174,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -74809,6 +75233,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -74852,6 +75277,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -74928,6 +75354,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -74992,6 +75419,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -75093,6 +75521,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -75157,6 +75586,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -75544,6 +75974,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -75608,6 +76039,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -75973,6 +76405,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -76037,6 +76470,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -76412,6 +76846,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -76476,6 +76911,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -76901,6 +77337,7 @@ export namespace Prisma {
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -76944,6 +77381,7 @@ export namespace Prisma {
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -77117,6 +77555,7 @@ export namespace Prisma {
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -77160,6 +77599,7 @@ export namespace Prisma {
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -77351,6 +77791,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -77415,6 +77856,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -77575,6 +78017,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -77639,6 +78082,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -77736,6 +78180,7 @@ export namespace Prisma {
     variants?: ProductVariantCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -77779,6 +78224,7 @@ export namespace Prisma {
     variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -77886,6 +78332,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -77950,6 +78397,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -78165,6 +78613,7 @@ export namespace Prisma {
     variants?: ProductVariantUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -78208,6 +78657,7 @@ export namespace Prisma {
     variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -78327,6 +78777,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -78391,6 +78842,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -78579,6 +79031,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -78643,6 +79096,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -78690,6 +79144,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
     reviews?: ProductReviewCreateNestedManyWithoutProductInput
   }
 
@@ -78733,6 +79188,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
     reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
   }
 
@@ -78859,6 +79315,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -78923,6 +79380,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -79019,6 +79477,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -79083,6 +79542,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -79163,6 +79623,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -79227,6 +79688,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -79291,6 +79753,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -79355,6 +79818,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -79435,6 +79899,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -79499,6 +79964,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -79563,6 +80029,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -79627,6 +80094,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -79707,6 +80175,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -79771,6 +80240,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -79835,6 +80305,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -79899,6 +80370,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -80011,6 +80483,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -80075,6 +80548,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -80254,6 +80728,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -80318,6 +80793,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -80447,6 +80923,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -80511,6 +80988,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -80630,6 +81108,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -80694,6 +81173,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -80823,6 +81303,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -80887,6 +81368,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -80985,6 +81467,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
     orderItems?: OrderItemCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutProductInput
   }
 
   export type ProductUncheckedCreateWithoutReviewsInput = {
@@ -81028,6 +81511,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutProductInput
   }
 
   export type ProductCreateOrConnectWithoutReviewsInput = {
@@ -81237,6 +81721,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
   }
 
   export type ProductUncheckedUpdateWithoutReviewsInput = {
@@ -81280,6 +81765,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
   }
 
   export type CustomerUpsertWithoutReviewsInput = {
@@ -81620,6 +82106,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -81684,6 +82171,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -81801,6 +82289,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -81865,6 +82354,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -81972,6 +82462,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -82036,6 +82527,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -82116,6 +82608,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -82180,6 +82673,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -82244,6 +82738,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -82308,6 +82803,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -82410,6 +82906,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -82474,6 +82971,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -82548,6 +83046,474 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     states?: ShippingZoneUpdatestatesInput | string[]
     sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ProductCreateWithoutBackInStockRequestsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitCreateNestedOneWithoutProductsInput
+    business: BusinessCreateNestedOneWithoutProductsInput
+    images?: ImageCreateNestedManyWithoutProductInput
+    variants?: ProductVariantCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutProductInput
+    reviews?: ProductReviewCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductUncheckedCreateWithoutBackInStockRequestsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    excerpt?: string | null
+    description?: string | null
+    price: number
+    compareAtPrice?: number | null
+    cost?: number | null
+    sku?: string | null
+    barcode?: string | null
+    trackInventory?: boolean
+    inventoryQty?: number
+    reservedQty?: number
+    allowBackorders?: boolean
+    lowInventoryThreshold?: number | null
+    lowInventoryAlertSent?: boolean
+    outOfStockAlertSent?: boolean
+    baseInventoryUnitId?: string | null
+    baseUnitsConsumed?: number | null
+    weight?: number | null
+    weightUnit?: string | null
+    published?: boolean
+    featured?: boolean
+    scheduledPublishAt?: Date | string | null
+    sortOrder?: number
+    metaTitle?: string | null
+    metaDescription?: string | null
+    metaKeywords?: string | null
+    ogImage?: string | null
+    businessId: string
+    averageRating?: number | null
+    reviewCount?: number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedCreateNestedManyWithoutProductInput
+    variants?: ProductVariantUncheckedCreateNestedManyWithoutProductInput
+    collectionProducts?: CollectionProductUncheckedCreateNestedManyWithoutProductInput
+    orderItems?: OrderItemUncheckedCreateNestedManyWithoutProductInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutProductInput
+    reviews?: ProductReviewUncheckedCreateNestedManyWithoutProductInput
+  }
+
+  export type ProductCreateOrConnectWithoutBackInStockRequestsInput = {
+    where: ProductWhereUniqueInput
+    create: XOR<ProductCreateWithoutBackInStockRequestsInput, ProductUncheckedCreateWithoutBackInStockRequestsInput>
+  }
+
+  export type BusinessCreateWithoutBackInStockRequestsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutBackInStockRequestsInput, BusinessUncheckedCreateWithoutBackInStockRequestsInput>
+  }
+
+  export type ProductUpsertWithoutBackInStockRequestsInput = {
+    update: XOR<ProductUpdateWithoutBackInStockRequestsInput, ProductUncheckedUpdateWithoutBackInStockRequestsInput>
+    create: XOR<ProductCreateWithoutBackInStockRequestsInput, ProductUncheckedCreateWithoutBackInStockRequestsInput>
+    where?: ProductWhereInput
+  }
+
+  export type ProductUpdateToOneWithWhereWithoutBackInStockRequestsInput = {
+    where?: ProductWhereInput
+    data: XOR<ProductUpdateWithoutBackInStockRequestsInput, ProductUncheckedUpdateWithoutBackInStockRequestsInput>
+  }
+
+  export type ProductUpdateWithoutBackInStockRequestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    baseInventoryUnit?: BaseInventoryUnitUpdateOneWithoutProductsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutProductsNestedInput
+    images?: ImageUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    reviews?: ProductReviewUpdateManyWithoutProductNestedInput
+  }
+
+  export type ProductUncheckedUpdateWithoutBackInStockRequestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    excerpt?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    price?: FloatFieldUpdateOperationsInput | number
+    compareAtPrice?: NullableFloatFieldUpdateOperationsInput | number | null
+    cost?: NullableFloatFieldUpdateOperationsInput | number | null
+    sku?: NullableStringFieldUpdateOperationsInput | string | null
+    barcode?: NullableStringFieldUpdateOperationsInput | string | null
+    trackInventory?: BoolFieldUpdateOperationsInput | boolean
+    inventoryQty?: IntFieldUpdateOperationsInput | number
+    reservedQty?: IntFieldUpdateOperationsInput | number
+    allowBackorders?: BoolFieldUpdateOperationsInput | boolean
+    lowInventoryThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    lowInventoryAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    outOfStockAlertSent?: BoolFieldUpdateOperationsInput | boolean
+    baseInventoryUnitId?: NullableStringFieldUpdateOperationsInput | string | null
+    baseUnitsConsumed?: NullableIntFieldUpdateOperationsInput | number | null
+    weight?: NullableFloatFieldUpdateOperationsInput | number | null
+    weightUnit?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    featured?: BoolFieldUpdateOperationsInput | boolean
+    scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    metaTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    metaDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
+    ogImage?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    averageRating?: NullableFloatFieldUpdateOperationsInput | number | null
+    reviewCount?: IntFieldUpdateOperationsInput | number
+    additionalFields?: NullableJsonNullValueInput | InputJsonValue
+    images?: ImageUncheckedUpdateManyWithoutProductNestedInput
+    variants?: ProductVariantUncheckedUpdateManyWithoutProductNestedInput
+    collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
+    orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
+  }
+
+  export type BusinessUpsertWithoutBackInStockRequestsInput = {
+    update: XOR<BusinessUpdateWithoutBackInStockRequestsInput, BusinessUncheckedUpdateWithoutBackInStockRequestsInput>
+    create: XOR<BusinessCreateWithoutBackInStockRequestsInput, BusinessUncheckedCreateWithoutBackInStockRequestsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutBackInStockRequestsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutBackInStockRequestsInput, BusinessUncheckedUpdateWithoutBackInStockRequestsInput>
+  }
+
+  export type BusinessUpdateWithoutBackInStockRequestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -83202,6 +84168,15 @@ export namespace Prisma {
     published?: boolean
   }
 
+  export type BackInStockRequestCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    productId: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+  }
+
   export type ProductUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -83242,6 +84217,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -83285,6 +84261,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 
@@ -84200,6 +85177,33 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
   }
 
+  export type BackInStockRequestUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    product?: ProductUpdateOneRequiredWithoutBackInStockRequestsNestedInput
+  }
+
+  export type BackInStockRequestUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type BackInStockRequestUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    productId?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type ImageCreateManyProductInput = {
     id?: string
     createdAt?: Date | string
@@ -84258,6 +85262,15 @@ export namespace Prisma {
     note?: string | null
     orderId?: string | null
     userId?: string | null
+  }
+
+  export type BackInStockRequestCreateManyProductInput = {
+    id?: string
+    createdAt?: Date | string
+    email: string
+    variantId?: string | null
+    notifiedAt?: Date | string | null
+    businessId: string
   }
 
   export type ProductReviewCreateManyProductInput = {
@@ -84465,6 +85478,33 @@ export namespace Prisma {
     note?: NullableStringFieldUpdateOperationsInput | string | null
     orderId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BackInStockRequestUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutBackInStockRequestsNestedInput
+  }
+
+  export type BackInStockRequestUncheckedUpdateWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BackInStockRequestUncheckedUpdateManyWithoutProductInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    email?: StringFieldUpdateOperationsInput | string
+    variantId?: NullableStringFieldUpdateOperationsInput | string | null
+    notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProductReviewUpdateWithoutProductInput = {
@@ -85776,6 +86816,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUpdateManyWithoutProductNestedInput
   }
 
@@ -85819,6 +86860,7 @@ export namespace Prisma {
     collectionProducts?: CollectionProductUncheckedUpdateManyWithoutProductNestedInput
     orderItems?: OrderItemUncheckedUpdateManyWithoutProductNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutProductNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutProductNestedInput
     reviews?: ProductReviewUncheckedUpdateManyWithoutProductNestedInput
   }
 

@@ -183,10 +183,20 @@ export default async function AdminDashboardPage() {
     // Revenue by day (last 30 days) — raw rows, bucketed into local
     // calendar days below (Prisma's groupBy(["createdAt"]) groups by the
     // full timestamp, i.e. one row per order, not per day).
+    //
+    // Scoped to paymentStatus: { in: ["paid", "refunded"] } to match the
+    // "Revenue (Last 30 Days)" card's headline number (stats.thirtyDayGrossRevenue,
+    // computed below from the same paid+refunded scoping). Both must share one
+    // definition of "revenue" — previously this query used paymentStatus: "paid"
+    // only, so the chart's bars summed to less than the headline once an order
+    // in the window was refunded. Gross (not net) was chosen as the shared
+    // definition since the card already surfaces the refunded amount and net
+    // total as a subtitle line, and the per-day bars have no room to show a
+    // refund breakdown of their own.
     db.order.findMany({
       where: {
         businessId: business.id,
-        paymentStatus: "paid",
+        paymentStatus: { in: ["paid", "refunded"] },
         createdAt: {
           gte: chartWindowStart,
         },

@@ -78,6 +78,46 @@ function withoutSpMeta(fields: Record<string, unknown>): Record<string, unknown>
   return rest;
 }
 
+/**
+ * Merge a publish `draft` over the current `live` customFields, changing only
+ * the keys the draft actually touched relative to its `base` (the values the
+ * draft diverged from — i.e. what was last published locally).
+ *
+ * Publishing must NOT replace the whole customFields object with the draft
+ * snapshot: any keys written to the live record since the draft was opened
+ * (e.g. Branding / Navigation saved via `updateSiteContent` while the draft
+ * stayed alive) are absent from the snapshot and would be clobbered. Starting
+ * from `live` and applying only the draft's real changes (adds / edits /
+ * removals — including the reserved `_sp` metadata key, which is just another
+ * key here) preserves those concurrent writes.
+ */
+function mergeDraftOverLive(
+  live: Record<string, unknown>,
+  draft: Record<string, unknown>,
+  base: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...live };
+  const keys = new Set<string>([...Object.keys(draft), ...Object.keys(base)]);
+  for (const key of keys) {
+    const inDraft = Object.prototype.hasOwnProperty.call(draft, key);
+    const inBase = Object.prototype.hasOwnProperty.call(base, key);
+    if (inDraft && !inBase) {
+      // Draft introduced this key — always apply it.
+      result[key] = draft[key];
+    } else if (!inDraft && inBase) {
+      // Draft removed a key that existed at draft-open — remove it.
+      delete result[key];
+    } else if (inDraft && inBase) {
+      // Present in both: apply the draft value only if the owner changed it,
+      // so keys the draft left untouched keep whatever the LIVE record holds.
+      if (stableStringify(draft[key]) !== stableStringify(base[key])) {
+        result[key] = draft[key];
+      }
+    }
+  }
+  return result;
+}
+
 function humanize(key: string): string {
   return key.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -162,6 +202,14 @@ export function VisualEditor({
   const [themeOpen, setThemeOpen] = useState(false);
   const [device, setDevice] = useState<DeviceKind>("desktop");
   const [isUpdating, setIsUpdating] = useState(false);
+  /**
+   * State mirror of `mutationPendingRef` so the field/theme panels can be
+   * visually disabled for the WHOLE publish/discard settling window — not just
+   * the mutation's own in-flight phase (`isPublishing`), which excludes the
+   * pre-mutation `await inFlightPromiseRef` gap where edits were being silently
+   * dropped.
+   */
+  const [mutationPending, setMutationPending] = useState(false);
 
   // ── Refs ──
   const previewRef = useRef<PreviewFrameHandle>(null);
@@ -201,10 +249,29 @@ export function VisualEditor({
   const unackedPatchKeysRef = useRef<Set<string>>(new Set());
 
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
+  const utils = api.useUtils();
 
   const setFlushPendingState = useCallback((pending: boolean) => {
     flushPendingRef.current = pending;
     setFlushPending(pending);
+  }, []);
+
+  const setMutationPendingState = useCallback((pending: boolean) => {
+    mutationPendingRef.current = pending;
+    setMutationPending(pending);
+  }, []);
+
+  /**
+   * A field/visibility/theme edit was attempted while publish or discard is
+   * settling. Freezing here prevents a silent race (the edit would be reset by
+   * discard, or flushed as a phantom draft right after publish cleared it) —
+   * but it must not be silent. Give the owner explicit feedback (deduped by a
+   * stable toast id so a burst of blocked edits shows a single message).
+   */
+  const notifyEditBlocked = useCallback(() => {
+    toast.info("Finishing your last action — one moment…", {
+      id: "sp-mutation-settling",
+    });
   }, []);
 
   /**
@@ -322,8 +389,12 @@ export function VisualEditor({
       // Frozen while publish/discard is settling — an edit here would race
       // the mutation and either be lost (discard reset) or flushed as a
       // phantom draft right after publish cleared it. The panel is visually
-      // disabled during this window as well.
-      if (mutationPendingRef.current) return;
+      // disabled during this window as well; the toast covers any edit that
+      // still slips through (e.g. keyboard) so the drop is never silent.
+      if (mutationPendingRef.current) {
+        notifyEditBlocked();
+        return;
+      }
       setFields((prev) => {
         const next = { ...prev, [key]: value };
         latestFieldsRef.current = next;
@@ -347,7 +418,7 @@ export function VisualEditor({
 
       scheduleFlush();
     },
-    [scheduleFlush, fieldTypeByKey],
+    [scheduleFlush, fieldTypeByKey, notifyEditBlocked],
   );
 
   // ── Publish ──
@@ -355,10 +426,18 @@ export function VisualEditor({
     onSuccess: (_data, variables) => {
       // Baseline from the PAYLOAD, not latestFieldsRef — the ref could in
       // principle drift after mutate() and the baseline must reflect what
-      // the server actually published.
-      setPublishedFields(
-        (variables.customFields ?? {}) as Record<string, unknown>,
-      );
+      // the server actually published. The payload is the merged object
+      // (draft applied over the live record), so it may carry keys the draft
+      // snapshot never had (e.g. Branding/Nav saved while the draft was open).
+      const published = (variables.customFields ?? {}) as Record<
+        string,
+        unknown
+      >;
+      setPublishedFields(published);
+      // Sync the working set to what was actually published so `localDiffers`
+      // doesn't immediately flag the concurrently-merged keys as "unpublished".
+      setFields(published);
+      latestFieldsRef.current = published;
       setServerHasDraft(false);
       setSaveFailed(false);
       refreshNeededRef.current = false;
@@ -373,25 +452,52 @@ export function VisualEditor({
       scheduleFlush();
     },
     onSettled: () => {
-      mutationPendingRef.current = false;
+      setMutationPendingState(false);
     },
   });
 
   const handlePublish = useCallback(() => {
     if (mutationPendingRef.current) return; // double-click / overlap guard
-    mutationPendingRef.current = true;
+    setMutationPendingState(true);
     void (async () => {
       cancelPendingFlush();
       // Let an already-sent draft write LAND before publishing — otherwise it
       // can re-create the server draft after updateSiteContent clears it.
       if (inFlightPromiseRef.current) await inFlightPromiseRef.current;
       setFlushPendingState(false);
+
+      // MERGE the draft over the CURRENT live customFields rather than
+      // replacing the whole object with the draft snapshot. Re-read the live
+      // record now so any keys written since the draft opened (Branding,
+      // Navigation, etc.) survive publish. Fall back to the raw snapshot if
+      // the read fails — that preserves the pre-existing publish behavior
+      // rather than blocking the owner from going live.
+      const draftSnapshot = latestFieldsRef.current;
+      let payload = draftSnapshot;
+      try {
+        const live = await utils.content.getEditorState.fetch();
+        payload = mergeDraftOverLive(
+          live.customFields ?? {},
+          draftSnapshot,
+          publishedFields,
+        );
+      } catch {
+        payload = draftSnapshot;
+      }
+
       publish.mutate({
-        customFields: latestFieldsRef.current,
+        customFields: payload,
         clearPreviewDraft: true,
       });
     })();
-  }, [cancelPendingFlush, publish, setFlushPendingState]);
+  }, [
+    cancelPendingFlush,
+    publish,
+    setFlushPendingState,
+    setMutationPendingState,
+    utils,
+    publishedFields,
+  ]);
 
   // ── Discard ──
   const clearDraft = api.content.clearPreviewDraft.useMutation({
@@ -414,13 +520,13 @@ export function VisualEditor({
       if (flushPendingRef.current) scheduleFlush();
     },
     onSettled: () => {
-      mutationPendingRef.current = false;
+      setMutationPendingState(false);
     },
   });
 
   const handleDiscard = useCallback(() => {
     if (mutationPendingRef.current) return; // double-click / overlap guard
-    mutationPendingRef.current = true;
+    setMutationPendingState(true);
     void (async () => {
       // Cancel synchronously so a scheduled flush can't fire mid-discard and
       // resurrect the edits, then let any already-sent write settle first.
@@ -428,7 +534,7 @@ export function VisualEditor({
       if (inFlightPromiseRef.current) await inFlightPromiseRef.current;
       clearDraft.mutate();
     })();
-  }, [cancelPendingFlush, clearDraft]);
+  }, [cancelPendingFlush, clearDraft, setMutationPendingState]);
 
   // ── Dirty model ──
   const localDiffers = useMemo(
@@ -536,7 +642,13 @@ export function VisualEditor({
 
   const handleToggleVisibility = useCallback(
     (section: TemplateSection) => {
-      if (mutationPendingRef.current) return;
+      // The section rail's eye toggle has no disabled state of its own, so
+      // this is the settling-window guard for visibility edits. Give feedback
+      // instead of dropping the toggle silently.
+      if (mutationPendingRef.current) {
+        notifyEditBlocked();
+        return;
+      }
       setFields((prev) => {
         const meta = getSpMeta(prev);
         const currentlyHidden =
@@ -549,7 +661,7 @@ export function VisualEditor({
       refreshNeededRef.current = true;
       scheduleFlush();
     },
-    [scheduleFlush],
+    [scheduleFlush, notifyEditBlocked],
   );
 
   // ── Theme ──
@@ -561,7 +673,10 @@ export function VisualEditor({
 
   const handleThemeSelect = useCallback(
     (kind: "palette" | "fonts", presetId: string | undefined) => {
-      if (mutationPendingRef.current) return;
+      if (mutationPendingRef.current) {
+        notifyEditBlocked();
+        return;
+      }
       setFields((prev) => {
         const next = setThemeSelection(prev, kind, presetId);
         latestFieldsRef.current = next;
@@ -571,7 +686,7 @@ export function VisualEditor({
       refreshNeededRef.current = true;
       scheduleFlush();
     },
-    [scheduleFlush],
+    [scheduleFlush, notifyEditBlocked],
   );
 
   // Patch ack from the iframe (sp:patched).
@@ -649,7 +764,7 @@ export function VisualEditor({
             theme={templateTheme}
             selection={themeSelection}
             onSelect={handleThemeSelect}
-            disabled={isPublishing}
+            disabled={isPublishing || mutationPending}
             onClose={() => setThemeOpen(false)}
           />
         )}
@@ -662,7 +777,7 @@ export function VisualEditor({
             onFieldChange={applyFieldUpdate}
             embedsEnabled={embedsEnabled}
             mediaEnabled={mediaEnabled}
-            disabled={isPublishing}
+            disabled={isPublishing || mutationPending}
             onClose={() => setActiveSectionId(null)}
           />
         )}

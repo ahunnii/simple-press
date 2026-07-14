@@ -333,7 +333,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
         >
           {privacyPolicy ? (
             <Link
-              href={privacyPolicy.slug}
+              href={`/${privacyPolicy.slug}`}
               className="transition-colors hover:text-[#0a0a0a]"
             >
               Privacy Policy{" "}
@@ -349,7 +349,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
 
           {termsOfService ? (
             <Link
-              href={termsOfService.slug}
+              href={`/${termsOfService.slug}`}
               className="transition-colors hover:text-[#0a0a0a]"
             >
               Terms of Service

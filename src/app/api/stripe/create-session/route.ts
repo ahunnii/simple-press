@@ -13,6 +13,7 @@ import {
 } from "~/lib/checkout/validate-cart";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import {
   releaseReservation,
@@ -101,6 +102,24 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+
+    // Feature-flag guard: disabling checkout/cart/payments must actually close
+    // the money endpoint, not just hide the storefront UI (which is bypassable
+    // by POSTing here directly). Resolve the store's flags and reject session
+    // creation if any of the required commerce flags are off. `coupons` is
+    // handled separately below (discounts are ignored, not fatal).
+    const { isEnabled: isFeatureEnabled } = resolveFlags(business.featureFlags);
+    if (
+      !isFeatureEnabled("cart") ||
+      !isFeatureEnabled("checkout") ||
+      !isFeatureEnabled("payments")
+    ) {
+      return NextResponse.json(
+        { error: "Checkout is not available for this store." },
+        { status: 403 },
+      );
+    }
+    const couponsEnabled = isFeatureEnabled("coupons");
 
     // Maintenance guard: reject checkout while platform or store is in maintenance.
     const platformMaintenance = await getPlatformMaintenance();
@@ -303,8 +322,12 @@ export async function POST(req: NextRequest) {
       productMap,
     );
 
+    // Ignore any supplied discount code when the coupons feature is disabled —
+    // the store has turned discounts off, so a stale/injected code must not apply.
     const rawDiscountId =
-      typeof discountCodeId === "string" && discountCodeId.trim() !== ""
+      couponsEnabled &&
+      typeof discountCodeId === "string" &&
+      discountCodeId.trim() !== ""
         ? discountCodeId.trim()
         : null;
 

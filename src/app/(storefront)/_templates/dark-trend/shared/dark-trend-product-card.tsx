@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { Clock, ShoppingBag } from "lucide-react";
 
 import type { Product } from "~/types";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
@@ -55,18 +55,33 @@ export function DarkTrendProductCard({ product }: Props) {
 
           {/* Badges — stacked top-left (top-right is the wishlist heart) */}
           <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
-            {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
-              <div className="bg-primary text-primary-foreground rounded px-2 py-1 text-xs font-medium">
-                {computeSavingsLabel(
-                  productStatus.displayPrice,
-                  productStatus.displayCompareAtPrice,
+            {productStatus.comingSoon ? (
+              <div className="flex items-center gap-1 rounded bg-amber-500 px-2 py-1 text-xs font-medium text-white">
+                <Clock className="h-3 w-3" aria-hidden="true" />
+                Coming Soon
+              </div>
+            ) : (
+              <>
+                {productStatus.isOnSale &&
+                  productStatus.displayCompareAtPrice && (
+                    <div className="bg-primary text-primary-foreground rounded px-2 py-1 text-xs font-medium">
+                      {computeSavingsLabel(
+                        productStatus.displayPrice,
+                        productStatus.displayCompareAtPrice,
+                      )}
+                    </div>
+                  )}
+                {productStatus.isOutOfStock && (
+                  <div className="bg-destructive text-destructive-foreground rounded px-2 py-1 text-xs font-medium">
+                    Sold Out
+                  </div>
                 )}
-              </div>
-            )}
-            {productStatus.isOutOfStock && (
-              <div className="bg-destructive text-destructive-foreground rounded px-2 py-1 text-xs font-medium">
-                Sold Out
-              </div>
+                {!productStatus.isOutOfStock && productStatus.isBackorder && (
+                  <div className="rounded bg-blue-500 px-2 py-1 text-xs font-medium text-white">
+                    Pre-order
+                  </div>
+                )}
+              </>
             )}
           </div>
 

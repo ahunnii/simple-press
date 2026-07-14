@@ -256,6 +256,8 @@ export const contentRouter = createTRPCRouter({
             slug: input.slug,
           },
           ...(input.type ? { type: input.type } : {}),
+          // Public route: never leak draft/unpublished pages.
+          published: true,
         },
       });
 
@@ -276,6 +278,8 @@ export const contentRouter = createTRPCRouter({
             slug: input.slug,
           },
           type: "blog",
+          // Public route: never leak draft/unpublished blog posts.
+          published: true,
         },
       });
 
@@ -355,13 +359,26 @@ export const contentRouter = createTRPCRouter({
       const { businessId } = ctx;
       const existingPage = await ctx.db.page.findUnique({
         where: { id: input.id, businessId },
-        select: { businessId: true, slug: true },
+        select: { businessId: true, slug: true, type: true },
       });
 
       if (!existingPage) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Page not found",
+        });
+      }
+
+      // A page's `type` is immutable after creation. The blog editor always
+      // sends `type: "blog"`, so opening a non-blog page id under the blog
+      // editor route and saving would silently retype it (e.g. a policy page
+      // becomes a blog post). Reject any attempt to change the type; legitimate
+      // saves either omit `type` or send the page's own existing type.
+      if (input.data.type && input.data.type !== existingPage.type) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "A page's type cannot be changed. This page was opened in the wrong editor.",
         });
       }
 

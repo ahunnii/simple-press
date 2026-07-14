@@ -615,12 +615,16 @@ export function VariantManager({
                       <NumberInput
                         id={`price-${index}`}
                         step="0.01"
-                        value={variant.price ? variant.price / 100 : 0}
+                        value={
+                          variant.price !== undefined
+                            ? variant.price / 100
+                            : null
+                        }
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "price",
-                            e ? Math.round(e * 100) : undefined,
+                            e === null ? undefined : Math.round(e * 100),
                           )
                         }
                         placeholder={(basePrice / 100).toFixed(2)}
@@ -639,15 +643,15 @@ export function VariantManager({
                         id={`compare-at-price-${index}`}
                         step="0.01"
                         value={
-                          variant.compareAtPrice
+                          variant.compareAtPrice !== undefined
                             ? variant.compareAtPrice / 100
-                            : 0
+                            : null
                         }
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "compareAtPrice",
-                            e ? Math.round(e * 100) : undefined,
+                            e === null ? undefined : Math.round(e * 100),
                           )
                         }
                         placeholder="Optional"

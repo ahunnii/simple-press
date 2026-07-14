@@ -24,7 +24,12 @@ export default async function PageView({ params }: Props) {
     slug,
   });
 
-  if (!page) notFound();
+  // Blog posts have their own dedicated route (/blog/[slug]), which is
+  // feature-gated behind the `blog` flag. getPageBySlug matches any page
+  // type by slug, so without this guard a blog post would also render here
+  // — bypassing the blog flag and creating a duplicate-canonical URL for
+  // the same content at two paths.
+  if (!page || page.type === "blog") notFound();
 
   const t = getTemplate(business.templateId);
 
@@ -58,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     api.business.simplifiedGet(),
   ]);
 
-  if (!page) return { title: "Page Not Found" };
+  if (!page || page.type === "blog") return { title: "Page Not Found" };
 
   const title = !!page.metaTitle ? page.metaTitle : page.title;
   const description = !!page.metaDescription

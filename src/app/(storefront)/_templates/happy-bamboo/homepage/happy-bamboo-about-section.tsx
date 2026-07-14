@@ -89,7 +89,7 @@ export function HappyBambooAboutSection({
 
           <FadeIn direction="right" className="space-y-6">
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
-              Zaires Visions
+              About Us
             </span>
             <h2
               className="font-serif text-4xl leading-tight font-bold md:text-5xl"
@@ -105,17 +105,11 @@ export function HappyBambooAboutSection({
             ) : (
               <div className="text-muted-foreground space-y-4 leading-relaxed">
                 <p>
-                  Zaires Visions is a purpose-driven company dedicated to
-                  creating healthier, more sustainable household products. Our
-                  company was built on a simple belief: everyday products should
-                  support both personal well-being and environmental
-                  responsibility. Through our brand Happy Bamboo, we provide
-                  eco-friendly alternatives to traditional paper products by
-                  using 100% bamboo pulp, a rapidly renewable resource that
-                  regenerates in just a few years without contributing to
-                  deforestation. Our products are designed to be chemical-free,
-                  biodegradable, and septic-safe, delivering a cleaner, more
-                  sustainable option for families, businesses, and institutions.
+                  Share your story here. Tell customers who you are, what you
+                  make, and the values behind your work — this is where a
+                  purpose-driven brand connects with the people it serves. Edit
+                  this section from your site editor to introduce your business
+                  in your own words.
                 </p>
               </div>
             )}

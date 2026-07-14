@@ -21,8 +21,9 @@ const aboutPageData: TemplateField[] = [
     group: "about.main",
     gridColumn: "col-span-full",
     defaultValue:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    placeholder: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+      "We started this business out of a love for craft and community. Every piece we make is a little different, shaped by the people and places that inspire us — and we're glad you're here to see it.",
+    placeholder:
+      "We started this business out of a love for craft and community...",
   },
   {
     key: "pollen.about.image",

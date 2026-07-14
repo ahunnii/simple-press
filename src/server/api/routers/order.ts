@@ -13,7 +13,7 @@ import {
   sendOrderRefunded,
   sendOrderShipped,
 } from "~/lib/email/templates";
-import { restorePoolInventory } from "~/lib/inventory";
+import { deductPoolInventory, restorePoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import {
@@ -671,11 +671,21 @@ export const orderRouter = createTRPCRouter({
       }
 
       if (searchQuery) {
-        where.OR = [
+        const or: Prisma.OrderWhereInput[] = [
           { customerEmail: { contains: searchQuery, mode: "insensitive" } },
           { customerName: { contains: searchQuery, mode: "insensitive" } },
           { id: { contains: searchQuery, mode: "insensitive" } },
         ];
+        // Customers quote the human order number (e.g. "#1042"), not the UUID.
+        // Match it whenever the query is numeric (tolerating a leading "#").
+        const numericQuery = Number.parseInt(
+          searchQuery.trim().replace(/^#/, ""),
+          10,
+        );
+        if (Number.isInteger(numericQuery)) {
+          or.push({ orderNumber: numericQuery });
+        }
+        where.OR = or;
       }
 
       // Pagination — mirrors product.secureList
@@ -1008,7 +1018,10 @@ export const orderRouter = createTRPCRouter({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
-            refundAmountCents: input.amount,
+            // For a cumulative full refund the customer must see the full
+            // refunded amount, not just this final partial. When still partial,
+            // report only the amount moved in this transaction.
+            refundAmountCents: isFullRefund ? newTotalRefunded : input.amount,
             orderTotalCents: order.total,
             isFullRefund,
             reason: reasonLabel,
@@ -1306,6 +1319,50 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      // Verify every line item references a product/variant owned by this
+      // tenant. Without this a manual order could reference a foreign
+      // business's product, and a later restock (refund/cancel) would mutate
+      // that other business's inventory.
+      const lineItemProductIds = [
+        ...new Set(
+          input.items
+            .map((i) => i.productId)
+            .filter((id): id is string => !!id),
+        ),
+      ];
+      const lineItemVariantIds = [
+        ...new Set(
+          input.items
+            .map((i) => i.productVariantId)
+            .filter((id): id is string => !!id),
+        ),
+      ];
+
+      if (lineItemProductIds.length > 0) {
+        const ownedCount = await ctx.db.product.count({
+          where: { id: { in: lineItemProductIds }, businessId },
+        });
+        if (ownedCount !== lineItemProductIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products do not belong to this business",
+          });
+        }
+      }
+
+      if (lineItemVariantIds.length > 0) {
+        const ownedCount = await ctx.db.productVariant.count({
+          where: { id: { in: lineItemVariantIds }, product: { businessId } },
+        });
+        if (ownedCount !== lineItemVariantIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "One or more product variants do not belong to this business",
+          });
+        }
+      }
+
       const nameParts = input.customerName.trim().split(" ");
       const firstName = nameParts[0] ?? "Guest";
       const lastName = nameParts.slice(1).join(" ") || "";
@@ -1431,6 +1488,233 @@ export const orderRouter = createTRPCRouter({
       })();
 
       console.log(`[Manual Order] Order created: ${order.id}`);
+
+      // Manual orders only count as a settled sale once they are marked paid.
+      // Both customer spend aggregates and inventory deduction are gated on
+      // this so a pending manual order neither inflates spend nor oversells.
+      const isPaidOrder = input.paymentStatus === "paid";
+
+      // Increment customer spend/order-count aggregates for paid manual orders
+      // so they surface in the customer list metrics — mirrors the Stripe
+      // webhook's customer-metrics update.
+      if (isPaidOrder) {
+        try {
+          await ctx.db.customer.update({
+            where: { id: customer.id },
+            data: {
+              totalSpent: { increment: order.total },
+              orderCount: { increment: 1 },
+            },
+          });
+        } catch (customerError) {
+          console.error(
+            "[Manual Order] Failed to update customer metrics:",
+            customerError,
+          );
+        }
+      }
+
+      // Decrement inventory for paid manual orders using the same
+      // oversell-safe conditional-update pattern as the checkout webhook
+      // (respects trackInventory / allowBackorders, logs oversells, and
+      // handles pool-based products). A hard oversell leaves inventory
+      // unchanged and records an "oversell" history row rather than going
+      // negative.
+      if (isPaidOrder) {
+        try {
+          await ctx.db.$transaction(async (tx) => {
+            const poolGroups = new Map<
+              string,
+              {
+                items: { productId: string; quantity: number }[];
+                unitsConsumedMap: Record<string, number>;
+              }
+            >();
+
+            for (const item of order.items) {
+              const qty = item.quantity;
+
+              if (item.productVariantId) {
+                const variant = await tx.productVariant.findUnique({
+                  where: { id: item.productVariantId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    productId: true,
+                    product: {
+                      select: {
+                        businessId: true,
+                        trackInventory: true,
+                        allowBackorders: true,
+                      },
+                    },
+                  },
+                });
+                if (!variant) continue;
+                if (!variant.product.trackInventory) continue;
+                const previousQty = variant.inventoryQty;
+
+                if (variant.product.allowBackorders) {
+                  await tx.productVariant.update({
+                    where: { id: variant.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                } else {
+                  const result = await tx.productVariant.updateMany({
+                    where: { id: variant.id, inventoryQty: { gte: qty } },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  if (result.count === 0) {
+                    await tx.inventoryHistory.create({
+                      data: {
+                        variantId: variant.id,
+                        productId: variant.productId,
+                        businessId: variant.product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Manual Order #${order.orderNumber}: insufficient stock; inventory unchanged`,
+                        orderId: order.id,
+                      },
+                    });
+                    continue;
+                  }
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                }
+              } else if (item.productId) {
+                const product = await tx.product.findUnique({
+                  where: { id: item.productId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    businessId: true,
+                    trackInventory: true,
+                    allowBackorders: true,
+                    baseInventoryUnitId: true,
+                    baseUnitsConsumed: true,
+                  },
+                });
+                if (!product) continue;
+
+                // Pool-based product — accumulate for aggregate deduction.
+                if (product.baseInventoryUnitId) {
+                  const poolId = product.baseInventoryUnitId;
+                  if (!poolGroups.has(poolId)) {
+                    poolGroups.set(poolId, {
+                      items: [],
+                      unitsConsumedMap: {},
+                    });
+                  }
+                  const group = poolGroups.get(poolId)!;
+                  group.items.push({ productId: product.id, quantity: qty });
+                  group.unitsConsumedMap[product.id] =
+                    product.baseUnitsConsumed ?? 1;
+                  continue;
+                }
+
+                if (!product.trackInventory) continue;
+                const previousQty = product.inventoryQty;
+
+                if (product.allowBackorders) {
+                  await tx.product.update({
+                    where: { id: product.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                } else {
+                  const result = await tx.product.updateMany({
+                    where: { id: product.id, inventoryQty: { gte: qty } },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  if (result.count === 0) {
+                    await tx.inventoryHistory.create({
+                      data: {
+                        productId: product.id,
+                        businessId: product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Manual Order #${order.orderNumber}: insufficient stock; inventory unchanged`,
+                        orderId: order.id,
+                        variantId: null,
+                      },
+                    });
+                    continue;
+                  }
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                }
+              }
+            }
+
+            for (const [poolId, group] of poolGroups) {
+              await deductPoolInventory(tx, {
+                poolId,
+                items: group.items,
+                unitsConsumedMap: group.unitsConsumedMap,
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                businessId,
+              });
+            }
+          });
+        } catch (invError) {
+          console.error(
+            "[Manual Order] Failed to deduct inventory:",
+            invError,
+          );
+        }
+      }
 
       if (input.sendConfirmationEmail) {
         try {

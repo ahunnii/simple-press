@@ -129,6 +129,12 @@ export async function DefaultHomePage({
           secondaryText={f["default.homepage.hero-button-2-text"]}
           secondaryHref={f["default.homepage.hero-button-2-link"]}
           sectionAttrs={sectionGroupAttr("homepage", "hero")}
+          eyebrowAttrs={fieldAttr("default.homepage.hero-eyebrow")}
+          descriptionAttrs={fieldAttr("default.homepage.hero-description")}
+          primaryTextAttrs={fieldAttr("default.homepage.hero-button-text")}
+          secondaryTextAttrs={fieldAttr(
+            "default.homepage.hero-button-2-text",
+          )}
         />
 
         {/* ── Collections ──────────────────────────────────────────────── */}

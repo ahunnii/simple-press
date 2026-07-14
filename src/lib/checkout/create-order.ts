@@ -100,6 +100,25 @@ export async function createOrderFromCheckout(
     deliveryMethod = "ship",
   } = params;
 
+  // Payment gate: only materialize the order (and, downstream in the webhook,
+  // decrement inventory) once the money is actually captured. On
+  // `checkout.session.completed`, standard card payments arrive as "paid" and
+  // fully-discounted / $0 orders as "no_payment_required" — both are safe to
+  // fulfill. Async/delayed payment methods (e.g. bank debits) instead complete
+  // the session as "unpaid" and settle later; creating the order here would
+  // decrement stock before payment succeeds. Reject "unpaid" so no order is
+  // created for it.
+  //
+  // NOTE: Fully supporting async payments requires the webhook to also handle
+  // `checkout.session.async_payment_succeeded` (create the order then) and
+  // `checkout.session.async_payment_failed` (release any reservation). Until
+  // that's wired up, async-payment sessions will not produce an order.
+  if (session.payment_status === "unpaid") {
+    throw new Error(
+      `[Webhook] Refusing to create order for unpaid session ${session.id} (payment_status=unpaid)`,
+    );
+  }
+
   // Free-shipping discount codes: record the order with shipping AND discount
   // at the original shipping value so totals reconcile:
   //   subtotal + shipping(S) - discount(S) = amount_total.

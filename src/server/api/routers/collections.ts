@@ -96,6 +96,8 @@ export const collectionsRouter = createTRPCRouter({
             businessId,
             slug,
           },
+          // Public route: never leak unpublished collections.
+          published: true,
         },
         include: {
           collectionProducts: {

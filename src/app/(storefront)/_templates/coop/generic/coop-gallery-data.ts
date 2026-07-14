@@ -44,21 +44,54 @@ function clampIndex(i: number, length: number): number {
 // ─── Stack A — 12 full-width stacked photos (clone `Logo_data`) ────────────
 
 export const STACK_A_DEFAULTS: CoopGalleryPhotoRow[] = [
-  { image: img("5ca4c8a7f7a9.jpg"), alt: "canton_cabinets.jpg" },
-  { image: img("12a57c797d94.jpg"), alt: "canton_exterior.jpg" },
-  { image: img("2ad7b6ecf68c.jpg"), alt: "custom_art.jpg" },
-  { image: img("55f53a6e3077.jpg"), alt: "door_restoration_ashkee.jpg" },
+  {
+    image: img("5ca4c8a7f7a9.jpg"),
+    alt: "Custom-built cabinets installed in a Canton restoration project",
+  },
+  {
+    image: img("12a57c797d94.jpg"),
+    alt: "Exterior of a restored home in Canton",
+  },
+  {
+    image: img("2ad7b6ecf68c.jpg"),
+    alt: "Custom decorative art created for a client project",
+  },
+  {
+    image: img("55f53a6e3077.jpg"),
+    alt: "Restored wooden door, finished for the Ashkee project",
+  },
   {
     image: img("f2b312e2f3fd.jpg"),
-    alt: "floor_restoratrion_danandcarolina.jpg",
+    alt: "Restored hardwood floor in Dan and Carolina's home",
   },
-  { image: img("5cfb52476f39.jpg"), alt: "floors_julie.jpg" },
-  { image: img("fdbba75c400f.jpeg"), alt: "IMG-7143.jpeg" },
-  { image: img("297d17c3d6e8.jpg"), alt: "Photo_1_after.jpg" },
-  { image: img("4e47aec238d4.jpg"), alt: "Photo_2_after.jpg" },
-  { image: img("b02cfd96eb90.jpg"), alt: "Photo_alone.jpg" },
-  { image: img("7dc395847044.jpg"), alt: "Window_restoration_after.jpg" },
-  { image: img("22930f5365f1.jpg"), alt: "windowjfh.jpg" },
+  {
+    image: img("5cfb52476f39.jpg"),
+    alt: "Restored hardwood flooring in Julie's home",
+  },
+  {
+    image: img("fdbba75c400f.jpeg"),
+    alt: "Building Cooperatively restoration project photo",
+  },
+  {
+    image: img("297d17c3d6e8.jpg"),
+    alt: "Restoration project, after completion",
+  },
+  {
+    image: img("4e47aec238d4.jpg"),
+    alt: "Restoration project, after completion",
+  },
+  {
+    image: img("b02cfd96eb90.jpg"),
+    alt: "Detail photo of a finished restoration piece",
+  },
+  {
+    image: img("7dc395847044.jpg"),
+    alt: "Restored window, after completion",
+  },
+  {
+    image: img("22930f5365f1.jpg"),
+    alt: "Restored window frame detail",
+  },
 ];
 
 /** `Logo_styles[i].className` — breakpoints rewritten per design.md Port rule 1. */

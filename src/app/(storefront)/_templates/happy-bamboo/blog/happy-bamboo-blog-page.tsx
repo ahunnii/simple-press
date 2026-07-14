@@ -36,7 +36,7 @@ import { resolveFields } from "../index";
 //   image: "/images/blog-bamboo-benefits.jpg",
 //   date: "March 18, 2025",
 //   readTime: "6 min read",
-//   author: "Zaires Visions Team",
+//   author: "Our Team",
 //   category: "Sustainability",
 // };
 
@@ -63,9 +63,10 @@ import { resolveFields } from "../index";
 
 type Props = DefaultBlogPageTemplateProps & {
   customFields?: Record<string, string>;
+  business?: { name?: string | null } | null;
 };
 
-export function HappyBambooBlogPage({ pages, customFields }: Props) {
+export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
   const fields = resolveFields(customFields, [
     "happy-bamboo.blog-listing-title",
     "happy-bamboo.blog-listing-intro",
@@ -78,14 +79,16 @@ export function HappyBambooBlogPage({ pages, customFields }: Props) {
 
   const [query, setQuery] = useState("");
 
+  const authorName = business?.name?.trim() ? business.name.trim() : "Our Team";
+
   const allPosts = useMemo(
     () =>
       pages.map((p, idx) => ({
         ...p,
         featured: idx === 0,
-        author: "Zaires Visions",
+        author: authorName,
       })),
-    [pages],
+    [pages, authorName],
   ) as (Page & { featured: boolean; author?: string })[];
 
   const postsWithSearch = useMemo(

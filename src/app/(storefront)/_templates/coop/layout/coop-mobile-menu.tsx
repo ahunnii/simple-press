@@ -27,6 +27,7 @@ export function CoopMobileMenu({
 }) {
   const [entered, setEntered] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
   const menuId = useId();
 
@@ -61,6 +62,60 @@ export function CoopMobileMenu({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
+  // Make the rest of the page inert while the dialog is open, so keyboard
+  // and screen-reader users can't reach content hidden behind the overlay
+  // (matches the pattern used by the other header components' mobile
+  // dialogs — noise-header.tsx, builders-header.tsx, sledge-header.tsx,
+  // vii-header.tsx, pollen-header.tsx).
+  useEffect(() => {
+    const siblings: Element[] = [];
+    const main = document.querySelector("main");
+    const footer = document.querySelector("footer");
+    if (main) siblings.push(main);
+    if (footer) siblings.push(footer);
+
+    if (open) {
+      siblings.forEach((el) => el.setAttribute("inert", ""));
+    } else {
+      siblings.forEach((el) => el.removeAttribute("inert"));
+    }
+    return () => {
+      siblings.forEach((el) => el.removeAttribute("inert"));
+    };
+  }, [open]);
+
+  // Tab focus trap: keep keyboard focus cycling within the dialog panel
+  // while it's open (WAI-ARIA APG modal dialog pattern).
+  useEffect(() => {
+    if (!open) return;
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusableSelectors =
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(focusableSelectors),
+      ).filter((el) => !el.closest("[inert]"));
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
+  }, [open]);
+
   // Focus management: move to the close button on open, return to the
   // hamburger trigger on close.
   useEffect(() => {
@@ -78,6 +133,7 @@ export function CoopMobileMenu({
 
   return (
     <div
+      ref={dialogRef}
       id={menuId}
       role="dialog"
       aria-modal="true"

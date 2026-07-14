@@ -22,6 +22,7 @@ import { toast } from "sonner";
 
 import type { EmailOverride } from "~/lib/email/customization";
 import type { RouterOutputs } from "~/trpc/react";
+import { getBusinessUrl } from "~/lib/business-url";
 import {
   applySubjectTemplate,
   CUSTOMIZABLE_EMAILS,
@@ -86,7 +87,14 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
   });
 
   const previews = useMemo<PreviewDef[]>(() => {
-    const businessUrl = `https://${business.subdomain}.yourdomain.com`;
+    // business.getForEmailPreview only selects subdomain/customDomain (no
+    // domainStatus), so this resolves to the subdomain URL unless a custom
+    // domain is confirmed ACTIVE — always a real, valid URL for the business
+    // rather than the previous hardcoded "yourdomain.com" placeholder.
+    const businessUrl = getBusinessUrl({
+      subdomain: business.subdomain,
+      customDomain: business.customDomain,
+    });
     const logoUrl = business.siteContent?.logoUrl ?? "";
 
     return [

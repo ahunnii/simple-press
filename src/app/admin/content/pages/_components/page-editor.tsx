@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ExternalLink, PlusCircle, Save } from "lucide-react";
+import { ArrowLeft, ExternalLink, PlusCircle, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -339,6 +339,19 @@ export function PageEditor({
                     <ExternalLink className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">View on storefront</span>
                   </a>
+                </Button>
+              )}
+              {page?.id && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isSubmitting || isDeleting}
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Delete</span>
                 </Button>
               )}
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUploadFiles } from "@better-upload/client";
+import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
 import type { PendingFile } from "~/components/inputs/pending-image-grid";
@@ -77,7 +78,23 @@ export function useDeferredImageUpload(
 
   const uploadHook = useUploadFiles({ api: "/api/upload", route });
 
-  const discardMutation = api.upload.discardUploads.useMutation();
+  const discardMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      // Best-effort S3 cleanup for uploads whose parent save step failed.
+      // If the discard call itself fails, the objects are orphaned in S3 —
+      // not user-visible or blocking (the caller's own error/flow already
+      // completed), but worth surfacing so it doesn't fail silently.
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+      Sentry.captureException(err, {
+        tags: { service: "upload", step: "discardUploads" },
+        extra: { urls: variables.urls },
+      });
+    },
+  });
 
   // Mirror state into ref so the unmount cleanup always sees the latest list.
   useEffect(() => {
@@ -196,12 +213,22 @@ export function useDeferredImageUpload(
       for (const batch of batches) {
         const result = await uploadHook.uploadAsync(batch.map((pf) => pf.file));
 
+        // Correlate each uploaded file back to its PendingFile by identity
+        // (the original raw File reference), with a filename fallback — not by
+        // array position. `result.files` is not guaranteed to preserve request
+        // order, so positional indexing can silently mis-correlate dims/urls.
+        //
         // Record URLs from this batch before checking for failures so the
-        // catch block can clean up even partially successful batches.
-        for (let i = 0; i < result.files.length; i++) {
-          const uploadedFile = result.files[i];
-          const pendingFile = batch[i];
-          if (!uploadedFile || !pendingFile) continue;
+        // catch block can clean up even partially successful batches. Iterate
+        // the ORIGINAL batch order (not `result.files`, whose order isn't
+        // guaranteed) so `results` stays in the caller's file order — image
+        // sortOrder downstream depends on it.
+        for (const pendingFile of batch) {
+          const uploadedFile = result.files.find(
+            (uf) =>
+              uf.raw === pendingFile.file || uf.name === pendingFile.file.name,
+          );
+          if (!uploadedFile) continue;
 
           const url = getStoredPath(uploadedFile);
           uploadedUrls.push(url);

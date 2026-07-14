@@ -156,14 +156,18 @@ export function CoopAboutPage({ business }: DefaultAboutPageTemplateProps) {
                               "-webkit-radial-gradient(center, var(--coop-background), var(--coop-clr-1))",
                           }}
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element -- asset-locked srcSet chain, matches other coop images */}
+                          {/* eslint-disable-next-line @next/next/no-img-element -- matches other coop images.
+                              No `srcSet`/`sizes` here: those were hardcoded to the ORIGINAL clone
+                              photo's responsive variants, so browsers kept selecting a clone-owned
+                              file over an owner-uploaded `src` (srcSet always wins when it matches
+                              `sizes`). We have no way to derive equivalent width variants for an
+                              arbitrary owner upload, so this renders the single `src` at all sizes —
+                              same tradeoff `stackBAssetFor` already makes for gallery photo swaps. */}
                           <img
                             className="absolute top-0 left-0 block aspect-[auto_582/3072] h-full w-full overflow-clip object-cover"
                             alt=""
                             height="3072"
-                            sizes="(max-width: 640px) 100vw, (max-width: 767px) 100vw, 100vw"
                             src={portraitImage}
-                            srcSet="/templates/coop/images/580d1f6c8a73.jpg 100w, /templates/coop/images/f5d5f8443ad0.jpg 300w, /templates/coop/images/407f8d626fdd.jpg 500w, /templates/coop/images/880aced68670.jpg 750w, /templates/coop/images/6e4a1503855c.jpg 1000w, /templates/coop/images/42d2cfff0ba4.jpg 1500w, /templates/coop/images/ab911179f8d4.jpg 2500w"
                             width="582"
                           />
                         </div>

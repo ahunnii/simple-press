@@ -25,6 +25,8 @@ export function BambooProductActions({
     setSelectedVariantId,
     additionalFields,
     justAdded,
+    remainingStock,
+    isInventoryTracked,
   } = useProduct(product);
 
   return (
@@ -67,33 +69,49 @@ export function BambooProductActions({
             <>
               {/* Quantity Selector */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="border-border flex items-center gap-1 rounded-lg border">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-11"
-                    onClick={() => handleDecrement()}
-                    disabled={quantity <= 1}
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="size-4" aria-hidden="true" />
-                  </Button>
-                  <span
-                    className="text-foreground w-10 text-center text-base font-semibold"
-                    aria-live="polite"
-                    aria-atomic="true"
-                  >
-                    {quantity}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-11"
-                    onClick={() => handleIncrement()}
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="size-4" aria-hidden="true" />
-                  </Button>
+                <div className="flex flex-col gap-1.5">
+                  <div className="border-border flex items-center gap-1 rounded-lg border">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-11"
+                      onClick={() => handleDecrement()}
+                      disabled={quantity <= 1}
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="size-4" aria-hidden="true" />
+                    </Button>
+                    <span
+                      className="text-foreground w-10 text-center text-base font-semibold"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {quantity}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-11"
+                      onClick={() => handleIncrement()}
+                      disabled={quantity >= remainingStock}
+                      aria-label="Increase quantity"
+                      aria-describedby={
+                        isInventoryTracked ? "bamboo-actions-stock-msg" : undefined
+                      }
+                    >
+                      <Plus className="size-4" aria-hidden="true" />
+                    </Button>
+                  </div>
+                  {isInventoryTracked && (
+                    <span
+                      id="bamboo-actions-stock-msg"
+                      className="text-muted-foreground text-sm"
+                    >
+                      {remainingStock > 1
+                        ? `${remainingStock} available`
+                        : "Last one!"}
+                    </span>
+                  )}
                 </div>
                 <Button
                   size="lg"

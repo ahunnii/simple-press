@@ -84,7 +84,7 @@ export function OrderFilters({ orderCount }: OrderFiltersProps) {
             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               type="text"
-              placeholder="Search by customer, email, or order ID..."
+              placeholder="Search by customer, email, or order number..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"

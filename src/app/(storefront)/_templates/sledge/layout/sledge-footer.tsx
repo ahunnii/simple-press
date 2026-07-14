@@ -15,12 +15,16 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, ["sledge.global.footer-tagline"]);
+  const g = resolveFields(customFields, [
+    "sledge.global.footer-tagline",
+    "sledge.global.location-tag",
+  ]);
 
   // Default notice for "all sales final" — sourced from the editable footer-tagline field
   const noticeText =
     g["sledge.global.footer-tagline"] ??
     "All sales are final. Each piece is made with love and care — please review sizing and details before purchasing. Questions? Reach out before you buy!";
+  const locationTag = g["sledge.global.location-tag"] ?? "";
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -109,6 +113,7 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
       <div className="sl-container-wide mx-auto flex flex-col gap-3 border-t border-white/12 px-7 py-5 sm:flex-row sm:items-center sm:justify-between">
         <span className="sl-footer-meta font-sans">
           © {new Date().getFullYear()} {name}
+          {locationTag && <span className="opacity-70"> · {locationTag}</span>}
         </span>
 
         <div className="flex flex-wrap gap-4">

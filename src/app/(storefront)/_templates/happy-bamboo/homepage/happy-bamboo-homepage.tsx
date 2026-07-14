@@ -7,6 +7,7 @@ import { PageTransition } from "~/components/page-animations";
 import { resolveFields } from "..";
 import { HappyBambooAboutSection } from "./happy-bamboo-about-section";
 import { HappyBambooBenefitsSection } from "./happy-bamboo-benefits-section";
+import { HappyBambooCtaSection } from "./happy-bamboo-cta-section";
 import { HappyBambooFeaturedProducts } from "./happy-bamboo-featured-products";
 import { HappyBambooHeroSection } from "./happy-bamboo-hero-section";
 import { HappyBambooTestimonialsSection } from "./happy-bamboo-testimonials-section";
@@ -124,24 +125,33 @@ export async function HappyBambooHomepage() {
             sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
           />
         )}
-        {/* <HappyBambooCtaSection
-          heading={themeSpecificFields?.[
-            "happy-bamboo.homepage-cta-heading"
-          ]?.trim()}
-          body={themeSpecificFields?.["happy-bamboo.homepage-cta-body"]?.trim()}
-          primaryButtonText={themeSpecificFields?.[
-            "happy-bamboo.homepage-cta-primary-button-text"
-          ]?.trim()}
-          primaryButtonLink={themeSpecificFields?.[
-            "happy-bamboo.homepage-cta-primary-button-link"
-          ]?.trim()}
-          secondaryButtonText={themeSpecificFields?.[
-            "happy-bamboo.homepage-cta-secondary-button-text"
-          ]?.trim()}
-          secondaryButtonLink={themeSpecificFields?.[
-            "happy-bamboo.homepage-cta-secondary-button-link"
-          ]?.trim()}
-        /> */}
+        {isSectionVisible(
+          homepage?.siteContent?.customFields,
+          "happy-bamboo",
+          "homepage.cta",
+        ) && (
+          <HappyBambooCtaSection
+            heading={themeSpecificFields?.[
+              "happy-bamboo.homepage-cta-heading"
+            ]?.trim()}
+            body={themeSpecificFields?.[
+              "happy-bamboo.homepage-cta-body"
+            ]?.trim()}
+            primaryButtonText={themeSpecificFields?.[
+              "happy-bamboo.homepage-cta-primary-button-text"
+            ]?.trim()}
+            primaryButtonLink={themeSpecificFields?.[
+              "happy-bamboo.homepage-cta-primary-button-link"
+            ]?.trim()}
+            secondaryButtonText={themeSpecificFields?.[
+              "happy-bamboo.homepage-cta-secondary-button-text"
+            ]?.trim()}
+            secondaryButtonLink={themeSpecificFields?.[
+              "happy-bamboo.homepage-cta-secondary-button-link"
+            ]?.trim()}
+            sectionAttrs={sectionGroupAttr("homepage", "cta")}
+          />
+        )}
       </PageTransition>
     </HydrateClient>
   );

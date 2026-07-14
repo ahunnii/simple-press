@@ -74,6 +74,31 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "shopping-cart";
 
+/** Parse a raw localStorage value into cart items; null when unusable. */
+function parseStoredCartItems(raw: string | null): CartItem[] | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return null;
+    return parsed.filter((item): item is CartItem => {
+      if (typeof item !== "object" || item === null) return false;
+      const c = item as Record<string, unknown>;
+      return (
+        typeof c.productId === "string" &&
+        (c.variantId === null || typeof c.variantId === "string") &&
+        typeof c.productName === "string" &&
+        (c.variantName === null || typeof c.variantName === "string") &&
+        typeof c.price === "number" &&
+        typeof c.quantity === "number" &&
+        (c.imageUrl === null || typeof c.imageUrl === "string") &&
+        (c.sku === null || typeof c.sku === "string")
+      );
+    });
+  } catch {
+    return null;
+  }
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -84,10 +109,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
 
     try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
-      if (savedCart) {
-        const parsed = JSON.parse(savedCart) as CartItem[];
-        setItems(parsed);
+      const saved = parseStoredCartItems(localStorage.getItem(CART_STORAGE_KEY));
+      if (saved) {
+        setItems(saved);
+      } else if (localStorage.getItem(CART_STORAGE_KEY) !== null) {
+        // Clear corrupted/malformed data
+        localStorage.removeItem(CART_STORAGE_KEY);
       }
     } catch (error) {
       console.error("Failed to load cart from localStorage:", error);
@@ -158,7 +185,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const updated = [...currentItems];
           const newQuantity = updated[existingIndex]!.quantity + quantity;
 
-          if (newItem.maxInventory && newQuantity > newItem.maxInventory) {
+          if (
+            newItem.maxInventory != null &&
+            newQuantity > newItem.maxInventory
+          ) {
             toastMsg = `Only ${newItem.maxInventory} available in stock`;
             toastIsError = true;
             return currentItems;
@@ -173,7 +203,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           return updated;
         }
 
-        if (newItem.maxInventory && quantity > newItem.maxInventory) {
+        if (newItem.maxInventory != null && quantity > newItem.maxInventory) {
           toastMsg = `Only ${newItem.maxInventory} available in stock`;
           toastIsError = true;
           return currentItems;
@@ -235,7 +265,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         maxInventoryHit = null;
         return currentItems.map((item) => {
           if (item.productId === productId && item.variantId === variantId) {
-            if (item.maxInventory && quantity > item.maxInventory) {
+            if (item.maxInventory != null && quantity > item.maxInventory) {
               maxInventoryHit = item.maxInventory;
               return item;
             }
@@ -262,7 +292,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (item.productId === productId && item.variantId === variantId) {
             const newQuantity = item.quantity + 1;
 
-            if (item.maxInventory && newQuantity > item.maxInventory) {
+            if (item.maxInventory != null && newQuantity > item.maxInventory) {
               maxInventoryHit = item.maxInventory;
               return item;
             }

@@ -94,7 +94,6 @@ export const reviewRouter = createTRPCRouter({
     .input(
       z.object({
         productId: z.string(),
-        approvedOnly: z.boolean().default(true),
         sortBy: z
           .enum(["recent", "helpful", "rating_high", "rating_low"])
           .default("recent"),
@@ -124,7 +123,10 @@ export const reviewRouter = createTRPCRouter({
         where: {
           productId: input.productId,
           product: { businessId: business.id },
-          ...(input.approvedOnly && { isApproved: true, isHidden: false }),
+          // Public storefront listing: NEVER trust a client flag to widen
+          // visibility. Unapproved/hidden reviews are owner-only via `listAll`.
+          isApproved: true,
+          isHidden: false,
           ...(input.rating && { rating: input.rating }),
         },
         orderBy: orderBy[input.sortBy],

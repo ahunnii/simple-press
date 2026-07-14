@@ -36,13 +36,13 @@ export default function AbandonedCheckoutEmail({
 
       <Text style={paragraph}>
         It looks like you started checking out at {businessName} but didn&apos;t
-        finish. Your cart is saved and waiting for you — pick up right where you
-        left off.
+        finish. Here&apos;s what you left behind — head back to the store to
+        pick it up again.
       </Text>
 
       <Section style={buttonSection}>
-        <Button href={`${businessUrl}/cart`} style={button}>
-          Return to your cart
+        <Button href={`${businessUrl}/shop`} style={button}>
+          Return to the shop
         </Button>
       </Section>
 

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
@@ -16,6 +17,13 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+// generateMetadata and the page component both need the same product — wrap
+// the fetch in React's request-scoped cache() so the tRPC call (and its DB
+// round trip) only runs once per request instead of twice. `api.*` calls
+// from src/trpc/server.ts are plain promises, not query-client-backed, so
+// they don't dedupe on their own (unlike `.prefetch()`).
+const getCachedProduct = cache((slug: string) => api.product.get(slug));
+
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
 
@@ -23,7 +31,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
   // Find product
-  const product = await api.product.get(slug);
+  const product = await getCachedProduct(slug);
 
   if (!product) {
     notFound();
@@ -68,7 +76,7 @@ export default async function ProductDetailPage({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const [product, business] = await Promise.all([
-    api.product.get(slug),
+    getCachedProduct(slug),
     api.business.simplifiedGet(),
   ]);
 

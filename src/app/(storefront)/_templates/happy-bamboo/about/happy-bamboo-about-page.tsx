@@ -196,8 +196,8 @@ export function HappyBambooAboutPage({
                 ) : (
                   <p className="text-lg leading-relaxed font-medium text-white md:text-xl">
                     Join us in our mission to make everyday moments healthier,
-                    cleaner and a lot more sustainable. Experience the softness
-                    and durability of our Happy Bamboo toilet tissue, because{" "}
+                    cleaner and a lot more sustainable. Experience the
+                    softness and durability of our products, because{" "}
                     <span className="font-bold italic">
                       you deserve the best!
                     </span>

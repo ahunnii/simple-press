@@ -69,6 +69,25 @@ export function ElegantProductPage({
 
   const additional = parseCardAdditionalFields(product.additionalFields);
 
+  // `parseCardAdditionalFields` (shared across templates) doesn't recognize
+  // a "how to use" key, so read it directly off the product's freeform JSON
+  // here. Elegant is a generic template — it must not assume every business
+  // sells skincare, so this tab only renders when the owner has actually
+  // supplied per-product usage instructions via `additionalFields.howToUse`.
+  const howToUseText =
+    product.additionalFields &&
+    typeof product.additionalFields === "object" &&
+    !Array.isArray(product.additionalFields) &&
+    typeof (product.additionalFields as Record<string, unknown>).howToUse ===
+      "string"
+      ? (
+          (product.additionalFields as Record<string, unknown>)
+            .howToUse as string
+        ).trim()
+      : "";
+
+  const tabs = TABS.filter((tab) => tab.key !== "how" || !!howToUseText);
+
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
@@ -83,7 +102,7 @@ export function ElegantProductPage({
         };
 
   const handleTabKeyDown = (e: React.KeyboardEvent, currentKey: TabKey) => {
-    const keys = TABS.map((t) => t.key);
+    const keys = tabs.map((t) => t.key);
     const idx = keys.indexOf(currentKey);
     let next: number | null = null;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -465,7 +484,7 @@ export function ElegantProductPage({
                     marginBottom: 20,
                   }}
                 >
-                  {TABS.map(({ key, label }) => (
+                  {tabs.map(({ key, label }) => (
                     <button
                       key={key}
                       type="button"
@@ -518,11 +537,8 @@ export function ElegantProductPage({
                   }}
                 >
                   {activeTab === "details" && <p>{product.description}</p>}
-                  {activeTab === "how" && (
-                    <p>
-                      For best results, apply to clean skin morning and evening.
-                      Use as directed.
-                    </p>
+                  {activeTab === "how" && howToUseText && (
+                    <p>{howToUseText}</p>
                   )}
                   {activeTab === "info" && (
                     <ProductDetailsAdditionalInfoAccordion

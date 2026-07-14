@@ -11,6 +11,7 @@ import { getSession } from "~/server/better-auth/server";
 import { HappyBambooAnnouncementBar } from "./happy-bamboo-announcement-bar";
 import { HappyBambooFooter } from "./happy-bamboo-footer";
 import { HappyBambooHeader } from "./happy-bamboo-header";
+import { HappyBambooRouteAnnouncer } from "./happy-bamboo-route-announcer";
 
 const fontSans = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 const fontSerif = Spectral({
@@ -43,6 +44,7 @@ export async function HappyBambooLayout({
       >
         Skip to main content
       </a>
+      <HappyBambooRouteAnnouncer />
       {banner && <HappyBambooAnnouncementBar banner={banner} />}
       <HappyBambooHeader business={business} session={session ?? null} />
       <div id="main-content" tabIndex={-1} className="min-h-[calc(100vh-4rem)]">

@@ -59,8 +59,29 @@ export function validateAndComputeDiscount(
     return { ok: false, error: "This code isn't active yet" };
   }
 
-  if (discount.expiresAt && new Date(discount.expiresAt) < new Date()) {
-    return { ok: false, error: "This discount code has expired" };
+  if (discount.expiresAt) {
+    // `expiresAt` is captured by the discount form as local midnight
+    // (00:00:00) of the selected calendar day — it encodes "expires on this
+    // date," not "expires at this exact instant." Comparing the raw
+    // timestamp against `now` would kill the code at the very start of its
+    // expiration day, when the intent is for it to remain valid through the
+    // end of that day. Extend the cutoff to the end of the stored date
+    // (23:59:59.999, evaluated in the server process's local timezone, which
+    // matches how the date components were originally read/written) so the
+    // code stays valid for the whole final day.
+    const expiry = new Date(discount.expiresAt);
+    const endOfExpiryDay = new Date(
+      expiry.getFullYear(),
+      expiry.getMonth(),
+      expiry.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+    if (endOfExpiryDay < new Date()) {
+      return { ok: false, error: "This discount code has expired" };
+    }
   }
 
   if (
