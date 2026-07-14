@@ -852,8 +852,8 @@ export const businessRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        ownerEmail: z.string(),
-        supportEmail: z.string().optional(),
+        ownerEmail: z.string().email(),
+        supportEmail: z.string().email().optional(),
         businessAddress: z.string().optional(),
         phoneNumber: z.string().optional(),
         sendAbandonedCheckoutEmails: z.boolean().optional(),

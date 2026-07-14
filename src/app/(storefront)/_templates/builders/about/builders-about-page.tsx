@@ -30,7 +30,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
     parsedMembers.length > 0 ? parsedMembers : DEFAULT_TEAM_MEMBERS;
 
   const heroImage = f["builders.about.hero-image"] ?? "";
-  const heroTitle = f["builders.about.hero-title"] ?? "Building Cooperatively";
+  const heroTitle = f["builders.about.hero-title"] ?? "Our Story";
   const heroSubtitle = f["builders.about.hero-subtitle"] ?? "";
   const storyHeading = f["builders.about.story-heading"] ?? "Our Detroit Story";
   const storyBody1 = f["builders.about.story-body-1"] ?? "";

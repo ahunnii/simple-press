@@ -43,9 +43,6 @@ export function DefaultCollectionPage({
             </span>
           </nav>
 
-          {/* <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-            Collection
-          </span> */}
           <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
             {collection.name}
           </h1>

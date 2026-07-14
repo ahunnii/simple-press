@@ -78,10 +78,6 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.band-image",
     "vii.homepage.band-heading",
     "vii.homepage.band-text",
-    // Inside the Studio (Story)
-    "vii.homepage.story-heading",
-    "vii.homepage.story-heading-accent",
-    "vii.homepage.story-intro",
     // Product rail
     "vii.homepage.product-rail-overline",
     "vii.homepage.product-rail-heading",

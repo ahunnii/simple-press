@@ -251,6 +251,15 @@ export function VisualEditor({
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
   const utils = api.useUtils();
 
+  // Keep the ref mirror in sync with the `fields` state. This is the single
+  // place that writes `latestFieldsRef` in response to a state change — state
+  // updater functions themselves must stay pure and must not reach outside
+  // to mutate a ref, so callers below only ever `return next` from their
+  // updater and let this effect do the mirroring.
+  useEffect(() => {
+    latestFieldsRef.current = fields;
+  }, [fields]);
+
   const setFlushPendingState = useCallback((pending: boolean) => {
     flushPendingRef.current = pending;
     setFlushPending(pending);
@@ -347,6 +356,11 @@ export function VisualEditor({
       }
       setFlushPendingState(false);
     } else if (retryCountRef.current < MAX_FLUSH_RETRIES) {
+      // The retry below re-reads `latestFieldsRef.current` (always current),
+      // so any edit that arrived mid-flight is already covered by the retry —
+      // clear the coalescing flag or the eventual successful flush will see
+      // it still set and fire one redundant extra flush after that.
+      queuedRef.current = false;
       // Keep flushPending ARMED so beforeunload/Exit still warn about the
       // unsaved edit, and auto-retry — "retry on next edit" is not enough
       // when the user stops editing.
@@ -359,6 +373,7 @@ export function VisualEditor({
     } else {
       // Retry budget exhausted: stop hammering the server, but keep the exit
       // warnings armed. The next edit resets the budget and tries again.
+      queuedRef.current = false;
       setSaveFailed(true);
       toast.error(
         "Your latest changes couldn't be saved. Check your connection — editing again will retry.",
@@ -395,11 +410,10 @@ export function VisualEditor({
         notifyEditBlocked();
         return;
       }
-      setFields((prev) => {
-        const next = { ...prev, [key]: value };
-        latestFieldsRef.current = next;
-        return next;
-      });
+      // Pure updater — `latestFieldsRef` is kept in sync by the `fields`
+      // effect above, not mutated here (state updaters must stay pure; React
+      // may invoke them more than once per commit in strict/concurrent mode).
+      setFields((prev) => ({ ...prev, [key]: value }));
 
       // Live-patch fast path: text/textarea edits are pushed straight into
       // the iframe DOM. Everything else reloads the preview on next flush.
@@ -649,13 +663,13 @@ export function VisualEditor({
         notifyEditBlocked();
         return;
       }
+      // Pure updater — see the `fields` effect above for the `latestFieldsRef`
+      // mirror.
       setFields((prev) => {
         const meta = getSpMeta(prev);
         const currentlyHidden =
           meta.sections?.[section.id]?.hidden ?? section.defaultHidden ?? false;
-        const next = setSectionHidden(prev, section.id, !currentlyHidden);
-        latestFieldsRef.current = next;
-        return next;
+        return setSectionHidden(prev, section.id, !currentlyHidden);
       });
       // Visibility renders server-side — always needs an iframe reload.
       refreshNeededRef.current = true;
@@ -677,11 +691,9 @@ export function VisualEditor({
         notifyEditBlocked();
         return;
       }
-      setFields((prev) => {
-        const next = setThemeSelection(prev, kind, presetId);
-        latestFieldsRef.current = next;
-        return next;
-      });
+      // Pure updater — see the `fields` effect above for the `latestFieldsRef`
+      // mirror.
+      setFields((prev) => setThemeSelection(prev, kind, presetId));
       // Theme vars render server-side on the template root — needs a reload.
       refreshNeededRef.current = true;
       scheduleFlush();
@@ -731,6 +743,7 @@ export function VisualEditor({
         hasUnpublishedChanges={hasUnpublishedChanges}
         isPublishing={isPublishing}
         flushPending={flushPending}
+        mutationPending={mutationPending}
         saveFailed={saveFailed}
         onPublish={handlePublish}
         onDiscard={handleDiscard}
@@ -774,6 +787,7 @@ export function VisualEditor({
             section={activeSection}
             templateId={templateId}
             fields={fields}
+            publishedFields={publishedFields}
             onFieldChange={applyFieldUpdate}
             embedsEnabled={embedsEnabled}
             mediaEnabled={mediaEnabled}

@@ -24,12 +24,13 @@ export const shippingRouter = createTRPCRouter({
         items: z
           .array(
             z.object({
-              productId: z.string().min(1),
-              variantId: z.string().nullable(),
-              quantity: z.number().int().positive(),
+              productId: z.string().min(1).max(255),
+              variantId: z.string().max(255).nullable(),
+              quantity: z.number().int().positive().max(10000),
             }),
           )
-          .min(1),
+          .min(1)
+          .max(200),
         destinationState: z.string(),
         destinationCountry: z.string(),
         deliveryMethod: z.enum(["ship", "pickup"]),

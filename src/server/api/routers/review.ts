@@ -206,6 +206,24 @@ export const reviewRouter = createTRPCRouter({
 
       const userId = ctx.session?.user.id ?? null;
 
+      // Confirm the review belongs to the resolved business before touching any
+      // vote. Without this, the create path below would let a caller cast a vote
+      // on another tenant's review id (the update path is already scoped via the
+      // `review.product.businessId` join on `existing`).
+      const review = await ctx.db.productReview.findFirst({
+        where: {
+          id: input.reviewId,
+          product: { businessId: business.id },
+        },
+        select: { id: true },
+      });
+      if (!review) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Review not found",
+        });
+      }
+
       const existing = await ctx.db.reviewVote.findFirst({
         where: {
           reviewId: input.reviewId,
@@ -249,10 +267,14 @@ export const reviewRouter = createTRPCRouter({
       });
       if (!user) return { canReview: false, reason: "User not found" };
 
+      // Reviews store `normalizeEmail()`; normalize here too so a mixed-case
+      // email doesn't wrongly report the product as un-reviewed.
+      const normalizedUserEmail = normalizeEmail(user.email);
+
       const existing = await ctx.db.productReview.findFirst({
         where: {
           productId: input.productId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           source: "customer",
         },
       });
@@ -271,7 +293,7 @@ export const reviewRouter = createTRPCRouter({
       const order = await ctx.db.order.findFirst({
         where: {
           businessId: product.businessId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           items: { some: { productId: input.productId } },
         },
         select: { id: true },
@@ -303,10 +325,15 @@ export const reviewRouter = createTRPCRouter({
           message: "User not found",
         });
 
+      // Reviews store `normalizeEmail()`, so the dedupe query must normalize too —
+      // otherwise a mixed-case sign-in email bypasses the one-review-per-product
+      // guard.
+      const normalizedUserEmail = normalizeEmail(user.email);
+
       const existing = await ctx.db.productReview.findFirst({
         where: {
           productId: input.productId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           source: "customer",
         },
       });
@@ -326,7 +353,6 @@ export const reviewRouter = createTRPCRouter({
           message: "Product not found",
         });
 
-      const normalizedUserEmail = normalizeEmail(user.email);
       const order = await ctx.db.order.findFirst({
         where: {
           businessId: product.businessId,

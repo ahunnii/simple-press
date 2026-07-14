@@ -8,7 +8,6 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import {
   Heart,
-  LayoutDashboardIcon,
   MessageSquare,
   ShoppingBag,
   X,
@@ -44,7 +43,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
-  const { isEnabled, isDisabledByDependency } = useFeatureFlags({
+  const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();

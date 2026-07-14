@@ -134,7 +134,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
               <Check className="h-6 w-6 text-yellow-600" />
             </div>
             <h2 className="mb-2 text-xl font-semibold">Already Submitted</h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               {canSubmitData.reason ??
                 "You have already submitted a testimonial for this business."}
             </p>
@@ -157,7 +157,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
               <Check className="h-6 w-6 text-green-600" />
             </div>
             <h2 className="mb-2 text-xl font-semibold">Thank You!</h2>
-            <p className="mb-6 text-gray-600">
+            <p className="mb-6 text-muted-foreground">
               {approved
                 ? "Your testimonial has been submitted and is now live on the site."
                 : "Your testimonial has been submitted and will appear once it's approved."}
@@ -170,11 +170,11 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4 py-12">
       <div className="w-full max-w-2xl">
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-bold">Share Your Experience</h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Help others by sharing your experience with {business.name}
           </p>
         </div>
@@ -224,7 +224,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                     {textError}
                   </p>
                 )}
-                <p id="text-char-count" className="mt-1 text-sm text-gray-500">
+                <p id="text-char-count" className="mt-1 text-sm text-muted-foreground">
                   {text.length}/1000 characters (minimum 10)
                 </p>
               </div>
@@ -234,7 +234,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                 <Label htmlFor="testimonial-photo-upload">
                   Photos (Optional, max {MAX_PHOTOS})
                 </Label>
-                <p id="photo-hint" className="mt-1 text-sm text-gray-500">
+                <p id="photo-hint" className="mt-1 text-sm text-muted-foreground">
                   Upload images to include with your testimonial
                 </p>
                 <div className="mt-2 space-y-3">
@@ -243,7 +243,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                       {photoUrls.map((url, i) => (
                         <div
                           key={url}
-                          className="relative h-24 w-24 overflow-hidden rounded-lg border bg-gray-100"
+                          className="relative h-24 w-24 overflow-hidden rounded-lg border bg-muted"
                         >
                           <img
                             src={url}
@@ -365,7 +365,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                     "Submit Testimonial"
                   )}
                 </Button>
-                <p className="mt-2 text-center text-xs text-gray-500">
+                <p className="mt-2 text-center text-xs text-muted-foreground">
                   Your testimonial will be reviewed before it appears on the
                   site
                 </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -37,6 +37,7 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuId = useId();
 
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
@@ -93,22 +94,27 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
               className="block min-w-0 shrink-0 cursor-pointer p-2 text-center leading-0"
               aria-label="Open navigation menu"
               aria-expanded={mobileOpen}
+              aria-controls={mobileMenuId}
               onClick={() => setMobileOpen(true)}
             >
+              {/* Sprite lines are fill="none" — they only paint via stroke.
+                  The --even variant matches the even (2px) stroke width. */}
               <svg
                 className="block h-4.5 w-6 overflow-hidden"
                 viewBox="0 0 24 18"
-                fill="currentColor"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
                 aria-hidden="true"
               >
                 <use xlinkHref="/templates/coop/ui-icons.svg#hamburger-icon--even" />
-                <use xlinkHref="/templates/coop/ui-icons.svg#hamburger-icon--odd" />
               </svg>
             </button>
           </div>
         </div>
 
         <CoopMobileMenu
+          id={mobileMenuId}
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
           links={mobileLinks}

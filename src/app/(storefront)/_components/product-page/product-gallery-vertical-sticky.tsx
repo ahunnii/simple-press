@@ -179,7 +179,7 @@ export function ProductGalleryVertical({
           >
             {images.map((image, index) => (
               <button
-                key={index}
+                key={image.url}
                 onClick={() => setSelectedImage(index)}
                 className={cn(
                   `relative aspect-square w-16 overflow-hidden rounded border-2 bg-gray-100 transition-all ${

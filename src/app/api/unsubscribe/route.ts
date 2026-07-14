@@ -74,25 +74,29 @@ function htmlPage(title: string, message: string, success: boolean): Response {
   });
 }
 
-export async function GET(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("t");
-
+// Shared by GET (clicked link) and POST (RFC 8058 One-Click
+// List-Unsubscribe-Post) — both unsubscribe the same way given a token.
+async function unsubscribeByToken(
+  token: string | null,
+): Promise<{ success: boolean; title: string; message: string }> {
   if (!token) {
-    return htmlPage(
-      "Invalid link",
-      "This unsubscribe link is missing a token. Please use the link from your email.",
-      false,
-    );
+    return {
+      success: false,
+      title: "Invalid link",
+      message:
+        "This unsubscribe link is missing a token. Please use the link from your email.",
+    };
   }
 
   const payload = verifyUnsubscribeToken(token);
 
   if (!payload) {
-    return htmlPage(
-      "Invalid link",
-      "This unsubscribe link is invalid or has been tampered with. Please contact support if you believe this is an error.",
-      false,
-    );
+    return {
+      success: false,
+      title: "Invalid link",
+      message:
+        "This unsubscribe link is invalid or has been tampered with. Please contact support if you believe this is an error.",
+    };
   }
 
   // Idempotent update — safe to call even if already unsubscribed
@@ -104,11 +108,18 @@ export async function GET(request: NextRequest) {
     data: { acceptsMarketing: false },
   });
 
-  return htmlPage(
-    "You've been unsubscribed",
-    "You will no longer receive marketing emails. You can re-enable emails at any time from your account preferences.",
-    true,
-  );
+  return {
+    success: true,
+    title: "You've been unsubscribed",
+    message:
+      "You will no longer receive marketing emails. You can re-enable emails at any time from your account preferences.",
+  };
+}
+
+export async function GET(request: NextRequest) {
+  const token = request.nextUrl.searchParams.get("t");
+  const result = await unsubscribeByToken(token);
+  return htmlPage(result.title, result.message, result.success);
 }
 
 // Opt out of caching so the page is always served fresh
@@ -117,7 +128,14 @@ export const dynamic = "force-dynamic";
 // Suppress Next.js from wrapping this in a redirect on non-GET
 export const runtime = "nodejs";
 
-// Satisfy Next.js route exports — no POST needed
-export function POST() {
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+// RFC 8058 One-Click List-Unsubscribe (List-Unsubscribe-Post header) — mail
+// clients (Gmail, Outlook, etc.) POST here directly, with the token still in
+// the `t` query param, and expect a plain 200/4xx response rather than HTML.
+export async function POST(request: NextRequest) {
+  const token = request.nextUrl.searchParams.get("t");
+  const result = await unsubscribeByToken(token);
+  return NextResponse.json(
+    { success: result.success, message: result.message },
+    { status: result.success ? 200 : 400 },
+  );
 }

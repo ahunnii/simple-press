@@ -40,15 +40,15 @@ function humanize(value: string): string {
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
   const styles: Record<string, string> = {
-    open: "border-[#0a0a0a] text-[#0a0a0a]",
-    completed: "border-[#15803d] text-[#15803d]",
-    fulfilled: "border-[#15803d] text-[#15803d]",
-    paid: "border-[#15803d] text-[#15803d]",
-    cancelled: "border-[#dc2626] text-[#dc2626]",
-    failed: "border-[#dc2626] text-[#dc2626]",
-    refunded: "border-[#6b6b6b] text-[#6b6b6b]",
+    open: "border-foreground text-foreground",
+    completed: "border-green-700 text-green-700",
+    fulfilled: "border-green-700 text-green-700",
+    paid: "border-green-700 text-green-700",
+    cancelled: "border-destructive text-destructive",
+    failed: "border-destructive text-destructive",
+    refunded: "border-muted-foreground text-muted-foreground",
   };
-  const style = styles[tone] ?? "border-[#b45309] text-[#b45309]";
+  const style = styles[tone] ?? "border-amber-700 text-amber-700";
   return (
     <span
       className={`inline-flex items-center rounded-[2px] border px-2 py-0.5 text-[10px] font-medium tracking-[0.1em] uppercase ${style}`}
@@ -66,8 +66,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-[#e8e8e8] p-6">
-      <h2 className="mb-4 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+    <div className="rounded-[var(--radius)] border border-border p-6">
+      <h2 className="mb-4 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
         {title}
       </h2>
       {children}
@@ -78,11 +78,11 @@ function Section({
 function ExpiredState() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16 sm:py-24">
-      <div className="rounded-[var(--radius)] border border-[#e8e8e8] p-8 text-center sm:p-12">
+      <div className="rounded-[var(--radius)] border border-border p-8 text-center sm:p-12">
         <h1 className="mb-3 text-2xl font-medium tracking-tight">
           This link has expired
         </h1>
-        <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-[#6b6b6b]">
+        <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-muted-foreground">
           Order status links are valid for 90 days. This one is no longer
           valid, but you can request a fresh link — we&apos;ll email it to the
           address used on your order.
@@ -131,7 +131,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-16">
       <header className="mb-8">
-        <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+        <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
           Order status
         </p>
         <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
@@ -156,7 +156,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
             }
             tone={order.fulfillmentStatus}
           />
-          <span className="text-[13px] text-[#6b6b6b]">
+          <span className="text-[13px] text-muted-foreground">
             Placed {formatDate(order.createdAt)}
           </span>
         </div>
@@ -167,7 +167,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
         <div className="flex flex-col gap-5 lg:col-span-2">
           <Section title="Items">
             {order.items.length > 0 ? (
-              <div className="flex flex-col divide-y divide-[#e8e8e8]">
+              <div className="flex flex-col divide-y divide-border">
                 {order.items.map((item) => (
                   <div
                     key={item.id}
@@ -176,11 +176,11 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                     <div className="flex flex-col gap-0.5">
                       <p className="text-sm font-medium">{item.productName}</p>
                       {item.variantName && (
-                        <p className="text-[13px] text-[#6b6b6b]">
+                        <p className="text-[13px] text-muted-foreground">
                           {item.variantName}
                         </p>
                       )}
-                      <p className="text-[13px] text-[#6b6b6b]">
+                      <p className="text-[13px] text-muted-foreground">
                         Qty {item.quantity} × {formatPrice(item.price)}
                       </p>
                     </div>
@@ -191,36 +191,36 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#6b6b6b]">
+              <p className="text-sm text-muted-foreground">
                 No item details recorded.
               </p>
             )}
 
             {/* Totals */}
-            <div className="mt-4 flex flex-col gap-2 border-t border-[#e8e8e8] pt-4 text-sm">
+            <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 text-sm">
               <div className="flex justify-between">
-                <span className="text-[#6b6b6b]">Subtotal</span>
+                <span className="text-muted-foreground">Subtotal</span>
                 <span>{formatPrice(order.subtotal)}</span>
               </div>
               {order.discount > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-[#6b6b6b]">Discount</span>
-                  <span className="text-[#15803d]">
+                  <span className="text-muted-foreground">Discount</span>
+                  <span className="text-green-700">
                     -{formatPrice(order.discount)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-[#6b6b6b]">Shipping</span>
+                <span className="text-muted-foreground">Shipping</span>
                 <span>
                   {order.shipping === 0 ? "Free" : formatPrice(order.shipping)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#6b6b6b]">Tax</span>
+                <span className="text-muted-foreground">Tax</span>
                 <span>{formatPrice(order.tax)}</span>
               </div>
-              <div className="flex justify-between border-t border-[#e8e8e8] pt-2 font-medium">
+              <div className="flex justify-between border-t border-border pt-2 font-medium">
                 <span>Total</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
@@ -239,7 +239,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                       <p className="font-medium">{shipment.carrier}</p>
                     )}
                     {shipment.trackingNumber && (
-                      <p className="text-[#6b6b6b]">
+                      <p className="text-muted-foreground">
                         {shipment.trackingNumber}
                       </p>
                     )}
@@ -258,7 +258,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                         <span className="sr-only">(opens in new tab)</span>
                       </a>
                     )}
-                    <p className="text-[12px] text-[#6b6b6b]">
+                    <p className="text-[12px] text-muted-foreground">
                       Added {formatDate(shipment.createdAt)}
                     </p>
                   </div>
@@ -278,14 +278,14 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                     {addr.firstName} {addr.lastName}
                   </p>
                 )}
-                <p className="text-[#6b6b6b]">{addr.address1}</p>
+                <p className="text-muted-foreground">{addr.address1}</p>
                 {addr.address2 && (
-                  <p className="text-[#6b6b6b]">{addr.address2}</p>
+                  <p className="text-muted-foreground">{addr.address2}</p>
                 )}
-                <p className="text-[#6b6b6b]">
+                <p className="text-muted-foreground">
                   {addr.city}, {addr.province} {addr.zip}
                 </p>
-                <p className="text-[#6b6b6b]">{addr.country}</p>
+                <p className="text-muted-foreground">{addr.country}</p>
               </address>
             </Section>
           )}
@@ -293,21 +293,21 @@ export default async function OrderStatusTokenPage({ params }: Props) {
           <Section title="Order Info">
             <dl className="flex flex-col gap-3 text-sm">
               <div>
-                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
+                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
                   Email
                 </dt>
                 <dd>{order.customerEmail}</dd>
               </div>
               {order.customerPhone && (
                 <div>
-                  <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
+                  <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
                     Phone
                   </dt>
                   <dd>{order.customerPhone}</dd>
                 </div>
               )}
               <div>
-                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-[#6b6b6b] uppercase">
+                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
                   Delivery
                 </dt>
                 <dd className="capitalize">

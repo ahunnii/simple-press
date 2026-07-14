@@ -439,8 +439,9 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      // Update sort order for each page
-      await Promise.all(
+      // Update sort order for each page atomically — a mid-batch failure
+      // must not leave the order partially applied.
+      await ctx.db.$transaction(
         input.pageIds.map((pageId, index) =>
           ctx.db.page.update({
             where: { id: pageId, businessId },

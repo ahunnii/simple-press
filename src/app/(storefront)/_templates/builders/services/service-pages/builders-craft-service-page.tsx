@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
@@ -150,7 +152,7 @@ export function BuildersCraftServicePage({
         )}
 
         {ctaButtonLabel && (
-          <a
+          <Link
             href={ctaButtonHref}
             className="inline-flex items-center gap-2 border-2 bg-[var(--builders-accent)] px-8 py-4 text-xs tracking-widest uppercase transition-colors duration-200 hover:bg-[var(--builders-accent-hover)]"
             style={{
@@ -163,7 +165,7 @@ export function BuildersCraftServicePage({
           >
             <span>{ctaButtonLabel}</span>
             <span aria-hidden="true">&rarr;</span>
-          </a>
+          </Link>
         )}
       </section>
     </div>

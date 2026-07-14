@@ -77,6 +77,23 @@ async function requireBusinessManager(req: Request) {
   return { business, session };
 }
 
+// NOTE on metadata key casing: the routes below are NOT consistent about
+// whether they emit `pathname` (lowercase) or `pathName` (capital N) in
+// objectInfo.metadata. This was the latent cause of a favicon bug where a
+// reader expected the wrong casing. The current per-route casing is:
+//   - "image", "video"                              -> metadata.pathname
+//   - "logo", "favicon", "images", "galleryImages",
+//     "testimonials"                                 -> metadata.pathName
+// Every current client-side reader has been verified against this mapping
+// (see src/lib/uploads.ts's getStoredPath(), which reads both keys defensively,
+// and the direct `.pathname` reads in product-form.tsx, collection-form.tsx,
+// blog-page-editor.tsx, seo-editor.tsx, page-editor.tsx,
+// template-field-widgets.tsx, minimal-tiptap-form-field.tsx, and
+// media-picker-dialog.tsx, all of which only ever use routes "image"/"video";
+// plus the one direct `.pathName` read in branding-editor.tsx, which is paired
+// with the "favicon" route). Do NOT change a route's casing without also
+// updating every direct (non-getStoredPath) reader of that route in the same
+// change — grep for `.pathname` / `.pathName` first.
 const router: Router = {
   client: s3Client,
   bucketName: env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,

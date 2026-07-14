@@ -257,67 +257,6 @@ const homepageBandData: TemplateField[] = [
   },
 ];
 
-// ─── Inside the Studio (Story) ─────────────────────────────────────────────
-// "Inside the Studio" section temporarily removed from homepage — kept for restore.
-
-const homepageStoryData: TemplateField[] = [
-  {
-    key: "vii.homepage.story-heading",
-    label: "Studio Section Heading",
-    description: "The plain part of the two-part studio section heading.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.story",
-    gridColumn: "col-span-1",
-    defaultValue: "Inside the",
-  },
-  {
-    key: "vii.homepage.story-heading-accent",
-    label: "Studio Heading Accent Word",
-    description: "The italic copper accent word completing the studio heading.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.story",
-    gridColumn: "col-span-1",
-    defaultValue: "studio",
-  },
-  {
-    key: "vii.homepage.story-intro",
-    label: "Studio Intro Text",
-    description: "Short calming line about the Detroit space.",
-    type: "textarea",
-    page: "homepage",
-    group: "homepage.story",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "A calm, considered space in the heart of Detroit — designed for focus, presence, and skin that glows.",
-  },
-  {
-    key: "vii.homepage.story-cards",
-    label: "Studio Photos",
-    description: "Photos shown in the studio image carousel. Up to 6 cards.",
-    type: "list",
-    page: "homepage",
-    group: "homepage.story",
-    gridColumn: "col-span-full",
-    maxItems: 6,
-    itemSchema: [
-      {
-        key: "image",
-        label: "Image",
-        type: "image",
-        placeholder: "Upload a studio photo",
-      },
-      {
-        key: "title",
-        label: "Title",
-        type: "text",
-        placeholder: "e.g. The treatment room",
-      },
-    ],
-  },
-];
-
 // ─── Product Rail ─────────────────────────────────────────────────────────────
 
 const homepageProductRailData: TemplateField[] = [

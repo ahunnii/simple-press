@@ -36,6 +36,7 @@ const bgMap: Record<string, string> = {
   pink: "bg-pink-100",
   indigo: "bg-indigo-100",
   teal: "bg-teal-100",
+  amber: "bg-amber-100",
 };
 
 const textMap: Record<string, string> = {
@@ -46,6 +47,7 @@ const textMap: Record<string, string> = {
   pink: "text-pink-600",
   indigo: "text-indigo-600",
   teal: "text-teal-600",
+  amber: "text-amber-600",
 };
 
 const borderMap: Record<string, string> = {
@@ -56,6 +58,7 @@ const borderMap: Record<string, string> = {
   pink: "hover:border-pink-500",
   indigo: "hover:border-indigo-500",
   teal: "hover:border-teal-500",
+  amber: "hover:border-amber-500",
 };
 
 export function ContentDashboard({ pages, isPlatformAdmin = false }: Props) {
@@ -255,12 +258,12 @@ export function ContentDashboard({ pages, isPlatformAdmin = false }: Props) {
                 Get started by creating your first page or policy
               </p>
               <p className="text-muted-foreground mb-6 text-xs">
-                To edit homepage sections or hero content, use{" "}
+                To edit homepage sections or hero content, use the{" "}
                 <Link
-                  href="/admin/content/template"
+                  href="/editor"
                   className="text-primary underline underline-offset-2"
                 >
-                  Template Fields
+                  Site Editor
                 </Link>{" "}
                 instead.
               </p>

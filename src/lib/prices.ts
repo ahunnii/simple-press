@@ -1,4 +1,3 @@
-import type { RouterOutputs } from "~/trpc/react";
 import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,

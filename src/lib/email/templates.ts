@@ -832,6 +832,12 @@ export async function sendMarketingBroadcast({
       unsubscribeUrl,
     }),
     tags: [{ name: "category", value: "marketing_broadcast" }],
+    // RFC 8058 one-click unsubscribe — lets mail clients POST to the
+    // unsubscribe endpoint (handled by /api/unsubscribe POST) without a visit.
+    headers: {
+      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
   });
 }
 

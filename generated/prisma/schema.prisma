@@ -63,7 +63,7 @@ model BusinessMembership {
   role BusinessRole // ← typed enum, not a raw string
 
   @@unique([userId, businessId])
-  @@index([userId])
+  // NOTE: no @@index([userId]) — covered by the @@unique([userId, businessId]) prefix.
   @@index([businessId])
 }
 
@@ -85,6 +85,7 @@ model Session {
   membershipRole String?
 
   @@unique([token])
+  @@index([userId])
   @@map("session")
 }
 
@@ -104,6 +105,7 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@index([userId])
   @@map("account")
 }
 
@@ -217,8 +219,7 @@ model Business {
   faqItems              FaqItem[]
   backInStockRequests   BackInStockRequest[]
 
-  @@index([subdomain])
-  @@index([customDomain])
+  // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
 
 model SiteContent {
@@ -377,6 +378,7 @@ model Product {
   @@unique([businessId, slug])
   @@index([businessId, published])
   @@index([businessId, featured])
+  @@index([baseInventoryUnitId])
 }
 
 model ProductVariant {
@@ -436,9 +438,9 @@ model Collection {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   collectionProducts CollectionProduct[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 
   @@unique([businessId, slug])
-  @@index([businessId])
 }
 
 model CollectionProduct {
@@ -452,7 +454,7 @@ model CollectionProduct {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, productId])
-  @@index([collectionId])
+  // NOTE: no @@index([collectionId]) — covered by the @@unique([collectionId, productId]) prefix.
   @@index([productId])
 }
 
@@ -595,7 +597,7 @@ model Customer {
   reviews            ProductReview[]
 
   @@unique([businessId, email])
-  @@index([businessId])
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
   @@index([userId])
 }
 
@@ -692,6 +694,8 @@ model Order {
   @@index([businessId, status])
   @@index([businessId, createdAt])
   @@index([customerId])
+  @@index([shippingAddressId])
+  @@index([discountCodeId])
   @@index([stripePaymentIntentId])
 }
 
@@ -742,6 +746,7 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+  @@index([productVariantId])
 }
 
 // For tracking which domains need to be added to Coolify
@@ -796,7 +801,7 @@ model DiscountCode {
   orders Order[]
 
   @@unique([businessId, code])
-  @@index([businessId])
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, code]) / @@index([businessId, active]) prefix.
   @@index([businessId, active])
   @@index([code])
 }
@@ -843,6 +848,7 @@ model InventoryHistory {
   @@index([baseInventoryUnitId])
   @@index([businessId])
   @@index([orderId])
+  @@index([userId])
   @@index([createdAt])
 }
 
@@ -895,11 +901,11 @@ model InventoryReservation {
 
   // Array of { variantId?, productId?, baseInventoryUnitId?, qty }
   items Json
+  // NOTE: no @@index([stripeSessionId]) — already @unique (own index).
 
   @@index([businessId])
   @@index([status])
   @@index([expiresAt])
-  @@index([stripeSessionId])
 }
 
 model Page {
@@ -999,9 +1005,9 @@ model Gallery {
 
   // Relationships
   images GalleryImage[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 
   @@unique([businessId, slug])
-  @@index([businessId])
 }
 
 model GalleryImage {
@@ -1085,8 +1091,9 @@ model TestimonialInvite {
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([businessId])
-  @@index([code])
+  // NOTE: no @@index([code]) — already @unique (own index).
   @@index([email])
+  @@index([customerId])
 }
 
 model ProductReview {
@@ -1140,6 +1147,7 @@ model ProductReview {
   @@index([productId, isApproved, isHidden])
   @@index([productId, source])
   @@index([customerId])
+  @@index([orderId])
 }
 
 model ReviewVote {
@@ -1194,8 +1202,9 @@ model PlatformInvite {
   creator   User?   @relation("CreatedInvites", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@index([email])
-  @@index([code])
+  // NOTE: no @@index([code]) — already @unique (own index).
   @@index([businessId])
+  @@index([createdBy])
 }
 
 model TeamInvite {
@@ -1215,7 +1224,7 @@ model TeamInvite {
   createdBy String?
 
   @@index([businessId])
-  @@index([code])
+  // NOTE: no @@index([code]) — already @unique (own index).
   @@index([email])
 }
 
@@ -1245,9 +1254,9 @@ model ShippingZone {
   sortOrder Int      @default(0)
 
   rates ShippingRate[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, name]) prefix.
 
   @@unique([businessId, name])
-  @@index([businessId])
 }
 
 model ShippingRate {
@@ -1258,9 +1267,9 @@ model ShippingRate {
 
   tierIndex  Int // position in Business.shippingWeightTiers (0-based)
   priceCents Int // shipping price in cents for this zone + tier combination
+  // NOTE: no @@index([zoneId]) — covered by the @@unique([zoneId, tierIndex]) prefix.
 
   @@unique([zoneId, tierIndex])
-  @@index([zoneId])
 }
 
 // A shopper's request to be emailed when an out-of-stock product is restocked.
@@ -1282,4 +1291,5 @@ model BackInStockRequest {
 
   @@index([businessId, productId])
   @@index([notifiedAt, productId])
+  @@index([productId])
 }

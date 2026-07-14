@@ -15,7 +15,7 @@ export const externalRouter = createTRPCRouter({
    * Used in partnership with the Artisanal Futures platform to verify artisan tokens.
    */
   verifyArtisanToken: publicProcedure
-    .input(z.string().min(1))
+    .input(z.string().min(1).max(512))
     .query(async ({ ctx, input: aftoken }) => {
       // This is an unauthenticated public procedure that proxies to the partner
       // API, so throttle per IP to prevent brute-force / PII-harvesting abuse.
@@ -54,6 +54,17 @@ export const externalRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "External API unavailable",
+        });
+      }
+
+      // Distinguish a partner-side outage/throttle from a genuinely bad token.
+      // A 5xx/429 means the partner API is unavailable, not that the token is
+      // invalid — surface that as UNAVAILABLE so the caller can retry rather than
+      // telling the artisan their (possibly valid) token is wrong.
+      if (fetchToken.status >= 500 || fetchToken.status === 429) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "External API unavailable. Please try again later.",
         });
       }
 

@@ -190,14 +190,6 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 1,
   },
   {
-    id: "global.contact",
-    title: "Contact",
-    description:
-      "Contact information for your business, displayed throughout the site",
-    icon: "🎯",
-    columns: 2,
-  },
-  {
     id: "global.cta",
     title: "Call to Action",
     description:

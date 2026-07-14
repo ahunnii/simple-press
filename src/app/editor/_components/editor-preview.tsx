@@ -1,7 +1,10 @@
 "use client";
 
+import { ExternalLink, RefreshCw } from "lucide-react";
+
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import { PreviewFrame } from "~/components/preview/preview-frame";
+import { Button } from "~/components/ui/button";
 
 /** Device viewport presets — widths match `PreviewPane`'s `DEVICE_WIDTHS`. */
 export type DeviceKind = "desktop" | "tablet" | "mobile";
@@ -24,7 +27,7 @@ export type EditorPreviewProps = {
   /** Fired when the iframe acks a live text patch. */
   onPatched: (applied: string[], missed: string[]) => void;
   /** Imperative handle to the underlying `PreviewFrame`. */
-  frameRef: React.Ref<PreviewFrameHandle>;
+  frameRef: React.RefObject<PreviewFrameHandle | null>;
 };
 
 /**
@@ -42,8 +45,38 @@ export function EditorPreview({
   onPatched,
   frameRef,
 }: EditorPreviewProps) {
+  const handleRefresh = () => {
+    frameRef.current?.refresh();
+  };
+
+  const handleOpenExternal = () => {
+    window.open(`${path}?__preview=1`, "_blank", "noopener");
+  };
+
   return (
-    <div className="bg-muted/40 flex min-w-0 flex-1 justify-center overflow-auto p-6">
+    <div className="bg-muted/40 relative flex min-w-0 flex-1 justify-center overflow-auto p-6">
+      <div className="bg-card/90 absolute top-3 right-3 z-10 flex items-center gap-1 rounded-lg border p-0.5 shadow-sm backdrop-blur">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          aria-label="Refresh preview"
+          onClick={handleRefresh}
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          aria-label="Open storefront in new tab"
+          onClick={handleOpenExternal}
+        >
+          <ExternalLink className="h-4 w-4" />
+        </Button>
+      </div>
       <PreviewFrame
         ref={frameRef}
         path={path}

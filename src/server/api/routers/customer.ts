@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { normalizeEmail } from "~/lib/utils";
@@ -12,6 +13,25 @@ import {
   protectedProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
+
+/**
+ * Owner-private CRM `notes` must never reach a STAFF (fulfillment-only) caller.
+ * `staffProcedure` admits OWNER/MANAGER/STAFF, so we re-resolve the caller's
+ * membership role for the resolved business (PLATFORM_ADMIN always allowed).
+ */
+async function canViewCustomerNotes(
+  db: DbClient,
+  userId: string,
+  platformRole: string | null | undefined,
+  businessId: string,
+): Promise<boolean> {
+  if (platformRole === "PLATFORM_ADMIN") return true;
+  const membership = await db.businessMembership.findUnique({
+    where: { userId_businessId: { userId, businessId } },
+    select: { role: true },
+  });
+  return !!membership && ["OWNER", "MANAGER"].includes(membership.role);
+}
 
 export const customerRouter = createTRPCRouter({
   // Get customer profile for current user
@@ -643,7 +663,7 @@ export const customerRouter = createTRPCRouter({
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
-      return ctx.db.customer.findFirst({
+      const customer = await ctx.db.customer.findFirst({
         where: { id, businessId },
         include: {
           orders: {
@@ -655,6 +675,18 @@ export const customerRouter = createTRPCRouter({
           },
         },
       });
+
+      if (!customer) return null;
+
+      // STAFF is fulfillment-only and must not see owner-private CRM notes.
+      const showNotes = await canViewCustomerNotes(
+        ctx.db,
+        ctx.session.user.id,
+        ctx.session.user.platformRole,
+        businessId,
+      );
+
+      return showNotes ? customer : { ...customer, notes: null };
     }),
 
   list: staffProcedure
@@ -704,8 +736,19 @@ export const customerRouter = createTRPCRouter({
 
       const totalPages = Math.ceil(totalCount / pageSize);
 
+      // STAFF is fulfillment-only and must not see owner-private CRM notes.
+      const showNotes = await canViewCustomerNotes(
+        ctx.db,
+        ctx.session.user.id,
+        ctx.session.user.platformRole,
+        businessId,
+      );
+      const safeCustomers = showNotes
+        ? customers
+        : customers.map((c) => ({ ...c, notes: null }));
+
       return {
-        customers,
+        customers: safeCustomers,
         totalCount,
         page,
         pageSize,

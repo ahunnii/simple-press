@@ -17,6 +17,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Upload } from "lucide-react";
+import { toast } from "sonner";
 
 import type { FormProductImage } from "../_validators/schema";
 import { Button } from "~/components/ui/button";
@@ -63,11 +64,11 @@ export function ImageUploader({
     const valid: File[] = [];
     for (const file of files) {
       if (!file.type.startsWith("image/")) {
-        alert(`Skipped "${file.name}": not an image`);
+        toast.error(`Skipped "${file.name}": not an image`);
         continue;
       }
       if (file.size > MAX_FILE_SIZE) {
-        alert(`Skipped "${file.name}": must be less than 5MB`);
+        toast.error(`Skipped "${file.name}": must be less than 5MB`);
         continue;
       }
       valid.push(file);

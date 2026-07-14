@@ -18,31 +18,40 @@ const settingsCards = getHubCards("settings");
 const bgMap: Record<string, string> = {
   slate: "bg-slate-100",
   emerald: "bg-emerald-100",
+  cyan: "bg-cyan-100",
   yellow: "bg-yellow-100",
   orange: "bg-orange-100",
   indigo: "bg-indigo-100",
   purple: "bg-purple-100",
   red: "bg-red-100",
+  blue: "bg-blue-100",
+  violet: "bg-violet-100",
 };
 
 const textMap: Record<string, string> = {
   slate: "text-slate-600",
   emerald: "text-emerald-600",
+  cyan: "text-cyan-600",
   yellow: "text-yellow-600",
   orange: "text-orange-600",
   indigo: "text-indigo-600",
   purple: "text-purple-600",
   red: "text-red-600",
+  blue: "text-blue-600",
+  violet: "text-violet-600",
 };
 
 const borderMap: Record<string, string> = {
   slate: "hover:border-slate-500",
   emerald: "hover:border-emerald-500",
+  cyan: "hover:border-cyan-500",
   yellow: "hover:border-yellow-500",
   orange: "hover:border-orange-500",
   indigo: "hover:border-indigo-500",
   purple: "hover:border-purple-500",
   red: "hover:border-red-500",
+  blue: "hover:border-blue-500",
+  violet: "hover:border-violet-500",
 };
 
 export function SettingsDashboard({

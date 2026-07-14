@@ -53,7 +53,7 @@ export async function ModernHomePage() {
       >
         <div className="relative h-[85vh] min-h-[600px]">
           <Image
-            src={f["modern.homepage.hero-image"]!}
+            src={f["modern.homepage.hero-image"] ?? "/placeholder.svg"}
             alt=""
             fill
             className="object-cover"
@@ -70,7 +70,7 @@ export async function ModernHomePage() {
                   {f["modern.homepage.hero-subtitle"]}
                 </p>
                 <Link
-                  href={f["modern.homepage.hero-cta-button-link"]!}
+                  href={f["modern.homepage.hero-cta-button-link"] ?? "/shop"}
                   className="bg-background text-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
                 >
                   {f["modern.homepage.hero-cta-button-text"]}
@@ -130,7 +130,7 @@ export async function ModernHomePage() {
               </h2>
             </div>
             <Link
-              href={f["modern.homepage.products-link-url"]!}
+              href={f["modern.homepage.products-link-url"] ?? "/shop"}
               className="text-foreground hover:text-muted-foreground hidden items-center gap-1 text-sm font-medium transition-colors md:flex"
             >
               {f["modern.homepage.products-link-text"]}
@@ -142,7 +142,7 @@ export async function ModernHomePage() {
           </div>
           <div className="mt-8 text-center md:hidden">
             <Link
-              href={f["modern.homepage.products-link-url"]!}
+              href={f["modern.homepage.products-link-url"] ?? "/shop"}
               className="text-foreground inline-flex items-center gap-1 text-sm font-medium"
             >
               {f["modern.homepage.products-link-text"]}
@@ -170,7 +170,7 @@ export async function ModernHomePage() {
                 {f["modern.homepage.about-text"]}
               </p>
               <Link
-                href={f["modern.homepage.about-cta-button-link"]!}
+                href={f["modern.homepage.about-cta-button-link"] ?? "/about"}
                 className="border-foreground text-foreground hover:bg-foreground hover:text-background mt-8 inline-flex items-center gap-2 border px-8 py-3 text-sm font-medium tracking-wide transition-colors"
               >
                 {f["modern.homepage.about-cta-button-text"]}
@@ -179,7 +179,7 @@ export async function ModernHomePage() {
             </div>
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
-                src={f["modern.homepage.about-image"]!}
+                src={f["modern.homepage.about-image"] ?? "/placeholder.svg"}
                 alt=""
                 fill
                 className="object-cover"

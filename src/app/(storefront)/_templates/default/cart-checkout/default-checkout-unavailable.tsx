@@ -15,10 +15,10 @@ export function DefaultCheckoutUnavailable() {
         className="flex flex-1 items-center justify-center p-4"
       >
         <div className="max-w-md text-center">
-          <h1 className="mb-4 text-2xl font-bold text-gray-900">
+          <h1 className="mb-4 text-2xl font-bold text-[#0a0a0a]">
             Checkout Unavailable
           </h1>
-          <p className="text-gray-600">
+          <p className="text-[#6b6b6b]">
             This store hasn&apos;t set up payment processing yet. Please contact
             the store owner.
           </p>

@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       where: { id: business.id },
       data: {
         stripeAccountId: null,
+        stripeChargesEnabled: false,
+        stripePayoutsEnabled: false,
       },
     });
 

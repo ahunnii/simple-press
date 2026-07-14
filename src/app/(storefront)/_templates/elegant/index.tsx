@@ -6,23 +6,23 @@ import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 export const DEFAULT_ELEGANT_TRUST_BADGES = [
   {
     icon: Leaf,
-    title: "Organic Certified",
-    description: "100% organic ingredients",
+    title: "Quality Assured",
+    description: "Carefully selected materials",
   },
   {
     icon: Droplets,
-    title: "Natural Extracts",
-    description: "Pure botanical formulas",
+    title: "Thoughtfully Made",
+    description: "Crafted with attention to detail",
   },
   {
     icon: Sparkles,
-    title: "Clean Beauty",
-    description: "No toxic chemicals",
+    title: "Trusted Quality",
+    description: "Consistently high standards",
   },
   {
     icon: Flower2,
-    title: "Vegan Formula",
-    description: "Plant-powered skincare",
+    title: "Customer Favorite",
+    description: "Loved by our customers",
   },
 ];
 
@@ -34,18 +34,18 @@ export const DEFAULT_ELEGANT_ABOUT_FEATURES = [
   },
   {
     icon: Droplets,
-    title: "Natural Extracts",
-    description: "Pure botanical formulas",
+    title: "Quality Craftsmanship",
+    description: "Made with attention to every detail",
   },
   {
     icon: Sparkles,
-    title: "Clean Beauty",
-    description: "No toxic chemicals",
+    title: "Trusted Standards",
+    description: "Consistently high quality",
   },
   {
     icon: Flower2,
-    title: "Vegan Formula",
-    description: "Plant-powered skincare",
+    title: "Customer Favorite",
+    description: "Loved by shoppers everywhere",
   },
 ];
 
@@ -56,8 +56,8 @@ const globalData: TemplateField[] = [
     description: "Your store's tagline shown in the hero section",
     type: "text",
     page: "global",
-    defaultValue: "Natural Skincare",
-    placeholder: "e.g. Natural Skincare",
+    defaultValue: "Thoughtfully Made",
+    placeholder: "e.g. Thoughtfully Made",
   },
 ];
 
@@ -124,8 +124,8 @@ const homepageHeroData: TemplateField[] = [
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-1",
-    defaultValue: "Natural Skincare",
-    placeholder: "e.g. Natural Skincare",
+    defaultValue: "Thoughtfully Made",
+    placeholder: "e.g. Thoughtfully Made",
   },
   {
     key: "elegant.homepage.hero-title-line-1",
@@ -357,8 +357,8 @@ const homepageFeaturesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.features",
-    defaultValue: "100% Natural",
-    placeholder: "e.g. 100% Natural",
+    defaultValue: "Quality Materials",
+    placeholder: "e.g. Quality Materials",
   },
   {
     key: "elegant.homepage.feature-2-description",
@@ -367,7 +367,7 @@ const homepageFeaturesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.features",
-    defaultValue: "No synthetic chemicals or parabens",
+    defaultValue: "Carefully selected components",
     placeholder: "Short description...",
   },
   {
@@ -377,8 +377,8 @@ const homepageFeaturesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.features",
-    defaultValue: "Plant-Based",
-    placeholder: "e.g. Plant-Based",
+    defaultValue: "Expert Craftsmanship",
+    placeholder: "e.g. Expert Craftsmanship",
   },
   {
     key: "elegant.homepage.feature-3-description",
@@ -387,7 +387,7 @@ const homepageFeaturesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.features",
-    defaultValue: "Botanical extracts and essential oils",
+    defaultValue: "Made with care and attention to detail",
     placeholder: "Short description...",
   },
   {
@@ -407,7 +407,7 @@ const homepageFeaturesData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.features",
-    defaultValue: "Fair trade certified ingredients",
+    defaultValue: "Responsibly sourced materials",
     placeholder: "Short description...",
   },
 ];
@@ -431,8 +431,8 @@ const homepageCtaData: TemplateField[] = [
     page: "homepage",
     group: "homepage.cta",
     gridColumn: "col-span-full",
-    defaultValue: "100% Natural",
-    placeholder: "e.g. 100% Natural",
+    defaultValue: "Quality You Can Trust",
+    placeholder: "e.g. Quality You Can Trust",
   },
   {
     key: "elegant.cta.pointone",
@@ -441,8 +441,8 @@ const homepageCtaData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.cta",
-    defaultValue: "No Harsh Chemicals",
-    placeholder: "e.g. No Harsh Chemicals",
+    defaultValue: "Carefully Selected Materials",
+    placeholder: "e.g. Carefully Selected Materials",
   },
   {
     key: "elegant.cta.pointtwo",
@@ -451,8 +451,8 @@ const homepageCtaData: TemplateField[] = [
     type: "text",
     page: "homepage",
     group: "homepage.cta",
-    defaultValue: "Plant-Based Goodness",
-    placeholder: "e.g. Plant-Based Goodness",
+    defaultValue: "Thoughtful Craftsmanship",
+    placeholder: "e.g. Thoughtful Craftsmanship",
   },
   {
     key: "elegant.cta.pointthree",

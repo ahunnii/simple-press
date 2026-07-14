@@ -29,6 +29,9 @@ const navigationItemsSchema = z
   )
   .optional();
 
+/** Max payload size for `customFields` on any content save (~1MB of JSON). */
+const CUSTOM_FIELDS_MAX_BYTES = 1_000_000;
+
 export const siteContentSchema = z.object({
   templateId: z.string().optional(),
   // Hero Section
@@ -79,10 +82,21 @@ export const siteContentSchema = z.object({
   // leave it false so an unrelated save never silently destroys an
   // in-progress /editor draft.
   clearPreviewDraft: z.boolean().optional(),
+}).superRefine((val, ctx) => {
+  // Same cap `previewDraftSchema` enforces below — publish (updateSiteContent)
+  // must not accept an unbounded customFields payload either. `customFields`
+  // is `z.any()` above (shape varies per template), so this is the only place
+  // that can catch an oversized publish.
+  if (val.customFields === undefined) return;
+  const size = JSON.stringify(val.customFields).length;
+  if (size > CUSTOM_FIELDS_MAX_BYTES) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Custom fields exceed ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
+      path: ["customFields"],
+    });
+  }
 });
-
-/** Max payload size for a preview draft (~1MB of JSON). */
-const PREVIEW_DRAFT_MAX_BYTES = 1_000_000;
 
 export const previewDraftSchema = z
   .object({
@@ -90,10 +104,10 @@ export const previewDraftSchema = z
   })
   .superRefine((val, ctx) => {
     const size = JSON.stringify(val.customFields).length;
-    if (size > PREVIEW_DRAFT_MAX_BYTES) {
+    if (size > CUSTOM_FIELDS_MAX_BYTES) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Preview draft exceeds ${PREVIEW_DRAFT_MAX_BYTES.toLocaleString()} characters`,
+        message: `Preview draft exceeds ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
       });
     }
   });

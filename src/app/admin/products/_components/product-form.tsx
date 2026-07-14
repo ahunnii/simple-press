@@ -13,6 +13,7 @@ import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { getBusinessUrl } from "~/lib/business-url";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
@@ -196,11 +197,13 @@ function SocialPreviewCard({
   description,
   ogImageFile,
   existingOgImage,
+  siteHost,
 }: {
   title: string;
   description: string;
   ogImageFile: File | null | undefined;
   existingOgImage?: string;
+  siteHost: string;
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -232,7 +235,7 @@ function SocialPreviewCard({
       )}
       <div className="border-t p-3">
         <p className="text-xs tracking-wide text-gray-400 uppercase">
-          yourstore.com
+          {siteHost}
         </p>
         <p className="truncate text-sm font-medium text-gray-900">{title}</p>
         {description && (
@@ -257,6 +260,17 @@ export function ProductForm({
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
+
+  // Resolve the business's real storefront domain for the SEO/social
+  // previews (falls back to a clearly-generic placeholder while loading).
+  const { data: businessInfo } = api.business.simplifiedGet.useQuery();
+  const siteHost = businessInfo
+    ? getBusinessUrl({
+        subdomain: businessInfo.subdomain,
+        customDomain: businessInfo.customDomain,
+        domainStatus: businessInfo.domainStatus,
+      }).replace(/^https?:\/\//, "")
+    : "yourstore.com";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [variantManagerKey, setVariantManagerKey] = useState(0);
 
@@ -1531,7 +1545,7 @@ export function ProductForm({
                             {seoPreviewTitle}
                           </div>
                           <div className="mb-1 text-xs text-green-700">
-                            yourstore.com/products/
+                            {siteHost}/products/
                             {form.watch("slug") || "product-slug"}
                           </div>
                           <div className="line-clamp-2 text-sm text-gray-600">
@@ -1558,6 +1572,7 @@ export function ProductForm({
                               ? undefined
                               : (product?.ogImage ?? undefined)
                           }
+                          siteHost={siteHost}
                         />
                       </CardContent>
                     </Card>

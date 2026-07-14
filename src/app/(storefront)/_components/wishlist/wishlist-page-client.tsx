@@ -20,14 +20,14 @@ export function WishlistPageClient() {
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-16">
       <header className="mb-8">
-        <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+        <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
           Saved items
         </p>
         <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
           Your Wishlist
         </h1>
         {isHydrated && items.length > 0 && (
-          <p className="mt-3 text-sm text-[#6b6b6b]">
+          <p className="mt-3 text-sm text-muted-foreground">
             {items.length} {items.length === 1 ? "item" : "items"} saved on this
             device. Prices and availability may have changed since you saved
             them.
@@ -38,19 +38,19 @@ export function WishlistPageClient() {
       {!isHydrated ? (
         // Avoid an empty-state flash before localStorage has loaded
         <div
-          className="rounded-[var(--radius)] border border-[#e8e8e8] p-12"
+          className="rounded-[var(--radius)] border border-border p-12"
           aria-hidden="true"
         />
       ) : items.length === 0 ? (
-        <div className="rounded-[var(--radius)] border border-[#e8e8e8] p-8 text-center sm:p-12">
+        <div className="rounded-[var(--radius)] border border-border p-8 text-center sm:p-12">
           <Heart
-            className="mx-auto mb-4 h-8 w-8 text-[#6b6b6b]"
+            className="mx-auto mb-4 h-8 w-8 text-muted-foreground"
             aria-hidden="true"
           />
           <h2 className="mb-3 text-xl font-medium tracking-tight">
             Your wishlist is empty
           </h2>
-          <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-[#6b6b6b]">
+          <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-muted-foreground">
             Tap the heart on any product to save it here for later.
           </p>
           <Link
@@ -70,7 +70,7 @@ export function WishlistPageClient() {
                 tabIndex={-1}
                 aria-hidden="true"
               >
-                <div className="relative mb-3 aspect-square overflow-hidden rounded-[var(--radius)] border border-[#e8e8e8] bg-[#f6f6f6]">
+                <div className="relative mb-3 aspect-square overflow-hidden rounded-[var(--radius)] border border-border bg-muted">
                   {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
@@ -80,7 +80,7 @@ export function WishlistPageClient() {
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[#6b6b6b]">
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                       <Heart className="h-8 w-8" aria-hidden="true" />
                     </div>
                   )}
@@ -96,10 +96,10 @@ export function WishlistPageClient() {
                     {item.name}
                   </Link>
                 </h2>
-                <p className="text-[14px] text-[#6b6b6b]">
+                <p className="text-[14px] text-muted-foreground">
                   {formatPrice(item.price)}
                 </p>
-                <p className="text-[12px] text-[#6b6b6b]">
+                <p className="text-[12px] text-muted-foreground">
                   Saved {formatDate(new Date(item.addedAt))}
                 </p>
               </div>
@@ -108,7 +108,7 @@ export function WishlistPageClient() {
                 type="button"
                 onClick={() => remove(item.productId)}
                 aria-label={`Remove ${item.name} from wishlist`}
-                className="absolute right-0 bottom-0 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-[#e8e8e8] text-[#6b6b6b] transition-colors hover:border-[#0a0a0a] hover:text-[#0a0a0a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+                className="absolute right-0 bottom-0 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   ArrowLeft,
@@ -35,7 +35,13 @@ import {
 
 import type { DeviceKind } from "./editor-preview";
 
-const EXIT_HREF = "/admin/content";
+/** Fallback Exit destination when no valid `?from=` deep link is present. */
+const DEFAULT_EXIT_HREF = "/admin/content";
+
+/** Only same-app admin paths are honored for `?from=` — never an open redirect. */
+function isSafeExitDestination(value: string | null): value is string {
+  return !!value && /^\/admin(\/|$)/.test(value);
+}
 
 export type EditorTopBarPage = { value: string; label: string };
 
@@ -54,6 +60,12 @@ export type EditorTopBarProps = {
   isPublishing: boolean;
   /** True while a draft flush is scheduled or in-flight (gates Exit confirm). */
   flushPending: boolean;
+  /**
+   * True from the moment publish/discard is clicked until it settles —
+   * mirrors the `beforeunload` guard so Exit warns during this window too,
+   * not just while a draft flush is pending.
+   */
+  mutationPending: boolean;
   /** True when autosave retries are exhausted — the last edit is NOT saved. */
   saveFailed: boolean;
   onPublish: () => void;
@@ -82,19 +94,29 @@ export function EditorTopBar({
   hasUnpublishedChanges,
   isPublishing,
   flushPending,
+  mutationPending,
   saveFailed,
   onPublish,
   onDiscard,
 }: EditorTopBarProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [exitOpen, setExitOpen] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
 
+  const fromParam = searchParams.get("from");
+  const exitHref = isSafeExitDestination(fromParam)
+    ? fromParam
+    : DEFAULT_EXIT_HREF;
+
+  // Consistent with the beforeunload guard: warn on an unflushed draft edit
+  // (flushPending, which itself covers scheduled-and-in-flight) OR while a
+  // publish/discard mutation is settling.
   const handleExit = () => {
-    if (flushPending) {
+    if (flushPending || mutationPending) {
       setExitOpen(true);
     } else {
-      router.push(EXIT_HREF);
+      router.push(exitHref);
     }
   };
 
@@ -237,7 +259,7 @@ export function EditorTopBar({
         </Button>
       </div>
 
-      {/* Exit confirm — only reachable while a flush is pending */}
+      {/* Exit confirm — reachable while a flush or a publish/discard mutation is pending */}
       <AlertDialog open={exitOpen} onOpenChange={setExitOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -249,7 +271,7 @@ export function EditorTopBar({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Stay</AlertDialogCancel>
-            <AlertDialogAction onClick={() => router.push(EXIT_HREF)}>
+            <AlertDialogAction onClick={() => router.push(exitHref)}>
               Leave anyway
             </AlertDialogAction>
           </AlertDialogFooter>

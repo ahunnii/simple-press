@@ -517,10 +517,9 @@ export function groupFieldsByPage(
   const grouped: Record<string, TemplateField[]> = {};
 
   fields.forEach((field) => {
-    if (!grouped[field.page ?? "global"]) {
-      grouped[field.page] = [];
-    }
-    grouped[field.page]!.push(field);
+    const page = field.page ?? "global";
+    grouped[page] ??= [];
+    grouped[page].push(field);
   });
 
   return grouped;

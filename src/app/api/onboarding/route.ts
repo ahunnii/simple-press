@@ -248,24 +248,9 @@ export async function POST(req: NextRequest) {
       slug = `${baseSlug}-${counter}`;
     }
 
-    //First, create the user.
-
-    // const authUser = await auth.api.signUpEmail({
-    //   body: {
-    //     email,
-    //     password,
-    //     name,
-    //   },
-    // });
-
-    // if (!authUser.user) {
-    //   return NextResponse.json(
-    //     { error: "Failed to create user" },
-    //     { status: 400 },
-    //   );
-    // }
-
-    // Then, create business, and site content in a transaction
+    // The user was already created via better-auth signUpEmail on the client
+    // before this route is called (see StoreCustomizationStep) — verified
+    // above via getSession(). Create business + site content in a transaction.
     const business = await db.$transaction(async (tx) => {
       // 1. Create business
       const newBusiness = await tx.business.create({

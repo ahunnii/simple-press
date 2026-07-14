@@ -27,7 +27,7 @@ function buildInviteUrl(
   business: {
     subdomain: string;
     customDomain: string | null;
-    domainStatus: import("generated/prisma").BusinessDomainStatus | null;
+    domainStatus: BusinessDomainStatus | null;
   },
   code: string,
 ): string {

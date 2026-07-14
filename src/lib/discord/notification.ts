@@ -1,5 +1,19 @@
 import { env } from "~/env";
 
+/**
+ * Throws if the webhook responds with a non-2xx status (e.g. a revoked or
+ * misconfigured webhook URL) so a misfiring webhook doesn't fail silently.
+ * Callers already wrap these senders in try/catch or `.catch()` that reports
+ * to Sentry, so throwing here is sufficient — no need to report from here too.
+ */
+async function assertOk(response: Response, context: string): Promise<void> {
+  if (!response.ok) {
+    throw new Error(
+      `Discord webhook request failed (${context}): ${response.status} ${response.statusText}`,
+    );
+  }
+}
+
 export async function notifyDiscordDeletionRequest({
   customerId,
   businessName,
@@ -11,7 +25,7 @@ export async function notifyDiscordDeletionRequest({
 
   if (!webhookUrl) return;
 
-  await fetch(webhookUrl, {
+  const response = await fetch(webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -38,6 +52,7 @@ export async function notifyDiscordDeletionRequest({
       ],
     }),
   });
+  await assertOk(response, "deletion-request");
 }
 
 export async function notifyDiscordDomainRemoved({
@@ -62,7 +77,7 @@ export async function notifyDiscordDomainRemoved({
   const subdomainUrl = `${subdomain}.${platformDomain}`;
   const adminUrl = `https://platform.${platformDomain}/domains`;
 
-  await fetch(webhookUrl, {
+  const response = await fetch(webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -107,6 +122,7 @@ export async function notifyDiscordDomainRemoved({
       ],
     }),
   });
+  await assertOk(response, "domain-removed");
 }
 
 export async function notifyDiscordNewDomain({
@@ -131,7 +147,7 @@ export async function notifyDiscordNewDomain({
   const subdomainUrl = `${subdomain}.${platformDomain}`;
   const adminUrl = `https://platform.${platformDomain}/domains`;
 
-  await fetch(webhookUrl, {
+  const response = await fetch(webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -176,4 +192,5 @@ export async function notifyDiscordNewDomain({
       ],
     }),
   });
+  await assertOk(response, "new-domain");
 }

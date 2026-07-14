@@ -62,9 +62,13 @@ export function BambooProductCard({ product }: Props) {
             <h3 className="text-card-foreground group-hover:text-primary font-heading text-lg font-semibold transition-colors">
               {product.name}
             </h3>
-            <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-              {product.description?.slice(0, 100)}...
-            </p>
+            {product.description && (
+              <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                {product.description.length > 100
+                  ? `${product.description.slice(0, 100)}...`
+                  : product.description}
+              </p>
+            )}
           </div>
 
           <div className="mt-auto flex items-center justify-between gap-4 pt-2">
@@ -146,9 +150,13 @@ export function BambooHorizontalProductCard({ product }: Props) {
           <h3 className="text-card-foreground group-hover:text-primary font-heading text-base font-semibold transition-colors">
             {product.name}
           </h3>
-          <p className="text-muted-foreground line-clamp-1 text-sm">
-            {product.description?.slice(0, 50)}...
-          </p>
+          {product.description && (
+            <p className="text-muted-foreground line-clamp-1 text-sm">
+              {product.description.length > 50
+                ? `${product.description.slice(0, 50)}...`
+                : product.description}
+            </p>
+          )}
         </div>
 
         <div className="mt-auto flex items-baseline gap-2">

@@ -53,7 +53,7 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
         : "Manager";
 
   // Error state
-  if (errorMessage ?? !invite) {
+  if (errorMessage != null || !invite) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
         <Card className="w-full max-w-md">

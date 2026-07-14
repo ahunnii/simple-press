@@ -6,6 +6,7 @@ export async function GET(request: Request) {
 
   const business = await db.business.findFirst({
     where: { customDomain: domain, domainStatus: "ACTIVE" },
+    select: { id: true },
   });
 
   // Caddy expects 200 to allow, any non-200 to deny

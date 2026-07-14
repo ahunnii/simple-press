@@ -2,12 +2,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useUploadFiles } from "@better-upload/client";
 import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import { getBusinessUrl } from "~/lib/business-url";
 import { getStoredPath } from "~/lib/uploads";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -28,14 +28,16 @@ type TestimonialFormUnauthenticatedProps = {
   business: {
     id: string;
     name: string;
+    subdomain: string;
+    customDomain: string | null;
+    domainStatus: string | null;
   };
 };
 
 export function TestimonialFormUnauthenticated({
   code,
+  business,
 }: TestimonialFormUnauthenticatedProps) {
-  const router = useRouter();
-
   const captchaRef = useRef<HCaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
 
@@ -182,11 +184,9 @@ export function TestimonialFormUnauthenticated({
                 : "Your testimonial has been submitted and will appear once it's approved."}
             </p>
             <Button
-              onClick={() =>
-                router.push(
-                  `https://${invite.business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
-                )
-              }
+              onClick={() => {
+                window.location.href = getBusinessUrl(business);
+              }}
             >
               Visit {invite.business.name}
             </Button>

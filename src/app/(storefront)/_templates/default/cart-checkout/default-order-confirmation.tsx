@@ -78,7 +78,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
         role="status"
         aria-live="polite"
       >
-        <p className="text-gray-600">Loading order details...</p>
+        <p className="text-[#6b6b6b]">Loading order details...</p>
       </div>
     );
   }
@@ -86,7 +86,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
   if (!sessionId) {
     return (
       <div className="mx-auto max-w-2xl text-center">
-        <p className="mb-4 text-gray-600">No order found</p>
+        <p className="mb-4 text-[#6b6b6b]">No order found</p>
         <Button asChild>
           <Link href="/shop">Continue Shopping</Link>
         </Button>
@@ -114,25 +114,25 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
             aria-hidden="true"
           />
         </div>
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
+        <h1 className="mb-2 text-3xl font-bold text-[#0a0a0a]">
           Order Confirmed!
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-[#6b6b6b]">
           Thank you for your purchase from {business.name}
         </p>
       </div>
 
-      <div className="mb-6 rounded-lg bg-gray-50 p-6">
+      <div className="mb-6 rounded-lg bg-[#f6f6f6] p-6">
         <div className="mb-4 flex items-start gap-4">
           <Package
-            className="h-6 w-6 shrink-0 text-gray-400"
+            className="h-6 w-6 shrink-0 text-[#6b6b6b]"
             aria-hidden="true"
           />
           <div>
-            <h2 className="mb-1 font-semibold text-gray-900">
+            <h2 className="mb-1 font-semibold text-[#0a0a0a]">
               What happens next?
             </h2>
-            <ul className="space-y-1 text-sm text-gray-600">
+            <ul className="space-y-1 text-sm text-[#6b6b6b]">
               <li>• You&apos;ll receive an email confirmation shortly</li>
               <li>• We&apos;ll notify you when your order ships</li>
               <li>• Track your order status via email</li>
@@ -141,7 +141,7 @@ export function DefaultOrderConfirmation({ business }: OrderConfirmationProps) {
         </div>
 
         {orderDetails?.customer_email && (
-          <div className="mt-4 border-t pt-4 text-sm text-gray-600">
+          <div className="mt-4 border-t pt-4 text-sm text-[#6b6b6b]">
             <p>
               Confirmation sent to:{" "}
               <strong>{orderDetails.customer_email}</strong>

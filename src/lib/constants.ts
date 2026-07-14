@@ -1,9 +1,3 @@
-export const PLATFORM_CONFIG = {
-  name: "Shop Platform",
-  domain: process.env.PLATFORM_DOMAIN ?? "shop-app.mycoolifyserver.com",
-  supportEmail: "support@shopplatform.com",
-} as const;
-
 export const TEMPLATE_IDS = {
   DEFAULT: "default",
   MODERN: "modern",
@@ -124,9 +118,4 @@ export const ORDER_STATUS = {
   FULFILLED: "fulfilled",
   CANCELLED: "cancelled",
   REFUNDED: "refunded",
-} as const;
-
-export const USER_ROLE = {
-  OWNER: "OWNER",
-  STAFF: "STAFF",
 } as const;

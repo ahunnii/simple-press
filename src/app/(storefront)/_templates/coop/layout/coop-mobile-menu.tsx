@@ -10,26 +10,31 @@ export type CoopNavLink = { href: string; label: string };
  * Working mobile nav menu (clone data-cid n15–n27 is static markup; this is
  * the template's one intentional functional addition — see design.md Chrome
  * + Motion). Fade-in duration (0.525s linear) matches the clone's declared
- * but never-emitted `anim-opacity-99` keyframe timing. The panel dims are
- * transcribed verbatim: 23.4375rem wide, `--coop-color-004` background,
- * Agdasima nav rows, 60×60 close button.
+ * but never-emitted `anim-opacity-99` keyframe timing. The overlay is a
+ * full-page `--coop-color-004` dark surface (bg on the `inset-0`
+ * container), with white Agdasima nav rows and a 60×60 close button
+ * pinned top-right in coral rgb(238,117,81).
  */
 export function CoopMobileMenu({
   open,
   onClose,
   links,
   triggerRef,
+  id,
 }: {
   open: boolean;
   onClose: () => void;
   links: CoopNavLink[];
   triggerRef: RefObject<HTMLButtonElement | null>;
+  /** DOM id for the dialog panel — pass the same id used by the trigger's `aria-controls`. */
+  id?: string;
 }) {
   const [entered, setEntered] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
-  const menuId = useId();
+  const generatedId = useId();
+  const menuId = id ?? generatedId;
 
   // Fade in on the frame after mount (transition on the CSS class handles
   // the 0.525s/linear timing; `prefers-reduced-motion` disables it in CSS).
@@ -138,16 +143,13 @@ export function CoopMobileMenu({
       role="dialog"
       aria-modal="true"
       aria-label="Navigation menu"
-      className="coop-mobile-menu-panel fixed inset-0 z-1010 flex justify-start"
+      className="coop-mobile-menu-panel fixed inset-0 z-1010 flex justify-start bg-[var(--coop-color-004)]"
       style={{ opacity: entered ? 1 : 0 }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
     >
-      {/* Clone n15/n16: 23.4375rem dark overlay anchored LEFT, transparent
-          19.6875rem scroll pane inside, close button at the overlay's right
-          edge (n25). */}
-      <div className="relative h-full w-[23.4375rem] max-w-full overflow-hidden bg-[var(--coop-color-004)]">
+      {/* Clone n15/n16: full-page dark overlay (bg on the inset-0 container),
+          transparent 19.6875rem scroll pane inside for the white Agdasima nav
+          rows, close button at the top-right corner (n25). */}
+      <div className="relative h-full w-full overflow-hidden">
         <div className="h-full w-[19.6875rem] max-w-full overflow-auto p-9">
           <nav className="block" aria-label="Mobile navigation">
             {links.map((link) => (
@@ -170,10 +172,13 @@ export function CoopMobileMenu({
           aria-label="Close navigation menu"
           className="absolute top-0 right-0 z-1 flex h-15 w-15 cursor-pointer items-center justify-center p-5.5 leading-0"
         >
+          {/* Sprite lines are fill="none" — they only paint via stroke. */}
           <svg
             className="block h-4 w-4 overflow-hidden"
             viewBox="0 0 16 16"
-            fill="var(--coop-background)"
+            fill="none"
+            stroke="rgb(238,117,81)"
+            strokeWidth={2}
             aria-hidden="true"
           >
             <use xlinkHref="/templates/coop/ui-icons.svg#close-icon" />

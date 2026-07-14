@@ -1901,6 +1901,29 @@
     }
   }
 
+  /* coop keeps the `default-template` root class (its account/cart fallback
+     pages reuse Default components), but the block above stamps Poppins on
+     every element, defeating the inheritance the clone-transcribed markup
+     relies on (e.g. Agdasima set on a nav, links inheriting it). Re-declare
+     with later-in-layer ties so the clone's fonts and normal cascade win. */
+  .coop {
+    font-family: var(--font-coop-body);
+
+    *,
+    p {
+      font-family: inherit;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-coop-heading);
+    }
+  }
+
   /* ─── Judy Sledge — design tokens ──────────────────────────────────────── */
   .sledge {
     --sl-cream: #e7f4dd;

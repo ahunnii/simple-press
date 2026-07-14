@@ -13,6 +13,17 @@ import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -92,14 +103,6 @@ export function StripeSettings({
   };
 
   const handleDisconnect = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to disconnect your Stripe account? You won't be able to accept payments until you reconnect.",
-      )
-    ) {
-      return;
-    }
-
     setIsDisconnecting(true);
     try {
       const response = await fetch("/api/stripe/connect/disconnect", {
@@ -177,21 +180,50 @@ export function StripeSettings({
                 </a>
               </Button>
 
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDisconnect}
-                disabled={isDisconnecting}
-              >
-                {isDisconnecting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Disconnecting...
-                  </>
-                ) : (
-                  "Disconnect"
-                )}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={isDisconnecting}
+                  >
+                    {isDisconnecting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Disconnecting...
+                      </>
+                    ) : (
+                      "Disconnect"
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Disconnect Stripe account?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You won&apos;t be able to accept payments until you
+                      reconnect a Stripe account.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDisconnecting}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      disabled={isDisconnecting}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        void handleDisconnect();
+                      }}
+                    >
+                      {isDisconnecting ? "Disconnecting…" : "Disconnect"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
 
             <div className="border-t pt-4">

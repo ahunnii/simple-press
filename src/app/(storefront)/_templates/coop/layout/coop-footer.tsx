@@ -47,10 +47,13 @@ export function CoopFooter({ business }: DefaultFooterTemplateProps) {
           <div className="inline">
             <a
               href={instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="coop-footer-link inline-block cursor-pointer pr-3.5 text-[var(--coop-background)]"
               {...fieldAttr("coop.global.footer.instagramLabel")}
             >
               {instagramLabel}
+              <span className="sr-only"> (opens in new tab)</span>
             </a>
             <a
               href={facebookUrl}

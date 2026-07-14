@@ -13,6 +13,26 @@ import { Button } from "~/components/ui/button";
 
 import { FieldInput } from "~/app/admin/content/template/_components/template-field-widgets";
 
+/**
+ * Stable stringify (sorted keys at every level) for order-insensitive
+ * per-field dirty comparison. Kept local rather than imported from
+ * `visual-editor.tsx` to avoid a circular import between the two modules.
+ */
+function stableStringify(value: unknown): string {
+  return JSON.stringify(value, (_key, val: unknown) => {
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      const record = val as Record<string, unknown>;
+      return Object.keys(record)
+        .sort()
+        .reduce<Record<string, unknown>>((acc, key) => {
+          acc[key] = record[key];
+          return acc;
+        }, {});
+    }
+    return val;
+  });
+}
+
 export type FieldPanelProps = {
   /** The section being edited. The parent only mounts this panel once a
    *  section is selected, so there is no empty state to render here. */
@@ -21,6 +41,8 @@ export type FieldPanelProps = {
   templateId: string;
   /** Current (draft) field values keyed by field key. */
   fields: Record<string, unknown>;
+  /** Currently published field values — the per-field dirty-comparison baseline. */
+  publishedFields: Record<string, unknown>;
   /** Route every edit through here so a Phase 2 live-patch path can hook in. */
   onFieldChange: (key: string, value: unknown) => void;
   /** Whether the Embeds feature is enabled for this business. */
@@ -43,6 +65,7 @@ export function FieldPanel({
   section,
   templateId,
   fields,
+  publishedFields,
   onFieldChange,
   embedsEnabled,
   mediaEnabled,
@@ -51,6 +74,17 @@ export function FieldPanel({
 }: FieldPanelProps) {
   const pageFields = groupFieldsByPage(templateId)[section.page] ?? [];
   const byGroup = groupFieldsByGroup(pageFields);
+
+  // Curated sections list groupIds that may not resolve to any field for this
+  // template (e.g. a group id referencing fields the template never defined).
+  // Detect that up front so we can render a message instead of a blank panel.
+  const hasAnyGroupFields = section.groupIds.some((groupId) => {
+    const isOther = groupId.endsWith(".__other");
+    const groupFields = isOther
+      ? (byGroup.ungrouped ?? [])
+      : (byGroup[groupId] ?? []);
+    return groupFields.length > 0;
+  });
 
   return (
     <aside className="bg-card animate-in slide-in-from-right-8 fade-in flex w-[380px] shrink-0 flex-col border-l duration-200">
@@ -79,11 +113,23 @@ export function FieldPanel({
       {/* Body */}
       <div
         aria-disabled={disabled || undefined}
+        // `inert` (not just pointer-events-none) removes the whole subtree
+        // from the tab order and blocks keyboard interaction with its
+        // inputs — pointer-events-none alone only stops mouse/touch input,
+        // so a keyboard user could still Tab into and edit a "disabled"
+        // panel.
+        inert={disabled || undefined}
         className={cn(
           "flex-1 space-y-5 overflow-y-auto px-4 py-4",
           disabled && "pointer-events-none opacity-60",
         )}
       >
+        {!hasAnyGroupFields && (
+          <p className="text-muted-foreground text-sm">
+            This section has no editable fields.
+          </p>
+        )}
+
         {section.groupIds.map((groupId, index) => {
           const isOther = groupId.endsWith(".__other");
           const groupFields = isOther
@@ -122,7 +168,10 @@ export function FieldPanel({
                     key={field.key}
                     field={field}
                     value={fields[field.key]}
-                    isModified={false}
+                    isModified={
+                      stableStringify(fields[field.key]) !==
+                      stableStringify(publishedFields[field.key])
+                    }
                     onChange={(value) => onFieldChange(field.key, value)}
                     embedsEnabled={embedsEnabled}
                     mediaLibraryEnabled={mediaEnabled}

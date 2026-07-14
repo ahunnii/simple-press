@@ -209,7 +209,7 @@ export function BusinessInfoStep({
                 placeholder="mystore"
                 required
                 readOnly={artisanFlow}
-                className={`flex-1${artisanFlow ? "bg-muted" : ""}`}
+                className={`flex-1 ${artisanFlow ? "bg-muted" : ""}`}
               />
               <span className="text-sm whitespace-nowrap text-gray-500">
                 .{env.NEXT_PUBLIC_PLATFORM_DOMAIN}

@@ -237,6 +237,9 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
                 { href: "/about", label: "About us" },
                 { href: "/testimonials", label: "Reviews" },
                 ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
+                ...(isEnabled("services")
+                  ? [{ href: "/services", label: "Services" }]
+                  : []),
               ].map(({ href, label }) => (
                 <Link
                   key={`quick-links-${label}`}
