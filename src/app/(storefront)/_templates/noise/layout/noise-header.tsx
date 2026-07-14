@@ -27,6 +27,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
@@ -330,7 +331,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     <>
       <span>{businessName.toUpperCase()}</span>
       {locationTag ? (
-        <span className="vn-wordmark-sub">{locationTag}</span>
+        <span
+          className="vn-wordmark-sub"
+          {...fieldAttr("noise.global.location-tag")}
+        >
+          {locationTag}
+        </span>
       ) : null}
     </>
   );
@@ -560,6 +566,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
       <header
         className="bg-background sticky top-0 z-50 w-full"
         style={{ borderBottom: "1px solid var(--vn-line-soft)" }}
+        {...sectionGroupAttr("global", "branding")}
       >
         <div
           className="mx-auto grid w-full max-w-[1440px] items-center gap-6 px-4 py-4 sm:px-6 sm:py-[18px]"

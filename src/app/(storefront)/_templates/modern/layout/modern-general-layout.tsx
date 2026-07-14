@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type Props = {
   children: React.ReactNode;
   title?: string;
@@ -8,6 +10,10 @@ type Props = {
   imageUrl?: string;
   /** Spread on the header root for the preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /** Resolved-field keys for live-text patching (vii pattern). */
+  titleFieldKey?: string;
+  subtitleFieldKey?: string;
+  excerptFieldKey?: string;
 };
 
 export function ModernGeneralLayout({
@@ -18,6 +24,9 @@ export function ModernGeneralLayout({
   excerpt,
   imageUrl,
   sectionAttrs,
+  titleFieldKey,
+  subtitleFieldKey,
+  excerptFieldKey,
 }: Props) {
   return (
     <div className="bg-background">
@@ -44,6 +53,7 @@ export function ModernGeneralLayout({
                         className={
                           "text-background/90 text-xs font-semibold tracking-widest uppercase"
                         }
+                        {...(subtitleFieldKey ? fieldAttr(subtitleFieldKey) : {})}
                       >
                         {subtitle}
                       </p>
@@ -52,11 +62,15 @@ export function ModernGeneralLayout({
                       className={
                         "text-background mt-2 font-serif text-4xl text-balance md:text-6xl"
                       }
+                      {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
                     >
                       {title}
                     </h1>
                     {excerpt && (
-                      <p className="text-background/90 mt-4 max-w-lg">
+                      <p
+                        className="text-background/90 mt-4 max-w-lg"
+                        {...(excerptFieldKey ? fieldAttr(excerptFieldKey) : {})}
+                      >
                         {excerpt}
                       </p>
                     )}
@@ -70,15 +84,26 @@ export function ModernGeneralLayout({
         <div className="border-border border-b" {...sectionAttrs}>
           <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
             {subtitle && (
-              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...(subtitleFieldKey ? fieldAttr(subtitleFieldKey) : {})}
+              >
                 {subtitle}
               </p>
             )}
-            <h1 className="text-foreground mt-2 font-serif text-4xl md:text-5xl">
+            <h1
+              className="text-foreground mt-2 font-serif text-4xl md:text-5xl"
+              {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
+            >
               {title}
             </h1>
             {excerpt && (
-              <p className="text-muted-foreground mt-4 max-w-lg">{excerpt}</p>
+              <p
+                className="text-muted-foreground mt-4 max-w-lg"
+                {...(excerptFieldKey ? fieldAttr(excerptFieldKey) : {})}
+              >
+                {excerpt}
+              </p>
             )}
           </div>
         </div>

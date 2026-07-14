@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 
@@ -24,13 +24,22 @@ export function ModernCollectionsPage({
         {...sectionGroupAttr("collections", "main")}
       >
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+          <p
+            className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+            {...fieldAttr("modern.collections.tagline")}
+          >
             {f["modern.collections.tagline"]}
           </p>
-          <h1 className="text-foreground mt-2 font-serif text-4xl md:text-5xl">
+          <h1
+            className="text-foreground mt-2 font-serif text-4xl md:text-5xl"
+            {...fieldAttr("modern.collections.title")}
+          >
             {f["modern.collections.title"]}
           </h1>
-          <p className="text-muted-foreground mt-4 max-w-lg">
+          <p
+            className="text-muted-foreground mt-4 max-w-lg"
+            {...fieldAttr("modern.collections.intro")}
+          >
             {f["modern.collections.intro"]}
           </p>
         </div>

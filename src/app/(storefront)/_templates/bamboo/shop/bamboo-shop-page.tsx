@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -28,11 +28,17 @@ export async function BambooShopPage({
         <FadeIn direction="up">
           <div {...sectionGroupAttr("products", "listing")} className="mb-12">
             <h1 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-              <span className="text-balance">
+              <span
+                className="text-balance"
+                {...fieldAttr("bamboo.products.listing-title")}
+              >
                 {f["bamboo.products.listing-title"]}
               </span>
             </h1>
-            <p className="text-muted-foreground mt-3 max-w-2xl font-sans">
+            <p
+              className="text-muted-foreground mt-3 max-w-2xl font-sans"
+              {...fieldAttr("bamboo.products.listing-intro")}
+            >
               {f["bamboo.products.listing-intro"]}
             </p>
           </div>

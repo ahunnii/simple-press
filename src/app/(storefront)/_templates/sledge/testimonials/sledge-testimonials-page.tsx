@@ -57,18 +57,21 @@ export async function SledgeTestimonialsPage({
     <PageTransition>
       <SledgePageHeader
         title={heading ?? "Testimonials"}
+        titleFieldKey="sledge.testimonials.page-heading"
         intro={pageIntro ?? undefined}
-        sectionAttrs={sectionGroupAttr("testimonials", "header")}
+        introFieldKey="sledge.testimonials.page-intro"
+        sectionAttrs={sectionGroupAttr("testimonials", "page")}
       />
 
       <SledgePageSection
-        sectionAttrs={sectionGroupAttr("testimonials", "list")}
+        sectionAttrs={sectionGroupAttr("testimonials", "page")}
       >
         {testimonials.length === 0 ? (
           <SledgeEmptyState
             bare
             className="py-16"
             message={emptyStateText ?? "No testimonials yet."}
+            messageFieldKey="sledge.testimonials.empty-state-text"
             action={
               <Link
                 href="/"
@@ -95,10 +98,11 @@ export async function SledgeTestimonialsPage({
 
       <SledgeProductRail
         heading={trendingHeading ?? ""}
+        headingFieldKey="sledge.testimonials.trending-heading"
         ctaText={shopCtaText ?? ""}
         ctaHref={shopCtaHref ?? ""}
         products={products}
-        sectionAttrs={sectionGroupAttr("testimonials", "products")}
+        sectionAttrs={sectionGroupAttr("testimonials", "page")}
       />
     </PageTransition>
   );

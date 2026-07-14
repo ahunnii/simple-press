@@ -11,7 +11,11 @@ import {
   TEMPLATE_FIELD_GROUPS,
   TEMPLATE_FIELDS,
 } from "./template-fields";
-import { getSectionById, getSectionsForTemplate } from "./template-sections";
+import {
+  getSectionById,
+  getSectionsForTemplate,
+  TEMPLATE_SECTIONS,
+} from "./template-sections";
 
 describe("getSectionsForTemplate (derived fallback)", () => {
   it("derives section ids that exactly match TemplateFieldGroup ids (the data-sp-group contract)", () => {
@@ -38,18 +42,18 @@ describe("getSectionsForTemplate (derived fallback)", () => {
     }
   });
 
-  it("derives a non-curated template's homepage hero with its real group id and title", () => {
-    // "modern" has no curated registry, so it exercises the derived path.
+  it("curated sections take precedence over the derived title", () => {
+    // Every template is now curated. modern's curated Hero section title must
+    // win over the meta/humanized title the derived fallback would produce.
     const sections = getSectionsForTemplate("modern");
     const hero = sections.find((s) => s.id === "homepage.hero");
     expect(hero).toBeDefined();
     expect(hero?.page).toBe("homepage");
     expect(hero?.groupIds).toEqual(["homepage.hero"]);
-    // Metadata title comes from TEMPLATE_FIELD_GROUPS, not a humanized key.
-    const meta = TEMPLATE_FIELD_GROUPS.modern?.find(
-      (g) => g.id === "homepage.hero",
+    const curated = TEMPLATE_SECTIONS.modern?.find(
+      (s) => s.id === "homepage.hero",
     );
-    expect(hero?.title).toBe(meta?.title);
+    expect(hero?.title).toBe(curated?.title);
   });
 
   it("orders sections per page in declaration order starting at 0", () => {
@@ -67,7 +71,7 @@ describe("getSectionsForTemplate (derived fallback)", () => {
     // Every group that has fields must appear in some section's groupIds,
     // otherwise those fields were editable under derived sections but are
     // orphaned by the curated registry.
-    for (const templateId of ["default", "happy-bamboo", "vii", "coop"]) {
+    for (const templateId of Object.keys(TEMPLATE_SECTIONS)) {
       const coveredGroupIds = new Set(
         getSectionsForTemplate(templateId).flatMap((s) => s.groupIds),
       );

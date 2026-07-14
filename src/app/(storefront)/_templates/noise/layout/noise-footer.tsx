@@ -4,6 +4,7 @@ import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
@@ -69,6 +70,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
         color: "var(--vn-ink)",
         marginTop: 80,
       }}
+      {...sectionGroupAttr("global", "branding")}
     >
       {/* ── Main grid ── */}
       <div
@@ -122,6 +124,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                           color: "var(--vn-steel-mist)",
                           fontWeight: 500,
                         }}
+                        {...fieldAttr("noise.global.location-tag")}
                       >
                         {locationTag}
                       </div>
@@ -139,6 +142,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                     color: "var(--vn-steel-mist)",
                     maxWidth: "280px",
                   }}
+                  {...fieldAttr("noise.global.footer-tagline")}
                 >
                   {footerTagline}
                 </p>

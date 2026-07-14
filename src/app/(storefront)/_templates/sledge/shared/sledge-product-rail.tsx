@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { Product } from "~/types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   StaggerContainer,
@@ -18,6 +19,8 @@ type SledgeProductRailProps = {
   limit?: number;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /** Template field key backing `heading`, when it's owner-editable. */
+  headingFieldKey?: string;
 };
 
 export function SledgeProductRail({
@@ -27,6 +30,7 @@ export function SledgeProductRail({
   products,
   limit = 4,
   sectionAttrs,
+  headingFieldKey,
 }: SledgeProductRailProps) {
   const shown = products.slice(0, limit);
   if (shown.length === 0) return null;
@@ -35,7 +39,10 @@ export function SledgeProductRail({
     <section className="bg-white px-7 py-16 md:py-20" {...sectionAttrs}>
       <div className="mx-auto max-w-7xl">
         <FadeIn className="mb-12 flex items-end justify-between gap-6">
-          <h2 className="sl-rail-heading font-heading font-bold uppercase">
+          <h2
+            className="sl-rail-heading font-heading font-bold uppercase"
+            {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
+          >
             {heading}
           </h2>
           <Link

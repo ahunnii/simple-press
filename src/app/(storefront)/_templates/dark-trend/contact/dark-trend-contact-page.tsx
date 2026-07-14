@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Mail, MapPin } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
@@ -54,7 +55,10 @@ export function DarkTrendContactPage({
       </div>
 
       {/* Contact Form Section */}
-      <section className="mb-20 py-20">
+      <section
+        className="mb-20 py-20"
+        {...sectionGroupAttr("contact", "info")}
+      >
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Image — N-2: decorative owner-configurable image → alt="" */}
           <div className="relative aspect-square max-w-md overflow-hidden rounded-full">
@@ -71,13 +75,22 @@ export function DarkTrendContactPage({
           <div className="space-y-6">
             <div>
               {/* S-11: text-purple-500 → text-purple-400 for small text */}
-              <span className="text-sm font-semibold tracking-wider text-purple-400 uppercase">
+              <span
+                className="text-sm font-semibold tracking-wider text-purple-400 uppercase"
+                {...fieldAttr("dark-trend.contact.subheader")}
+              >
                 {f["dark-trend.contact.subheader"]}
               </span>
-              <h2 className="mt-2 text-3xl font-bold text-white md:text-5xl">
+              <h2
+                className="mt-2 text-3xl font-bold text-white md:text-5xl"
+                {...fieldAttr("dark-trend.contact.header")}
+              >
                 {f["dark-trend.contact.header"]}
               </h2>
-              <p className="mt-4 text-white/70">
+              <p
+                className="mt-4 text-white/70"
+                {...fieldAttr("dark-trend.contact.description")}
+              >
                 {f["dark-trend.contact.description"]}
               </p>
             </div>

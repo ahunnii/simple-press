@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -24,6 +24,8 @@ type Props = {
   aboutTagline?: string;
   /** Spread on root <section> for preview overlay hotspot (homepage.about). */
   sectionAttrs?: Record<string, string>;
+  /** Whether the owner has hidden the nested feature-card grid (homepage.features). Defaults to visible. */
+  featuresVisible?: boolean;
 };
 
 const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
@@ -58,6 +60,7 @@ export function ElegantFeatureSection({
   aboutVideo,
   aboutImage,
   sectionAttrs,
+  featuresVisible = true,
 }: Props) {
   const { ref, visible } = useReveal();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -212,6 +215,7 @@ export function ElegantFeatureSection({
                   display: "block",
                   marginBottom: 16,
                 }}
+                {...fieldAttr("elegant.homepage.about.tagline")}
               >
                 {aboutTagline ?? "About Us"}
               </span>
@@ -228,6 +232,7 @@ export function ElegantFeatureSection({
                   marginBottom: 24,
                   color: "var(--el-ink, #1c1a17)",
                 }}
+                {...fieldAttr("elegant.homepage.about.title")}
               >
                 {aboutTitle ?? "About Us"}
               </h2>
@@ -243,13 +248,14 @@ export function ElegantFeatureSection({
                   maxWidth: 520,
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
+                {...fieldAttr("elegant.homepage.about.text")}
               >
                 {aboutText}
               </p>
             </div>
 
             {/* Feature icon cards */}
-            {featureCards && featureCards.length > 0 && (
+            {featuresVisible && featureCards && featureCards.length > 0 && (
               <div
                 {...sectionGroupAttr("homepage", "features")}
                 style={{

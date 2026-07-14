@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 type BuildersProjectsSectionProps = {
   heading: string;
@@ -57,6 +58,7 @@ export function BuildersProjectsSection({
         {/* Section header */}
         <div className="mb-12 flex items-end justify-between border-b border-gray-200 pb-4">
           <h2
+            {...fieldAttr("builders.homepage.projects-heading")}
             className="text-3xl font-semibold uppercase md:text-[40px] md:leading-tight"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",

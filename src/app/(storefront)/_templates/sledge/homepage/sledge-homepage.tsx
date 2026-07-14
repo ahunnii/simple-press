@@ -1,6 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 
@@ -70,6 +71,7 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
           }
           ctaHref={f["sledge.homepage.hero-primary-button-link"] ?? "/shop"}
           businessName={businessName}
+          sectionAttrs={sectionGroupAttr("homepage", "hero")}
         />
         {/* Wave cream → green */}
         <div className="bg-[var(--sl-cream)]">
@@ -91,7 +93,8 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
           <SledgeWave to="cream" />
         </div>
         {/* 3. Testimonials — pale-green block */}
-        {flags.isEnabled("testimonials") && (
+        {flags.isEnabled("testimonials") &&
+        isSectionVisible(themeFields, "sledge", "homepage.testimonials") ? (
           <SledgeTestimonials
             heading={
               f["sledge.homepage-testimonials-heading"] ?? "Testimonials"
@@ -100,19 +103,21 @@ export async function SledgeHomepage(_props?: DefaultHomepageTemplateProps) {
             image={f["sledge.homepage-guarantee-image"] ?? undefined}
             sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
           />
-        )}
+        ) : null}
         {/* Wave cream → green (or cream → green if testimonials hidden) */}
         <div className="bg-[var(--sl-cream)]">
           <SledgeWave to="green" />
         </div>
         {/* 4. Subscribe — grass-green block */}
-        <SledgeSubscribe
-          image={f["sledge.homepage-guarantee-image"] ?? undefined}
-          heading={f["sledge.homepage-guarantee-heading"] ?? undefined}
-          body={f["sledge.homepage-guarantee-quote"] ?? undefined}
-          business={homepage}
-          sectionAttrs={sectionGroupAttr("homepage", "subscribe")}
-        />{" "}
+        {isSectionVisible(themeFields, "sledge", "homepage.subscribe") ? (
+          <SledgeSubscribe
+            image={f["sledge.homepage-guarantee-image"] ?? undefined}
+            heading={f["sledge.homepage-guarantee-heading"] ?? undefined}
+            body={f["sledge.homepage-guarantee-quote"] ?? undefined}
+            business={homepage}
+            sectionAttrs={sectionGroupAttr("homepage", "subscribe")}
+          />
+        ) : null}
       </div>
     </HydrateClient>
   );

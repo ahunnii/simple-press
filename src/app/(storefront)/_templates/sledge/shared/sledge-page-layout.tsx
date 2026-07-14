@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 import { FadeIn } from "~/components/page-animations";
 
@@ -23,6 +24,10 @@ type SledgePageHeaderProps = {
   children?: ReactNode;
   className?: string;
   sectionAttrs?: Record<string, string>;
+  /** Template field key backing `title`, when it's owner-editable. */
+  titleFieldKey?: string;
+  /** Template field key backing `intro`, when it's owner-editable. */
+  introFieldKey?: string;
 };
 
 export function SledgePageHeader({
@@ -35,6 +40,8 @@ export function SledgePageHeader({
   children,
   className,
   sectionAttrs,
+  titleFieldKey,
+  introFieldKey,
 }: SledgePageHeaderProps) {
   const hasActions = Boolean(actions);
 
@@ -68,11 +75,17 @@ export function SledgePageHeader({
               {eyebrow}
             </p>
           ) : null}
-          <h1 className="sl-page-title-lg font-heading font-semibold uppercase">
+          <h1
+            className="sl-page-title-lg font-heading font-semibold uppercase"
+            {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
+          >
             {title}
           </h1>
           {intro ? (
-            <p className="sl-eyebrow mt-5 max-w-2xl font-sans text-sm leading-relaxed md:text-base">
+            <p
+              className="sl-eyebrow mt-5 max-w-2xl font-sans text-sm leading-relaxed md:text-base"
+              {...(introFieldKey ? fieldAttr(introFieldKey) : {})}
+            >
               {intro}
             </p>
           ) : null}
@@ -153,6 +166,8 @@ type SledgeEmptyStateProps = {
   className?: string;
   /** When true, skip outer container (use inside SledgePageSection) */
   bare?: boolean;
+  /** Template field key backing `message`, when it's owner-editable. */
+  messageFieldKey?: string;
 };
 
 export function SledgeEmptyState({
@@ -160,10 +175,16 @@ export function SledgeEmptyState({
   action,
   className,
   bare = false,
+  messageFieldKey,
 }: SledgeEmptyStateProps) {
   const content = (
     <FadeIn className={cn("text-center", className)}>
-      <p className="sl-eyebrow font-sans text-base">{message}</p>
+      <p
+        className="sl-eyebrow font-sans text-base"
+        {...(messageFieldKey ? fieldAttr(messageFieldKey) : {})}
+      >
+        {message}
+      </p>
       {action ? <div className="mt-6">{action}</div> : null}
     </FadeIn>
   );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
@@ -62,19 +62,35 @@ export function ElegantContactPage({
 
   const contactItems = [
     displayEmail
-      ? { label: "Email", value: displayEmail, href: `mailto:${displayEmail}` }
+      ? {
+          label: "Email",
+          value: displayEmail,
+          href: `mailto:${displayEmail}`,
+          fieldKey: "elegant.contact.email",
+        }
       : null,
     displayPhone
       ? {
           label: "Phone",
           value: displayPhone,
           href: `tel:${displayPhone.replace(/\D/g, "")}`,
+          fieldKey: "elegant.contact.phone",
         }
       : null,
     displayAddress
-      ? { label: "Address", value: displayAddress, href: null }
+      ? {
+          label: "Address",
+          value: displayAddress,
+          href: null,
+          fieldKey: "elegant.contact.address",
+        }
       : null,
-  ].filter(Boolean) as { label: string; value: string; href: string | null }[];
+  ].filter(Boolean) as {
+    label: string;
+    value: string;
+    href: string | null;
+    fieldKey: string;
+  }[];
 
   return (
     <div style={{ background: "var(--el-cream, #f5f1ea)" }}>
@@ -119,12 +135,18 @@ export function ElegantContactPage({
                 }}
               >
                 <span style={{ display: "block", overflow: "hidden" }}>
-                  <span style={maskStyle(0.08)}>
+                  <span
+                    style={maskStyle(0.08)}
+                    {...fieldAttr("elegant.contact.hero-title")}
+                  >
                     {f["elegant.contact.hero-title"] ?? "Write to"}
                   </span>
                 </span>
                 <span style={{ display: "block", overflow: "hidden" }}>
-                  <em style={{ ...maskStyle(0.2), fontStyle: "italic" }}>
+                  <em
+                    style={{ ...maskStyle(0.2), fontStyle: "italic" }}
+                    {...fieldAttr("elegant.contact.hero-subtitle")}
+                  >
                     {f["elegant.contact.hero-subtitle"] ?? "us."}
                   </em>
                 </span>
@@ -142,6 +164,7 @@ export function ElegantContactPage({
                     fontFamily: "var(--font-sans, sans-serif)",
                     marginBottom: 40,
                   }}
+                  {...fieldAttr("elegant.contact.info-description")}
                 >
                   {f["elegant.contact.info-description"] ??
                     "Questions about an order or anything else — we read every message ourselves."}
@@ -158,7 +181,7 @@ export function ElegantContactPage({
                       gap: 20,
                     }}
                   >
-                    {contactItems.map(({ label, value, href }) => (
+                    {contactItems.map(({ label, value, href, fieldKey }) => (
                       <div key={label}>
                         <div
                           style={{
@@ -183,6 +206,7 @@ export function ElegantContactPage({
                               lineHeight: 1.5,
                               whiteSpace: "pre-line",
                             }}
+                            {...fieldAttr(fieldKey)}
                           >
                             {value}
                           </a>
@@ -196,6 +220,7 @@ export function ElegantContactPage({
                               whiteSpace: "pre-line",
                               margin: 0,
                             }}
+                            {...fieldAttr(fieldKey)}
                           >
                             {value}
                           </p>
@@ -227,6 +252,7 @@ export function ElegantContactPage({
                   color: "var(--el-ink, #1c1a17)",
                   marginBottom: 28,
                 }}
+                {...fieldAttr("elegant.contact.form-title")}
               >
                 {f["elegant.contact.form-title"] ?? "Send a message"}
               </h2>

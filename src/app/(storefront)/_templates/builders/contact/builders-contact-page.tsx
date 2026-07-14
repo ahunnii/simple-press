@@ -2,7 +2,7 @@ import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
@@ -59,6 +59,7 @@ export function BuildersContactPage({
       >
         <header className="max-w-3xl">
           <h1
+            {...fieldAttr("builders.contact.header")}
             className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -69,6 +70,7 @@ export function BuildersContactPage({
             {contactHeader}
           </h1>
           <p
+            {...fieldAttr("builders.contact.subheader")}
             className="border-l pl-8 text-lg leading-relaxed md:text-xl"
             style={{
               fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -98,7 +100,10 @@ export function BuildersContactPage({
           </div>
 
           {/* Info — 5/12 columns */}
-          <div className="flex flex-col gap-12 md:col-span-5">
+          <div
+            className="flex flex-col gap-12 md:col-span-5"
+            {...sectionGroupAttr("contact", "info")}
+          >
             {/* The Shop (address) */}
             {address && (
               <div
@@ -106,6 +111,7 @@ export function BuildersContactPage({
                 style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
               >
                 <h2
+                  {...fieldAttr("builders.contact.shop-label")}
                   className="text-xl font-semibold"
                   style={{
                     fontFamily:

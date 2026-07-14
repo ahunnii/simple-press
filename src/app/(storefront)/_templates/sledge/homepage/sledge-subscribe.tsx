@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
@@ -52,7 +53,10 @@ export function SledgeSubscribe({
 
         {/* Right: social links */}
         <div>
-          <h2 className="sl-heading-lg font-heading">
+          <h2
+            className="sl-heading-lg font-heading"
+            {...fieldAttr("sledge.homepage-guarantee-heading")}
+          >
             {heading ?? "Subscribe for the latest drops"}
           </h2>
 

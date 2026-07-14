@@ -1,4 +1,5 @@
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
@@ -70,20 +71,26 @@ export async function PollenHomepage() {
           imageUrl={f["pollen.homepage.hero-image"]}
           sectionAttrs={sectionGroupAttr("homepage", "hero")}
         />
-        <PollenHomepageAbout
-          services={services ?? []}
-          sectionLabel={f["pollen.homepage.about-service-title"] ?? ""}
-          sectionHeading={f["pollen.homepage.about-service-description"] ?? ""}
-          sectionAttrs={sectionGroupAttr("homepage", "services")}
-        />
-        <PollenHomepageGallery
-          sectionLabel={f["pollen.homepage.gallery-label"] ?? ""}
-          sectionHeading={f["pollen.homepage.gallery-heading"] ?? ""}
-          buttonText={f["pollen.homepage.gallery-button-text"]}
-          buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/gallery"}
-          galleryItems={galleryItems ?? []}
-          sectionAttrs={sectionGroupAttr("homepage", "gallery")}
-        />
+        {isSectionVisible(customFields, "pollen", "homepage.services") && (
+          <PollenHomepageAbout
+            services={services ?? []}
+            sectionLabel={f["pollen.homepage.about-service-title"] ?? ""}
+            sectionHeading={
+              f["pollen.homepage.about-service-description"] ?? ""
+            }
+            sectionAttrs={sectionGroupAttr("homepage", "services")}
+          />
+        )}
+        {isSectionVisible(customFields, "pollen", "homepage.gallery") && (
+          <PollenHomepageGallery
+            sectionLabel={f["pollen.homepage.gallery-label"] ?? ""}
+            sectionHeading={f["pollen.homepage.gallery-heading"] ?? ""}
+            buttonText={f["pollen.homepage.gallery-button-text"]}
+            buttonLink={f["pollen.homepage.gallery-button-link"] ?? "/gallery"}
+            galleryItems={galleryItems ?? []}
+            sectionAttrs={sectionGroupAttr("homepage", "gallery")}
+          />
+        )}
         <PollenCallToAction
           title={f["pollen.global.cta-title"] ?? ""}
           subtitle={f["pollen.global.cta-subtitle"] ?? ""}

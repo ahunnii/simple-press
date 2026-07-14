@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { buttonVariants } from "~/components/ui/button";
 
 const fadeUp = {
@@ -90,6 +91,7 @@ export function PollenHero({
             variants={itemVariant}
             transition={itemTransition}
             className="text-xs font-medium tracking-[0.2em] text-white uppercase sm:text-sm md:text-base"
+            {...fieldAttr("pollen.homepage.hero-title")}
           >
             {title}
           </motion.p>
@@ -110,6 +112,7 @@ export function PollenHero({
             variants={itemVariant}
             transition={itemTransition}
             className="max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg md:text-xl"
+            {...fieldAttr("pollen.homepage.hero-description-text")}
           >
             {descriptionText}
           </motion.p>
@@ -122,6 +125,7 @@ export function PollenHero({
                 className:
                   "gap-2 bg-[#215935]! px-6 py-4 text-base font-medium text-white hover:bg-[#1a4729]! sm:px-8 sm:py-6 sm:text-lg!",
               })}
+              {...fieldAttr("pollen.homepage.hero-button-text")}
             >
               {buttonText}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />

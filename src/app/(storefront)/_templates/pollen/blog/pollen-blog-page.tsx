@@ -8,7 +8,7 @@ import { CalendarDays, Search } from "lucide-react";
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import type { RouterOutputs } from "~/trpc/react";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { FadeIn } from "~/components/page-animations";
@@ -94,13 +94,17 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
         title={listingTitle}
         subtitle="Blog"
         imageUrl={heroImageUrl}
+        titleFieldKey="pollen.blog.listing-title"
         sectionAttrs={sectionGroupAttr("blog", "header")}
       >
         <section className="bg-background py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <FadeIn direction="up">
               {listingIntro ? (
-                <p className="mx-auto mb-10 max-w-3xl text-center text-lg leading-relaxed text-[#4b5563]">
+                <p
+                  className="mx-auto mb-10 max-w-3xl text-center text-lg leading-relaxed text-[#4b5563]"
+                  {...fieldAttr("pollen.blog.listing-intro")}
+                >
                   {listingIntro}
                 </p>
               ) : null}
@@ -128,13 +132,17 @@ export function PollenBlogPage({ pages, customFields, business }: Props) {
       title={listingTitle}
       subtitle="Blog"
       imageUrl={heroImageUrl}
+      titleFieldKey="pollen.blog.listing-title"
       sectionAttrs={sectionGroupAttr("blog", "header")}
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeIn direction="up">
             {listingIntro ? (
-              <p className="mx-auto mb-10 max-w-3xl text-center text-lg leading-relaxed text-[#4b5563]">
+              <p
+                className="mx-auto mb-10 max-w-3xl text-center text-lg leading-relaxed text-[#4b5563]"
+                {...fieldAttr("pollen.blog.listing-intro")}
+              >
                 {listingIntro}
               </p>
             ) : null}

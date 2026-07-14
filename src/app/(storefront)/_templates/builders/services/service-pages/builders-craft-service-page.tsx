@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveCraftFields } from "./fields";
 
@@ -38,7 +37,6 @@ export function BuildersCraftServicePage({
     >
       {/* ── 1. Hero ─────────────────────────────────────────────────────────── */}
       <section
-        {...sectionGroupAttr("service", "hero")}
         className="mb-32 grid grid-cols-1 gap-6 md:grid-cols-12"
       >
         <div className="flex flex-col justify-end md:col-span-8">
@@ -72,7 +70,6 @@ export function BuildersCraftServicePage({
       {/* ── 2. Sub-Services ─────────────────────────────────────────────────── */}
       {publishedItems.length > 0 && (
         <section
-          {...sectionGroupAttr("service", "sub-services")}
           aria-labelledby="sub-services-heading"
           className="mb-32"
         >
@@ -135,7 +132,6 @@ export function BuildersCraftServicePage({
 
       {/* ── 3. CTA ──────────────────────────────────────────────────────────── */}
       <section
-        {...sectionGroupAttr("service", "cta")}
         className="flex flex-col items-center border-t py-24 text-center"
         style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
       >

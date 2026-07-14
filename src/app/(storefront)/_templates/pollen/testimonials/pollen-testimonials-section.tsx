@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   StaggerContainer,
@@ -20,6 +21,8 @@ type Props = {
   sectionLabel?: string;
   sectionHeading?: string;
   viewAllText?: string;
+  /** Spread on root <section> for the preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function PollenTestimonialsSection({
@@ -27,6 +30,7 @@ export function PollenTestimonialsSection({
   sectionLabel = "Testimonials",
   sectionHeading = "Hear From Our Clients",
   viewAllText = "View all testimonials",
+  sectionAttrs,
 }: Props) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState<string[]>([]);
@@ -49,17 +53,26 @@ export function PollenTestimonialsSection({
 
   return (
     <>
-      <section className="relative overflow-hidden bg-[#2a351f] py-15 md:py-24">
+      <section
+        className="relative overflow-hidden bg-[#2a351f] py-15 md:py-24"
+        {...sectionAttrs}
+      >
         <div
           className="absolute inset-0 bg-[url('/flowers-pattern-1-white.svg')] bg-repeat opacity-[0.08]"
           aria-hidden
         />
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <FadeIn direction="up">
-            <p className="mb-4 text-center text-sm font-medium tracking-wider text-[#A8D081] uppercase">
+            <p
+              className="mb-4 text-center text-sm font-medium tracking-wider text-[#A8D081] uppercase"
+              {...fieldAttr("pollen.testimonials.section-label")}
+            >
               {sectionLabel}
             </p>
-            <h2 className="mb-12 text-center text-3xl font-bold text-white md:text-4xl">
+            <h2
+              className="mb-12 text-center text-3xl font-bold text-white md:text-4xl"
+              {...fieldAttr("pollen.testimonials.section-heading")}
+            >
               {sectionHeading}
             </h2>
           </FadeIn>
@@ -79,6 +92,7 @@ export function PollenTestimonialsSection({
             <Link
               href="/testimonials"
               className="inline-flex items-center font-semibold text-[#A8D081] transition-colors hover:text-[#c5e8a8] hover:underline focus:ring-2 focus:ring-[#A8D081] focus:ring-offset-2 focus:ring-offset-[#2a351f] focus:outline-none"
+              {...fieldAttr("pollen.testimonials.view-all-text")}
             >
               {viewAllText}
             </Link>

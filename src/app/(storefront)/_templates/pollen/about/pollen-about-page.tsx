@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import {
   FadeIn,
@@ -40,11 +40,19 @@ export async function PollenAboutPage({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <FadeIn direction="right">
-              <h2 className="mb-6 text-4xl font-bold text-[#374151] md:text-5xl">
+              <h2
+                className="mb-6 text-4xl font-bold text-[#374151] md:text-5xl"
+                {...fieldAttr("pollen.about.title")}
+              >
                 {f["pollen.about.title"]}
               </h2>
               <div className="space-y-6 leading-relaxed text-[#4b5563]">
-                <p className="whitespace-pre-line">{f["pollen.about.text"]}</p>
+                <p
+                  className="whitespace-pre-line"
+                  {...fieldAttr("pollen.about.text")}
+                >
+                  {f["pollen.about.text"]}
+                </p>
               </div>
             </FadeIn>
             <FadeIn
@@ -84,26 +92,41 @@ export async function PollenAboutPage({
             </FadeIn>
             <FadeIn direction="left" delay={0.1} className="flex-1">
               {f["pollen.about.owner-subheader"] && (
-                <p className="mb-4 text-sm font-semibold tracking-wider text-[#5e7747] uppercase">
+                <p
+                  className="mb-4 text-sm font-semibold tracking-wider text-[#5e7747] uppercase"
+                  {...fieldAttr("pollen.about.owner-subheader")}
+                >
                   {f["pollen.about.owner-subheader"]}
                 </p>
               )}
-              <h2 className="mb-6 text-3xl font-bold text-[#374151] md:text-4xl">
+              <h2
+                className="mb-6 text-3xl font-bold text-[#374151] md:text-4xl"
+                {...fieldAttr("pollen.about.owner-heading")}
+              >
                 {f["pollen.about.owner-heading"]}
               </h2>
               {f["pollen.about.owner-name"] && (
-                <h3 className="text-xl font-semibold text-[#374151]">
+                <h3
+                  className="text-xl font-semibold text-[#374151]"
+                  {...fieldAttr("pollen.about.owner-name")}
+                >
                   {f["pollen.about.owner-name"]}
                 </h3>
               )}
               {f["pollen.about.owner-role"] && (
-                <p className="mb-6 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
+                <p
+                  className="mb-6 text-sm font-medium tracking-wider text-[#5e7747] uppercase"
+                  {...fieldAttr("pollen.about.owner-role")}
+                >
                   {f["pollen.about.owner-role"]}
                 </p>
               )}
               {f["pollen.about.owner-blurb"] ? (
                 <div className="space-y-4 leading-relaxed text-[#4b5563]">
-                  <p className="whitespace-pre-line">
+                  <p
+                    className="whitespace-pre-line"
+                    {...fieldAttr("pollen.about.owner-blurb")}
+                  >
                     {f["pollen.about.owner-blurb"]}
                   </p>
                 </div>

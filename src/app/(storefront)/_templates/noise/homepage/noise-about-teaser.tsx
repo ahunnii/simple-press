@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { FadeIn } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
@@ -75,6 +76,7 @@ export function NoiseAboutTeaser({
               letterSpacing: "-0.02em",
               lineHeight: 1.1,
             }}
+            {...fieldAttr("noise.homepage-about-heading")}
           >
             {heading ?? "The Art of Noise"}
           </h2>
@@ -112,7 +114,10 @@ export function NoiseAboutTeaser({
               color: "var(--vn-ink)",
             }}
           >
-            {buttonText ?? "Our Story"} →
+            <span {...fieldAttr("noise.homepage-about-button-text")}>
+              {buttonText ?? "Our Story"}
+            </span>{" "}
+            →
           </Link>
         </div>
       </FadeIn>

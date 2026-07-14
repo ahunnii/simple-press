@@ -1,3 +1,4 @@
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +19,10 @@ type Props = {
   topContent?: React.ReactNode;
   /** Spread on the header block for the preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /** Field key for `title`, so the preview can live-patch it in place. */
+  titleFieldKey?: string;
+  /** Field key for `excerpt`, so the preview can live-patch it in place. */
+  excerptFieldKey?: string;
 };
 
 export function DarkTrendGeneralLayout({
@@ -28,6 +33,8 @@ export function DarkTrendGeneralLayout({
   parentBreadcrumb,
   topContent,
   sectionAttrs,
+  titleFieldKey,
+  excerptFieldKey,
 }: Props) {
   return (
     <div className="flex-1 px-4 py-12">
@@ -70,7 +77,10 @@ export function DarkTrendGeneralLayout({
             <div className="max-w-4xl pt-2">{topContent}</div>
           ) : null}
 
-          <h1 className="mb-2 text-left text-4xl font-bold text-white lg:text-7xl">
+          <h1
+            className="mb-2 text-left text-4xl font-bold text-white lg:text-7xl"
+            {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
+          >
             {title}
           </h1>
 
@@ -82,7 +92,12 @@ export function DarkTrendGeneralLayout({
             </p>
           )}
           {excerpt && (
-            <p className="text-center text-xl text-white/80">{excerpt}</p>
+            <p
+              className="text-center text-xl text-white/80"
+              {...(excerptFieldKey ? fieldAttr(excerptFieldKey) : {})}
+            >
+              {excerpt}
+            </p>
           )}
         </div>
 

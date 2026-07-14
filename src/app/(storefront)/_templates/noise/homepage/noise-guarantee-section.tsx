@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { FadeIn } from "~/components/page-animations";
 
 type NoiseGuaranteeSectionProps = {
@@ -42,9 +43,14 @@ export function NoiseGuaranteeSection({
               lineHeight: 1.1,
             }}
           >
-            {heading ?? "Thoughtfully made."}
+            <span {...fieldAttr("noise.homepage-guarantee-heading")}>
+              {heading ?? "Thoughtfully made."}
+            </span>
             <br />
-            <span style={{ color: "var(--vn-steel)" }}>
+            <span
+              style={{ color: "var(--vn-steel)" }}
+              {...fieldAttr("noise.homepage-guarantee-headingAccent")}
+            >
               {headingAccent ?? "Responsibly backed."}
             </span>
           </h2>
@@ -56,6 +62,7 @@ export function NoiseGuaranteeSection({
               color: "var(--vn-ink-soft)",
               lineHeight: 1.85,
             }}
+            {...fieldAttr("noise.homepage-guarantee-quote")}
           >
             {body ??
               "If a piece doesn't fit, doesn't last, or doesn't feel right — we'll make it right. Free returns within 60 days, and a lifetime repair program for every garment we make."}
@@ -101,6 +108,7 @@ export function NoiseGuaranteeSection({
             <div
               className="absolute top-4 left-4 px-2 py-1 font-mono text-[9.5px] tracking-[.2em] uppercase"
               style={{ background: "var(--vn-bone)", color: "var(--vn-ink)" }}
+              {...fieldAttr("noise.homepage-guarantee-stamp")}
             >
               {stamp}
             </div>

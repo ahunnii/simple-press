@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type BuildersHeroSectionProps = {
   title: string;
   subtitle: string;
@@ -49,6 +51,7 @@ export function BuildersHeroSection({
       <div className="relative z-20 mx-auto w-full max-w-[1280px] pt-20">
         <div className="builders-on-dark flex w-full max-w-2xl flex-col gap-6 bg-black/20 p-8 backdrop-blur-sm">
           <h1
+            {...fieldAttr("builders.homepage.hero-title")}
             className="text-4xl leading-none font-light tracking-tighter [overflow-wrap:anywhere] break-words text-white uppercase md:text-6xl lg:text-7xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -59,6 +62,7 @@ export function BuildersHeroSection({
 
           {subtitle && (
             <p
+              {...fieldAttr("builders.homepage.hero-subtitle")}
               className="max-w-xl border-l-2 pl-4 text-lg leading-relaxed text-white/90 md:text-xl"
               style={{
                 borderColor: "var(--builders-accent, #FFC5B6)",
@@ -72,6 +76,7 @@ export function BuildersHeroSection({
             {cta1Label && (
               <Link
                 href={cta1Href || "/contact"}
+                {...fieldAttr("builders.homepage.hero-cta1-label")}
                 className="inline-block border border-[var(--builders-accent)] bg-[var(--builders-accent)] px-8 py-4 text-xs font-bold tracking-[0.1em] text-[var(--builders-accent-ink)] uppercase transition-colors hover:border-[var(--builders-accent-hover)] hover:bg-[var(--builders-accent-hover)]"
                 style={{
                   fontFamily:
@@ -85,6 +90,7 @@ export function BuildersHeroSection({
             {cta2Label && (
               <Link
                 href={cta2Href || "/about"}
+                {...fieldAttr("builders.homepage.hero-cta2-label")}
                 className="inline-block border border-white/50 bg-transparent px-8 py-4 text-xs font-bold tracking-[0.1em] text-white uppercase transition-colors hover:bg-white/10"
                 style={{
                   fontFamily:

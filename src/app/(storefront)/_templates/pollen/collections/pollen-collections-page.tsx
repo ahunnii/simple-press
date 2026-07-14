@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -27,14 +27,23 @@ export function PollenCollectionsPage({
       >
         <FadeIn direction="up">
           <div className="mb-12">
-            <p className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
+            <p
+              className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase"
+              {...fieldAttr("pollen.collections.page-subtitle")}
+            >
               {f["pollen.collections.page-subtitle"] ?? "Collections"}
             </p>
-            <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">
+            <h1
+              className="text-4xl font-bold text-[#2a351f] md:text-5xl"
+              {...fieldAttr("pollen.collections.page-title")}
+            >
               {f["pollen.collections.page-title"] ?? "Our Collections"}
             </h1>
             {f["pollen.collections.listing-intro"] && (
-              <p className="mt-3 max-w-2xl text-[#4c566a]">
+              <p
+                className="mt-3 max-w-2xl text-[#4c566a]"
+                {...fieldAttr("pollen.collections.listing-intro")}
+              >
                 {f["pollen.collections.listing-intro"]}
               </p>
             )}

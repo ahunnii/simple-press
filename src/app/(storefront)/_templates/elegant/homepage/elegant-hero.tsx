@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type Props = {
@@ -136,7 +137,9 @@ export function ElegantHero({
                   flexShrink: 0,
                 }}
               />
-              {tagline ?? "A thoughtful studio"}
+              <span {...fieldAttr("elegant.homepage.hero-tagline")}>
+                {tagline ?? "A thoughtful studio"}
+              </span>
             </span>
           </div>
 
@@ -152,12 +155,18 @@ export function ElegantHero({
             }}
           >
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.08)}>
+              <span
+                style={maskStyle(0.08)}
+                {...fieldAttr("elegant.homepage.hero-title-line-1")}
+              >
                 {heroTitleLine1 ?? "Made with care."}
               </span>
             </span>
             <span style={{ display: "block", overflow: "hidden" }}>
-              <em style={{ ...maskStyle(0.2), fontStyle: "italic" }}>
+              <em
+                style={{ ...maskStyle(0.2), fontStyle: "italic" }}
+                {...fieldAttr("elegant.homepage.hero-title-line-2")}
+              >
                 {heroTitleLine2 ?? "Especially for you."}
               </em>
             </span>
@@ -174,6 +183,7 @@ export function ElegantHero({
               color: "var(--el-ink-soft, #6b6659)",
               fontFamily: "var(--font-sans, sans-serif)",
             }}
+            {...fieldAttr("elegant.homepage.hero-description")}
           >
             {heroDescription ?? "Explore our collection."}
           </p>
@@ -209,7 +219,9 @@ export function ElegantHero({
               }}
               className="el-btn-primary"
             >
-              {heroButtonText ?? "Shop Now"}
+              <span {...fieldAttr("elegant.homepage.hero-button-text")}>
+                {heroButtonText ?? "Shop Now"}
+              </span>
               <ArrowRight
                 aria-hidden={true}
                 style={{ width: 14, height: 14 }}

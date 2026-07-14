@@ -9,6 +9,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { parseCardAdditionalFields } from "~/lib/products";
 import {
   getListFieldValue,
@@ -37,10 +38,13 @@ function ProductAccordion({
   title,
   children,
   defaultOpen = false,
+  contentFieldKey,
 }: {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  /** Template field key backing `children`, when it's exactly one field. */
+  contentFieldKey?: string;
 }) {
   return (
     <details
@@ -56,7 +60,10 @@ function ProductAccordion({
           +
         </span>
       </summary>
-      <div className="sl-eyebrow pt-3.5 font-sans text-sm leading-[1.7]">
+      <div
+        className="sl-eyebrow pt-3.5 font-sans text-sm leading-[1.7]"
+        {...(contentFieldKey ? fieldAttr(contentFieldKey) : {})}
+      >
         {children}
       </div>
     </details>
@@ -362,7 +369,10 @@ export function SledgeProductPage({
             ) : null}
 
             {f["sledge.global.product-shipping-description"] ? (
-              <p className="sl-eyebrow font-sans text-xs tracking-[0.1em] uppercase">
+              <p
+                className="sl-eyebrow font-sans text-xs tracking-[0.1em] uppercase"
+                {...fieldAttr("sledge.global.product-shipping-description")}
+              >
                 {f["sledge.global.product-shipping-description"]}
               </p>
             ) : null}
@@ -372,12 +382,19 @@ export function SledgeProductPage({
             {hasSidebarAccordions ? (
               <div className="mt-2">
                 {f["sledge.global.product-care-instructions"] ? (
-                  <ProductAccordion title="Care Instructions" defaultOpen>
+                  <ProductAccordion
+                    title="Care Instructions"
+                    defaultOpen
+                    contentFieldKey="sledge.global.product-care-instructions"
+                  >
                     {f["sledge.global.product-care-instructions"]}
                   </ProductAccordion>
                 ) : null}
                 {f["sledge.global.product-shipping-details"] ? (
-                  <ProductAccordion title="Shipping & Returns">
+                  <ProductAccordion
+                    title="Shipping & Returns"
+                    contentFieldKey="sledge.global.product-shipping-details"
+                  >
                     {f["sledge.global.product-shipping-details"]}
                   </ProductAccordion>
                 ) : null}
@@ -490,7 +507,10 @@ export function SledgeProductPage({
                     ) : null}
 
                     {f["sledge.global.product-shipping-description"] ? (
-                      <ProductAccordion title="Shipping & Returns">
+                      <ProductAccordion
+                        title="Shipping & Returns"
+                        contentFieldKey="sledge.global.product-shipping-description"
+                      >
                         <p>{f["sledge.global.product-shipping-description"]}</p>
                       </ProductAccordion>
                     ) : null}

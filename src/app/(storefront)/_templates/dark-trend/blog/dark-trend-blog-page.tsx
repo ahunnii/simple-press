@@ -82,7 +82,9 @@ export function DarkTrendBlogPage({ pages, customFields }: Props) {
   return (
     <DarkTrendGeneralLayout
       title={listingTitle}
+      titleFieldKey="dark-trend.blog.listing-title"
       excerpt={listingIntro || undefined}
+      excerptFieldKey="dark-trend.blog.listing-intro"
       sectionAttrs={sectionGroupAttr("blog", "listing")}
     >
       <div className="mb-12">

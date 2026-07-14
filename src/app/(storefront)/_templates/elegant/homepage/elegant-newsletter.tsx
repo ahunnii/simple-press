@@ -28,7 +28,12 @@ function useReveal() {
   return { ref, visible };
 }
 
-export function ElegantNewsletter() {
+export function ElegantNewsletter({
+  sectionAttrs,
+}: {
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
+} = {}) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { ref, visible } = useReveal();
@@ -54,6 +59,7 @@ export function ElegantNewsletter() {
 
   return (
     <section
+      {...sectionAttrs}
       style={{
         padding: "80px 40px",
         background: "var(--el-ink, #1c1a17)",

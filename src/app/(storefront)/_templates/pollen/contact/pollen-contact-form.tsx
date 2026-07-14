@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -57,10 +58,18 @@ export function PollenContactForm({
         className="space-y-6"
       >
         <div>
-          <h2 className="text-xl font-bold text-gray-900 md:text-2xl">
+          <h2
+            className="text-xl font-bold text-gray-900 md:text-2xl"
+            {...fieldAttr("pollen.contact.form-title")}
+          >
             {formTitle}
           </h2>
-          <p className="mt-1 text-sm text-gray-600">{formDescription}</p>
+          <p
+            className="mt-1 text-sm text-gray-600"
+            {...fieldAttr("pollen.contact.form-description")}
+          >
+            {formDescription}
+          </p>
         </div>
 
         {error && (

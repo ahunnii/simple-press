@@ -1,3 +1,4 @@
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { FadeIn } from "~/components/page-animations";
 
 type NoisePhilosophySectionProps = {
@@ -22,6 +23,7 @@ export function NoisePhilosophySection({
         <p
           className="mb-8 font-mono text-[9.5px] tracking-[.28em] uppercase"
           style={{ color: "var(--vn-steel)" }}
+          {...fieldAttr("noise.homepage.philosophy-overline")}
         >
           {overline}
         </p>
@@ -32,6 +34,7 @@ export function NoisePhilosophySection({
             letterSpacing: "-0.01em",
             color: "var(--vn-ink)",
           }}
+          {...fieldAttr("noise.homepage.philosophy-quote")}
         >
           {quote}
         </p>

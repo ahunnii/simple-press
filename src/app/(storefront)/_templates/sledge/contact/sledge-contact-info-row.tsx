@@ -1,10 +1,14 @@
 import type { LucideIcon } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type Props = {
   icon: LucideIcon;
   title: string;
   lines: string[];
   links?: (string | null)[];
+  /** Template field key backing `title`, when it's owner-editable. */
+  titleFieldKey?: string;
 };
 
 export function SledgeContactInfoRow({
@@ -12,6 +16,7 @@ export function SledgeContactInfoRow({
   title,
   lines,
   links,
+  titleFieldKey,
 }: Props) {
   return (
     <div className="flex gap-4">
@@ -21,7 +26,10 @@ export function SledgeContactInfoRow({
       />
       <div>
         {/* M-2: h2 under the sr-only page h1; C-3: bold ≥20px = large text → AA accent token */}
-        <h2 className="mb-2 text-[clamp(1.25rem,2.5vw,1.5625rem)] leading-[1.2] font-bold tracking-[0.04em] text-[var(--sl-coral-aa)] uppercase">
+        <h2
+          className="mb-2 text-[clamp(1.25rem,2.5vw,1.5625rem)] leading-[1.2] font-bold tracking-[0.04em] text-[var(--sl-coral-aa)] uppercase"
+          {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
+        >
           {title}
         </h2>
         <div className="text-[1.09375rem] leading-relaxed text-[var(--sl-ink)]">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -372,12 +372,13 @@ export async function BuildersTestimonialsPage({
     >
       {/* ── 1. Header ───────────────────────────────────────────────────────── */}
       <section
-        {...sectionGroupAttr("testimonials", "header")}
+        {...sectionGroupAttr("testimonials", "page")}
         className="mb-32"
       >
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
           <div className="flex flex-col justify-end md:col-span-8">
             <h1
+              {...fieldAttr("builders.testimonials.page-heading")}
               className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl lg:text-7xl"
               style={{
                 fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -389,6 +390,7 @@ export async function BuildersTestimonialsPage({
             </h1>
             {pageIntro && (
               <p
+                {...fieldAttr("builders.testimonials.page-intro")}
                 className="max-w-2xl border-l-2 pl-6 text-lg leading-relaxed md:text-xl"
                 style={{
                   fontFamily:
@@ -425,6 +427,7 @@ export async function BuildersTestimonialsPage({
           }}
         >
           <p
+            {...fieldAttr("builders.testimonials.empty-state-text")}
             className="mb-8 max-w-md text-base"
             style={{
               fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -436,6 +439,7 @@ export async function BuildersTestimonialsPage({
           </p>
           <Link
             href="/testimonials/submit"
+            {...fieldAttr("builders.testimonials.cta-button-label")}
             className="inline-block px-6 py-3 text-sm uppercase transition-opacity hover:opacity-80"
             style={{
               background: "var(--builders-accent, #FFC5B6)",
@@ -451,7 +455,7 @@ export async function BuildersTestimonialsPage({
 
       {/* ── 3. Submit CTA band ───────────────────────────────────────────────── */}
       <section
-        {...sectionGroupAttr("testimonials", "cta")}
+        {...sectionGroupAttr("testimonials", "page")}
         className="mt-24 border-t pt-16 text-center"
         style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
       >
@@ -463,6 +467,7 @@ export async function BuildersTestimonialsPage({
           }}
         >
           <h2
+            {...fieldAttr("builders.testimonials.cta-heading")}
             className="mb-4 text-3xl leading-tight uppercase md:text-4xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -474,6 +479,7 @@ export async function BuildersTestimonialsPage({
           </h2>
           {ctaBody && (
             <p
+              {...fieldAttr("builders.testimonials.cta-body")}
               className="mx-auto mb-8 max-w-lg text-base"
               style={{
                 fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -486,6 +492,7 @@ export async function BuildersTestimonialsPage({
           )}
           <Link
             href="/testimonials/submit"
+            {...fieldAttr("builders.testimonials.cta-button-label")}
             className="inline-block px-6 py-3 text-sm uppercase transition-opacity hover:opacity-80"
             style={{
               background: "var(--builders-accent, #FFC5B6)",

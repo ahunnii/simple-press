@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -24,11 +24,17 @@ export function PollenShopPage({ business }: DefaultProductsPageTemplateProps) {
             <p className="mb-2 text-sm font-medium tracking-wider text-[#5e7747] uppercase">
               Our Products
             </p>
-            <h1 className="text-4xl font-bold text-[#2a351f] md:text-5xl">
+            <h1
+              className="text-4xl font-bold text-[#2a351f] md:text-5xl"
+              {...fieldAttr("pollen.shop.listing-title")}
+            >
               {f["pollen.shop.listing-title"] ?? "Our Products"}
             </h1>
             {f["pollen.shop.listing-intro"] && (
-              <p className="mt-3 max-w-2xl text-[#4c566a]">
+              <p
+                className="mt-3 max-w-2xl text-[#4c566a]"
+                {...fieldAttr("pollen.shop.listing-intro")}
+              >
                 {f["pollen.shop.listing-intro"]}
               </p>
             )}

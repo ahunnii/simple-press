@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
@@ -48,7 +49,7 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
 
   return (
-    <footer className="sl-footer">
+    <footer className="sl-footer" {...sectionGroupAttr("global", "branding")}>
       {/* ── Main block ── */}
       <div className="sl-container-wide mx-auto px-7 pt-16 pb-10">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:items-center">
@@ -59,7 +60,10 @@ export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
             </h2>
 
             <div>
-              <p className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80">
+              <p
+                className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80"
+                {...fieldAttr("sledge.global.footer-tagline")}
+              >
                 {noticeText}
               </p>
             </div>

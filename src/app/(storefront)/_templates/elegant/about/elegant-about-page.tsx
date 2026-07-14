@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
@@ -125,7 +125,12 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
             }}
           >
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.08)}>{heroTitle}</span>
+              <span
+                style={maskStyle(0.08)}
+                {...fieldAttr("elegant.about.hero-title")}
+              >
+                {heroTitle}
+              </span>
             </span>
           </h1>
 
@@ -141,6 +146,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                   lineHeight: 1.6,
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
+                {...fieldAttr("elegant.about.hero-subtitle")}
               >
                 {heroSubtitle}
               </p>
@@ -221,6 +227,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                   color: "var(--el-ink, #1c1a17)",
                   marginBottom: 24,
                 }}
+                {...fieldAttr("elegant.about.story-heading")}
               >
                 {storyHeading}
               </h2>
@@ -234,6 +241,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                     marginBottom: 32,
                     whiteSpace: "pre-line",
                   }}
+                  {...fieldAttr("elegant.about.story-body")}
                 >
                   {storyBody}
                 </p>
@@ -330,6 +338,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                       borderLeft: "1px solid var(--el-sage, #4a5240)",
                       paddingLeft: 24,
                     }}
+                    {...fieldAttr("elegant.about.mission")}
                   >
                     {mission}
                   </p>
@@ -360,6 +369,7 @@ export function ElegantAboutPage({ business }: DefaultAboutPageTemplateProps) {
                       borderLeft: "1px solid var(--el-sage, #4a5240)",
                       paddingLeft: 24,
                     }}
+                    {...fieldAttr("elegant.about.vision")}
                   >
                     {vision}
                   </p>

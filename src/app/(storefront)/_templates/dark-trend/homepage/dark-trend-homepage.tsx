@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -38,6 +39,7 @@ export async function DarkTrendHomepage() {
     "dark-trend.cta-image",
   ]);
 
+  const customFields = homepage?.siteContent?.customFields;
   const firstProduct = homepage?.products?.[0];
 
   // Get gallery ID from template field
@@ -72,7 +74,9 @@ export async function DarkTrendHomepage() {
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <DarkTrendHeroContent
                 title={f["dark-trend.homepage.hero-title"] ?? ""}
+                titleFieldKey="dark-trend.homepage.hero-title"
                 buttonText={f["dark-trend.homepage.hero-button-text"] ?? ""}
+                buttonTextFieldKey="dark-trend.homepage.hero-button-text"
                 buttonLink={
                   f["dark-trend.homepage.hero-button-link"] ?? "/shop"
                 }
@@ -82,101 +86,146 @@ export async function DarkTrendHomepage() {
         </div>
       </section>
 
-      {gallery && <GalleryRenderer gallery={gallery} />}
+      {gallery &&
+        isSectionVisible(customFields, "dark-trend", "homepage.gallery") && (
+          <section {...sectionGroupAttr("homepage", "gallery")}>
+            <GalleryRenderer gallery={gallery} />
+          </section>
+        )}
 
       {/* Custom Embroidery Section */}
-      <section className="bg-zinc-900/80 py-20">
-        <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div className="relative">
-              <span className="text-sm font-semibold text-purple-400">01.</span>
-              <span
-                className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
-                aria-hidden
-              >
-                {f["dark-trend.first-section-title"]}
-              </span>
-              <h2 className="relative text-3xl font-bold tracking-tight md:text-6xl">
-                {f["dark-trend.first-section-title"]}
-              </h2>
-            </div>
-            <Link
-              href={f["dark-trend.first-section-button-link"] ?? "/about"}
-              className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
-            >
-              {f["dark-trend.first-section-button-text"]}
-            </Link>
-          </div>
-          <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2">
-            <div className="relative aspect-4/3 overflow-hidden rounded-sm bg-zinc-800">
-              <Image
-                src={f["dark-trend.first-section-image"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
-            <div className="flex flex-col justify-center">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30">
-                <svg
-                  className="h-5 w-5 text-white/80"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+      {isSectionVisible(
+        customFields,
+        "dark-trend",
+        "homepage.first-section",
+      ) && (
+        <section
+          className="bg-zinc-900/80 py-20"
+          {...sectionGroupAttr("homepage", "first-section")}
+        >
+          <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="flex items-end justify-between">
+              <div className="relative">
+                <span className="text-sm font-semibold text-purple-400">
+                  01.
+                </span>
+                <span
+                  className="absolute top-2 -left-2 overflow-hidden text-6xl leading-none font-bold whitespace-nowrap text-white/5 uppercase md:text-8xl"
                   aria-hidden
+                  {...fieldAttr("dark-trend.first-section-title")}
                 >
-                  <path
-                    d="M3 6l3-2h12l3 2v4c0 7-4 10-9 10s-9-3-9-10V6z"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                  <path
-                    d="M3 6l9 6 9-6"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                </svg>
+                  {f["dark-trend.first-section-title"]}
+                </span>
+                <h2
+                  className="relative text-3xl font-bold tracking-tight md:text-6xl"
+                  {...fieldAttr("dark-trend.first-section-title")}
+                >
+                  {f["dark-trend.first-section-title"]}
+                </h2>
               </div>
-              <h3 className="text-2xl font-semibold tracking-tight">
-                {f["dark-trend.first-section-subheader"]}
-              </h3>
-              <p className="mt-4 text-sm leading-relaxed text-white/80">
-                {f["dark-trend.first-section-description"]}
-              </p>
+              <Link
+                href={f["dark-trend.first-section-button-link"] ?? "/about"}
+                className="rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
+                {...fieldAttr("dark-trend.first-section-button-text")}
+              >
+                {f["dark-trend.first-section-button-text"]}
+              </Link>
             </div>
-          </div>
-        </DarkTrendMotionSection>
-      </section>
+            <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2">
+              <div className="relative aspect-4/3 overflow-hidden rounded-sm bg-zinc-800">
+                <Image
+                  src={
+                    f["dark-trend.first-section-image"] ?? "/placeholder.svg"
+                  }
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+              <div className="flex flex-col justify-center">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30">
+                  <svg
+                    className="h-5 w-5 text-white/80"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path
+                      d="M3 6l3-2h12l3 2v4c0 7-4 10-9 10s-9-3-9-10V6z"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                    <path
+                      d="M3 6l9 6 9-6"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+                <h3
+                  className="text-2xl font-semibold tracking-tight"
+                  {...fieldAttr("dark-trend.first-section-subheader")}
+                >
+                  {f["dark-trend.first-section-subheader"]}
+                </h3>
+                <p
+                  className="mt-4 text-sm leading-relaxed text-white/80"
+                  {...fieldAttr("dark-trend.first-section-description")}
+                >
+                  {f["dark-trend.first-section-description"]}
+                </p>
+              </div>
+            </div>
+          </DarkTrendMotionSection>
+        </section>
+      )}
 
       {/* Brand New / Featured Product Section */}
-      <section className="relative overflow-hidden bg-[#232323] py-20 antialiased">
-        <Spotlight />
-        <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-            <div className="relative">
-              <span className="text-sm font-semibold text-purple-400">02.</span>
-              {/* <span
+      {isSectionVisible(
+        customFields,
+        "dark-trend",
+        "homepage.second-section",
+      ) && (
+        <section
+          className="relative overflow-hidden bg-[#232323] py-20 antialiased"
+          {...sectionGroupAttr("homepage", "second-section")}
+        >
+          <Spotlight />
+          <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+              <div className="relative">
+                <span className="text-sm font-semibold text-purple-400">
+                  02.
+                </span>
+                {/* <span
                 className="absolute -top-4 -left-2 text-5xl leading-none font-bold text-white/10 uppercase md:text-7xl"
                 aria-hidden
               >
                 {businessName.toUpperCase().replace(/\s/g, " ")}
               </span> */}
-              <h2 className="relative max-w-md text-3xl font-bold tracking-tight md:text-7xl">
-                {f["dark-trend.second-section-title"]}
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-white/80">
-                {f["dark-trend.second-section-description"]}
-              </p>
-            </div>
-            <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-end">
-              {firstProduct ? (
+                <h2
+                  className="relative max-w-md text-3xl font-bold tracking-tight md:text-7xl"
+                  {...fieldAttr("dark-trend.second-section-title")}
+                >
+                  {f["dark-trend.second-section-title"]}
+                </h2>
+                <p
+                  className="mt-4 text-sm leading-relaxed text-white/80"
+                  {...fieldAttr("dark-trend.second-section-description")}
+                >
+                  {f["dark-trend.second-section-description"]}
+                </p>
+              </div>
+              <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-end">
+                {firstProduct ? (
                 <>
                   <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-sm bg-zinc-800">
                     <Image
@@ -224,10 +273,11 @@ export async function DarkTrendHomepage() {
                   </Link>
                 </div>
               )}
+              </div>
             </div>
-          </div>
-        </DarkTrendMotionSection>
-      </section>
+          </DarkTrendMotionSection>
+        </section>
+      )}
 
       {/* Products Section */}
       <section className="bg-[#1A1A1A] py-20">
@@ -258,44 +308,58 @@ export async function DarkTrendHomepage() {
         </DarkTrendMotionSection>
       </section>
 
-      <section className="mx-auto mb-20 max-w-7xl rounded-md bg-[#1F1F1F]">
-        <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-3">
-            <div className="col-span-2 flex flex-col justify-center space-y-4">
-              <div className="relative">
-                <span className="text-sm font-semibold text-purple-400">
-                  04.
-                </span>
+      {isSectionVisible(customFields, "dark-trend", "homepage.cta") && (
+        <section
+          className="mx-auto mb-20 max-w-7xl rounded-md bg-[#1F1F1F]"
+          {...sectionGroupAttr("homepage", "cta")}
+        >
+          <DarkTrendMotionSection className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mt-12 grid grid-cols-1 items-stretch gap-12 lg:grid-cols-3">
+              <div className="col-span-2 flex flex-col justify-center space-y-4">
+                <div className="relative">
+                  <span className="text-sm font-semibold text-purple-400">
+                    04.
+                  </span>
 
-                <h2 className="relative text-3xl font-bold tracking-tight md:text-6xl">
-                  {f["dark-trend.cta-header"]}
-                </h2>
+                  <h2
+                    className="relative text-3xl font-bold tracking-tight md:text-6xl"
+                    {...fieldAttr("dark-trend.cta-header")}
+                  >
+                    {f["dark-trend.cta-header"]}
+                  </h2>
+                </div>
+                <p
+                  className="mt-4 text-lg leading-relaxed text-white/80"
+                  {...fieldAttr("dark-trend.cta-description")}
+                >
+                  {f["dark-trend.cta-description"]}
+                </p>
+
+                <Button
+                  className="w-fit rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
+                  asChild
+                >
+                  <Link
+                    href={f["dark-trend.cta-button-link"] ?? "/contact"}
+                    {...fieldAttr("dark-trend.cta-button-text")}
+                  >
+                    {f["dark-trend.cta-button-text"]}
+                  </Link>
+                </Button>
               </div>
-              <p className="mt-4 text-lg leading-relaxed text-white/80">
-                {f["dark-trend.cta-description"]}
-              </p>
-
-              <Button
-                className="w-fit rounded border border-white/60 bg-transparent px-5 py-2.5 text-xs font-medium tracking-wider text-white uppercase transition-colors hover:bg-white/10"
-                asChild
-              >
-                <Link href={f["dark-trend.cta-button-link"] ?? "/contact"}>
-                  {f["dark-trend.cta-button-text"]}
-                </Link>
-              </Button>
+              <div className="relative aspect-4/5 overflow-hidden rounded-sm">
+                <Image
+                  src={f["dark-trend.cta-image"] ?? "/placeholder.svg"}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
             </div>
-            <div className="relative aspect-4/5 overflow-hidden rounded-sm">
-              <Image
-                src={f["dark-trend.cta-image"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-            </div>
-          </div>
-        </DarkTrendMotionSection>
-      </section>
+          </DarkTrendMotionSection>
+        </section>
+      )}
     </div>
   );
 }

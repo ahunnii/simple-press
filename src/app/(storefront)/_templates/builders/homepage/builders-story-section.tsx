@@ -1,3 +1,5 @@
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type BuildersStorySectionProps = {
   heading: string;
   body1: string;
@@ -50,6 +52,7 @@ export function BuildersStorySection({
         {/* Text column */}
         <div className="flex flex-col gap-6 md:col-span-6">
           <h2
+            {...fieldAttr("builders.homepage.story-heading")}
             className="text-3xl font-semibold uppercase md:text-[40px] md:leading-tight"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -68,13 +71,19 @@ export function BuildersStorySection({
           />
 
           {body1 && (
-            <p className="text-justify text-base leading-relaxed text-gray-700">
+            <p
+              {...fieldAttr("builders.homepage.story-body-1")}
+              className="text-justify text-base leading-relaxed text-gray-700"
+            >
               {body1}
             </p>
           )}
 
           {body2 && (
-            <p className="text-justify text-base leading-relaxed text-gray-700">
+            <p
+              {...fieldAttr("builders.homepage.story-body-2")}
+              className="text-justify text-base leading-relaxed text-gray-700"
+            >
               {body2}
             </p>
           )}

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import type { GenericImageRow } from "~/lib/template-fields";
 import { buttonVariants } from "~/components/ui/button";
 import {
@@ -37,10 +38,16 @@ export function PollenHomepageGallery({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeIn direction="up">
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <p className="text-primary mb-4 text-sm font-medium tracking-wider uppercase">
+            <p
+              className="text-primary mb-4 text-sm font-medium tracking-wider uppercase"
+              {...fieldAttr("pollen.homepage.gallery-label")}
+            >
               {sectionLabel}
             </p>
-            <h2 className="text-foreground text-3xl font-bold text-balance md:text-4xl">
+            <h2
+              className="text-foreground text-3xl font-bold text-balance md:text-4xl"
+              {...fieldAttr("pollen.homepage.gallery-heading")}
+            >
               {sectionHeading}
             </h2>
           </div>
@@ -74,7 +81,9 @@ export function PollenHomepageGallery({
               className: "gap-2 bg-[#215935]! hover:bg-[#1a4729]!",
             })}
           >
-            {buttonText}
+            <span {...fieldAttr("pollen.homepage.gallery-button-text")}>
+              {buttonText}
+            </span>
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>

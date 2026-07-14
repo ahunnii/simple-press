@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 import { motion } from "motion/react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 type NoiseHeroSectionProps = {
@@ -27,7 +28,7 @@ type NoiseHeroSectionProps = {
 export function NoiseHeroSection({
   heroVideo,
   heroImage,
-
+  heroOverline,
   heroTitle,
   heroTagline,
   heroPrimaryButtonText,
@@ -158,6 +159,19 @@ export function NoiseHeroSection({
           className="flex flex-col items-center gap-6"
           style={{ maxWidth: "860px", width: "100%" }}
         >
+          {heroOverline && (
+            <p
+              className="font-mono text-[10px] tracking-[.24em] uppercase"
+              style={{
+                color: "rgba(255,255,255,.75)",
+                textShadow: "0 1px 8px rgba(0,0,0,.6)",
+              }}
+              {...fieldAttr("noise.homepage.hero-overline")}
+            >
+              {heroOverline}
+            </p>
+          )}
+
           <h1
             className="font-serif leading-none tracking-tight italic"
             style={{
@@ -166,6 +180,7 @@ export function NoiseHeroSection({
               color: "#fff",
               textShadow: "0 2px 40px rgba(0,0,0,.3)",
             }}
+            {...fieldAttr("noise.homepage.hero-title")}
           >
             {title}
           </h1>
@@ -178,11 +193,16 @@ export function NoiseHeroSection({
               textShadow: "0 1px 14px rgba(0,0,0,.55)",
               maxWidth: "52ch",
             }}
+            {...fieldAttr("noise.homepage.hero-tagline")}
           >
             {tagline}
           </p>
 
-          <Link href={btnLink} className="vn-btn-hero vn-focus-on-dark mt-1">
+          <Link
+            href={btnLink}
+            className="vn-btn-hero vn-focus-on-dark mt-1"
+            {...fieldAttr("noise.homepage.hero-primary-button-text")}
+          >
             {btnText}
           </Link>
         </motion.div>

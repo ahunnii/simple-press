@@ -5,6 +5,8 @@ import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   FadeIn,
   PageTransition,
@@ -140,32 +142,43 @@ export function NoiseBlogPostPage({
       </section>
 
       {/* ── Shop CTA band ── */}
-      <section className="px-7 py-0" style={{ background: "var(--vn-paper)" }}>
-        <FadeIn className="mx-auto w-full max-w-5xl">
-          <div className="border-foreground flex flex-col gap-6 border-y-2 py-8 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p
-                className="font-serif leading-none italic"
-                style={{ fontSize: "28px", letterSpacing: "-0.01em" }}
+      {isSectionVisible(customFields, "noise", "blog.post") && (
+        <section
+          className="px-7 py-0"
+          style={{ background: "var(--vn-paper)" }}
+          {...sectionGroupAttr("blog", "post")}
+        >
+          <FadeIn className="mx-auto w-full max-w-5xl">
+            <div className="border-foreground flex flex-col gap-6 border-y-2 py-8 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p
+                  className="font-serif leading-none italic"
+                  style={{ fontSize: "28px", letterSpacing: "-0.01em" }}
+                  {...fieldAttr("noise.blog.post-shop-cta-heading")}
+                >
+                  {shopCtaHeading}
+                </p>
+                <p
+                  className="mt-1.5 font-sans text-sm"
+                  style={{ color: "var(--vn-steel-mist)" }}
+                  {...fieldAttr("noise.blog.post-shop-cta-subheading")}
+                >
+                  {shopCtaSubheading}
+                </p>
+              </div>
+              <Link
+                href={shopCtaLink}
+                className="vn-stamp vn-stamp-solid flex-shrink-0 text-[10.5px] transition-all hover:opacity-80"
               >
-                {shopCtaHeading}
-              </p>
-              <p
-                className="mt-1.5 font-sans text-sm"
-                style={{ color: "var(--vn-steel-mist)" }}
-              >
-                {shopCtaSubheading}
-              </p>
+                <span {...fieldAttr("noise.global.shop-cta-text")}>
+                  {shopCtaText}
+                </span>{" "}
+                →
+              </Link>
             </div>
-            <Link
-              href={shopCtaLink}
-              className="vn-stamp vn-stamp-solid flex-shrink-0 text-[10.5px] transition-all hover:opacity-80"
-            >
-              {shopCtaText} →
-            </Link>
-          </div>
-        </FadeIn>
-      </section>
+          </FadeIn>
+        </section>
+      )}
 
       {/* ── Related articles ── */}
       {filtered.length > 0 && (

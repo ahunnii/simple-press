@@ -1,7 +1,8 @@
 import Image from "next/image";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   Accordion,
   AccordionContent,
@@ -70,10 +71,14 @@ export function NoiseContactPage({
               fontSize: "clamp(3rem, 7vw, 5rem)",
               letterSpacing: "-0.025em",
             }}
+            {...fieldAttr("noise.contact.header")}
           >
             {contactHeader}
           </h1>
-          <p className="mx-auto mt-8 mb-14 max-w-[680px] font-sans text-[15px] leading-[1.85] text-(--vn-ink-soft)">
+          <p
+            className="mx-auto mt-8 mb-14 max-w-[680px] font-sans text-[15px] leading-[1.85] text-(--vn-ink-soft)"
+            {...fieldAttr("noise.contact.subheader")}
+          >
             {contactSubheader}
           </p>
 
@@ -128,54 +133,60 @@ export function NoiseContactPage({
       </section>
 
       {/* ── FAQ ── */}
-      <section
-        className="px-7 py-16"
-        style={{ background: "var(--vn-paper)" }}
-        {...sectionGroupAttr("contact", "faq")}
-      >
-        <FadeIn className="mx-auto max-w-4xl">
-          <div className="border-foreground/15 mb-10 flex items-end justify-between border-b pb-6">
-            <div>
-              <p className="mb-3 font-mono text-[9.5px] tracking-[0.22em] text-(--vn-steel-mist) uppercase">
-                FAQ
-              </p>
-              <h2
-                className="font-serif leading-none tracking-tight italic"
-                style={{
-                  fontSize: "clamp(2rem, 4vw, 3.5rem)",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {faqTitle}
-              </h2>
-              <p className="mt-4 max-w-[46ch] font-sans text-[14px] leading-relaxed text-(--vn-steel-mist)">
-                {faqSubtitle}
-              </p>
+      {isSectionVisible(customFields, "noise", "contact.faq") && (
+        <section
+          className="px-7 py-16"
+          style={{ background: "var(--vn-paper)" }}
+          {...sectionGroupAttr("contact", "faq")}
+        >
+          <FadeIn className="mx-auto max-w-4xl">
+            <div className="border-foreground/15 mb-10 flex items-end justify-between border-b pb-6">
+              <div>
+                <p className="mb-3 font-mono text-[9.5px] tracking-[0.22em] text-(--vn-steel-mist) uppercase">
+                  FAQ
+                </p>
+                <h2
+                  className="font-serif leading-none tracking-tight italic"
+                  style={{
+                    fontSize: "clamp(2rem, 4vw, 3.5rem)",
+                    letterSpacing: "-0.02em",
+                  }}
+                  {...fieldAttr("noise.contact-faq-title")}
+                >
+                  {faqTitle}
+                </h2>
+                <p
+                  className="mt-4 max-w-[46ch] font-sans text-[14px] leading-relaxed text-(--vn-steel-mist)"
+                  {...fieldAttr("noise.contact-faq-subtitle")}
+                >
+                  {faqSubtitle}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <Accordion type="single" collapsible className="flex flex-col gap-0">
-            {faqItems.map((item, index) => (
-              <AccordionItem
-                key={item._id ?? index}
-                value={String(item._id ?? index)}
-                className="border-foreground/15 border-b"
-              >
-                <AccordionTrigger className="group flex items-center justify-between py-5 hover:no-underline">
-                  <span className="text-left font-sans text-[15px] leading-snug text-(--vn-ink) transition-opacity group-hover:opacity-70">
-                    {item.question}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <p className="pb-5 font-sans text-[14px] leading-relaxed text-(--vn-steel-mist)">
-                    {item.answer}
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </FadeIn>
-      </section>
+            <Accordion type="single" collapsible className="flex flex-col gap-0">
+              {faqItems.map((item, index) => (
+                <AccordionItem
+                  key={item._id ?? index}
+                  value={String(item._id ?? index)}
+                  className="border-foreground/15 border-b"
+                >
+                  <AccordionTrigger className="group flex items-center justify-between py-5 hover:no-underline">
+                    <span className="text-left font-sans text-[15px] leading-snug text-(--vn-ink) transition-opacity group-hover:opacity-70">
+                      {item.question}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="pb-5 font-sans text-[14px] leading-relaxed text-(--vn-steel-mist)">
+                      {item.answer}
+                    </p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </FadeIn>
+        </section>
+      )}
     </PageTransition>
   );
 }

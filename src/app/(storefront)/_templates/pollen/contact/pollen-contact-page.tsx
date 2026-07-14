@@ -58,6 +58,8 @@ export function PollenContactPage({
       business={business}
       title={f["pollen.contact.page-title"] ?? "Contact Us"}
       subtitle={f["pollen.contact.page-subtitle"] ?? "Let's Talk"}
+      titleFieldKey="pollen.contact.page-title"
+      subtitleFieldKey="pollen.contact.page-subtitle"
       sectionAttrs={sectionGroupAttr("contact", "main")}
     >
       <div

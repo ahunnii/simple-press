@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
 
 type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
@@ -54,7 +55,10 @@ export function SledgeTestimonials({
       <div className="sl-container grid grid-cols-1 items-center gap-12 md:grid-cols-2">
         {/* Left: text side */}
         <div>
-          <h2 className="sl-heading-xl font-heading">
+          <h2
+            className="sl-heading-xl font-heading"
+            {...fieldAttr("sledge.homepage-testimonials-heading")}
+          >
             {heading ?? "Testimonials"}
           </h2>
 

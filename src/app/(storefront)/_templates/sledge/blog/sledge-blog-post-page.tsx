@@ -6,6 +6,8 @@ import Link from "next/link";
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { RouterOutputs } from "~/trpc/react";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { cn } from "~/lib/utils";
 import {
   FadeIn,
@@ -144,12 +146,16 @@ export function SledgeBlogPostPage({
         </FadeIn>
       </section>
 
-      <SledgeProductRail
-        heading={shopCtaHeading}
-        ctaText={shopCtaText}
-        ctaHref={shopCtaLink}
-        products={featuredProducts}
-      />
+      {isSectionVisible(customFields, "sledge", "blog.post") ? (
+        <SledgeProductRail
+          heading={shopCtaHeading}
+          headingFieldKey="sledge.blog.post-shop-cta-heading"
+          ctaText={shopCtaText}
+          ctaHref={shopCtaLink}
+          products={featuredProducts}
+          sectionAttrs={sectionGroupAttr("blog", "post")}
+        />
+      ) : null}
 
       {filtered.length > 0 ? (
         <>

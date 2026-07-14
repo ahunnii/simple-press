@@ -61,7 +61,9 @@ export function SledgeBlogPage({ pages, customFields }: Props) {
       <SledgePageHeader
         eyebrow="Journal"
         title={heading}
+        titleFieldKey="sledge.blog-listing-heading"
         intro={intro}
+        introFieldKey="sledge.blog-listing-intro"
         sectionAttrs={sectionGroupAttr("blog", "listing")}
       >
         <div className="mt-8">

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "../index";
@@ -71,6 +71,7 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
               fontSize: "clamp(2.8rem, 6vw, 4.5rem)",
               letterSpacing: "-0.025em",
             }}
+            {...fieldAttr("noise.shop-listing-heading")}
           >
             {shopHeading}
           </h1>
@@ -83,6 +84,7 @@ export function NoiseShopPage({ business }: DefaultProductsPageTemplateProps) {
                 color: "var(--vn-steel-mist)",
                 maxWidth: "56ch",
               }}
+              {...fieldAttr("noise.shop-listing-intro")}
             >
               {shopIntro}
             </p>

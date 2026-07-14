@@ -1,7 +1,8 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateFAQListRows,
@@ -49,13 +50,22 @@ export function ModernContactPage({
         {...sectionGroupAttr("contact", "main")}
       >
         <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-          <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+          <p
+            className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+            {...fieldAttr("modern.contact.page-tagline")}
+          >
             {f["modern.contact.page-tagline"]}
           </p>
-          <h1 className="text-foreground mt-2 font-serif text-4xl text-balance md:text-6xl">
+          <h1
+            className="text-foreground mt-2 font-serif text-4xl text-balance md:text-6xl"
+            {...fieldAttr("modern.contact.page-header")}
+          >
             {f["modern.contact.page-header"]}
           </h1>
-          <p className="text-muted-foreground mx-auto mt-6 max-w-lg text-sm leading-relaxed">
+          <p
+            className="text-muted-foreground mx-auto mt-6 max-w-lg text-sm leading-relaxed"
+            {...fieldAttr("modern.contact.page-description")}
+          >
             {f["modern.contact.page-description"]}
           </p>
         </div>
@@ -70,10 +80,16 @@ export function ModernContactPage({
               className="lg:col-span-2"
               {...sectionGroupAttr("contact", "info")}
             >
-              <h2 className="text-foreground font-serif text-2xl md:text-3xl">
+              <h2
+                className="text-foreground font-serif text-2xl md:text-3xl"
+                {...fieldAttr("modern.contact.info-title")}
+              >
                 {f["modern.contact.info-title"]}
               </h2>
-              <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
+              <p
+                className="text-muted-foreground mt-4 text-sm leading-relaxed"
+                {...fieldAttr("modern.contact.info-description")}
+              >
                 {f["modern.contact.info-description"]}
               </p>
 
@@ -143,10 +159,16 @@ export function ModernContactPage({
               {...sectionGroupAttr("contact", "form")}
             >
               <div className="border-border bg-card rounded-sm border p-8 md:p-10">
-                <h2 className="text-foreground font-serif text-2xl md:text-3xl">
+                <h2
+                  className="text-foreground font-serif text-2xl md:text-3xl"
+                  {...fieldAttr("modern.contact.form-title")}
+                >
                   {f["modern.contact.form-title"]}
                 </h2>
-                <p className="text-muted-foreground mt-2 text-sm">
+                <p
+                  className="text-muted-foreground mt-2 text-sm"
+                  {...fieldAttr("modern.contact.form-description")}
+                >
                   {f["modern.contact.form-description"]}
                 </p>
                 <ModernContactForm />
@@ -157,33 +179,45 @@ export function ModernContactPage({
       </section>
 
       {/* FAQ teaser */}
-      <section
-        className="border-border bg-secondary border-t py-20"
-        {...sectionGroupAttr("contact", "questions")}
-      >
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              {f["modern.contact.faq-tagline"]}
-            </p>
-            <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-              {f["modern.contact.faq-heading"]}
-            </h2>
+      {isSectionVisible(
+        business?.siteContent?.customFields,
+        "modern",
+        "contact.questions",
+      ) && (
+        <section
+          className="border-border bg-secondary border-t py-20"
+          {...sectionGroupAttr("contact", "questions")}
+        >
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...fieldAttr("modern.contact.faq-tagline")}
+              >
+                {f["modern.contact.faq-tagline"]}
+              </p>
+              <h2
+                className="text-foreground mt-2 font-serif text-3xl md:text-4xl"
+                {...fieldAttr("modern.contact.faq-heading")}
+              >
+                {f["modern.contact.faq-heading"]}
+              </h2>
+            </div>
+            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+              {faqList?.map((faq) => (
+                <div key={faq.question}>
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {faq.question}
+                  </h3>
+                  <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-            {faqList?.map((faq) => (
-              <div key={faq.question}>
-                <h3 className="text-foreground text-sm font-semibold">
-                  {faq.question}
-                </h3>
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                  {faq.answer}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

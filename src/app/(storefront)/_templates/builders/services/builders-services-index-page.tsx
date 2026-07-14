@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
 
@@ -11,7 +12,9 @@ type Props = {
 };
 
 export async function BuildersServicesIndexPage({ business, services }: Props) {
-  const f = resolveFields(business.siteContent?.customFields, [
+  const customFields = business.siteContent?.customFields;
+
+  const f = resolveFields(customFields, [
     "builders.services.hero-title",
     "builders.services.hero-subtitle",
     "builders.services.cta-heading",
@@ -38,6 +41,7 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
       >
         <div className="flex flex-col justify-end md:col-span-8">
           <h1
+            {...fieldAttr("builders.services.hero-title")}
             className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl lg:text-7xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -50,6 +54,7 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
 
           {heroSubtitle && (
             <p
+              {...fieldAttr("builders.services.hero-subtitle")}
               className="max-w-2xl border-l-2 pl-6 text-lg leading-relaxed md:text-xl"
               style={{
                 fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -65,7 +70,9 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
       </section>
 
       {/* ── 2. Service Grid ─────────────────────────────────────────────────── */}
-      <section {...sectionGroupAttr("services", "list")} className="mb-32">
+      {/* DB-driven service listing — no editable template fields, so no
+          data-sp-group hotspot (nothing to open in the field panel). */}
+      <section className="mb-32">
         {services.length === 0 ? (
           <div
             className="flex items-center justify-center border py-24 text-center"
@@ -154,34 +161,38 @@ export async function BuildersServicesIndexPage({ business, services }: Props) {
       </section>
 
       {/* ── 3. CTA ──────────────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("services", "cta")}
-        className="flex flex-col items-center border-t py-24 text-center"
-        style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
-      >
-        <h2
-          className="mb-8 text-3xl tracking-tight uppercase md:text-5xl"
-          style={{
-            fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
-            fontWeight: 600,
-            color: "var(--builders-ink, #131313)",
-          }}
+      {isSectionVisible(customFields, "builders", "services.cta") && (
+        <section
+          {...sectionGroupAttr("services", "cta")}
+          className="flex flex-col items-center border-t py-24 text-center"
+          style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
         >
-          {ctaHeading}
-        </h2>
+          <h2
+            {...fieldAttr("builders.services.cta-heading")}
+            className="mb-8 text-3xl tracking-tight uppercase md:text-5xl"
+            style={{
+              fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
+              fontWeight: 600,
+              color: "var(--builders-ink, #131313)",
+            }}
+          >
+            {ctaHeading}
+          </h2>
 
-        <a
-          href={ctaButtonHref}
-          className="border-2 bg-[var(--builders-accent)] px-8 py-4 text-xs tracking-widest uppercase transition-colors duration-200 hover:bg-[var(--builders-accent-hover)]"
-          style={{
-            borderColor: "var(--builders-accent, #FFC5B6)",
-            color: "var(--builders-accent-ink, #31130A)",
-            fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
-          }}
-        >
-          {ctaButtonLabel}
-        </a>
-      </section>
+          <a
+            href={ctaButtonHref}
+            {...fieldAttr("builders.services.cta-button-label")}
+            className="border-2 bg-[var(--builders-accent)] px-8 py-4 text-xs tracking-widest uppercase transition-colors duration-200 hover:bg-[var(--builders-accent-hover)]"
+            style={{
+              borderColor: "var(--builders-accent, #FFC5B6)",
+              color: "var(--builders-accent-ink, #31130A)",
+              fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
+            }}
+          >
+            {ctaButtonLabel}
+          </a>
+        </section>
+      )}
     </div>
   );
 }

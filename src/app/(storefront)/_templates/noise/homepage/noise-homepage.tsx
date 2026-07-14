@@ -2,6 +2,7 @@ import type { DefaultHomepageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
@@ -122,7 +123,11 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           <NoiseHeroSection
             heroVideo={f["noise.homepage.hero-video"] ?? undefined}
             heroImage={f["noise.homepage.hero-image"] ?? undefined}
-            heroOverline={f["noise.homepage.hero-overline"] ?? undefined}
+            heroOverline={
+              (f["noise.homepage.hero-overline"] ?? "").length > 0
+                ? f["noise.homepage.hero-overline"]
+                : undefined
+            }
             heroTitle={f["noise.homepage.hero-title"] ?? undefined}
             heroTagline={f["noise.homepage.hero-tagline"] ?? undefined}
             heroPrimaryButtonText={
@@ -141,10 +146,12 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           />
 
           {/* 2. Scrolling marquee band beneath the hero */}
-          <NoiseMarqueeStrip
-            text={f["noise.homepage.editorial-marquee-text"]}
-            sectionAttrs={sectionGroupAttr("homepage", "editorial")}
-          />
+          {isSectionVisible(themeFields, "noise", "homepage.editorial") && (
+            <NoiseMarqueeStrip
+              text={f["noise.homepage.editorial-marquee-text"]}
+              sectionAttrs={sectionGroupAttr("homepage", "editorial")}
+            />
+          )}
 
           {/* 3. Philosophy */}
           <NoisePhilosophySection
@@ -154,19 +161,22 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           />
 
           {/* 4. Brand story teaser */}
-          <NoiseAboutTeaser
-            heading={f["noise.homepage-about-heading"] ?? undefined}
-            body={aboutTeaserBody as TiptapJSON | null}
-            image={f["noise.homepage-about-image"] ?? undefined}
-            buttonText={f["noise.homepage-about-button-text"] ?? undefined}
-            buttonLink={f["noise.homepage-about-button-link"] ?? undefined}
-            sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
-          />
+          {isSectionVisible(themeFields, "noise", "homepage.aboutTeaser") && (
+            <NoiseAboutTeaser
+              heading={f["noise.homepage-about-heading"] ?? undefined}
+              body={aboutTeaserBody as TiptapJSON | null}
+              image={f["noise.homepage-about-image"] ?? undefined}
+              buttonText={f["noise.homepage-about-button-text"] ?? undefined}
+              buttonLink={f["noise.homepage-about-button-link"] ?? undefined}
+              sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
+            />
+          )}
 
           {/* 5. First product rail */}
           {railOneProducts.length > 0 && (
             <NoiseProductRail
               overline={f["noise.homepage.rail-one-overline"] ?? "Collection"}
+              overlineFieldKey="noise.homepage.rail-one-overline"
               title={
                 rail1Data?.collection.name ??
                 f["noise.homepage-featured-title"] ??
@@ -178,6 +188,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
                 undefined
               }
               ctaText={f["noise.homepage-featured-button-text"] ?? "Shop All"}
+              ctaTextFieldKey="noise.homepage-featured-button-text"
               ctaHref={railOneCtaHref}
               products={railOneProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
@@ -191,6 +202,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           {railTwoProducts.length > 0 && (
             <NoiseProductRail
               overline={f["noise.homepage.rail-two-overline"] ?? "New Arrivals"}
+              overlineFieldKey="noise.homepage.rail-two-overline"
               title={
                 rail2Data?.collection.name ??
                 f["noise.homepage.rail-two-title"] ??
@@ -198,6 +210,7 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
               }
               description={rail2Data?.collection.description ?? undefined}
               ctaText={f["noise.global.shop-cta-text"] ?? "Shop All"}
+              ctaTextFieldKey="noise.global.shop-cta-text"
               ctaHref={railTwoCtaHref}
               products={railTwoProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
@@ -215,13 +228,14 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           />
 
           {/* 9. Rotating testimonial strip */}
-          {flags.isEnabled("testimonials") && (
-            <NoiseTestimonialStrip
-              testimonials={testimonials}
-              heading={f["noise.homepage-testimonials-heading"] ?? undefined}
-              sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
-            />
-          )}
+          {flags.isEnabled("testimonials") &&
+            isSectionVisible(themeFields, "noise", "homepage.testimonials") && (
+              <NoiseTestimonialStrip
+                testimonials={testimonials}
+                heading={f["noise.homepage-testimonials-heading"] ?? undefined}
+                sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+              />
+            )}
         </PageTransition>
       </NoiseIntroWrapper>
     </HydrateClient>

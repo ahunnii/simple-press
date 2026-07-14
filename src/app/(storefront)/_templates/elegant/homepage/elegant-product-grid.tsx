@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { ElegantProductCard } from "../shared/elegant-product-card";
@@ -96,6 +97,7 @@ export function ElegantProductGrid({
                   textTransform: "uppercase",
                   color: "var(--el-ink-soft, #6b6659)",
                 }}
+                {...fieldAttr("elegant.homepage.products-tagline")}
               >
                 {productsTagline ?? "Our Products"}
               </span>
@@ -127,6 +129,7 @@ export function ElegantProductGrid({
                     color: "var(--el-ink-soft, #6b6659)",
                     fontFamily: "var(--font-sans, sans-serif)",
                   }}
+                  {...fieldAttr("elegant.homepage.products-description")}
                 >
                   {productsDescription}
                 </p>
@@ -149,7 +152,9 @@ export function ElegantProductGrid({
                 fontFamily: "var(--font-sans, sans-serif)",
               }}
             >
-              {productsButtonText ?? "View all"}
+              <span {...fieldAttr("elegant.homepage.products-button-text")}>
+                {productsButtonText ?? "View all"}
+              </span>
               <ArrowRight
                 aria-hidden={true}
                 style={{ width: 14, height: 14 }}

@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import Image from "next/image";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FadeIn } from "~/components/page-animations";
 
@@ -40,15 +40,21 @@ export async function SledgeAboutPage({
   const sections = [
     {
       label: f["sledge.about.section-1-label"] ?? "My Story.",
+      labelKey: "sledge.about.section-1-label",
       body: f["sledge.about.section-1-body"] ?? "",
+      bodyKey: "sledge.about.section-1-body",
     },
     {
       label: f["sledge.about.section-2-label"] ?? "What I Do.",
+      labelKey: "sledge.about.section-2-label",
       body: f["sledge.about.section-2-body"] ?? "",
+      bodyKey: "sledge.about.section-2-body",
     },
     {
       label: f["sledge.about.section-3-label"] ?? "My Services.",
+      labelKey: "sledge.about.section-3-label",
       body: f["sledge.about.section-3-body"] ?? "",
+      bodyKey: "sledge.about.section-3-body",
     },
   ];
 
@@ -79,7 +85,10 @@ export async function SledgeAboutPage({
         {...sectionGroupAttr("about", "main")}
       >
         <FadeIn className="mx-auto max-w-7xl">
-          <h1 className="font-heading sl-page-header my-12 leading-6 font-semibold uppercase md:my-16">
+          <h1
+            className="font-heading sl-page-header my-12 leading-6 font-semibold uppercase md:my-16"
+            {...fieldAttr("sledge.about-hero-heading")}
+          >
             {heading}
           </h1>
 
@@ -87,12 +96,18 @@ export async function SledgeAboutPage({
           <div className="flex flex-col gap-12 md:hidden">
             {sections.map((section, i) => (
               <div key={i} className="flex flex-col gap-3">
-                <span className="sl-about-label-mobile text-[20px] font-normal italic">
+                <span
+                  className="sl-about-label-mobile text-[20px] font-normal italic"
+                  {...fieldAttr(section.labelKey)}
+                >
                   {section.label}
                 </span>
                 <div className="sl-about-divider-mobile h-0.5 w-12 bg-(--sl-coral)" />
                 {section.body ? (
-                  <p className="sl-about-body-mobile font-normal italic">
+                  <p
+                    className="sl-about-body-mobile font-normal italic"
+                    {...fieldAttr(section.bodyKey)}
+                  >
                     {section.body}
                   </p>
                 ) : (
@@ -118,7 +133,10 @@ export async function SledgeAboutPage({
                   className="self-start pr-8"
                   style={{ gridColumn: 1, gridRow: i + 1 }}
                 >
-                  <span className="sl-about-label-desktop leading-[1.4rem] font-normal italic">
+                  <span
+                    className="sl-about-label-desktop leading-[1.4rem] font-normal italic"
+                    {...fieldAttr(section.labelKey)}
+                  >
                     {section.label}
                   </span>
                 </div>
@@ -127,7 +145,10 @@ export async function SledgeAboutPage({
                   style={{ gridColumn: 3, gridRow: i + 1 }}
                 >
                   {section.body && (
-                    <p className="sl-about-body-desktop font-normal italic">
+                    <p
+                      className="sl-about-body-desktop font-normal italic"
+                      {...fieldAttr(section.bodyKey)}
+                    >
                       {section.body}
                     </p>
                   )}
@@ -138,12 +159,13 @@ export async function SledgeAboutPage({
         </FadeIn>
       </section>
 
+      {/* No dedicated field group backs this rail (heading is fixed,
+          products are pulled live) — no sectionGroupAttr. */}
       <SledgeProductRail
         heading="Trending Now"
         ctaText={shopCtaText}
         ctaHref={shopCtaHref}
         products={products}
-        sectionAttrs={sectionGroupAttr("about", "products")}
       />
     </>
   );

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { resolveFields } from "..";
@@ -121,6 +122,7 @@ export function ElegantCTABanner({
                 color: "var(--el-paper, #fbf8f2)",
                 marginBottom: 28,
               }}
+              {...fieldAttr("elegant.cta.title")}
             >
               {title}
             </h2>

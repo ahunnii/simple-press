@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Quote, Star } from "lucide-react";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Card, CardContent } from "~/components/ui/card";
@@ -50,10 +50,16 @@ export async function BambooTestimonialsPage({
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
               Testimonials
             </span>
-            <h1 className="text-foreground font-heading mt-2 text-4xl font-bold tracking-tight md:text-5xl">
+            <h1
+              className="text-foreground font-heading mt-2 text-4xl font-bold tracking-tight md:text-5xl"
+              {...fieldAttr("bamboo.testimonials-page.heading")}
+            >
               {heading}
             </h1>
-            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed">
+            <p
+              className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed"
+              {...fieldAttr("bamboo.testimonials-page.subheading")}
+            >
               {subheading}
             </p>
           </FadeIn>

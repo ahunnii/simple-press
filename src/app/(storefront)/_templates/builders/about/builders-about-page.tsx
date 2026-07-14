@@ -1,5 +1,5 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { DEFAULT_TEAM_MEMBERS } from ".";
@@ -51,6 +51,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
         {/* Left: headline + subtitle */}
         <div className="flex flex-col justify-end md:col-span-8">
           <h1
+            {...fieldAttr("builders.about.hero-title")}
             className="mb-6 text-4xl leading-none tracking-tight uppercase md:text-6xl lg:text-7xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -63,6 +64,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
           {heroSubtitle && (
             <p
+              {...fieldAttr("builders.about.hero-subtitle")}
               className="max-w-2xl border-l-2 pl-6 text-lg leading-relaxed md:text-xl"
               style={{
                 fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
@@ -109,6 +111,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
           {/* Left: heading + accent bar */}
           <div className="md:col-span-4">
             <h2
+              {...fieldAttr("builders.about.story-heading")}
               className="mb-4 text-3xl leading-tight uppercase md:text-4xl"
               style={{
                 fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",
@@ -129,6 +132,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
           <div className="grid grid-cols-1 gap-6 md:col-span-8 md:grid-cols-2">
             {storyBody1 && (
               <p
+                {...fieldAttr("builders.about.story-body-1")}
                 className="mb-6 text-base leading-relaxed"
                 style={{
                   fontFamily:
@@ -142,6 +146,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
             )}
             {storyBody2 && (
               <p
+                {...fieldAttr("builders.about.story-body-2")}
                 className="text-base leading-relaxed"
                 style={{
                   fontFamily:
@@ -165,6 +170,7 @@ export function BuildersAboutPage({ business }: DefaultAboutPageTemplateProps) {
           style={{ borderColor: "var(--builders-rule, #e5e7eb)" }}
         >
           <h2
+            {...fieldAttr("builders.about.team-heading")}
             className="mb-4 text-3xl leading-tight uppercase md:text-4xl"
             style={{
               fontFamily: "var(--font-builders-display, 'Jost', sans-serif)",

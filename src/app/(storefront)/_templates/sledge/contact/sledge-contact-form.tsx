@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
@@ -77,7 +78,10 @@ export function SledgeContactForm({ formTitle }: Props) {
   return (
     <div>
       {/* C-3: form heading is large (sl-rail-heading ≥24px) → AA accent token */}
-      <h2 className="sl-rail-heading font-heading mb-8 font-semibold text-[var(--sl-coral-aa)] uppercase">
+      <h2
+        className="sl-rail-heading font-heading mb-8 font-semibold text-[var(--sl-coral-aa)] uppercase"
+        {...fieldAttr("sledge.contact.form-title")}
+      >
         {formTitle}
       </h2>
 

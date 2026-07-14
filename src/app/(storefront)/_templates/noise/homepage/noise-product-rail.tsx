@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   StaggerContainer,
@@ -25,6 +26,14 @@ type NoiseProductRailProps = {
   limit?: number;
   /** Spread on root <section> for preview overlay hotspot. */
   sectionAttrs?: Record<string, string>;
+  /**
+   * Field key for the `overline` prop, when it's a direct (non-collection-
+   * overridden) resolved field value — this component renders two rail
+   * instances bound to different fields, so the key is passed per-instance.
+   */
+  overlineFieldKey?: string;
+  /** Field key for the `ctaText` prop, same rationale as `overlineFieldKey`. */
+  ctaTextFieldKey?: string;
 };
 
 export function NoiseProductRail({
@@ -36,6 +45,8 @@ export function NoiseProductRail({
   products,
   limit = 4,
   sectionAttrs,
+  overlineFieldKey,
+  ctaTextFieldKey,
 }: NoiseProductRailProps) {
   const shown = products.slice(0, limit);
   if (shown.length === 0) return null;
@@ -53,6 +64,7 @@ export function NoiseProductRail({
             <p
               className="font-mono text-[10px] tracking-[.22em] uppercase"
               style={{ color: "var(--vn-steel-mist)" }}
+              {...(overlineFieldKey ? fieldAttr(overlineFieldKey) : {})}
             >
               {overline}
             </p>
@@ -80,7 +92,10 @@ export function NoiseProductRail({
               color: "var(--vn-ink)",
             }}
           >
-            {ctaText} →
+            <span {...(ctaTextFieldKey ? fieldAttr(ctaTextFieldKey) : {})}>
+              {ctaText}
+            </span>{" "}
+            →
           </Link>
         </FadeIn>
 

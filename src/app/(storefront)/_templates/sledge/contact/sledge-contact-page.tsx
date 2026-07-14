@@ -52,7 +52,7 @@ export async function SledgeContactPage({
       {/* ── Hero banner ── */}
       <section
         className="sl-hero-banner-sm relative w-full"
-        {...sectionGroupAttr("contact", "hero")}
+        {...sectionGroupAttr("contact", "info")}
       >
         {/* M-9: decorative banner image */}
         <Image
@@ -81,6 +81,7 @@ export async function SledgeContactPage({
                 <SledgeContactInfoRow
                   icon={MapPin}
                   title={locationHeading}
+                  titleFieldKey="sledge.contact.location-heading"
                   lines={[address, ...(locationNote ? [locationNote] : [])]}
                 />
               )}
@@ -88,6 +89,7 @@ export async function SledgeContactPage({
                 <SledgeContactInfoRow
                   icon={Mail}
                   title={emailHeading}
+                  titleFieldKey="sledge.contact.email-heading"
                   lines={[email]}
                   links={[`mailto:${email}`]}
                 />
@@ -96,6 +98,7 @@ export async function SledgeContactPage({
                 <SledgeContactInfoRow
                   icon={Phone}
                   title={phoneHeading}
+                  titleFieldKey="sledge.contact.phone-heading"
                   lines={[phone]}
                   links={[`tel:${phone.replace(/\D/g, "")}`]}
                 />
@@ -112,10 +115,11 @@ export async function SledgeContactPage({
 
       <SledgeProductRail
         heading={f["sledge.contact.trending-heading"] ?? "Trending Now"}
+        headingFieldKey="sledge.contact.trending-heading"
         ctaText={shopCtaText}
         ctaHref={shopCtaHref}
         products={products}
-        sectionAttrs={sectionGroupAttr("contact", "products")}
+        sectionAttrs={sectionGroupAttr("contact", "info")}
       />
     </>
   );

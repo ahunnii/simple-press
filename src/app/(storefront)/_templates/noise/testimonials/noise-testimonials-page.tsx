@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
@@ -69,11 +70,13 @@ export async function NoiseTestimonialsPage({
       <section
         className="border-foreground/15 border-b px-6 pt-20 pb-14 text-center"
         style={{ background: "var(--vn-paper)" }}
+        {...sectionGroupAttr("testimonials", "page")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "1280px" }}>
           <p
             className="mb-4 font-mono text-[10px] tracking-[0.28em] uppercase"
             style={{ color: "var(--vn-steel-mist)" }}
+            {...fieldAttr("noise.testimonials.page-overline")}
           >
             {pageOverline}
           </p>
@@ -83,6 +86,7 @@ export async function NoiseTestimonialsPage({
               fontSize: "clamp(3.5rem, 8vw, 6rem)",
               letterSpacing: "-0.025em",
             }}
+            {...fieldAttr("noise.homepage-testimonials-heading")}
           >
             {heading}
           </h1>
@@ -93,6 +97,7 @@ export async function NoiseTestimonialsPage({
               color: "var(--vn-ink-soft)",
               maxWidth: "52ch",
             }}
+            {...fieldAttr("noise.testimonials.page-intro")}
           >
             {pageIntro}
           </p>
@@ -106,6 +111,7 @@ export async function NoiseTestimonialsPage({
             <p
               className="font-serif text-2xl italic"
               style={{ color: "var(--vn-steel-mist)" }}
+              {...fieldAttr("noise.testimonials.empty-state-text")}
             >
               {emptyStateText}
             </p>
@@ -138,11 +144,13 @@ export async function NoiseTestimonialsPage({
       <section
         className="border-foreground border-y-2 px-7 py-20 text-center"
         style={{ background: "var(--vn-ink)", color: "var(--vn-bone)" }}
+        {...sectionGroupAttr("testimonials", "page")}
       >
         <FadeIn className="mx-auto" style={{ maxWidth: "780px" }}>
           <p
             className="mb-5 font-mono text-[9.5px] tracking-[0.28em] uppercase"
             style={{ opacity: 0.55 }}
+            {...fieldAttr("noise.testimonials.cta-overline")}
           >
             {ctaOverline}
           </p>
@@ -152,12 +160,14 @@ export async function NoiseTestimonialsPage({
               fontSize: "clamp(2rem, 4vw, 3rem)",
               letterSpacing: "-0.02em",
             }}
+            {...fieldAttr("noise.testimonials.cta-heading")}
           >
             {ctaHeading}
           </h2>
           <p
             className="mx-auto mt-5 font-sans leading-[1.85]"
             style={{ fontSize: "14px", opacity: 0.78, maxWidth: "48ch" }}
+            {...fieldAttr("noise.testimonials.cta-body")}
           >
             {ctaBody}
           </p>
