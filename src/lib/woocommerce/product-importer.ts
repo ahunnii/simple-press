@@ -1,4 +1,5 @@
 import path from "node:path";
+import * as Sentry from "@sentry/nextjs";
 import slugify from "slugify";
 
 import type { ParsedProduct } from "./csv-parser";
@@ -112,7 +113,14 @@ async function rehostProductImage(
       contentType: contentType ?? "application/octet-stream",
     });
   } catch (error) {
+    // A single image failing to rehost must not fail the whole product import,
+    // but it shouldn't be invisible either — a product silently importing with
+    // zero images is otherwise impossible to notice. Report to Sentry.
     console.error(`Failed to rehost product image: ${sourceUrl}`, error);
+    Sentry.captureException(error, {
+      tags: { service: "woocommerce-import", step: "image-rehost" },
+      extra: { sourceUrl },
+    });
     return null;
   }
 }

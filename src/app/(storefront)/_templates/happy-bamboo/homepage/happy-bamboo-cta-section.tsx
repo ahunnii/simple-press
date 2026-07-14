@@ -20,7 +20,7 @@ type Props = {
 
 export function HappyBambooCtaSection({
   heading = "Ready to Make the Switch?",
-  body = "Join thousands of eco-conscious households who have already made the switch to Happy Bamboo. Experience premium quality while making a positive impact on our planet.",
+  body = "Join a growing community of customers who love what we make. Experience premium quality while making a positive impact.",
   primaryButtonText = "Shop Now",
   primaryButtonLink = "/shop",
   secondaryButtonText = "Learn More",

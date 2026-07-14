@@ -32,6 +32,9 @@ export function NoiseMarqueeStrip({
         {track.map((item, index) => (
           <span
             key={index}
+            // The second copy exists only for the seamless visual loop — hide it
+            // from assistive tech so screen readers don't read the list twice.
+            aria-hidden={index >= items.length}
             className="font-mono whitespace-nowrap uppercase"
             style={{
               fontSize: "11px",

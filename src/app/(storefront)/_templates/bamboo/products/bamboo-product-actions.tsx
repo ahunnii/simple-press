@@ -102,7 +102,7 @@ export function BambooProductActions({
                       <Plus className="size-4" aria-hidden="true" />
                     </Button>
                   </div>
-                  {isInventoryTracked && (
+                  {isInventoryTracked && !product.allowBackorders && (
                     <span
                       id="bamboo-actions-stock-msg"
                       className="text-muted-foreground text-sm"

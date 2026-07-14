@@ -674,8 +674,8 @@ const homepageCtaData: TemplateField[] = [
     group: "homepage.cta",
     gridColumn: "col-span-full",
     defaultValue:
-      "Join thousands of eco-conscious households who have already made the switch to Happy Bamboo. Experience premium quality while making a positive impact on our planet.",
-    placeholder: "Join thousands of eco-conscious households...",
+      "Join a growing community of customers who love what we make. Experience premium quality while making a positive impact.",
+    placeholder: "Join a growing community of customers...",
   },
   {
     key: "happy-bamboo.homepage-cta-primary-button-text",

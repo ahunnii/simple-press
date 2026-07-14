@@ -98,7 +98,7 @@ export function HappyBambooProductActions({
                       <Plus className="size-4" />
                     </Button>
                   </div>
-                  {isInventoryTracked && (
+                  {isInventoryTracked && !product.allowBackorders && (
                     <span
                       id="hb-actions-stock-msg"
                       className="text-muted-foreground text-sm"
