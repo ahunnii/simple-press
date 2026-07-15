@@ -47,9 +47,9 @@ describe("isImageContentType", () => {
 describe("resolveTemplateId", () => {
   const free = ["modern", "default", "elegant"] as const;
 
-  it("defaults to modern when unset", () => {
+  it("defaults to the platform default template when unset", () => {
     expect(resolveTemplateId(undefined, free)).toEqual({
-      templateId: "modern",
+      templateId: "default",
       fellBack: false,
     });
   });
@@ -61,9 +61,9 @@ describe("resolveTemplateId", () => {
     });
   });
 
-  it("falls back to modern for unknown/paid templates", () => {
+  it("falls back to the default template for unknown/paid templates", () => {
     expect(resolveTemplateId("bamboo", free)).toEqual({
-      templateId: "modern",
+      templateId: "default",
       fellBack: true,
     });
   });

@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2, MailCheck } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  LogOut,
+  MailCheck,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
 import { isValidEmail } from "~/lib/utils";
@@ -31,16 +39,23 @@ type ClaimClientProps = {
 };
 
 /**
- * loading — resolving any existing session on mount
- * signup  — no account yet: create one (email locked to the invite)
- * signin  — account exists: sign in (email locked to the invite)
- * verify  — account created / sign-in blocked pending email verification
- * ready   — already signed in as the verified invited user; one click to claim
+ * loading  — resolving any existing session on mount
+ * mismatch — a DIFFERENT account is signed in; must sign out before claiming
+ * signup   — no account yet: create one (email locked to the invite)
+ * signin   — account exists: sign in (email locked to the invite)
+ * verify   — account created / sign-in blocked pending email verification
+ * ready    — already signed in as the verified invited user; one click to claim
  *
  * An in-flight request is tracked separately via `submitting` so the visible
  * phase (and thus which form renders) never changes mid-request.
  */
-type Phase = "loading" | "signup" | "signin" | "verify" | "ready";
+type Phase =
+  | "loading"
+  | "mismatch"
+  | "signup"
+  | "signin"
+  | "verify"
+  | "ready";
 
 export function ClaimClient({
   code,
@@ -58,35 +73,75 @@ export function ClaimClient({
   const [phase, setPhase] = useState<Phase>("loading");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Email of a DIFFERENT signed-in account, populated only in the "mismatch"
+  // phase so we can name it in the copy.
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  // Resend "verification email" cooldown, in seconds (0 = ready to send).
+  const [resending, setResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const subdomainPreview = `${subdomain}.${platformDomain}`;
 
-  // On mount, resolve an existing session. If the invited owner already verified
-  // (e.g. they clicked the verification link, which auto-signs them in, then
-  // returned here), skip straight to a one-click claim.
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      try {
-        const { data } = await authClient.getSession();
-        const sessionEmail = data?.user?.email?.toLowerCase();
-        if (
-          active &&
-          sessionEmail === email.toLowerCase() &&
+  // Where the verification link should land the owner AFTER they verify. Better
+  // Auth threads this through signUp.email / signIn.email / sendVerificationEmail
+  // into the `/verify-email?...&callbackURL=` link; on success it redirects here.
+  // A relative path resolves against the platform base URL (claim flows run on
+  // the platform domain, so sendVerificationEmail does NOT rewrite the host).
+  const callbackURL = `/platform/claim/${code}`;
+
+  // Resolve the current session into the right phase. Shared by the mount effect
+  // and the "sign out and continue" action so signing out re-runs the same check.
+  const mountedRef = useRef(true);
+  const resolveSession = useCallback(async () => {
+    try {
+      const { data } = await authClient.getSession();
+      const currentEmail = data?.user?.email?.toLowerCase();
+      if (currentEmail === email.toLowerCase()) {
+        // Right account. If already verified (e.g. they clicked the verification
+        // link, which auto-signs them in, then returned here) go straight to the
+        // one-click claim; otherwise into the normal auth forms.
+        if (!mountedRef.current) return;
+        setSessionEmail(null);
+        setPhase(
           data?.user?.emailVerified === true
-        ) {
-          setPhase("ready");
-          return;
-        }
-      } catch {
-        // Ignore — fall through to the appropriate auth form.
+            ? "ready"
+            : userExists
+              ? "signin"
+              : "signup",
+        );
+        return;
       }
-      if (active) setPhase(userExists ? "signin" : "signup");
-    })();
-    return () => {
-      active = false;
-    };
+      if (data?.user) {
+        // A DIFFERENT account is signed in. Never render the auth forms (and thus
+        // never fire signUp/signIn) while a wrong session is live.
+        if (!mountedRef.current) return;
+        setSessionEmail(data.user.email);
+        setPhase("mismatch");
+        return;
+      }
+    } catch {
+      // Ignore — fall through to the appropriate auth form.
+    }
+    if (mountedRef.current) setPhase(userExists ? "signin" : "signup");
   }, [email, userExists]);
+
+  // On mount, resolve any existing session.
+  useEffect(() => {
+    mountedRef.current = true;
+    void resolveSession();
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [resolveSession]);
+
+  // Tick the resend cooldown down to zero.
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const id = setInterval(() => {
+      setResendCooldown((c) => (c <= 1 ? 0 : c - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [resendCooldown]);
 
   const resetCaptcha = () => {
     captchaRef.current?.reset();
@@ -153,6 +208,9 @@ export function ClaimClient({
         email,
         password,
         name: name.trim(),
+        // Land the verification link back on THIS claim page (verified +
+        // auto-signed-in) so the mount check drops into the ready-to-claim state.
+        callbackURL,
         fetchOptions: { headers: { "x-captcha-response": captchaToken } },
       });
 
@@ -207,6 +265,10 @@ export function ClaimClient({
       const { error: signInError } = await authClient.signIn.email({
         email,
         password,
+        // If the account is unverified, requireEmailVerification makes Better Auth
+        // auto-resend the verification email using THIS callbackURL — keeping the
+        // return path on the claim page even for the sign-in branch.
+        callbackURL,
         fetchOptions: { headers: { "x-captcha-response": captchaToken } },
       });
 
@@ -251,6 +313,49 @@ export function ClaimClient({
       );
     } catch {
       setError("Something went wrong. Please try again.");
+    }
+  };
+
+  // Wrong-account state: sign out the mismatched session, then re-run the session
+  // check — which drops the user into the normal sign-up / sign-in branch.
+  const handleSignOut = async () => {
+    setError(null);
+    setSubmitting(true);
+    try {
+      await authClient.signOut();
+      setSessionEmail(null);
+      setPhase("loading");
+      await resolveSession();
+    } catch {
+      setError("Couldn't sign you out. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Resend the verification email to the invited address (never a free-typed one),
+  // with a light client-side cooldown so the button can't be hammered.
+  const handleResend = async () => {
+    if (resending || resendCooldown > 0) return;
+    setError(null);
+    setResending(true);
+    try {
+      const { error: resendError } = await authClient.sendVerificationEmail({
+        email,
+        callbackURL,
+      });
+      if (resendError) {
+        toast.error(
+          resendError.message ?? "Couldn't send the verification email.",
+        );
+        return;
+      }
+      toast.success("Verification email sent");
+      setResendCooldown(30);
+    } catch {
+      toast.error("Couldn't send the verification email.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -309,7 +414,48 @@ export function ClaimClient({
     );
   }
 
+  if (phase === "mismatch") {
+    return (
+      <>
+        {SiteHeader}
+        <CardContent className="space-y-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You&apos;re signed in as <strong>{sessionEmail}</strong>, but this
+              invitation was sent to <strong>{email}</strong>. To claim this
+              website you need to continue as <strong>{email}</strong>.
+            </AlertDescription>
+          </Alert>
+          {ErrorAlert}
+          <Button className="w-full" disabled={busy} onClick={handleSignOut}>
+            {busy ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing out…
+              </>
+            ) : (
+              <>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out and continue
+              </>
+            )}
+          </Button>
+          <p className="text-center text-sm text-gray-500">
+            <Link href="/" className="font-medium underline">
+              Go to your dashboard instead
+            </Link>
+          </p>
+        </CardContent>
+      </>
+    );
+  }
+
   if (phase === "verify") {
+    const resendLabel =
+      resendCooldown > 0
+        ? `Resend verification email (${resendCooldown}s)`
+        : "Resend verification email";
     return (
       <>
         {SiteHeader}
@@ -317,17 +463,29 @@ export function ClaimClient({
           <Alert>
             <MailCheck className="h-4 w-4" />
             <AlertDescription>
-              We sent a verification email to <strong>{email}</strong>. Click the
-              link inside, then return to this page to finish claiming your site.
+              Check <strong>{email}</strong> for a verification link — it will
+              bring you back here to finish claiming your site.
             </AlertDescription>
           </Alert>
           {ErrorAlert}
           <Button className="w-full" onClick={handleVerifiedContinue}>
             I&apos;ve verified my email — continue
           </Button>
-          <p className="text-center text-sm text-gray-500">
-            Keep this link handy: {`platform/claim/${code}`}
-          </p>
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={resending || resendCooldown > 0}
+            onClick={handleResend}
+          >
+            {resending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending…
+              </>
+            ) : (
+              resendLabel
+            )}
+          </Button>
         </CardContent>
       </>
     );

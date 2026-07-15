@@ -57,9 +57,9 @@ export function isImageContentType(contentType: string | null): boolean {
 }
 
 /**
- * Resolve the effective template id: default to `"modern"`, and fall back to
- * `"modern"` for any id not in the free-template allow-list (unknown/paid
- * templates never error — they silently downgrade).
+ * Resolve the effective template id: default to `"default"` (the platform's
+ * default template), and fall back to it for any id not in the free-template
+ * allow-list (unknown/paid templates never error — they silently downgrade).
  *
  * @returns the effective id plus whether a fallback was applied (for logging).
  */
@@ -67,7 +67,7 @@ export function resolveTemplateId(
   requested: string | undefined,
   freeTemplateIds: readonly string[],
 ): { templateId: string; fellBack: boolean } {
-  const DEFAULT = "modern";
+  const DEFAULT = "default";
   if (!requested) return { templateId: DEFAULT, fellBack: false };
   if (freeTemplateIds.includes(requested)) {
     return { templateId: requested, fellBack: false };
