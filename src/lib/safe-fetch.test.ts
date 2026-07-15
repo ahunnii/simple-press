@@ -1,14 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { safeFetch, SafeFetchError } from "./safe-fetch";
+
 const lookupMock = vi.fn();
 
 vi.mock("node:dns/promises", () => ({
   default: {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     lookup: (...args: unknown[]) => lookupMock(...args),
   },
 }));
-
-import { safeFetch, SafeFetchError } from "./safe-fetch";
 
 /** Resolve any hostname to a public IP so DNS-lookup tests don't need real network access. */
 function mockPublicDns() {
@@ -64,9 +65,9 @@ describe("safeFetch", () => {
 
   it("rejects a hostname that resolves to a private address (DNS rebinding)", async () => {
     lookupMock.mockResolvedValue([{ address: "169.254.169.254" }]);
-    await expect(safeFetch("https://sneaky.example.com/logo.png")).rejects.toThrow(
-      SafeFetchError,
-    );
+    await expect(
+      safeFetch("https://sneaky.example.com/logo.png"),
+    ).rejects.toThrow(SafeFetchError);
   });
 
   it("rejects redirect responses", async () => {
@@ -127,9 +128,9 @@ describe("safeFetch", () => {
   });
 
   it("rejects non-standard ports", async () => {
-    await expect(safeFetch("https://example.com:8080/logo.png")).rejects.toThrow(
-      /standard web ports/i,
-    );
+    await expect(
+      safeFetch("https://example.com:8080/logo.png"),
+    ).rejects.toThrow(/standard web ports/i);
   });
 
   it("rejects URLs with embedded credentials", async () => {

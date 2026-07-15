@@ -175,8 +175,7 @@ export async function POST(req: NextRequest) {
       // token must NOT be able to sign up with an arbitrary address — reject
       // outright rather than falling through to the invitation-code path.
       if (
-        !artisanCheck.email ||
-        artisanCheck.email.toLowerCase() !== session.user.email.toLowerCase()
+        artisanCheck.email?.toLowerCase() !== session.user.email.toLowerCase()
       ) {
         return NextResponse.json(
           {

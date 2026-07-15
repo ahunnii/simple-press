@@ -105,7 +105,7 @@ export function verifyPartnerRequest(
   // 3. Signature. A missing or non-`v1=` header is malformed; a well-formed
   //    header that doesn't match the recomputed HMAC is a signature failure.
   const sigHeader = req.headers.get("x-partner-signature");
-  if (!sigHeader || !sigHeader.startsWith("v1=")) {
+  if (!sigHeader?.startsWith("v1=")) {
     return { ok: false, reason: "malformed" };
   }
   const expected = signPartnerRequest(opts.rawBody, opts.hmacSecret, ts);
