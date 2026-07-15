@@ -134,6 +134,15 @@ export const backInStockLimiter = makeLazy({
   keyPrefix: "rl:back-in-stock",
 });
 
+// 30 requests per minute per IP — for the machine-to-machine partner
+// provisioning API (Artisanal Futures → SimplePress). Higher than the
+// human-facing limiters since a partner may legitimately provision in bursts.
+export const partnerApiLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:partner-api",
+});
+
 // 10 attempts per minute per IP — for unauthenticated external token lookups
 // (Artisanal Futures). Prevents the public procedure being abused as an
 // unthrottled brute-force / harvesting oracle against the partner API.

@@ -34,13 +34,8 @@ export const externalRouter = createTRPCRouter({
           `${env.ARTISANAL_FUTURES_API_URL}/simplepress?code=${encodeURIComponent(aftoken)}`,
           {
             headers: {
-              // Use a dedicated partner token when configured; fall back to the
-              // internal hash secret only for backward compatibility. The
-              // internal secret also signs Stripe OAuth state, so it should not
-              // be shared with a third party once a distinct token is set.
-              Authorization: `Bearer ${
-                env.ARTISANAL_FUTURES_API_TOKEN ?? env.SIMPLEPRESS_HASH_SECRET
-              }`,
+              // Bearer token for Artisanal Futures API
+              Authorization: `Bearer ${env.ARTISANAL_FUTURES_API_TOKEN}`,
             },
           },
         );

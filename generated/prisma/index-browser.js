@@ -189,6 +189,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   subdomain: 'subdomain',
   customDomain: 'customDomain',
   domainStatus: 'domainStatus',
+  afProvisionCode: 'afProvisionCode',
   templateId: 'templateId',
   ownerEmail: 'ownerEmail',
   supportEmail: 'supportEmail',

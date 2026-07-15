@@ -132,11 +132,12 @@ model Business {
   updatedAt DateTime @updatedAt
 
   // Identity
-  name         String
-  slug         String               @unique // URL-friendly version of name
-  subdomain    String               @unique // "anothershop" for anothershop.myapplication.com
-  customDomain String?              @unique // "anothershop.co"
-  domainStatus BusinessDomainStatus @default(NONE) // none | pending_dns | active
+  name            String
+  slug            String               @unique // URL-friendly version of name
+  subdomain       String               @unique // "anothershop" for anothershop.myapplication.com
+  customDomain    String?              @unique // "anothershop.co"
+  domainStatus    BusinessDomainStatus @default(NONE) // none | pending_dns | active
+  afProvisionCode String?              @unique // Artisanal Futures provisioning idempotency key
 
   // Template & Branding
   templateId String @default("modern") // modern | vintage | minimal
@@ -1164,14 +1165,14 @@ model ReviewVote {
   userId    String?
   ipAddress String?
 
-  // NOTE: The migration replaces these with PARTIAL unique indexes
+  // NOTE: Uniqueness is enforced by hand-written PARTIAL unique indexes
   // (`... WHERE "userId" IS NOT NULL` / `... WHERE "ipAddress" IS NOT NULL`) so that
   // NULL voter identifiers are not treated as distinct (which would let duplicate
   // votes slip past a plain multi-column UNIQUE index). Prisma cannot express partial
-  // indexes in-schema; these `@@unique` lines are kept only to preserve the compound
-  // unique key types in the generated client. See migration p2_schema_integrity.
-  @@unique([reviewId, userId])
-  @@unique([reviewId, ipAddress])
+  // indexes in-schema, and declaring plain `@@unique`s here made every
+  // `db push`/`migrate dev` diff try to re-create them (42P07 collisions with the
+  // partial indexes' names). No code uses the compound unique client keys, so the
+  // `@@unique` declarations were removed. See migration p2_schema_integrity.
   @@index([reviewId])
 }
 
@@ -1290,16 +1291,17 @@ model BackInStockRequest {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   // Prevent duplicate PENDING signups for the same email + product + variant
-  // within a business. NOTE: The migration replaces this with a PARTIAL unique
-  // index (`... WHERE "notifiedAt" IS NULL`) — notified rows are kept as
+  // within a business. NOTE: Uniqueness is enforced by a hand-written PARTIAL
+  // unique index (`... WHERE "notifiedAt" IS NULL`) — notified rows are kept as
   // history by the cron, and a plain UNIQUE would block a legitimate
   // re-subscribe after a notification (silently, via subscribe's P2002 catch).
-  // Prisma cannot express partial indexes in-schema; this `@@unique` line is
-  // kept only to preserve the compound unique key types in the generated
-  // client (same pattern as ReviewVote). See migration p4_backinstock_unique.
+  // Prisma cannot express partial indexes in-schema, and declaring a plain
+  // `@@unique` here made every `db push`/`migrate dev` diff try to re-create it
+  // (42P07 collision with the partial index's name). No code uses the compound
+  // unique client key, so the `@@unique` declaration was removed (same pattern
+  // as ReviewVote). See migration p4_backinstock_unique.
   // Also: Postgres treats NULLs as distinct, so variant-less signups
   // (variantId IS NULL) are still deduped in app code (subscribe's findFirst).
-  @@unique([businessId, productId, variantId, email])
   @@index([businessId, productId])
   @@index([notifiedAt, productId])
   @@index([productId])

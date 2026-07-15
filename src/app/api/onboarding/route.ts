@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { notifyArtisanalFuturesClaimed } from "~/lib/artisanal-futures/notify";
+import { signPartnerRequest } from "~/lib/partner-auth";
 import { authLimiter, getClientIp } from "~/lib/rate-limit";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
 import { auth } from "~/server/better-auth/config";
@@ -12,74 +14,85 @@ import { db } from "~/server/db";
  * Verify an Artisanal Futures artisan token server-side. The artisan onboarding
  * flow is exempt from the invitation code, so the token IS its admission
  * credential and must be validated — otherwise any request could bypass the
- * invite gate by supplying an arbitrary `aftoken`. Fails closed (returns false)
- * on an invalid token OR an unreachable AF API, so an unverified token can never
- * grant the exemption.
+ * invite gate by supplying an arbitrary `aftoken`. Fails closed (`verified:
+ * false`) on an invalid token OR an unreachable AF API, so an unverified token
+ * can never grant the exemption.
+ *
+ * Returns the email AF has bound to this token so the caller can enforce that
+ * the token holder can only sign up with THAT email — otherwise any holder of a
+ * valid token could claim an arbitrary address. `email` is `null` whenever the
+ * token is unverified or the response body can't be parsed.
  */
-async function verifyArtisanToken(aftoken: string): Promise<boolean> {
+async function verifyArtisanToken(
+  aftoken: string,
+): Promise<{ verified: boolean; email: string | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
+    // Sign the canonical GET query string per the partner contract. AF tolerates
+    // missing HMAC during cutover, but send it now so SP is ready. HMAC runs over
+    // the exact `code=<aftoken>` bytes used below.
+    const canonicalQuery = `code=${encodeURIComponent(aftoken)}`;
+    const { timestamp, signature } = signPartnerRequest(
+      canonicalQuery,
+      env.AF_SP_WEBHOOK_SECRET,
+    );
     const res = await fetch(
-      `${env.ARTISANAL_FUTURES_API_URL}/simplepress?code=${encodeURIComponent(aftoken)}`,
+      `${env.ARTISANAL_FUTURES_API_URL}/simplepress?${canonicalQuery}`,
       {
         headers: {
-          Authorization: `Bearer ${env.ARTISANAL_FUTURES_API_TOKEN ?? env.SIMPLEPRESS_HASH_SECRET}`,
+          Authorization: `Bearer ${env.ARTISANAL_FUTURES_API_TOKEN}`,
+          "X-Partner-Timestamp": String(timestamp),
+          "X-Partner-Signature": signature,
         },
         signal: controller.signal,
       },
     );
-    return res.status === 200;
+    if (res.status !== 200) {
+      return { verified: false, email: null };
+    }
+    // Fail closed on any parse error (treat as unverified).
+    const data = (await res.json()) as { email?: unknown };
+    const email = typeof data.email === "string" ? data.email : null;
+    return { verified: email !== null, email };
   } catch (err) {
     Sentry.captureException(err, {
       tags: { route: "onboarding", step: "verify-artisan-token" },
     });
-    return false;
+    return { verified: false, email: null };
   } finally {
     clearTimeout(timeout);
   }
 }
 
 /**
- * Notify Artisanal Futures that an artisan token was successfully used.
- * Non-blocking — a failure here should never prevent store creation.
- * Called server-side so SIMPLEPRESS_HASH_SECRET is never exposed to the client.
+ * Notify Artisanal Futures that an artisan token was successfully used and the
+ * site is live. Non-blocking — a failure here should never prevent store
+ * creation. Delegates to the shared `notifyArtisanalFuturesClaimed` client,
+ * which posts the fixed contract body `{code, event, status, subdomain,
+ * deploymentUrl, customDomain, errorMessage}` with the partner auth headers
+ * (bearer + timestamp + HMAC) and never throws (it reports to Sentry itself).
+ *
+ * In the v1 flow the aftoken IS the AF provision code. `customDomain` carries
+ * the actual bare domain (or null) — never a URL; the storefront URL is built
+ * separately and sent as `deploymentUrl`.
  */
 async function notifyArtisanalFutures(
   aftoken: string,
   subdomain: string,
   customDomain: string | null,
 ): Promise<void> {
-  const storeUrl =
-    customDomain ?? `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
-  try {
-    const res = await fetch(`${env.ARTISANAL_FUTURES_API_URL}/simplepress`, {
-      method: "POST",
-      body: JSON.stringify({
-        artisanToken: aftoken,
-        subdomain,
-        customDomain: storeUrl,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.SIMPLEPRESS_HASH_SECRET}`,
-      },
-    });
-    if (!res.ok) {
-      console.warn(
-        "[Onboarding] AF token update returned non-OK status",
-        res.status,
-      );
-    }
-  } catch (err) {
-    Sentry.captureException(err, {
-      tags: { route: "onboarding", step: "af-token-update" },
-    });
-    console.error(
-      "[Onboarding] Failed to notify Artisanal Futures (non-blocking)",
-      err,
-    );
-  }
+  const deploymentUrl = customDomain
+    ? `https://${customDomain}`
+    : `https://${subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  await notifyArtisanalFuturesClaimed({
+    afProvisionCode: aftoken,
+    event: "claimed",
+    status: "ACTIVE",
+    subdomain,
+    deploymentUrl,
+    customDomain,
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -152,8 +165,29 @@ export async function POST(req: NextRequest) {
     // before creating any store. The artisan flow is exempt from the invite code,
     // but ONLY when its Artisanal Futures token is verified against the AF API —
     // an unverified/forged aftoken must not bypass the invite gate.
-    const artisanVerified = aftoken ? await verifyArtisanToken(aftoken) : false;
-    if (!artisanVerified) {
+    const artisanCheck = aftoken
+      ? await verifyArtisanToken(aftoken)
+      : { verified: false as const, email: null };
+    if (aftoken && artisanCheck.verified) {
+      // Bind the token to the email AF issued it for. `session.user.email` is
+      // already proven to equal `email` (checked above), so comparing against it
+      // pins the signup to the verified session identity. A holder of a valid
+      // token must NOT be able to sign up with an arbitrary address — reject
+      // outright rather than falling through to the invitation-code path.
+      if (
+        !artisanCheck.email ||
+        artisanCheck.email.toLowerCase() !== session.user.email.toLowerCase()
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "This Artisanal Futures link is for a different email address",
+          },
+          { status: 403 },
+        );
+      }
+    } else {
+      // No token, or the token is unverified — require a valid invitation code.
       if (!invitationCode || invitationCode !== env.INVITATION_CODE) {
         return NextResponse.json(
           { error: "Invalid or missing invitation code" },

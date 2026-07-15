@@ -10824,6 +10824,7 @@ export namespace Prisma {
     subdomain: string | null
     customDomain: string | null
     domainStatus: $Enums.BusinessDomainStatus | null
+    afProvisionCode: string | null
     templateId: string | null
     ownerEmail: string | null
     supportEmail: string | null
@@ -10864,6 +10865,7 @@ export namespace Prisma {
     subdomain: string | null
     customDomain: string | null
     domainStatus: $Enums.BusinessDomainStatus | null
+    afProvisionCode: string | null
     templateId: string | null
     ownerEmail: string | null
     supportEmail: string | null
@@ -10904,6 +10906,7 @@ export namespace Prisma {
     subdomain: number
     customDomain: number
     domainStatus: number
+    afProvisionCode: number
     templateId: number
     ownerEmail: number
     supportEmail: number
@@ -10964,6 +10967,7 @@ export namespace Prisma {
     subdomain?: true
     customDomain?: true
     domainStatus?: true
+    afProvisionCode?: true
     templateId?: true
     ownerEmail?: true
     supportEmail?: true
@@ -11004,6 +11008,7 @@ export namespace Prisma {
     subdomain?: true
     customDomain?: true
     domainStatus?: true
+    afProvisionCode?: true
     templateId?: true
     ownerEmail?: true
     supportEmail?: true
@@ -11044,6 +11049,7 @@ export namespace Prisma {
     subdomain?: true
     customDomain?: true
     domainStatus?: true
+    afProvisionCode?: true
     templateId?: true
     ownerEmail?: true
     supportEmail?: true
@@ -11175,6 +11181,7 @@ export namespace Prisma {
     subdomain: string
     customDomain: string | null
     domainStatus: $Enums.BusinessDomainStatus
+    afProvisionCode: string | null
     templateId: string
     ownerEmail: string
     supportEmail: string | null
@@ -11238,6 +11245,7 @@ export namespace Prisma {
     subdomain?: boolean
     customDomain?: boolean
     domainStatus?: boolean
+    afProvisionCode?: boolean
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
@@ -11305,6 +11313,7 @@ export namespace Prisma {
     subdomain?: boolean
     customDomain?: boolean
     domainStatus?: boolean
+    afProvisionCode?: boolean
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
@@ -11349,6 +11358,7 @@ export namespace Prisma {
     subdomain?: boolean
     customDomain?: boolean
     domainStatus?: boolean
+    afProvisionCode?: boolean
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
@@ -11393,6 +11403,7 @@ export namespace Prisma {
     subdomain?: boolean
     customDomain?: boolean
     domainStatus?: boolean
+    afProvisionCode?: boolean
     templateId?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
@@ -11428,7 +11439,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11492,6 +11503,7 @@ export namespace Prisma {
       subdomain: string
       customDomain: string | null
       domainStatus: $Enums.BusinessDomainStatus
+      afProvisionCode: string | null
       templateId: string
       ownerEmail: string
       supportEmail: string | null
@@ -11978,6 +11990,7 @@ export namespace Prisma {
     readonly subdomain: FieldRef<"Business", 'String'>
     readonly customDomain: FieldRef<"Business", 'String'>
     readonly domainStatus: FieldRef<"Business", 'BusinessDomainStatus'>
+    readonly afProvisionCode: FieldRef<"Business", 'String'>
     readonly templateId: FieldRef<"Business", 'String'>
     readonly ownerEmail: FieldRef<"Business", 'String'>
     readonly supportEmail: FieldRef<"Business", 'String'>
@@ -53513,6 +53526,7 @@ export namespace Prisma {
     subdomain: 'subdomain',
     customDomain: 'customDomain',
     domainStatus: 'domainStatus',
+    afProvisionCode: 'afProvisionCode',
     templateId: 'templateId',
     ownerEmail: 'ownerEmail',
     supportEmail: 'supportEmail',
@@ -54754,6 +54768,7 @@ export namespace Prisma {
     subdomain?: StringFilter<"Business"> | string
     customDomain?: StringNullableFilter<"Business"> | string | null
     domainStatus?: EnumBusinessDomainStatusFilter<"Business"> | $Enums.BusinessDomainStatus
+    afProvisionCode?: StringNullableFilter<"Business"> | string | null
     templateId?: StringFilter<"Business"> | string
     ownerEmail?: StringFilter<"Business"> | string
     supportEmail?: StringNullableFilter<"Business"> | string | null
@@ -54820,6 +54835,7 @@ export namespace Prisma {
     subdomain?: SortOrder
     customDomain?: SortOrderInput | SortOrder
     domainStatus?: SortOrder
+    afProvisionCode?: SortOrderInput | SortOrder
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrderInput | SortOrder
@@ -54882,6 +54898,7 @@ export namespace Prisma {
     slug?: string
     subdomain?: string
     customDomain?: string
+    afProvisionCode?: string
     stripeAccountId?: string
     AND?: BusinessWhereInput | BusinessWhereInput[]
     OR?: BusinessWhereInput[]
@@ -54944,7 +54961,7 @@ export namespace Prisma {
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
-  }, "id" | "slug" | "subdomain" | "customDomain" | "stripeAccountId">
+  }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
     id?: SortOrder
@@ -54955,6 +54972,7 @@ export namespace Prisma {
     subdomain?: SortOrder
     customDomain?: SortOrderInput | SortOrder
     domainStatus?: SortOrder
+    afProvisionCode?: SortOrderInput | SortOrder
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrderInput | SortOrder
@@ -55007,6 +55025,7 @@ export namespace Prisma {
     subdomain?: StringWithAggregatesFilter<"Business"> | string
     customDomain?: StringNullableWithAggregatesFilter<"Business"> | string | null
     domainStatus?: EnumBusinessDomainStatusWithAggregatesFilter<"Business"> | $Enums.BusinessDomainStatus
+    afProvisionCode?: StringNullableWithAggregatesFilter<"Business"> | string | null
     templateId?: StringWithAggregatesFilter<"Business"> | string
     ownerEmail?: StringWithAggregatesFilter<"Business"> | string
     supportEmail?: StringNullableWithAggregatesFilter<"Business"> | string | null
@@ -57952,8 +57971,6 @@ export namespace Prisma {
 
   export type ReviewVoteWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    reviewId_userId?: ReviewVoteReviewIdUserIdCompoundUniqueInput
-    reviewId_ipAddress?: ReviewVoteReviewIdIpAddressCompoundUniqueInput
     AND?: ReviewVoteWhereInput | ReviewVoteWhereInput[]
     OR?: ReviewVoteWhereInput[]
     NOT?: ReviewVoteWhereInput | ReviewVoteWhereInput[]
@@ -57963,7 +57980,7 @@ export namespace Prisma {
     userId?: StringNullableFilter<"ReviewVote"> | string | null
     ipAddress?: StringNullableFilter<"ReviewVote"> | string | null
     review?: XOR<ProductReviewScalarRelationFilter, ProductReviewWhereInput>
-  }, "id" | "reviewId_userId" | "reviewId_ipAddress">
+  }, "id">
 
   export type ReviewVoteOrderByWithAggregationInput = {
     id?: SortOrder
@@ -58347,7 +58364,6 @@ export namespace Prisma {
 
   export type BackInStockRequestWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    businessId_productId_variantId_email?: BackInStockRequestBusinessIdProductIdVariantIdEmailCompoundUniqueInput
     AND?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
     OR?: BackInStockRequestWhereInput[]
     NOT?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
@@ -58359,7 +58375,7 @@ export namespace Prisma {
     businessId?: StringFilter<"BackInStockRequest"> | string
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
-  }, "id" | "businessId_productId_variantId_email">
+  }, "id">
 
   export type BackInStockRequestOrderByWithAggregationInput = {
     id?: SortOrder
@@ -58829,6 +58845,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -58895,6 +58912,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -58961,6 +58979,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59027,6 +59046,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59093,6 +59113,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -59137,6 +59158,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59181,6 +59203,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63677,6 +63700,7 @@ export namespace Prisma {
     subdomain?: SortOrder
     customDomain?: SortOrder
     domainStatus?: SortOrder
+    afProvisionCode?: SortOrder
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
@@ -63728,6 +63752,7 @@ export namespace Prisma {
     subdomain?: SortOrder
     customDomain?: SortOrder
     domainStatus?: SortOrder
+    afProvisionCode?: SortOrder
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
@@ -63768,6 +63793,7 @@ export namespace Prisma {
     subdomain?: SortOrder
     customDomain?: SortOrder
     domainStatus?: SortOrder
+    afProvisionCode?: SortOrder
     templateId?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
@@ -65770,16 +65796,6 @@ export namespace Prisma {
     isNot?: ProductReviewWhereInput
   }
 
-  export type ReviewVoteReviewIdUserIdCompoundUniqueInput = {
-    reviewId: string
-    userId: string
-  }
-
-  export type ReviewVoteReviewIdIpAddressCompoundUniqueInput = {
-    reviewId: string
-    ipAddress: string
-  }
-
   export type ReviewVoteCountOrderByAggregateInput = {
     id?: SortOrder
     createdAt?: SortOrder
@@ -65993,13 +66009,6 @@ export namespace Prisma {
   export type ShippingRateSumOrderByAggregateInput = {
     tierIndex?: SortOrder
     priceCents?: SortOrder
-  }
-
-  export type BackInStockRequestBusinessIdProductIdVariantIdEmailCompoundUniqueInput = {
-    businessId: string
-    productId: string
-    variantId: string
-    email: string
   }
 
   export type BackInStockRequestCountOrderByAggregateInput = {
@@ -70051,6 +70060,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -70116,6 +70126,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -70240,6 +70251,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70305,6 +70317,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72267,6 +72280,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -72332,6 +72346,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -72413,6 +72428,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72478,6 +72494,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72543,6 +72560,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -72608,6 +72626,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -72689,6 +72708,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72754,6 +72774,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72856,6 +72877,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -72921,6 +72943,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -73305,6 +73328,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73370,6 +73394,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73920,6 +73945,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -73985,6 +74011,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -74088,6 +74115,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74153,6 +74181,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74510,6 +74539,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -74575,6 +74605,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -74708,6 +74739,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74773,6 +74805,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75064,6 +75097,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -75129,6 +75163,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -75309,6 +75344,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75374,6 +75410,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75476,6 +75513,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -75541,6 +75579,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -75929,6 +75968,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75994,6 +76034,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76360,6 +76401,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -76425,6 +76467,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -76801,6 +76844,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76866,6 +76910,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77746,6 +77791,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -77811,6 +77857,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -77972,6 +78019,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78037,6 +78085,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78287,6 +78336,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -78352,6 +78402,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -78732,6 +78783,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78797,6 +78849,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78986,6 +79039,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -79051,6 +79105,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -79270,6 +79325,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79335,6 +79391,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79432,6 +79489,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -79497,6 +79555,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -79578,6 +79637,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79643,6 +79703,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79708,6 +79769,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -79773,6 +79835,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -79854,6 +79917,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79919,6 +79983,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79984,6 +80049,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -80049,6 +80115,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -80130,6 +80197,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80195,6 +80263,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80260,6 +80329,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -80325,6 +80395,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -80438,6 +80509,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80503,6 +80575,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80683,6 +80756,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -80748,6 +80822,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -80878,6 +80953,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80943,6 +81019,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81063,6 +81140,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -81128,6 +81206,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -81258,6 +81337,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81323,6 +81403,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82061,6 +82142,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -82126,6 +82208,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -82244,6 +82327,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82309,6 +82393,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82417,6 +82502,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -82482,6 +82568,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -82563,6 +82650,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82628,6 +82716,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82693,6 +82782,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -82758,6 +82848,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -82861,6 +82952,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82926,6 +83018,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83158,6 +83251,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -83223,6 +83317,7 @@ export namespace Prisma {
     subdomain: string
     customDomain?: string | null
     domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
     templateId?: string
     ownerEmail: string
     supportEmail?: string | null
@@ -83403,6 +83498,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83468,6 +83564,7 @@ export namespace Prisma {
     subdomain?: StringFieldUpdateOperationsInput | string
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
