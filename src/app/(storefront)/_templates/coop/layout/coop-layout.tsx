@@ -113,9 +113,10 @@ export async function CoopLayout({
        * outline rule (`.default-template *:focus-visible`) actually applies,
        * which is a pure a11y improvement coop had no conflicting rule for.
        *
-       * NOTE: `builders` (the other partial/fallback template) has this same
-       * gap — `BuildersLayout` doesn't apply `.default-template` either — but
-       * is out of scope for this fix (see registry.ts `builders` entry).
+       * `builders` (the other partial/fallback template) had this same gap;
+       * `BuildersLayout` now applies `.default-template` too, using the same
+       * reasoning (see its layout file for the `.builders`-specific cascade
+       * notes).
        */}
       <style dangerouslySetInnerHTML={{ __html: buildCoopFontFaceCss() }} />
 

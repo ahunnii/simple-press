@@ -7,6 +7,7 @@ import { toRouteHandler } from "@better-upload/server/adapters/next";
 import { env } from "~/env";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
+import { ROUTE_MAX_FILES } from "~/lib/uploads";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
@@ -209,7 +210,10 @@ const router: Router = {
     images: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
-      maxFiles: 10,
+      // Keep in sync with ROUTE_MAX_FILES.images (src/lib/uploads.ts) — the
+      // client's useDeferredImageUpload hook derives its batch size from that
+      // shared constant, so it must match the value enforced here.
+      maxFiles: ROUTE_MAX_FILES.images,
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
@@ -235,7 +239,8 @@ const router: Router = {
     galleryImages: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
-      maxFiles: 10,
+      // Keep in sync with ROUTE_MAX_FILES.galleryImages (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.galleryImages,
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
@@ -260,7 +265,8 @@ const router: Router = {
     testimonials: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
-      maxFiles: 5,
+      // Keep in sync with ROUTE_MAX_FILES.testimonials (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.testimonials,
       maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, clientMetadata }) => {
         const code = (clientMetadata as { code?: string } | undefined)?.code;

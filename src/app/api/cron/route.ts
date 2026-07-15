@@ -7,7 +7,9 @@
 //   4. backInStock         — email shoppers whose requested product/variant is purchasable again
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
-// secret is unset, the endpoint always returns 401.
+// secret is unset, the endpoint always returns 401 — and logs a one-time
+// console.warn + Sentry warning-level message so the misconfiguration (and
+// the resulting silent loss of all scheduled jobs) is observable.
 //
 // Schedule it externally (system crontab, Coolify scheduled task, etc.), e.g.:
 //   */15 * * * * curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://<platform-domain>/api/cron
@@ -27,9 +29,34 @@ import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { parseCardAdditionalFields } from "~/lib/products";
 import { db } from "~/server/db";
 
+// Fires at most once per server process — CRON_SECRET being unset means every
+// scheduled job (stale-reservation sweep, scheduled publish, back-in-stock
+// emails) silently never runs, which is easy to miss since the endpoint just
+// returns a routine-looking 401. This makes the misconfiguration loud without
+// spamming Sentry/logs on every cron tick (typically every few minutes).
+let missingSecretWarned = false;
+
+function warnMissingCronSecret(): void {
+  if (missingSecretWarned) return;
+  missingSecretWarned = true;
+
+  const message =
+    "CRON_SECRET is not set — /api/cron is rejecting all requests, so " +
+    "scheduled jobs (stale-reservation sweep, scheduled publish, back-in-stock " +
+    "emails) are silently never running. Set CRON_SECRET to enable the cron endpoint.";
+  console.warn(message);
+  Sentry.captureMessage(message, {
+    level: "warning",
+    tags: { "cron.job": "auth-config" },
+  });
+}
+
 function isAuthorized(request: Request): boolean {
   const secret = env.CRON_SECRET;
-  if (!secret) return false;
+  if (!secret) {
+    warnMissingCronSecret();
+    return false;
+  }
 
   const header = request.headers.get("authorization") ?? "";
   // Hash both sides so timingSafeEqual never throws on length mismatch.

@@ -368,6 +368,21 @@ export const platformRouter = createTRPCRouter({
         });
       }
 
+      // Last-owner protection: never let a business be left with zero OWNERs by
+      // demoting its final OWNER to a lesser role.
+      if (membership.role === "OWNER" && input.role !== "OWNER") {
+        const ownerCount = await ctx.db.businessMembership.count({
+          where: { businessId: membership.businessId, role: "OWNER" },
+        });
+        if (ownerCount <= 1) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Cannot demote the last owner of this business. Promote another member to Owner first.",
+          });
+        }
+      }
+
       const updatedMembership = await ctx.db.businessMembership.update({
         where: { id: input.membershipId },
         data: { role: input.role },
@@ -403,6 +418,21 @@ export const platformRouter = createTRPCRouter({
           code: "NOT_FOUND",
           message: "Membership not found",
         });
+      }
+
+      // Last-owner protection: never let a business be left with zero OWNERs by
+      // deleting its final OWNER membership.
+      if (membership.role === "OWNER") {
+        const ownerCount = await ctx.db.businessMembership.count({
+          where: { businessId: membership.businessId, role: "OWNER" },
+        });
+        if (ownerCount <= 1) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Cannot delete the last owner of this business. Transfer ownership first.",
+          });
+        }
       }
 
       await ctx.db.businessMembership.delete({

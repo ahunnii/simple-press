@@ -1289,6 +1289,17 @@ model BackInStockRequest {
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
+  // Prevent duplicate PENDING signups for the same email + product + variant
+  // within a business. NOTE: The migration replaces this with a PARTIAL unique
+  // index (`... WHERE "notifiedAt" IS NULL`) — notified rows are kept as
+  // history by the cron, and a plain UNIQUE would block a legitimate
+  // re-subscribe after a notification (silently, via subscribe's P2002 catch).
+  // Prisma cannot express partial indexes in-schema; this `@@unique` line is
+  // kept only to preserve the compound unique key types in the generated
+  // client (same pattern as ReviewVote). See migration p4_backinstock_unique.
+  // Also: Postgres treats NULLs as distinct, so variant-less signups
+  // (variantId IS NULL) are still deduped in app code (subscribe's findFirst).
+  @@unique([businessId, productId, variantId, email])
   @@index([businessId, productId])
   @@index([notifiedAt, productId])
   @@index([productId])

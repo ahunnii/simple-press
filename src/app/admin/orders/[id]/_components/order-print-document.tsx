@@ -231,12 +231,25 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
               <span className="tabular-nums">{formatPrice(order.total)}</span>
             </div>
             {(order.refundAmountCents ?? 0) > 0 && (
-              <div className="flex justify-between font-medium">
-                <span>Refunded</span>
-                <span className="tabular-nums">
-                  -{formatPrice(order.refundAmountCents ?? 0)}
-                </span>
-              </div>
+              <>
+                <div className="flex justify-between font-medium">
+                  <span>Refunded</span>
+                  <span className="tabular-nums">
+                    -{formatPrice(order.refundAmountCents ?? 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-black pt-1.5 font-bold">
+                  <span>Amount Due</span>
+                  <span className="tabular-nums">
+                    {formatPrice(
+                      Math.max(
+                        0,
+                        order.total - (order.refundAmountCents ?? 0),
+                      ),
+                    )}
+                  </span>
+                </div>
+              </>
             )}
           </div>
         </div>

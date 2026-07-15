@@ -5,7 +5,11 @@ import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discoun
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { discountLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
-import { discountFormSchema } from "~/lib/validators/discounts";
+import {
+  DISCOUNT_DATE_RANGE_ERROR,
+  discountFormSchema,
+  validateDiscountDateRange,
+} from "~/lib/validators/discounts";
 import {
   createTRPCRouter,
   featureGate,
@@ -47,6 +51,18 @@ export const discountRouter = createTRPCRouter({
     .input(discountFormSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      if (
+        !validateDiscountDateRange({
+          startsAt: input.startsAt,
+          expiresAt: input.expiresAt,
+        })
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: DISCOUNT_DATE_RANGE_ERROR,
+        });
+      }
 
       const existingCode = await ctx.db.discountCode.findFirst({
         where: {
@@ -91,6 +107,18 @@ export const discountRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      if (
+        !validateDiscountDateRange({
+          startsAt: input.startsAt,
+          expiresAt: input.expiresAt,
+        })
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: DISCOUNT_DATE_RANGE_ERROR,
+        });
+      }
 
       const codeTaken = await ctx.db.discountCode.findFirst({
         where: {

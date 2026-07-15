@@ -630,6 +630,16 @@ export function VariantManager({
                         placeholder={(basePrice / 100).toFixed(2)}
                         className="h-8"
                       />
+                      {variant.price === 0 ? (
+                        <p className="text-destructive mt-1 text-xs">
+                          $0 isn&apos;t a valid override — clear this to inherit
+                          the base price.
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground mt-1 text-[11px]">
+                          Blank inherits the base price.
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -657,6 +667,12 @@ export function VariantManager({
                         placeholder="Optional"
                         className="h-8"
                       />
+                      {variant.compareAtPrice === 0 && (
+                        <p className="text-destructive mt-1 text-xs">
+                          $0 isn&apos;t valid — leave blank if there&apos;s no
+                          compare-at price.
+                        </p>
+                      )}
                     </div>
 
                     {trackInventory && (

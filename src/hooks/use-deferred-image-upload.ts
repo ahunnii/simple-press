@@ -6,10 +6,22 @@ import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
 import type { PendingFile } from "~/components/inputs/pending-image-grid";
-import { getImageDimensions, getStoredPath } from "~/lib/uploads";
+import {
+  getImageDimensions,
+  getStoredPath,
+  ROUTE_MAX_FILES,
+} from "~/lib/uploads";
 import { api } from "~/trpc/react";
 
-/** Maximum files per single upload request (matches the `images` route). */
+/**
+ * Default/fallback maximum files per single upload request. This is only
+ * used when `config.route` isn't present in `ROUTE_MAX_FILES` (src/lib/uploads.ts)
+ * — for any registered route, the real per-route server cap from that shared
+ * constant is used instead (see `batchSize` below), so this hook can never
+ * silently batch above what the server's `maxFiles` will accept. If you add a
+ * new multi-file route to `src/app/api/upload/route.ts`, add its cap to
+ * `ROUTE_MAX_FILES` too — don't rely on this fallback.
+ */
 const UPLOAD_BATCH_SIZE = 10;
 
 /** Maximum file size accepted by the `images` route: 5 MB. */
@@ -68,6 +80,9 @@ export function useDeferredImageUpload(
   config?: DeferredImageUploadConfig,
 ): UseDeferredImageUpload {
   const route = config?.route ?? "images";
+  // Clamp to the server route's real `maxFiles` (src/app/api/upload/route.ts)
+  // when known, so this hook can't drift out of sync with the server cap.
+  const batchSize = ROUTE_MAX_FILES[route] ?? UPLOAD_BATCH_SIZE;
 
   const nextIdRef = useRef(0);
   // Keep a ref mirror of pendingFiles so the unmount cleanup can revoke
@@ -201,10 +216,11 @@ export function useDeferredImageUpload(
         }),
       );
 
-      // Split into batches of at most UPLOAD_BATCH_SIZE (server route cap).
+      // Split into batches of at most `batchSize` (the route's server-side
+      // maxFiles cap, from ROUTE_MAX_FILES — see comment above).
       const batches: PendingFile[][] = [];
-      for (let i = 0; i < snapshot.length; i += UPLOAD_BATCH_SIZE) {
-        batches.push(snapshot.slice(i, i + UPLOAD_BATCH_SIZE));
+      for (let i = 0; i < snapshot.length; i += batchSize) {
+        batches.push(snapshot.slice(i, i + batchSize));
       }
 
       // Result list populated in original file order.
@@ -253,7 +269,7 @@ export function useDeferredImageUpload(
     } finally {
       setIsUploading(false);
     }
-  }, [pendingFiles, uploadHook, discard]);
+  }, [pendingFiles, uploadHook, discard, batchSize]);
 
   return {
     pendingFiles,

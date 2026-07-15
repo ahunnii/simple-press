@@ -12,7 +12,11 @@ import { toast } from "sonner";
 import type { DiscountFormSchema } from "~/lib/validators/discounts";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { cn } from "~/lib/utils";
-import { discountFormSchema } from "~/lib/validators/discounts";
+import {
+  DISCOUNT_DATE_RANGE_ERROR,
+  discountFormSchema,
+  validateDiscountDateRange,
+} from "~/lib/validators/discounts";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -171,6 +175,22 @@ export function DiscountForm({ initialDiscount }: Props) {
       form.setError("value", {
         type: "manual",
         message: "Percentage discount cannot exceed 100%",
+      });
+      return;
+    }
+
+    // Same cross-field rule the server enforces (discount.create/update) —
+    // catch it here so the owner gets an inline field error instead of a
+    // round-trip BAD_REQUEST.
+    if (
+      !validateDiscountDateRange({
+        startsAt: data.startsAt,
+        expiresAt: data.expiresAt,
+      })
+    ) {
+      form.setError("expiresAt", {
+        type: "manual",
+        message: DISCOUNT_DATE_RANGE_ERROR,
       });
       return;
     }

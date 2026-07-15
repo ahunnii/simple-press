@@ -29,7 +29,24 @@ export async function BuildersLayout({
 
   return (
     <div
-      className={`${fontDisplay.variable} ${fontBody.variable} builders`}
+      // `default-template` is added alongside `builders` so that DEFAULT-TEMPLATE
+      // FALLBACK pages (Shop, Cart, Checkout, Product, Blog, Account, etc. —
+      // builders is a partial template; see registry.ts `builders` entry,
+      // "everything unlisted falls back to Default") pick up the
+      // `.default-template` font/radius tokens and focus-visible ring rules
+      // defined in globals.css (~L339-364), instead of rendering unstyled with
+      // no visible keyboard focus indicator.
+      //
+      // Safe for builders' OWN pages too: `.builders` (globals.css ~L3721)
+      // sets `--font-sans`/`--font-serif`/`--radius` and is declared later in
+      // the stylesheet than `.default-template`, so — at equal specificity —
+      // it wins the cascade for those tokens. `border-radius` is additionally
+      // pinned via `!important` on all `.builders` descendants. The shared
+      // `*:focus-visible` outline rules are near-duplicates (builders' wins
+      // outline/outline-offset by source order; default-template's extra
+      // white box-shadow ring still layers on top as a pure a11y bonus) —
+      // same mechanism already verified for `CoopLayout`.
+      className={`${fontDisplay.variable} ${fontBody.variable} builders default-template`}
       style={{
         fontFamily: "var(--font-builders-body, 'Agdasima', sans-serif)",
         color: "var(--builders-ink, #131313)",

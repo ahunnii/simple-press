@@ -293,8 +293,15 @@ export function ProductForm({
   const [collectionSearch, setCollectionSearch] = useState("");
 
   // Variants state (kept separate due to complex nested structure and VariantManager component)
+  // Stored price/compareAtPrice of 0 (persisted by the old form's `?? priceInCents`
+  // fallback) means "inherit the base price" at runtime — normalize to undefined
+  // on load so the submit-time $0 guard doesn't block saving legacy products.
   const [variants, setVariants] = useState<FormVariant[]>(
-    (product?.variants as FormVariant[]) ?? [],
+    ((product?.variants as FormVariant[]) ?? []).map((v) => ({
+      ...v,
+      price: v.price === 0 ? undefined : v.price,
+      compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
+    })),
   );
 
   const storedAdditional = parseStoredAdditionalFields(
@@ -476,6 +483,18 @@ export function ProductForm({
   const onSubmit = async (data: ProductFormSchema) => {
     const createAnother = createAnotherRef.current;
     createAnotherRef.current = false;
+
+    // A variant price of exactly $0 is not a real override — the storefront
+    // treats 0 as "inherit the base product price" (a deliberate guard against
+    // accidental $0 charges). Reject it so the owner leaves the field blank to
+    // inherit, or enters a positive amount to override, rather than silently
+    // getting the base price when they typed 0.
+    if (variants.some((v) => v.price === 0 || v.compareAtPrice === 0)) {
+      toast.error(
+        "A variant price can't be $0. Leave it blank to inherit the base price, or enter an amount above $0.",
+      );
+      return;
+    }
 
     // Convert price to cents
     const priceInCents = Math.round(data.price * 100);

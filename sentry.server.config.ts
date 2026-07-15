@@ -4,6 +4,13 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+// Optional release identifier — mirrors src/instrumentation-client.ts so
+// server- and client-side events group under the same release. No dedicated
+// release/commit-SHA env var exists in this project yet; set
+// NEXT_PUBLIC_APP_VERSION in the deploy environment to enable it. Read
+// directly (not through env.js) so it stays optional and never fails the build.
+const release = process.env.NEXT_PUBLIC_APP_VERSION ?? undefined;
+
 Sentry.init({
   dsn: "https://5e6a011a5bdc2f14efa396319877120e@o4511181241384960.ingest.us.sentry.io/4511181245972480",
 
@@ -18,4 +25,7 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false,
+
+  // Tag events with the deploy version, if known — see `release` comment above.
+  release,
 });

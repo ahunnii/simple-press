@@ -58347,6 +58347,7 @@ export namespace Prisma {
 
   export type BackInStockRequestWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    businessId_productId_variantId_email?: BackInStockRequestBusinessIdProductIdVariantIdEmailCompoundUniqueInput
     AND?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
     OR?: BackInStockRequestWhereInput[]
     NOT?: BackInStockRequestWhereInput | BackInStockRequestWhereInput[]
@@ -58358,7 +58359,7 @@ export namespace Prisma {
     businessId?: StringFilter<"BackInStockRequest"> | string
     product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
-  }, "id">
+  }, "id" | "businessId_productId_variantId_email">
 
   export type BackInStockRequestOrderByWithAggregationInput = {
     id?: SortOrder
@@ -65992,6 +65993,13 @@ export namespace Prisma {
   export type ShippingRateSumOrderByAggregateInput = {
     tierIndex?: SortOrder
     priceCents?: SortOrder
+  }
+
+  export type BackInStockRequestBusinessIdProductIdVariantIdEmailCompoundUniqueInput = {
+    businessId: string
+    productId: string
+    variantId: string
+    email: string
   }
 
   export type BackInStockRequestCountOrderByAggregateInput = {

@@ -52,6 +52,11 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
     f["coop.global.header.galleryHref"] ?? "/project-gallery-page";
 
   const businessName = business?.name ?? "Building Cooperatively";
+  // Owner-uploaded logo takes priority (matches every other template, e.g.
+  // DefaultHeader's `business.siteContent?.logoUrl` check). Falls back to
+  // the hardcoded clone logo so the pixel-exact demo keeps looking right
+  // when no owner logo has been set.
+  const ownerLogoUrl = business?.siteContent?.logoUrl;
   const navLinkColorClass = overlay
     ? "text-[var(--coop-background)]"
     : "text-[var(--coop-color-001)]";
@@ -80,9 +85,9 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
               <img
                 className="block w-20 max-coop-md:h-19.5"
                 alt={businessName}
-                sizes="240px"
-                src={LOGO_SRC}
-                srcSet={LOGO_SRC_SET}
+                {...(ownerLogoUrl
+                  ? { src: ownerLogoUrl }
+                  : { sizes: "240px", src: LOGO_SRC, srcSet: LOGO_SRC_SET })}
               />
             </Link>
           </div>
@@ -140,9 +145,9 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
               <img
                 className="block h-29 w-30 max-w-30 overflow-clip"
                 alt={businessName}
-                sizes="320px"
-                src={LOGO_SRC}
-                srcSet={LOGO_SRC_SET}
+                {...(ownerLogoUrl
+                  ? { src: ownerLogoUrl }
+                  : { sizes: "320px", src: LOGO_SRC, srcSet: LOGO_SRC_SET })}
               />
             </Link>
           </div>

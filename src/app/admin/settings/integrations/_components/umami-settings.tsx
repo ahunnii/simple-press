@@ -165,9 +165,24 @@ export function UmamiSettings({ business }: Props) {
               <div>
                 <Label htmlFor="umamiEnabled">Enable Analytics</Label>
                 <p className="text-muted-foreground text-sm">
-                  Adds the tracking script to every storefront page and turns
-                  on the admin Analytics dashboard. Leave off to keep both
-                  disabled even if a Website ID is saved above.
+                  Adds the tracking script to every storefront page, which
+                  starts collecting visit data right away. Leave off to
+                  collect nothing, regardless of the Website ID saved above.
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  This is independent of the{" "}
+                  <Link
+                    href="/admin/settings/features"
+                    className="underline underline-offset-2"
+                  >
+                    Analytics feature flag
+                  </Link>
+                  : this toggle controls whether data is collected, while the
+                  feature flag controls whether the in-admin Analytics
+                  dashboard is visible. Turning this on without the feature
+                  flag enabled means data is collected but you can&apos;t view
+                  it in-app yet; turning the feature flag on without this
+                  toggle enabled shows an empty dashboard.
                 </p>
               </div>
               <Switch
