@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -27,6 +28,9 @@ export async function ModernTestimonialsPage({
       subtitle={f["modern.testimonials.tagline"]}
       excerpt={f["modern.testimonials.description"]}
       sectionAttrs={sectionGroupAttr("testimonials", "page")}
+      titleFieldKey="modern.testimonials.header"
+      subtitleFieldKey="modern.testimonials.tagline"
+      excerptFieldKey="modern.testimonials.description"
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -95,23 +99,41 @@ export async function ModernTestimonialsPage({
                   </article>
                 ))}
               </div>
-              <div
-                className="bg-muted/40 mt-12 rounded-2xl px-8 py-12 text-center"
-                {...sectionGroupAttr("testimonials", "call-to-action")}
-              >
-                <h2 className="text-2xl font-bold">
-                  {f["modern.testimonials.call-to-action.header"]}
-                </h2>
-                <p className="text-muted-foreground mt-2">
-                  {f["modern.testimonials.call-to-action.text"]}
-                </p>
-                <Link
-                  href="/testimonials/submit"
-                  className="bg-primary text-primary-foreground mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+              {isSectionVisible(
+                business?.siteContent?.customFields,
+                "modern",
+                "testimonials.call-to-action",
+              ) && (
+                <div
+                  className="bg-muted/40 mt-12 rounded-2xl px-8 py-12 text-center"
+                  {...sectionGroupAttr("testimonials", "call-to-action")}
                 >
-                  {f["modern.testimonials.call-to-action.button-text"]}
-                </Link>
-              </div>
+                  <h2
+                    className="text-2xl font-bold"
+                    {...fieldAttr("modern.testimonials.call-to-action.header")}
+                  >
+                    {f["modern.testimonials.call-to-action.header"]}
+                  </h2>
+                  <p
+                    className="text-muted-foreground mt-2"
+                    {...fieldAttr("modern.testimonials.call-to-action.text")}
+                  >
+                    {f["modern.testimonials.call-to-action.text"]}
+                  </p>
+                  <Link
+                    href="/testimonials/submit"
+                    className="bg-primary text-primary-foreground mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
+                  >
+                    <span
+                      {...fieldAttr(
+                        "modern.testimonials.call-to-action.button-text",
+                      )}
+                    >
+                      {f["modern.testimonials.call-to-action.button-text"]}
+                    </span>
+                  </Link>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -71,14 +71,20 @@ function ViiToc({
     // Inject IDs into rendered headings and build the TOC list
     const nodes = el.querySelectorAll("h2, h3");
     const list: Heading[] = [];
+    const seen = new Map<string, number>();
     nodes.forEach((node) => {
       const text = node.textContent?.trim() ?? "";
       if (!text) return;
-      const id = text
+      const base = text
         .toLowerCase()
         .replace(/[^\w\s-]/g, "")
         .trim()
         .replace(/\s+/g, "-");
+      // De-duplicate: two identical-text headings would otherwise collide on
+      // the same DOM id, breaking anchors and scroll-spy for the later one.
+      const count = seen.get(base) ?? 0;
+      seen.set(base, count + 1);
+      const id = count === 0 ? base : `${base}-${count + 1}`;
       node.id = id;
       list.push({ id, text, level: node.tagName === "H2" ? 2 : 3 });
     });

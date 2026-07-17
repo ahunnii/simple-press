@@ -38,6 +38,13 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Builders",
     subdomains: ["buildingcooperatively", "detroit-coop"],
   },
+  // Exact replica of buildingcooperatively.com (short-lived demo of their
+  // existing site; ideally they migrate to `builders`). "demo" is included so
+  // runtime QA can switch the demo business to this template.
+  coop: {
+    label: "Coop",
+    subdomains: ["buildingcooperatively", "demo"],
+  },
   sledge: {
     label: "Sledge",
     subdomains: ["judysledge"],
@@ -45,6 +52,11 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
   vii: {
     label: "Skinbar VII",
     subdomains: ["skinbar-vii", "demo"],
+  },
+  // Throwaway sp-new-template skill test template — safe to delete.
+  testkit: {
+    label: "Testkit",
+    subdomains: ["testkit"],
   },
 };
 
@@ -81,6 +93,21 @@ export const getCommercialTemplateSubdomains = (): string[] => {
     (info) => info.subdomains,
   );
 };
+
+// Template ids that are free / generic and may be offered to any business
+// (e.g. in onboarding and the public marketing showcase). Excludes every
+// client-owned commercial template.
+export const getFreeTemplateIds = (): string[] =>
+  AVAILABLE_FREE_TEMPLATES.map((t) => t.value);
+
+// Whether a given business (identified by its subdomain) is allowed to use a
+// template. Free templates are always allowed; commercial templates only for
+// their owning subdomain. Mirrors getAvailableTemplates (all allowed in dev).
+export const isTemplateAvailableForSubdomain = (
+  templateId: string,
+  subdomain: string,
+): boolean =>
+  getAvailableTemplates(subdomain).some((t) => t.value === templateId);
 
 export const getAvailableTemplates = (subdomain: string) => {
   // In development, show all templates

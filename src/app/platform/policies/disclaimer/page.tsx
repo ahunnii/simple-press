@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "Disclaimer | SimplePress",
+  description: "SimplePress platform warranty exclusions, liability limitations, and merchant responsibility.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/disclaimer`,
+  },
+};
 
 export default function DisclaimerPage() {
   return (

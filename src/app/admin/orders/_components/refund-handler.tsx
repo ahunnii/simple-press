@@ -51,18 +51,35 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const utils = api.useUtils();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [restockItems, setRestockItems] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
+  // Remaining refundable = order total minus what has already been refunded.
+  // On a partially-refunded order the remainder is the true ceiling — defaulting
+  // to order.total would over-request and the server (which caps at the
+  // remaining refundable) would reject it.
+  const alreadyRefunded = order.refundAmountCents ?? 0;
+  const remainingRefundable = order.total - alreadyRefunded;
+
   const [amountDollars, setAmountDollars] = useState(
-    (order.total / 100).toFixed(2),
+    (remainingRefundable / 100).toFixed(2),
   );
 
-  const maxDollars = order.total / 100;
+  const maxDollars = remainingRefundable / 100;
   const amountCents = Math.round(parseFloat(amountDollars) * 100);
   const isValidAmount =
-    !isNaN(amountCents) && amountCents > 0 && amountCents <= order.total;
-  const isPartial = isValidAmount && amountCents < order.total;
+    !isNaN(amountCents) && amountCents > 0 && amountCents <= remainingRefundable;
+  const isPartial = isValidAmount && amountCents < remainingRefundable;
+
+  const validateAmount = (value: string): string | null => {
+    if (!value.trim()) return "Amount is required";
+    const cents = Math.round(parseFloat(value) * 100);
+    if (isNaN(cents) || cents <= 0 || cents > remainingRefundable) {
+      return `Amount must be between $0.01 and ${formatPrice(remainingRefundable)}`;
+    }
+    return null;
+  };
 
   const refundMutation = api.order.refund.useMutation({
     onSuccess: () => {
@@ -85,7 +102,12 @@ function StripeRefundDialog({ order }: { order: Order }) {
   });
 
   const handleRefund = () => {
-    if (!isValidAmount) return;
+    const validationError = validateAmount(amountDollars);
+    if (validationError) {
+      setAmountError(validationError);
+      return;
+    }
+    setAmountError(null);
     refundMutation.mutate({
       orderId: order.id,
       amount: amountCents,
@@ -97,8 +119,17 @@ function StripeRefundDialog({ order }: { order: Order }) {
 
   const isProcessing = refundMutation.isPending;
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setIsOpen(nextOpen);
+    if (!nextOpen) {
+      setError(null);
+      setAmountError(null);
+      setAmountDollars((remainingRefundable / 100).toFixed(2));
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full" size="sm">
           <RefreshCw className="mr-2 h-4 w-4" />
@@ -126,7 +157,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
             <Label htmlFor="refund-amount">
               Refund amount{" "}
               <span className="text-muted-foreground text-xs font-normal">
-                (max {formatPrice(order.total)})
+                (max {formatPrice(remainingRefundable)})
               </span>
             </Label>
             <div className="relative">
@@ -141,17 +172,22 @@ function StripeRefundDialog({ order }: { order: Order }) {
                 step="0.01"
                 className="pl-7"
                 value={amountDollars}
-                onChange={(e) => setAmountDollars(e.target.value)}
+                onChange={(e) => {
+                  setAmountDollars(e.target.value);
+                  setAmountError(validateAmount(e.target.value));
+                }}
+                onBlur={(e) => setAmountError(validateAmount(e.target.value))}
+                aria-invalid={!!amountError}
               />
             </div>
-            {isPartial && (
+            {isPartial && !amountError && (
               <p className="text-muted-foreground text-xs">
                 Partial refund — customer keeps the difference
               </p>
             )}
-            {!isValidAmount && amountDollars !== "" && (
-              <p className="text-destructive text-xs">
-                Enter a valid amount up to {formatPrice(order.total)}
+            {amountError && (
+              <p className="text-destructive text-sm" role="alert">
+                {amountError}
               </p>
             )}
           </div>
@@ -215,7 +251,7 @@ function StripeRefundDialog({ order }: { order: Order }) {
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => setIsOpen(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isProcessing}
           >
             Cancel
@@ -394,16 +430,17 @@ function ManualRefundDialog({ order }: { order: Order }) {
 // ─── Public export ────────────────────────────────────────────────────────────
 
 export function RefundHandler({ order }: Props) {
+  // Gate on paymentStatus "paid" — that's the only state where refundable
+  // money is held. This includes partially-refunded orders (they stay
+  // "paid"; the server supports refunding the remainder) and excludes
+  // fully-refunded/disputed/unpaid orders. Deliberately does NOT exclude
+  // cancelled orders — a paid-then-cancelled order must remain refundable,
+  // and the server mutations allow it.
   const canStripeRefund =
-    (order.status === "paid" || order.status === "fulfilled") &&
-    !!order.stripePaymentIntentId;
+    order.paymentStatus === "paid" && !!order.stripePaymentIntentId;
 
   const canManualRefund =
-    (order.status === "paid" ||
-      order.status === "fulfilled" ||
-      order.paymentStatus === "paid") &&
-    !order.stripePaymentIntentId &&
-    order.status !== "refunded";
+    order.paymentStatus === "paid" && !order.stripePaymentIntentId;
 
   if (canStripeRefund) return <StripeRefundDialog order={order} />;
   if (canManualRefund) return <ManualRefundDialog order={order} />;

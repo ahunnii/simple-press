@@ -11,8 +11,8 @@ const aboutHeroData: TemplateField[] = [
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
-    defaultValue: "Building Cooperatively",
-    placeholder: "Building Cooperatively",
+    defaultValue: "Our Story",
+    placeholder: "Our Story",
   },
   {
     key: "builders.about.hero-subtitle",

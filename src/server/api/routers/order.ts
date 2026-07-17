@@ -13,7 +13,7 @@ import {
   sendOrderRefunded,
   sendOrderShipped,
 } from "~/lib/email/templates";
-import { restorePoolInventory } from "~/lib/inventory";
+import { deductPoolInventory, restorePoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import {
@@ -33,6 +33,7 @@ import {
   createTRPCRouter,
   featureGate,
   ownerAdminProcedure,
+  staffProcedure,
 } from "~/server/api/trpc";
 
 const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
@@ -41,8 +42,56 @@ const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   fraudulent: "Fraudulent order",
 };
 
+type ShipmentItemRequest = { orderItemId: string; quantity: number };
+
+/**
+ * Validates requested per-item shipment quantities against what is still
+ * unfulfilled on the order — cumulatively across every shipment in the
+ * request, so two packages can't both claim the same remaining unit.
+ * Returns the aggregated requested quantity per orderItemId.
+ * Throws BAD_REQUEST naming the offending item.
+ */
+function aggregateAndValidateShipmentItems(
+  orderItems: {
+    id: string;
+    productName: string;
+    quantity: number;
+    fulfilledQuantity: number;
+  }[],
+  shipmentItemLists: ShipmentItemRequest[][],
+): Map<string, number> {
+  const itemMap = new Map(orderItems.map((item) => [item.id, item]));
+  const requested = new Map<string, number>();
+
+  for (const items of shipmentItemLists) {
+    for (const entry of items) {
+      const orderItem = itemMap.get(entry.orderItemId);
+      if (!orderItem) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Item ${entry.orderItemId} does not belong to this order`,
+        });
+      }
+      const alreadyRequested = requested.get(entry.orderItemId) ?? 0;
+      const remaining = Math.max(
+        0,
+        orderItem.quantity - orderItem.fulfilledQuantity - alreadyRequested,
+      );
+      if (entry.quantity > remaining) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Cannot ship ${entry.quantity} × ${orderItem.productName} — only ${remaining} unit${remaining === 1 ? "" : "s"} remaining to fulfill`,
+        });
+      }
+      requested.set(entry.orderItemId, alreadyRequested + entry.quantity);
+    }
+  }
+
+  return requested;
+}
+
 export const orderRouter = createTRPCRouter({
-  markAsFulfilled: ownerAdminProcedure
+  markAsFulfilled: staffProcedure
     .use(featureGate("orders"))
     .input(markAsFulfilledSchema)
     .mutation(async ({ ctx, input }) => {
@@ -64,26 +113,92 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      const updatedOrder = await ctx.db.order.update({
-        where: { id: input.orderId },
-        data: {
-          status: order.paymentStatus === "paid" ? "completed" : "open",
-          fulfillmentStatus: "fulfilled",
-          shipments: {
-            create: input.shipments.map((s) => ({
-              carrier: s.carrier?.trim() ?? null,
-              trackingNumber: s.trackingNumber?.trim() ?? null,
-              trackingUrl: s.trackingUrl?.trim() ?? null,
-            })),
-          },
-        },
-        include: { shipments: { orderBy: { shippedAt: "asc" } } },
-      });
+      // Shipments carrying explicit line items drive partial fulfillment.
+      // A request with no itemized shipments is the legacy path: everything
+      // on the order is considered shipped.
+      const { createdShipments, updatedOrder } = await ctx.db.$transaction(
+        async (tx) => {
+          const orderItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+          });
 
-      const shipmentsWithTracking = updatedOrder.shipments.filter(
+          const itemizedShipments = input.shipments.filter(
+            (s): s is typeof s & { items: ShipmentItemRequest[] } =>
+              !!s.items && s.items.length > 0,
+          );
+
+          // Validate + aggregate requested quantities (throws BAD_REQUEST).
+          const requested = aggregateAndValidateShipmentItems(
+            orderItems,
+            itemizedShipments.map((s) => s.items),
+          );
+
+          const createdShipments = [];
+          for (const s of input.shipments) {
+            createdShipments.push(
+              await tx.orderShipment.create({
+                data: {
+                  orderId: input.orderId,
+                  carrier: s.carrier?.trim() ?? null,
+                  trackingNumber: s.trackingNumber?.trim() ?? null,
+                  trackingUrl: s.trackingUrl?.trim() ?? null,
+                  ...(s.items && s.items.length > 0 && { items: s.items }),
+                },
+              }),
+            );
+          }
+
+          if (itemizedShipments.length > 0) {
+            for (const [orderItemId, qty] of requested) {
+              await tx.orderItem.update({
+                where: { id: orderItemId },
+                data: { fulfilledQuantity: { increment: qty } },
+              });
+            }
+          } else {
+            // Legacy whole-order fulfillment: everything ships.
+            for (const item of orderItems) {
+              if (item.fulfilledQuantity !== item.quantity) {
+                await tx.orderItem.update({
+                  where: { id: item.id },
+                  data: { fulfilledQuantity: item.quantity },
+                });
+              }
+            }
+          }
+
+          const finalItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+            select: { quantity: true, fulfilledQuantity: true },
+          });
+          const fullyFulfilled = finalItems.every(
+            (i) => i.fulfilledQuantity >= i.quantity,
+          );
+
+          const updatedOrder = await tx.order.update({
+            where: { id: input.orderId },
+            data: fullyFulfilled
+              ? {
+                  status: order.paymentStatus === "paid" ? "completed" : "open",
+                  fulfillmentStatus: "fulfilled",
+                }
+              : { fulfillmentStatus: "partially_fulfilled" },
+            include: { shipments: { orderBy: { shippedAt: "asc" } } },
+          });
+
+          return { createdShipments, updatedOrder };
+        },
+      );
+
+      // Only email about the shipments created in THIS request — a partially
+      // fulfilled order can be fulfilled again later, and we must not re-send
+      // tracking emails for its earlier shipments.
+      const shipmentsWithTracking = createdShipments.filter(
         (s) => s.trackingNumber,
       );
       const anyTracking = shipmentsWithTracking.length > 0;
+      const becameFullyFulfilled =
+        updatedOrder.fulfillmentStatus === "fulfilled";
 
       try {
         if (anyTracking) {
@@ -100,13 +215,18 @@ export const orderRouter = createTRPCRouter({
                 ownerEmail: order.business.ownerEmail,
                 siteContent: order.business.siteContent,
                 subdomain: order.business.subdomain,
+                customDomain: order.business.customDomain,
+                domainStatus: order.business.domainStatus,
               },
+              orderId: order.id,
             });
           }
           console.log(
             `[Orders] Shipped email(s) sent for order #${order.orderNumber}`,
           );
-        } else {
+        } else if (becameFullyFulfilled) {
+          // The "fulfilled" (no-tracking) email is only correct when the
+          // whole order is now fulfilled — skip it for partial shipments.
           await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
@@ -137,7 +257,7 @@ export const orderRouter = createTRPCRouter({
       return updatedOrder;
     }),
 
-  markReadyForPickup: ownerAdminProcedure
+  markReadyForPickup: staffProcedure
     .use(featureGate("orders"))
     .input(z.object({ orderId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -212,7 +332,7 @@ export const orderRouter = createTRPCRouter({
       return updatedOrder;
     }),
 
-  addShipment: ownerAdminProcedure
+  addShipment: staffProcedure
     .use(featureGate("orders"))
     .input(addShipmentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -231,14 +351,71 @@ export const orderRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
       }
 
-      const shipment = await ctx.db.orderShipment.create({
-        data: {
-          orderId: input.orderId,
-          carrier: input.carrier?.trim() ?? null,
-          trackingNumber: input.trackingNumber?.trim() ?? null,
-          trackingUrl: input.trackingUrl?.trim() ?? null,
+      const { shipment, updatedOrder } = await ctx.db.$transaction(
+        async (tx) => {
+          const orderItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+          });
+
+          const hasItems = !!input.items && input.items.length > 0;
+          // Validate + aggregate requested quantities (throws BAD_REQUEST).
+          const requested = hasItems
+            ? aggregateAndValidateShipmentItems(orderItems, [input.items!])
+            : null;
+
+          const shipment = await tx.orderShipment.create({
+            data: {
+              orderId: input.orderId,
+              carrier: input.carrier?.trim() ?? null,
+              trackingNumber: input.trackingNumber?.trim() ?? null,
+              trackingUrl: input.trackingUrl?.trim() ?? null,
+              ...(hasItems && { items: input.items }),
+            },
+          });
+
+          if (requested) {
+            for (const [orderItemId, qty] of requested) {
+              await tx.orderItem.update({
+                where: { id: orderItemId },
+                data: { fulfilledQuantity: { increment: qty } },
+              });
+            }
+          } else {
+            // Legacy path: a shipment without line items ships everything
+            // remaining on the order.
+            for (const item of orderItems) {
+              if (item.fulfilledQuantity !== item.quantity) {
+                await tx.orderItem.update({
+                  where: { id: item.id },
+                  data: { fulfilledQuantity: item.quantity },
+                });
+              }
+            }
+          }
+
+          const finalItems = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+            select: { quantity: true, fulfilledQuantity: true },
+          });
+          const fullyFulfilled = finalItems.every(
+            (i) => i.fulfilledQuantity >= i.quantity,
+          );
+
+          const updatedOrder = await tx.order.update({
+            where: { id: input.orderId },
+            data: fullyFulfilled
+              ? {
+                  fulfillmentStatus: "fulfilled",
+                  ...(order.paymentStatus === "paid" && {
+                    status: "completed",
+                  }),
+                }
+              : { fulfillmentStatus: "partially_fulfilled" },
+          });
+
+          return { shipment, updatedOrder };
         },
-      });
+      );
 
       try {
         if (shipment.trackingNumber) {
@@ -254,16 +431,23 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: order.business.ownerEmail,
               siteContent: order.business.siteContent,
               subdomain: order.business.subdomain,
+              customDomain: order.business.customDomain,
+              domainStatus: order.business.domainStatus,
             },
+            orderId: order.id,
           });
           console.log(
             `[Orders] Additional shipped email sent for order #${order.orderNumber}`,
           );
-        } else if (order.fulfillmentStatus !== "fulfilled") {
-          // Only send "fulfilled" email if this is the first time the order is
-          // being marked fulfilled. Calling addShipment on an already-fulfilled
+        } else if (
+          order.fulfillmentStatus !== "fulfilled" &&
+          updatedOrder.fulfillmentStatus === "fulfilled"
+        ) {
+          // Only send "fulfilled" email if this shipment just completed the
+          // order for the first time. Calling addShipment on an already-fulfilled
           // order (e.g. to add a second package with no tracking) would otherwise
-          // send a duplicate "your order has been fulfilled" email.
+          // send a duplicate "your order has been fulfilled" email, and a partial
+          // shipment with no tracking shouldn't claim the order is fulfilled.
           await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
@@ -291,7 +475,7 @@ export const orderRouter = createTRPCRouter({
       return shipment;
     }),
 
-  updateShipment: ownerAdminProcedure
+  updateShipment: staffProcedure
     .use(featureGate("orders"))
     .input(updateShipmentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -374,6 +558,7 @@ export const orderRouter = createTRPCRouter({
               customDomain: business.customDomain,
               domainStatus: business.domainStatus,
             },
+            orderId: order.id,
           });
           break;
         }
@@ -405,7 +590,10 @@ export const orderRouter = createTRPCRouter({
               ownerEmail: business.ownerEmail,
               siteContent: business.siteContent,
               subdomain: business.subdomain,
+              customDomain: business.customDomain,
+              domainStatus: business.domainStatus,
             },
+            orderId: order.id,
           });
           break;
         }
@@ -455,7 +643,7 @@ export const orderRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getAll: ownerAdminProcedure
+  getAll: staffProcedure
     .use(featureGate("orders"))
     .input(orderFiltersSchema)
     .query(async ({ ctx, input }) => {
@@ -463,6 +651,8 @@ export const orderRouter = createTRPCRouter({
 
       const statusFilter = input?.status;
       const searchQuery = input?.search;
+      const fulfillmentFilter = input?.fulfillment;
+      const paymentStatusFilter = input?.paymentStatus;
 
       const where: Prisma.OrderWhereInput = {
         businessId,
@@ -472,34 +662,87 @@ export const orderRouter = createTRPCRouter({
         where.status = statusFilter;
       }
 
+      if (fulfillmentFilter && fulfillmentFilter !== "all") {
+        where.fulfillmentStatus = fulfillmentFilter;
+      }
+
+      if (paymentStatusFilter && paymentStatusFilter !== "all") {
+        where.paymentStatus = paymentStatusFilter;
+      }
+
       if (searchQuery) {
-        where.OR = [
+        const or: Prisma.OrderWhereInput[] = [
           { customerEmail: { contains: searchQuery, mode: "insensitive" } },
           { customerName: { contains: searchQuery, mode: "insensitive" } },
           { id: { contains: searchQuery, mode: "insensitive" } },
         ];
+        // Customers quote the human order number (e.g. "#1042"), not the UUID.
+        // Match it whenever the query is numeric (tolerating a leading "#").
+        const numericQuery = Number.parseInt(
+          searchQuery.trim().replace(/^#/, ""),
+          10,
+        );
+        if (Number.isInteger(numericQuery)) {
+          or.push({ orderNumber: numericQuery });
+        }
+        where.OR = or;
       }
 
-      const orders = await ctx.db.order.findMany({
-        where,
-        include: {
-          items: true,
-          _count: {
-            select: {
-              inventoryHistory: { where: { reason: "oversell" } },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      });
+      // Pagination — mirrors product.secureList
+      const pageSize = 50;
+      const page = input?.page ?? 1;
+      const skip = (page - 1) * pageSize;
 
-      return orders.map((order) => ({
-        ...order,
-        hasOversell: order._count.inventoryHistory > 0,
-      }));
+      // Stats are computed over the FULL filtered set (not just the page).
+      // Revenue counts paid orders only and subtracts refunds.
+      const [orders, totalCount, paidOrders, revenueAgg] =
+        await ctx.db.$transaction([
+          ctx.db.order.findMany({
+            where,
+            include: {
+              items: true,
+              _count: {
+                select: {
+                  inventoryHistory: { where: { reason: "oversell" } },
+                },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: pageSize,
+          }),
+          ctx.db.order.count({ where }),
+          ctx.db.order.count({
+            where: { AND: [where, { paymentStatus: "paid" }] },
+          }),
+          ctx.db.order.aggregate({
+            where: { AND: [where, { paymentStatus: "paid" }] },
+            _sum: { total: true, refundAmountCents: true },
+          }),
+        ]);
+
+      const totalRevenue =
+        (revenueAgg._sum.total ?? 0) - (revenueAgg._sum.refundAmountCents ?? 0);
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return {
+        orders: orders.map((order) => ({
+          ...order,
+          hasOversell: order._count.inventoryHistory > 0,
+        })),
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+        stats: {
+          totalRevenue,
+          totalOrders: totalCount,
+          paidOrders,
+        },
+      };
     }),
 
-  getById: ownerAdminProcedure
+  getById: staffProcedure
     .use(featureGate("orders"))
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
@@ -600,19 +843,42 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      // The idempotency key is stable for a given (order, prior-refund-state,
+      // amount) so a double-clicked or retried mutation reuses the same Stripe
+      // refund instead of creating a second one. metadata.source lets the
+      // charge.refunded webhook skip the customer email for refunds we already
+      // email about here.
       const stripeRefund = await stripeClient.refunds.create(
         {
           payment_intent: order.stripePaymentIntentId,
           amount: input.amount,
           reason: (input.reason ??
             "requested_by_customer") as Stripe.RefundCreateParams.Reason,
+          metadata: { source: "simplepress", orderId: order.id },
         },
         {
           stripeAccount: order.business.stripeAccountId!,
+          idempotencyKey: `refund:${order.id}:${alreadyRefunded}:${input.amount}`,
         },
       );
 
-      const newTotalRefunded = alreadyRefunded + input.amount;
+      // Read the authoritative cumulative refunded amount back from the
+      // charge, so concurrent refunds can't undercount each other in the DB.
+      let newTotalRefunded = alreadyRefunded + input.amount;
+      const chargeId =
+        typeof stripeRefund.charge === "string"
+          ? stripeRefund.charge
+          : stripeRefund.charge?.id;
+      if (chargeId) {
+        try {
+          const charge = await stripeClient.charges.retrieve(chargeId, {
+            stripeAccount: order.business.stripeAccountId!,
+          });
+          newTotalRefunded = charge.amount_refunded;
+        } catch {
+          // fall back to the locally computed total
+        }
+      }
       const isFullRefund = newTotalRefunded >= order.total;
       const reasonLabel = input.reason
         ? (STRIPE_REFUND_REASON_LABEL[input.reason] ?? input.reason)
@@ -752,7 +1018,10 @@ export const orderRouter = createTRPCRouter({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
-            refundAmountCents: input.amount,
+            // For a cumulative full refund the customer must see the full
+            // refunded amount, not just this final partial. When still partial,
+            // report only the amount moved in this transaction.
+            refundAmountCents: isFullRefund ? newTotalRefunded : input.amount,
             orderTotalCents: order.total,
             isFullRefund,
             reason: reasonLabel,
@@ -1050,6 +1319,50 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
+      // Verify every line item references a product/variant owned by this
+      // tenant. Without this a manual order could reference a foreign
+      // business's product, and a later restock (refund/cancel) would mutate
+      // that other business's inventory.
+      const lineItemProductIds = [
+        ...new Set(
+          input.items
+            .map((i) => i.productId)
+            .filter((id): id is string => !!id),
+        ),
+      ];
+      const lineItemVariantIds = [
+        ...new Set(
+          input.items
+            .map((i) => i.productVariantId)
+            .filter((id): id is string => !!id),
+        ),
+      ];
+
+      if (lineItemProductIds.length > 0) {
+        const ownedCount = await ctx.db.product.count({
+          where: { id: { in: lineItemProductIds }, businessId },
+        });
+        if (ownedCount !== lineItemProductIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more products do not belong to this business",
+          });
+        }
+      }
+
+      if (lineItemVariantIds.length > 0) {
+        const ownedCount = await ctx.db.productVariant.count({
+          where: { id: { in: lineItemVariantIds }, product: { businessId } },
+        });
+        if (ownedCount !== lineItemVariantIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "One or more product variants do not belong to this business",
+          });
+        }
+      }
+
       const nameParts = input.customerName.trim().split(" ");
       const firstName = nameParts[0] ?? "Guest";
       const lastName = nameParts.slice(1).join(" ") || "";
@@ -1176,6 +1489,233 @@ export const orderRouter = createTRPCRouter({
 
       console.log(`[Manual Order] Order created: ${order.id}`);
 
+      // Manual orders only count as a settled sale once they are marked paid.
+      // Both customer spend aggregates and inventory deduction are gated on
+      // this so a pending manual order neither inflates spend nor oversells.
+      const isPaidOrder = input.paymentStatus === "paid";
+
+      // Increment customer spend/order-count aggregates for paid manual orders
+      // so they surface in the customer list metrics — mirrors the Stripe
+      // webhook's customer-metrics update.
+      if (isPaidOrder) {
+        try {
+          await ctx.db.customer.update({
+            where: { id: customer.id },
+            data: {
+              totalSpent: { increment: order.total },
+              orderCount: { increment: 1 },
+            },
+          });
+        } catch (customerError) {
+          console.error(
+            "[Manual Order] Failed to update customer metrics:",
+            customerError,
+          );
+        }
+      }
+
+      // Decrement inventory for paid manual orders using the same
+      // oversell-safe conditional-update pattern as the checkout webhook
+      // (respects trackInventory / allowBackorders, logs oversells, and
+      // handles pool-based products). A hard oversell leaves inventory
+      // unchanged and records an "oversell" history row rather than going
+      // negative.
+      if (isPaidOrder) {
+        try {
+          await ctx.db.$transaction(async (tx) => {
+            const poolGroups = new Map<
+              string,
+              {
+                items: { productId: string; quantity: number }[];
+                unitsConsumedMap: Record<string, number>;
+              }
+            >();
+
+            for (const item of order.items) {
+              const qty = item.quantity;
+
+              if (item.productVariantId) {
+                const variant = await tx.productVariant.findUnique({
+                  where: { id: item.productVariantId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    productId: true,
+                    product: {
+                      select: {
+                        businessId: true,
+                        trackInventory: true,
+                        allowBackorders: true,
+                      },
+                    },
+                  },
+                });
+                if (!variant) continue;
+                if (!variant.product.trackInventory) continue;
+                const previousQty = variant.inventoryQty;
+
+                if (variant.product.allowBackorders) {
+                  await tx.productVariant.update({
+                    where: { id: variant.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                } else {
+                  const result = await tx.productVariant.updateMany({
+                    where: { id: variant.id, inventoryQty: { gte: qty } },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  if (result.count === 0) {
+                    await tx.inventoryHistory.create({
+                      data: {
+                        variantId: variant.id,
+                        productId: variant.productId,
+                        businessId: variant.product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Manual Order #${order.orderNumber}: insufficient stock; inventory unchanged`,
+                        orderId: order.id,
+                      },
+                    });
+                    continue;
+                  }
+                  await tx.inventoryHistory.create({
+                    data: {
+                      variantId: variant.id,
+                      productId: variant.productId,
+                      businessId: variant.product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                    },
+                  });
+                }
+              } else if (item.productId) {
+                const product = await tx.product.findUnique({
+                  where: { id: item.productId },
+                  select: {
+                    id: true,
+                    inventoryQty: true,
+                    businessId: true,
+                    trackInventory: true,
+                    allowBackorders: true,
+                    baseInventoryUnitId: true,
+                    baseUnitsConsumed: true,
+                  },
+                });
+                if (!product) continue;
+
+                // Pool-based product — accumulate for aggregate deduction.
+                if (product.baseInventoryUnitId) {
+                  const poolId = product.baseInventoryUnitId;
+                  if (!poolGroups.has(poolId)) {
+                    poolGroups.set(poolId, {
+                      items: [],
+                      unitsConsumedMap: {},
+                    });
+                  }
+                  const group = poolGroups.get(poolId)!;
+                  group.items.push({ productId: product.id, quantity: qty });
+                  group.unitsConsumedMap[product.id] =
+                    product.baseUnitsConsumed ?? 1;
+                  continue;
+                }
+
+                if (!product.trackInventory) continue;
+                const previousQty = product.inventoryQty;
+
+                if (product.allowBackorders) {
+                  await tx.product.update({
+                    where: { id: product.id },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                } else {
+                  const result = await tx.product.updateMany({
+                    where: { id: product.id, inventoryQty: { gte: qty } },
+                    data: { inventoryQty: { decrement: qty } },
+                  });
+                  if (result.count === 0) {
+                    await tx.inventoryHistory.create({
+                      data: {
+                        productId: product.id,
+                        businessId: product.businessId,
+                        previousQty,
+                        newQty: previousQty,
+                        changeQty: 0,
+                        reason: "oversell",
+                        note: `Manual Order #${order.orderNumber}: insufficient stock; inventory unchanged`,
+                        orderId: order.id,
+                        variantId: null,
+                      },
+                    });
+                    continue;
+                  }
+                  await tx.inventoryHistory.create({
+                    data: {
+                      productId: product.id,
+                      businessId: product.businessId,
+                      previousQty,
+                      newQty: previousQty - qty,
+                      changeQty: -qty,
+                      reason: "sale",
+                      note: `Manual Order #${order.orderNumber}`,
+                      orderId: order.id,
+                      variantId: null,
+                    },
+                  });
+                }
+              }
+            }
+
+            for (const [poolId, group] of poolGroups) {
+              await deductPoolInventory(tx, {
+                poolId,
+                items: group.items,
+                unitsConsumedMap: group.unitsConsumedMap,
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                businessId,
+              });
+            }
+          });
+        } catch (invError) {
+          console.error(
+            "[Manual Order] Failed to deduct inventory:",
+            invError,
+          );
+        }
+      }
+
       if (input.sendConfirmationEmail) {
         try {
           await sendOrderConfirmation({
@@ -1196,6 +1736,7 @@ export const orderRouter = createTRPCRouter({
               customDomain: business.customDomain ?? undefined,
               domainStatus: business.domainStatus,
             },
+            orderId: order.id,
           });
           console.log(
             `[Manual Order] Confirmation email sent to ${input.customerEmail}`,
@@ -1211,7 +1752,7 @@ export const orderRouter = createTRPCRouter({
       return order;
     }),
 
-  updateFulfillment: ownerAdminProcedure
+  updateFulfillment: staffProcedure
     .use(featureGate("orders"))
     .input(updateFulfillmentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -1239,18 +1780,42 @@ export const orderRouter = createTRPCRouter({
         derivedStatus = "open";
       }
 
-      const updatedOrder = await ctx.db.order.update({
-        where: { id: input.orderId, businessId },
-        data: {
-          fulfillmentStatus: input.fulfillmentStatus,
-          ...(derivedStatus !== undefined && { status: derivedStatus }),
-        },
+      const updatedOrder = await ctx.db.$transaction(async (tx) => {
+        // Keep per-item fulfillment counters coherent with manual overrides:
+        // "fulfilled" means every unit shipped, "unfulfilled" means none.
+        // "partially_fulfilled" leaves the existing per-item counts alone.
+        if (
+          input.fulfillmentStatus === "fulfilled" ||
+          input.fulfillmentStatus === "unfulfilled"
+        ) {
+          const items = await tx.orderItem.findMany({
+            where: { orderId: input.orderId },
+          });
+          for (const item of items) {
+            const target =
+              input.fulfillmentStatus === "fulfilled" ? item.quantity : 0;
+            if (item.fulfilledQuantity !== target) {
+              await tx.orderItem.update({
+                where: { id: item.id },
+                data: { fulfilledQuantity: target },
+              });
+            }
+          }
+        }
+
+        return tx.order.update({
+          where: { id: input.orderId, businessId },
+          data: {
+            fulfillmentStatus: input.fulfillmentStatus,
+            ...(derivedStatus !== undefined && { status: derivedStatus }),
+          },
+        });
       });
 
       return updatedOrder;
     }),
 
-  updateNote: ownerAdminProcedure
+  updateNote: staffProcedure
     .use(featureGate("orders"))
     .input(
       z.object({

@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateTextListRows,
@@ -61,10 +62,16 @@ export function DarkTrendAboutPage({
           <div className="space-y-8">
             <div>
               {/* S-11: text-purple-500 → text-purple-400 for small text */}
-              <span className="text-sm font-semibold tracking-wider text-purple-400 uppercase">
+              <span
+                className="text-sm font-semibold tracking-wider text-purple-400 uppercase"
+                {...fieldAttr("dark-trend.about.subheader")}
+              >
                 {f["dark-trend.about.subheader"]}
               </span>
-              <h2 className="mt-2 text-3xl font-bold text-white md:text-5xl">
+              <h2
+                className="mt-2 text-3xl font-bold text-white md:text-5xl"
+                {...fieldAttr("dark-trend.about.header")}
+              >
                 {f["dark-trend.about.header"]}
               </h2>
             </div>
@@ -94,7 +101,10 @@ export function DarkTrendAboutPage({
               asChild
               className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
             >
-              <Link href={f["dark-trend.about.button-link"]!}>
+              <Link
+                href={f["dark-trend.about.button-link"]!}
+                {...fieldAttr("dark-trend.about.button")}
+              >
                 {f["dark-trend.about.button"]}
               </Link>
             </Button>
@@ -103,39 +113,57 @@ export function DarkTrendAboutPage({
       </section>
 
       {/* Custom Section */}
-      <section className="mb-20 py-20" {...sectionGroupAttr("about", "cta")}>
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          {/* Content */}
-          <div className="space-y-6">
-            <h2 className="text-4xl font-bold text-white md:text-6xl">
-              {f["dark-trend.about.cta-header"]}
-            </h2>
-            <p className="text-lg text-white/70">
-              {f["dark-trend.about.cta-description"]}
-            </p>
-            {/* S-11: violet-600 */}
-            <Button
-              asChild
-              className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
-            >
-              <Link href={f["dark-trend.about.cta-button-link"]!}>
-                {f["dark-trend.about.cta-button-text"]}
-              </Link>
-            </Button>
-          </div>
+      {isSectionVisible(
+        business?.siteContent?.customFields,
+        "dark-trend",
+        "about.cta",
+      ) && (
+        <section
+          className="mb-20 py-20"
+          {...sectionGroupAttr("about", "cta")}
+        >
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+            {/* Content */}
+            <div className="space-y-6">
+              <h2
+                className="text-4xl font-bold text-white md:text-6xl"
+                {...fieldAttr("dark-trend.about.cta-header")}
+              >
+                {f["dark-trend.about.cta-header"]}
+              </h2>
+              <p
+                className="text-lg text-white/70"
+                {...fieldAttr("dark-trend.about.cta-description")}
+              >
+                {f["dark-trend.about.cta-description"]}
+              </p>
+              {/* S-11: violet-600 */}
+              <Button
+                asChild
+                className="bg-violet-600 px-8 py-6 text-sm font-semibold tracking-wider text-white uppercase hover:bg-violet-700"
+              >
+                <Link
+                  href={f["dark-trend.about.cta-button-link"]!}
+                  {...fieldAttr("dark-trend.about.cta-button-text")}
+                >
+                  {f["dark-trend.about.cta-button-text"]}
+                </Link>
+              </Button>
+            </div>
 
-          {/* N-2: decorative owner-configurable image → alt="" */}
-          <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-zinc-900">
-            <Image
-              src={f["dark-trend.about.second-image"]!}
-              alt=""
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
+            {/* N-2: decorative owner-configurable image → alt="" */}
+            <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-zinc-900">
+              <Image
+                src={f["dark-trend.about.second-image"]!}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </DarkTrendGeneralLayout>
   );
 }

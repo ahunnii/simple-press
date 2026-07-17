@@ -1,6 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateListRows } from "~/lib/template-fields";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { HydrateClient } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -77,13 +78,18 @@ export async function BuildersHomepage({
       />
 
       {/* 4. CTA */}
-      <BuildersCtaSection
-        heading={f["builders.homepage.cta-heading"] ?? ""}
-        body={f["builders.homepage.cta-body"] ?? ""}
-        buttonLabel={f["builders.homepage.cta-button-label"] ?? ""}
-        buttonHref={f["builders.homepage.cta-button-href"] ?? "/contact"}
-        sectionAttrs={sectionGroupAttr("homepage", "cta")}
-      />
+      {isSectionVisible(customFields, "builders", "homepage.cta") && (
+        <BuildersCtaSection
+          heading={f["builders.homepage.cta-heading"] ?? ""}
+          body={f["builders.homepage.cta-body"] ?? ""}
+          buttonLabel={f["builders.homepage.cta-button-label"] ?? ""}
+          buttonHref={f["builders.homepage.cta-button-href"] ?? "/contact"}
+          sectionAttrs={sectionGroupAttr("homepage", "cta")}
+          headingFieldKey="builders.homepage.cta-heading"
+          bodyFieldKey="builders.homepage.cta-body"
+          buttonLabelFieldKey="builders.homepage.cta-button-label"
+        />
+      )}
     </HydrateClient>
   );
 }

@@ -32,13 +32,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -70,6 +64,8 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+
+import { AdminEmpty } from "../../_components/admin-empty";
 
 type Collection = RouterOutputs["collections"]["getAll"][number];
 
@@ -291,26 +287,19 @@ export function CollectionsClient({ collections }: Props) {
 
       {/* Absolute empty state — no collections at all */}
       {!hasCollections ? (
-        <Card>
-          <CardHeader className="items-center text-center">
-            <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
-              <FolderOpen className="text-muted-foreground h-6 w-6" />
-            </div>
-            <CardTitle>No collections yet</CardTitle>
-            <CardDescription>
-              Group related products together so shoppers can browse by
-              category, season, or any theme that fits your store.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center pb-8">
+        <AdminEmpty
+          icon={FolderOpen}
+          title="No collections yet"
+          description="Group related products together so shoppers can browse by category, season, or any theme that fits your store."
+          action={
             <Button asChild>
               <Link href="/admin/collections/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Collection
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <>
           {/* Search + Filter bar (sticky so it stays reachable while scrolling) */}
@@ -408,18 +397,12 @@ export function CollectionsClient({ collections }: Props) {
 
           {/* No-match empty state */}
           {!hasResults ? (
-            <Card>
-              <CardHeader className="items-center text-center">
-                <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
-                  <Search className="text-muted-foreground h-6 w-6" />
-                </div>
-                <CardTitle>No collections match your filters</CardTitle>
-                <CardDescription>
-                  Try adjusting your search or status filter to find what
-                  you&apos;re looking for.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center pb-8">
+            <AdminEmpty
+              icon={Search}
+              title="No collections match your filters"
+              description="Try adjusting your search or status filter to find what you're looking for."
+              filtered
+              action={
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -430,8 +413,8 @@ export function CollectionsClient({ collections }: Props) {
                 >
                   Clear filters
                 </Button>
-              </CardContent>
-            </Card>
+              }
+            />
           ) : (
             <>
               {/* Collections Table */}

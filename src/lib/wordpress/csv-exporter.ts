@@ -4,7 +4,21 @@ import Papa from "papaparse";
 type ProductWithRelations = Product & {
   images: Image[];
   variants: ProductVariant[];
+  /**
+   * Optional collection memberships, used to populate the WooCommerce
+   * `Categories` column. Backward-compatible: callers that don't include this
+   * relation (e.g. the product-only exporter in export.ts) leave it undefined,
+   * and categories fall back to an empty string.
+   */
+  collectionProducts?: { collection: { name: string } }[];
 };
+
+/** Join a product's collection names into the WooCommerce Categories value. */
+function collectionCategories(product: ProductWithRelations): string {
+  return (product.collectionProducts ?? [])
+    .map((cp) => cp.collection.name)
+    .join(", ");
+}
 
 type WooCommerceExportRow = {
   ID: string;
@@ -141,7 +155,7 @@ function createSimpleProductRow(
     "Purchase note": "",
     "Sale price": salePrice,
     "Regular price": salePrice || comparePrice,
-    Categories: "", // Could map from collections
+    Categories: collectionCategories(product),
     Tags: "",
     "Shipping class": "",
     Images: images,
@@ -226,7 +240,7 @@ function createVariableProductRow(
     "Purchase note": "",
     "Sale price": "",
     "Regular price": regularPrice,
-    Categories: "",
+    Categories: collectionCategories(product),
     Tags: "",
     "Shipping class": "",
     Images: images,

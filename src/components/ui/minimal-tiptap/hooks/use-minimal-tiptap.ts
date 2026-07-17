@@ -40,8 +40,10 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
 }
 
 async function fakeuploader(file: File): Promise<string> {
-  // NOTE: This is a fake upload function. Replace this with your own upload logic.
-  // This function should return the uploaded image URL.
+  // Fallback used only when no `uploader` prop is supplied. Encodes the image
+  // as a base64 data URI, which bloats the DB — real callers should always
+  // provide an `uploader` (see MinimalTiptapFormField, which wires one up to
+  // S3 by default for every CMS form).
 
   // wait 3s to simulate upload
   await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -121,9 +123,6 @@ const createExtensions = ({
         }),
       );
     },
-    onImageRemoved() {
-      console.log("Image removed");
-    },
     onValidationError(errors) {
       errors.forEach((error) => {
         toast.error("Image validation error", {
@@ -162,7 +161,10 @@ const createExtensions = ({
     onDrop: (editor, files, pos) => {
       void Promise.all(
         files.map(async (file) => {
-          const src = await fileToBase64(file);
+          // Prefer the configured uploader (S3) so dropped images don't end
+          // up base64-encoded in the document. Base64 is a last-resort
+          // fallback for when no uploader is configured at all.
+          const src = uploader ? await uploader(file) : await fileToBase64(file);
           editor.commands.insertContentAt(pos, {
             type: "image",
             attrs: { src },
@@ -173,7 +175,8 @@ const createExtensions = ({
     onPaste: (editor, files) => {
       void Promise.all(
         files.map(async (file) => {
-          const src = await fileToBase64(file);
+          // Same rationale as onDrop above — use the real uploader when set.
+          const src = uploader ? await uploader(file) : await fileToBase64(file);
           editor.commands.insertContent({
             type: "image",
             attrs: { src },

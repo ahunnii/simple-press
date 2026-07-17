@@ -7,6 +7,7 @@ const collectionsPageData: TemplateField[] = [
     description: "Tagline for the collections section",
     type: "text",
     page: "collections",
+    group: "collections.main",
     defaultValue: "Shop",
     placeholder: "e.g. Shop",
   },
@@ -16,6 +17,7 @@ const collectionsPageData: TemplateField[] = [
     description: "Title for the collections section",
     type: "text",
     page: "collections",
+    group: "collections.main",
     defaultValue: "Our Collections",
     placeholder: "e.g. Our Collections",
   },
@@ -25,6 +27,7 @@ const collectionsPageData: TemplateField[] = [
     description: "Intro for the collections section",
     type: "textarea",
     page: "collections",
+    group: "collections.main",
     defaultValue:
       "Browse our curated collections, each assembled with care around a distinct theme or purpose.",
     placeholder:

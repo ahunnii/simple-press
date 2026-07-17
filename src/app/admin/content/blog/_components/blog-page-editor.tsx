@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ExternalLink, PlusCircle, Save } from "lucide-react";
+import { ArrowLeft, ExternalLink, PlusCircle, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -53,6 +53,17 @@ import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
 
+/** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
+const toDatetimeLocalInput = (
+  value: Date | string | null | undefined,
+): string => {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 const NEW_BLOG_POST_DEFAULTS = {
   title: "",
   slug: "",
@@ -60,6 +71,7 @@ const NEW_BLOG_POST_DEFAULTS = {
   excerpt: "",
   published: true,
   publishedAt: "",
+  scheduledPublishAt: "",
   metaTitle: "",
   metaDescription: "",
   image: undefined,
@@ -76,6 +88,7 @@ const pageFormSchema = z.object({
   excerpt: z.string().optional().nullable(),
   published: z.boolean(),
   publishedAt: z.string().optional().nullable(),
+  scheduledPublishAt: z.string().optional().nullable(),
   metaTitle: z.string().optional().nullable(),
   metaDescription: z.string().optional().nullable(),
   imageFile: z.instanceof(File).optional().nullable(),
@@ -95,6 +108,7 @@ type BlogPostEditorProps = {
     excerpt: string | null;
     published: boolean;
     publishedAt: Date | null;
+    scheduledPublishAt?: Date | null;
     metaTitle: string | null;
     metaDescription: string | null;
     image: string | null;
@@ -120,6 +134,8 @@ export function BlogPostEditor({
   // Initialize form with TipTap content
   const form = useForm<PageFormValues>({
     resolver: zodResolver(pageFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       title: page?.title ?? "",
       slug: page?.slug ?? "",
@@ -129,6 +145,7 @@ export function BlogPostEditor({
       publishedAt: page?.publishedAt
         ? new Date(page.publishedAt).toISOString().slice(0, 10)
         : "",
+      scheduledPublishAt: toDatetimeLocalInput(page?.scheduledPublishAt),
       metaTitle: page?.metaTitle ?? "",
       metaDescription: page?.metaDescription ?? "",
       image: page?.image ?? undefined,
@@ -170,8 +187,12 @@ export function BlogPostEditor({
   };
 
   const handleReset = (
-    data?: Omit<Partial<PageFormValues>, "publishedAt"> & {
+    data?: Omit<
+      Partial<PageFormValues>,
+      "publishedAt" | "scheduledPublishAt"
+    > & {
       publishedAt?: string | Date | null;
+      scheduledPublishAt?: string | Date | null;
     },
   ) => {
     const toDateInput = (value?: string | Date | null) =>
@@ -186,13 +207,23 @@ export function BlogPostEditor({
         data !== undefined
           ? toDateInput(data.publishedAt)
           : toDateInput(page?.publishedAt),
+      scheduledPublishAt:
+        data !== undefined
+          ? toDatetimeLocalInput(data.scheduledPublishAt)
+          : toDatetimeLocalInput(page?.scheduledPublishAt),
       metaTitle: data?.metaTitle ?? page?.metaTitle ?? "",
       metaDescription: data?.metaDescription ?? page?.metaDescription ?? "",
       image:
         data !== undefined ? (data.image ?? null) : (page?.image ?? undefined),
       imageFile: undefined,
+      ogImage:
+        data !== undefined
+          ? (data.ogImage ?? null)
+          : (page?.ogImage ?? undefined),
+      ogImageFile: undefined,
     });
     if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+    if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
   };
 
   const createPage = api.content.createPage.useMutation({
@@ -303,6 +334,10 @@ export function BlogPostEditor({
       excerpt: data.excerpt ?? "",
       published: data.published,
       publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
+      scheduledPublishAt:
+        !data.published && data.scheduledPublishAt
+          ? new Date(data.scheduledPublishAt)
+          : null,
       metaTitle: data.metaTitle ?? "",
       metaDescription: data.metaDescription ?? "",
       type: "blog" as const,
@@ -376,6 +411,19 @@ export function BlogPostEditor({
                     <ExternalLink className="h-4 w-4 lg:mr-2" />
                     <span className="hidden lg:inline">View on storefront</span>
                   </a>
+                </Button>
+              )}
+              {page?.id && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isSubmitting || isDeleting}
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Delete</span>
                 </Button>
               )}
               <FormField
@@ -517,6 +565,34 @@ export function BlogPostEditor({
                       )}
                     />
 
+                    {/* Schedule publish (only while unpublished) */}
+                    {!form.watch("published") && (
+                      <FormField
+                        control={form.control}
+                        name="scheduledPublishAt"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Schedule publish</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="datetime-local"
+                                className="w-auto"
+                                value={field.value ?? ""}
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                              />
+                            </FormControl>
+                            <p className="text-muted-foreground text-xs">
+                              {field.value
+                                ? `Scheduled for ${new Date(field.value).toLocaleString()}`
+                                : "Optional — publish this post automatically at a future date and time."}
+                            </p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {/* Excerpt */}
                     <TextareaFormField
                       form={form}
@@ -600,7 +676,7 @@ export function BlogPostEditor({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete product</AlertDialogTitle>
+            <AlertDialogTitle>Delete post</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &quot;{page?.title}&quot;? This
               action cannot be undone.

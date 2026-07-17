@@ -6,7 +6,8 @@ import { ArrowLeft, ArrowRight, CalendarDays, Leaf } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { formatDate } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -40,6 +41,7 @@ export function BambooBlogPostPage({
   const ctaBody = f["bamboo.blog.post-cta-body"];
   const ctaButtonText = f["bamboo.blog.post-cta-button-text"];
   const ctaHref = f["bamboo.blog.post-cta-button-link"];
+  const ctaVisible = isSectionVisible(customFields, "bamboo", "blog.post");
 
   const others = relatedPosts.filter((p) => p.slug !== page.slug);
 
@@ -104,7 +106,7 @@ export function BambooBlogPostPage({
                 <TiptapRenderer content={page.content as TiptapJSON} />
               </article>
 
-              {(ctaHeading ?? ctaBody) && (
+              {(ctaHeading ?? ctaBody) && ctaVisible && (
                 <FadeIn delay={0.1} className="mt-10">
                   <div
                     {...sectionGroupAttr("blog", "post")}
@@ -119,18 +121,28 @@ export function BambooBlogPostPage({
                       </div>
                       <div>
                         {ctaHeading ? (
-                          <h2 className="text-foreground font-heading mb-2 text-xl font-bold">
+                          <h2
+                            className="text-foreground font-heading mb-2 text-xl font-bold"
+                            {...fieldAttr("bamboo.blog.post-cta-heading")}
+                          >
                             {ctaHeading}
                           </h2>
                         ) : null}
                         {ctaBody ? (
-                          <p className="text-muted-foreground mb-4 text-sm leading-relaxed whitespace-pre-line">
+                          <p
+                            className="text-muted-foreground mb-4 text-sm leading-relaxed whitespace-pre-line"
+                            {...fieldAttr("bamboo.blog.post-cta-body")}
+                          >
                             {ctaBody}
                           </p>
                         ) : null}
                         <Button asChild className="group">
                           <Link href={ctaHref!}>
-                            {ctaButtonText}
+                            <span
+                              {...fieldAttr("bamboo.blog.post-cta-button-text")}
+                            >
+                              {ctaButtonText}
+                            </span>
                             <ArrowRight
                               className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
                               aria-hidden="true"

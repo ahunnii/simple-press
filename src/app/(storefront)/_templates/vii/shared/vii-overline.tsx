@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type Props = {
   children: ReactNode;
   /** Text alignment of the overline within its container. */
@@ -8,6 +10,13 @@ type Props = {
   tone?: "light" | "dark";
   /** Optional extra styles merged onto the wrapper (e.g. marginBottom). */
   style?: CSSProperties;
+  /**
+   * Full template field key for the resolved text passed as `children`.
+   * When set, spreads `data-sp-field` onto the root so the preview overlay
+   * can live-patch this text. Only pass when `children` is exactly that
+   * field's resolved value (no interpolation).
+   */
+  fieldKey?: string;
 };
 
 /**
@@ -22,6 +31,7 @@ export function ViiOverline({
   align = "left",
   tone = "light",
   style,
+  fieldKey,
 }: Props) {
   const labelColor = tone === "dark" ? "var(--vii-tan)" : "var(--vii-ink-soft)";
   const ruleColor =
@@ -29,6 +39,7 @@ export function ViiOverline({
 
   return (
     <p
+      {...(fieldKey ? fieldAttr(fieldKey) : {})}
       style={{
         display: "flex",
         alignItems: "center",

@@ -1,15 +1,20 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
+import { getRichTextFieldValue } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
+import { NoiseAboutTeaser } from "./noise-about-teaser";
 import { NoiseEditorialSplit } from "./noise-editorial-split";
 import { NoiseGuaranteeSection } from "./noise-guarantee-section";
 import { NoiseHeroSection } from "./noise-hero-section";
 import { NoiseIntroWrapper } from "./noise-intro-wrapper";
+import { NoiseMarqueeStrip } from "./noise-marquee-strip";
 import { NoisePhilosophySection } from "./noise-philosophy-section";
 import { NoiseProductRail } from "./noise-product-rail";
 import { NoiseTestimonialStrip } from "./noise-testimonial-strip";
@@ -38,12 +43,14 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.homepage.hero-primary-button-text",
     "noise.homepage.hero-primary-button-link",
     "noise.homepage-featured-title",
+    "noise.homepage-featured-description",
     "noise.homepage-featured-button-text",
     "noise.homepage-featured-button-link",
     "noise.homepage-testimonials-heading",
     "noise.homepage.philosophy-overline",
     "noise.homepage.philosophy-quote",
-    "noise.homepage-guarantee-title",
+    "noise.homepage-guarantee-heading",
+    "noise.homepage-guarantee-headingAccent",
     "noise.homepage-guarantee-quote",
     "noise.homepage.rail-one-collection",
     "noise.homepage.rail-one-overline",
@@ -55,7 +62,17 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
     "noise.global.location-tag",
     "noise.homepage-guarantee-stamp",
     "noise.homepage-guarantee-image",
+    "noise.homepage.editorial-marquee-text",
+    "noise.homepage-about-image",
+    "noise.homepage-about-heading",
+    "noise.homepage-about-button-text",
+    "noise.homepage-about-button-link",
   ]);
+
+  const aboutTeaserBody = getRichTextFieldValue(
+    themeFields,
+    "noise.homepage-about-body",
+  );
 
   const products = homepage?.products ?? [];
 
@@ -106,7 +123,11 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
           <NoiseHeroSection
             heroVideo={f["noise.homepage.hero-video"] ?? undefined}
             heroImage={f["noise.homepage.hero-image"] ?? undefined}
-            heroOverline={f["noise.homepage.hero-overline"] ?? undefined}
+            heroOverline={
+              (f["noise.homepage.hero-overline"] ?? "").length > 0
+                ? f["noise.homepage.hero-overline"]
+                : undefined
+            }
             heroTitle={f["noise.homepage.hero-title"] ?? undefined}
             heroTagline={f["noise.homepage.hero-tagline"] ?? undefined}
             heroPrimaryButtonText={
@@ -124,17 +145,38 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             sectionAttrs={sectionGroupAttr("homepage", "hero")}
           />
 
-          {/* 2. Philosophy */}
+          {/* 2. Scrolling marquee band beneath the hero */}
+          {isSectionVisible(themeFields, "noise", "homepage.editorial") && (
+            <NoiseMarqueeStrip
+              text={f["noise.homepage.editorial-marquee-text"]}
+              sectionAttrs={sectionGroupAttr("homepage", "editorial")}
+            />
+          )}
+
+          {/* 3. Philosophy */}
           <NoisePhilosophySection
             overline={f["noise.homepage.philosophy-overline"]}
             quote={f["noise.homepage.philosophy-quote"]}
             sectionAttrs={sectionGroupAttr("homepage", "philosophy")}
           />
 
-          {/* 3. First product rail */}
+          {/* 4. Brand story teaser */}
+          {isSectionVisible(themeFields, "noise", "homepage.aboutTeaser") && (
+            <NoiseAboutTeaser
+              heading={f["noise.homepage-about-heading"] ?? undefined}
+              body={aboutTeaserBody as TiptapJSON | null}
+              image={f["noise.homepage-about-image"] ?? undefined}
+              buttonText={f["noise.homepage-about-button-text"] ?? undefined}
+              buttonLink={f["noise.homepage-about-button-link"] ?? undefined}
+              sectionAttrs={sectionGroupAttr("homepage", "aboutTeaser")}
+            />
+          )}
+
+          {/* 5. First product rail */}
           {railOneProducts.length > 0 && (
             <NoiseProductRail
               overline={f["noise.homepage.rail-one-overline"] ?? "Collection"}
+              overlineFieldKey="noise.homepage.rail-one-overline"
               title={
                 rail1Data?.collection.name ??
                 f["noise.homepage-featured-title"] ??
@@ -146,19 +188,21 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
                 undefined
               }
               ctaText={f["noise.homepage-featured-button-text"] ?? "Shop All"}
+              ctaTextFieldKey="noise.homepage-featured-button-text"
               ctaHref={railOneCtaHref}
               products={railOneProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
             />
           )}
 
-          {/* 4. Editorial split — links to the journal */}
+          {/* 6. Editorial split — links to the journal */}
           {flags.isEnabled("blog") && <NoiseEditorialSplit />}
 
-          {/* 5. Second product rail (when 5+ featured products or a collection is configured) */}
+          {/* 7. Second product rail (when 5+ featured products or a collection is configured) */}
           {railTwoProducts.length > 0 && (
             <NoiseProductRail
               overline={f["noise.homepage.rail-two-overline"] ?? "New Arrivals"}
+              overlineFieldKey="noise.homepage.rail-two-overline"
               title={
                 rail2Data?.collection.name ??
                 f["noise.homepage.rail-two-title"] ??
@@ -166,13 +210,14 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
               }
               description={rail2Data?.collection.description ?? undefined}
               ctaText={f["noise.global.shop-cta-text"] ?? "Shop All"}
+              ctaTextFieldKey="noise.global.shop-cta-text"
               ctaHref={railTwoCtaHref}
               products={railTwoProducts}
               sectionAttrs={sectionGroupAttr("homepage", "featured")}
             />
           )}
 
-          {/* 6. Guarantee */}
+          {/* 8. Guarantee */}
           <NoiseGuaranteeSection
             heading={f["noise.homepage-guarantee-heading"]}
             headingAccent={f["noise.homepage-guarantee-headingAccent"]}
@@ -182,14 +227,15 @@ export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
             sectionAttrs={sectionGroupAttr("homepage", "guarantee")}
           />
 
-          {/* 7. Rotating testimonial strip */}
-          {flags.isEnabled("testimonials") && (
-            <NoiseTestimonialStrip
-              testimonials={testimonials}
-              heading={f["noise.homepage-testimonials-heading"] ?? undefined}
-              sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
-            />
-          )}
+          {/* 9. Rotating testimonial strip */}
+          {flags.isEnabled("testimonials") &&
+            isSectionVisible(themeFields, "noise", "homepage.testimonials") && (
+              <NoiseTestimonialStrip
+                testimonials={testimonials}
+                heading={f["noise.homepage-testimonials-heading"] ?? undefined}
+                sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+              />
+            )}
         </PageTransition>
       </NoiseIntroWrapper>
     </HydrateClient>

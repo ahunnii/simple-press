@@ -336,20 +336,38 @@ export function ZoneWeightEditor() {
             variant="outline"
             size="sm"
             onClick={() => {
+              const STEP = 10;
               const lastTier = tiers[tiers.length - 1];
-              const newMin = lastTier?.maxLb ?? 0;
+              const newBoundary = (lastTier?.minLb ?? 0) + STEP;
               // Make the previous last tier bounded
-              if (lastTier?.maxLb === null && tiers.length > 0) {
+              if (lastTier) {
                 form.setValue(
                   `weightTiers.${tiers.length - 1}.maxLb`,
-                  newMin + 10,
+                  newBoundary,
+                  { shouldDirty: true },
+                );
+                form.setValue(
+                  `weightTiers.${tiers.length - 1}.label`,
+                  `${lastTier.minLb} – ${newBoundary} lb`,
                   { shouldDirty: true },
                 );
               }
               appendTier({
-                label: `${newMin} lb+`,
-                minLb: newMin,
+                label: `${newBoundary} lb+`,
+                minLb: newBoundary,
                 maxLb: null,
+              });
+              // Seed the new tier's rate cell in every existing zone so the
+              // column always has a key — the validator and save path only
+              // look at keys that are present.
+              const newTierIdx = tiers.length;
+              const currentZones = form.getValues("zones");
+              currentZones.forEach((zone, zIdx) => {
+                form.setValue(
+                  `zones.${zIdx}.rateDollars`,
+                  { ...zone.rateDollars, [String(newTierIdx)]: "" },
+                  { shouldDirty: true },
+                );
               });
             }}
           >

@@ -69,6 +69,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
   // Initialize form with react-hook-form
   const form = useForm<ManualOrderFormSchema>({
     resolver: zodResolver(manualOrderFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       customerName: "",
       customerEmail: "",
@@ -268,7 +270,6 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
       <form
         ref={formRef}
         onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-        onChange={() => console.log(form.formState.errors)}
         className="bg-muted/40 min-h-screen"
       >
         <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>

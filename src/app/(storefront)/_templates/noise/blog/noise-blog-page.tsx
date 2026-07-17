@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   PageTransition,
@@ -78,6 +78,7 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
               fontSize: "clamp(3.5rem, 8vw, 6rem)",
               letterSpacing: "-0.025em",
             }}
+            {...fieldAttr("noise.blog-listing-heading")}
           >
             {heading}
           </h1>
@@ -88,6 +89,7 @@ export function NoiseBlogPage({ pages, customFields }: Props) {
               color: "var(--vn-ink-soft)",
               maxWidth: "52ch",
             }}
+            {...fieldAttr("noise.blog-listing-intro")}
           >
             {intro}
           </p>

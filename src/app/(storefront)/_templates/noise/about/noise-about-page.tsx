@@ -1,6 +1,6 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getRichTextFieldValue } from "~/lib/template-fields";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
@@ -38,6 +38,7 @@ export function NoiseAboutPage({ business }: DefaultAboutPageTemplateProps) {
               fontSize: "clamp(2.8rem, 7vw, 5rem)",
               letterSpacing: "-0.025em",
             }}
+            {...fieldAttr("noise.about-hero-heading")}
           >
             {f["noise.about-hero-heading"]}
           </h1>

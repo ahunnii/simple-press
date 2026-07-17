@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, ShoppingCart } from "lucide-react";
 
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
@@ -11,37 +11,43 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { AdminEmpty } from "../_components/admin-empty";
 import { TrailHeader } from "../_components/trail-header";
+import { ExportOrdersButton } from "./_components/export-orders-button";
 import { OrderFilters } from "./_components/order-filters";
+import { OrdersPagination } from "./_components/orders-pagination";
 import { OrdersTable } from "./_components/orders-table";
 
 type Props = {
   searchParams: Promise<{
     status?: string;
     search?: string;
+    fulfillment?: string;
+    paymentStatus?: string;
+    page?: string;
   }>;
 };
 
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
+  const hasActiveFilters = Boolean(
+    params.status ?? params.search ?? params.fulfillment ?? params.paymentStatus,
+  );
+  const page = params.page ? Math.max(1, parseInt(params.page, 10)) : undefined;
 
-  // Get all orders for this business
-  const orders = await api.order
+  // Get orders for this business (paginated; stats cover the full filtered set)
+  const result = await api.order
     .getAll({
       status: params.status,
       search: params.search,
+      fulfillment: params.fulfillment,
+      paymentStatus: params.paymentStatus,
+      page,
     })
     .catch(rethrowTrpcForErrorBoundary);
 
-  // Calculate stats — exclude fully refunded orders; subtract partial refund amounts from partial-refund orders.
-  const totalRevenue = orders
-    .filter((order) => order.paymentStatus !== "refunded")
-    .reduce(
-      (sum, order) => sum + order.total - (order.refundAmountCents ?? 0),
-      0,
-    );
-  const totalOrders = orders.length;
-  const paidOrders = orders.filter((o) => o.paymentStatus === "paid").length;
+  const { orders, totalCount, totalPages, stats } = result;
+  const { totalRevenue, totalOrders, paidOrders } = stats;
 
   return (
     <>
@@ -52,16 +58,19 @@ export default async function OrdersPage({ searchParams }: Props) {
             <h1>Orders</h1>
             <p>Manage your customer orders</p>
           </div>
-          <Button asChild>
-            <Link href="/admin/orders/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Manual Order
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportOrdersButton />
+            <Button asChild>
+              <Link href="/admin/orders/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Manual Order
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
-        {!params.status && !params.search && (
+        {!hasActiveFilters && (
           <div className="mb-8 grid gap-6 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
@@ -89,20 +98,38 @@ export default async function OrdersPage({ searchParams }: Props) {
         )}
 
         {/* Filters */}
-        <OrderFilters orderCount={totalOrders} />
+        <OrderFilters orderCount={totalCount} />
 
         {/* Orders List */}
         {orders.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No orders yet</CardTitle>
-              <CardDescription>
-                Orders will appear here when customers make purchases
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <AdminEmpty
+            icon={ShoppingCart}
+            title={hasActiveFilters ? "No matching orders" : "No orders yet"}
+            description={
+              hasActiveFilters
+                ? "No orders match your current filters."
+                : "Orders appear here when customers check out on your storefront. You can also create one manually for phone or in-person sales."
+            }
+            filtered={hasActiveFilters}
+            action={
+              <Button asChild>
+                <Link href="/admin/orders/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Manual Order
+                </Link>
+              </Button>
+            }
+          />
         ) : (
-          <OrdersTable orders={orders} />
+          <>
+            <OrdersTable orders={orders} />
+            <OrdersPagination
+              page={result.page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={result.pageSize}
+            />
+          </>
         )}
       </div>
     </>

@@ -615,17 +615,31 @@ export function VariantManager({
                       <NumberInput
                         id={`price-${index}`}
                         step="0.01"
-                        value={variant.price ? variant.price / 100 : 0}
+                        value={
+                          variant.price !== undefined
+                            ? variant.price / 100
+                            : null
+                        }
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "price",
-                            e ? Math.round(e * 100) : undefined,
+                            e === null ? undefined : Math.round(e * 100),
                           )
                         }
                         placeholder={(basePrice / 100).toFixed(2)}
                         className="h-8"
                       />
+                      {variant.price === 0 ? (
+                        <p className="text-destructive mt-1 text-xs">
+                          $0 isn&apos;t a valid override — clear this to inherit
+                          the base price.
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground mt-1 text-[11px]">
+                          Blank inherits the base price.
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -639,20 +653,26 @@ export function VariantManager({
                         id={`compare-at-price-${index}`}
                         step="0.01"
                         value={
-                          variant.compareAtPrice
+                          variant.compareAtPrice !== undefined
                             ? variant.compareAtPrice / 100
-                            : 0
+                            : null
                         }
                         onChange={(e) =>
                           updateVariant(
                             index,
                             "compareAtPrice",
-                            e ? Math.round(e * 100) : undefined,
+                            e === null ? undefined : Math.round(e * 100),
                           )
                         }
                         placeholder="Optional"
                         className="h-8"
                       />
+                      {variant.compareAtPrice === 0 && (
+                        <p className="text-destructive mt-1 text-xs">
+                          $0 isn&apos;t valid — leave blank if there&apos;s no
+                          compare-at price.
+                        </p>
+                      )}
                     </div>
 
                     {trackInventory && (

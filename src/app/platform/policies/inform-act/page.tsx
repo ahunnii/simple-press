@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "INFORM Consumers Act | SimplePress",
+  description: "How SimplePress complies with the federal INFORM Consumers Act for high-volume seller verification.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/inform-act`,
+  },
+};
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??

@@ -1,4 +1,5 @@
 import type { GenericIconRow } from "~/lib/template-fields";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import {
   FadeIn,
   StaggerContainer,
@@ -32,10 +33,16 @@ export function PollenHomepageAbout({
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <FadeIn direction="up">
           <div className="mx-auto mb-16 max-w-3xl text-center">
-            <p className="mb-4 text-sm font-medium tracking-wider text-white/70 uppercase">
+            <p
+              className="mb-4 text-sm font-medium tracking-wider text-white/70 uppercase"
+              {...fieldAttr("pollen.homepage.about-service-title")}
+            >
               {sectionLabel}
             </p>
-            <h2 className="text-3xl leading-tight font-bold text-balance text-white md:text-4xl">
+            <h2
+              className="text-3xl leading-tight font-bold text-balance text-white md:text-4xl"
+              {...fieldAttr("pollen.homepage.about-service-description")}
+            >
               {sectionHeading}
             </h2>
           </div>

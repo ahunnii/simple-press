@@ -7,6 +7,7 @@ import { toRouteHandler } from "@better-upload/server/adapters/next";
 import { env } from "~/env";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
+import { ROUTE_MAX_FILES } from "~/lib/uploads";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
@@ -77,6 +78,23 @@ async function requireBusinessManager(req: Request) {
   return { business, session };
 }
 
+// NOTE on metadata key casing: the routes below are NOT consistent about
+// whether they emit `pathname` (lowercase) or `pathName` (capital N) in
+// objectInfo.metadata. This was the latent cause of a favicon bug where a
+// reader expected the wrong casing. The current per-route casing is:
+//   - "image", "video"                              -> metadata.pathname
+//   - "logo", "favicon", "images", "galleryImages",
+//     "testimonials"                                 -> metadata.pathName
+// Every current client-side reader has been verified against this mapping
+// (see src/lib/uploads.ts's getStoredPath(), which reads both keys defensively,
+// and the direct `.pathname` reads in product-form.tsx, collection-form.tsx,
+// blog-page-editor.tsx, seo-editor.tsx, page-editor.tsx,
+// template-field-widgets.tsx, minimal-tiptap-form-field.tsx, and
+// media-picker-dialog.tsx, all of which only ever use routes "image"/"video";
+// plus the one direct `.pathName` read in branding-editor.tsx, which is paired
+// with the "favicon" route). Do NOT change a route's casing without also
+// updating every direct (non-getStoredPath) reader of that route in the same
+// change — grep for `.pathname` / `.pathName` first.
 const router: Router = {
   client: s3Client,
   bucketName: env.NEXT_PUBLIC_STORAGE_BUCKET_NAME,
@@ -192,7 +210,10 @@ const router: Router = {
     images: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
-      maxFiles: 10,
+      // Keep in sync with ROUTE_MAX_FILES.images (src/lib/uploads.ts) — the
+      // client's useDeferredImageUpload hook derives its batch size from that
+      // shared constant, so it must match the value enforced here.
+      maxFiles: ROUTE_MAX_FILES.images,
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
@@ -218,7 +239,8 @@ const router: Router = {
     galleryImages: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
-      maxFiles: 10,
+      // Keep in sync with ROUTE_MAX_FILES.galleryImages (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.galleryImages,
       maxFileSize: 1024 * 1024 * 5, // 5MB
 
       onBeforeUpload: async ({ req }) => {
@@ -238,10 +260,14 @@ const router: Router = {
         };
       },
     }),
+    // Reachable by non-members (invite code or any logged-in shopper), so the
+    // size cap matters here more than anywhere else.
     testimonials: route({
       fileTypes: ["image/*"],
       multipleFiles: true,
-      maxFiles: 5,
+      // Keep in sync with ROUTE_MAX_FILES.testimonials (src/lib/uploads.ts).
+      maxFiles: ROUTE_MAX_FILES.testimonials,
+      maxFileSize: 1024 * 1024 * 5, // 5MB
       onBeforeUpload: async ({ req, clientMetadata }) => {
         const code = (clientMetadata as { code?: string } | undefined)?.code;
         let businessId: string;

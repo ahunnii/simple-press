@@ -9,6 +9,7 @@ import { normalizeEmail } from "~/lib/utils";
 
 import {
   createTRPCRouter,
+  featureGate,
   ownerAdminProcedure,
   protectedProcedure,
   publicProcedure,
@@ -30,7 +31,13 @@ async function assertBusinessOwner(
     return;
   }
 
-  if (!user?.memberships.some((m) => m.businessId === businessId)) {
+  // Review moderation/authoring touches store content, so it must be limited to
+  // OWNER/MANAGER — STAFF (fulfillment-only) must not approve/hide/delete or
+  // author reviews. A bare membership check would let any role through.
+  const membership = user?.memberships.find(
+    (m) => m.businessId === businessId,
+  );
+  if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
   }
 }
@@ -83,10 +90,10 @@ async function updateVoteCounts(db: DbClient, reviewId: string) {
 
 export const reviewRouter = createTRPCRouter({
   listByProduct: publicProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         productId: z.string(),
-        approvedOnly: z.boolean().default(true),
         sortBy: z
           .enum(["recent", "helpful", "rating_high", "rating_low"])
           .default("recent"),
@@ -116,7 +123,10 @@ export const reviewRouter = createTRPCRouter({
         where: {
           productId: input.productId,
           product: { businessId: business.id },
-          ...(input.approvedOnly && { isApproved: true, isHidden: false }),
+          // Public storefront listing: NEVER trust a client flag to widen
+          // visibility. Unapproved/hidden reviews are owner-only via `listAll`.
+          isApproved: true,
+          isHidden: false,
           ...(input.rating && { rating: input.rating }),
         },
         orderBy: orderBy[input.sortBy],
@@ -127,6 +137,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   getProductStats: publicProcedure
+    .use(featureGate("reviews"))
     .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
       const business = await checkBusiness();
@@ -167,6 +178,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   vote: publicProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         reviewId: z.string(),
@@ -193,6 +205,24 @@ export const reviewRouter = createTRPCRouter({
       }
 
       const userId = ctx.session?.user.id ?? null;
+
+      // Confirm the review belongs to the resolved business before touching any
+      // vote. Without this, the create path below would let a caller cast a vote
+      // on another tenant's review id (the update path is already scoped via the
+      // `review.product.businessId` join on `existing`).
+      const review = await ctx.db.productReview.findFirst({
+        where: {
+          id: input.reviewId,
+          product: { businessId: business.id },
+        },
+        select: { id: true },
+      });
+      if (!review) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Review not found",
+        });
+      }
 
       const existing = await ctx.db.reviewVote.findFirst({
         where: {
@@ -228,6 +258,7 @@ export const reviewRouter = createTRPCRouter({
   // ── Customer Submitted ───────────────────────────────────────────────────
 
   canReview: protectedProcedure
+    .use(featureGate("reviews"))
     .input(z.object({ productId: z.string() }))
     .query(async ({ ctx, input }) => {
       const user = await ctx.db.user.findUnique({
@@ -236,10 +267,14 @@ export const reviewRouter = createTRPCRouter({
       });
       if (!user) return { canReview: false, reason: "User not found" };
 
+      // Reviews store `normalizeEmail()`; normalize here too so a mixed-case
+      // email doesn't wrongly report the product as un-reviewed.
+      const normalizedUserEmail = normalizeEmail(user.email);
+
       const existing = await ctx.db.productReview.findFirst({
         where: {
           productId: input.productId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           source: "customer",
         },
       });
@@ -258,7 +293,7 @@ export const reviewRouter = createTRPCRouter({
       const order = await ctx.db.order.findFirst({
         where: {
           businessId: product.businessId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           items: { some: { productId: input.productId } },
         },
         select: { id: true },
@@ -268,6 +303,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   submit: protectedProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         productId: z.string(),
@@ -289,10 +325,15 @@ export const reviewRouter = createTRPCRouter({
           message: "User not found",
         });
 
+      // Reviews store `normalizeEmail()`, so the dedupe query must normalize too —
+      // otherwise a mixed-case sign-in email bypasses the one-review-per-product
+      // guard.
+      const normalizedUserEmail = normalizeEmail(user.email);
+
       const existing = await ctx.db.productReview.findFirst({
         where: {
           productId: input.productId,
-          customerEmail: user.email,
+          customerEmail: normalizedUserEmail,
           source: "customer",
         },
       });
@@ -312,7 +353,6 @@ export const reviewRouter = createTRPCRouter({
           message: "Product not found",
         });
 
-      const normalizedUserEmail = normalizeEmail(user.email);
       const order = await ctx.db.order.findFirst({
         where: {
           businessId: product.businessId,
@@ -363,6 +403,7 @@ export const reviewRouter = createTRPCRouter({
   // ── Owner Created ────────────────────────────────────────────────────────
 
   ownerCreate: protectedProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         productId: z.string(),
@@ -412,6 +453,7 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   ownerUpdate: protectedProcedure
+    .use(featureGate("reviews"))
     .input(
       z.object({
         id: z.string(),
@@ -456,6 +498,12 @@ export const reviewRouter = createTRPCRouter({
     }),
 
   // ── Admin (both types) ───────────────────────────────────────────────────
+  //
+  // NOTE: the moderation procedures below (listAll, approve, toggleHidden,
+  // delete) are intentionally left ungated by featureGate("reviews"). Owners
+  // must still be able to moderate/hide/delete pre-existing reviews after
+  // disabling the reviews feature — otherwise turning the flag off would trap
+  // stale or reported reviews with no way to clean them up.
 
   // List all reviews for a business across all products
   listAll: ownerAdminProcedure

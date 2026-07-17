@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -20,7 +23,7 @@ export function DefaultVariantSelector({
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] ?? null,
+    pickInitialVariant(product.variants, product),
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -53,16 +56,7 @@ export function DefaultVariantSelector({
     if (addToCartDisabled) return;
 
     addItem(
-      {
-        productId: product.id,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: effectiveMax,
-      },
+      buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
     );
 
@@ -208,6 +202,19 @@ export function DefaultVariantSelector({
                   ? `${selectedVariant.inventoryQty} available`
                   : null}
             </p>
+          )}
+
+          {/* Notify me when the selected variant is back in stock */}
+          {addToCartDisabled && (
+            <NotifyMeForm
+              productId={product.id}
+              variantId={selectedVariant.id}
+              className="mt-1"
+              message="Get notified when this option is back in stock."
+              messageClassName="text-sm text-[#6b6b6b]"
+              inputClassName="rounded-[var(--radius)] border-[#e8e8e8]"
+              buttonClassName="rounded-[var(--radius)] border-[#0a0a0a]"
+            />
           )}
         </div>
       )}

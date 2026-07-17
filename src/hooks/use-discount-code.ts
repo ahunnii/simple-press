@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
 import { useCart } from "~/providers/cart-context";
@@ -46,12 +47,31 @@ export function useDiscountCode(): UseDiscountCodeReturn {
     },
   });
 
-  // Reset discount when cart subtotal changes
+  // Reset discount when cart subtotal changes. Skip the very first run (on
+  // mount) so we don't fire a spurious toast before the shopper has ever
+  // applied anything.
+  const isFirstSubtotalRenderRef = useRef(true);
   useEffect(() => {
+    if (isFirstSubtotalRenderRef.current) {
+      isFirstSubtotalRenderRef.current = false;
+      return;
+    }
+    // Only notify + clear the code text if a discount was actually applied —
+    // otherwise this just silently no-ops on ordinary cart changes.
+    if (discountCodeId) {
+      toast.info("Discount removed because your cart changed", {
+        description: "Please re-apply your code if it still qualifies.",
+      });
+    }
+    setDiscountCodeInput("");
     setDiscountCodeId(null);
     setDiscountAmount(0);
     setDiscountCodeLabel(null);
     setDiscountFieldError(null);
+    // Deliberately keyed only on `subtotal` — `discountCodeId` is read from
+    // the latest render's closure (not listed as a dep) so applying a
+    // discount doesn't itself re-trigger this "cart changed" effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subtotal]);
 
   function handleApplyDiscount() {

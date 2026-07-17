@@ -21,11 +21,7 @@ import type {
   StoreTransferMediaEntry,
 } from "~/lib/store-transfer/types";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
-import {
-  FEATURE_REGISTRY,
-  getDefaultFlags,
-  getDisabledDueToDependency,
-} from "~/lib/features/registry";
+import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import { s3Client } from "~/lib/s3/client";
 import { listBusinessObjects } from "~/lib/s3/list";
 import { keyToPublicUrl, STORAGE_BASE, STORAGE_BUCKET } from "~/lib/s3/url";
@@ -62,25 +58,6 @@ async function chunkedAsync<T, R>(
     results.push(...chunkResults);
   }
   return results;
-}
-
-// ─── Feature-flag check (by businessId, not from headers) ────────────────────
-
-async function isStoreTransferEnabled(businessId: string): Promise<boolean> {
-  const row = await db.business.findUnique({
-    where: { id: businessId },
-    select: { featureFlags: true },
-  });
-  const defaults = getDefaultFlags();
-  const stored = (row?.featureFlags as Record<string, boolean>) ?? {};
-  const merged = { ...defaults, ...stored };
-  const disabledByDependency = getDisabledDueToDependency(merged);
-  if (disabledByDependency.has("storeTransfer")) return false;
-  return (
-    merged.storeTransfer ??
-    FEATURE_REGISTRY.storeTransfer?.enabledByDefault ??
-    false
-  );
 }
 
 // ─── Route handler ────────────────────────────────────────────────────────────
@@ -140,7 +117,10 @@ export async function GET(req: Request): Promise<Response> {
     resolvedBusinessId = targetBusinessId;
 
     // ── 2. Feature gate ──────────────────────────────────────────────────────
-    const featureEnabled = await isStoreTransferEnabled(targetBusinessId);
+    const featureEnabled = await isFeatureEnabledForBusiness(
+      targetBusinessId,
+      "storeTransfer",
+    );
     if (!featureEnabled) {
       return new Response(
         "The Store Transfer feature is not enabled for this business.",

@@ -6,6 +6,7 @@ import { Pause, Play } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -23,6 +24,12 @@ type Props = {
    *  (this file is already "use client"). Reduced-motion users see the
    *  static wrapping row instead — handled via useReducedMotion(). */
   marquee?: boolean;
+  /** Extra data attributes (e.g. `data-sp-group`) spread onto the root `<section>` for the preview overlay. */
+  sectionAttrs?: Record<string, string>;
+  /** Full template field key for `overline`, when it's a live-patchable field. */
+  overlineFieldKey?: string;
+  /** Full template field key for `heading`, when it's a live-patchable field. */
+  headingFieldKey?: string;
 };
 
 // ── Single-logo renderer ─────────────────────────────────────────────────────
@@ -72,6 +79,9 @@ export function ViiBrandsSection({
   logos,
   headingId = "vii-brands-heading",
   marquee = false,
+  sectionAttrs,
+  overlineFieldKey,
+  headingFieldKey,
 }: Props) {
   const { ref, visible } = useViiReveal(0.1);
   const reducedMotion = useReducedMotion();
@@ -96,6 +106,7 @@ export function ViiBrandsSection({
     <section
       aria-labelledby={labelledBy}
       aria-label={heading ? undefined : "Brands we carry"}
+      {...sectionAttrs}
       style={{
         background: "var(--vii-paper)",
         padding: "clamp(56px, 8vw, 96px) clamp(24px, 6vw, 96px)",
@@ -120,13 +131,18 @@ export function ViiBrandsSection({
           }}
         >
           {overline && (
-            <ViiOverline tone="light" align="center">
+            <ViiOverline
+              tone="light"
+              align="center"
+              fieldKey={overlineFieldKey}
+            >
               {overline}
             </ViiOverline>
           )}
           {heading && (
             <h2
               id={headingId}
+              {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
               style={{
                 fontFamily: "var(--font-serif)",
                 fontWeight: 400,
@@ -215,7 +231,7 @@ export function ViiBrandsSection({
           </div>
         ) : (
           /* ── Static mode (default — unchanged behaviour) ───────────────── */
-          <div ref={ref} className={`vii-reveal${visible ? "is-visible" : ""}`}>
+          <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
             <ul
               className="vii-brands-grid"
               style={{

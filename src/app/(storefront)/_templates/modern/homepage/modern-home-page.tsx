@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateListRows,
@@ -44,6 +45,7 @@ export async function ModernHomePage() {
     title: string;
     description: string;
   }[];
+  const customFields = homepage?.siteContent?.customFields;
   return (
     <div>
       {/* Hero Section */}
@@ -53,7 +55,7 @@ export async function ModernHomePage() {
       >
         <div className="relative h-[85vh] min-h-[600px]">
           <Image
-            src={f["modern.homepage.hero-image"]!}
+            src={f["modern.homepage.hero-image"] ?? "/placeholder.svg"}
             alt=""
             fill
             className="object-cover"
@@ -63,17 +65,25 @@ export async function ModernHomePage() {
           <div className="absolute inset-0 flex items-center">
             <div className="mx-auto w-full max-w-7xl px-6 lg:px-8">
               <div className="max-w-xl">
-                <h1 className="text-background font-serif text-5xl leading-tight text-balance md:text-7xl md:leading-tight">
+                <h1
+                  className="text-background font-serif text-5xl leading-tight text-balance md:text-7xl md:leading-tight"
+                  {...fieldAttr("modern.homepage.hero-title")}
+                >
                   {f["modern.homepage.hero-title"]}
                 </h1>
-                <p className="text-background/80 mt-6 text-lg leading-relaxed">
+                <p
+                  className="text-background/80 mt-6 text-lg leading-relaxed"
+                  {...fieldAttr("modern.homepage.hero-subtitle")}
+                >
                   {f["modern.homepage.hero-subtitle"]}
                 </p>
                 <Link
-                  href={f["modern.homepage.hero-cta-button-link"]!}
+                  href={f["modern.homepage.hero-cta-button-link"] ?? "/shop"}
                   className="bg-background text-foreground mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
                 >
-                  {f["modern.homepage.hero-cta-button-text"]}
+                  <span {...fieldAttr("modern.homepage.hero-cta-button-text")}>
+                    {f["modern.homepage.hero-cta-button-text"]}
+                  </span>
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
@@ -83,36 +93,38 @@ export async function ModernHomePage() {
       </section>
 
       {/* Values Strip */}
-      <section
-        className="border-border bg-background border-b"
-        {...sectionGroupAttr("homepage", "values")}
-      >
-        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {(valuesList?.length ?? 0) > 0
-              ? valuesList.map((value) => (
-                  <div className="text-center" key={value.title}>
-                    <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-                      {value.title}
-                    </h3>
-                    <p className="text-muted-foreground mt-2 text-sm">
-                      {value.description}
-                    </p>
-                  </div>
-                ))
-              : DEFAULT_MODERN_VALUES_LIST.map((value, index) => (
-                  <div className="text-center" key={index}>
-                    <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
-                      {value.title}
-                    </h3>
-                    <p className="text-muted-foreground mt-2 text-sm">
-                      {value.description}
-                    </p>
-                  </div>
-                ))}
+      {isSectionVisible(customFields, "modern", "homepage.values") && (
+        <section
+          className="border-border bg-background border-b"
+          {...sectionGroupAttr("homepage", "values")}
+        >
+          <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {(valuesList?.length ?? 0) > 0
+                ? valuesList.map((value) => (
+                    <div className="text-center" key={value.title}>
+                      <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+                        {value.title}
+                      </h3>
+                      <p className="text-muted-foreground mt-2 text-sm">
+                        {value.description}
+                      </p>
+                    </div>
+                  ))
+                : DEFAULT_MODERN_VALUES_LIST.map((value, index) => (
+                    <div className="text-center" key={index}>
+                      <h3 className="text-foreground text-xs font-semibold tracking-widest uppercase">
+                        {value.title}
+                      </h3>
+                      <p className="text-muted-foreground mt-2 text-sm">
+                        {value.description}
+                      </p>
+                    </div>
+                  ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Featured Products */}
       <section
@@ -122,30 +134,40 @@ export async function ModernHomePage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...fieldAttr("modern.homepage.products-tagline")}
+              >
                 {f["modern.homepage.products-tagline"]}
               </p>
-              <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
+              <h2
+                className="text-foreground mt-2 font-serif text-3xl md:text-4xl"
+                {...fieldAttr("modern.homepage.products-title")}
+              >
                 {f["modern.homepage.products-title"]}
               </h2>
             </div>
             <Link
-              href={f["modern.homepage.products-link-url"]!}
+              href={f["modern.homepage.products-link-url"] ?? "/shop"}
               className="text-foreground hover:text-muted-foreground hidden items-center gap-1 text-sm font-medium transition-colors md:flex"
             >
-              {f["modern.homepage.products-link-text"]}
+              <span {...fieldAttr("modern.homepage.products-link-text")}>
+                {f["modern.homepage.products-link-text"]}
+              </span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
           <div className="mt-12">
-            <FeaturedProductsGrid />
+            <FeaturedProductsGrid products={homepage?.products ?? []} />
           </div>
           <div className="mt-8 text-center md:hidden">
             <Link
-              href={f["modern.homepage.products-link-url"]!}
+              href={f["modern.homepage.products-link-url"] ?? "/shop"}
               className="text-foreground inline-flex items-center gap-1 text-sm font-medium"
             >
-              {f["modern.homepage.products-link-text"]}
+              <span {...fieldAttr("modern.homepage.products-link-text")}>
+                {f["modern.homepage.products-link-text"]}
+              </span>
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
@@ -160,26 +182,37 @@ export async function ModernHomePage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2">
             <div>
-              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...fieldAttr("modern.homepage.about-tagline")}
+              >
                 {f["modern.homepage.about-tagline"]}
               </p>
-              <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
+              <h2
+                className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl"
+                {...fieldAttr("modern.homepage.about-header")}
+              >
                 {f["modern.homepage.about-header"]}
               </h2>
-              <p className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line">
+              <p
+                className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line"
+                {...fieldAttr("modern.homepage.about-text")}
+              >
                 {f["modern.homepage.about-text"]}
               </p>
               <Link
-                href={f["modern.homepage.about-cta-button-link"]!}
+                href={f["modern.homepage.about-cta-button-link"] ?? "/about"}
                 className="border-foreground text-foreground hover:bg-foreground hover:text-background mt-8 inline-flex items-center gap-2 border px-8 py-3 text-sm font-medium tracking-wide transition-colors"
               >
-                {f["modern.homepage.about-cta-button-text"]}
+                <span {...fieldAttr("modern.homepage.about-cta-button-text")}>
+                  {f["modern.homepage.about-cta-button-text"]}
+                </span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
             <div className="relative aspect-4/3 overflow-hidden rounded-sm">
               <Image
-                src={f["modern.homepage.about-image"]!}
+                src={f["modern.homepage.about-image"] ?? "/placeholder.svg"}
                 alt=""
                 fill
                 className="object-cover"

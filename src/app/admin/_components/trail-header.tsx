@@ -11,6 +11,8 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 
+import { CommandPaletteTrigger } from "./command-palette-trigger";
+
 type Props = {
   breadcrumbs: {
     label: string;
@@ -60,6 +62,10 @@ export function TrailHeader({ breadcrumbs }: Props) {
             )}
           </BreadcrumbList>
         </Breadcrumb>
+
+        <div className="ml-auto flex items-center gap-2">
+          <CommandPaletteTrigger />
+        </div>
       </div>
     </header>
   );

@@ -58,6 +58,30 @@ type FormState = {
 
 const emptyForm: FormState = { question: "", answer: "", published: true };
 
+const QUESTION_MAX_LENGTH = 500;
+const ANSWER_MAX_LENGTH = 10000;
+
+type FormErrors = {
+  question?: string;
+  answer?: string;
+};
+
+function validateQuestion(value: string): string | undefined {
+  if (!value.trim()) return "Question is required";
+  if (value.length > QUESTION_MAX_LENGTH) {
+    return `Question must be ${QUESTION_MAX_LENGTH} characters or fewer`;
+  }
+  return undefined;
+}
+
+function validateAnswer(value: string): string | undefined {
+  if (!value.trim()) return "Answer is required";
+  if (value.length > ANSWER_MAX_LENGTH) {
+    return `Answer must be ${ANSWER_MAX_LENGTH} characters or fewer`;
+  }
+  return undefined;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function FaqManager({ initialItems }: FaqManagerProps) {
@@ -67,6 +91,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   // Expanded state for preview
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -80,6 +105,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
       toast.success("FAQ item added");
       setDialogOpen(false);
       setForm(emptyForm);
+      setErrors({});
       router.refresh();
     },
     onError: (err) => toast.error(err.message || "Failed to create FAQ item"),
@@ -91,6 +117,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
       setDialogOpen(false);
       setEditingId(null);
       setForm(emptyForm);
+      setErrors({});
       router.refresh();
     },
     onError: (err) => toast.error(err.message || "Failed to update FAQ item"),
@@ -117,6 +144,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setErrors({});
     setDialogOpen(true);
   };
 
@@ -127,14 +155,25 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
       answer: item.answer,
       published: item.published,
     });
+    setErrors({});
     setDialogOpen(true);
   };
 
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    setDialogOpen(nextOpen);
+    if (!nextOpen) {
+      setErrors({});
+    }
+  };
+
   const handleSubmit = () => {
-    if (!form.question.trim() || !form.answer.trim()) {
-      toast.error("Question and answer are required");
+    const questionError = validateQuestion(form.question);
+    const answerError = validateAnswer(form.answer);
+    if (questionError || answerError) {
+      setErrors({ question: questionError, answer: answerError });
       return;
     }
+    setErrors({});
 
     if (editingId) {
       updateMutation.mutate({
@@ -346,7 +385,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
       </div>
 
       {/* Add / Edit dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
@@ -366,11 +405,33 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                 id="faq-question"
                 placeholder="e.g. What is your return policy?"
                 value={form.question}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, question: e.target.value }))
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, question: e.target.value }));
+                  if (errors.question) {
+                    setErrors((prev) => ({ ...prev, question: undefined }));
+                  }
+                }}
+                onBlur={(e) =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    question: validateQuestion(e.target.value),
+                  }))
                 }
-                maxLength={500}
+                maxLength={QUESTION_MAX_LENGTH}
+                aria-invalid={!!errors.question}
               />
+              <div className="flex items-center justify-between gap-2">
+                {errors.question ? (
+                  <p className="text-destructive text-sm" role="alert">
+                    {errors.question}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {form.question.length}/{QUESTION_MAX_LENGTH}
+                </span>
+              </div>
             </div>
 
             <div className="space-y-1.5">
@@ -379,12 +440,34 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
                 id="faq-answer"
                 placeholder="Write a clear, helpful answer..."
                 value={form.answer}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, answer: e.target.value }))
+                onChange={(e) => {
+                  setForm((f) => ({ ...f, answer: e.target.value }));
+                  if (errors.answer) {
+                    setErrors((prev) => ({ ...prev, answer: undefined }));
+                  }
+                }}
+                onBlur={(e) =>
+                  setErrors((prev) => ({
+                    ...prev,
+                    answer: validateAnswer(e.target.value),
+                  }))
                 }
                 rows={5}
-                maxLength={10000}
+                maxLength={ANSWER_MAX_LENGTH}
+                aria-invalid={!!errors.answer}
               />
+              <div className="flex items-center justify-between gap-2">
+                {errors.answer ? (
+                  <p className="text-destructive text-sm" role="alert">
+                    {errors.answer}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {form.answer.length}/{ANSWER_MAX_LENGTH}
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -404,7 +487,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setDialogOpen(false)}
+              onClick={() => handleDialogOpenChange(false)}
               disabled={isPending}
             >
               Cancel

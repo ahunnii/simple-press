@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -135,6 +136,7 @@ export function ViiAboutSteps({
   return (
     <section
       aria-labelledby="about-steps-heading"
+      {...sectionGroupAttr("about", "steps")}
       style={{
         background: "var(--vii-cream)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -142,7 +144,7 @@ export function ViiAboutSteps({
     >
       <div
         ref={headRef}
-        className={`vii-reveal-group${headVisible ? "is-visible" : ""}`}
+        className={`vii-reveal-group${headVisible ? " is-visible" : ""}`}
         style={{ maxWidth: 1100, margin: "0 auto" }}
       >
         {/* Header */}
@@ -162,6 +164,7 @@ export function ViiAboutSteps({
               align="center"
               tone="light"
               style={{ marginBottom: 14 }}
+              fieldKey="vii.about.steps-overline"
             >
               {overline}
             </ViiOverline>
@@ -179,13 +182,17 @@ export function ViiAboutSteps({
             }}
           >
             {heading}{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+            <em
+              {...fieldAttr("vii.about.steps-heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
               {headingAccent}
             </em>
           </h2>
 
           {intro && (
             <p
+              {...fieldAttr("vii.about.steps-intro")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.3vw, 16px)",

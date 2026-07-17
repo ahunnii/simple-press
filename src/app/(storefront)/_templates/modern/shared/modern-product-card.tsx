@@ -8,8 +8,10 @@ import { Check, Eye, Plus } from "lucide-react";
 import type { Product } from "~/types";
 import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -45,6 +47,7 @@ export function ModernProductCard({ product }: Props) {
     if (productStatus.disableCart) return;
     addItem({
       productId: product.id,
+      productSlug: product.slug,
       variantId: null,
       productName: product.name,
       variantName: null,
@@ -61,7 +64,7 @@ export function ModernProductCard({ product }: Props) {
   };
 
   return (
-    <div className="group">
+    <div className="group relative">
       <Link href={`/shop/${product.slug}`} className="block">
         <div className="bg-muted relative aspect-square overflow-hidden rounded-sm">
           <Image
@@ -78,6 +81,16 @@ export function ModernProductCard({ product }: Props) {
           )}
         </div>
       </Link>
+      <WishlistButton
+        item={{
+          productId: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: productStatus.displayPrice,
+          imageUrl: product.images[0]?.url ?? null,
+        }}
+        className="border-border absolute top-3 right-3 z-10 border bg-white/85"
+      />
       <div className="mt-4 flex items-start justify-between">
         <div>
           <Link href={`/shop/${product.slug}`}>
@@ -112,10 +125,20 @@ export function ModernProductCard({ product }: Props) {
           <>
             <button
               type="button"
-              className="border-border text-foreground hover:bg-primary hover:text-primary-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors"
+              className={cn(
+                "border-border text-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
+                productStatus.disableCart
+                  ? "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-foreground"
+                  : "hover:bg-primary hover:text-primary-foreground",
+              )}
               onClick={handleAddToCart}
+              disabled={productStatus.disableCart}
               aria-disabled={productStatus.disableCart ? "true" : undefined}
-              aria-label={`Add ${product.name} to cart`}
+              aria-label={
+                productStatus.disableCart
+                  ? `${product.name} is unavailable`
+                  : `Add ${product.name} to cart`
+              }
             >
               {isAdded ? (
                 <Check className="h-4 w-4" aria-hidden="true" />

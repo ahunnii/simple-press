@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import {
+  Heart,
   LayoutDashboardIcon,
   Menu,
   Search,
@@ -18,6 +19,8 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { authClient } from "~/server/better-auth/client";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 import { ElegantCartDrawer } from "../cart-checkout/elegant-cart-drawer";
 
@@ -26,15 +29,22 @@ const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { setIsOpen, itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const pathname = usePathname();
+  const router = useRouter();
 
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -61,13 +71,40 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
 
+  // Auto-focus search input when opened
+  useEffect(() => {
+    if (searchOpen) {
+      searchInputRef.current?.focus();
+    }
+  }, [searchOpen]);
+
+  function openSearch() {
+    setSearchOpen(true);
+    setSearchValue("");
+  }
+
+  function closeSearch() {
+    setSearchOpen(false);
+    setSearchValue("");
+  }
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchValue.trim();
+    closeSearch();
+    router.push(q ? `/shop?q=${encodeURIComponent(q)}` : "/shop");
+  }
+
   const DEFAULT_NAV_LINKS = [
     { href: "/shop", label: "Shop" },
     ...(isEnabled("collections")
       ? [{ href: "/collections", label: "Collections" }]
       : []),
-    { href: "/blog", label: "Journal" },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
     { href: "/about", label: "About" },
+    ...(isEnabled("services")
+      ? [{ href: "/services", label: "Services" }]
+      : []),
   ];
 
   const links =
@@ -238,53 +275,140 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
               gap: 2,
             }}
           >
-            <Link
-              href="/shop"
-              aria-label="Search products"
-              style={iconBtnStyle}
-              className="el-icon-btn"
-            >
-              <Search aria-hidden={true} style={{ width: 17, height: 17 }} />
-            </Link>
-
-            {isPending ? (
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 999,
-                  background: "rgba(28,26,23,0.06)",
-                }}
-              />
-            ) : user ? (
-              <UserButton
-                size="icon"
-                classNames={{
-                  trigger: {
-                    base: "w-[34px] h-[34px] rounded-full",
-                    avatar: { base: "w-[34px] h-[34px]" },
-                  },
-                }}
-                additionalLinks={[
-                  ...(user.platformRole === "PLATFORM_ADMIN"
-                    ? [
-                        {
-                          icon: <LayoutDashboardIcon className="h-4 w-4" />,
-                          label: "Admin",
-                          href: "/admin",
-                        },
-                      ]
-                    : []),
-                ]}
-              />
+            {searchOpen ? (
+              <form
+                onSubmit={handleSearchSubmit}
+                style={{ display: "flex", alignItems: "center", gap: 4 }}
+              >
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Escape" && closeSearch()}
+                  aria-label="Search products"
+                  placeholder="Search…"
+                  style={{
+                    width: 140,
+                    height: 30,
+                    padding: "0 10px",
+                    fontSize: 13,
+                    fontFamily: "var(--font-sans, Manrope, sans-serif)",
+                    letterSpacing: "0.02em",
+                    color: "var(--el-ink, #1c1a17)",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "1px solid var(--el-ink, #1c1a17)",
+                    outline: "none",
+                    borderRadius: 0,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={closeSearch}
+                  aria-label="Close search"
+                  style={iconBtnStyle}
+                  className="el-icon-btn"
+                >
+                  <X aria-hidden={true} style={{ width: 16, height: 16 }} />
+                </button>
+              </form>
             ) : (
-              <Link
-                href="/auth/sign-in"
+              <button
+                type="button"
+                onClick={openSearch}
+                aria-label="Search products"
                 style={iconBtnStyle}
                 className="el-icon-btn"
-                aria-label="Sign in"
               >
-                <User aria-hidden={true} style={{ width: 17, height: 17 }} />
+                <Search aria-hidden={true} style={{ width: 17, height: 17 }} />
+              </button>
+            )}
+
+            {isStorefrontEnabled("customerAccounts") && (
+              <>
+                {isPending ? (
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 999,
+                      background: "rgba(28,26,23,0.06)",
+                    }}
+                  />
+                ) : user ? (
+                  <UserButton
+                    size="icon"
+                    classNames={{
+                      trigger: {
+                        base: "w-[34px] h-[34px] rounded-full",
+                        avatar: { base: "w-[34px] h-[34px]" },
+                      },
+                    }}
+                    additionalLinks={[
+                      ...(user.platformRole === "PLATFORM_ADMIN"
+                        ? [
+                            {
+                              icon: <LayoutDashboardIcon className="h-4 w-4" />,
+                              label: "Admin",
+                              href: "/admin",
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                ) : (
+                  <Link
+                    href="/auth/sign-in"
+                    style={iconBtnStyle}
+                    className="el-icon-btn"
+                    aria-label="Sign in"
+                  >
+                    <User
+                      aria-hidden={true}
+                      style={{ width: 17, height: 17 }}
+                    />
+                  </Link>
+                )}
+              </>
+            )}
+
+            {isStorefrontEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label={
+                  wishlistCount > 0
+                    ? `Wishlist (${wishlistCount} item${wishlistCount === 1 ? "" : "s"})`
+                    : "Wishlist"
+                }
+                style={{ ...iconBtnStyle, position: "relative" }}
+                className="el-icon-btn"
+              >
+                <Heart aria-hidden={true} style={{ width: 17, height: 17 }} />
+                <span
+                  aria-hidden={true}
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    minWidth: 16,
+                    height: 16,
+                    padding: "0 4px",
+                    background: "var(--el-sage, #4a5240)",
+                    color: "var(--el-paper, #fbf8f2)",
+                    borderRadius: 999,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-sans, sans-serif)",
+                    transform: wishlistCount > 0 ? "scale(1)" : "scale(0)",
+                    transition: `transform 0.35s ${ease}`,
+                  }}
+                >
+                  {wishlistCount}
+                </span>
               </Link>
             )}
 

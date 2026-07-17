@@ -1,7 +1,7 @@
 import { api } from "~/trpc/server";
-import { DomainQueueTable } from "~/app/admin/platform/domains/_components/domain-queue-table";
 
 import { PlatformTrailHeader } from "../_components/platform-trail-header";
+import { DomainQueueTable } from "./_components/domain-queue-table";
 
 export default async function PlatformDomainsPage() {
   const entries = await api.platform.listDomainQueue();

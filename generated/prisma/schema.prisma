@@ -23,6 +23,7 @@ enum PlatformRole {
 enum BusinessRole {
   OWNER // Full control of one business
   MANAGER // Operational access, scoped per membership row
+  STAFF // Fulfillment-only: orders and customer lookup, no products/settings/money
 }
 
 // Necessary for Better Auth
@@ -62,7 +63,7 @@ model BusinessMembership {
   role BusinessRole // ← typed enum, not a raw string
 
   @@unique([userId, businessId])
-  @@index([userId])
+  // NOTE: no @@index([userId]) — covered by the @@unique([userId, businessId]) prefix.
   @@index([businessId])
 }
 
@@ -84,6 +85,7 @@ model Session {
   membershipRole String?
 
   @@unique([token])
+  @@index([userId])
   @@map("session")
 }
 
@@ -103,6 +105,7 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@index([userId])
   @@map("account")
 }
 
@@ -129,11 +132,12 @@ model Business {
   updatedAt DateTime @updatedAt
 
   // Identity
-  name         String
-  slug         String               @unique // URL-friendly version of name
-  subdomain    String               @unique // "anothershop" for anothershop.myapplication.com
-  customDomain String?              @unique // "anothershop.co"
-  domainStatus BusinessDomainStatus @default(NONE) // none | pending_dns | active
+  name            String
+  slug            String               @unique // URL-friendly version of name
+  subdomain       String               @unique // "anothershop" for anothershop.myapplication.com
+  customDomain    String?              @unique // "anothershop.co"
+  domainStatus    BusinessDomainStatus @default(NONE) // none | pending_dns | active
+  afProvisionCode String?              @unique // Artisanal Futures provisioning idempotency key
 
   // Template & Branding
   templateId String @default("modern") // modern | vintage | minimal
@@ -147,6 +151,8 @@ model Business {
   // Integrations
   stripeAccountId      String? @unique
   stripeAutoTaxEnabled Boolean @default(false)
+  stripeChargesEnabled Boolean @default(false) // synced from account.updated webhook
+  stripePayoutsEnabled Boolean @default(false) // synced from account.updated webhook
 
   // Testimonials
   testimonialsAutoApprove Boolean @default(false) // when true, customer submissions are auto-approved
@@ -165,8 +171,9 @@ model Business {
   onboardingComplete Boolean @default(false)
 
   // SEO / AEO / GEO controls
-  localBusinessEnabled Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
-  allowAiCrawlers      Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
+  localBusinessEnabled        Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
+  allowAiCrawlers             Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
+  sendAbandonedCheckoutEmails Boolean @default(false) // recovery email to shoppers who abandon a Stripe checkout (needs their email on the expired session)
 
   // Features
   featureFlags Json @default("{}") // Record<string, boolean>
@@ -207,12 +214,13 @@ model Business {
   testimonials          Testimonial[]
   testimonialInvites    TestimonialInvite[]
   platformInvites       PlatformInvite[]
+  teamInvites           TeamInvite[]
   memberships           BusinessMembership[]
   zones                 ShippingZone[]
   faqItems              FaqItem[]
+  backInStockRequests   BackInStockRequest[]
 
-  @@index([subdomain])
-  @@index([customDomain])
+  // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
 
 model SiteContent {
@@ -262,6 +270,10 @@ model SiteContent {
 
   bannerConfig Json? // BannerConfig — see src/lib/validators/site-banner.ts
   popupConfig  Json? // PopupConfig
+
+  // Per-email-template copy overrides, keyed by email template id:
+  // { "order-confirmation": { subject?: string, introText?: string }, ... }
+  emailOverrides Json?
 
   // Owner-only preview draft (never shipped to public visitors)
   previewCustomFields Json?
@@ -332,9 +344,10 @@ model Product {
   weightUnit String? @default("lb") // lb | kg
 
   // Organization
-  published Boolean @default(false)
-  featured  Boolean @default(false)
-  sortOrder Int     @default(0)
+  published          Boolean   @default(false)
+  featured           Boolean   @default(false)
+  scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
+  sortOrder          Int       @default(0)
 
   // SEO
   metaTitle       String?
@@ -347,11 +360,12 @@ model Product {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   // Relationships
-  images             Image[]
-  variants           ProductVariant[]
-  collectionProducts CollectionProduct[]
-  orderItems         OrderItem[]
-  inventoryHistory   InventoryHistory[]
+  images              Image[]
+  variants            ProductVariant[]
+  collectionProducts  CollectionProduct[]
+  orderItems          OrderItem[]
+  inventoryHistory    InventoryHistory[]
+  backInStockRequests BackInStockRequest[]
 
   // Computed fields (can be calculated on demand)
   averageRating Float?
@@ -365,6 +379,7 @@ model Product {
   @@unique([businessId, slug])
   @@index([businessId, published])
   @@index([businessId, featured])
+  @@index([baseInventoryUnitId])
 }
 
 model ProductVariant {
@@ -424,9 +439,9 @@ model Collection {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   collectionProducts CollectionProduct[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 
   @@unique([businessId, slug])
-  @@index([businessId])
 }
 
 model CollectionProduct {
@@ -440,7 +455,7 @@ model CollectionProduct {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, productId])
-  @@index([collectionId])
+  // NOTE: no @@index([collectionId]) — covered by the @@unique([collectionId, productId]) prefix.
   @@index([productId])
 }
 
@@ -466,6 +481,7 @@ model Service {
   // SEO
   metaTitle       String?
   metaDescription String?
+  metaKeywords    String?
   ogImage         String?
 
   // Multi-tenancy
@@ -564,6 +580,9 @@ model Customer {
   deletionRequestedAt DateTime?
   anonymizedAt        DateTime?
 
+  // Owner-facing CRM notes (never shown to the customer)
+  notes String? @db.Text
+
   // Link to authenticated user (if they've signed in)
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -579,7 +598,7 @@ model Customer {
   reviews            ProductReview[]
 
   @@unique([businessId, email])
-  @@index([businessId])
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
   @@index([userId])
 }
 
@@ -676,6 +695,9 @@ model Order {
   @@index([businessId, status])
   @@index([businessId, createdAt])
   @@index([customerId])
+  @@index([shippingAddressId])
+  @@index([discountCodeId])
+  @@index([stripePaymentIntentId])
 }
 
 model OrderShipment {
@@ -686,6 +708,10 @@ model OrderShipment {
   carrier        String?
   trackingNumber String?
   trackingUrl    String?
+
+  // Line-item contents of this shipment for partial fulfillment:
+  // [{ orderItemId: string, quantity: number }]. Null = legacy whole-order shipment.
+  items Json?
 
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -706,6 +732,9 @@ model OrderItem {
   quantity Int
   total    Float // price * quantity
 
+  // Units already shipped across this order's shipments (partial fulfillment)
+  fulfilledQuantity Int @default(0)
+
   // Relationships (nullable in case product is deleted)
   productId        String?
   productVariantId String?
@@ -718,6 +747,7 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+  @@index([productVariantId])
 }
 
 // For tracking which domains need to be added to Coolify
@@ -756,8 +786,9 @@ model DiscountCode {
   active Boolean @default(true)
 
   // Usage limits
-  usageLimit Int? // null = unlimited
-  usageCount Int  @default(0)
+  usageLimit       Int? // null = unlimited (total redemptions)
+  usageCount       Int  @default(0)
+  perCustomerLimit Int? // null = unlimited; enforced by counting the customer's prior orders using this code
 
   // Validity period
   startsAt  DateTime?
@@ -771,7 +802,7 @@ model DiscountCode {
   orders Order[]
 
   @@unique([businessId, code])
-  @@index([businessId])
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, code]) / @@index([businessId, active]) prefix.
   @@index([businessId, active])
   @@index([code])
 }
@@ -786,7 +817,7 @@ model InventoryHistory {
 
   // What changed
   variantId String?
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
@@ -818,6 +849,7 @@ model InventoryHistory {
   @@index([baseInventoryUnitId])
   @@index([businessId])
   @@index([orderId])
+  @@index([userId])
   @@index([createdAt])
 }
 
@@ -870,11 +902,11 @@ model InventoryReservation {
 
   // Array of { variantId?, productId?, baseInventoryUnitId?, qty }
   items Json
+  // NOTE: no @@index([stripeSessionId]) — already @unique (own index).
 
   @@index([businessId])
   @@index([status])
   @@index([expiresAt])
-  @@index([stripeSessionId])
 }
 
 model Page {
@@ -898,8 +930,9 @@ model Page {
   ogImage         String?
 
   // Status
-  published Boolean @default(true)
-  sortOrder Int     @default(0)
+  published          Boolean   @default(true)
+  sortOrder          Int       @default(0)
+  scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
 
   // Page type
   type     String @default("page") // page | policy | blog | custom
@@ -973,9 +1006,9 @@ model Gallery {
 
   // Relationships
   images GalleryImage[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 
   @@unique([businessId, slug])
-  @@index([businessId])
 }
 
 model GalleryImage {
@@ -1059,8 +1092,9 @@ model TestimonialInvite {
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([businessId])
-  @@index([code])
+  // NOTE: no @@index([code]) — already @unique (own index).
   @@index([email])
+  @@index([customerId])
 }
 
 model ProductReview {
@@ -1114,6 +1148,7 @@ model ProductReview {
   @@index([productId, isApproved, isHidden])
   @@index([productId, source])
   @@index([customerId])
+  @@index([orderId])
 }
 
 model ReviewVote {
@@ -1130,8 +1165,14 @@ model ReviewVote {
   userId    String?
   ipAddress String?
 
-  @@unique([reviewId, userId])
-  @@unique([reviewId, ipAddress])
+  // NOTE: Uniqueness is enforced by hand-written PARTIAL unique indexes
+  // (`... WHERE "userId" IS NOT NULL` / `... WHERE "ipAddress" IS NOT NULL`) so that
+  // NULL voter identifiers are not treated as distinct (which would let duplicate
+  // votes slip past a plain multi-column UNIQUE index). Prisma cannot express partial
+  // indexes in-schema, and declaring plain `@@unique`s here made every
+  // `db push`/`migrate dev` diff try to re-create them (42P07 collisions with the
+  // partial indexes' names). No code uses the compound unique client keys, so the
+  // `@@unique` declarations were removed. See migration p2_schema_integrity.
   @@index([reviewId])
 }
 
@@ -1162,8 +1203,30 @@ model PlatformInvite {
   creator   User?   @relation("CreatedInvites", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@index([email])
-  @@index([code])
+  // NOTE: no @@index([code]) — already @unique (own index).
   @@index([businessId])
+  @@index([createdBy])
+}
+
+model TeamInvite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  email  String
+  code   String       @unique
+  role   BusinessRole
+  used   Boolean      @default(false)
+  usedAt DateTime?
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdBy String?
+
+  @@index([businessId])
+  // NOTE: no @@index([code]) — already @unique (own index).
+  @@index([email])
 }
 
 // ============================================
@@ -1192,9 +1255,9 @@ model ShippingZone {
   sortOrder Int      @default(0)
 
   rates ShippingRate[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, name]) prefix.
 
   @@unique([businessId, name])
-  @@index([businessId])
 }
 
 model ShippingRate {
@@ -1205,7 +1268,41 @@ model ShippingRate {
 
   tierIndex  Int // position in Business.shippingWeightTiers (0-based)
   priceCents Int // shipping price in cents for this zone + tier combination
+  // NOTE: no @@index([zoneId]) — covered by the @@unique([zoneId, tierIndex]) prefix.
 
   @@unique([zoneId, tierIndex])
-  @@index([zoneId])
+}
+
+// A shopper's request to be emailed when an out-of-stock product is restocked.
+// Fulfilled by the /api/cron restock job; duplicates are prevented in code
+// (nullable variantId keeps a DB unique constraint from applying cleanly).
+model BackInStockRequest {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  email     String
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+
+  notifiedAt DateTime?
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate PENDING signups for the same email + product + variant
+  // within a business. NOTE: Uniqueness is enforced by a hand-written PARTIAL
+  // unique index (`... WHERE "notifiedAt" IS NULL`) — notified rows are kept as
+  // history by the cron, and a plain UNIQUE would block a legitimate
+  // re-subscribe after a notification (silently, via subscribe's P2002 catch).
+  // Prisma cannot express partial indexes in-schema, and declaring a plain
+  // `@@unique` here made every `db push`/`migrate dev` diff try to re-create it
+  // (42P07 collision with the partial index's name). No code uses the compound
+  // unique client key, so the `@@unique` declaration was removed (same pattern
+  // as ReviewVote). See migration p4_backinstock_unique.
+  // Also: Postgres treats NULLs as distinct, so variant-less signups
+  // (variantId IS NULL) are still deduped in app code (subscribe's findFirst).
+  @@index([businessId, productId])
+  @@index([notifiedAt, productId])
+  @@index([productId])
 }

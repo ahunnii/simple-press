@@ -2,13 +2,26 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUploadFiles } from "@better-upload/client";
+import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
 import type { PendingFile } from "~/components/inputs/pending-image-grid";
-import { getImageDimensions, getStoredPath } from "~/lib/uploads";
+import {
+  getImageDimensions,
+  getStoredPath,
+  ROUTE_MAX_FILES,
+} from "~/lib/uploads";
 import { api } from "~/trpc/react";
 
-/** Maximum files per single upload request (matches the `images` route). */
+/**
+ * Default/fallback maximum files per single upload request. This is only
+ * used when `config.route` isn't present in `ROUTE_MAX_FILES` (src/lib/uploads.ts)
+ * — for any registered route, the real per-route server cap from that shared
+ * constant is used instead (see `batchSize` below), so this hook can never
+ * silently batch above what the server's `maxFiles` will accept. If you add a
+ * new multi-file route to `src/app/api/upload/route.ts`, add its cap to
+ * `ROUTE_MAX_FILES` too — don't rely on this fallback.
+ */
 const UPLOAD_BATCH_SIZE = 10;
 
 /** Maximum file size accepted by the `images` route: 5 MB. */
@@ -67,6 +80,9 @@ export function useDeferredImageUpload(
   config?: DeferredImageUploadConfig,
 ): UseDeferredImageUpload {
   const route = config?.route ?? "images";
+  // Clamp to the server route's real `maxFiles` (src/app/api/upload/route.ts)
+  // when known, so this hook can't drift out of sync with the server cap.
+  const batchSize = ROUTE_MAX_FILES[route] ?? UPLOAD_BATCH_SIZE;
 
   const nextIdRef = useRef(0);
   // Keep a ref mirror of pendingFiles so the unmount cleanup can revoke
@@ -77,7 +93,23 @@ export function useDeferredImageUpload(
 
   const uploadHook = useUploadFiles({ api: "/api/upload", route });
 
-  const discardMutation = api.upload.discardUploads.useMutation();
+  const discardMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      // Best-effort S3 cleanup for uploads whose parent save step failed.
+      // If the discard call itself fails, the objects are orphaned in S3 —
+      // not user-visible or blocking (the caller's own error/flow already
+      // completed), but worth surfacing so it doesn't fail silently.
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+      Sentry.captureException(err, {
+        tags: { service: "upload", step: "discardUploads" },
+        extra: { urls: variables.urls },
+      });
+    },
+  });
 
   // Mirror state into ref so the unmount cleanup always sees the latest list.
   useEffect(() => {
@@ -184,10 +216,11 @@ export function useDeferredImageUpload(
         }),
       );
 
-      // Split into batches of at most UPLOAD_BATCH_SIZE (server route cap).
+      // Split into batches of at most `batchSize` (the route's server-side
+      // maxFiles cap, from ROUTE_MAX_FILES — see comment above).
       const batches: PendingFile[][] = [];
-      for (let i = 0; i < snapshot.length; i += UPLOAD_BATCH_SIZE) {
-        batches.push(snapshot.slice(i, i + UPLOAD_BATCH_SIZE));
+      for (let i = 0; i < snapshot.length; i += batchSize) {
+        batches.push(snapshot.slice(i, i + batchSize));
       }
 
       // Result list populated in original file order.
@@ -196,12 +229,22 @@ export function useDeferredImageUpload(
       for (const batch of batches) {
         const result = await uploadHook.uploadAsync(batch.map((pf) => pf.file));
 
+        // Correlate each uploaded file back to its PendingFile by identity
+        // (the original raw File reference), with a filename fallback — not by
+        // array position. `result.files` is not guaranteed to preserve request
+        // order, so positional indexing can silently mis-correlate dims/urls.
+        //
         // Record URLs from this batch before checking for failures so the
-        // catch block can clean up even partially successful batches.
-        for (let i = 0; i < result.files.length; i++) {
-          const uploadedFile = result.files[i];
-          const pendingFile = batch[i];
-          if (!uploadedFile || !pendingFile) continue;
+        // catch block can clean up even partially successful batches. Iterate
+        // the ORIGINAL batch order (not `result.files`, whose order isn't
+        // guaranteed) so `results` stays in the caller's file order — image
+        // sortOrder downstream depends on it.
+        for (const pendingFile of batch) {
+          const uploadedFile = result.files.find(
+            (uf) =>
+              uf.raw === pendingFile.file || uf.name === pendingFile.file.name,
+          );
+          if (!uploadedFile) continue;
 
           const url = getStoredPath(uploadedFile);
           uploadedUrls.push(url);
@@ -226,7 +269,7 @@ export function useDeferredImageUpload(
     } finally {
       setIsUploading(false);
     }
-  }, [pendingFiles, uploadHook, discard]);
+  }, [pendingFiles, uploadHook, discard, batchSize]);
 
   return {
     pendingFiles,

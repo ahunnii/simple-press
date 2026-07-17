@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type Icon } from "@tabler/icons-react";
 
@@ -33,7 +34,7 @@ export function NavSecondary({
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <a
+                <Link
                   href={item.url}
                   className={
                     isActive(item.url)
@@ -43,7 +44,7 @@ export function NavSecondary({
                 >
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

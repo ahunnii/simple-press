@@ -9,6 +9,7 @@ import { formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type _HomepageProduct = NonNullable<
   RouterOutputs["business"]["getHomepage"]
@@ -21,7 +22,6 @@ type CardProduct = Pick<
   | "name"
   | "slug"
   | "description"
-  | "images"
   | "price"
   | "compareAtPrice"
   | "trackInventory"
@@ -29,8 +29,15 @@ type CardProduct = Pick<
   | "allowBackorders"
   | "baseUnitsConsumed"
   | "additionalFields"
-  | "variants"
 > & {
+  // Structural minimums so both full rows (homepage/related) and the slimmed
+  // shop-page selection remain assignable.
+  images: { url: string }[];
+  variants: {
+    price: number | null;
+    compareAtPrice: number | null;
+    inventoryQty: number;
+  }[];
   // baseInventoryUnit is not included in getRelated, so make it optional
   baseInventoryUnit?: { inventoryQty: number; allowBackorders: boolean } | null;
 };
@@ -162,6 +169,18 @@ export function ElegantProductCard({ product, index, isVisible }: Props) {
             {productStatus.badgeLabel}
           </span>
         )}
+
+        {/* Wishlist heart — top-right (badge is top-left), above ::after overlay */}
+        <WishlistButton
+          item={{
+            productId: product.id,
+            name: product.name,
+            slug: product.slug,
+            price: productStatus.displayPrice,
+            imageUrl: product.images[0]?.url ?? null,
+          }}
+          className="absolute top-3 right-3 z-[3] bg-[var(--el-paper,#fbf8f2)] text-[var(--el-ink,#1c1a17)]"
+        />
 
         {/* Quick-add pills (slide up on hover) — z-index:3 sits above card-link ::after overlay */}
         <div

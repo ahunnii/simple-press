@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -40,7 +41,10 @@ export function HappyBambooShopClient({
   shopHeading,
   shopIntro,
 }: Props) {
-  const [search, setSearch] = useState("");
+  const searchParams = useSearchParams();
+  const [search, setSearch] = useState<string>(
+    () => searchParams.get("q") ?? "",
+  );
   const [sort, setSort] = useState<SortOption>("newest");
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
     null,

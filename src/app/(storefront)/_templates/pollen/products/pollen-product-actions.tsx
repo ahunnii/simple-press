@@ -6,6 +6,7 @@ import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { PollenVariantSelector } from "./pollen-variant-selector";
 
@@ -35,12 +36,7 @@ export function PollenProductActions({
         {justAdded ? `${product.name} added to cart` : ""}
       </span>
 
-      {Object.keys(variantOptions).length > 0 ? (
-        <PollenVariantSelector
-          product={product}
-          setSelectedVariantId={setSelectedVariantId}
-        />
-      ) : additionalFields?.comingSoon ? (
+      {additionalFields?.comingSoon ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
           <p className="font-semibold text-amber-700 dark:text-amber-300">
             Coming Soon
@@ -50,16 +46,30 @@ export function PollenProductActions({
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
+      ) : Object.keys(variantOptions).length > 0 ? (
+        <PollenVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+        />
       ) : !inStock ? (
-        /* S-5: keep focusable — remove disabled, add aria-disabled + no-op onClick */
-        <Button
-          size="lg"
-          aria-disabled="true"
-          onClick={(e) => e.preventDefault()}
-          className="flex opacity-60"
-        >
-          Out of Stock
-        </Button>
+        <div className="flex flex-col gap-4">
+          {/* S-5: keep focusable — remove disabled, add aria-disabled + no-op onClick */}
+          <Button
+            size="lg"
+            aria-disabled="true"
+            onClick={(e) => e.preventDefault()}
+            className="flex opacity-60"
+          >
+            Out of Stock
+          </Button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            messageClassName="text-sm text-[#2a351f]/80"
+            inputClassName="border-[#2a351f]/20 text-[#2a351f]"
+            buttonClassName="border-[#215935] text-[#215935]"
+          />
+        </div>
       ) : (
         <>
           {canAddMore && (

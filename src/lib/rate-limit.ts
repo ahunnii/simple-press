@@ -99,6 +99,13 @@ export const testimonialSubmitLimiter = makeLazy({
   keyPrefix: "rl:testimonial-submit",
 });
 
+// 5 attempts per 15 minutes per IP — for guest order-status link requests
+export const orderLookupLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:order-lookup",
+});
+
 // 10 attempts per minute per IP — for review votes
 export const reviewVoteLimiter = makeLazy({
   points: 10,
@@ -118,6 +125,31 @@ export const checkoutLimiter = makeLazy({
   points: 10,
   duration: 60,
   keyPrefix: "rl:checkout",
+});
+
+// 10 attempts per 15 minutes per IP — for back-in-stock notification signups
+export const backInStockLimiter = makeLazy({
+  points: 10,
+  duration: 900,
+  keyPrefix: "rl:back-in-stock",
+});
+
+// 30 requests per minute per IP — for the machine-to-machine partner
+// provisioning API (Artisanal Futures → SimplePress). Higher than the
+// human-facing limiters since a partner may legitimately provision in bursts.
+export const partnerApiLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:partner-api",
+});
+
+// 10 attempts per minute per IP — for unauthenticated external token lookups
+// (Artisanal Futures). Prevents the public procedure being abused as an
+// unthrottled brute-force / harvesting oracle against the partner API.
+export const externalTokenLimiter = makeLazy({
+  points: 10,
+  duration: 60,
+  keyPrefix: "rl:external-token",
 });
 
 /**

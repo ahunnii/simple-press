@@ -465,11 +465,18 @@ export async function buildUsedMediaIndex(
         image: true,
         ogImage: true,
         content: true,
+        type: true,
       },
     })
     .then((pages) => {
       for (const page of pages) {
-        const pageHref = `/admin/content/pages/${page.id}`;
+        // Blog posts live under /admin/content/blog, not /admin/content/pages
+        // — routing a blog post's image usage to the Pages editor 404s (or
+        // opens the wrong record if a page happens to share the id).
+        const pageHref =
+          page.type === "blog"
+            ? `/admin/content/blog/${page.id}`
+            : `/admin/content/pages/${page.id}`;
         if (page.image) {
           addUsage(map, page.image, {
             url: page.image,

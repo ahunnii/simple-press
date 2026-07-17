@@ -2,7 +2,7 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 // ─── About Page ───────────────────────────────────────────────────────────────
 
-const aboutNoiseData: TemplateField[] = [
+const aboutSledgeData: TemplateField[] = [
   {
     key: "sledge.about-hero-heading",
     label: "About Page Heading",
@@ -85,11 +85,11 @@ const aboutNoiseData: TemplateField[] = [
   },
 ];
 
-export const noiseAboutData = [...aboutNoiseData];
+export const sledgeAboutData = [...aboutSledgeData];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
-export const noiseAboutFieldGroups: TemplateFieldGroup[] = [
+export const sledgeAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
     title: "About Hero",

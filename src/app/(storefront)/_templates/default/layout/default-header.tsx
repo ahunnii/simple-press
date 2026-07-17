@@ -10,9 +10,11 @@ import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { authClient } from "~/server/better-auth/client";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
+import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
 
 type NavChild = { label: string; href: string; external?: boolean };
 type NavLink = {
@@ -21,13 +23,6 @@ type NavLink = {
   external?: boolean;
   children?: NavChild[];
 };
-
-const NAV_LINKS: NavLink[] = [
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About" },
-  { href: "/testimonials", label: "Reviews" },
-  { href: "/contact", label: "Contact" },
-];
 
 export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -118,8 +113,20 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const user = session?.user;
   const pathname = usePathname();
 
+  const { isEnabled } = useFeatureFlags({
+    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
+  });
+
+  const defaultNavLinks: NavLink[] = [
+    { href: "/shop", label: "Shop" },
+    { href: "/about", label: "About" },
+    ...(isEnabled("services") ? [{ href: "/services", label: "Services" }] : []),
+    { href: "/testimonials", label: "Reviews" },
+    { href: "/contact", label: "Contact" },
+  ];
+
   const links =
-    (business?.siteContent?.navigationItems as NavLink[]) ?? NAV_LINKS;
+    (business?.siteContent?.navigationItems as NavLink[]) ?? defaultNavLinks;
 
   const toggleMobileExpanded = (index: number) => {
     setExpandedMobile((prev) => {
@@ -326,6 +333,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                 Sign in
               </Link>
             )}
+            <DefaultWishlistBadge />
             <DefaultCartBadge />
           </div>
         </div>

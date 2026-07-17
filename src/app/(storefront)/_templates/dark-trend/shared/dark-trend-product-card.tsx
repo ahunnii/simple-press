@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { Clock, ShoppingBag } from "lucide-react";
 
 import type { Product } from "~/types";
 import { computeSavingsLabel, formatPrice } from "~/lib/prices";
 import { checkProductStatus } from "~/lib/products/check-product-status";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -52,22 +53,37 @@ export function DarkTrendProductCard({ product }: Props) {
             </div>
           )}
 
-          {/* Discount Badge */}
-          {productStatus.isOnSale && productStatus.displayCompareAtPrice && (
-            <div className="bg-primary text-primary-foreground absolute top-3 left-3 rounded px-2 py-1 text-xs font-medium">
-              {computeSavingsLabel(
-                productStatus.displayPrice,
-                productStatus.displayCompareAtPrice,
-              )}
-            </div>
-          )}
-
-          {/* Out of Stock Badge */}
-          {productStatus.isOutOfStock && (
-            <div className="bg-destructive text-destructive-foreground absolute top-3 right-3 rounded px-2 py-1 text-xs font-medium">
-              Sold Out
-            </div>
-          )}
+          {/* Badges — stacked top-left (top-right is the wishlist heart) */}
+          <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
+            {productStatus.comingSoon ? (
+              <div className="flex items-center gap-1 rounded bg-amber-500 px-2 py-1 text-xs font-medium text-white">
+                <Clock className="h-3 w-3" aria-hidden="true" />
+                Coming Soon
+              </div>
+            ) : (
+              <>
+                {productStatus.isOnSale &&
+                  productStatus.displayCompareAtPrice && (
+                    <div className="bg-primary text-primary-foreground rounded px-2 py-1 text-xs font-medium">
+                      {computeSavingsLabel(
+                        productStatus.displayPrice,
+                        productStatus.displayCompareAtPrice,
+                      )}
+                    </div>
+                  )}
+                {productStatus.isOutOfStock && (
+                  <div className="bg-destructive text-destructive-foreground rounded px-2 py-1 text-xs font-medium">
+                    Sold Out
+                  </div>
+                )}
+                {!productStatus.isOutOfStock && productStatus.isBackorder && (
+                  <div className="rounded bg-blue-500 px-2 py-1 text-xs font-medium text-white">
+                    Pre-order
+                  </div>
+                )}
+              </>
+            )}
+          </div>
 
           {/* Decorative hover overlay — the whole card is a link; this span is aria-hidden */}
           <div
@@ -105,6 +121,16 @@ export function DarkTrendProductCard({ product }: Props) {
           </div>
         </div>
       </Link>
+      <WishlistButton
+        item={{
+          productId: product.id,
+          name: product.name,
+          slug: product.slug,
+          price: productStatus.displayPrice,
+          imageUrl: product.images[0]?.url ?? null,
+        }}
+        className="absolute top-3 right-3 z-10 rounded-md"
+      />
     </div>
   );
 }

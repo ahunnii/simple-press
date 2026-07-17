@@ -6,8 +6,11 @@ import { Check, Minus, Plus } from "lucide-react";
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -22,7 +25,7 @@ export function BambooVariantSelector({
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] ?? null,
+    pickInitialVariant(product.variants, product),
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -48,16 +51,7 @@ export function BambooVariantSelector({
     if (!selectedVariant) return;
 
     addItem(
-      {
-        productId: product.id,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: effectiveMax,
-      },
+      buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity, // ← Add specified quantity
     );
 
@@ -198,6 +192,18 @@ export function BambooVariantSelector({
             : ""}
         </div>
       </div>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && effectiveMax === 0 && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          message="Get notified when this option is back in stock."
+          messageClassName="text-muted-foreground text-sm"
+          inputClassName="border-border rounded-lg"
+          buttonClassName="rounded-lg"
+        />
+      )}
     </div>
   );
 }

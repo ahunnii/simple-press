@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, BookUser, Lock, Package, Settings } from "lucide-react";
+import { Bell, Lock, Settings } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";

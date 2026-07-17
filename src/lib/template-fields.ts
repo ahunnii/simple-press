@@ -25,6 +25,7 @@ import {
   buildersData,
   buildersFieldGroups,
 } from "~/app/(storefront)/_templates/builders";
+import { coopData, coopFieldGroups } from "~/app/(storefront)/_templates/coop";
 import {
   darkTrendData,
   darkTrendFieldGroups,
@@ -437,50 +438,12 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...sledgeFieldGroups,
   ...elegantFieldGroups,
   ...viiFieldGroups,
+  ...coopFieldGroups,
+
   ...defaultTemplateFieldGroups,
 };
 
 export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
-  vintage: [
-    {
-      key: "vintage.tagline",
-      label: "Tagline",
-      description: "Your store's tagline",
-      type: "text",
-      page: "global",
-    },
-    {
-      key: "vintage.welcome",
-      label: "Welcome Message",
-      description: "Greeting message for visitors",
-      type: "textarea",
-      page: "global",
-    },
-    {
-      key: "vintage.signature",
-      label: "Signature",
-      description: "Personal signature or sign-off",
-      type: "text",
-      page: "global",
-    },
-  ],
-  minimal: [
-    {
-      key: "minimal.motto",
-      label: "Motto",
-      description: "Short motto or slogan",
-      type: "text",
-      page: "global",
-    },
-    {
-      key: "minimal.statement",
-      label: "Brand Statement",
-      description: "Your brand's mission statement",
-      type: "textarea",
-      page: "global",
-    },
-  ],
-
   ...bambooData,
   ...buildersData,
   ...darkTrendData,
@@ -491,6 +454,8 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...sledgeData,
   ...elegantData,
   ...viiData,
+  ...coopData,
+
   ...defaultTemplateData,
 };
 
@@ -552,10 +517,9 @@ export function groupFieldsByPage(
   const grouped: Record<string, TemplateField[]> = {};
 
   fields.forEach((field) => {
-    if (!grouped[field.page ?? "global"]) {
-      grouped[field.page] = [];
-    }
-    grouped[field.page]!.push(field);
+    const page = field.page ?? "global";
+    grouped[page] ??= [];
+    grouped[page].push(field);
   });
 
   return grouped;
@@ -627,6 +591,21 @@ export const PAGE_METADATA = {
 
 export { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
+/**
+ * Node types that are "leaf" content — they carry their meaning via `attrs`
+ * rather than a nested `content` array (e.g. a standalone image has no
+ * children, but is obviously not empty). Without this list, `isContentEmpty`
+ * would misreport any richtext block containing only these nodes as blank,
+ * silently hiding image-only sections/tabs.
+ */
+const LEAF_CONTENT_NODE_TYPES = new Set([
+  "image",
+  "horizontalRule",
+  "hardBreak",
+  "gallery",
+  "embed",
+]);
+
 export function isContentEmpty(content: TiptapJSON): boolean {
   if (content === null || content === undefined) {
     return true;
@@ -641,9 +620,20 @@ export function isContentEmpty(content: TiptapJSON): boolean {
     return content.every((item) => isContentEmpty(item));
   }
 
+  if (
+    typeof content.type === "string" &&
+    LEAF_CONTENT_NODE_TYPES.has(content.type)
+  ) {
+    return false;
+  }
+
+  if (typeof content.text === "string" && content.text !== "") {
+    return false;
+  }
+
   if (!content.content) {
     return true;
   }
 
-  return content.content.every((item) => !item.content);
+  return content.content.every((item) => isContentEmpty(item));
 }

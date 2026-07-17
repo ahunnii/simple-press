@@ -74,6 +74,8 @@ export function NewGalleryForm() {
 
   const form = useForm<GalleryCreateData>({
     resolver: zodResolver(galleryCreateSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: NEW_GALLERY_DEFAULTS,
   });
 

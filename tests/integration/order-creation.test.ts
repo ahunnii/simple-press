@@ -1,6 +1,8 @@
+import { Prisma } from "generated/prisma";
 import type Stripe from "stripe";
 import { beforeEach, describe, expect, it } from "vitest";
 
+import type { DbClient } from "~/server/db";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
 
 import { db, resetDb } from "../helpers/db";
@@ -86,6 +88,49 @@ function makeSession(opts: {
     },
     metadata: {},
   } as unknown as Stripe.Checkout.Session;
+}
+
+/** Builds a Prisma P2002 unique-constraint error shaped like a real orderNumber conflict. */
+function makeOrderNumberConflictError(): Prisma.PrismaClientKnownRequestError {
+  return new Prisma.PrismaClientKnownRequestError(
+    "Unique constraint failed on the fields: (`businessId`,`orderNumber`)",
+    {
+      code: "P2002",
+      clientVersion: "test",
+      meta: { target: ["orderNumber"] },
+    },
+  );
+}
+
+/**
+ * Wraps the real db client so `order.create` can be made to throw a P2002
+ * conflict on `orderNumber` for the first `failCount` calls before falling
+ * through to the real implementation. `order.findFirst` (used internally by
+ * `getNextOrderNumber`) always delegates to the real client. This simulates
+ * the race between concurrent webhook deliveries that the retry loop in
+ * `createOrderFromCheckout` exists to handle, without needing two real
+ * concurrent DB connections.
+ */
+function withFlakyOrderCreate(failCount: number): {
+  db: DbClient;
+  createCallCount: () => number;
+} {
+  let calls = 0;
+  const flakyDb = {
+    order: {
+      findFirst: (
+        ...args: Parameters<DbClient["order"]["findFirst"]>
+      ) => db.order.findFirst(...args),
+      create: (...args: Parameters<DbClient["order"]["create"]>) => {
+        calls++;
+        if (calls <= failCount) {
+          throw makeOrderNumberConflictError();
+        }
+        return db.order.create(...args);
+      },
+    },
+  } as unknown as DbClient;
+  return { db: flakyDb, createCallCount: () => calls };
 }
 
 describe("createOrderFromCheckout (integration)", () => {
@@ -285,5 +330,68 @@ describe("createOrderFromCheckout (integration)", () => {
 
     expect(order.customerId).toBeNull();
     expect(order.customerEmail).toBe("guest@test.dev");
+  });
+
+  it("retries after a transient orderNumber conflict and still creates the order", async () => {
+    const business = await createBusiness();
+    const session = makeSession({ id: "cs_conflict_once" });
+
+    // Fail once (simulating a concurrent webhook winning the race on the
+    // first attempt), then succeed on the retry.
+    const { db: flakyDb, createCallCount } = withFlakyOrderCreate(1);
+
+    const order = await createOrderFromCheckout(flakyDb, {
+      business: { id: business.id },
+      customer: null,
+      shippingAddressId: null,
+      customerEmail: "buyer@test.dev",
+      session,
+      fullSession: session,
+      verifiedDiscountCodeId: null,
+      discountAmount: 0,
+    });
+
+    // create() was attempted twice: the first attempt hit the simulated
+    // P2002, the second (after re-querying getNextOrderNumber) succeeded.
+    expect(createCallCount()).toBe(2);
+    expect(order.orderNumber).toBe(1);
+    expect(order.stripeSessionId).toBe("cs_conflict_once");
+
+    // Confirm it actually landed in the DB, not just the return value.
+    const dbOrder = await db.order.findUniqueOrThrow({
+      where: { id: order.id },
+    });
+    expect(dbOrder.orderNumber).toBe(1);
+  });
+
+  it("throws after exhausting all retries on a persistent orderNumber conflict", async () => {
+    const business = await createBusiness();
+    const session = makeSession({ id: "cs_conflict_persistent" });
+
+    // Always fail — simulates a conflict that never clears within the
+    // retry budget.
+    const { db: flakyDb, createCallCount } = withFlakyOrderCreate(
+      Number.POSITIVE_INFINITY,
+    );
+
+    await expect(
+      createOrderFromCheckout(flakyDb, {
+        business: { id: business.id },
+        customer: null,
+        shippingAddressId: null,
+        customerEmail: "buyer@test.dev",
+        session,
+        fullSession: session,
+        verifiedDiscountCodeId: null,
+        discountAmount: 0,
+      }),
+    ).rejects.toMatchObject({ code: "P2002" });
+
+    // 3 attempts total (indices 0, 1, 2), per the retry loop's `attempt < 3`.
+    expect(createCallCount()).toBe(3);
+
+    // No order should have been persisted for this business.
+    const count = await db.order.count({ where: { businessId: business.id } });
+    expect(count).toBe(0);
   });
 });

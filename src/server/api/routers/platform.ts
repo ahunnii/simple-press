@@ -1,6 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import {
+  FEATURE_REGISTRY,
+  getDefaultFlags,
+  getDisabledDueToDependency,
+} from "~/lib/features/registry";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { createTRPCRouter, platformAdminProcedure } from "~/server/api/trpc";
 
@@ -267,7 +272,7 @@ export const platformRouter = createTRPCRouter({
       z.object({
         userId: z.string(),
         businessId: z.string(),
-        role: z.enum(["OWNER", "MANAGER"]),
+        role: z.enum(["OWNER", "MANAGER", "STAFF"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -348,7 +353,7 @@ export const platformRouter = createTRPCRouter({
     .input(
       z.object({
         membershipId: z.string(),
-        role: z.enum(["OWNER", "MANAGER"]),
+        role: z.enum(["OWNER", "MANAGER", "STAFF"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -361,6 +366,21 @@ export const platformRouter = createTRPCRouter({
           code: "NOT_FOUND",
           message: "Membership not found",
         });
+      }
+
+      // Last-owner protection: never let a business be left with zero OWNERs by
+      // demoting its final OWNER to a lesser role.
+      if (membership.role === "OWNER" && input.role !== "OWNER") {
+        const ownerCount = await ctx.db.businessMembership.count({
+          where: { businessId: membership.businessId, role: "OWNER" },
+        });
+        if (ownerCount <= 1) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Cannot demote the last owner of this business. Promote another member to Owner first.",
+          });
+        }
       }
 
       const updatedMembership = await ctx.db.businessMembership.update({
@@ -398,6 +418,21 @@ export const platformRouter = createTRPCRouter({
           code: "NOT_FOUND",
           message: "Membership not found",
         });
+      }
+
+      // Last-owner protection: never let a business be left with zero OWNERs by
+      // deleting its final OWNER membership.
+      if (membership.role === "OWNER") {
+        const ownerCount = await ctx.db.businessMembership.count({
+          where: { businessId: membership.businessId, role: "OWNER" },
+        });
+        if (ownerCount <= 1) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Cannot delete the last owner of this business. Transfer ownership first.",
+          });
+        }
       }
 
       await ctx.db.businessMembership.delete({
@@ -477,6 +512,77 @@ export const platformRouter = createTRPCRouter({
         name: business.name,
         subdomain: business.subdomain,
       };
+    }),
+
+  // Feature Flag Management
+  getBusinessFlags: platformAdminProcedure
+    .input(z.object({ businessId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const business = await ctx.db.business.findUnique({
+        where: { id: input.businessId },
+        select: { featureFlags: true },
+      });
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      // Same resolution as features.getFlags: defaults merged with stored overrides
+      const defaults = getDefaultFlags();
+      const stored = (business.featureFlags as Record<string, boolean>) ?? {};
+      const merged = { ...defaults, ...stored };
+      const disabledByDependency = getDisabledDueToDependency(merged);
+
+      return {
+        flags: merged,
+        disabledByDependency: [...disabledByDependency],
+      };
+    }),
+
+  setBusinessFlags: platformAdminProcedure
+    .input(
+      z.object({
+        businessId: z.string(),
+        flags: z.record(z.string(), z.boolean()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const unknownKeys = Object.keys(input.flags).filter(
+        (key) => !FEATURE_REGISTRY[key],
+      );
+
+      if (unknownKeys.length > 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Unknown feature flag(s): ${unknownKeys.join(", ")}`,
+        });
+      }
+
+      const business = await ctx.db.business.findUnique({
+        where: { id: input.businessId },
+        select: { featureFlags: true },
+      });
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      // Mirror features.adminSetFlags: merge incoming flags over stored ones
+      const current = (business.featureFlags as Record<string, boolean>) ?? {};
+      const updated = { ...current, ...input.flags };
+
+      await ctx.db.business.update({
+        where: { id: input.businessId },
+        data: { featureFlags: updated },
+      });
+
+      return { success: true };
     }),
 
   getMaintenance: platformAdminProcedure.query(async ({ ctx }) => {

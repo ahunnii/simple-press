@@ -1,10 +1,13 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import { checkBusiness } from "~/lib/check-business";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { db } from "~/server/db";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { ConversionCard } from "~/app/admin/dashboard/_components/conversion-card";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
+import { bucketRevenueByDay } from "~/app/admin/dashboard/_lib/revenue-by-day";
 
 import { TrailHeader } from "../_components/trail-header";
 
@@ -30,9 +33,36 @@ export default async function AdminDashboardPage() {
     },
   });
 
+  // Cheap lookup for the "Finish setting up" card — mirrors the completion
+  // logic in /admin/welcome/page.tsx (same 5 setup steps).
+  const siteContentForSetup = await db.siteContent.findUnique({
+    where: { businessId: business.id },
+    select: { logoUrl: true, customFields: true },
+  });
+
   // Get stats for the dashboard
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  // Prior-period windows for period-over-period deltas:
+  // days 14–8 (vs last 7) and days 60–31 (vs last 30).
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  const sixtyDaysAgo = new Date();
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  // The revenue chart labels whole calendar days, so its window starts at
+  // local midnight — otherwise the first bar would silently cover a partial
+  // day. Other 30-day stats keep the rolling `thirtyDaysAgo` window.
+  const chartWindowStart = new Date(thirtyDaysAgo);
+  chartWindowStart.setHours(0, 0, 0, 0);
 
   const [
     totalRevenue,
@@ -40,9 +70,20 @@ export default async function AdminDashboardPage() {
     recentOrders,
     lowStockProducts,
     lowStockPools,
-    revenueByDay,
+    revenueOrders,
     recentOversells,
     topProducts,
+    ordersToFulfillCount,
+    awaitingPaymentCount,
+    todayRevenue,
+    sevenDayRevenue,
+    sevenDayOrders,
+    thirtyDayRevenue,
+    thirtyDayPaidOrders,
+    prevSevenDayRevenue,
+    prevSevenDayOrders,
+    prevThirtyDayRevenue,
+    prevThirtyDayPaidOrders,
   ] = await Promise.all([
     // Total revenue (all time, paid orders that are not fully refunded)
     // Subtract refundAmountCents from partial-refund orders so the stat
@@ -139,21 +180,30 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Revenue by day (last 30 days)
-    db.order.groupBy({
-      by: ["createdAt"],
+    // Revenue by day (last 30 days) — raw rows, bucketed into local
+    // calendar days below (Prisma's groupBy(["createdAt"]) groups by the
+    // full timestamp, i.e. one row per order, not per day).
+    //
+    // Scoped to paymentStatus: { in: ["paid", "refunded"] } to match the
+    // "Revenue (Last 30 Days)" card's headline number (stats.thirtyDayGrossRevenue,
+    // computed below from the same paid+refunded scoping). Both must share one
+    // definition of "revenue" — previously this query used paymentStatus: "paid"
+    // only, so the chart's bars summed to less than the headline once an order
+    // in the window was refunded. Gross (not net) was chosen as the shared
+    // definition since the card already surfaces the refunded amount and net
+    // total as a subtitle line, and the per-day bars have no room to show a
+    // refund breakdown of their own.
+    db.order.findMany({
       where: {
         businessId: business.id,
-        paymentStatus: "paid",
+        paymentStatus: { in: ["paid", "refunded"] },
         createdAt: {
-          gte: thirtyDaysAgo,
+          gte: chartWindowStart,
         },
       },
-      _sum: {
+      select: {
+        createdAt: true,
         total: true,
-      },
-      orderBy: {
-        createdAt: "asc",
       },
     }),
 
@@ -200,7 +250,122 @@ export default async function AdminDashboardPage() {
       },
       take: 5,
     }),
+
+    // Orders needing fulfillment (paid, not yet fully fulfilled, not cancelled/refunded)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        fulfillmentStatus: { in: ["unfulfilled", "partially_fulfilled"] },
+        status: { notIn: ["cancelled", "refunded"] },
+      },
+    }),
+
+    // Orders awaiting payment (pending, not cancelled/refunded)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "pending",
+        status: { notIn: ["cancelled", "refunded"] },
+      },
+    }),
+
+    // Today's revenue (paid orders created since midnight)
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: todayStart },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Last 7 days revenue.
+    // Includes fully-refunded orders ("refunded" status) so the gross and
+    // refunded components are complete; net (total − refundAmountCents) is
+    // unchanged because full refunds store refundAmountCents = total.
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: { in: ["paid", "refunded"] },
+        createdAt: { gte: sevenDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Last 7 days total order count
+    db.order.count({
+      where: {
+        businessId: business.id,
+        createdAt: { gte: sevenDaysAgo },
+      },
+    }),
+
+    // Last 30 days revenue (gross / refunded / net; net feeds the AOV
+    // numerator). Same paid+refunded scoping rationale as the 7-day query.
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: { in: ["paid", "refunded"] },
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Last 30 days paid order count (for AOV denominator)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: thirtyDaysAgo },
+      },
+    }),
+
+    // Prior 7-day window revenue (days 14–8) for the period-over-period delta
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: { in: ["paid", "refunded"] },
+        createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Prior 7-day window total order count
+    db.order.count({
+      where: {
+        businessId: business.id,
+        createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+      },
+    }),
+
+    // Prior 30-day window revenue (days 60–31) for delta + prior AOV numerator
+    db.order.aggregate({
+      where: {
+        businessId: business.id,
+        paymentStatus: { in: ["paid", "refunded"] },
+        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+      },
+      _sum: { total: true, refundAmountCents: true },
+    }),
+
+    // Prior 30-day window paid order count (prior AOV denominator)
+    db.order.count({
+      where: {
+        businessId: business.id,
+        paymentStatus: "paid",
+        createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+      },
+    }),
   ]);
+
+  // Bucket raw revenue rows into one total per local calendar day, filling
+  // zero-revenue days so the chart axis is continuous.
+  const revenueByDay = bucketRevenueByDay(
+    revenueOrders,
+    chartWindowStart,
+    todayStart,
+  );
 
   // Get product details for top products
   const topProductIds = topProducts
@@ -221,6 +386,30 @@ export default async function AdminDashboardPage() {
     },
   });
 
+  // Gross / refunded / net breakdowns for the trailing windows. The cards
+  // display gross with a "− $X refunded" line; deltas compare net to net so
+  // trends stay honest when refunds land.
+  const sevenDayGross = sevenDayRevenue._sum.total ?? 0;
+  const sevenDayRefunded = sevenDayRevenue._sum.refundAmountCents ?? 0;
+  const thirtyDayGross = thirtyDayRevenue._sum.total ?? 0;
+  const thirtyDayRefunded = thirtyDayRevenue._sum.refundAmountCents ?? 0;
+
+  const prevSevenDayNet =
+    (prevSevenDayRevenue._sum.total ?? 0) -
+    (prevSevenDayRevenue._sum.refundAmountCents ?? 0);
+  const prevThirtyDayNet =
+    (prevThirtyDayRevenue._sum.total ?? 0) -
+    (prevThirtyDayRevenue._sum.refundAmountCents ?? 0);
+
+  // Conversion card renders only when analytics is fully configured for this
+  // business; it streams in behind its own Suspense boundary so Umami latency
+  // (or an outage) never blocks the dashboard.
+  const umamiWebsiteId = businessData?.umamiWebsiteId ?? null;
+  const showConversionCard =
+    flags.isEnabled("analytics") &&
+    !!businessData?.umamiEnabled &&
+    umamiWebsiteId !== null;
+
   const topProductsWithDetails = topProducts.map((item) => {
     const product = productDetails.find((p) => p.id === item.productId);
     return {
@@ -231,6 +420,54 @@ export default async function AdminDashboardPage() {
       unitsSold: item._sum.quantity ?? 0,
     };
   });
+
+  // "Finish setting up" card — mirrors the 5-step completion logic in
+  // /admin/welcome/page.tsx (businessCreated is always true post-onboarding).
+  const setupCustomFields = siteContentForSetup?.customFields;
+  const storefrontCustomized =
+    Boolean(siteContentForSetup?.logoUrl) ||
+    (setupCustomFields !== null &&
+      setupCustomFields !== undefined &&
+      typeof setupCustomFields === "object" &&
+      !Array.isArray(setupCustomFields) &&
+      Object.keys(setupCustomFields as Record<string, unknown>).length > 0);
+
+  const setupSteps: Array<{ done: boolean; label: string; href: string }> = [
+    { done: true, label: "Store created", href: "/admin/welcome" },
+    {
+      done: Boolean(businessData?.stripeAccountId),
+      label: "Connect payment processing",
+      href: "/admin/welcome",
+    },
+    {
+      done: Boolean(businessData?.customDomain),
+      label: "Connect a custom domain",
+      href: "/admin/welcome",
+    },
+    {
+      done: (businessData?._count.products ?? 0) > 0,
+      label: "Add your first product",
+      href: "/admin/products/new",
+    },
+    {
+      done: storefrontCustomized,
+      label: "Customize your storefront",
+      href: "/admin/content/template",
+    },
+  ];
+  const setupCompletedSteps = setupSteps.filter((s) => s.done).length;
+  const setupTotalSteps = setupSteps.length;
+  const nextSetupStep = setupSteps.find((s) => !s.done) ?? null;
+  const setupProgress =
+    setupCompletedSteps === setupTotalSteps
+      ? null
+      : {
+          completed: setupCompletedSteps,
+          total: setupTotalSteps,
+          nextStep: nextSetupStep
+            ? { label: nextSetupStep.label, href: nextSetupStep.href }
+            : null,
+        };
 
   return (
     <>
@@ -248,6 +485,7 @@ export default async function AdminDashboardPage() {
       )}
       <DashboardContent
         business={businessData!}
+        setupProgress={setupProgress}
         stats={{
           totalRevenue:
             (totalRevenue._sum.total ?? 0) -
@@ -255,7 +493,34 @@ export default async function AdminDashboardPage() {
           totalOrders,
           totalProducts: businessData!._count.products,
           totalCustomers: businessData!._count.customers,
+          todayRevenue:
+            (todayRevenue._sum.total ?? 0) -
+            (todayRevenue._sum.refundAmountCents ?? 0),
+          sevenDayRevenue: sevenDayGross - sevenDayRefunded,
+          sevenDayGrossRevenue: sevenDayGross,
+          sevenDayRefunded,
+          prevSevenDayRevenue: prevSevenDayNet,
+          sevenDayOrders,
+          prevSevenDayOrders,
+          thirtyDayRevenue: thirtyDayGross - thirtyDayRefunded,
+          thirtyDayGrossRevenue: thirtyDayGross,
+          thirtyDayRefunded,
+          prevThirtyDayRevenue: prevThirtyDayNet,
+          thirtyDayPaidOrders,
+          prevThirtyDayPaidOrders,
         }}
+        conversionCard={
+          showConversionCard && umamiWebsiteId ? (
+            <Suspense fallback={null}>
+              <ConversionCard
+                websiteId={umamiWebsiteId}
+                paidOrders={thirtyDayPaidOrders}
+              />
+            </Suspense>
+          ) : undefined
+        }
+        ordersToFulfillCount={ordersToFulfillCount}
+        awaitingPaymentCount={awaitingPaymentCount}
         recentOrders={
           recentOrders as Array<{
             id: string;

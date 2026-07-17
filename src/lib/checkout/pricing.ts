@@ -1,3 +1,5 @@
+import { resolveVariantPrice } from "~/lib/variant-price";
+
 import type { CartLineItem, ProductMap, VariantMap } from "./types";
 
 /**
@@ -14,9 +16,17 @@ export function computeSubtotalCents(
   productMap: ProductMap,
 ): number {
   return items.reduce((sum, item) => {
-    const serverPrice = item.variantId
-      ? (variantMap.get(item.variantId)?.price ?? 0)
-      : (productMap.get(item.productId)?.price ?? 0);
+    let serverPrice: number;
+    if (item.variantId) {
+      const variant = variantMap.get(item.variantId);
+      // Fall back to 0 only when the record is missing entirely; a variant
+      // priced 0/null inherits its product's base price.
+      serverPrice = variant
+        ? resolveVariantPrice(variant.price, variant.product.price)
+        : 0;
+    } else {
+      serverPrice = productMap.get(item.productId)?.price ?? 0;
+    }
     return sum + serverPrice * item.quantity;
   }, 0);
 }

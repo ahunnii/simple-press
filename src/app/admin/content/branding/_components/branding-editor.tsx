@@ -82,6 +82,8 @@ export function BrandingEditor({ business, siteContent }: Props) {
   // Form Setup
   const form = useForm<BrandingFormSchema>({
     resolver: zodResolver(brandingFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       footerText: siteContent.footerText ?? "",
       socialLinks: {
@@ -213,7 +215,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
       try {
         const response = await faviconUploader.upload(tempFaviconFile);
         const fileLocation =
-          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          (response.file.objectInfo.metadata?.pathName as string | undefined) ??
           "";
 
         if (fileLocation) faviconUrl = fileLocation;

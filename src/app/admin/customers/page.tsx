@@ -1,3 +1,5 @@
+import { Users } from "lucide-react";
+
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 import {
@@ -7,25 +9,29 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { AdminEmpty } from "../_components/admin-empty";
 import { TrailHeader } from "../_components/trail-header";
 import { CustomerFilters } from "./_components/customer-filters";
+import { CustomersPagination } from "./_components/customers-pagination";
 import { CustomersTable } from "./_components/customers-table";
 
 type Props = {
   searchParams: Promise<{
     search?: string;
+    page?: string;
   }>;
 };
 
 export default async function CustomersPage({ searchParams }: Props) {
   const params = await searchParams;
+  const page = params.page ? Math.max(1, parseInt(params.page, 10)) : undefined;
 
-  const customers = await api.customer
-    .list({ search: params.search })
+  const result = await api.customer
+    .list({ search: params.search, page })
     .catch(rethrowTrpcForErrorBoundary);
 
-  const totalCustomers = customers.length;
-  const marketingCount = customers.filter((c) => c.acceptsMarketing).length;
+  const { customers, totalCount, totalPages, stats } = result;
+  const { totalCustomers, marketingCount } = stats;
 
   return (
     <>
@@ -56,21 +62,25 @@ export default async function CustomersPage({ searchParams }: Props) {
           </div>
         )}
 
-        <CustomerFilters customerCount={totalCustomers} />
+        <CustomerFilters customerCount={totalCount} />
 
         {customers.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No customers found</CardTitle>
-              <CardDescription>
-                {params.search
-                  ? "Try a different search term."
-                  : "Customers will appear here once orders are placed."}
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <AdminEmpty
+            icon={Users}
+            title={params.search ? "No matching customers" : "No customers yet"}
+            description={params.search ? "No customers match your search." : "Customers appear here after their first order or when they create an account on your storefront."}
+            filtered={!!params.search}
+          />
         ) : (
-          <CustomersTable customers={customers} />
+          <>
+            <CustomersTable customers={customers} />
+            <CustomersPagination
+              page={result.page}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              pageSize={result.pageSize}
+            />
+          </>
         )}
       </div>
     </>

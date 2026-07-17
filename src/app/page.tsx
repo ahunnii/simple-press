@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { permanentRedirect } from "next/navigation";
 
+import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
 import {
   buildLocalBusinessSchema,
@@ -17,6 +18,8 @@ import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo
 import { BambooLayout } from "./(storefront)/_templates/bamboo/layout/bamboo-general-layout";
 import { BuildersHomepage } from "./(storefront)/_templates/builders/homepage/builders-homepage";
 import { BuildersLayout } from "./(storefront)/_templates/builders/layout/builders-layout";
+import { CoopHomepage } from "./(storefront)/_templates/coop/homepage/coop-homepage";
+import { CoopLayout } from "./(storefront)/_templates/coop/layout/coop-layout";
 import { DarkTrendHomepage } from "./(storefront)/_templates/dark-trend/homepage/dark-trend-homepage";
 import { DarkTrendLayout } from "./(storefront)/_templates/dark-trend/layout/dark-trend-layout";
 import { DefaultHomePage } from "./(storefront)/_templates/default/homepage/default-homepage";
@@ -55,12 +58,15 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
   // Canonical-host guard: redirect platform-subdomain requests to the active
   // custom domain (308 permanent). enforceCanonicalHost returns null when no
   // redirect is needed, making this loop-safe.
-  const headersList = await headers();
-  const host = headersList.get("host") ?? "";
-  const pathname = headersList.get("x-pathname") ?? "/";
-  const canonicalRedirect = enforceCanonicalHost(business, host, pathname);
-  if (canonicalRedirect) {
-    permanentRedirect(canonicalRedirect);
+  // Skipped in development so custom-domain businesses stay reachable locally.
+  if (env.NODE_ENV !== "development") {
+    const headersList = await headers();
+    const host = headersList.get("host") ?? "";
+    const pathname = headersList.get("x-pathname") ?? "/";
+    const canonicalRedirect = enforceCanonicalHost(business, host, pathname);
+    if (canonicalRedirect) {
+      permanentRedirect(canonicalRedirect);
+    }
   }
 
   if (business.maintenance?.active) {
@@ -84,6 +90,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       "happy-bamboo": HappyBambooHomepage,
       noise: NoiseHomepage,
       builders: BuildersHomepage,
+      coop: CoopHomepage,
       sledge: SledgeHomepage,
       vii: ViiHomepage,
     }[business.templateId] ?? DefaultHomePage;
@@ -99,6 +106,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       "happy-bamboo": HappyBambooLayout,
       noise: NoiseLayout,
       builders: BuildersLayout,
+      coop: CoopLayout,
       sledge: SledgeLayout,
       vii: ViiLayout,
     }[business.templateId] ?? DefaultLayout;

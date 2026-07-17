@@ -6,13 +6,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 import { BambooMobileNav } from "./bamboo-mobile-nav";
 
@@ -33,8 +35,10 @@ const NAV_LINKS: NavLink[] = [
 
 export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
+  const { isEnabled } = useStorefrontFlags();
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
@@ -222,12 +226,33 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
         </nav>
 
         <div className="flex items-center gap-2">
-          {isPending ? (
-            <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-          ) : session?.user ? (
-            userMenu
-          ) : (
-            authActions
+          {isEnabled("customerAccounts") && (
+            <>
+              {isPending ? (
+                <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+              ) : session?.user ? (
+                userMenu
+              ) : (
+                authActions
+              )}
+            </>
+          )}
+          {isEnabled("wishlist") && (
+            <Button variant="ghost" size="icon" asChild>
+              <Link
+                href="/wishlist"
+                aria-label={`Wishlist with ${wishlistCount} items`}
+              >
+                <span className="relative" aria-hidden="true">
+                  <Heart className="size-5" />
+                  {wishlistCount > 0 && (
+                    <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 flex size-4 items-center justify-center rounded-full text-[10px] font-bold">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </span>
+              </Link>
+            </Button>
           )}
           <Button variant="ghost" size="icon" asChild>
             <Link

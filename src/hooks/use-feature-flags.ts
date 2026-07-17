@@ -2,11 +2,8 @@
 
 import { useMemo } from "react";
 
-import {
-  FEATURE_REGISTRY,
-  getDefaultFlags,
-  getDisabledDueToDependency,
-} from "~/lib/features/registry";
+import { FEATURE_REGISTRY } from "~/lib/features/registry";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 
 type UseFeatureFlagsOptions = {
   // Pass server-fetched flags in (avoids extra client fetch)
@@ -15,21 +12,21 @@ type UseFeatureFlagsOptions = {
 
 export function useFeatureFlags({ flags }: UseFeatureFlagsOptions) {
   const resolved = useMemo(() => {
-    const defaults = getDefaultFlags();
-    const merged = { ...defaults, ...flags };
-    const disabledByDependency = getDisabledDueToDependency(merged);
+    const {
+      flags: merged,
+      isEnabled,
+      disabledByDependency,
+    } = resolveFlags(flags);
+    const disabledSet = new Set(disabledByDependency);
 
     return {
       flags: merged,
-      disabledByDependency,
+      disabledByDependency: disabledSet,
 
-      isEnabled: (key: string): boolean => {
-        if (disabledByDependency.has(key)) return false;
-        return merged[key] ?? FEATURE_REGISTRY[key]?.enabledByDefault ?? false;
-      },
+      isEnabled,
 
       isDisabledByDependency: (key: string): boolean => {
-        return disabledByDependency.has(key);
+        return disabledSet.has(key);
       },
 
       getDependencyLabel: (key: string): string | undefined => {

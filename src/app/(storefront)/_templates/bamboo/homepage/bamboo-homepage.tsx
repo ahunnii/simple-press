@@ -3,11 +3,12 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Package } from "lucide-react";
 
 import type { Product } from "~/types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
@@ -93,26 +94,44 @@ export async function BambooHomepage() {
               direction="right"
               className="flex flex-1 flex-col items-start gap-6"
             >
-              <span className="bg-primary/10 text-primary rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase">
+              <span
+                className="bg-primary/10 text-primary rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider uppercase"
+                {...fieldAttr("bamboo.homepage.hero-tagline")}
+              >
                 {f["bamboo.homepage.hero-tagline"]}
               </span>
               <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl lg:text-6xl">
-                <span className="text-balance">
+                <span
+                  className="text-balance"
+                  {...fieldAttr("bamboo.homepage.hero-title")}
+                >
                   {f["bamboo.homepage.hero-title"]}
                 </span>
               </h1>
-              <p className="text-muted-foreground max-w-md text-lg leading-relaxed">
+              <p
+                className="text-muted-foreground max-w-md text-lg leading-relaxed"
+                {...fieldAttr("bamboo.homepage.hero-description")}
+              >
                 {f["bamboo.homepage.hero-description"]}
               </p>
               <div className="flex flex-wrap items-center gap-4">
                 <Button size="lg" asChild>
                   <Link href={f["bamboo.homepage.hero-primary-button-link"]!}>
-                    {f["bamboo.homepage.hero-primary-button-text"]}{" "}
+                    <span
+                      {...fieldAttr("bamboo.homepage.hero-primary-button-text")}
+                    >
+                      {f["bamboo.homepage.hero-primary-button-text"]}
+                    </span>{" "}
                     <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link href={f["bamboo.homepage.hero-secondary-button-link"]!}>
+                  <Link
+                    href={f["bamboo.homepage.hero-secondary-button-link"]!}
+                    {...fieldAttr(
+                      "bamboo.homepage.hero-secondary-button-text",
+                    )}
+                  >
                     {f["bamboo.homepage.hero-secondary-button-text"]}
                   </Link>
                 </Button>
@@ -141,11 +160,17 @@ export async function BambooHomepage() {
           <FadeIn direction="up">
             <div className="mb-12 text-center">
               <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-                <span className="text-balance">
+                <span
+                  className="text-balance"
+                  {...fieldAttr("bamboo.homepage.featured-title")}
+                >
                   {f["bamboo.homepage.featured-title"]}
                 </span>
               </h2>
-              <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
+              <p
+                className="text-muted-foreground mx-auto mt-4 max-w-2xl"
+                {...fieldAttr("bamboo.homepage.featured-description")}
+              >
                 {f["bamboo.homepage.featured-description"]}
               </p>
             </div>
@@ -190,37 +215,43 @@ export async function BambooHomepage() {
         </section>
 
         {/* Sustainability Banner */}
-        <section
-          {...sectionGroupAttr("homepage", "sustainability")}
-          className="bg-primary"
-        >
-          <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
-            <StaggerContainer
-              className="grid grid-cols-2 gap-8 lg:grid-cols-3"
-              staggerDelay={0.1}
-            >
-              {sustainabilityList?.map((feature) => (
-                <StaggerItem
-                  key={feature.title}
-                  className="flex flex-col items-center gap-3 text-center"
-                >
-                  <div
-                    className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full"
-                    aria-hidden="true"
+        {isSectionVisible(
+          homepage?.siteContent?.customFields,
+          "bamboo",
+          "homepage.sustainability",
+        ) && (
+          <section
+            {...sectionGroupAttr("homepage", "sustainability")}
+            className="bg-primary"
+          >
+            <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
+              <StaggerContainer
+                className="grid grid-cols-2 gap-8 lg:grid-cols-3"
+                staggerDelay={0.1}
+              >
+                {sustainabilityList?.map((feature) => (
+                  <StaggerItem
+                    key={feature.title}
+                    className="flex flex-col items-center gap-3 text-center"
                   >
-                    <feature.icon className="text-primary-foreground size-6" />
-                  </div>
-                  <h3 className="text-primary-foreground text-sm font-semibold">
-                    {feature.title}
-                  </h3>
-                  <p className="text-primary-foreground/80 text-xs">
-                    {feature.description}
-                  </p>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
+                    <div
+                      className="bg-primary-foreground/10 flex size-12 items-center justify-center rounded-full"
+                      aria-hidden="true"
+                    >
+                      <feature.icon className="text-primary-foreground size-6" />
+                    </div>
+                    <h3 className="text-primary-foreground text-sm font-semibold">
+                      {feature.title}
+                    </h3>
+                    <p className="text-primary-foreground/80 text-xs">
+                      {feature.description}
+                    </p>
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            </div>
+          </section>
+        )}
 
         {/* About Teaser */}
         <section
@@ -230,16 +261,26 @@ export async function BambooHomepage() {
           <ScaleIn>
             <div className="bg-secondary flex flex-col items-center gap-6 rounded-2xl p-8 text-center md:p-16">
               <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-                <span className="text-balance">
+                <span
+                  className="text-balance"
+                  {...fieldAttr("bamboo.homepage.about-teaser-heading")}
+                >
                   {f["bamboo.homepage.about-teaser-heading"]}
                 </span>
               </h2>
-              <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed">
+              <p
+                className="text-muted-foreground max-w-2xl text-lg leading-relaxed"
+                {...fieldAttr("bamboo.homepage.about-teaser-body")}
+              >
                 {f["bamboo.homepage.about-teaser-body"]}
               </p>
               <Button variant="outline" asChild>
                 <Link href={f["bamboo.homepage.about-teaser-button-link"]!}>
-                  {f["bamboo.homepage.about-teaser-button-text"]}{" "}
+                  <span
+                    {...fieldAttr("bamboo.homepage.about-teaser-button-text")}
+                  >
+                    {f["bamboo.homepage.about-teaser-button-text"]}
+                  </span>{" "}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
@@ -256,7 +297,10 @@ export async function BambooHomepage() {
             <FadeIn direction="up">
               <div className="mb-12 text-center">
                 <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-                  <span className="text-balance">
+                  <span
+                    className="text-balance"
+                    {...fieldAttr("bamboo.homepage.location-heading")}
+                  >
                     {f["bamboo.homepage.location-heading"]}
                   </span>
                 </h2>
@@ -264,6 +308,7 @@ export async function BambooHomepage() {
             </FadeIn>
 
             <a
+              {...sectionGroupAttr("global", "location")}
               href={mapsUrl ?? "#!"}
               target="_blank"
               rel="noopener noreferrer"

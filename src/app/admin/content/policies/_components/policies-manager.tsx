@@ -354,6 +354,8 @@ export function PoliciesManager({ business }: Props) {
 
   // Create forms for each policy
   const privacyForm = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       content:
         existingPolicies.get("privacy-policy")?.content ?? EMPTY_TIPTAP_DOC,
@@ -361,6 +363,8 @@ export function PoliciesManager({ business }: Props) {
   });
 
   const termsForm = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       content:
         existingPolicies.get("terms-of-service")?.content ?? EMPTY_TIPTAP_DOC,
@@ -368,6 +372,8 @@ export function PoliciesManager({ business }: Props) {
   });
 
   const refundForm = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       content:
         existingPolicies.get("refund-policy")?.content ?? EMPTY_TIPTAP_DOC,
@@ -375,6 +381,8 @@ export function PoliciesManager({ business }: Props) {
   });
 
   const shippingForm = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       content:
         existingPolicies.get("shipping-policy")?.content ?? EMPTY_TIPTAP_DOC,

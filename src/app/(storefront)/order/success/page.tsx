@@ -15,4 +15,5 @@ export default async function OrderSuccessPage() {
 
 export const metadata = {
   title: "Order Details",
+  robots: { index: false, follow: false },
 };

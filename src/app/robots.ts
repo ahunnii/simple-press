@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 
+import { businessHostFilter } from "~/lib/domain-utils";
 import { db } from "~/server/db";
 
 const AI_CRAWLERS = [
@@ -20,11 +21,10 @@ const AI_CRAWLERS = [
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const headersList = await headers();
   const host = headersList.get("host") ?? "";
-  const domain = host.split(":")[0] ?? "";
 
   const business = await db.business.findFirst({
     where: {
-      OR: [{ customDomain: domain }, { subdomain: domain.split(".")[0] }],
+      ...businessHostFilter(host),
       status: "active",
     },
     select: { allowAiCrawlers: true },
@@ -34,7 +34,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     (agent) => ({
       userAgent: agent,
       ...(business === null || business.allowAiCrawlers
-        ? { allow: "/", disallow: ["/admin", "/api", "/platform"] }
+        ? { allow: "/", disallow: ["/admin", "/api", "/platform", "/cart", "/checkout", "/account", "/order"] }
         : { disallow: "/" }),
     }),
   );
@@ -44,7 +44,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api", "/platform"],
+        disallow: ["/admin", "/api", "/platform", "/cart", "/checkout", "/account", "/order"],
       },
       ...aiCrawlerRules,
     ],

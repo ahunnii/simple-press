@@ -6,12 +6,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ArrowRight, Menu, ShoppingBag, User, X } from "lucide-react";
+import { ArrowRight, Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 type NavLink = { label: string; href: string; external?: boolean };
 
@@ -25,7 +27,8 @@ export function BuildersHeader({
   business,
   session,
 }: DefaultHeaderTemplateProps) {
-  const { itemCount, setIsOpen } = useCart();
+  const { itemCount } = useCart();
+  const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -127,6 +130,8 @@ export function BuildersHeader({
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
   const customNav = business?.siteContent?.navigationItems as
     | NavLink[]
@@ -277,18 +282,47 @@ export function BuildersHeader({
           {/* Right actions */}
           <div className="flex items-center gap-4">
             {/* Desktop auth */}
-            <div className="hidden md:flex md:items-center md:gap-4">
-              {session?.user ? userMenu : authLink}
-            </div>
+            {isStorefrontEnabled("customerAccounts") && (
+              <div className="hidden md:flex md:items-center md:gap-4">
+                {session?.user ? userMenu : authLink}
+              </div>
+            )}
+
+            {/* Wishlist */}
+            {isStorefrontEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label="Open wishlist"
+                className={cn(
+                  "relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60",
+                  solid ? "text-gray-700" : "text-white",
+                )}
+              >
+                <Heart className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                {wishlistHydrated && wishlistCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center text-[9px] font-bold"
+                    style={{
+                      background: "var(--builders-accent, #FFC5B6)",
+                      color: "var(--builders-accent-ink, #31130A)",
+                      minWidth: "16px",
+                    }}
+                  >
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Cart */}
             {isEnabled("cart") && (
-              <button
-                onClick={() => setIsOpen(true)}
+              <Link
+                href="/cart"
                 aria-label={
                   itemCount > 0
-                    ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                    : "Open cart"
+                    ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                    : "View cart"
                 }
                 className={cn(
                   "relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60",
@@ -309,7 +343,7 @@ export function BuildersHeader({
                     {itemCount}
                   </span>
                 )}
-              </button>
+              </Link>
             )}
 
             {/* Mobile menu toggle */}
@@ -443,20 +477,45 @@ export function BuildersHeader({
                 </span>
               </Link>
 
-              {/* Cart + account row */}
+              {/* Wishlist + cart + account row */}
               <div className="flex items-center justify-center gap-4">
+                {isStorefrontEnabled("wishlist") && (
+                  <>
+                    <Link
+                      href="/wishlist"
+                      onClick={closeMobileMenu}
+                      aria-label="Open wishlist"
+                      className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
+                      style={{
+                        color:
+                          "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
+                        fontFamily:
+                          "var(--font-builders-body, 'Agdasima', sans-serif)",
+                      }}
+                    >
+                      <Heart className="h-3.5 w-3.5" aria-hidden="true" />
+                      Wishlist
+                      {wishlistHydrated && wishlistCount > 0
+                        ? ` (${wishlistCount})`
+                        : ""}
+                    </Link>
+
+                    <span
+                      aria-hidden="true"
+                      className="h-4 w-px bg-[var(--builders-rule)]"
+                    />
+                  </>
+                )}
+
                 {isEnabled("cart") && (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        closeMobileMenu();
-                        setIsOpen(true);
-                      }}
+                    <Link
+                      href="/cart"
+                      onClick={closeMobileMenu}
                       aria-label={
                         itemCount > 0
-                          ? `Open cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                          : "Open cart"
+                          ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                          : "View cart"
                       }
                       className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
                       style={{
@@ -468,7 +527,7 @@ export function BuildersHeader({
                     >
                       <ShoppingBag className="h-3.5 w-3.5" aria-hidden="true" />
                       Cart{itemCount > 0 ? ` (${itemCount})` : ""}
-                    </button>
+                    </Link>
 
                     <span
                       aria-hidden="true"
@@ -477,25 +536,29 @@ export function BuildersHeader({
                   </>
                 )}
 
-                {session?.user ? (
-                  <div className="flex items-center justify-center">
-                    {userMenu}
-                  </div>
-                ) : (
-                  <Link
-                    href="/auth/sign-in"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
-                    style={{
-                      color:
-                        "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
-                      fontFamily:
-                        "var(--font-builders-body, 'Agdasima', sans-serif)",
-                    }}
-                  >
-                    <User className="h-3.5 w-3.5" aria-hidden="true" />
-                    Login
-                  </Link>
+                {isStorefrontEnabled("customerAccounts") && (
+                  <>
+                    {session?.user ? (
+                      <div className="flex items-center justify-center">
+                        {userMenu}
+                      </div>
+                    ) : (
+                      <Link
+                        href="/auth/sign-in"
+                        onClick={closeMobileMenu}
+                        className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase transition-colors hover:text-[var(--builders-ink)]"
+                        style={{
+                          color:
+                            "color-mix(in srgb, var(--builders-ink) 60%, transparent)",
+                          fontFamily:
+                            "var(--font-builders-body, 'Agdasima', sans-serif)",
+                        }}
+                      >
+                        <User className="h-3.5 w-3.5" aria-hidden="true" />
+                        Login
+                      </Link>
+                    )}
+                  </>
                 )}
               </div>
 

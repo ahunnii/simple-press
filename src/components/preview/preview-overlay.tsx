@@ -83,7 +83,7 @@ export function PreviewOverlay() {
 
       const groupId = `${msg.page}.${msg.group}`;
       const el = document.querySelector<HTMLElement>(
-        `[data-sp-group="${groupId}"]`,
+        `[data-sp-group="${CSS.escape(groupId)}"]`,
       );
       if (!el) return;
 
@@ -108,7 +108,7 @@ export function PreviewOverlay() {
       setHovered((prev) => {
         if (!prev) return null;
         const el = document.querySelector<HTMLElement>(
-          `[data-sp-group="${prev.group}"]`,
+          `[data-sp-group="${CSS.escape(prev.group)}"]`,
         );
         if (!el) return null;
         return { ...prev, rect: el.getBoundingClientRect() };
@@ -250,7 +250,7 @@ export function PreviewOverlay() {
       {pulsing &&
         (() => {
           const el = document.querySelector<HTMLElement>(
-            `[data-sp-group="${pulsing}"]`,
+            `[data-sp-group="${CSS.escape(pulsing)}"]`,
           );
           if (!el) return null;
           const rect = el.getBoundingClientRect();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle,
@@ -30,15 +31,34 @@ type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
 };
 
+// Umami website IDs are UUIDs (e.g. "abc123-def456-...").
+const UMAMI_WEBSITE_ID_REGEX = /^[a-zA-Z0-9-]+$/;
+
 export function UmamiSettings({ business }: Props) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
 
   // Form state
   const [umamiWebsiteId, setUmamiWebsiteId] = useState(
     business.umamiWebsiteId ?? "",
   );
   const [umamiEnabled, setUmamiEnabled] = useState(business.umamiEnabled);
+  const [websiteIdError, setWebsiteIdError] = useState<string | null>(null);
+
+  const validateWebsiteId = (
+    value: string,
+    enabled: boolean,
+  ): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return enabled
+        ? "Website ID is required to enable analytics"
+        : null;
+    }
+    if (!UMAMI_WEBSITE_ID_REGEX.test(trimmed)) {
+      return "Enter a valid Umami website ID";
+    }
+    return null;
+  };
 
   const updateIntegrationsMutation =
     api.business.updateIntegrations.useMutation({
@@ -61,7 +81,13 @@ export function UmamiSettings({ business }: Props) {
 
   const handleSaveUmami = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
+
+    const validationError = validateWebsiteId(umamiWebsiteId, umamiEnabled);
+    if (validationError) {
+      setWebsiteIdError(validationError);
+      return;
+    }
+    setWebsiteIdError(null);
 
     updateIntegrationsMutation.mutate({
       umamiWebsiteId: umamiWebsiteId ?? undefined,
@@ -78,7 +104,17 @@ export function UmamiSettings({ business }: Props) {
               <div>
                 <CardTitle>Umami Analytics</CardTitle>
                 <CardDescription>
-                  Privacy-focused website analytics
+                  Tracks visits, page views, referrers, and on-site events
+                  (product views, add-to-cart, embed engagement) on your
+                  storefront — without third-party cookies or ad-network
+                  tracking. Once enabled, results appear on your{" "}
+                  <Link
+                    href="/admin/analytics"
+                    className="underline underline-offset-2"
+                  >
+                    Analytics dashboard
+                  </Link>
+                  .
                 </CardDescription>
               </div>
               {umamiEnabled && umamiWebsiteId ? (
@@ -100,25 +136,64 @@ export function UmamiSettings({ business }: Props) {
               <Input
                 id="umamiWebsiteId"
                 value={umamiWebsiteId}
-                onChange={(e) => setUmamiWebsiteId(e.target.value)}
+                onChange={(e) => {
+                  setUmamiWebsiteId(e.target.value);
+                  if (websiteIdError) setWebsiteIdError(null);
+                }}
+                onBlur={(e) =>
+                  setWebsiteIdError(
+                    validateWebsiteId(e.target.value, umamiEnabled),
+                  )
+                }
                 placeholder="abc123-def456-ghi789"
+                aria-invalid={!!websiteIdError}
               />
-              <p className="text-muted-foreground mt-1 text-sm">
-                Your Umami website tracking ID
-              </p>
+              {websiteIdError ? (
+                <p className="text-destructive text-sm" role="alert">
+                  {websiteIdError}
+                </p>
+              ) : (
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Found on the website&apos;s Settings page in your Umami
+                  account after you add your storefront domain there — not
+                  your Umami account ID or API key.
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="umamiEnabled">Enable Analytics</Label>
                 <p className="text-muted-foreground text-sm">
-                  Track visitor data on your storefront
+                  Adds the tracking script to every storefront page, which
+                  starts collecting visit data right away. Leave off to
+                  collect nothing, regardless of the Website ID saved above.
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  This is independent of the{" "}
+                  <Link
+                    href="/admin/settings/features"
+                    className="underline underline-offset-2"
+                  >
+                    Analytics feature flag
+                  </Link>
+                  : this toggle controls whether data is collected, while the
+                  feature flag controls whether the in-admin Analytics
+                  dashboard is visible. Turning this on without the feature
+                  flag enabled means data is collected but you can&apos;t view
+                  it in-app yet; turning the feature flag on without this
+                  toggle enabled shows an empty dashboard.
                 </p>
               </div>
               <Switch
                 id="umamiEnabled"
                 checked={umamiEnabled}
-                onCheckedChange={setUmamiEnabled}
+                onCheckedChange={(checked) => {
+                  setUmamiEnabled(checked);
+                  setWebsiteIdError(
+                    validateWebsiteId(umamiWebsiteId, checked),
+                  );
+                }}
               />
             </div>
 
@@ -139,8 +214,8 @@ export function UmamiSettings({ business }: Props) {
             </div>
 
             <div className="border-t pt-4">
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? (
+              <Button type="submit" disabled={updateIntegrationsMutation.isPending}>
+                {updateIntegrationsMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...

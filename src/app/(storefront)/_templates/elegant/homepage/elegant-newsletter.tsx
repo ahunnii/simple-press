@@ -28,7 +28,12 @@ function useReveal() {
   return { ref, visible };
 }
 
-export function ElegantNewsletter() {
+export function ElegantNewsletter({
+  sectionAttrs,
+}: {
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
+} = {}) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const { ref, visible } = useReveal();
@@ -36,10 +41,11 @@ export function ElegantNewsletter() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setEmail("");
-    }
+    // NOTE: there is no newsletter/marketing-subscribe backend wired up yet
+    // (no public tRPC procedure exists to persist this address anywhere).
+    // Rather than fake a successful signup, tell the visitor honestly that
+    // sign-ups aren't available yet instead of silently discarding their email.
+    setSubmitted(true);
   };
 
   const revealStyle = (delay: number): React.CSSProperties =>
@@ -53,6 +59,7 @@ export function ElegantNewsletter() {
 
   return (
     <section
+      {...sectionAttrs}
       style={{
         padding: "80px 40px",
         background: "var(--el-ink, #1c1a17)",
@@ -107,7 +114,8 @@ export function ElegantNewsletter() {
         <div style={revealStyle(0.3)}>
           {submitted ? (
             <p role="status" className="el-newsletter-success">
-              Thank you — you&apos;ll hear from us soon.
+              Newsletter sign-ups aren&apos;t open yet — thanks for your
+              interest, and please check back soon.
             </p>
           ) : (
             <form

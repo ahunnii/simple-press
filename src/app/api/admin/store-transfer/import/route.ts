@@ -3,11 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
-import {
-  FEATURE_REGISTRY,
-  getDefaultFlags,
-  getDisabledDueToDependency,
-} from "~/lib/features/registry";
+import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import { importStoreBundle } from "~/lib/store-transfer/import";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
@@ -82,22 +78,12 @@ export async function POST(req: Request): Promise<Response> {
 
   // ── Feature flag check ────────────────────────────────────────────────────────
 
-  // Inline feature check against the resolved business — mirrors featureGate middleware
-  const bizData = await db.business.findUnique({
-    where: { id: targetBusinessId },
-    select: { featureFlags: true },
-  });
+  const featureEnabled = await isFeatureEnabledForBusiness(
+    targetBusinessId,
+    "storeTransfer",
+  );
 
-  const defaults = getDefaultFlags();
-  const stored = (bizData?.featureFlags as Record<string, boolean>) ?? {};
-  const merged = { ...defaults, ...stored };
-  const disabledByDependency = getDisabledDueToDependency(merged);
-  const isEnabled = (key: string): boolean => {
-    if (disabledByDependency.has(key)) return false;
-    return merged[key] ?? FEATURE_REGISTRY[key]?.enabledByDefault ?? false;
-  };
-
-  if (!isEnabled("storeTransfer")) {
+  if (!featureEnabled) {
     return Response.json(
       {
         error:

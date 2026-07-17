@@ -7,7 +7,8 @@ import { ArrowRight, Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { formatDate } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
@@ -129,7 +130,12 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
               }}
             >
               <span style={{ display: "block", overflow: "hidden" }}>
-                <span style={maskStyle(0.08)}>{listingTitle}</span>
+                <span
+                style={maskStyle(0.08)}
+                {...fieldAttr("elegant.blog.listing-title")}
+              >
+                {listingTitle}
+              </span>
               </span>
             </h1>
             <p
@@ -183,7 +189,12 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
             }}
           >
             <span style={{ display: "block", overflow: "hidden" }}>
-              <span style={maskStyle(0.08)}>{listingTitle}</span>
+              <span
+                style={maskStyle(0.08)}
+                {...fieldAttr("elegant.blog.listing-title")}
+              >
+                {listingTitle}
+              </span>
             </span>
           </h1>
 
@@ -199,6 +210,7 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
                   lineHeight: 1.65,
                   fontFamily: "var(--font-sans, sans-serif)",
                 }}
+                {...fieldAttr("elegant.blog.listing-intro")}
               >
                 {listingIntro}
               </p>
@@ -565,7 +577,11 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
       )}
 
       {/* Newsletter strip — matches design */}
-      <ElegantNewsletter />
+      {isSectionVisible(customFields, "elegant", "blog.newsletter") && (
+        <ElegantNewsletter
+          sectionAttrs={sectionGroupAttr("blog", "newsletter")}
+        />
+      )}
     </div>
   );
 }

@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Play } from "lucide-react";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -68,6 +70,7 @@ export function ViiVideoFeature({
   return (
     <section
       aria-labelledby="vii-video-heading"
+      {...sectionGroupAttr("homepage", "video")}
       style={{
         background: "var(--vii-navy)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -87,10 +90,14 @@ export function ViiVideoFeature({
         {/* ── Text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <ViiOverline tone="dark" style={{ marginBottom: 16 }}>
+            <ViiOverline
+              tone="dark"
+              style={{ marginBottom: 16 }}
+              fieldKey="vii.homepage.video-overline"
+            >
               {overline}
             </ViiOverline>
           )}
@@ -111,6 +118,7 @@ export function ViiVideoFeature({
               {heading && headingAccent ? " " : ""}
               {headingAccent && (
                 <em
+                  {...fieldAttr("vii.homepage.video-heading-accent")}
                   style={{
                     fontStyle: "italic",
                     color: "var(--vii-copper-light)",
@@ -124,6 +132,7 @@ export function ViiVideoFeature({
 
           {body && (
             <p
+              {...fieldAttr("vii.homepage.video-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -142,6 +151,7 @@ export function ViiVideoFeature({
             <div style={{ marginTop: "clamp(28px, 4vw, 40px)" }}>
               <Link
                 href={ctaHref}
+                {...fieldAttr("vii.homepage.video-cta-text")}
                 style={{
                   display: "inline-block",
                   fontFamily: "var(--font-sans)",
@@ -164,7 +174,7 @@ export function ViiVideoFeature({
         {/* ── Media column ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",

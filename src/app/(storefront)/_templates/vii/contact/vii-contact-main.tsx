@@ -7,6 +7,7 @@ import { PinterestIcon } from "~/components/icons/pinterest-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { TwitterIcon } from "~/components/icons/twitter-icon";
 import { YouTubeIcon } from "~/components/icons/youtube-icon";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -89,6 +90,7 @@ export function ViiContactMain({
   return (
     <section
       aria-labelledby="contact-main-heading"
+      {...sectionGroupAttr("contact", "main")}
       style={{
         background: "var(--vii-cream)",
         padding: "clamp(64px, 9vw, 120px) clamp(24px, 6vw, 96px)",
@@ -108,10 +110,15 @@ export function ViiContactMain({
         {/* Left — intro + info */}
         <div
           ref={infoRef}
-          className={`vii-reveal${infoVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${infoVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <ViiOverline align="left" tone="light" style={{ marginBottom: 14 }}>
+            <ViiOverline
+              align="left"
+              tone="light"
+              style={{ marginBottom: 14 }}
+              fieldKey="vii.contact.intro-overline"
+            >
               {overline}
             </ViiOverline>
           )}
@@ -129,7 +136,10 @@ export function ViiContactMain({
           >
             {heading}{" "}
             {headingAccent && (
-              <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+              <em
+                {...fieldAttr("vii.contact.intro-heading-accent")}
+                style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+              >
                 {headingAccent}
               </em>
             )}
@@ -137,6 +147,7 @@ export function ViiContactMain({
 
           {body && (
             <p
+              {...fieldAttr("vii.contact.intro-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -344,7 +355,7 @@ export function ViiContactMain({
         {/* Right — form card */}
         <div
           ref={formRef}
-          className={`vii-reveal${formVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${formVisible ? " is-visible" : ""}`}
           style={{
             background: "var(--vii-paper)",
             borderRadius: "var(--radius)",

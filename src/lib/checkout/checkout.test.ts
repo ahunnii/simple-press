@@ -49,6 +49,7 @@ function makeVariant(
     inventoryQty: 10,
     reservedQty: 0,
     product: {
+      price: 1_000,
       published: true,
       trackInventory: true,
       allowBackorders: false,
@@ -79,6 +80,27 @@ describe("computeSubtotalCents", () => {
 
   it("treats a missing product/variant as price 0", () => {
     const items = [makeItem({ productId: "ghost", quantity: 5 })];
+    expect(computeSubtotalCents(items, new Map(), new Map())).toBe(0);
+  });
+
+  it("inherits the product base price for a variant priced 0", () => {
+    const items = [makeItem({ productId: "p1", variantId: "v1", quantity: 2 })];
+    // makeVariant defaults product.price to 1000.
+    const variantMap = new Map([["v1", makeVariant({ price: 0 })]]);
+    // variant price 0 => inherit product base price 1000. 1000*2 = 2000.
+    expect(computeSubtotalCents(items, variantMap, new Map())).toBe(2_000);
+  });
+
+  it("inherits the product base price for a variant priced null", () => {
+    const items = [makeItem({ productId: "p1", variantId: "v1", quantity: 3 })];
+    // makeVariant defaults product.price to 1000.
+    const variantMap = new Map([["v1", makeVariant({ price: null })]]);
+    // variant price null => inherit product base price 1000. 1000*3 = 3000.
+    expect(computeSubtotalCents(items, variantMap, new Map())).toBe(3_000);
+  });
+
+  it("treats a missing variant record as price 0 (existing behavior preserved)", () => {
+    const items = [makeItem({ productId: "p1", variantId: "ghost", quantity: 5 })];
     expect(computeSubtotalCents(items, new Map(), new Map())).toBe(0);
   });
 });

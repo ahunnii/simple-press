@@ -34,6 +34,9 @@ type Props<CurrentForm extends FieldValues> = {
   autoFocus?: boolean;
   labelClassName?: string;
   inputClassName?: string;
+  min?: number;
+  max?: number;
+  step?: number | "any";
 };
 
 export const NumberFormField = <CurrentForm extends FieldValues>({
@@ -55,6 +58,9 @@ export const NumberFormField = <CurrentForm extends FieldValues>({
   autoFocus,
   labelClassName,
   inputClassName,
+  min,
+  max,
+  step,
 }: Props<CurrentForm>) => {
   return (
     <FormField
@@ -102,6 +108,9 @@ export const NumberFormField = <CurrentForm extends FieldValues>({
                 id={inputId}
                 required={required}
                 autoFocus={autoFocus}
+                min={min}
+                max={max}
+                step={step}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

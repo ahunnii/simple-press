@@ -7,6 +7,7 @@ import {
   buildBreadcrumbSchema,
 } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
+import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 
@@ -16,14 +17,27 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+// Templates only ever read metadata (title, slug, excerpt, image, dates)
+// off relatedPosts — never the rich-text body — but getBlogPages() returns
+// every published blog post's FULL row (including the large Tiptap
+// `content` JSON), unbounded. Cap the list and null out `content` before it
+// crosses the server/client boundary so a large blog doesn't balloon the
+// payload just to render a "related posts" rail.
+const RELATED_POSTS_CAP = 20;
+
 export default async function PageView({ params }: Props) {
   const { slug } = await params;
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
 
-  const relatedPosts = await api.content
+  const relatedPostsRaw = await api.content
     .getBlogPages()
     .catch(rethrowTrpcForErrorBoundary);
+
+  const relatedPosts = relatedPostsRaw
+    .filter((p) => p.slug !== slug)
+    .slice(0, RELATED_POSTS_CAP)
+    .map((p) => ({ ...p, content: EMPTY_TIPTAP_DOC }));
 
   const homepage =
     business.templateId === "sledge"

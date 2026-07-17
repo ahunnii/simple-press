@@ -9,7 +9,7 @@ import { ArrowRight, CalendarDays, Leaf, Search, Tag } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent } from "~/components/ui/card";
@@ -85,11 +85,17 @@ export function BambooBlogPage({ pages, customFields }: Props) {
         >
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <FadeIn className="text-center">
-              <h1 className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl">
+              <h1
+                className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl"
+                {...fieldAttr("bamboo.blog.listing-title")}
+              >
                 {pageTitle ?? "Blog"}
               </h1>
               {pageIntro ? (
-                <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed">
+                <p
+                  className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg leading-relaxed"
+                  {...fieldAttr("bamboo.blog.listing-intro")}
+                >
                   {pageIntro}
                 </p>
               ) : null}
@@ -126,11 +132,17 @@ export function BambooBlogPage({ pages, customFields }: Props) {
                 <Leaf className="mr-1 h-3 w-3" aria-hidden="true" />
                 Stories &amp; Insights
               </Badge>
-              <h1 className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl">
+              <h1
+                className="text-foreground font-heading text-4xl font-bold tracking-tight md:text-5xl"
+                {...fieldAttr("bamboo.blog.listing-title")}
+              >
                 {pageTitle ?? "Blog"}
               </h1>
               {pageIntro ? (
-                <p className="text-muted-foreground mt-4 max-w-xl text-lg leading-relaxed">
+                <p
+                  className="text-muted-foreground mt-4 max-w-xl text-lg leading-relaxed"
+                  {...fieldAttr("bamboo.blog.listing-intro")}
+                >
                   {pageIntro}
                 </p>
               ) : null}

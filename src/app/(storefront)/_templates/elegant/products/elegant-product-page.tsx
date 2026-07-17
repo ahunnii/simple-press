@@ -13,6 +13,9 @@ import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoAccordion } from "~/app/(storefront)/_components/product-page/additional-info-accordion";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
@@ -40,6 +43,10 @@ export function ElegantProductPage({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<TabKey>("details");
 
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+
   const { variantImageUrl } = useVariantImage();
   // Jump to the variant's image when the selected variant changes.
   // Depend only on variantImageUrl so manual thumbnail clicks are not overridden.
@@ -62,6 +69,25 @@ export function ElegantProductPage({
 
   const additional = parseCardAdditionalFields(product.additionalFields);
 
+  // `parseCardAdditionalFields` (shared across templates) doesn't recognize
+  // a "how to use" key, so read it directly off the product's freeform JSON
+  // here. Elegant is a generic template — it must not assume every business
+  // sells skincare, so this tab only renders when the owner has actually
+  // supplied per-product usage instructions via `additionalFields.howToUse`.
+  const howToUseText =
+    product.additionalFields &&
+    typeof product.additionalFields === "object" &&
+    !Array.isArray(product.additionalFields) &&
+    typeof (product.additionalFields as Record<string, unknown>).howToUse ===
+      "string"
+      ? (
+          (product.additionalFields as Record<string, unknown>)
+            .howToUse as string
+        ).trim()
+      : "";
+
+  const tabs = TABS.filter((tab) => tab.key !== "how" || !!howToUseText);
+
   const { data: relatedProducts } = api.product.getRelated.useQuery({
     productId: product.id,
   });
@@ -76,7 +102,7 @@ export function ElegantProductPage({
         };
 
   const handleTabKeyDown = (e: React.KeyboardEvent, currentKey: TabKey) => {
-    const keys = TABS.map((t) => t.key);
+    const keys = tabs.map((t) => t.key);
     const idx = keys.indexOf(currentKey);
     let next: number | null = null;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -458,7 +484,7 @@ export function ElegantProductPage({
                     marginBottom: 20,
                   }}
                 >
-                  {TABS.map(({ key, label }) => (
+                  {tabs.map(({ key, label }) => (
                     <button
                       key={key}
                       type="button"
@@ -511,11 +537,8 @@ export function ElegantProductPage({
                   }}
                 >
                   {activeTab === "details" && <p>{product.description}</p>}
-                  {activeTab === "how" && (
-                    <p>
-                      For best results, apply to clean skin morning and evening.
-                      Use as directed.
-                    </p>
+                  {activeTab === "how" && howToUseText && (
+                    <p>{howToUseText}</p>
                   )}
                   {activeTab === "info" && (
                     <ProductDetailsAdditionalInfoAccordion
@@ -529,6 +552,58 @@ export function ElegantProductPage({
           </div>
         </div>
       </section>
+
+      {/* ── Reviews — only mounts (and only fires review queries) when the
+          reviews feature flag is enabled for this business. ── */}
+      {reviewsEnabled && (
+        <section
+          style={{
+            padding: "80px 40px",
+            background: "var(--el-cream, #f5f1ea)",
+          }}
+        >
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+            <div style={{ marginBottom: 48 }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono, ui-monospace)",
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--el-ink-soft, #6b6659)",
+                  display: "block",
+                  marginBottom: 14,
+                }}
+              >
+                Reviews
+              </span>
+              <h2
+                style={{
+                  fontFamily: "var(--font-serif, 'Cormorant Garamond', serif)",
+                  fontWeight: 400,
+                  fontSize: "clamp(36px, 4.5vw, 56px)",
+                  lineHeight: 1.05,
+                  letterSpacing: "-0.01em",
+                  color: "var(--el-ink, #1c1a17)",
+                }}
+              >
+                What customers are saying
+              </h2>
+            </div>
+            <ProductReviews
+              productId={product.id}
+              onWriteReviewClick={() => setReviewDialogOpen(true)}
+            />
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </div>
+        </section>
+      )}
 
       {/* ── Related products ── */}
       {relatedProducts && relatedProducts.length > 0 && (

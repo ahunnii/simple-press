@@ -6,6 +6,11 @@ import { api } from "~/trpc/server";
 import { TestimonialForm } from "./_components/testimonial-form";
 import { TestimonialFormUnauthenticated } from "./_components/testimonial-form-unauthenticated";
 
+export const metadata = {
+  title: "Submit a Testimonial",
+  robots: { index: false, follow: false },
+};
+
 export default async function SubmitTestimonialPage({
   searchParams,
 }: {

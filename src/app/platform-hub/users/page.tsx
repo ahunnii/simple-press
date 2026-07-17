@@ -6,11 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { UsersTable } from "~/app/admin/platform/_components/users-table";
-
 import { PlatformListFilters } from "../_components/platform-list-filters";
 import { PlatformListPagination } from "../_components/platform-list-pagination";
 import { PlatformTrailHeader } from "../_components/platform-trail-header";
+import { UsersTable } from "../_components/users-table";
 
 const PAGE_SIZE = 25;
 

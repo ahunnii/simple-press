@@ -25,6 +25,16 @@ type ProductReviewsProps = {
   onWriteReviewClick?: () => void;
 };
 
+/**
+ * Initial number of reviews rendered before the shopper has to click
+ * "Load more". `review.listByProduct` (src/server/api/routers/review.ts)
+ * has no server-side limit/cursor — it returns every approved review for
+ * the product — so this caps the render for popular products entirely
+ * client-side, over the already-fetched list.
+ */
+const INITIAL_REVIEW_COUNT = 10;
+const REVIEW_PAGE_SIZE = 10;
+
 export function ProductReviews({
   productId,
   showWriteReview = true,
@@ -36,6 +46,7 @@ export function ProductReviews({
   const [filterRating, setFilterRating] = useState<number | undefined>(
     undefined,
   );
+  const [visibleCount, setVisibleCount] = useState(INITIAL_REVIEW_COUNT);
 
   const { data: stats } = api.review.getProductStats.useQuery({ productId });
   const { data: reviews } = api.review.listByProduct.useQuery({
@@ -68,7 +79,32 @@ export function ProductReviews({
   };
 
   if (!stats || !reviews) {
-    return <div>Loading reviews...</div>;
+    return (
+      <div className="py-12 text-center text-sm text-gray-500">
+        Loading reviews...
+      </div>
+    );
+  }
+
+  // Inviting empty state — the common case before any approved reviews exist.
+  // Skips the (all-zero) stats overview and sort controls entirely.
+  if (stats.totalReviews === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+          <div className="flex">{renderStars(0, "lg")}</div>
+          <div className="space-y-1">
+            <p className="font-medium">No reviews yet</p>
+            <p className="text-sm text-gray-500">
+              Be the first to share your thoughts on this product.
+            </p>
+          </div>
+          {showWriteReview && onWriteReviewClick && (
+            <Button onClick={onWriteReviewClick}>Write a Review</Button>
+          )}
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -110,11 +146,12 @@ export function ProductReviews({
                 return (
                   <div key={rating} className="flex items-center gap-3">
                     <button
-                      onClick={() =>
+                      onClick={() => {
                         setFilterRating(
                           rating === filterRating ? undefined : rating,
-                        )
-                      }
+                        );
+                        setVisibleCount(INITIAL_REVIEW_COUNT);
+                      }}
                       className="flex items-center gap-2 hover:text-blue-600"
                     >
                       <span className="w-8 text-sm font-medium">{rating}</span>
@@ -137,11 +174,10 @@ export function ProductReviews({
         <div className="flex items-center gap-4">
           <Select
             value={sortBy}
-            onValueChange={(v) =>
-              setSortBy(
-                v as "recent" | "helpful" | "rating_high" | "rating_low",
-              )
-            }
+            onValueChange={(v) => {
+              setSortBy(v as "recent" | "helpful" | "rating_high" | "rating_low");
+              setVisibleCount(INITIAL_REVIEW_COUNT);
+            }}
           >
             <SelectTrigger className="w-48">
               <SelectValue />
@@ -158,7 +194,10 @@ export function ProductReviews({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setFilterRating(undefined)}
+              onClick={() => {
+                setFilterRating(undefined);
+                setVisibleCount(INITIAL_REVIEW_COUNT);
+              }}
             >
               Clear Filter
             </Button>
@@ -184,11 +223,24 @@ export function ProductReviews({
             </CardContent>
           </Card>
         ) : (
-          reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))
+          reviews
+            .slice(0, visibleCount)
+            .map((review) => <ReviewCard key={review.id} review={review} />)
         )}
       </div>
+
+      {reviews.length > visibleCount && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() =>
+              setVisibleCount((count) => count + REVIEW_PAGE_SIZE)
+            }
+          >
+            Load more reviews ({reviews.length - visibleCount} remaining)
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -199,9 +251,12 @@ function ReviewCard({
 }: {
   review: RouterOutputs["review"]["listByProduct"][number];
 }) {
+  const utils = api.useUtils();
   const voteMutation = api.review.vote.useMutation({
     onSuccess: () => {
-      // Refetch reviews to update counts
+      // Refetch reviews so helpful/not-helpful counts (and the "helpful"
+      // sort order) reflect the new vote. Stats don't depend on votes.
+      void utils.review.listByProduct.invalidate();
     },
   });
 

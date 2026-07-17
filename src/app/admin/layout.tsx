@@ -1,11 +1,10 @@
-import { notFound, redirect } from "next/navigation";
-
-import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { getPlatformMaintenance } from "~/lib/maintenance";
-import { getSession } from "~/server/better-auth/server";
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { api, HydrateClient } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
+import { NavigationGuardProvider } from "~/providers/navigation-guard-context";
+import { AdminCommandPalette } from "~/app/admin/_components/admin-command-palette";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
 
 type Props = {
@@ -13,29 +12,7 @@ type Props = {
 };
 
 export default async function AdminLayout({ children }: Props) {
-  const session = await getSession();
-
-  if (!session) {
-    redirect("/auth/sign-in?callbackUrl=/admin");
-  }
-
-  const business = await checkBusiness();
-
-  if (!business) {
-    notFound();
-  }
-
-  // Allow PLATFORM_ADMIN unconditionally
-  if (session.user.platformRole !== "PLATFORM_ADMIN") {
-    // For everyone else, check BusinessMembership
-    const membership = await checkBusinessMembership(
-      business.id,
-      session.user.id,
-    );
-    if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
-      redirect("/not-permitted");
-    }
-  }
+  const { session, business, membershipRole } = await requireAdminAccess();
 
   const platformMaintenance = await getPlatformMaintenance();
   if (
@@ -56,24 +33,32 @@ export default async function AdminLayout({ children }: Props) {
 
   return (
     <HydrateClient>
-      <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 12)",
-          } as React.CSSProperties
-        }
-      >
-        <AppSidebar
-          variant="inset"
-          session={session}
-          businessName={businessName}
-          featureData={featureData}
-        />
-        <SidebarInset>
-          <div className="bg-muted min-h-screen">{children}</div>
-        </SidebarInset>
-      </SidebarProvider>
+      <NavigationGuardProvider>
+        <SidebarProvider
+          style={
+            {
+              "--sidebar-width": "calc(var(--spacing) * 72)",
+              "--header-height": "calc(var(--spacing) * 12)",
+            } as React.CSSProperties
+          }
+        >
+          <AppSidebar
+            variant="inset"
+            session={session}
+            businessName={businessName}
+            featureData={featureData}
+            membershipRole={membershipRole}
+          />
+          <SidebarInset>
+            <div className="bg-muted min-h-screen">{children}</div>
+          </SidebarInset>
+          <AdminCommandPalette
+            session={session}
+            featureData={featureData}
+            membershipRole={membershipRole}
+          />
+        </SidebarProvider>
+      </NavigationGuardProvider>
     </HydrateClient>
   );
 }

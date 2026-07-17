@@ -15,6 +15,7 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 const IS_IN_PRODUCTION = process.env.NODE_ENV === "production";
 
@@ -46,6 +47,9 @@ export function BambooContactForm() {
       successHeadingRef.current?.focus();
     }
   }, [isSuccess]);
+
+  const { isEnabled } = useStorefrontFlags();
+  if (!isEnabled("contactForm")) return null;
 
   if (isSuccess) {
     return (

@@ -276,8 +276,8 @@ const aboutHeroData: TemplateField[] = [
     type: "text",
     page: "about",
     group: "about.hero",
-    defaultValue: "Zaires Visions",
-    placeholder: "Zaires Visions",
+    defaultValue: "About Us",
+    placeholder: "About Us",
     gridColumn: "col-span-full",
   },
   {
@@ -502,6 +502,7 @@ const aboutCTAData: TemplateField[] = [
     page: "about",
     group: "about.cta",
     gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
   },
 ];
 
@@ -673,8 +674,8 @@ const homepageCtaData: TemplateField[] = [
     group: "homepage.cta",
     gridColumn: "col-span-full",
     defaultValue:
-      "Join thousands of eco-conscious households who have already made the switch to Happy Bamboo. Experience premium quality while making a positive impact on our planet.",
-    placeholder: "Join thousands of eco-conscious households...",
+      "Join a growing community of customers who love what we make. Experience premium quality while making a positive impact.",
+    placeholder: "Join a growing community of customers...",
   },
   {
     key: "happy-bamboo.homepage-cta-primary-button-text",
@@ -959,17 +960,55 @@ const globalAuthenticationData: TemplateField[] = [
     defaultValue: "80",
     placeholder: "80",
   },
+];
 
+/// BLOG POST CTA
+const blogPostCtaData: TemplateField[] = [
   {
-    key: "happy-bamboo.global.image-overlay-color",
-    label: "Image Overlay Color",
-    description: "Color of the image overlay in the authentication section",
-    type: "color",
-    page: "global",
-    group: "global.authentication",
+    key: "happy-bamboo.blog.post-cta-heading",
+    label: "Blog post — CTA heading",
+    description: "Call-to-action box at the end of each blog post",
+    type: "text",
+    page: "blog",
+    group: "blog.post",
+    gridColumn: "col-span-full",
+    defaultValue: "Bring Bamboo Home",
+    placeholder: "Bring Bamboo Home",
+  },
+  {
+    key: "happy-bamboo.blog.post-cta-body",
+    label: "Blog post — CTA body",
+    description: "Supporting text for the post footer CTA",
+    type: "textarea",
+    page: "blog",
+    group: "blog.post",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Explore tree-free, thoughtfully made essentials — crafted for everyday comfort.",
+    placeholder:
+      "Explore tree-free, thoughtfully made essentials — crafted for everyday comfort.",
+  },
+  {
+    key: "happy-bamboo.blog.post-cta-button-text",
+    label: "Blog post — CTA button text",
+    description: "Label for the primary button in the post footer CTA",
+    type: "text",
+    page: "blog",
+    group: "blog.post",
     gridColumn: "col-span-1",
-    defaultValue: "#000000",
-    placeholder: "#000000",
+    defaultValue: "Shop Now",
+    placeholder: "Shop Now",
+  },
+  {
+    key: "happy-bamboo.blog.post-cta-button-link",
+    label: "Blog post — CTA button link",
+    description: "Destination URL for the post footer CTA button",
+    type: "url",
+    page: "blog",
+    group: "blog.post",
+    gridColumn: "col-span-1",
+    defaultValue: "/shop",
+    placeholder: "/shop",
   },
 ];
 
@@ -1068,6 +1107,13 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 1,
   },
   {
+    id: "blog.post",
+    title: "Blog Post Call to Action",
+    description: "Call-to-action shown at the end of every blog article",
+    icon: "✨",
+    columns: 2,
+  },
+  {
     id: "collections.listing",
     title: "Collections Page",
     description: "Heading and intro text for the collections listing page",
@@ -1129,6 +1175,7 @@ export const happyBambooData = {
     ...contactPageData,
     ...contactFaqData,
     ...blogListingData,
+    ...blogPostCtaData,
     ...collectionsListingData,
     ...collectionsCtaData,
     ...shopListingData,
@@ -1205,7 +1252,7 @@ export const DEFAULT_HAPPY_BAMBOO_SERVICES_LIST: GenericIconRow[] = [
     icon: Recycle,
     title: "100% Biodegradable",
     description:
-      "Every sheet of Happy Bamboo toilet tissue is made from 100% biodegradable materials, helping to reduce deforestation and promote a greener future.",
+      "Our products are made from 100% biodegradable materials, helping to reduce waste and promote a greener future.",
   },
   {
     icon: Shield,

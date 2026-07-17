@@ -6,6 +6,8 @@ import { ArrowLeft, ArrowRight, CalendarDays, Leaf } from "lucide-react";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { formatDate } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -16,6 +18,8 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
+
+import { resolveFields } from "..";
 
 // const relatedPosts = [
 //   {
@@ -34,10 +38,32 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 //   },
 // ];
 
+type Props = DefaultBlogPostPageTemplateProps & {
+  customFields?: Record<string, string>;
+};
+
 export function HappyBambooBlogPostPage({
   page,
   relatedPosts,
-}: DefaultBlogPostPageTemplateProps) {
+  customFields,
+}: Props) {
+  const f = resolveFields(customFields, [
+    "happy-bamboo.blog.post-cta-heading",
+    "happy-bamboo.blog.post-cta-body",
+    "happy-bamboo.blog.post-cta-button-text",
+    "happy-bamboo.blog.post-cta-button-link",
+  ]);
+
+  const ctaHeading = f["happy-bamboo.blog.post-cta-heading"];
+  const ctaBody = f["happy-bamboo.blog.post-cta-body"];
+  const ctaButtonText = f["happy-bamboo.blog.post-cta-button-text"];
+  const ctaHref = f["happy-bamboo.blog.post-cta-button-link"];
+  const ctaVisible = isSectionVisible(
+    customFields,
+    "happy-bamboo",
+    "blog.post",
+  );
+
   return (
     <PageTransition>
       {/* Post Header */}
@@ -112,31 +138,38 @@ export function HappyBambooBlogPostPage({
               </article>
 
               {/* CTA */}
-              <FadeIn delay={0.1} className="mt-10">
-                <div className="border-border bg-muted/50 rounded-2xl border p-6 md:p-8">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 shrink-0 rounded-full p-3">
-                      <Leaf className="text-primary h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-xl font-bold">
-                        Try Happy Bamboo Today
-                      </h3>
-                      <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                        Experience the softness, strength, and sustainability of
-                        our premium bamboo tissue. Free shipping on orders over
-                        $30.
-                      </p>
-                      <Button asChild className="group">
-                        <Link href="/shop">
-                          Shop Now
-                          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Link>
-                      </Button>
+              {ctaVisible && (Boolean(ctaHeading) || Boolean(ctaBody)) && (
+                <FadeIn delay={0.1} className="mt-10">
+                  <div
+                    {...sectionGroupAttr("blog", "post")}
+                    className="border-border bg-muted/50 rounded-2xl border p-6 md:p-8"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="bg-primary/10 shrink-0 rounded-full p-3">
+                        <Leaf className="text-primary h-6 w-6" />
+                      </div>
+                      <div>
+                        {ctaHeading ? (
+                          <h3 className="mb-2 text-xl font-bold">
+                            {ctaHeading}
+                          </h3>
+                        ) : null}
+                        {ctaBody ? (
+                          <p className="text-muted-foreground mb-4 text-sm leading-relaxed whitespace-pre-line">
+                            {ctaBody}
+                          </p>
+                        ) : null}
+                        <Button asChild className="group">
+                          <Link href={ctaHref!}>
+                            {ctaButtonText}
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </FadeIn>
+                </FadeIn>
+              )}
             </FadeIn>
           </div>
         </div>

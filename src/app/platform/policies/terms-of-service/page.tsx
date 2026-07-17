@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | SimplePress",
+  description: "SimplePress platform Terms of Service.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/terms-of-service`,
+  },
+};
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??

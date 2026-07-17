@@ -1,5 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
+import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api } from "~/trpc/server";
 
@@ -45,7 +47,12 @@ export async function ViiShopPage({
     "vii.homepage.brands-heading",
   ]);
 
-  const collections = await api.collections.getAllPublic();
+  const { isEnabled } = await getBusinessFlags();
+  const collections: RouterOutputs["collections"]["getAllPublic"] = isEnabled(
+    "collections",
+  )
+    ? await api.collections.getAllPublic()
+    : [];
   const products = (business.products ?? []) as unknown as Product[];
 
   const overline = f["vii.shop.intro-overline"] ?? "";

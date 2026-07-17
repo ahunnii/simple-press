@@ -15,7 +15,7 @@ import {
   StaggerItem,
 } from "~/components/page-animations";
 
-import { NoiseProductCard } from "../shared/sledge-product-card";
+import { SledgeProductCard } from "../shared/sledge-product-card";
 
 type CollectionEntry = {
   id: string;
@@ -187,7 +187,7 @@ export function SledgeShopFilterClient({ products, collections = [] }: Props) {
         >
           {filtered.map((product, index) => (
             <StaggerItem key={product.id}>
-              <NoiseProductCard product={product} index={index} />
+              <SledgeProductCard product={product} index={index} />
             </StaggerItem>
           ))}
         </StaggerContainer>

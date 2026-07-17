@@ -7,6 +7,7 @@ import { getTemplate } from "../../../_templates/registry";
 
 export const metadata = {
   title: "Order Details",
+  robots: { index: false, follow: false },
 };
 
 type Props = {

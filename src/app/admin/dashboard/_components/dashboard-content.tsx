@@ -5,9 +5,16 @@ import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  CalendarDays,
+  Clock,
   DollarSign,
+  ExternalLink,
   Package,
+  Palette,
+  Plus,
   ShoppingCart,
+  TrendingUp,
+  Truck,
   Users,
 } from "lucide-react";
 import {
@@ -24,19 +31,48 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Progress } from "~/components/ui/progress";
 
 type DashboardContentProps = {
   business: {
     id: string;
     name: string;
     subdomain: string;
+    customDomain: string | null;
   };
   stats: {
     totalRevenue: number;
     totalOrders: number;
     totalProducts: number;
     totalCustomers: number;
+    todayRevenue: number;
+    /** Net (gross − refunds) over the trailing 7 days. */
+    sevenDayRevenue: number;
+    sevenDayGrossRevenue: number;
+    sevenDayRefunded: number;
+    /** Net revenue over the prior 7-day window (days 14–8). */
+    prevSevenDayRevenue: number;
+    sevenDayOrders: number;
+    prevSevenDayOrders: number;
+    /** Net (gross − refunds) over the trailing 30 days. */
+    thirtyDayRevenue: number;
+    thirtyDayGrossRevenue: number;
+    thirtyDayRefunded: number;
+    /** Net revenue over the prior 30-day window (days 60–31). */
+    prevThirtyDayRevenue: number;
+    thirtyDayPaidOrders: number;
+    prevThirtyDayPaidOrders: number;
   };
+  /** Optional Suspense-wrapped conversion-rate card (server-rendered). */
+  conversionCard?: React.ReactNode;
+  /** Onboarding progress from /admin/welcome; null when setup is complete. */
+  setupProgress: {
+    completed: number;
+    total: number;
+    nextStep: { label: string; href: string } | null;
+  } | null;
+  ordersToFulfillCount: number;
+  awaitingPaymentCount: number;
   recentOrders: Array<{
     id: string;
     orderNumber: number;
@@ -67,11 +103,10 @@ type DashboardContentProps = {
     order: { id: string; orderNumber: number } | null;
     previousQty: number;
   }>;
+  /** One entry per local calendar day, pre-bucketed server-side; `revenue` is in cents. */
   revenueByDay: Array<{
-    createdAt: Date;
-    _sum: {
-      total: number | null;
-    };
+    date: Date;
+    revenue: number;
   }>;
   topProducts: Array<{
     productId: string | null;
@@ -82,9 +117,53 @@ type DashboardContentProps = {
   }>;
 };
 
+/**
+ * Period-over-period delta chip: green up / red down, muted em dash when the
+ * prior period is zero (no baseline) or the metric is unchanged.
+ */
+function DeltaChip({
+  current,
+  previous,
+  compareLabel,
+}: {
+  current: number;
+  previous: number;
+  compareLabel: string;
+}) {
+  const pct =
+    previous > 0 ? Math.round(((current - previous) / previous) * 100) : null;
+
+  if (pct === null || pct === 0) {
+    return (
+      <p className="text-muted-foreground mt-1 text-xs">
+        &mdash; vs {compareLabel}
+      </p>
+    );
+  }
+
+  const up = pct > 0;
+  return (
+    <p
+      className={`mt-1 text-xs font-medium ${
+        up
+          ? "text-green-600 dark:text-green-500"
+          : "text-red-600 dark:text-red-500"
+      }`}
+    >
+      <span aria-hidden="true">{up ? "▲" : "▼"}</span>
+      <span className="sr-only">{up ? "Up" : "Down"}</span> {Math.abs(pct)}% vs{" "}
+      {compareLabel}
+    </p>
+  );
+}
+
 export function DashboardContent({
   business,
   stats,
+  conversionCard,
+  setupProgress,
+  ordersToFulfillCount,
+  awaitingPaymentCount,
   recentOrders,
   lowStockProducts,
   lowStockPools,
@@ -121,12 +200,10 @@ export function DashboardContent({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "paid":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "processing":
+      case "open":
         return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
       case "cancelled":
         return "bg-gray-100 text-gray-800";
       case "refunded":
@@ -136,87 +213,259 @@ export function DashboardContent({
     }
   };
 
-  // Process revenue data for chart
+  // Process revenue data for chart (already bucketed per local day server-side)
   const chartData = revenueByDay.map((item) => ({
-    date: new Date(item.createdAt).toLocaleDateString("en-US", {
+    date: new Date(item.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     }),
-    revenue: (item._sum.total ?? 0) / 100,
+    revenue: item.revenue / 100,
   }));
+
+  // Average order value: 30-day net paid revenue ÷ 30-day paid order count,
+  // plus the same figure for the prior 30-day window for the delta chip.
+  const aov =
+    stats.thirtyDayPaidOrders > 0
+      ? Math.round(stats.thirtyDayRevenue / stats.thirtyDayPaidOrders)
+      : 0;
+  const prevAov =
+    stats.prevThirtyDayPaidOrders > 0
+      ? Math.round(stats.prevThirtyDayRevenue / stats.prevThirtyDayPaidOrders)
+      : 0;
+
+  // Live storefront URL — prefer custom domain if configured
+  const storefrontUrl = business.customDomain
+    ? `https://${business.customDomain}`
+    : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? ""}`;
+
+  const hasAttentionItems = ordersToFulfillCount > 0 || awaitingPaymentCount > 0;
 
   return (
     <div className="bg-muted min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-foreground text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back! Here&apos;s what&apos;s happening with {business.name}
-          </p>
+        {/* Header + Quick Actions */}
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-foreground text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Welcome back! Here&apos;s what&apos;s happening with{" "}
+              {business.name}
+            </p>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-2 sm:shrink-0">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/products/new">
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add Product
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/orders/new">
+                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                New Order
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/admin/content/template">
+                <Palette className="mr-1.5 h-3.5 w-3.5" />
+                Customize
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={storefrontUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                View Store
+              </a>
+            </Button>
+          </div>
         </div>
+
+        {/* Finish Setting Up */}
+        {setupProgress && (
+          <Card className="mb-6">
+            <CardContent className="flex flex-col gap-4 py-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex-1">
+                <div className="flex items-center justify-between gap-4 sm:justify-start">
+                  <h2 className="text-foreground text-sm font-semibold">
+                    Finish setting up your store
+                  </h2>
+                  <span className="text-muted-foreground text-xs">
+                    {setupProgress.completed} of {setupProgress.total} steps
+                    complete
+                  </span>
+                </div>
+                <Progress
+                  value={(setupProgress.completed / setupProgress.total) * 100}
+                  className="mt-2 h-1.5 max-w-sm"
+                />
+                {setupProgress.nextStep && (
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    Next: {setupProgress.nextStep.label}
+                  </p>
+                )}
+              </div>
+              <Button asChild size="sm" className="shrink-0">
+                <Link href="/admin/welcome">
+                  Continue setup
+                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Needs-Attention Strip */}
+        {hasAttentionItems && (
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {ordersToFulfillCount > 0 && (
+              <Link
+                href="/admin/orders?fulfillment=unfulfilled&paymentStatus=paid"
+                className="group"
+              >
+                <div className="flex items-center gap-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 transition-colors group-hover:bg-amber-100">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 group-hover:bg-amber-200">
+                    <Truck className="h-4 w-4 text-amber-700" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-amber-900">
+                      {ordersToFulfillCount}{" "}
+                      {ordersToFulfillCount === 1 ? "order" : "orders"} to
+                      fulfill
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Paid but not yet shipped
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-amber-600 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )}
+            {awaitingPaymentCount > 0 && (
+              <Link
+                href="/admin/orders?paymentStatus=pending"
+                className="group"
+              >
+                <div className="flex items-center gap-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 transition-colors group-hover:bg-blue-100">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200">
+                    <Clock className="h-4 w-4 text-blue-700" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-blue-900">
+                      {awaitingPaymentCount}{" "}
+                      {awaitingPaymentCount === 1 ? "order" : "orders"} awaiting
+                      payment
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Pending payment confirmation
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-blue-600 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {/* Revenue */}
+          {/* Revenue Today */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Total Revenue
+                Revenue Today
               </CardTitle>
               <DollarSign className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(stats.totalRevenue)}
+                {formatCurrency(stats.todayRevenue)}
               </div>
-              <p className="text-muted-foreground mt-1 text-xs">All time</p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                All time:{" "}
+                <span className="font-medium">
+                  {formatCurrency(stats.totalRevenue)}
+                </span>
+              </p>
             </CardContent>
           </Card>
 
-          {/* Orders */}
+          {/* Revenue 7 days */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Total Orders
+                Revenue (7 Days)
               </CardTitle>
-              <ShoppingCart className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-              <p className="text-muted-foreground mt-1 text-xs">All time</p>
+              <div className="text-2xl font-bold">
+                {formatCurrency(stats.sevenDayGrossRevenue)}
+              </div>
+              <DeltaChip
+                current={stats.sevenDayRevenue}
+                previous={stats.prevSevenDayRevenue}
+                compareLabel="prior 7 days"
+              />
+              <p className="text-muted-foreground mt-1 text-xs">
+                Last 7 days, paid orders
+                {stats.sevenDayRefunded > 0 && (
+                  <>
+                    {" "}
+                    &middot; &minus;{formatCurrency(stats.sevenDayRefunded)}{" "}
+                    refunded
+                  </>
+                )}
+              </p>
             </CardContent>
           </Card>
 
-          {/* Products */}
+          {/* Orders 7 days */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Products
+                Orders (7 Days)
               </CardTitle>
-              <Package className="h-4 w-4 text-purple-600" />
+              <CalendarDays className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProducts}</div>
-              <p className="text-muted-foreground mt-1 text-xs">In catalog</p>
+              <div className="text-2xl font-bold">{stats.sevenDayOrders}</div>
+              <DeltaChip
+                current={stats.sevenDayOrders}
+                previous={stats.prevSevenDayOrders}
+                compareLabel="prior 7 days"
+              />
+              <p className="text-muted-foreground mt-1 text-xs">
+                All time:{" "}
+                <span className="font-medium">{stats.totalOrders}</span>
+              </p>
             </CardContent>
           </Card>
 
-          {/* Customers */}
+          {/* AOV 30 days */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-muted-foreground text-sm font-medium">
-                Customers
+                Avg. Order Value
               </CardTitle>
               <Users className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalCustomers}</div>
+              <div className="text-2xl font-bold">{formatCurrency(aov)}</div>
+              <DeltaChip
+                current={aov}
+                previous={prevAov}
+                compareLabel="prior 30 days"
+              />
               <p className="text-muted-foreground mt-1 text-xs">
-                Total customers
+                30-day avg · {stats.thirtyDayPaidOrders} paid orders
               </p>
             </CardContent>
           </Card>
+
+          {/* Conversion Rate (streams in when analytics is configured) */}
+          {conversionCard}
         </div>
 
         {/* Two Column Layout */}
@@ -411,6 +660,26 @@ export function DashboardContent({
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Revenue (Last 30 Days)</CardTitle>
+            {chartData.length > 0 && (
+              <div>
+                <div className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-2xl font-bold">
+                    {formatCurrency(stats.thirtyDayGrossRevenue)}
+                  </span>
+                  {stats.thirtyDayRefunded > 0 && (
+                    <span className="text-muted-foreground text-xs">
+                      &minus;{formatCurrency(stats.thirtyDayRefunded)} refunded
+                      &middot; {formatCurrency(stats.thirtyDayRevenue)} net
+                    </span>
+                  )}
+                </div>
+                <DeltaChip
+                  current={stats.thirtyDayRevenue}
+                  previous={stats.prevThirtyDayRevenue}
+                  compareLabel="prior 30 days"
+                />
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             {chartData.length === 0 ? (

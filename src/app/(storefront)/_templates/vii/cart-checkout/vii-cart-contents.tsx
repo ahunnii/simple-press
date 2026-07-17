@@ -159,7 +159,7 @@ export function ViiCartContents({
   return (
     <div
       ref={ref}
-      className={`vii-reveal-group${visible ? "is-visible" : ""} grid grid-cols-1 items-start lg:grid-cols-[1fr_360px]`}
+      className={`vii-reveal-group${visible ? " is-visible" : ""} grid grid-cols-1 items-start lg:grid-cols-[1fr_360px]`}
       style={{ gap: "clamp(32px, 5vw, 64px)" }}
     >
       {/* Visually-hidden section heading keeps the h1 → h2 → h3 order intact */}
@@ -172,9 +172,7 @@ export function ViiCartContents({
       >
         {items.map((item, index) => {
           const lineTotal = item.price * item.quantity;
-          const productPath = item.productSlug
-            ? `/shop/${item.productSlug}`
-            : "/shop";
+          const productPath = `/shop/${item.productSlug ?? item.productId}`;
 
           return (
             <div

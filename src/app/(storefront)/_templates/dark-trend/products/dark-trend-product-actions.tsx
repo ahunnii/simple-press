@@ -5,6 +5,7 @@ import { Check, Minus, Plus } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { DarkTrendVariantSelector } from "./dark-trend-variant-selector";
 
@@ -29,6 +30,7 @@ export function DarkTrendProductActions({
   const [liveMessage, setLiveMessage] = useState("");
 
   const addToCart = () => {
+    if (!canAddMore) return;
     handleAddToCart();
     setLiveMessage(`Added ${quantity} × ${product.name} to cart`);
     setTimeout(() => {
@@ -38,12 +40,7 @@ export function DarkTrendProductActions({
 
   return (
     <>
-      {Object.keys(variantOptions).length > 0 ? (
-        <DarkTrendVariantSelector
-          product={product}
-          setSelectedVariantId={setSelectedVariantId}
-        />
-      ) : additionalFields?.comingSoon ? (
+      {additionalFields?.comingSoon ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-800 dark:bg-amber-950">
           <p className="font-semibold text-amber-700 dark:text-amber-300">
             Coming Soon
@@ -52,15 +49,30 @@ export function DarkTrendProductActions({
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
+      ) : Object.keys(variantOptions).length > 0 ? (
+        <DarkTrendVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+        />
       ) : !inStock ? (
-        <button
-          type="button"
-          aria-disabled="true"
-          onClick={(e) => e.preventDefault()}
-          className="bg-primary hover:bg-primary/90 inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase opacity-50 transition-all"
-        >
-          Out of Stock
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={(e) => e.preventDefault()}
+            className="bg-primary hover:bg-primary/90 inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase opacity-50 transition-all"
+          >
+            Out of Stock
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            className="text-white"
+            messageClassName="text-sm text-white/70"
+            inputClassName="rounded-md border-white/20 placeholder:text-white/40"
+            buttonClassName="rounded-md border-white/40"
+          />
+        </div>
       ) : (
         <>
           {/* Visually-hidden live region for add-to-cart announcements */}
@@ -123,35 +135,35 @@ export function DarkTrendProductActions({
                   </div>
                 </div>
               </div>
+
+              {/* Add to Cart Buttons */}
+              <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={addToCart}
+                  className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
+                    justAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
+                  }`}
+                >
+                  {justAdded ? (
+                    <>
+                      <Check className="h-4 w-4" aria-hidden="true" />
+                      Added to Cart
+                    </>
+                  ) : (
+                    "Add to Cart"
+                  )}
+                </button>
+                {product.trackInventory &&
+                  product.allowBackorders &&
+                  (product.inventoryQty ?? 0) === 0 && (
+                    <p className="text-muted-foreground text-sm">
+                      Backordered — ships when available
+                    </p>
+                  )}
+              </div>
             </>
           )}
-
-          {/* Add to Cart Buttons */}
-          <div className="mb-10 flex flex-col gap-4 sm:flex-row">
-            <button
-              type="button"
-              onClick={addToCart}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-md px-8 py-4 text-sm font-semibold tracking-wider text-white uppercase transition-all ${
-                justAdded ? "bg-primary" : "bg-primary hover:bg-primary/90"
-              }`}
-            >
-              {justAdded ? (
-                <>
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                  Added to Cart
-                </>
-              ) : (
-                "Add to Cart"
-              )}
-            </button>
-            {product.trackInventory &&
-              product.allowBackorders &&
-              (product.inventoryQty ?? 0) === 0 && (
-                <p className="text-muted-foreground text-sm">
-                  Backordered — ships when available
-                </p>
-              )}
-          </div>
 
           {!canAddMore && inStock && (
             <p className="text-muted-foreground mt-3 text-center text-sm">

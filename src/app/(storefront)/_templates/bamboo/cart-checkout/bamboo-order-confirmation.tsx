@@ -20,6 +20,13 @@ type Props = {
   };
 };
 
+// Order-details fetch is best-effort only — it must never block the
+// "Order Confirmed!" heading. If it hangs or fails, the customer still
+// paid and still needs to see confirmation, so we cap it with a timeout
+// and treat any failure as "no extra details available" rather than an
+// error state.
+const DETAILS_FETCH_TIMEOUT_MS = 10_000;
+
 export function BambooOrderConfirmation({ business }: Props) {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
@@ -29,25 +36,34 @@ export function BambooOrderConfirmation({ business }: Props) {
     currency: string;
     payment_status: string;
   } | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Gates only the order-details card (email/amount), never the
+  // confirmation heading itself.
+  const [detailsLoading, setDetailsLoading] = useState(true);
   const confirmedHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     if (!sessionId) {
-      setLoading(false);
+      setDetailsLoading(false);
       return;
     }
 
     // Clear cart on successful order
     clearCart();
 
-    // Fetch order details
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(),
+      DETAILS_FETCH_TIMEOUT_MS,
+    );
+
+    // Fetch order details (best-effort; never blocks the confirmation UI)
     const fetchOrderDetails = async () => {
       try {
         const response = await fetch(
           `/api/stripe/session?session_id=${sessionId}`,
+          { signal: controller.signal },
         );
         if (response.ok) {
           const data = (await response.json()) as {
@@ -62,27 +78,27 @@ export function BambooOrderConfirmation({ business }: Props) {
       } catch (error) {
         console.error("Failed to fetch order details:", error);
       } finally {
-        setLoading(false);
+        clearTimeout(timeoutId);
+        setDetailsLoading(false);
       }
     };
 
     void fetchOrderDetails();
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [sessionId, clearCart]);
 
-  // M-4: Move focus to the "Order Confirmed!" heading once loading is done
+  // M-4: Move focus to the "Order Confirmed!" heading as soon as it renders
+  // (as soon as we know we have a valid session_id) — do not wait on the
+  // order-details fetch, which is best-effort and may never resolve.
   useEffect(() => {
-    if (!loading && sessionId) {
+    if (sessionId) {
       confirmedHeadingRef.current?.focus();
     }
-  }, [loading, sessionId]);
-
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-2xl text-center" role="status">
-        <p className="text-muted-foreground">Loading order details...</p>
-      </div>
-    );
-  }
+  }, [sessionId]);
 
   if (!sessionId) {
     return (
@@ -155,15 +171,26 @@ export function BambooOrderConfirmation({ business }: Props) {
             </div>
           </div>
 
-          {orderDetails?.customer_email && (
-            <div className="border-border mt-6 border-t pt-6 text-sm">
-              <p className="text-muted-foreground">
-                Confirmation sent to:{" "}
-                <span className="text-foreground font-semibold">
-                  {orderDetails.customer_email}
-                </span>
+          {detailsLoading ? (
+            <div
+              className="border-border mt-6 border-t pt-6 text-sm"
+              role="status"
+            >
+              <p className="text-muted-foreground animate-pulse">
+                Loading confirmation details…
               </p>
             </div>
+          ) : (
+            orderDetails?.customer_email && (
+              <div className="border-border mt-6 border-t pt-6 text-sm">
+                <p className="text-muted-foreground">
+                  Confirmation sent to:{" "}
+                  <span className="text-foreground font-semibold">
+                    {orderDetails.customer_email}
+                  </span>
+                </p>
+              </div>
+            )
           )}
         </CardContent>
       </Card>

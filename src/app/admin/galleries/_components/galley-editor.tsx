@@ -90,6 +90,8 @@ export function GalleryEditor({ gallery }: GalleryEditorProps) {
 
   const form = useForm<GalleryUpdateData>({
     resolver: zodResolver(galleryUpdateSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       id: gallery.id,
       name: gallery.name,

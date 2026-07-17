@@ -38,7 +38,7 @@ export function ViiBlogPostCta({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{
           maxWidth: 640,
           margin: "0 auto",

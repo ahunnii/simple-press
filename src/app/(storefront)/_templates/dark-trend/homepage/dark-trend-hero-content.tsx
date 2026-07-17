@@ -3,13 +3,25 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type Props = {
   title: string;
   buttonText: string;
   buttonLink: string;
+  /** Field key for the title, so the preview can live-patch it in place. */
+  titleFieldKey?: string;
+  /** Field key for the button text, so the preview can live-patch it in place. */
+  buttonTextFieldKey?: string;
 };
 
-export function DarkTrendHeroContent({ title, buttonText, buttonLink }: Props) {
+export function DarkTrendHeroContent({
+  title,
+  buttonText,
+  buttonLink,
+  titleFieldKey,
+  buttonTextFieldKey,
+}: Props) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -24,6 +36,7 @@ export function DarkTrendHeroContent({ title, buttonText, buttonLink }: Props) {
           duration: shouldReduceMotion ? 0 : 0.6,
           ease: [0.25, 0.46, 0.45, 0.94],
         }}
+        {...(titleFieldKey ? fieldAttr(titleFieldKey) : {})}
       >
         {title}
       </motion.h1>
@@ -51,6 +64,7 @@ export function DarkTrendHeroContent({ title, buttonText, buttonLink }: Props) {
             }
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
             transition={{ duration: 0.2 }}
+            {...(buttonTextFieldKey ? fieldAttr(buttonTextFieldKey) : {})}
           >
             {!buttonText ? "SHOP NOW" : buttonText}
           </motion.span>

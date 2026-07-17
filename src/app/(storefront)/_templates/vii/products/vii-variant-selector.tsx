@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -56,16 +58,7 @@ export function ViiVariantSelector({
     if (addToCartDisabled) return;
 
     addItem(
-      {
-        productId: product.id,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: effectiveMax,
-      },
+      buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
     );
 
@@ -310,6 +303,18 @@ export function ViiVariantSelector({
                   ? `${selectedVariant.inventoryQty} available`
                   : null}
             </p>
+          )}
+
+          {/* Notify me when the selected variant is back in stock */}
+          {addToCartDisabled && (
+            <NotifyMeForm
+              productId={product.id}
+              variantId={selectedVariant.id}
+              message="Get notified when this option is back in stock."
+              messageClassName="text-sm text-[var(--vii-ink-soft)]"
+              inputClassName="rounded-[var(--radius)] border-[var(--vii-hairline-strong)] text-[var(--vii-navy)]"
+              buttonClassName="rounded-[var(--radius)] border-[var(--vii-navy)] text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--vii-navy)]"
+            />
           )}
         </div>
       )}

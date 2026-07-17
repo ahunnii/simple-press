@@ -51,6 +51,7 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { AdminEmpty } from "../../_components/admin-empty";
 import { OwnerReviewDialog } from "./owner-review-dialog";
 
 export function ReviewsAdminList() {
@@ -329,18 +330,6 @@ export function ReviewsAdminList() {
     </Card>
   );
 
-  const Empty = ({ msg, sub }: { msg: string; sub?: string }) => (
-    <Card>
-      <CardContent className="text-muted-foreground py-12 text-center text-sm">
-        {sub && (
-          <MessageSquare className="text-muted-foreground/40 mx-auto mb-3 h-8 w-8" />
-        )}
-        <p className="text-foreground font-medium">{msg}</p>
-        {sub && <p className="text-muted-foreground mt-1 text-xs">{sub}</p>}
-      </CardContent>
-    </Card>
-  );
-
   return (
     <div className="admin-container space-y-6">
       <div className="admin-header">
@@ -381,37 +370,6 @@ export function ReviewsAdminList() {
         </div>
       </div>
 
-      {/* Header */}
-      {/* <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm font-medium text-gray-600">
-            Filter by source:
-          </h2>
-          <Select
-            value={source}
-            onValueChange={(v) => setSource(v as "customer" | "owner" | "all")}
-          >
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All ({all.length})</SelectItem>
-              <SelectItem value="customer">
-                Customer ({customerSub.length})
-              </SelectItem>
-              <SelectItem value="owner">
-                Owner Added ({ownerAdded.length})
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Review
-        </Button>
-      </div> */}
-
       {/* Tabs */}
       <Tabs defaultValue="pending">
         <TabsList>
@@ -432,7 +390,10 @@ export function ReviewsAdminList() {
 
         <TabsContent value="pending" className="mt-4 space-y-3">
           {pending.length === 0 ? (
-            <Empty msg="No pending reviews — you're all caught up!" />
+            <AdminEmpty
+              icon={MessageSquare}
+              title="No pending reviews — you're all caught up!"
+            />
           ) : (
             pending.map((r) => (
               <ReviewCard
@@ -445,7 +406,7 @@ export function ReviewsAdminList() {
 
         <TabsContent value="approved" className="mt-4 space-y-3">
           {approved.length === 0 ? (
-            <Empty msg="No published reviews yet" />
+            <AdminEmpty icon={MessageSquare} title="No published reviews yet" />
           ) : (
             approved.map((r) => (
               <ReviewCard
@@ -458,7 +419,7 @@ export function ReviewsAdminList() {
 
         <TabsContent value="hidden" className="mt-4 space-y-3">
           {hidden.length === 0 ? (
-            <Empty msg="No hidden reviews" />
+            <AdminEmpty icon={MessageSquare} title="No hidden reviews" />
           ) : (
             hidden.map((r) => (
               <ReviewCard
@@ -471,9 +432,10 @@ export function ReviewsAdminList() {
 
         <TabsContent value="all" className="mt-4 space-y-3">
           {all.length === 0 ? (
-            <Empty
-              msg="No reviews yet"
-              sub="Reviews appear here once customers submit them on a product page."
+            <AdminEmpty
+              icon={MessageSquare}
+              title="No reviews yet"
+              description="Reviews appear here once customers submit them on a product page."
             />
           ) : (
             all.map((r) => (

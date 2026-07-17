@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { resolveThemeVars } from "~/lib/template-themes";
 
 import { DefaultAnnouncementBar } from "./default-announcement-bar";
 import { DefaultFooter } from "./default-footer";
@@ -27,10 +28,15 @@ export async function DefaultLayout({
 }: DefaultLayoutTemplateProps) {
   const { isEnabled } = await getBusinessFlags();
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
+  const themeVars = resolveThemeVars(
+    "default",
+    business.siteContent?.customFields,
+  );
 
   return (
     <div
       className={`${inter.variable} ${poppins.variable} default-template flex min-h-screen flex-col`}
+      style={themeVars ?? undefined}
     >
       {/* Skip navigation — first focusable element on every page */}
       <a

@@ -10,11 +10,14 @@ type OrderReadyForPickupEmailProps = {
   businessUrl: string;
   pickupLocation?: string;
   pickupInstructions?: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function OrderReadyForPickupEmail({
   orderNumber,
   customerName,
+  introText,
   businessName,
   businessLogoUrl,
   businessUrl,
@@ -28,6 +31,12 @@ export default function OrderReadyForPickupEmail({
       logoUrl={businessLogoUrl}
     >
       <Text style={heading}>Your order is ready for pickup</Text>
+
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
 
       {customerName && <Text style={paragraph}>Hi {customerName},</Text>}
 

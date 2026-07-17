@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
@@ -38,6 +39,7 @@ export function ViiDetroitSection({
   return (
     <section
       aria-labelledby="vii-detroit-heading"
+      {...sectionGroupAttr("homepage", "detroit")}
       style={{
         background: "var(--vii-cream)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -57,7 +59,7 @@ export function ViiDetroitSection({
         {/* ── Image ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
           style={{
             position: "relative",
             width: "100%",
@@ -98,10 +100,11 @@ export function ViiDetroitSection({
         {/* ── Text ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           {overline && (
             <p
+              {...fieldAttr("vii.homepage.detroit-overline")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: 11,
@@ -131,7 +134,10 @@ export function ViiDetroitSection({
               {heading}
               {heading && headingAccent ? " " : ""}
               {headingAccent && (
-                <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+                <em
+                  {...fieldAttr("vii.homepage.detroit-heading-accent")}
+                  style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+                >
                   {headingAccent}
                 </em>
               )}
@@ -140,6 +146,7 @@ export function ViiDetroitSection({
 
           {body && (
             <p
+              {...fieldAttr("vii.homepage.detroit-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(15px, 1.4vw, 17px)",
@@ -194,6 +201,7 @@ export function ViiDetroitSection({
             <div style={{ marginTop: "clamp(28px, 4vw, 40px)" }}>
               <Link
                 href={ctaHref}
+                {...fieldAttr("vii.homepage.detroit-cta-text")}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

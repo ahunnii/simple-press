@@ -100,7 +100,7 @@ export function OrdersTable({ orders }: Props) {
                   <Link href={`/admin/orders/${order.id}`}>
                     <div>
                       <div className="text-foreground text-sm font-medium">
-                        #{order.id.slice(0, 8)}
+                        #{order.orderNumber}
                       </div>
                       <div className="text-muted-foreground text-sm">
                         {formatDate(order.createdAt)}
@@ -129,6 +129,14 @@ export function OrdersTable({ orders }: Props) {
                     <Badge variant={getStatusColor(order.status)}>
                       {order.status}
                     </Badge>
+                    {order.fulfillmentStatus === "partially_fulfilled" && (
+                      <Badge
+                        variant="outline"
+                        className="border-amber-300 bg-amber-50 text-amber-700"
+                      >
+                        Partially fulfilled
+                      </Badge>
+                    )}
                     {order.deliveryMethod === "pickup" && (
                       <Badge
                         variant="outline"

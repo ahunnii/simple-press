@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -29,6 +31,7 @@ export function ViiAboutTeamOwner({
   return (
     <section
       aria-labelledby="about-owner-heading"
+      {...sectionGroupAttr("about", "owner")}
       style={{
         background: "var(--vii-paper)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -48,10 +51,15 @@ export function ViiAboutTeamOwner({
         {/* Text */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
         >
           {overline && (
-            <ViiOverline align="left" tone="light" style={{ marginBottom: 14 }}>
+            <ViiOverline
+              align="left"
+              tone="light"
+              style={{ marginBottom: 14 }}
+              fieldKey="vii.about.owner-overline"
+            >
               {overline}
             </ViiOverline>
           )}
@@ -68,13 +76,17 @@ export function ViiAboutTeamOwner({
             }}
           >
             {heading}{" "}
-            <em style={{ fontStyle: "italic", color: "var(--vii-copper)" }}>
+            <em
+              {...fieldAttr("vii.about.owner-heading-accent")}
+              style={{ fontStyle: "italic", color: "var(--vii-copper)" }}
+            >
               {headingAccent}
             </em>
           </h2>
 
           {role.trim() && (
             <p
+              {...fieldAttr("vii.about.owner-role")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: 12,
@@ -90,6 +102,7 @@ export function ViiAboutTeamOwner({
 
           {body && (
             <p
+              {...fieldAttr("vii.about.owner-body")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.3vw, 16px)",
@@ -106,7 +119,7 @@ export function ViiAboutTeamOwner({
         {/* Image */}
         <div
           ref={imgRef}
-          className={`vii-reveal${imgVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${imgVisible ? " is-visible" : ""}`}
           style={{
             position: "relative",
             aspectRatio: "4/5",

@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -117,6 +118,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
   return (
     <section
       aria-labelledby="about-team-heading"
+      {...sectionGroupAttr("about", "team")}
       style={{
         background: "var(--vii-cream)",
         padding: "clamp(72px, 10vw, 120px) clamp(24px, 6vw, 96px)",
@@ -124,7 +126,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
     >
       <div
         ref={headRef}
-        className={`vii-reveal-group${headVisible ? "is-visible" : ""}`}
+        className={`vii-reveal-group${headVisible ? " is-visible" : ""}`}
         style={{ maxWidth: 1100, margin: "0 auto" }}
       >
         {/* Header */}
@@ -144,6 +146,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
               align="center"
               tone="light"
               style={{ marginBottom: 14 }}
+              fieldKey="vii.about.team-overline"
             >
               {overline}
             </ViiOverline>
@@ -151,6 +154,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
 
           <h2
             id="about-team-heading"
+            {...fieldAttr("vii.about.team-heading")}
             style={{
               fontFamily: "var(--font-serif)",
               fontWeight: 400,
@@ -165,6 +169,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
 
           {intro && (
             <p
+              {...fieldAttr("vii.about.team-intro")}
               style={{
                 fontFamily: "var(--font-sans)",
                 fontSize: "clamp(14px, 1.3vw, 16px)",

@@ -5,8 +5,11 @@ import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
+import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -21,7 +24,7 @@ export function DarkTrendVariantSelector({
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] ?? null,
+    pickInitialVariant(product.variants, product),
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -48,16 +51,7 @@ export function DarkTrendVariantSelector({
     if (!selectedVariant) return;
 
     addItem(
-      {
-        productId: product.id,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: effectiveMax,
-      },
+      buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity, // ← Add specified quantity
     );
 
@@ -214,6 +208,19 @@ export function DarkTrendVariantSelector({
           )}
         </button>
       </div>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && isCartDisabled && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          className="text-white"
+          message="Get notified when this option is back in stock."
+          messageClassName="text-sm text-white/70"
+          inputClassName="rounded-md border-white/20 placeholder:text-white/40"
+          buttonClassName="rounded-md border-white/40"
+        />
+      )}
     </div>
   );
 }

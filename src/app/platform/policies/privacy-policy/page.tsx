@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | SimplePress",
+  description: "How SimplePress collects, uses, and protects your personal information.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/privacy-policy`,
+  },
+};
 
 const contactEmail =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??
@@ -367,7 +377,13 @@ export default function PrivacyPolicyPage() {
         <li>custom domains;</li>
         <li>external websites;</li>
         <li>embedded content providers;</li>
-        <li>hosting infrastructure providers.</li>
+        <li>hosting infrastructure providers;</li>
+        <li>
+          error-monitoring and diagnostics providers, such as Sentry, which
+          may receive limited technical and account identifiers (such as
+          email address, when available) solely to help us detect,
+          diagnose, and resolve platform errors.
+        </li>
       </ul>
       <p>
         We are not responsible for the privacy practices or content of

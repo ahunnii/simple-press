@@ -13,6 +13,8 @@ type SendEmailOptions = {
   fromName?: string;
   tags?: Array<{ name: string; value: string }>;
   idempotencyKey?: string;
+  /** Extra SMTP headers (e.g. RFC 8058 List-Unsubscribe / List-Unsubscribe-Post). */
+  headers?: Record<string, string>;
 };
 
 // Email addresses
@@ -31,6 +33,7 @@ export async function sendEmail({
   fromName,
   tags = [],
   idempotencyKey,
+  headers,
 }: SendEmailOptions) {
   try {
     const fromAddress = fromName
@@ -44,6 +47,7 @@ export async function sendEmail({
       react,
       replyTo,
       tags,
+      ...(headers ? { headers } : {}),
     };
 
     const { data, error } = idempotencyKey

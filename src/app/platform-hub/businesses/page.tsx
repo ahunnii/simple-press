@@ -6,9 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { BusinessesTable } from "~/app/admin/platform/_components/businesses-table";
-import { CreateBusinessButton } from "~/app/admin/platform/_components/create-business-button";
-
+import { BusinessesTable } from "../_components/businesses-table";
+import { CreateBusinessButton } from "../_components/create-business-button";
 import { PlatformListFilters } from "../_components/platform-list-filters";
 import { PlatformListPagination } from "../_components/platform-list-pagination";
 import { PlatformTrailHeader } from "../_components/platform-trail-header";

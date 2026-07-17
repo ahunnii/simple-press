@@ -109,7 +109,7 @@ export function QuickActions({ business }: QuickActionsProps) {
             <ExternalLink className="h-3 w-3" />
           </a>
           <a
-            href="mailto:support@example.com"
+            href={`mailto:${env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL}`}
             className="text-primary flex items-center gap-2 hover:underline"
           >
             Contact Support

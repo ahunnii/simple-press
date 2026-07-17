@@ -37,6 +37,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -81,6 +82,8 @@ export function BusinessHoursSettings({ business }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       rows: initial.length
         ? initial
@@ -203,9 +206,12 @@ export function BusinessHoursSettings({ business }: Props) {
               <CardHeader>
                 <CardTitle>Business Hours</CardTitle>
                 <CardDescription>
-                  Set your opening hours by day. Each row can cover one or more
-                  days. Rows display on your storefront in the order listed
-                  below.
+                  Shown on your storefront contact page and embedded as
+                  structured data (schema.org openingHoursSpecification) so
+                  search engines can display your hours directly in search
+                  results. Each row can cover one or more days, but a day can
+                  only belong to one row — rows display on your storefront in
+                  the order listed below.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -304,6 +310,12 @@ export function BusinessHoursSettings({ business }: Props) {
                                 })}
                               </div>
                             </FormControl>
+                            <FormDescription>
+                              Select the days this row applies to. A day can
+                              only belong to one row — adding it here doesn&apos;t
+                              remove it from another row, so doing so will
+                              flag a conflict below when you save.
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -314,26 +326,36 @@ export function BusinessHoursSettings({ business }: Props) {
                         control={form.control}
                         name={`rows.${i}.closed`}
                         render={({ field: closedField }) => (
-                          <FormItem className="flex flex-row items-center gap-3">
-                            <FormControl>
-                              <Switch
-                                checked={closedField.value}
-                                onCheckedChange={(checked) => {
-                                  closedField.onChange(checked);
-                                  if (checked) {
-                                    form.setValue(`rows.${i}.open`, null, {
-                                      shouldDirty: true,
-                                    });
-                                    form.setValue(`rows.${i}.close`, null, {
-                                      shouldDirty: true,
-                                    });
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="!mt-0 cursor-pointer font-normal">
-                              Closed
-                            </FormLabel>
+                          <FormItem className="gap-1">
+                            <div className="flex flex-row items-center gap-3">
+                              <FormControl>
+                                <Switch
+                                  checked={closedField.value}
+                                  onCheckedChange={(checked) => {
+                                    closedField.onChange(checked);
+                                    if (checked) {
+                                      form.setValue(`rows.${i}.open`, null, {
+                                        shouldDirty: true,
+                                      });
+                                      form.setValue(`rows.${i}.close`, null, {
+                                        shouldDirty: true,
+                                      });
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="!mt-0 cursor-pointer font-normal">
+                                Closed
+                              </FormLabel>
+                            </div>
+                            <FormDescription>
+                              Clears the open/close times for this row.
+                              Closed days are labeled &quot;Closed&quot; in the
+                              storefront preview below, but are left out of
+                              the structured data search engines read — so
+                              they won&apos;t appear as explicitly closed in
+                              search results, just absent.
+                            </FormDescription>
                           </FormItem>
                         )}
                       />

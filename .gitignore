@@ -57,3 +57,15 @@ skills/
 /playwright/.cache/
 e2e/.seed-data.json
 .env.e2e.local
+
+
+# pnpm local store cache
+.pnpm-store/
+
+# pnpm virtual store directory (if customized)
+.pnpm/
+
+# Standard dependencies folder
+node_modules/
+# coop template fonts — Adobe-licensed woff2, NEVER commit (served from MinIO; see docs/templates/coop/upload-fonts.md)
+public/templates/coop/fonts/

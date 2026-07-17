@@ -342,7 +342,7 @@ export function ViiOrderConfirmation({
       >
         <div
           ref={ref}
-          className={`vii-reveal-group${visible ? "is-visible" : ""}`}
+          className={`vii-reveal-group${visible ? " is-visible" : ""}`}
           style={{
             maxWidth: 720,
             margin: "0 auto",

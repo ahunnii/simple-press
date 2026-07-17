@@ -7,6 +7,7 @@ import { getTemplate } from "../../_templates/registry";
 
 export const metadata = {
   title: "Address Book",
+  robots: { index: false, follow: false },
 };
 
 export default async function AddressBookPage() {

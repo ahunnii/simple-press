@@ -2,6 +2,7 @@ import type { DefaultLayoutTemplateProps } from "../../types";
 
 import { DarkTrendFooter } from "./dark-trend-footer";
 import { DarkTrendHeader } from "./dark-trend-header";
+import { DarkTrendRouteAnnouncer } from "./dark-trend-route-announcer";
 
 export function DarkTrendLayout({
   business,
@@ -13,6 +14,7 @@ export function DarkTrendLayout({
       <a href="#main-content" className="dt-skip-link">
         Skip to main content
       </a>
+      <DarkTrendRouteAnnouncer />
       <DarkTrendHeader business={business} />
       <main id="main-content">{children}</main>
       <DarkTrendFooter business={business} />

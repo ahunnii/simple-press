@@ -12,6 +12,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { useCart } from "~/providers/cart-context";
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 type Props = {
   product: Product;
@@ -54,6 +55,7 @@ export function HappyBambooProductCard({
     if (productStatus.disableCart) return;
     addItem({
       productId: product.id,
+      productSlug: product.slug,
       variantId: null,
       productName: product.name,
       variantName: null,
@@ -72,55 +74,68 @@ export function HappyBambooProductCard({
   return (
     <Card className="group border-border/80 bg-card hover:border-primary/25 h-full overflow-hidden rounded-xl border py-0 shadow-sm transition-all duration-300 hover:shadow-md">
       <div className="flex h-full flex-col sm:flex-row sm:items-stretch">
-        {/* Image */}
-        <Link
-          href={productHref}
-          className="bg-secondary relative aspect-5/3 w-full flex-none shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52 md:flex-1"
-          aria-label={`View ${product.name}`}
-          tabIndex={-1}
-        >
-          <Image
-            src={productImage}
-            alt={product.name ?? "Product"}
-            fill
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-            sizes="(max-width: 640px) 100vw, 208px"
+        {/* Image — wrapper div holds layout so the wishlist heart can sit as
+            a sibling of the link (no <button> inside <a>) */}
+        <div className="bg-secondary relative aspect-5/3 w-full flex-none shrink-0 overflow-hidden rounded-t-xl sm:aspect-auto sm:min-h-[160px] sm:w-44 sm:rounded-t-none sm:rounded-l-xl md:w-52 md:flex-1">
+          <Link
+            href={productHref}
+            className="absolute inset-0 block"
+            aria-label={`View ${product.name}`}
+            tabIndex={-1}
+          >
+            <Image
+              src={productImage}
+              alt={product.name ?? "Product"}
+              fill
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              sizes="(max-width: 640px) 100vw, 208px"
+            />
+            {productStatus.comingSoon && (
+              <Badge className="absolute top-2 left-2 bg-amber-500 text-white hover:bg-amber-600">
+                <Clock className="mr-1 h-3 w-3" />
+                Coming Soon
+              </Badge>
+            )}
+            {!productStatus.comingSoon &&
+              productStatus.isOnSale &&
+              productStatus.displayCompareAtPrice && (
+                <Badge className="absolute top-2 left-2 bg-black text-white hover:bg-black/90">
+                  {computeSavingsLabel(
+                    productStatus.displayPrice,
+                    productStatus.displayCompareAtPrice,
+                    saleBadgeFormat,
+                  )}
+                </Badge>
+              )}
+            {!productStatus.comingSoon &&
+              !productStatus.isOnSale &&
+              productStatus.isOutOfStock && (
+                <Badge
+                  variant="secondary"
+                  className="absolute top-2 left-2 bg-black/60 text-white"
+                >
+                  Out of Stock
+                </Badge>
+              )}
+            {!productStatus.comingSoon &&
+              !productStatus.isOnSale &&
+              productStatus.isBackorder && (
+                <Badge className="absolute top-2 left-2 bg-blue-500 text-white hover:bg-blue-600">
+                  Pre-order
+                </Badge>
+              )}
+          </Link>
+          <WishlistButton
+            item={{
+              productId: product.id,
+              name: product.name,
+              slug: product.slug,
+              price: productStatus.displayPrice,
+              imageUrl: product.images[0]?.url ?? null,
+            }}
+            className="absolute top-2 right-2 z-10"
           />
-          {productStatus.comingSoon && (
-            <Badge className="absolute top-2 left-2 bg-amber-500 text-white hover:bg-amber-600">
-              <Clock className="mr-1 h-3 w-3" />
-              Coming Soon
-            </Badge>
-          )}
-          {!productStatus.comingSoon &&
-            productStatus.isOnSale &&
-            productStatus.displayCompareAtPrice && (
-              <Badge className="absolute top-2 left-2 bg-black text-white hover:bg-black/90">
-                {computeSavingsLabel(
-                  productStatus.displayPrice,
-                  productStatus.displayCompareAtPrice,
-                  saleBadgeFormat,
-                )}
-              </Badge>
-            )}
-          {!productStatus.comingSoon &&
-            !productStatus.isOnSale &&
-            productStatus.isOutOfStock && (
-              <Badge
-                variant="secondary"
-                className="absolute top-2 left-2 bg-black/60 text-white"
-              >
-                Out of Stock
-              </Badge>
-            )}
-          {!productStatus.comingSoon &&
-            !productStatus.isOnSale &&
-            productStatus.isBackorder && (
-              <Badge className="absolute top-2 left-2 bg-blue-500 text-white hover:bg-blue-600">
-                Pre-order
-              </Badge>
-            )}
-        </Link>
+        </div>
 
         {/* Content */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-between gap-3 px-4 py-8">

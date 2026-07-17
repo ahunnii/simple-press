@@ -29,6 +29,9 @@ const navigationItemsSchema = z
   )
   .optional();
 
+/** Max payload size for `customFields` on any content save (~1MB of JSON). */
+const CUSTOM_FIELDS_MAX_BYTES = 1_000_000;
+
 export const siteContentSchema = z.object({
   templateId: z.string().optional(),
   // Hero Section
@@ -71,10 +74,29 @@ export const siteContentSchema = z.object({
 
   // Template-specific — shape varies per template, validated at consumption time
   customFields: z.any().optional(),
-});
 
-/** Max payload size for a preview draft (~1MB of JSON). */
-const PREVIEW_DRAFT_MAX_BYTES = 1_000_000;
+  // Set by the visual editor's Publish action only — tells the server the
+  // owner's durable draft (SiteContent.previewCustomFields) has just been
+  // superseded by this save and should be cleared. Every other caller
+  // (Branding, Navigation, legacy Template Fields editor) must omit this /
+  // leave it false so an unrelated save never silently destroys an
+  // in-progress /editor draft.
+  clearPreviewDraft: z.boolean().optional(),
+}).superRefine((val, ctx) => {
+  // Same cap `previewDraftSchema` enforces below — publish (updateSiteContent)
+  // must not accept an unbounded customFields payload either. `customFields`
+  // is `z.any()` above (shape varies per template), so this is the only place
+  // that can catch an oversized publish.
+  if (val.customFields === undefined) return;
+  const size = JSON.stringify(val.customFields).length;
+  if (size > CUSTOM_FIELDS_MAX_BYTES) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Custom fields exceed ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
+      path: ["customFields"],
+    });
+  }
+});
 
 export const previewDraftSchema = z
   .object({
@@ -82,10 +104,10 @@ export const previewDraftSchema = z
   })
   .superRefine((val, ctx) => {
     const size = JSON.stringify(val.customFields).length;
-    if (size > PREVIEW_DRAFT_MAX_BYTES) {
+    if (size > CUSTOM_FIELDS_MAX_BYTES) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Preview draft exceeds ${PREVIEW_DRAFT_MAX_BYTES.toLocaleString()} characters`,
+        message: `Preview draft exceeds ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
       });
     }
   });
@@ -108,4 +130,5 @@ export const pageSchema = z.object({
   template: z.enum(["default", "sidebar", "full-width"]).default("default"),
   image: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
   publishedAt: z.union([z.coerce.date(), z.null()]).optional(),
+  scheduledPublishAt: z.union([z.coerce.date(), z.null()]).optional(),
 });

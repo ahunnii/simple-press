@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { getBusinessUrl } from "~/lib/business-url";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
@@ -78,6 +80,15 @@ type Props = {
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
+
+/** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
+function toDatetimeLocalInput(value: Date | string | null | undefined): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 function parseStoredAdditionalFields(raw: unknown) {
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
@@ -186,11 +197,13 @@ function SocialPreviewCard({
   description,
   ogImageFile,
   existingOgImage,
+  siteHost,
 }: {
   title: string;
   description: string;
   ogImageFile: File | null | undefined;
   existingOgImage?: string;
+  siteHost: string;
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -222,7 +235,7 @@ function SocialPreviewCard({
       )}
       <div className="border-t p-3">
         <p className="text-xs tracking-wide text-gray-400 uppercase">
-          yourstore.com
+          {siteHost}
         </p>
         <p className="truncate text-sm font-medium text-gray-900">{title}</p>
         {description && (
@@ -247,6 +260,17 @@ export function ProductForm({
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
+
+  // Resolve the business's real storefront domain for the SEO/social
+  // previews (falls back to a clearly-generic placeholder while loading).
+  const { data: businessInfo } = api.business.simplifiedGet.useQuery();
+  const siteHost = businessInfo
+    ? getBusinessUrl({
+        subdomain: businessInfo.subdomain,
+        customDomain: businessInfo.customDomain,
+        domainStatus: businessInfo.domainStatus,
+      }).replace(/^https?:\/\//, "")
+    : "yourstore.com";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [variantManagerKey, setVariantManagerKey] = useState(0);
 
@@ -269,8 +293,15 @@ export function ProductForm({
   const [collectionSearch, setCollectionSearch] = useState("");
 
   // Variants state (kept separate due to complex nested structure and VariantManager component)
+  // Stored price/compareAtPrice of 0 (persisted by the old form's `?? priceInCents`
+  // fallback) means "inherit the base price" at runtime — normalize to undefined
+  // on load so the submit-time $0 guard doesn't block saving legacy products.
   const [variants, setVariants] = useState<FormVariant[]>(
-    (product?.variants as FormVariant[]) ?? [],
+    ((product?.variants as FormVariant[]) ?? []).map((v) => ({
+      ...v,
+      price: v.price === 0 ? undefined : v.price,
+      compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
+    })),
   );
 
   const storedAdditional = parseStoredAdditionalFields(
@@ -280,8 +311,11 @@ export function ProductForm({
   // Initialize form with react-hook-form
   const form = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       published: product?.published ?? true,
+      scheduledPublishAt: toDatetimeLocalInput(product?.scheduledPublishAt),
       name: product?.name ?? "",
       slug: product?.slug ?? "",
       description: product?.description ?? undefined,
@@ -396,7 +430,10 @@ export function ProductForm({
   const createProductMutation = api.product.create.useMutation({
     onError: (error) => {
       toast.dismiss();
-      toast.error(error.message ?? "Failed to create product");
+      applyTrpcErrorToForm(form, error, {
+        fieldMap: { slug: "slug" },
+        fallbackMessage: "Failed to create product",
+      });
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -411,7 +448,10 @@ export function ProductForm({
   const updateProductMutation = api.product.update.useMutation({
     onError: (error) => {
       toast.dismiss();
-      toast.error(error.message ?? "Failed to update product");
+      applyTrpcErrorToForm(form, error, {
+        fieldMap: { slug: "slug" },
+        fallbackMessage: "Failed to update product",
+      });
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -443,6 +483,18 @@ export function ProductForm({
   const onSubmit = async (data: ProductFormSchema) => {
     const createAnother = createAnotherRef.current;
     createAnotherRef.current = false;
+
+    // A variant price of exactly $0 is not a real override — the storefront
+    // treats 0 as "inherit the base product price" (a deliberate guard against
+    // accidental $0 charges). Reject it so the owner leaves the field blank to
+    // inherit, or enters a positive amount to override, rather than silently
+    // getting the base price when they typed 0.
+    if (variants.some((v) => v.price === 0 || v.compareAtPrice === 0)) {
+      toast.error(
+        "A variant price can't be $0. Leave it blank to inherit the base price, or enter an amount above $0.",
+      );
+      return;
+    }
 
     // Convert price to cents
     const priceInCents = Math.round(data.price * 100);
@@ -507,6 +559,17 @@ export function ProductForm({
       }
     }
 
+    // Variant images must point at a current gallery image. Remap any
+    // pending (blob:) URLs to their uploaded URL and drop references to
+    // images that were removed from the gallery.
+    const resolvedUrlByFormUrl = new Map<string, string>();
+    images.forEach((img, idx) => {
+      const resolved = resolvedImages[idx];
+      if (resolved) resolvedUrlByFormUrl.set(img.url, resolved.url);
+    });
+    const resolveVariantImageUrl = (url: string | null | undefined) =>
+      url ? (resolvedUrlByFormUrl.get(url) ?? null) : null;
+
     if (product) {
       // Update existing product
       imagesToSyncRef.current = resolvedImages;
@@ -519,6 +582,10 @@ export function ProductForm({
         price: priceInCents,
         compareAtPrice: compareAtPriceInCents,
         published: data.published,
+        scheduledPublishAt:
+          !data.published && data.scheduledPublishAt
+            ? new Date(data.scheduledPublishAt)
+            : null,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
@@ -533,7 +600,7 @@ export function ProductForm({
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
-          imageUrl: v.imageUrl ?? null,
+          imageUrl: resolveVariantImageUrl(v.imageUrl),
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -590,6 +657,10 @@ export function ProductForm({
         description: data.description ?? undefined,
         price: priceInCents,
         published: data.published,
+        scheduledPublishAt:
+          !data.published && data.scheduledPublishAt
+            ? new Date(data.scheduledPublishAt)
+            : null,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
@@ -604,7 +675,7 @@ export function ProductForm({
           compareAtPrice: v.compareAtPrice ?? undefined,
           inventoryQty: v.inventoryQty,
           options: v.options,
-          imageUrl: v.imageUrl ?? null,
+          imageUrl: resolveVariantImageUrl(v.imageUrl),
         })),
         additionalFields: {
           additionalInformation: data.additionalFields?.additionalInformation,
@@ -881,6 +952,33 @@ export function ProductForm({
                           placeholder="Describe your product..."
                           rows={4}
                         />
+
+                        {/* Schedule publish (only while unpublished) */}
+                        {!form.watch("published") && (
+                          <FormField
+                            control={form.control}
+                            name="scheduledPublishAt"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Schedule publish</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="datetime-local"
+                                    className="w-auto"
+                                    value={field.value ?? ""}
+                                    onChange={field.onChange}
+                                    onBlur={field.onBlur}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  {field.value
+                                    ? `Scheduled for ${new Date(field.value).toLocaleString()}`
+                                    : "Optional — publish this product automatically at a future date and time."}
+                                </FormDescription>
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </CardContent>
                     </Card>
 
@@ -1466,7 +1564,7 @@ export function ProductForm({
                             {seoPreviewTitle}
                           </div>
                           <div className="mb-1 text-xs text-green-700">
-                            yourstore.com/products/
+                            {siteHost}/products/
                             {form.watch("slug") || "product-slug"}
                           </div>
                           <div className="line-clamp-2 text-sm text-gray-600">
@@ -1493,6 +1591,7 @@ export function ProductForm({
                               ? undefined
                               : (product?.ogImage ?? undefined)
                           }
+                          siteHost={siteHost}
                         />
                       </CardContent>
                     </Card>

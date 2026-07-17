@@ -20,6 +20,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 const inputClass =
   "w-full rounded-md border border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 focus:border-[#215935] focus:ring-2 focus:ring-[#215935]/20 focus:outline-none px-3 py-2 text-sm";
@@ -128,56 +132,61 @@ export function PollenCheckoutForm({ business }: Props) {
         </section>
 
         {/* Discount Code */}
-        <section>
-          <h2 className={sectionHeadingClass}>Discount Code</h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={f.discountCodeInput}
-              onChange={(e) =>
-                f.setDiscountCodeInput(e.target.value.toUpperCase())
-              }
-              placeholder="SAVE20"
-              autoComplete="off"
-              aria-label="Discount code"
-              aria-invalid={!!f.discountFieldError}
-              aria-describedby={
-                f.discountFieldError ? "discount-error" : undefined
-              }
-              className={`${inputClass} flex-1`}
-            />
-            <button
-              type="button"
-              onClick={f.handleApplyDiscount}
-              disabled={f.isValidatingDiscount || f.items.length === 0}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              {f.isValidatingDiscount ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                "Apply"
-              )}
-            </button>
-          </div>
-          {f.discountFieldError && (
-            <p
-              id="discount-error"
-              role="alert"
-              className="mt-2 text-sm text-red-600"
-            >
-              {f.discountFieldError}
-            </p>
-          )}
-          {f.discountCodeLabel && f.discountAmount > 0 && (
-            <p role="status" className="mt-2 text-sm text-green-700">
-              Code{" "}
-              <span className="font-mono font-semibold">
-                {f.discountCodeLabel}
-              </span>{" "}
-              applied.
-            </p>
-          )}
-        </section>
+        {f.couponsEnabled && (
+          <section>
+            <h2 className={sectionHeadingClass}>Discount Code</h2>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={f.discountCodeInput}
+                onChange={(e) =>
+                  f.setDiscountCodeInput(e.target.value.toUpperCase())
+                }
+                placeholder="SAVE20"
+                autoComplete="off"
+                aria-label="Discount code"
+                aria-invalid={!!f.discountFieldError}
+                aria-describedby={
+                  f.discountFieldError ? "discount-error" : undefined
+                }
+                className={`${inputClass} flex-1`}
+              />
+              <button
+                type="button"
+                onClick={f.handleApplyDiscount}
+                disabled={f.isValidatingDiscount || f.items.length === 0}
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {f.isValidatingDiscount ? (
+                  <Loader2
+                    className="h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  "Apply"
+                )}
+              </button>
+            </div>
+            {f.discountFieldError && (
+              <p
+                id="discount-error"
+                role="alert"
+                className="mt-2 text-sm text-red-600"
+              >
+                {f.discountFieldError}
+              </p>
+            )}
+            {f.discountCodeLabel && f.discountAmount > 0 && (
+              <p role="status" className="mt-2 text-sm text-green-700">
+                Code{" "}
+                <span className="font-mono font-semibold">
+                  {f.discountCodeLabel}
+                </span>{" "}
+                applied.
+              </p>
+            )}
+          </section>
+        )}
 
         {/* Delivery Method */}
         {f.shippingConfig.offersInStorePickup && (
@@ -241,6 +250,10 @@ export function PollenCheckoutForm({ business }: Props) {
                 ? "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
+            <SavedAddressPicker
+              className="mb-4 text-gray-900"
+              onSelect={(address) => applySavedAddressToForm(f, address)}
+            />
             <div className="space-y-4">
               <div>
                 <label htmlFor="address-line1" className={labelClass}>

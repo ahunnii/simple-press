@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
-import type { Product } from "~/types";
 import {
   FadeIn,
   StaggerContainer,
@@ -76,10 +75,7 @@ export function DefaultProductRail({
         >
           {shown.map((product, index) => (
             <StaggerItem key={product.id}>
-              <DefaultProductCard
-                product={product as unknown as Product}
-                index={index}
-              />
+              <DefaultProductCard product={product} index={index} />
             </StaggerItem>
           ))}
         </StaggerContainer>

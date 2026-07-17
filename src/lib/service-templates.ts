@@ -24,6 +24,7 @@ import {
   serviceTwoFields,
 } from "~/app/(storefront)/_templates/_service-pages/service-two";
 import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/builders/services/service-pages/fields";
+import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 
@@ -98,7 +99,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   string,
   ServiceTemplateDef[]
 > = {
-  default: genericServiceTemplateDefs,
+  default: defaultServiceTemplateDefs,
   builders: buildersServiceTemplateDefs,
   pollen: pollenServiceTemplateDefs,
   vii: viiServiceTemplateDefs,
@@ -115,6 +116,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
   Object.fromEntries(
     [
       ...genericServiceTemplateDefs,
+      ...defaultServiceTemplateDefs,
       ...buildersServiceTemplateDefs,
       ...pollenServiceTemplateDefs,
       ...viiServiceTemplateDefs,

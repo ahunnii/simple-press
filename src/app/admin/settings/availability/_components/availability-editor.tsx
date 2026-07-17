@@ -80,9 +80,15 @@ export function AvailabilityEditor({
         <CardHeader>
           <CardTitle>Maintenance Mode</CardTitle>
           <CardDescription>
-            When enabled, visitors to your storefront will see a maintenance or
-            coming-soon page instead of your store. Your admin dashboard remains
-            fully accessible.
+            When enabled, every public storefront page — home, shop, product,
+            cart, checkout, etc. — is replaced by a single maintenance or
+            coming-soon screen for visitors. The page is also marked
+            &quot;noindex&quot; so search engines drop it from results while
+            it&apos;s active. Checkout is blocked server-side too, so no
+            orders can be placed even if a customer already has the checkout
+            page open. None of this affects you: your admin dashboard stays
+            fully accessible so you can keep working and turn this off when
+            you&apos;re ready.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -96,8 +102,9 @@ export function AvailabilityEditor({
                 Enable maintenance mode for my storefront
               </Label>
               <p className="text-muted-foreground mt-0.5 text-sm">
-                Only affects the public storefront — your admin dashboard stays
-                accessible.
+                Takes effect immediately for all visitors after you save —
+                there&apos;s no scheduling or preview delay. Only the public
+                storefront is affected; your admin dashboard stays accessible.
               </p>
             </div>
             <Switch
@@ -172,6 +179,11 @@ export function AvailabilityEditor({
                   rows={3}
                   disabled={updateMutation.isPending}
                 />
+                <p className="text-muted-foreground text-xs">
+                  Shown below the default heading and subtext on the
+                  maintenance/coming-soon screen. Leave blank to show just the
+                  default copy for the selected display type above.
+                </p>
                 <p className="text-muted-foreground text-right text-xs">
                   {charCount} / 500
                 </p>

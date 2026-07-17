@@ -35,6 +35,9 @@ export function ModernBlogPage({ pages, customFields }: Props) {
         subtitle={f["modern.blog.listing-tagline"]}
         excerpt={f["modern.blog.listing-intro"]}
         sectionAttrs={sectionGroupAttr("blog", "header")}
+        titleFieldKey="modern.blog.listing-title"
+        subtitleFieldKey="modern.blog.listing-tagline"
+        excerptFieldKey="modern.blog.listing-intro"
       >
         <section className="bg-background py-16">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -61,6 +64,9 @@ export function ModernBlogPage({ pages, customFields }: Props) {
       subtitle={f["modern.blog.listing-tagline"]}
       excerpt={f["modern.blog.listing-intro"]}
       sectionAttrs={sectionGroupAttr("blog", "header")}
+      titleFieldKey="modern.blog.listing-title"
+      subtitleFieldKey="modern.blog.listing-tagline"
+      excerptFieldKey="modern.blog.listing-intro"
     >
       <section className="bg-background py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

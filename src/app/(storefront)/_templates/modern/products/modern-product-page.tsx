@@ -11,6 +11,9 @@ import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
+import { ProductReviews } from "~/components/product-reviews";
+import { WriteReviewDialog } from "~/components/write-review-dialog";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { ProductDetailsAdditionalInfoTabs } from "~/app/(storefront)/_components/product-page/additional-info-tabs";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
@@ -29,6 +32,10 @@ export function ModernProductPage({
   } = useProduct(product);
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const { isEnabled } = useStorefrontFlags();
+  const reviewsEnabled = isEnabled("reviews");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   const { variantImageUrl } = useVariantImage();
   // Jump to the variant's image when the selected variant changes.
@@ -186,6 +193,31 @@ export function ModernProductPage({
           />
         </div>
       </div>
+
+      {/* Reviews — only mounts (and only fires review queries) when the
+          reviews feature flag is enabled for this business. */}
+      {reviewsEnabled && (
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="border-border border-t py-16">
+            <h2 className="text-foreground font-serif text-2xl md:text-3xl">
+              What customers are saying
+            </h2>
+            <div className="mt-10">
+              <ProductReviews
+                productId={product.id}
+                onWriteReviewClick={() => setReviewDialogOpen(true)}
+              />
+            </div>
+            <WriteReviewDialog
+              productId={product.id}
+              productName={product.name}
+              isOpen={reviewDialogOpen}
+              onClose={() => setReviewDialogOpen(false)}
+              onSuccess={() => setReviewDialogOpen(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Related Products */}
       <div className="mx-auto max-w-7xl px-6 lg:px-8">

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { buildUsedMediaIndex, normalizeUrl } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { generateGallerySlug } from "~/lib/slug";
 import {
@@ -154,6 +155,48 @@ export const galleryRouter = createTRPCRouter({
         where: { id, businessId },
         select: { images: { select: { url: true } } },
       });
+
+      // Usage-aware guard: block deletion if this gallery's images are
+      // referenced anywhere outside the gallery's own listing. TipTap
+      // `gallery` blocks and gallery-type template fields resolve to
+      // per-image usage entries here (see src/lib/media/usage.ts), so we
+      // scan each of this gallery's image URLs and ignore only the
+      // "galleryImage" entries (a gallery's own listing of its images, or —
+      // when a duplicated gallery reuses the same S3 URL — another
+      // gallery's own listing). Anything else means a blog post, page, or
+      // product description still embeds this gallery. Mirrors the
+      // usage check in the media router (src/server/api/routers/media.ts).
+      if (gallery && gallery.images.length > 0) {
+        const usageIndex = await buildUsedMediaIndex(businessId);
+        const externalUsages = new Map<
+          string,
+          { location: string; entityLabel?: string }
+        >();
+        for (const img of gallery.images) {
+          const usages = usageIndex.get(normalizeUrl(img.url)) ?? [];
+          for (const u of usages) {
+            if (u.entityType === "galleryImage") continue;
+            externalUsages.set(`${u.entityType}:${u.entityId ?? u.location}`, {
+              location: u.location,
+              entityLabel: u.entityLabel,
+            });
+          }
+        }
+
+        if (externalUsages.size > 0) {
+          const list = Array.from(externalUsages.values());
+          const summary = list
+            .slice(0, 5)
+            .map((u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""))
+            .join(", ");
+          const more = list.length > 5 ? ` and ${list.length - 5} more` : "";
+
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: `This gallery is embedded and cannot be deleted. Referenced by: ${summary}${more}.`,
+          });
+        }
+      }
 
       await ctx.db.gallery.delete({
         where: { id, businessId },

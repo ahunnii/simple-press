@@ -7,6 +7,7 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { parseHappyBambooBenefitsList } from "./happy-bamboo-benefits-data";
 
@@ -39,11 +40,17 @@ export function HappyBambooBenefitsSection({
           <span className="text-primary text-sm font-semibold tracking-wider uppercase">
             Happy Bamboo
           </span>
-          <h2 className="mt-2 font-serif text-4xl font-bold md:text-5xl">
+          <h2
+            className="mt-2 font-serif text-4xl font-bold md:text-5xl"
+            {...fieldAttr("happy-bamboo.homepage-benefits-heading")}
+          >
             {heading}
           </h2>
           {intro && (
-            <p className="text-muted-foreground mx-auto mt-4 max-w-2xl">
+            <p
+              className="text-muted-foreground mx-auto mt-4 max-w-2xl"
+              {...fieldAttr("happy-bamboo.homepage-benefits-intro")}
+            >
               {intro}
             </p>
           )}
@@ -76,6 +83,7 @@ export function HappyBambooBenefitsSection({
           <FadeIn
             delay={0.5}
             className="text-muted-foreground mt-12 text-center"
+            {...fieldAttr("happy-bamboo.homepage-benefits-closing")}
           >
             {closing}
           </FadeIn>

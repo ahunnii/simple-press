@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { Button } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {
@@ -88,9 +89,12 @@ export function HappyBambooAboutSection({
 
           <FadeIn direction="right" className="space-y-6">
             <span className="text-primary text-sm font-semibold tracking-wider uppercase">
-              Zaires Visions
+              About Us
             </span>
-            <h2 className="font-serif text-4xl leading-tight font-bold md:text-5xl">
+            <h2
+              className="font-serif text-4xl leading-tight font-bold md:text-5xl"
+              {...fieldAttr("happy-bamboo.homepage-about-heading")}
+            >
               {aboutHeading}
             </h2>
             {aboutDescription ? (
@@ -101,22 +105,19 @@ export function HappyBambooAboutSection({
             ) : (
               <div className="text-muted-foreground space-y-4 leading-relaxed">
                 <p>
-                  Zaires Visions is a purpose-driven company dedicated to
-                  creating healthier, more sustainable household products. Our
-                  company was built on a simple belief: everyday products should
-                  support both personal well-being and environmental
-                  responsibility. Through our brand Happy Bamboo, we provide
-                  eco-friendly alternatives to traditional paper products by
-                  using 100% bamboo pulp, a rapidly renewable resource that
-                  regenerates in just a few years without contributing to
-                  deforestation. Our products are designed to be chemical-free,
-                  biodegradable, and septic-safe, delivering a cleaner, more
-                  sustainable option for families, businesses, and institutions.
+                  Share your story here. Tell customers who you are, what you
+                  make, and the values behind your work — this is where a
+                  purpose-driven brand connects with the people it serves. Edit
+                  this section from your site editor to introduce your business
+                  in your own words.
                 </p>
               </div>
             )}
             <Button variant="outline" className="group" asChild>
-              <Link href={aboutButtonLink ?? "/about"}>
+              <Link
+                href={aboutButtonLink ?? "/about"}
+                {...fieldAttr("happy-bamboo.homepage-about-button-text")}
+              >
                 {aboutButtonText}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>

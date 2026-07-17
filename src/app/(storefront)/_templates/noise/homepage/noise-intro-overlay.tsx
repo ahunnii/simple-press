@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+
 // Default color palette when no gallery is configured
 const DEFAULT_TILES = [
   { c: "#3e3a35", t: "I" },
@@ -136,6 +138,7 @@ export function NoiseIntroOverlay({
         overflow: "hidden",
         pointerEvents: "auto",
       }}
+      {...sectionGroupAttr("homepage", "intro")}
     >
       {/* Left curtain half */}
       <div

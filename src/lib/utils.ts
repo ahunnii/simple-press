@@ -110,6 +110,10 @@ export function isSubdomainReserved(subdomain: string): boolean {
     "staging",
     "platform",
     "preview",
+    // middleware.ts treats `mystore.<platform-domain>` as the platform domain
+    // (a platform alias), so a tenant must never be able to claim it — otherwise
+    // that store would be shadowed and route to the platform instead.
+    "mystore",
   ];
   return reserved.includes(subdomain.toLowerCase());
 }

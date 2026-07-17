@@ -42,7 +42,7 @@ export function ViiBlogRelated({
         {/* Header row */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
           style={{
             display: "flex",
             alignItems: "flex-end",
@@ -81,7 +81,7 @@ export function ViiBlogRelated({
         {/* Post grid */}
         <div
           ref={gridRef}
-          className={`vii-reveal-group${gridVisible ? "is-visible" : ""}`}
+          className={`vii-reveal-group${gridVisible ? " is-visible" : ""}`}
           style={{
             display: "flex",
             flexWrap: "wrap",

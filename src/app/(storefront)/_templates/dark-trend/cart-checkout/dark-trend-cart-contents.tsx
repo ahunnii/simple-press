@@ -67,7 +67,7 @@ export function DarkTrendCartContents({ business: _business }: Props) {
         <p className="mb-8 text-white/70">Add some products to get started!</p>
         <Button
           asChild
-          className="bg-violet-600 text-white hover:bg-violet-700"
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
           <Link href="/shop">Shop Products</Link>
         </Button>
@@ -265,10 +265,10 @@ export function DarkTrendCartContents({ business: _business }: Props) {
             </div>
           </div>
 
-          {/* S-11: violet-600 */}
+          {/* S-11: themed via bg-primary to respect store primary color */}
           <Button
             onClick={handleCheckout}
-            className="w-full bg-violet-600 py-6 text-base font-semibold text-white hover:bg-violet-700"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full py-6 text-base font-semibold"
             size="lg"
           >
             Proceed to checkout

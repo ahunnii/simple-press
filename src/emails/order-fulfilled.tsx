@@ -8,11 +8,14 @@ type OrderFulfilledEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   businessUrl: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function OrderFulfilledEmail({
   orderNumber,
   customerName,
+  introText,
   businessName,
   businessLogoUrl,
   businessUrl,
@@ -24,6 +27,12 @@ export default function OrderFulfilledEmail({
       logoUrl={businessLogoUrl}
     >
       <Text style={heading}>Your order is on the way</Text>
+
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
 
       <Text style={paragraph}>Hi {customerName},</Text>
 

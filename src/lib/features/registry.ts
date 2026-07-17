@@ -102,6 +102,26 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     dependsOn: ["orders", "cart"],
   },
+  wishlist: {
+    key: "wishlist",
+    label: "Wishlist",
+    description:
+      "Let shoppers save products to a wishlist (heart icons on product cards and a wishlist page)",
+    category: "ecommerce",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+    dependsOn: ["products"],
+  },
+  backInStock: {
+    key: "backInStock",
+    label: "Back-in-Stock Notifications",
+    description:
+      "Show a 'notify me' form on out-of-stock products and email shoppers when items are restocked",
+    category: "ecommerce",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+    dependsOn: ["products"],
+  },
 
   // ─── CONTENT ────────────────────────────────────────────────────────────────
   pages: {
@@ -168,6 +188,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["store-transfer"],
   },
+  wordpressExport: {
+    key: "wordpressExport",
+    label: "Export to WordPress",
+    description:
+      "Download your content, products, and records in WordPress/WooCommerce import formats",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["wordpress-export"],
+  },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
   customerAccounts: {
@@ -205,7 +235,7 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     description: "Allow customers to review products",
     category: "marketing",
     enabledByDefault: false,
-    ownerCanToggle: false,
+    ownerCanToggle: true,
     dependsOn: ["products", "customerAccounts"],
     hidesNav: ["reviews"],
   },
@@ -233,6 +263,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "marketing",
     enabledByDefault: false,
     ownerCanToggle: true,
+  },
+  emailMarketing: {
+    key: "emailMarketing",
+    label: "Email Marketing",
+    description:
+      "Send one-off announcement and newsletter emails to customers who opted in to marketing",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["marketing"],
   },
 };
 

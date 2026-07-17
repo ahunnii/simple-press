@@ -6,12 +6,14 @@ import { Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type Props = {
   heading: string;
@@ -44,6 +46,9 @@ export function ViiContactForm({ heading }: Props) {
 
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
+
+  const { isEnabled } = useStorefrontFlags();
+  if (!isEnabled("contactForm")) return null;
 
   if (isSuccess) {
     return (
@@ -115,6 +120,7 @@ export function ViiContactForm({ heading }: Props) {
     <div className="vii-contact-form">
       <h2
         className="mb-8"
+        {...fieldAttr("vii.contact.form-heading")}
         style={{
           fontFamily: "var(--font-serif)",
           fontWeight: 400,

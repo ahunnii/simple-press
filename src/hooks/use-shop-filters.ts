@@ -64,7 +64,9 @@ export function useShopFilters(
   const [localPriceMax, setLocalPriceMax] = useState<number>(
     () => priceMax ?? maxPrice,
   );
-  const [search, setSearch] = useState("");
+  const [search, setSearchRaw] = useState<string>(
+    () => searchParams.get("q") ?? "",
+  );
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(
     null,
   );
@@ -138,14 +140,20 @@ export function useShopFilters(
     updateParams({ in_stock: checked ? "1" : null, page: null });
   }
 
+  function handleSearch(value: string) {
+    setSearchRaw(value);
+    updateParams({ q: value || null, page: null });
+  }
+
   function clearFilters() {
-    setSearch("");
+    setSearchRaw("");
     setActiveCollectionId(null);
     updateParams({
       price_max: null,
       in_stock: null,
       sort_by: null,
       page: null,
+      q: null,
     });
   }
 
@@ -187,7 +195,8 @@ export function useShopFilters(
       case "newest":
         list.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            new Date(b.createdAt ?? 0).getTime() -
+            new Date(a.createdAt ?? 0).getTime(),
         );
         break;
     }
@@ -233,7 +242,7 @@ export function useShopFilters(
 
     // Search
     search,
-    setSearch,
+    setSearch: handleSearch,
 
     // Collection filter
     activeCollectionId,

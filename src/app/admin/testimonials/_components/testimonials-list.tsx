@@ -13,6 +13,7 @@ import {
   ImageIcon,
   Loader2,
   Mail,
+  MessageSquare,
   MoreVertical,
   Pencil,
   RefreshCw,
@@ -57,6 +58,7 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
+import { AdminEmpty } from "../../_components/admin-empty";
 import { ManageTestimonialImagesDialog } from "./manage-testimonial-images-dialog";
 import { OwnerTestimonialDialog } from "./owner-testimonial-dialog";
 
@@ -741,13 +743,6 @@ export function TestimonialsList({
     );
   };
 
-  const emptyState = (message: string) => (
-    <Card>
-      <CardContent className="text-muted-foreground py-12 text-center">
-        <p>{message}</p>
-      </CardContent>
-    </Card>
-  );
 
   // ── Individual invite card ─────────────────────────────────────────────────
   const renderInvite = (invite: Invite) => {
@@ -876,11 +871,12 @@ export function TestimonialsList({
         {filterBar(filtered.length)}
         {bulkActionBar()}
         {slice.length === 0 ? (
-          emptyState(
-            search || sourceFilter !== "all"
-              ? "No testimonials match your filters"
-              : emptyMessage,
-          )
+          <AdminEmpty
+            icon={MessageSquare}
+            title={search || sourceFilter !== "all" ? "No matching testimonials" : "No testimonials"}
+            description={search || sourceFilter !== "all" ? "No testimonials match your filters." : emptyMessage}
+            filtered={!!(search || sourceFilter !== "all")}
+          />
         ) : (
           <>
             {selectAllRow(pageIds)}
@@ -989,9 +985,16 @@ export function TestimonialsList({
               </TabsTrigger>
             </TabsList>
             <div className="space-y-4">
-              {filteredInvites.length === 0
-                ? emptyState(inviteEmptyMessage)
-                : filteredInvites.map(renderInvite)}
+              {filteredInvites.length === 0 ? (
+                <AdminEmpty
+                  icon={Mail}
+                  title={inviteFilter === "all" ? "No invites sent yet" : "No invites"}
+                  description={inviteEmptyMessage}
+                  filtered={inviteFilter !== "all"}
+                />
+              ) : (
+                filteredInvites.map(renderInvite)
+              )}
             </div>
           </Tabs>
         </TabsContent>

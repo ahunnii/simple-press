@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
 import { getBusinessUrl } from "~/lib/business-url";
+import { businessHostFilter } from "~/lib/domain-utils";
 import { formatPrice } from "~/lib/prices";
 import { db } from "~/server/db";
 
@@ -12,15 +13,29 @@ import { db } from "~/server/db";
  *
  * Returns published products only, each with name, price (cents + formatted),
  * description, the storefront URL where it can be purchased, and an image URL.
+ *
+ * Paginated: `?limit=` (default 50, max 100) and `?offset=` (default 0) cap the
+ * payload so a large catalog can't be dumped in a single unbounded response.
  */
-export async function GET() {
+export async function GET(request: Request) {
   const headersList = await headers();
   const hostname = headersList.get("host") ?? "";
-  const domain = hostname.split(":")[0]; // strip port
+
+  const { searchParams } = new URL(request.url);
+  const DEFAULT_LIMIT = 50;
+  const MAX_LIMIT = 100;
+  const parsedLimit = Number.parseInt(searchParams.get("limit") ?? "", 10);
+  const limit =
+    Number.isFinite(parsedLimit) && parsedLimit > 0
+      ? Math.min(parsedLimit, MAX_LIMIT)
+      : DEFAULT_LIMIT;
+  const parsedOffset = Number.parseInt(searchParams.get("offset") ?? "", 10);
+  const offset =
+    Number.isFinite(parsedOffset) && parsedOffset > 0 ? parsedOffset : 0;
 
   const business = await db.business.findFirst({
     where: {
-      OR: [{ customDomain: domain }, { subdomain: domain?.split(".")[0] }],
+      ...businessHostFilter(hostname),
       status: "active",
     },
     select: {
@@ -28,9 +43,14 @@ export async function GET() {
       subdomain: true,
       customDomain: true,
       domainStatus: true,
+      _count: {
+        select: { products: { where: { published: true } } },
+      },
       products: {
         where: { published: true },
         orderBy: { createdAt: "desc" },
+        take: limit,
+        skip: offset,
         select: {
           id: true,
           name: true,
@@ -69,8 +89,19 @@ export async function GET() {
     imageUrl: product.images[0]?.url ?? null,
   }));
 
+  const total = business._count.products;
+
   return Response.json(
-    { business: business.name, products },
+    {
+      business: business.name,
+      products,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + products.length < total,
+      },
+    },
     {
       headers: {
         "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",

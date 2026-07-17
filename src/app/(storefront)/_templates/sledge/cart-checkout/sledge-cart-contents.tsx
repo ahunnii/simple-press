@@ -19,7 +19,7 @@ import {
   SledgeEmptyState,
   SledgePageHeader,
 } from "../shared/sledge-page-layout";
-import { NoiseCartItem } from "./noise-cart-item";
+import { SledgeCartItem } from "./sledge-cart-item";
 import { SledgeCartSummary } from "./sledge-cart-summary";
 
 type Props = {
@@ -126,7 +126,7 @@ export function SledgeCartContents({ business }: Props) {
             </div>
 
             {items.map((item) => (
-              <NoiseCartItem
+              <SledgeCartItem
                 key={`${item.productId}-${item.variantId ?? "base"}`}
                 item={item}
               />

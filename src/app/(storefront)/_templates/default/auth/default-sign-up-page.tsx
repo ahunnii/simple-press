@@ -12,28 +12,34 @@ export const metadata = {
   title: "Sign Up",
 };
 
-export function DefaultSignUpPage({
-  business,
-}: {
-  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
-}) {
+type Props = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]> | null;
+  redirectTo?: string;
+};
+
+/**
+ * Used at both store subdomains (business != null) and the platform root
+ * (business == null — e.g. an invited team member creating their account).
+ */
+export function DefaultSignUpPage({ business, redirectTo }: Props) {
+  const isPlatformRoot = !business;
   const themeSpecificFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
 
   const signUpImageUrl =
     themeSpecificFields?.[
-      `${business.templateId}.global.authentication-image`
+      `${business?.templateId}.global.authentication-image`
     ]?.trim() ?? "/placeholder.svg";
 
   const logoSizeWidth =
     themeSpecificFields?.[
-      `${business.templateId}.global.logo-size-width`
+      `${business?.templateId}.global.logo-size-width`
     ]?.trim() ?? "80";
 
   const logoSizeHeight =
     themeSpecificFields?.[
-      `${business.templateId}.global.logo-size-height`
+      `${business?.templateId}.global.logo-size-height`
     ]?.trim() ?? "80";
 
   // const imageOverlayColor =
@@ -63,7 +69,7 @@ export function DefaultSignUpPage({
             href="/"
             className="text-primary-foreground flex w-fit items-center gap-2 transition-opacity hover:opacity-80"
           >
-            {business.siteContent?.logoUrl ? (
+            {business?.siteContent?.logoUrl ? (
               <Image
                 src={business.siteContent.logoUrl}
                 alt={business.name}
@@ -72,14 +78,16 @@ export function DefaultSignUpPage({
                 className="rounded-full"
               />
             ) : (
-              <span className="text-xl font-bold">{business.name}</span>
+              <span className="text-xl font-bold">
+                {isPlatformRoot ? "SimplePress" : business.name}
+              </span>
             )}
           </Link>
 
           {/* Headline */}
           <div className="max-w-md">
             <h1 className="mb-4 text-4xl font-bold text-balance">
-              Join {business.name}
+              {isPlatformRoot ? "Create your account" : `Join ${business.name}`}
             </h1>
             <p className="text-primary-foreground/80 mb-8 text-lg">
               Create your SimplePress account to track orders, engage with the
@@ -108,26 +116,32 @@ export function DefaultSignUpPage({
             <div className="bg-primary-foreground/10 border-primary-foreground/20 mt-8 rounded-lg border p-4">
               <p className="text-primary-foreground/90 text-sm leading-relaxed">
                 <span className="font-semibold">One account, all stores.</span>{" "}
-                You&apos;re creating a SimplePress platform account — not just
-                an account for {business.name}. If you already shop at another
-                SimplePress store, you already have an account. Just sign in.
+                You&apos;re creating a SimplePress platform account
+                {isPlatformRoot ? "" : ` — not just an account for ${business.name}`}
+                . If you already shop at another SimplePress store, you already
+                have an account. Just sign in.
               </p>
             </div>
           </div>
 
           {/* Footer */}
           <div className="text-primary-foreground/60 text-sm">
-            © 2026 {business.name}. All rights reserved.
-            <span className="text-muted-foreground mx-2">|</span>
-            Site created with{" "}
-            <Link
-              href="https://simplepress.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground underline"
-            >
-              SimplePress<span className="sr-only"> (opens in new tab)</span>
-            </Link>
+            © 2026 {isPlatformRoot ? "SimplePress" : business.name}. All rights
+            reserved.
+            {!isPlatformRoot && (
+              <>
+                <span className="text-muted-foreground mx-2">|</span>
+                Site created with{" "}
+                <Link
+                  href="https://simplepress.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground underline"
+                >
+                  SimplePress<span className="sr-only"> (opens in new tab)</span>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -150,7 +164,7 @@ export function DefaultSignUpPage({
             {/* Mobile brand */}
             <div className="flex flex-col items-center gap-1 lg:hidden">
               <span className="text-foreground text-xl font-bold">
-                {business.name}
+                {isPlatformRoot ? "SimplePress" : business.name}
               </span>
             </div>
 
@@ -160,9 +174,18 @@ export function DefaultSignUpPage({
              * - Tells user this is a SimplePress account
              * - Prevents "I got hacked" confusion if they already have one
              */}
-            <DefaultPlatformBadge businessName={business.name} view="sign-up" />
+            {!isPlatformRoot && (
+              <DefaultPlatformBadge
+                businessName={business.name}
+                view="sign-up"
+              />
+            )}
 
-            <AuthView view="SIGN_UP" classNames={{ base: "max-w-full" }} />
+            <AuthView
+              view="SIGN_UP"
+              redirectTo={redirectTo}
+              classNames={{ base: "max-w-full" }}
+            />
 
             <div className="mt-4 hidden text-left lg:block">
               <Link

@@ -34,23 +34,13 @@ const blogPostData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "Shop the Collection.",
   },
-  {
-    key: "sledge.blog.post-shop-cta-subheading",
-    label: "Blog Post Shop CTA Subheading",
-    description: "Smaller line below the shop CTA heading.",
-    type: "text",
-    page: "blog",
-    group: "blog.post",
-    gridColumn: "col-span-1",
-    defaultValue: "Discover one-of-a-kind wearable art.",
-  },
 ];
 
-export const noiseBlogData = [...blogListingData, ...blogPostData];
+export const sledgeBlogData = [...blogListingData, ...blogPostData];
 
 // ─── Field Groups ─────────────────────────────────────────────────────────────
 
-export const noiseBlogFieldGroups: TemplateFieldGroup[] = [
+export const sledgeBlogFieldGroups: TemplateFieldGroup[] = [
   {
     id: "blog.listing",
     title: "Blog Page",

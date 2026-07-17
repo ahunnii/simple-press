@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Edit, MoreVertical, Plus, Trash } from "lucide-react";
+import { Edit, MoreVertical, Plus, Trash, Package } from "lucide-react";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -19,6 +19,8 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+
+import { AdminEmpty } from "../../_components/admin-empty";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,20 +66,17 @@ export function PoolsTable({ pools }: Props) {
       </div>
 
       {pools.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No base units yet.</p>
-          <p className="text-muted-foreground/70 mt-1 text-sm">
-            Create your first base unit to start tracking shared inventory.
-          </p>
-          <Button
-            className="mt-4"
-            size="sm"
-            onClick={() => setCreateOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Base Unit
-          </Button>
-        </Card>
+        <AdminEmpty
+          icon={Package}
+          title="No base units yet"
+          description="Create your first base unit to start tracking shared inventory."
+          action={
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Base Unit
+            </Button>
+          }
+        />
       ) : (
         <Card>
           <div className="overflow-x-auto">

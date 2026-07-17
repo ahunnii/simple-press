@@ -48,9 +48,9 @@ const homepageData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "Handcrafted goods made with care, sourced from people and places we trust. Take a look around and see what catches your eye.",
     placeholder:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "Handcrafted goods made with care, sourced from people and places we trust.",
   },
   {
     key: "pollen.homepage.hero-button-text",
@@ -239,23 +239,23 @@ export const pollenHomepageFieldGroups: TemplateFieldGroup[] = [
 export const DEFAULT_POLLEN_HOMEPAGE_SERVICES = [
   {
     icon: Flower2,
-    title: "Service One",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    title: "Custom Orders",
+    description: "One-of-a-kind pieces made to your specifications.",
   },
   {
     icon: HandHelping,
-    title: "Service Two",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    title: "Personal Consultations",
+    description: "One-on-one guidance to help you find the right fit.",
   },
   {
     icon: MapIcon,
-    title: "Service Three",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    title: "Local Delivery",
+    description: "Fast, friendly delivery right to your door.",
   },
   {
     icon: BookOpen,
-    title: "Service Four",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    title: "Workshops & Classes",
+    description: "Hands-on sessions to learn the craft yourself.",
   },
 ];
 

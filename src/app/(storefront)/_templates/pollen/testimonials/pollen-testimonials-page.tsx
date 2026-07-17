@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultTestimonialsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -26,6 +26,8 @@ export async function PollenTestimonialsPage({
       business={business}
       title={f["pollen.testimonials.section-heading"]}
       subtitle={f["pollen.testimonials.section-label"]}
+      titleFieldKey="pollen.testimonials.section-heading"
+      subtitleFieldKey="pollen.testimonials.section-label"
       sectionAttrs={sectionGroupAttr("testimonials", "page")}
     >
       <PollenTestimonialsWall testimonials={testimonials} />
@@ -34,15 +36,22 @@ export async function PollenTestimonialsPage({
         {...sectionGroupAttr("testimonials", "page")}
       >
         <div className="mx-auto max-w-2xl px-4 text-center">
-          <h2 className="text-2xl font-bold text-[#2a351f]">
+          <h2
+            className="text-2xl font-bold text-[#2a351f]"
+            {...fieldAttr("pollen.testimonials.call-to-action-header")}
+          >
             {f["pollen.testimonials.call-to-action-header"]}
           </h2>
-          <p className="mt-2 text-[#4c566a]">
+          <p
+            className="mt-2 text-[#4c566a]"
+            {...fieldAttr("pollen.testimonials.call-to-action-text")}
+          >
             {f["pollen.testimonials.call-to-action-text"]}
           </p>
           <Link
             href="/testimonials/submit"
             className="mt-6 inline-block rounded-full bg-[#215935] px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            {...fieldAttr("pollen.testimonials.call-to-action-button-text")}
           >
             {f["pollen.testimonials.call-to-action-button-text"]}
           </Link>

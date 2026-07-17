@@ -23,6 +23,23 @@ export const domainRouter = createTRPCRouter({
         });
       }
 
+      // Reject the platform's own domain and any of its subdomains
+      // (e.g. `*.simplepress.co`). A tenant claiming these as a custom domain
+      // would let them hijack platform/other-tenant traffic during routing.
+      const platformDomain = env.NEXT_PUBLIC_PLATFORM_DOMAIN.trim().toLowerCase();
+      const normalizedDomain = domain.trim().toLowerCase();
+      if (
+        platformDomain &&
+        (normalizedDomain === platformDomain ||
+          normalizedDomain.endsWith(`.${platformDomain}`))
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "That domain is reserved by the platform and cannot be used as a custom domain",
+        });
+      }
+
       // Check if domain is already taken
       const existingDomain = await ctx.db.business.findFirst({
         where: {
@@ -106,6 +123,21 @@ export const domainRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "VPS IP not configured",
+        });
+      }
+
+      // Only verify the domain the business actually configured. Without this a
+      // caller could pass an arbitrary domain that happens to point at our VPS
+      // (e.g. another tenant's) and flip THIS business to ACTIVE.
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: { customDomain: true },
+      });
+
+      if (!business?.customDomain || business.customDomain !== domain) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Domain does not match the configured custom domain",
         });
       }
 

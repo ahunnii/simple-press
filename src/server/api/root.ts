@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 import { analyticsRouter } from "./routers/analytics";
+import { backInStockRouter } from "./routers/back-in-stock";
 import { baseInventoryUnitRouter } from "./routers/base-inventory-unit";
 import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
@@ -12,17 +13,21 @@ import { domainRouter } from "./routers/domain";
 import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
 import { faqRouter } from "./routers/faq";
-import { featuresRouter } from "./routers/featues";
+import { featuresRouter } from "./routers/features";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
+import { marketingRouter } from "./routers/marketing";
 import { mediaRouter } from "./routers/media";
 import { orderRouter } from "./routers/order";
+import { orderLookupRouter } from "./routers/order-lookup";
 import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
 import { reviewRouter } from "./routers/review";
+import { searchRouter } from "./routers/search";
 import { serviceRouter } from "./routers/service";
 import { shippingRouter } from "./routers/shipping";
+import { teamRouter } from "./routers/team";
 import { testimonialRouter } from "./routers/testimonials";
 import { uploadRouter } from "./routers/upload";
 
@@ -33,6 +38,7 @@ import { uploadRouter } from "./routers/upload";
  */
 export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
+  backInStock: backInStockRouter,
   baseInventoryUnit: baseInventoryUnitRouter,
   domain: domainRouter,
   discount: discountRouter,
@@ -41,6 +47,7 @@ export const appRouter = createTRPCRouter({
   business: businessRouter,
   product: productRouter,
   order: orderRouter,
+  orderLookup: orderLookupRouter,
   customer: customerRouter,
   inventory: inventoryRouter,
   collections: collectionsRouter,
@@ -61,8 +68,11 @@ export const appRouter = createTRPCRouter({
 
   external: externalRouter,
   faq: faqRouter,
+  marketing: marketingRouter,
+  team: teamRouter,
 
   upload: uploadRouter,
+  search: searchRouter,
 });
 
 // export type definition of API

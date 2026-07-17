@@ -121,7 +121,33 @@ export function coerceEmbedDisplayMode(
 // Original exports (unchanged below)
 // ---------------------------------------------------------------------------
 
-/** Sandbox attribute for all embedded iframes. */
+/**
+ * Sandbox attribute for all embedded iframes (owner-supplied, arbitrary
+ * third-party HTTPS URLs — video players, maps, booking widgets, forms, etc.
+ * via EmbedFrame / the `iframe` template field type).
+ *
+ * SECURITY NOTE — accepted risk, intentionally NOT changed here:
+ * `allow-scripts` + `allow-same-origin` together are a well-known sandbox
+ * weakening: if the framed document's origin is the SAME as the origin it's
+ * embedded on, `allow-same-origin` stops the browser from forcing that frame
+ * into a unique opaque origin, so the "sandbox" no longer isolates it from
+ * that origin's cookies/localStorage/sessionStorage. Concretely here, that
+ * would matter if an owner points an embed at a URL on their own subdomain
+ * (or the platform domain) rather than a genuine third-party site.
+ *
+ * We keep both flags anyway because dropping `allow-same-origin` breaks a
+ * large share of real-world embeds this feature exists to support — Google
+ * Maps, Calendly, Typeform, booking widgets like Vagaro, and other
+ * third-party tools commonly read their own cookies/localStorage (auth,
+ * CSRF tokens, saved form state, booking session) and simply render blank or
+ * fail to load without it. `sanitizeEmbedSrc` still restricts embeds to
+ * well-formed absolute HTTPS URLs (no `javascript:`/`data:`/relative), which
+ * covers the common injection vectors; it does not currently block a src
+ * that happens to share an origin with the embedding page. If that narrower
+ * gap needs closing, prefer rejecting same-origin/platform-domain embed URLs
+ * at validation time (`sanitizeEmbedSrc` / the `iframe` field parser) over
+ * removing `allow-same-origin` here.
+ */
 export const EMBED_SANDBOX =
   "allow-scripts allow-same-origin allow-forms allow-popups";
 

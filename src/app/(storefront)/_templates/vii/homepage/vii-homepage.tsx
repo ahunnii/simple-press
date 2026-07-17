@@ -1,6 +1,8 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolvePopup } from "~/lib/site-banner/resolve";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
@@ -76,10 +78,6 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     "vii.homepage.band-image",
     "vii.homepage.band-heading",
     "vii.homepage.band-text",
-    // Inside the Studio (Story)
-    "vii.homepage.story-heading",
-    "vii.homepage.story-heading-accent",
-    "vii.homepage.story-intro",
     // Product rail
     "vii.homepage.product-rail-overline",
     "vii.homepage.product-rail-heading",
@@ -218,7 +216,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         />
 
         {/* 8. Testimonial Quote */}
-        {testimonialQuote ? (
+        {testimonialQuote &&
+        isSectionVisible(customFields, "vii", "homepage.testimonial") ? (
           <ViiTestimonialQuote
             quoteImage={f["vii.homepage.testimonial-image"] ?? undefined}
             quoteText={testimonialQuote}
@@ -227,31 +226,40 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         ) : null}
 
         {/* 9. Brands We Carry */}
-        <ViiBrandsSection
-          marquee
-          overline={f["vii.homepage.brands-overline"] ?? ""}
-          heading={f["vii.homepage.brands-heading"] ?? ""}
-          logos={brandLogos}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.brands") && (
+          <ViiBrandsSection
+            marquee
+            overline={f["vii.homepage.brands-overline"] ?? ""}
+            heading={f["vii.homepage.brands-heading"] ?? ""}
+            logos={brandLogos}
+            sectionAttrs={sectionGroupAttr("homepage", "brands")}
+            overlineFieldKey="vii.homepage.brands-overline"
+            headingFieldKey="vii.homepage.brands-heading"
+          />
+        )}
 
         {/* 10. Blog */}
-        <ViiBlogSection
-          heading={f["vii.homepage.blog-heading"] ?? ""}
-          headingAccent={f["vii.homepage.blog-heading-accent"] ?? ""}
-          intro={f["vii.homepage.blog-intro"] ?? ""}
-          ctaText={f["vii.homepage.blog-cta-text"] ?? "Read the blog"}
-          ctaHref={f["vii.homepage.blog-cta-link"] ?? "/blog"}
-          posts={blogPosts}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.blog") && (
+          <ViiBlogSection
+            heading={f["vii.homepage.blog-heading"] ?? ""}
+            headingAccent={f["vii.homepage.blog-heading-accent"] ?? ""}
+            intro={f["vii.homepage.blog-intro"] ?? ""}
+            ctaText={f["vii.homepage.blog-cta-text"] ?? "Read the blog"}
+            ctaHref={f["vii.homepage.blog-cta-link"] ?? "/blog"}
+            posts={blogPosts}
+          />
+        )}
 
         {/* 11. Instagram Strip */}
-        <ViiInstagramStrip
-          handle={f["vii.homepage.instagram-handle"] ?? ""}
-          images={instagramImages}
-          ctaText={
-            f["vii.homepage.instagram-cta-text"] ?? "Follow on Instagram"
-          }
-        />
+        {isSectionVisible(customFields, "vii", "homepage.instagram") && (
+          <ViiInstagramStrip
+            handle={f["vii.homepage.instagram-handle"] ?? ""}
+            images={instagramImages}
+            ctaText={
+              f["vii.homepage.instagram-cta-text"] ?? "Follow on Instagram"
+            }
+          />
+        )}
 
         {/* 12. Rooted in Detroit */}
         <ViiDetroitSection
@@ -266,18 +274,25 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         />
 
         {/* 13. Contact CTA */}
-        <ViiContactCtaSection
-          contactImage={f["vii.homepage.contact-image"] ?? undefined}
-          heading={f["vii.homepage.contact-heading"] ?? ""}
-          subheading={f["vii.homepage.contact-subheading"] ?? ""}
-          body={f["vii.homepage.contact-body"] ?? ""}
-          phone={homepage?.phoneNumber ?? ""}
-          email={homepage?.supportEmail ?? ""}
-          buttonLabel={f["vii.homepage.contact-cta-text"] ?? ""}
-          buttonHref={f["vii.homepage.contact-cta-link"] ?? ""}
-          showPhone={f["vii.homepage.contact-show-phone"] !== "false"}
-          showEmail={f["vii.homepage.contact-show-email"] !== "false"}
-        />
+        {isSectionVisible(customFields, "vii", "homepage.contact") && (
+          <ViiContactCtaSection
+            contactImage={f["vii.homepage.contact-image"] ?? undefined}
+            heading={f["vii.homepage.contact-heading"] ?? ""}
+            subheading={f["vii.homepage.contact-subheading"] ?? ""}
+            body={f["vii.homepage.contact-body"] ?? ""}
+            phone={homepage?.phoneNumber ?? ""}
+            email={homepage?.supportEmail ?? ""}
+            buttonLabel={f["vii.homepage.contact-cta-text"] ?? ""}
+            buttonHref={f["vii.homepage.contact-cta-link"] ?? ""}
+            showPhone={f["vii.homepage.contact-show-phone"] !== "false"}
+            showEmail={f["vii.homepage.contact-show-email"] !== "false"}
+            sectionAttrs={sectionGroupAttr("homepage", "contact")}
+            headingFieldKey="vii.homepage.contact-heading"
+            subheadingFieldKey="vii.homepage.contact-subheading"
+            bodyFieldKey="vii.homepage.contact-body"
+            buttonLabelFieldKey="vii.homepage.contact-cta-text"
+          />
+        )}
       </PageTransition>
     </HydrateClient>
   );

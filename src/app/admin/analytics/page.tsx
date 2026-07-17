@@ -1,4 +1,7 @@
+import { AlertTriangle } from "lucide-react";
+
 import { api } from "~/trpc/server";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
 import { TrailHeader } from "../_components/trail-header";
 import { AnalyticsContent } from "./_components/analytics-content";
@@ -23,14 +26,53 @@ export default async function AnalyticsPage({ searchParams }: Props) {
   const params = await searchParams;
   const range = parseRange(params.range);
 
-  const [overview, topPages, topReferrers, events, embedEngagement] =
-    await Promise.all([
-      api.analytics.overview({ range }),
-      api.analytics.topPages({ range }),
-      api.analytics.topReferrers({ range }),
-      api.analytics.events({ range }),
-      api.analytics.embedEngagement({ range }),
-    ]);
+  // Promise.allSettled (not Promise.all) so a single failing Umami call
+  // (outage, misconfiguration, network error) can't throw and crash the
+  // whole /admin/analytics server component — each failed section falls
+  // back to its existing "not configured" empty state, and a banner above
+  // explains that it's a temporary data issue rather than a setup problem.
+  const [
+    overviewResult,
+    topPagesResult,
+    topReferrersResult,
+    eventsResult,
+    embedEngagementResult,
+  ] = await Promise.allSettled([
+    api.analytics.overview({ range }),
+    api.analytics.topPages({ range }),
+    api.analytics.topReferrers({ range }),
+    api.analytics.events({ range }),
+    api.analytics.embedEngagement({ range }),
+  ]);
+
+  const hasError = [
+    overviewResult,
+    topPagesResult,
+    topReferrersResult,
+    eventsResult,
+    embedEngagementResult,
+  ].some((r) => r.status === "rejected");
+
+  const overview =
+    overviewResult.status === "fulfilled"
+      ? overviewResult.value
+      : { configured: false as const };
+  const topPages =
+    topPagesResult.status === "fulfilled"
+      ? topPagesResult.value
+      : { configured: false as const };
+  const topReferrers =
+    topReferrersResult.status === "fulfilled"
+      ? topReferrersResult.value
+      : { configured: false as const };
+  const events =
+    eventsResult.status === "fulfilled"
+      ? eventsResult.value
+      : { configured: false as const };
+  const embedEngagement =
+    embedEngagementResult.status === "fulfilled"
+      ? embedEngagementResult.value
+      : { configured: false as const };
 
   return (
     <>
@@ -43,6 +85,19 @@ export default async function AnalyticsPage({ searchParams }: Props) {
           </div>
           <RangeSelector current={range} />
         </div>
+
+        {hasError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Analytics data unavailable</AlertTitle>
+            <AlertDescription>
+              We couldn&apos;t load some analytics data right now. This is
+              usually a temporary issue with the Umami connection — try
+              refreshing in a few minutes. If it persists, check your Umami
+              configuration in Settings → Integrations.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <AnalyticsContent
           overview={overview}

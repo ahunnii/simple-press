@@ -9,11 +9,14 @@ type OrderCancelledEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   businessUrl: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function OrderCancelledEmail({
   orderNumber,
   customerName,
+  introText,
   reason,
   businessName,
   businessLogoUrl,
@@ -26,6 +29,12 @@ export default function OrderCancelledEmail({
       logoUrl={businessLogoUrl}
     >
       <Text style={heading}>Your order has been cancelled</Text>
+
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
 
       <Text style={paragraph}>Hi {customerName},</Text>
 

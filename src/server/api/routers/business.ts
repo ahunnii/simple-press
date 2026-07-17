@@ -4,6 +4,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { TEMPLATES } from "~/lib/constants";
+import { emailOverridesSchema } from "~/lib/email/customization";
 import {
   getPlatformMaintenance,
   resolveStorefrontMaintenance,
@@ -11,6 +13,7 @@ import {
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
+import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
@@ -362,6 +365,49 @@ export const businessRouter = createTRPCRouter({
     return { business, sampleOrder };
   }),
 
+  // Owner-customized transactional email copy (subject + intro text).
+  getEmailOverrides: ownerAdminProcedure.query(async ({ ctx }) => {
+    const siteContent = await ctx.db.siteContent.findUnique({
+      where: { businessId: ctx.businessId },
+      select: { emailOverrides: true },
+    });
+
+    const parsed = emailOverridesSchema.safeParse(
+      siteContent?.emailOverrides ?? {},
+    );
+    return parsed.success ? parsed.data : {};
+  }),
+
+  updateEmailOverrides: ownerAdminProcedure
+    .input(emailOverridesSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Drop empty values and empty entries so cleared fields fall back to
+      // the default copy instead of persisting empty strings.
+      const cleaned: Record<string, { subject?: string; introText?: string }> =
+        {};
+      for (const [templateId, value] of Object.entries(input)) {
+        const entry: { subject?: string; introText?: string } = {};
+        if (value?.subject?.trim()) entry.subject = value.subject.trim();
+        if (value?.introText?.trim()) entry.introText = value.introText.trim();
+        if (Object.keys(entry).length > 0) cleaned[templateId] = entry;
+      }
+
+      await ctx.db.siteContent.upsert({
+        where: { businessId },
+        create: {
+          businessId,
+          emailOverrides: cleaned as Prisma.InputJsonValue,
+        },
+        update: {
+          emailOverrides: cleaned as Prisma.InputJsonValue,
+        },
+      });
+
+      return { overrides: cleaned };
+    }),
+
   get: ownerAdminProcedure
     .input(
       z
@@ -423,38 +469,74 @@ export const businessRouter = createTRPCRouter({
       });
     }
 
-    const business = await ctx.db.business.findFirst({
-      where: {
-        id: businessId.id,
-        status: "active",
-      },
-      include: {
-        siteContent: true,
-        images: true,
-        products: {
-          where: { published: true },
-          include: {
-            images: {
-              orderBy: { sortOrder: "asc" },
-              take: 1,
-            },
-            variants: true,
-
-            collectionProducts: {
-              include: {
-                collection: {
-                  select: { id: true, name: true, slug: true },
+    const [business, publishedProductCount] = await Promise.all([
+      ctx.db.business.findFirst({
+        where: {
+          id: businessId.id,
+          status: "active",
+        },
+        include: {
+          siteContent: true,
+          images: true,
+          products: {
+            where: { published: true },
+            // Explicit select keeps the shop-page payload lean: only fields
+            // consumed by product cards, shop filter clients, and
+            // use-shop-filters. Heavy unused columns (excerpt, SEO meta,
+            // cost/barcode, alert flags, variant options JSON, etc.) are
+            // intentionally omitted.
+            select: {
+              id: true,
+              createdAt: true, // "newest" sort in use-shop-filters
+              name: true,
+              slug: true,
+              description: true, // card teaser text + client-side search
+              sku: true, // noise product card
+              price: true,
+              compareAtPrice: true,
+              trackInventory: true,
+              inventoryQty: true,
+              allowBackorders: true,
+              baseUnitsConsumed: true,
+              additionalFields: true, // comingSoon / productTagline etc.
+              images: {
+                select: { id: true, url: true, altText: true },
+                orderBy: { sortOrder: "asc" },
+                take: 1,
+              },
+              variants: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  compareAtPrice: true,
+                  inventoryQty: true,
                 },
               },
+              collectionProducts: {
+                select: {
+                  collection: {
+                    select: { id: true, name: true, slug: true },
+                  },
+                },
+              },
+              baseInventoryUnit: {
+                select: { inventoryQty: true, allowBackorders: true },
+              },
             },
-            baseInventoryUnit: {
-              select: { inventoryQty: true, allowBackorders: true },
-            },
+            orderBy: { createdAt: "desc" },
+            // Payload ceiling: the shop page serializes every product to the
+            // browser for client-side filtering. Cap at the 500 newest
+            // published products so a huge catalog can't blow up the response.
+            // Stores beyond 500 products need real server-side pagination.
+            take: 500,
           },
-          orderBy: { createdAt: "desc" },
         },
-      },
-    });
+      }),
+      ctx.db.product.count({
+        where: { businessId: businessId.id, published: true },
+      }),
+    ]);
 
     if (business && business.products && Array.isArray(business.products)) {
       // Move products with additionalFields.comingSoon === true to the bottom
@@ -492,7 +574,13 @@ export const businessRouter = createTRPCRouter({
       ? (({ previewCustomFields: _drop, ...safe }) => safe)(sc)
       : sc;
 
-    return { ...business, siteContent: sanitizedSiteContent };
+    // Total published products (the products array above is capped at 500),
+    // so consumers can detect truncation without another query.
+    return {
+      ...business,
+      siteContent: sanitizedSiteContent,
+      publishedProductCount,
+    };
   }),
 
   getWithIntegrations: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -524,13 +612,18 @@ export const businessRouter = createTRPCRouter({
       select: { stripeAccountId: true },
     });
 
-    // Annual order stats — current calendar year, exclude refunded/cancelled
+    // Annual order stats — current calendar year. INFORM Act thresholds
+    // measure transactions conducted, not revenue currently retained: an
+    // order that was paid counts even if it was later refunded or disputed,
+    // while an order that was never paid (pending/unpaid/failed) does not.
+    // This is gross, not net of refunds — deliberately different from the
+    // dashboard's revenue convention (paid-only, net of refunds).
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
     const orderStats = await ctx.db.order.aggregate({
       where: {
         businessId,
         createdAt: { gte: startOfYear },
-        status: { notIn: ["refunded", "cancelled"] },
+        paymentStatus: { in: ["paid", "refunded", "disputed"] },
       },
       _count: { id: true },
       _sum: { total: true },
@@ -720,7 +813,7 @@ export const businessRouter = createTRPCRouter({
 
       const include = {
         ...(input?.includePages
-          ? { pages: { orderBy: { sortOrder: "asc" } } }
+          ? { pages: { where: { type: "page" }, orderBy: { sortOrder: "asc" } } }
           : {}),
         ...(input?.includeSiteContent
           ? {
@@ -759,16 +852,23 @@ export const businessRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        ownerEmail: z.string(),
-        supportEmail: z.string().optional(),
+        ownerEmail: z.string().email(),
+        supportEmail: z.string().email().optional(),
         businessAddress: z.string().optional(),
         phoneNumber: z.string().optional(),
+        sendAbandonedCheckoutEmails: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const { name, ownerEmail, supportEmail, businessAddress, phoneNumber } =
-        input;
+      const {
+        name,
+        ownerEmail,
+        supportEmail,
+        businessAddress,
+        phoneNumber,
+        sendAbandonedCheckoutEmails,
+      } = input;
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -778,6 +878,7 @@ export const businessRouter = createTRPCRouter({
           supportEmail,
           businessAddress,
           phoneNumber,
+          sendAbandonedCheckoutEmails,
         },
       });
       return {
@@ -1011,5 +1112,46 @@ export const businessRouter = createTRPCRouter({
       });
 
       return { message: "Shipping settings updated successfully" };
+    }),
+
+  updateTemplate: ownerAdminProcedure
+    .input(
+      z.object({
+        templateId: z.enum(TEMPLATES.map((t) => t.id) as [string, ...string[]]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const business = await ctx.db.business.findUnique({
+        where: { id: businessId },
+        select: { subdomain: true, templateId: true },
+      });
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      // Commercial templates are locked to their owning subdomain. Allow only
+      // templates available to this business (free templates + ones it owns),
+      // plus its currently-active template so an existing assignment is never
+      // lost. Never trust the client — re-validate ownership server-side.
+      const allowed =
+        input.templateId === business.templateId ||
+        isTemplateAvailableForSubdomain(input.templateId, business.subdomain);
+      if (!allowed) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This template is not available for your store.",
+        });
+      }
+
+      await ctx.db.business.update({
+        where: { id: businessId },
+        data: { templateId: input.templateId },
+      });
+      return { success: true };
     }),
 });

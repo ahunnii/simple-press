@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import type { DbClient } from "~/server/db";
 import { deleteStoredObjects } from "~/lib/s3/delete";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import {
   productCreateSchema,
   productImageSchema,
@@ -131,9 +132,9 @@ export const productRouter = createTRPCRouter({
 
       const product = await ctx.db.product.findFirst({
         where: {
-          slug,
           businessId,
           published: true,
+          OR: [{ slug }, { id: slug }],
         },
         include: {
           images: { orderBy: { sortOrder: "asc" } },
@@ -282,6 +283,7 @@ export const productRouter = createTRPCRouter({
         price,
         compareAtPrice,
         published,
+        scheduledPublishAt,
         trackInventory,
         allowBackorders,
         inventoryQty,
@@ -299,6 +301,22 @@ export const productRouter = createTRPCRouter({
       } = input;
 
       const { businessId } = ctx;
+
+      // Verify a client-supplied inventory pool belongs to THIS business before
+      // linking it — otherwise a product could be tied to (and later deduct
+      // from) another tenant's pool.
+      if (baseInventoryUnitId) {
+        const pool = await ctx.db.baseInventoryUnit.findFirst({
+          where: { id: baseInventoryUnitId, businessId },
+          select: { id: true },
+        });
+        if (!pool) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid inventory pool",
+          });
+        }
+      }
 
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
@@ -323,6 +341,8 @@ export const productRouter = createTRPCRouter({
           price,
           compareAtPrice: compareAtPrice ?? null,
           published,
+          // A schedule only makes sense for unpublished products.
+          scheduledPublishAt: published ? null : (scheduledPublishAt ?? null),
           // When pool is set, force trackInventory off — pool manages stock
           trackInventory: baseInventoryUnitId ? false : trackInventory,
           allowBackorders,
@@ -375,6 +395,7 @@ export const productRouter = createTRPCRouter({
         price,
         compareAtPrice,
         published,
+        scheduledPublishAt,
         trackInventory,
         allowBackorders,
         inventoryQty,
@@ -390,6 +411,22 @@ export const productRouter = createTRPCRouter({
         weight,
         weightUnit,
       } = input;
+
+      // Verify a client-supplied inventory pool belongs to THIS business before
+      // linking it — otherwise a product could be tied to (and later deduct
+      // from) another tenant's pool.
+      if (baseInventoryUnitId) {
+        const pool = await ctx.db.baseInventoryUnit.findFirst({
+          where: { id: baseInventoryUnitId, businessId },
+          select: { id: true },
+        });
+        if (!pool) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid inventory pool",
+          });
+        }
+      }
 
       // Check if slug is already taken for this business
       const existingProduct = await ctx.db.product.findFirst({
@@ -437,6 +474,8 @@ export const productRouter = createTRPCRouter({
           price,
           compareAtPrice: compareAtPrice ?? null,
           published,
+          // A schedule only makes sense for unpublished products.
+          scheduledPublishAt: published ? null : (scheduledPublishAt ?? null),
           // When pool is set, force trackInventory off — pool manages stock
           trackInventory: baseInventoryUnitId ? false : trackInventory,
           allowBackorders,
@@ -710,9 +749,12 @@ export const productRouter = createTRPCRouter({
       await Promise.all(
         input.images.map(async (image) => {
           if (image.id) {
-            // Update existing
-            await ctx.db.image.update({
-              where: { id: image.id },
+            // Update existing — scope to THIS product (already verified to
+            // belong to businessId above) so a client-supplied image id
+            // belonging to another product/tenant can't be written. updateMany
+            // no-ops (count 0) rather than touching a foreign row.
+            await ctx.db.image.updateMany({
+              where: { id: image.id, productId: input.productId },
               data: {
                 altText: image.altText,
                 sortOrder: image.sortOrder,
@@ -930,6 +972,7 @@ export const productRouter = createTRPCRouter({
             price: 0,
             compareAtPrice: null,
             maxQuantity: null,
+            slug: product?.slug ?? null,
           };
         }
 
@@ -946,6 +989,7 @@ export const productRouter = createTRPCRouter({
             price: 0,
             compareAtPrice: null,
             maxQuantity: null,
+            slug: product.slug,
           };
         }
 
@@ -960,14 +1004,12 @@ export const productRouter = createTRPCRouter({
               price: 0,
               compareAtPrice: null,
               maxQuantity: null,
+              slug: product.slug,
             };
           }
 
           // Variant price: use variant price if set & non-zero, else fall back to product price
-          const price =
-            variant.price !== null && variant.price > 0
-              ? variant.price
-              : product.price;
+          const price = resolveVariantPrice(variant.price, product.price);
           const compareAtPrice =
             variant.compareAtPrice ?? product.compareAtPrice ?? null;
 
@@ -990,6 +1032,7 @@ export const productRouter = createTRPCRouter({
             price,
             compareAtPrice,
             maxQuantity,
+            slug: product.slug,
           };
         } else {
           // No-variant (base) item
@@ -1012,6 +1055,7 @@ export const productRouter = createTRPCRouter({
               price: product.price,
               compareAtPrice: product.compareAtPrice ?? null,
               maxQuantity,
+              slug: product.slug,
             };
           }
 
@@ -1034,6 +1078,7 @@ export const productRouter = createTRPCRouter({
             price: product.price,
             compareAtPrice: product.compareAtPrice ?? null,
             maxQuantity,
+            slug: product.slug,
           };
         }
       });

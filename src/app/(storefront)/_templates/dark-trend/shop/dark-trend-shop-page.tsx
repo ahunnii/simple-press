@@ -1,8 +1,10 @@
+import { Suspense } from "react";
+
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import { Separator } from "~/components/ui/separator";
 
 import { DarkTrendGeneralLayout } from "../layout/dark-trend-general-layout";
-import { DarkTrendProductCard } from "../shared/dark-trend-product-card";
+import { DarkTrendShopClient } from "./dark-trend-shop-client";
 
 export function DarkTrendShopPage({
   business,
@@ -18,15 +20,9 @@ export function DarkTrendShopPage({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {business.products?.map((product, index) => (
-            <DarkTrendProductCard
-              key={product.id}
-              index={index}
-              product={product}
-            />
-          ))}
-        </div>
+        <Suspense>
+          <DarkTrendShopClient products={business.products ?? []} />
+        </Suspense>
       )}
     </DarkTrendGeneralLayout>
   );

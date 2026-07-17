@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 
 import type { NavHub } from "~/app/admin/_lib/admin-nav";
 import { getHubCards } from "~/app/admin/_lib/admin-nav";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { api } from "~/trpc/react";
 
 const HUB_LABELS: Record<NavHub, string> = {
   settings: "Settings",
@@ -17,7 +19,17 @@ type Props = {
 
 export function HubSubNav({ hub }: Props) {
   const pathname = usePathname();
-  const cards = getHubCards(hub);
+  const allCards = getHubCards(hub);
+
+  // Mirror the hub dashboard's feature-flag filtering (see
+  // SettingsDashboard/ContentDashboard) so a tab for a disabled feature
+  // never appears in the sub-nav strip. Fetched client-side since this
+  // component is rendered from server pages that don't pass flags down.
+  const { data: flagsData } = api.features.getFlags.useQuery();
+  const { isEnabled } = useFeatureFlags({ flags: flagsData?.flags ?? {} });
+  const cards = allCards.filter(
+    (card) => !card.featureKey || isEnabled(card.featureKey),
+  );
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");

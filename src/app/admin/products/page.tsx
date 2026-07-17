@@ -1,18 +1,12 @@
 import Link from "next/link";
-import { Download, Plus, Upload } from "lucide-react";
+import { Download, Package, Plus, Upload } from "lucide-react";
 
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 
+import { AdminEmpty } from "../_components/admin-empty";
 import { TrailHeader } from "../_components/trail-header";
 import { ProductFilters } from "./_components/product-filters";
 import { ProductsTable } from "./_components/products-client-data-table";
@@ -112,34 +106,26 @@ export default async function ProductsPage({ searchParams }: Props) {
 
         {/* Products List */}
         {products.length === 0 ? (
-          hasActiveFilters ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>No products match your filters</CardTitle>
-                <CardDescription>
-                  Try adjusting your search or filters to find what you are
-                  looking for.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No products yet</CardTitle>
-                <CardDescription>
-                  Get started by adding your first product
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild>
-                  <Link href="/admin/products/new">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Your First Product
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )
+          <AdminEmpty
+            icon={Package}
+            title={
+              hasActiveFilters ? "No products match your filters" : "No products yet"
+            }
+            description={
+              hasActiveFilters
+                ? "Try adjusting your search or filters to find what you are looking for."
+                : "Get started by adding your first product"
+            }
+            filtered={hasActiveFilters}
+            action={
+              <Button asChild>
+                <Link href="/admin/products/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Product
+                </Link>
+              </Button>
+            }
+          />
         ) : (
           <>
             <ProductsTable products={products} />

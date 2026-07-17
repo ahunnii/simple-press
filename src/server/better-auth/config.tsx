@@ -67,16 +67,24 @@ export const auth = betterAuth({
 
     sendResetPassword: async ({ user, url }) => {
       const business = await checkBusinessForEmail();
-      const domain = getBusinessUrl({
-        subdomain: business?.subdomain ?? "",
-        customDomain: business?.customDomain ?? null,
-        domainStatus: business?.domainStatus ?? "NONE",
-      });
 
-      const updatedResetUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
+      // On the platform domain (e.g. owner signup) no business resolves. Leave
+      // the URL on BETTER_AUTH_BASE_URL — rewriting with an empty subdomain
+      // produces a malformed `https://.<domain>` link — and use a neutral
+      // sender instead of "undefined via SimplePress".
+      const updatedResetUrl = business
+        ? url.replace(
+            env.BETTER_AUTH_BASE_URL,
+            getBusinessUrl({
+              subdomain: business.subdomain ?? "",
+              customDomain: business.customDomain ?? null,
+              domainStatus: business.domainStatus ?? "NONE",
+            }),
+          )
+        : url;
 
       sendResendEmail({
-        from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+        from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
         to: user.email,
         subject: "Reset your SimplePress password",
         react: ResetPasswordEmail({
@@ -102,15 +110,22 @@ export const auth = betterAuth({
     }) => {
       const business = await checkBusinessForEmail();
 
-      const domain = getBusinessUrl({
-        subdomain: business?.subdomain ?? "",
-        customDomain: business?.customDomain ?? null,
-        domainStatus: business?.domainStatus ?? "NONE",
-      });
-
-      const updatedVerifyUrl = url.replace(env.BETTER_AUTH_BASE_URL, domain);
+      // On the platform domain (e.g. owner signup) no business resolves. Leave
+      // the URL on BETTER_AUTH_BASE_URL — rewriting with an empty subdomain
+      // produces a malformed `https://.<domain>` link — and use a neutral
+      // sender instead of "undefined via SimplePress".
+      const updatedVerifyUrl = business
+        ? url.replace(
+            env.BETTER_AUTH_BASE_URL,
+            getBusinessUrl({
+              subdomain: business.subdomain ?? "",
+              customDomain: business.customDomain ?? null,
+              domainStatus: business.domainStatus ?? "NONE",
+            }),
+          )
+        : url;
       sendResendEmail({
-        from: `${business?.name} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+        from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
         to: user.email,
         subject: "Verify your email",
         react: VerifyEmail({

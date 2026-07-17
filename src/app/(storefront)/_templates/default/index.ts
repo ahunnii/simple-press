@@ -9,11 +9,14 @@ import {
 } from "./collections";
 import { defaultContactData, defaultContactFieldGroups } from "./contact";
 import { defaultHomepageData, defaultHomepageFieldGroups } from "./homepage";
+import { defaultServicesData, defaultServicesFieldGroups } from "./services";
 import { defaultShopData, defaultShopFieldGroups } from "./shop";
 import {
   defaultTestimonialsData,
   defaultTestimonialsFieldGroups,
 } from "./testimonials";
+
+export { defaultTemplateSections } from "./sections";
 
 const globalAuthenticationData: TemplateField[] = [
   {
@@ -119,6 +122,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...defaultBlogFieldGroups,
   ...defaultCollectionsFieldGroups,
   ...defaultContactFieldGroups,
+  ...defaultServicesFieldGroups,
   ...defaultShopFieldGroups,
   ...defaultTestimonialsFieldGroups,
   {
@@ -144,6 +148,7 @@ export const defaultTemplateData = {
     ...defaultBlogData,
     ...defaultCollectionsData,
     ...defaultContactData,
+    ...defaultServicesData,
     ...defaultShopData,
     ...defaultTestimonialsData,
     ...globalAuthenticationData,

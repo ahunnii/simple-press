@@ -93,6 +93,124 @@ async function fillFirst(
   return false;
 }
 
+/** Resolve the owning `Page` for a fill scope that may be a `Locator`. */
+function pageOf(scope: Page | Locator): Page {
+  return "page" in scope && typeof scope.page === "function"
+    ? scope.page()
+    : (scope as Page);
+}
+
+// Mirrors src/lib/geo/regions.ts's US_STATES (code -> full name). Duplicated
+// here (rather than imported) to keep this test helper self-contained; the
+// checkout form's <SelectItem value={opt.code}>{opt.name}</SelectItem> renders
+// the code as the option's `value` but the full name as its visible/accessible
+// text, which is what Playwright's `getByRole("option", { name })` matches on.
+const US_STATE_NAMES: Record<string, string> = {
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DE: "Delaware",
+  DC: "District of Columbia",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  IA: "Iowa",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  ME: "Maine",
+  MD: "Maryland",
+  MA: "Massachusetts",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MS: "Mississippi",
+  MO: "Missouri",
+  MT: "Montana",
+  NE: "Nebraska",
+  NV: "Nevada",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NY: "New York",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VT: "Vermont",
+  VA: "Virginia",
+  WA: "Washington",
+  WV: "West Virginia",
+  WI: "Wisconsin",
+  WY: "Wyoming",
+};
+
+/**
+ * Set the checkout "State / Province" field. Every shared checkout form
+ * (default/elegant/pollen/happy-bamboo/bamboo/sledge/noise/dark-trend) renders
+ * it as a shadcn/Radix `<Select>` — `#state` is a `<button role="combobox">`
+ * trigger, not an `<input>`, so `.fill()` throws ("Element is not an <input>,
+ * <textarea> or [contenteditable] element"). The `modern` template renders a
+ * plain native `<select id="state">` instead.
+ *
+ * Both cases share the same underlying option data
+ * (`getRegionOptions` in src/lib/geo/regions.ts): the option `value` is the
+ * two-letter code (e.g. "MI") but its rendered/accessible text is the full
+ * name (e.g. "Michigan").
+ *
+ * Returns false if no `#state` element is present, so callers can fall back.
+ */
+async function selectState(
+  scope: Page | Locator,
+  code: string,
+): Promise<boolean> {
+  const trigger = scope.locator("#state").first();
+  if ((await trigger.count()) === 0) return false;
+
+  const tagName = await trigger.evaluate((el) => el.tagName.toLowerCase());
+  if (tagName === "select") {
+    // Native <select> (modern template) — Playwright's selectOption works
+    // directly, matching by option value (the state code).
+    await trigger.selectOption(code);
+    return true;
+  }
+
+  // Radix Select combobox trigger: open the listbox, then click the option by
+  // its accessible name (the full state name). The listbox is portaled to
+  // document.body, so option lookups must go through the root Page, not
+  // `scope` (which may be a Locator scoped to the <form>).
+  //
+  // Some templates (default/bamboo/elegant) render a sticky element that
+  // overlaps the trigger, so a plain pointer click is intercepted by a div.
+  // Scroll it into view and open via keyboard (focus + Enter) which Radix
+  // Select honors and which sidesteps the pointer-intercept entirely.
+  await trigger.scrollIntoViewIfNeeded();
+  await trigger.focus();
+  await trigger.press("Enter");
+  const page = pageOf(scope);
+  const option = page.getByRole("option", { name: US_STATE_NAMES[code] ?? code, exact: true });
+  // Fall back to a forced pointer click if the keyboard open didn't surface it.
+  if ((await option.count()) === 0) {
+    await trigger.click({ force: true });
+  }
+  await option.click();
+  return true;
+}
+
 export type CheckoutInfo = {
   email: string;
   name: string;
@@ -108,6 +226,8 @@ export type CheckoutInfo = {
  * (#email/#name/#phone/#address-line1/#city/#state/#postal) except `modern`,
  * which splits the name into given-name/family-name and uses autocomplete tokens
  * for the address — the fallbacks below cover that without per-template branching.
+ * `#state` is a Select (Radix combobox on most templates, native <select> on
+ * `modern`), not a text input — see `selectState`.
  */
 export async function fillCheckout(
   scope: Page | Locator,
@@ -141,11 +261,16 @@ export async function fillCheckout(
     ["#city", 'input[autocomplete="shipping address-level2"]'],
     info.city,
   );
-  await fillFirst(
-    scope,
-    ["#state", 'input[autocomplete="shipping address-level1"]'],
-    info.state,
-  );
+  const filledState = await selectState(scope, info.state);
+  if (!filledState) {
+    // Fallback for any template that renders State as a plain text input
+    // instead of a Select (none currently do, but keeps this resilient).
+    await fillFirst(
+      scope,
+      ["#state", 'input[autocomplete="shipping address-level1"]'],
+      info.state,
+    );
+  }
   await fillFirst(
     scope,
     ["#postal", 'input[autocomplete="shipping postal-code"]'],

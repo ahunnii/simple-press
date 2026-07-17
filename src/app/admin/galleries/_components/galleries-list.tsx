@@ -29,6 +29,8 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+
+import { AdminEmpty } from "../../_components/admin-empty";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,18 +168,16 @@ export function GalleriesList({ galleries }: Props) {
   // Absolute empty state — no galleries at all
   if (!hasGalleries) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Images className="text-muted-foreground mx-auto h-12 w-12" />
-          <h3 className="mt-4 text-lg font-medium">No galleries yet</h3>
-          <p className="text-muted-foreground mt-2">
-            Create your first gallery to get started
-          </p>
-          <Button className="mt-4" asChild>
+      <AdminEmpty
+        icon={Images}
+        title="No galleries yet"
+        description="Create your first gallery to get started"
+        action={
+          <Button asChild>
             <Link href="/admin/galleries/new">Create Gallery</Link>
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
 
@@ -244,13 +244,12 @@ export function GalleriesList({ galleries }: Props) {
 
       {/* No-match empty state */}
       {!hasResults ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-muted-foreground">
-              No galleries match your search or filter.
-            </p>
-          </CardContent>
-        </Card>
+        <AdminEmpty
+          icon={Images}
+          title="No matching galleries"
+          description="No galleries match your search or filter."
+          filtered={true}
+        />
       ) : (
         <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

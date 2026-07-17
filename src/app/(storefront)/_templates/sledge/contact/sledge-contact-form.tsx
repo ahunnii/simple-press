@@ -6,11 +6,13 @@ import { Loader2 } from "lucide-react";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Form } from "~/components/ui/form";
 import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 type Props = {
   formTitle: string;
@@ -45,6 +47,9 @@ export function SledgeContactForm({ formTitle }: Props) {
   useKeyboardEnter(form, onSubmit);
   useDirtyForm(isDirty);
 
+  const { isEnabled } = useStorefrontFlags();
+  if (!isEnabled("contactForm")) return null;
+
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
@@ -73,7 +78,10 @@ export function SledgeContactForm({ formTitle }: Props) {
   return (
     <div>
       {/* C-3: form heading is large (sl-rail-heading ≥24px) → AA accent token */}
-      <h2 className="sl-rail-heading font-heading mb-8 font-semibold text-[var(--sl-coral-aa)] uppercase">
+      <h2
+        className="sl-rail-heading font-heading mb-8 font-semibold text-[var(--sl-coral-aa)] uppercase"
+        {...fieldAttr("sledge.contact.form-title")}
+      >
         {formTitle}
       </h2>
 

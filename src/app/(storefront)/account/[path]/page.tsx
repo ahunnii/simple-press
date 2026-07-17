@@ -7,6 +7,11 @@ import { getTemplate } from "../../_templates/registry";
 
 export const dynamicParams = false;
 
+export const metadata = {
+  title: "Account",
+  robots: { index: false, follow: false },
+};
+
 export function generateStaticParams() {
   return Object.values(accountViewPaths).map((path) => ({ path }));
 }

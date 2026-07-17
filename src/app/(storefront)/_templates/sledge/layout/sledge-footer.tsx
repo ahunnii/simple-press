@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
@@ -9,18 +10,22 @@ import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 import { resolveFields } from "../index";
 
-export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
+export async function SledgeFooter({ business }: DefaultFooterTemplateProps) {
   const name = business?.name ?? "";
 
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
-  const g = resolveFields(customFields, ["sledge.global.footer-tagline"]);
+  const g = resolveFields(customFields, [
+    "sledge.global.footer-tagline",
+    "sledge.global.location-tag",
+  ]);
 
   // Default notice for "all sales final" — sourced from the editable footer-tagline field
   const noticeText =
     g["sledge.global.footer-tagline"] ??
     "All sales are final. Each piece is made with love and care — please review sizing and details before purchasing. Questions? Reach out before you buy!";
+  const locationTag = g["sledge.global.location-tag"] ?? "";
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -44,7 +49,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const termsOfService = policies.find((p) => p.slug === "terms-of-service");
 
   return (
-    <footer className="sl-footer">
+    <footer className="sl-footer" {...sectionGroupAttr("global", "branding")}>
       {/* ── Main block ── */}
       <div className="sl-container-wide mx-auto px-7 pt-16 pb-10">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:items-center">
@@ -55,7 +60,10 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
             </h2>
 
             <div>
-              <p className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80">
+              <p
+                className="font-sans text-lg leading-[1.75] whitespace-pre-wrap text-white/80"
+                {...fieldAttr("sledge.global.footer-tagline")}
+              >
                 {noticeText}
               </p>
             </div>
@@ -109,6 +117,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
       <div className="sl-container-wide mx-auto flex flex-col gap-3 border-t border-white/12 px-7 py-5 sm:flex-row sm:items-center sm:justify-between">
         <span className="sl-footer-meta font-sans">
           © {new Date().getFullYear()} {name}
+          {locationTag && <span className="opacity-70"> · {locationTag}</span>}
         </span>
 
         <div className="flex flex-wrap gap-4">

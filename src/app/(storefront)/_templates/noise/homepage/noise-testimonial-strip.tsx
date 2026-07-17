@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Pause, Play } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 type Testimonial = RouterOutputs["testimonial"]["listRandom"][number];
 
@@ -52,6 +53,7 @@ export function NoiseTestimonialStrip({
         <p
           className="mb-8 font-mono text-[9.5px] tracking-[.28em] uppercase"
           style={{ color: "var(--vn-steel)" }}
+          {...fieldAttr("noise.homepage-testimonials-heading")}
         >
           {heading ?? "Worn by"}
         </p>

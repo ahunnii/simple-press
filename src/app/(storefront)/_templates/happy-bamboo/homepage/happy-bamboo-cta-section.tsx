@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { FadeIn, ScaleIn } from "~/components/page-animations";
 
@@ -13,18 +14,24 @@ type Props = {
   primaryButtonLink?: string;
   secondaryButtonText?: string;
   secondaryButtonLink?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function HappyBambooCtaSection({
   heading = "Ready to Make the Switch?",
-  body = "Join thousands of eco-conscious households who have already made the switch to Happy Bamboo. Experience premium quality while making a positive impact on our planet.",
+  body = "Join a growing community of customers who love what we make. Experience premium quality while making a positive impact.",
   primaryButtonText = "Shop Now",
   primaryButtonLink = "/shop",
   secondaryButtonText = "Learn More",
   secondaryButtonLink = "/about",
+  sectionAttrs,
 }: Props) {
   return (
-    <section className="bg-primary relative overflow-hidden py-20 md:py-32">
+    <section
+      className="bg-primary relative overflow-hidden py-20 md:py-32"
+      {...sectionAttrs}
+    >
       {/* Decorative Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-white blur-3xl" />
@@ -37,11 +44,19 @@ export function HappyBambooCtaSection({
             <Leaf className="text-primary-foreground h-8 w-8" />
           </ScaleIn>
 
-          <h2 className="text-primary-foreground mb-6 text-4xl font-bold md:text-5xl">
+          <h2
+            className="text-primary-foreground mb-6 text-4xl font-bold md:text-5xl"
+            {...fieldAttr("happy-bamboo.homepage-cta-heading")}
+          >
             {heading}
           </h2>
           {body && (
-            <p className="text-primary-foreground/80 mb-8 text-lg">{body}</p>
+            <p
+              className="text-primary-foreground/80 mb-8 text-lg"
+              {...fieldAttr("happy-bamboo.homepage-cta-body")}
+            >
+              {body}
+            </p>
           )}
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

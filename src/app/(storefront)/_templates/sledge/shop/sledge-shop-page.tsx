@@ -52,7 +52,9 @@ export function SledgeShopPage({ business }: DefaultProductsPageTemplateProps) {
     <PageTransition>
       <SledgePageHeader
         title={shopHeading}
+        titleFieldKey="sledge.shop-listing-heading"
         intro={shopIntro || undefined}
+        introFieldKey="sledge.shop-listing-intro"
         sectionAttrs={sectionGroupAttr("shop", "listing")}
       />
 

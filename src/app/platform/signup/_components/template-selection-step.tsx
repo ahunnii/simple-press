@@ -5,6 +5,7 @@ import { ArrowLeft, Check } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
 import { TEMPLATES } from "~/lib/constants";
+import { getFreeTemplateIds } from "~/lib/template-ownership";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import {
@@ -30,6 +31,13 @@ export function TemplateSelectionStep({
     formData.templateId ?? "modern",
   );
 
+  // New businesses can only choose free/generic templates. Commercial templates
+  // are reserved for the specific client subdomains that own them.
+  const freeTemplateIds = getFreeTemplateIds();
+  const onboardingTemplates = TEMPLATES.filter((t) =>
+    freeTemplateIds.includes(t.id),
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onNext({ templateId: selectedTemplate });
@@ -47,7 +55,7 @@ export function TemplateSelectionStep({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Template Grid */}
           <div className="grid gap-4 md:grid-cols-3">
-            {TEMPLATES.map((template) => (
+            {onboardingTemplates.map((template) => (
               <button
                 key={template.id}
                 type="button"
@@ -86,11 +94,14 @@ export function TemplateSelectionStep({
           {selectedTemplate && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <h4 className="mb-2 text-sm font-semibold">
-                {TEMPLATES.find((t) => t.id === selectedTemplate)?.name}{" "}
+                {onboardingTemplates.find((t) => t.id === selectedTemplate)?.name}{" "}
                 Template
               </h4>
               <p className="text-sm text-gray-700">
-                {TEMPLATES.find((t) => t.id === selectedTemplate)?.description}
+                {
+                  onboardingTemplates.find((t) => t.id === selectedTemplate)
+                    ?.description
+                }
               </p>
             </div>
           )}

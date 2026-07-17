@@ -7,6 +7,7 @@ import { getTemplate } from "../../_templates/registry";
 
 export const metadata = {
   title: "My Orders",
+  robots: { index: false, follow: false },
 };
 
 export default async function OrdersPage() {

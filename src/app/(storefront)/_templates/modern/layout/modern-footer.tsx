@@ -142,7 +142,7 @@ export async function ModernFooter({ business }: DefaultFooterTemplateProps) {
               {policies?.map((policy) => (
                 <li key={policy.id + policy.title}>
                   <Link
-                    href={policy.slug}
+                    href={`/${policy.slug}`}
                     className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                   >
                     {policy.title}

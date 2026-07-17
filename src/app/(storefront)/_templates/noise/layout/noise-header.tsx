@@ -15,6 +15,7 @@ import {
   BookUser,
   ChevronDown,
   ChevronUp,
+  Heart,
   Lock,
   Menu,
   Package,
@@ -26,12 +27,15 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 import { NoiseCartDrawer } from "../cart-checkout/noise-cart-drawer";
 import { resolveFields } from "../index";
@@ -57,6 +61,7 @@ const MOBILE_ACCOUNT_LINKS = [
 
 export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
+  const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -207,6 +212,8 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
 
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
+
   const LEFT_NAV: NavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
     ...(isEnabled("collections")
@@ -324,7 +331,12 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     <>
       <span>{businessName.toUpperCase()}</span>
       {locationTag ? (
-        <span className="vn-wordmark-sub">{locationTag}</span>
+        <span
+          className="vn-wordmark-sub"
+          {...fieldAttr("noise.global.location-tag")}
+        >
+          {locationTag}
+        </span>
       ) : null}
     </>
   );
@@ -554,6 +566,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
       <header
         className="bg-background sticky top-0 z-50 w-full"
         style={{ borderBottom: "1px solid var(--vn-line-soft)" }}
+        {...sectionGroupAttr("global", "branding")}
       >
         <div
           className="mx-auto grid w-full max-w-[1440px] items-center gap-6 px-4 py-4 sm:px-6 sm:py-[18px]"
@@ -604,9 +617,38 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
               {links.map((link, i) => renderDesktopNavLink(link, i, "right"))}
             </nav>
 
-            <div className="hidden md:block">
-              {session?.user ? userMenu : authLink}
-            </div>
+            {isStorefrontEnabled("customerAccounts") && (
+              <div className="hidden md:block">
+                {session?.user ? userMenu : authLink}
+              </div>
+            )}
+
+            {isStorefrontEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label="Open wishlist"
+                className="relative -m-3 flex items-center p-3 transition-opacity hover:opacity-60"
+                style={{ color: "var(--vn-ink-soft)" }}
+              >
+                <Heart className="h-[18px] w-[18px]" strokeWidth={1.4} />
+                {wishlistHydrated && wishlistCount > 0 && (
+                  <motion.span
+                    aria-hidden="true"
+                    initial={{ scale: reduce ? 1 : 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: reduce ? 0 : 0.2 }}
+                    className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] font-semibold"
+                    style={{
+                      background: "var(--vn-accent)",
+                      color: "#fff",
+                      minWidth: "16px",
+                    }}
+                  >
+                    {wishlistCount}
+                  </motion.span>
+                )}
+              </Link>
+            )}
 
             <button
               onClick={() => setIsOpen(true)}
@@ -806,7 +848,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                   ) : null}
                 </AnimatePresence>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <button
                     type="button"
                     onClick={openCart}
@@ -836,6 +878,32 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                       </span>
                     ) : null}
                   </button>
+
+                  <Link
+                    href="/wishlist"
+                    onClick={closeMobileMenu}
+                    aria-label="Open wishlist"
+                    className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
+                    style={{
+                      border: "1px solid var(--vn-rule)",
+                      color: "var(--vn-ink-soft)",
+                    }}
+                  >
+                    <Heart className="h-4 w-4" aria-hidden="true" />
+                    <span aria-hidden="true">Wishlist</span>
+                    {wishlistHydrated && wishlistCount > 0 ? (
+                      <span
+                        aria-hidden="true"
+                        className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
+                        style={{
+                          background: "var(--vn-accent)",
+                          color: "#fff",
+                        }}
+                      >
+                        {wishlistCount}
+                      </span>
+                    ) : null}
+                  </Link>
 
                   {session?.user ? (
                     <button

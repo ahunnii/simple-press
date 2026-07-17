@@ -23,6 +23,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 const formatPrice = (cents: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -220,6 +224,11 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
                       ? "We price shipping from this address. Make changes here before continuing to payment."
                       : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                   </p>
+                  <SavedAddressPicker
+                    accentColor={primaryColor}
+                    className="text-[#0a0a0a]"
+                    onSelect={(address) => applySavedAddressToForm(f, address)}
+                  />
                   <div>
                     <Label htmlFor="address-line1">
                       Address line 1 <span aria-hidden="true">*</span>
@@ -404,81 +413,85 @@ export function DefaultCheckoutForm({ business }: CheckoutFormProps) {
               </div>
 
               {/* Discount Code Input — inline */}
-              <div className="space-y-3 pt-4">
-                <label htmlFor="discount-code" className="sr-only">
-                  Discount code
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Tag
-                      className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
-                      aria-hidden="true"
-                    />
-                    <Input
-                      id="discount-code"
-                      type="text"
-                      placeholder="Discount code"
-                      value={f.discountCodeInput}
-                      onChange={(e) => {
-                        f.setDiscountCodeInput(e.target.value.toUpperCase());
-                        f.setDiscountFieldError(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          f.handleApplyDiscount();
-                        }
-                      }}
-                      aria-invalid={!!f.discountFieldError}
-                      aria-describedby={
-                        f.discountFieldError ? "discount-code-error" : undefined
-                      }
-                      autoComplete="off"
-                      className="pl-10"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={f.handleApplyDiscount}
-                    disabled={
-                      f.isValidatingDiscount || !f.discountCodeInput.trim()
-                    }
-                    variant="outline"
-                    aria-label={
-                      f.isValidatingDiscount
-                        ? "Applying discount code"
-                        : "Apply discount code"
-                    }
-                  >
-                    {f.isValidatingDiscount ? (
-                      <Loader2
-                        className="h-4 w-4 animate-spin"
+              {f.couponsEnabled && (
+                <div className="space-y-3 pt-4">
+                  <label htmlFor="discount-code" className="sr-only">
+                    Discount code
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag
+                        className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
                         aria-hidden="true"
                       />
-                    ) : (
-                      "Apply"
-                    )}
-                  </Button>
-                </div>
-                {f.discountFieldError && (
-                  <Alert variant="destructive">
-                    <AlertDescription
-                      id="discount-code-error"
-                      className="text-sm"
+                      <Input
+                        id="discount-code"
+                        type="text"
+                        placeholder="Discount code"
+                        value={f.discountCodeInput}
+                        onChange={(e) => {
+                          f.setDiscountCodeInput(e.target.value.toUpperCase());
+                          f.setDiscountFieldError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            f.handleApplyDiscount();
+                          }
+                        }}
+                        aria-invalid={!!f.discountFieldError}
+                        aria-describedby={
+                          f.discountFieldError
+                            ? "discount-code-error"
+                            : undefined
+                        }
+                        autoComplete="off"
+                        className="pl-10"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={f.handleApplyDiscount}
+                      disabled={
+                        f.isValidatingDiscount || !f.discountCodeInput.trim()
+                      }
+                      variant="outline"
+                      aria-label={
+                        f.isValidatingDiscount
+                          ? "Applying discount code"
+                          : "Apply discount code"
+                      }
                     >
-                      {f.discountFieldError}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {f.discountCodeLabel && f.discountAmount > 0 && (
-                  <p
-                    role="status"
-                    className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-900"
-                  >
-                    Discount Applied: {f.discountCodeLabel} — you saved{" "}
-                    {formatPrice(f.discountAmount)}
-                  </p>
-                )}
-              </div>
+                      {f.isValidatingDiscount ? (
+                        <Loader2
+                          className="h-4 w-4 animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        "Apply"
+                      )}
+                    </Button>
+                  </div>
+                  {f.discountFieldError && (
+                    <Alert variant="destructive">
+                      <AlertDescription
+                        id="discount-code-error"
+                        className="text-sm"
+                      >
+                        {f.discountFieldError}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {f.discountCodeLabel && f.discountAmount > 0 && (
+                    <p
+                      role="status"
+                      className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium text-green-900"
+                    >
+                      Discount Applied: {f.discountCodeLabel} — you saved{" "}
+                      {formatPrice(f.discountAmount)}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2 border-t pt-4">
                 <div className="flex justify-between text-sm">

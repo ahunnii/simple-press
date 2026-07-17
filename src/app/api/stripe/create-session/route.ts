@@ -13,13 +13,16 @@ import {
 } from "~/lib/checkout/validate-cart";
 import { validateAndComputeDiscount } from "~/lib/discount-validation";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import {
   releaseReservation,
   reserveInventory,
+  sweepStaleReservations,
 } from "~/lib/inventory/reservation";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { checkoutLimiter, getClientIp } from "~/lib/rate-limit";
+import { normalizeEmail } from "~/lib/utils";
 import { buildZoneWeightConfig } from "~/lib/shipping-config";
 import {
   calculateShipping,
@@ -31,6 +34,7 @@ import {
 import { shouldPinPaymentIntentShipping } from "~/lib/checkout/shipping";
 import { stripeClient } from "~/lib/stripe/client";
 import { checkoutSessionSchema } from "~/lib/validators/checkout";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import { db } from "~/server/db";
 
 // Thrown inside the reservation transaction to force a rollback when stock
@@ -99,6 +103,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Feature-flag guard: disabling checkout/cart/payments must actually close
+    // the money endpoint, not just hide the storefront UI (which is bypassable
+    // by POSTing here directly). Resolve the store's flags and reject session
+    // creation if any of the required commerce flags are off. `coupons` is
+    // handled separately below (discounts are ignored, not fatal).
+    const { isEnabled: isFeatureEnabled } = resolveFlags(business.featureFlags);
+    if (
+      !isFeatureEnabled("cart") ||
+      !isFeatureEnabled("checkout") ||
+      !isFeatureEnabled("payments")
+    ) {
+      return NextResponse.json(
+        { error: "Checkout is not available for this store." },
+        { status: 403 },
+      );
+    }
+    const couponsEnabled = isFeatureEnabled("coupons");
+
     // Maintenance guard: reject checkout while platform or store is in maintenance.
     const platformMaintenance = await getPlatformMaintenance();
     if (platformMaintenance.active || business.maintenanceMode) {
@@ -114,24 +136,7 @@ export async function POST(req: NextRequest) {
     // Lazy sweeper: release any stale reservations for this business before
     // running availability checks so they don't inflate reservedQty.
     try {
-      const stale = await db.inventoryReservation.findMany({
-        where: {
-          businessId: business.id,
-          status: "active",
-          expiresAt: { lt: new Date() },
-        },
-        take: 50,
-      });
-      for (const stalRes of stale) {
-        await db.$transaction(async (tx) => {
-          const entries = stalRes.items as ReservationEntry[];
-          await releaseReservation(tx, { items: entries });
-          await tx.inventoryReservation.update({
-            where: { id: stalRes.id },
-            data: { status: "released" },
-          });
-        });
-      }
+      await sweepStaleReservations(db, { businessId: business.id, take: 50 });
     } catch (sweeperErr) {
       // Non-fatal — availability check will be slightly conservative at worst
       console.warn(
@@ -317,13 +322,18 @@ export async function POST(req: NextRequest) {
       productMap,
     );
 
+    // Ignore any supplied discount code when the coupons feature is disabled —
+    // the store has turned discounts off, so a stale/injected code must not apply.
     const rawDiscountId =
-      typeof discountCodeId === "string" && discountCodeId.trim() !== ""
+      couponsEnabled &&
+      typeof discountCodeId === "string" &&
+      discountCodeId.trim() !== ""
         ? discountCodeId.trim()
         : null;
 
     let discountCents = 0;
     let verifiedDiscountCodeId: string | null = null;
+    let verifiedDiscountType: string | null = null;
 
     if (rawDiscountId) {
       const discountRow = await db.discountCode.findFirst({
@@ -340,13 +350,33 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const computed = validateAndComputeDiscount(discountRow, subtotalCents);
+      // Per-customer limit: count this shopper's prior (non-cancelled) orders
+      // that used this code. Authoritative check — the storefront validate
+      // endpoint may not have known the email.
+      let customerUsageCount: number | undefined;
+      if (discountRow.perCustomerLimit != null) {
+        customerUsageCount = await db.order.count({
+          where: {
+            businessId: business.id,
+            discountCodeId: discountRow.id,
+            customerEmail: normalizeEmail(customerInfo.email),
+            status: { not: "cancelled" },
+          },
+        });
+      }
+
+      // Shipping isn't computed yet: free_shipping codes yield 0 here and are
+      // applied to the shipping amount below once it's known.
+      const computed = validateAndComputeDiscount(discountRow, subtotalCents, {
+        customerUsageCount,
+      });
       if (!computed.ok) {
         return NextResponse.json({ error: computed.error }, { status: 400 });
       }
 
       discountCents = computed.discountAmountCents;
       verifiedDiscountCodeId = discountRow.id;
+      verifiedDiscountType = discountRow.type;
     }
 
     const shippingConfig = shippingConfigFromBusiness({
@@ -414,6 +444,23 @@ export async function POST(req: NextRequest) {
         shippingCents === 0 ? "Free shipping" : "Standard shipping";
     }
 
+    // Free-shipping discount codes: the discount amount IS the computed
+    // shipping cost. Rather than a coupon/negative line item, the shipping
+    // option presented to Stripe becomes free ($0). The original shipping
+    // value travels in metadata (`freeShippingDiscountCents`) so the order
+    // records shipping + discount at that value and totals reconcile:
+    //   subtotal + shipping(S) - discount(S) = amount_total.
+    let freeShippingDiscountCents = 0;
+    if (
+      verifiedDiscountType === "free_shipping" &&
+      deliveryMethod === "ship" &&
+      shippingCents > 0
+    ) {
+      freeShippingDiscountCents = shippingCents;
+      shippingCents = 0;
+      shippingDisplayName = "Free shipping";
+    }
+
     // Initialize Stripe with platform account
 
     // Create line items for Stripe (metadata so webhook can store product/variant and deduct inventory)
@@ -423,7 +470,9 @@ export async function POST(req: NextRequest) {
         ? variantMap.get(item.variantId)
         : undefined;
       const productRecord = productMap.get(item.productId);
-      const serverPrice = variantRecord?.price ?? productRecord?.price;
+      const serverPrice = variantRecord
+        ? resolveVariantPrice(variantRecord.price, variantRecord.product.price)
+        : productRecord?.price;
 
       if (serverPrice == null) {
         throw new Error(`Price not found for item ${item.productId}`);
@@ -614,6 +663,9 @@ export async function POST(req: NextRequest) {
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
         discountCodeId: verifiedDiscountCodeId ?? "",
+        ...(freeShippingDiscountCents > 0
+          ? { freeShippingDiscountCents: String(freeShippingDiscountCents) }
+          : {}),
         deliveryMethod,
         ...(hasFullShipping && sa
           ? {
@@ -810,7 +862,7 @@ export async function POST(req: NextRequest) {
       path: "/",
       httpOnly: true,
       sameSite: "strict",
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       maxAge: 3600,
     });
     return response;

@@ -26,6 +26,7 @@ import {
 } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
@@ -44,6 +45,8 @@ export function GeneralSettings({ business }: Props) {
   // Form Setup
   const form = useForm<GeneralBusinessFormSchema>({
     resolver: zodResolver(generalBusinessFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       name: business.name ?? "",
       ownerEmail: business.ownerEmail ?? "",
@@ -51,6 +54,7 @@ export function GeneralSettings({ business }: Props) {
       supportEmail: business.supportEmail ?? "",
       businessAddress: business.businessAddress ?? "",
       slug: business.slug ?? "",
+      sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
     },
   });
 
@@ -66,6 +70,8 @@ export function GeneralSettings({ business }: Props) {
         businessAddress: data.business.businessAddress ?? "",
         phoneNumber: data.business.phoneNumber ?? "",
         slug: data.business.slug,
+        sendAbandonedCheckoutEmails:
+          data.business.sendAbandonedCheckoutEmails ?? false,
       });
       void utils.business.invalidate();
       router.refresh();
@@ -85,6 +91,7 @@ export function GeneralSettings({ business }: Props) {
       supportEmail: data.supportEmail ?? undefined,
       businessAddress: data.businessAddress ?? undefined,
       phoneNumber: data.phoneNumber ?? undefined,
+      sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
     });
   };
 
@@ -96,6 +103,7 @@ export function GeneralSettings({ business }: Props) {
         supportEmail: business.supportEmail ?? undefined,
         businessAddress: business.businessAddress ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
+        sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
       },
     );
   };
@@ -247,6 +255,24 @@ export function GeneralSettings({ business }: Props) {
                   description="Public business phone number. Customers will see this number on your storefront."
                   type="tel"
                   placeholder="123-456-7890"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Customer Emails */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Emails</CardTitle>
+                <CardDescription>
+                  Automated emails sent to your customers
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <SwitchFormField
+                  form={form}
+                  name="sendAbandonedCheckoutEmails"
+                  label="Send abandoned checkout recovery emails"
+                  description="Email shoppers who start checkout but don't finish, inviting them back to their cart."
                 />
               </CardContent>
             </Card>

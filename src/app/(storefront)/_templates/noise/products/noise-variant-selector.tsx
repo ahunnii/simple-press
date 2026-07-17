@@ -5,8 +5,11 @@ import { Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
+import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type Props = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -18,7 +21,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] ?? null,
+    pickInitialVariant(product.variants, product),
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -43,16 +46,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
   const handleAddToCart = () => {
     if (!selectedVariant) return;
     addItem(
-      {
-        productId: product.id,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: effectiveMax,
-      },
+      buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
     );
     setQuantity(1);
@@ -172,7 +166,7 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
                   Added
                 </>
               ) : (
-                `Add ${quantity} to Cart`
+                `Add ${quantity > 1 ? `${quantity} ` : ""}to Cart`
               )}
             </Button>
           );
@@ -184,6 +178,18 @@ export function NoiseVariantSelector({ product, setSelectedVariantId }: Props) {
           ? `${product.name} — ${selectedVariant.name} added to bag`
           : ""}
       </div>
+
+      {/* Notify me when the selected variant is back in stock */}
+      {selectedVariant && effectiveMax === 0 && (
+        <NotifyMeForm
+          productId={product.id}
+          variantId={selectedVariant.id}
+          message="Get notified when this option is back in stock."
+          messageClassName="font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--vn-steel)]"
+          inputClassName="rounded-none border-[var(--vn-ink)] font-sans"
+          buttonClassName="rounded-none font-mono text-[11px] tracking-[0.24em] uppercase"
+        />
+      )}
     </div>
   );
 }

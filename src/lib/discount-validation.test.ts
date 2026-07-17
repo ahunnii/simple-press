@@ -12,6 +12,7 @@ function makeDiscount(overrides: Partial<DiscountArg> = {}): DiscountArg {
     expiresAt: null,
     usageLimit: null,
     usageCount: 0,
+    perCustomerLimit: null,
     minPurchase: null,
     maxDiscount: null,
     type: "percentage",
@@ -41,13 +42,23 @@ describe("validateAndComputeDiscount", () => {
     if (!result.ok) expect(result.error).toMatch(/expired/i);
   });
 
-  it("rejects a code that has not started yet", () => {
+  it("rejects a code whose startsAt is in the future", () => {
     const result = validateAndComputeDiscount(
       makeDiscount({ startsAt: new Date(Date.now() + 86_400_000) }),
       10_000,
     );
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.error).toMatch(/not yet valid/i);
+    expect(result).toEqual({
+      ok: false,
+      error: "This code isn't active yet",
+    });
+  });
+
+  it("accepts a code whose startsAt is in the past", () => {
+    const result = validateAndComputeDiscount(
+      makeDiscount({ startsAt: new Date(Date.now() - 86_400_000) }),
+      10_000,
+    );
+    expect(result).toEqual({ ok: true, discountAmountCents: 1_000 });
   });
 
   it("rejects when the usage limit is reached", () => {
@@ -90,5 +101,75 @@ describe("validateAndComputeDiscount", () => {
       10_000,
     );
     expect(result).toEqual({ ok: true, discountAmountCents: 10_000 });
+  });
+
+  describe("free_shipping", () => {
+    it("discounts exactly the computed shipping cost", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ type: "free_shipping", value: 0 }),
+        10_000,
+        { shippingCents: 799 },
+      );
+      expect(result).toEqual({ ok: true, discountAmountCents: 799 });
+    });
+
+    it("returns 0 when shipping is not yet known (validate endpoint)", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ type: "free_shipping", value: 0 }),
+        10_000,
+      );
+      expect(result).toEqual({ ok: true, discountAmountCents: 0 });
+    });
+
+    it("ignores maxDiscount — the cap only applies to item discounts", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ type: "free_shipping", value: 0, maxDiscount: 100 }),
+        10_000,
+        { shippingCents: 799 },
+      );
+      expect(result).toEqual({ ok: true, discountAmountCents: 799 });
+    });
+
+    it("still enforces minPurchase", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ type: "free_shipping", value: 0, minPurchase: 20_000 }),
+        10_000,
+        { shippingCents: 799 },
+      );
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(result.error).toMatch(/minimum purchase of \$200/i);
+    });
+  });
+
+  describe("perCustomerLimit", () => {
+    it("rejects when the customer has already used the code the maximum number of times", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ perCustomerLimit: 2 }),
+        10_000,
+        { customerUsageCount: 2 },
+      );
+      expect(result).toEqual({
+        ok: false,
+        error: "You've already used this code the maximum number of times",
+      });
+    });
+
+    it("accepts when the customer is below the per-customer limit", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ perCustomerLimit: 2 }),
+        10_000,
+        { customerUsageCount: 1 },
+      );
+      expect(result).toEqual({ ok: true, discountAmountCents: 1_000 });
+    });
+
+    it("cannot enforce the limit when the customer usage count is unknown (no email yet)", () => {
+      const result = validateAndComputeDiscount(
+        makeDiscount({ perCustomerLimit: 2 }),
+        10_000,
+      );
+      expect(result).toEqual({ ok: true, discountAmountCents: 1_000 });
+    });
   });
 });

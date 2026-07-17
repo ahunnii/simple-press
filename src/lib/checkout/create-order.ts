@@ -42,6 +42,25 @@ export function mapStripeLineItemsToOrderItems(
   );
 }
 
+/**
+ * Free-shipping discount codes: create-session zeroes the shipping option on
+ * Stripe (so `amount_shipping` is 0) and records the original shipping cost in
+ * session metadata as `freeShippingDiscountCents`. This parses it back out.
+ *
+ * Pure function — returns 0 for missing/malformed/non-positive values.
+ */
+export function parseFreeShippingDiscountCents(
+  session: Stripe.Checkout.Session,
+  fullSession: Stripe.Checkout.Session,
+): number {
+  const raw =
+    session.metadata?.freeShippingDiscountCents ??
+    fullSession.metadata?.freeShippingDiscountCents ??
+    "";
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
 export type CreateOrderParams = {
   business: { id: string };
   customer: { id: string } | null;
@@ -81,6 +100,33 @@ export async function createOrderFromCheckout(
     deliveryMethod = "ship",
   } = params;
 
+  // Payment gate: only materialize the order (and, downstream in the webhook,
+  // decrement inventory) once the money is actually captured. On
+  // `checkout.session.completed`, standard card payments arrive as "paid" and
+  // fully-discounted / $0 orders as "no_payment_required" — both are safe to
+  // fulfill. Async/delayed payment methods (e.g. bank debits) instead complete
+  // the session as "unpaid" and settle later; creating the order here would
+  // decrement stock before payment succeeds. Reject "unpaid" so no order is
+  // created for it.
+  //
+  // NOTE: Fully supporting async payments requires the webhook to also handle
+  // `checkout.session.async_payment_succeeded` (create the order then) and
+  // `checkout.session.async_payment_failed` (release any reservation). Until
+  // that's wired up, async-payment sessions will not produce an order.
+  if (session.payment_status === "unpaid") {
+    throw new Error(
+      `[Webhook] Refusing to create order for unpaid session ${session.id} (payment_status=unpaid)`,
+    );
+  }
+
+  // Free-shipping discount codes: record the order with shipping AND discount
+  // at the original shipping value so totals reconcile:
+  //   subtotal + shipping(S) - discount(S) = amount_total.
+  const freeShippingDiscountCents = parseFreeShippingDiscountCents(
+    session,
+    fullSession,
+  );
+
   // Generate order number and create order. Retry up to 3 times on a
   // unique-constraint conflict for orderNumber — two concurrent webhook
   // deliveries for different sessions can race and produce the same number.
@@ -115,8 +161,10 @@ export async function createOrderFromCheckout(
             // Amounts in cents
             subtotal: session.amount_subtotal ?? 0,
             tax: fullSession.total_details?.amount_tax ?? 0,
-            shipping: fullSession.total_details?.amount_shipping ?? 0,
-            discount: discountAmount,
+            shipping:
+              (fullSession.total_details?.amount_shipping ?? 0) +
+              freeShippingDiscountCents,
+            discount: discountAmount + freeShippingDiscountCents,
             total: session.amount_total ?? 0,
 
             // currency: session.currency ?? "usd",

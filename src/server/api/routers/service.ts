@@ -116,6 +116,7 @@ export const serviceRouter = createTRPCRouter({
           published: input.published,
           metaTitle: input.metaTitle,
           metaDescription: input.metaDescription,
+          metaKeywords: input.metaKeywords,
           ogImage: input.ogImage,
           sortOrder: (maxSort?.sortOrder ?? 0) + 1,
         },

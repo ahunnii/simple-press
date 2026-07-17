@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 // The collage places the logo top-center with up to 8 photo tiles around it
 // (two tall flanking images + a cluster below). See `.sl-mosaic` in globals.css.
 const MAX_TILES = 8;
@@ -17,6 +19,8 @@ type SledgeMosaicHeroProps = {
   ctaText?: string;
   ctaHref?: string;
   businessName?: string;
+  /** Spread on root <section> for preview overlay hotspot. */
+  sectionAttrs?: Record<string, string>;
 };
 
 export function SledgeMosaicHero({
@@ -26,6 +30,7 @@ export function SledgeMosaicHero({
   ctaText,
   ctaHref,
   businessName,
+  sectionAttrs,
 }: SledgeMosaicHeroProps) {
   const [visible, setVisible] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -62,7 +67,11 @@ export function SledgeMosaicHero({
         };
 
   return (
-    <section className="bg-[var(--sl-cream)]" aria-label="Hero">
+    <section
+      className="bg-[var(--sl-cream)]"
+      aria-label="Hero"
+      {...sectionAttrs}
+    >
       <div className="sl-container-hero">
         <div className="sl-mosaic py-5">
           {/* Logo / wordmark — top center of the collage */}
@@ -114,11 +123,20 @@ export function SledgeMosaicHero({
         </div>
 
         {/* Tagline */}
-        <p className="sl-hero-tagline font-sans italic">{resolvedTagline}</p>
+        <p
+          className="sl-hero-tagline font-sans italic"
+          {...fieldAttr("sledge.homepage.hero-tagline")}
+        >
+          {resolvedTagline}
+        </p>
 
         {/* CTA — larger than the default sl-btn to match the original hero */}
         <div className="sl-hero-cta-wrap">
-          <Link href={resolvedCtaHref} className="sl-btn sl-btn-hero">
+          <Link
+            href={resolvedCtaHref}
+            className="sl-btn sl-btn-hero"
+            {...fieldAttr("sledge.homepage.hero-primary-button-text")}
+          >
             {resolvedCtaText}
           </Link>
         </div>

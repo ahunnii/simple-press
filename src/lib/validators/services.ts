@@ -31,6 +31,7 @@ export const serviceFormSchema = z.object({
     .max(200, "Meta description must be 200 characters or fewer")
     .optional()
     .nullable(),
+  metaKeywords: z.string().optional().nullable(),
   ogImage: z.string().url().optional().nullable(),
 });
 

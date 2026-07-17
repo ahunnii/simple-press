@@ -11,8 +11,6 @@ type Props = {
 export function NoiseGenericPage({ page }: Props) {
   const isPolicyPage = page.type === "policy";
 
-  console.log(isPolicyPage);
-
   return (
     <PageTransition>
       {/* ── Centered header — type overline + h1 + excerpt ── */}

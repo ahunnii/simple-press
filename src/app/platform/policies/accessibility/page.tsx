@@ -1,4 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { env } from "~/env";
+
+export const metadata: Metadata = {
+  title: "Accessibility Statement | SimplePress",
+  description: "SimplePress commitment to WCAG 2.1 AA accessibility and how to report issues.",
+  alternates: {
+    canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/accessibility`,
+  },
+};
 
 const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL ??

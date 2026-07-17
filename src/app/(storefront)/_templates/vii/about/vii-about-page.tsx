@@ -1,5 +1,7 @@
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import type { TemplateListRow } from "~/lib/template-fields";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { PageTransition } from "~/components/page-animations";
 
@@ -183,18 +185,25 @@ export function ViiAboutPage({ business }: DefaultAboutPageTemplateProps) {
       />
 
       {/* 7. Closing contact CTA */}
-      <ViiContactCtaSection
-        contactImage={f["vii.about.cta-image"] ?? undefined}
-        heading={f["vii.about.cta-heading"] ?? ""}
-        subheading={f["vii.about.cta-subheading"] ?? ""}
-        body={f["vii.about.cta-body"] ?? ""}
-        buttonLabel={f["vii.about.cta-button-label"] ?? ""}
-        buttonHref={f["vii.about.cta-button-link"] ?? ""}
-        phone={f["vii.about.cta-phone"] ?? ""}
-        email={f["vii.about.cta-email"] ?? ""}
-        showPhone={f["vii.about.cta-show-phone"] !== "false"}
-        showEmail={f["vii.about.cta-show-email"] !== "false"}
-      />
+      {isSectionVisible(customFields, "vii", "about.cta") && (
+        <ViiContactCtaSection
+          contactImage={f["vii.about.cta-image"] ?? undefined}
+          heading={f["vii.about.cta-heading"] ?? ""}
+          subheading={f["vii.about.cta-subheading"] ?? ""}
+          body={f["vii.about.cta-body"] ?? ""}
+          buttonLabel={f["vii.about.cta-button-label"] ?? ""}
+          buttonHref={f["vii.about.cta-button-link"] ?? ""}
+          phone={f["vii.about.cta-phone"] ?? ""}
+          email={f["vii.about.cta-email"] ?? ""}
+          showPhone={f["vii.about.cta-show-phone"] !== "false"}
+          showEmail={f["vii.about.cta-show-email"] !== "false"}
+          sectionAttrs={sectionGroupAttr("about", "cta")}
+          headingFieldKey="vii.about.cta-heading"
+          subheadingFieldKey="vii.about.cta-subheading"
+          bodyFieldKey="vii.about.cta-body"
+          buttonLabelFieldKey="vii.about.cta-button-label"
+        />
+      )}
     </PageTransition>
   );
 }

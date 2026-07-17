@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, Globe, Package, Store } from "lucide-react";
+import { ArrowRight, CreditCard, Globe, Package, Palette, Store } from "lucide-react";
 
 import { env } from "~/env";
 import { Button } from "~/components/ui/button";
@@ -34,6 +34,7 @@ type Props = {
     stripeConnected: boolean;
     domainConfigured: boolean;
     firstProductAdded: boolean;
+    storefrontCustomized: boolean;
   };
   completedSteps: number;
   totalSteps: number;
@@ -96,21 +97,20 @@ export function SetupChecklist({
               <ConnectStripeButton
                 businessId={business.id}
                 stripeAccountId={business?.stripeAccountId ?? null}
-                // subdomain={business.subdomain}
               />
             )
           }
         />
 
-        {/* Step 3: Configure Domain */}
+        {/* Step 3: Configure Domain — required to complete setup */}
         <SetupStep
           completed={setupSteps.domainConfigured}
           icon={<Globe className="h-5 w-5" />}
-          title="Configure Your Domain"
+          title="Connect a Custom Domain (Required)"
           description={
             setupSteps.domainConfigured
-              ? `Your store is accessible at ${business.customDomain ?? `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`}`
-              : "Set up your custom domain or use your free subdomain"
+              ? `Your store is live at ${business.customDomain}`
+              : `A custom domain is required to complete setup. Your subdomain (${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}) is temporary.`
           }
           action={<DomainSetup business={business} vpsIp={vpsIp} />}
         />
@@ -133,6 +133,36 @@ export function SetupChecklist({
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+            )
+          }
+        />
+
+        {/* Step 5: Customize Storefront */}
+        <SetupStep
+          completed={setupSteps.storefrontCustomized}
+          icon={<Palette className="h-5 w-5" />}
+          title="Customize Your Storefront"
+          description={
+            setupSteps.storefrontCustomized
+              ? "Your storefront has been customized"
+              : "Upload a logo and edit your homepage sections to make the store your own"
+          }
+          action={
+            !setupSteps.storefrontCustomized && (
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/admin/content/branding">
+                    Brand Identity
+                    <ArrowRight className="ml-2 h-3 w-3" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/admin/content/template">
+                    Template Fields
+                    <ArrowRight className="ml-2 h-3 w-3" />
+                  </Link>
+                </Button>
+              </div>
             )
           }
         />

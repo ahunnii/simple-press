@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+
 type SledgeGetToKnowProps = {
   heading?: string;
   body?: string;
@@ -39,13 +41,21 @@ export function SledgeGetToKnow({
 
         {/* Right: text */}
         <div>
-          <h2 className="sl-heading-xl font-heading">
+          <h2
+            className="sl-heading-xl font-heading"
+            {...fieldAttr("sledge.homepage.get-to-know-overline")}
+          >
             {heading ?? "Get to Know Judy"}
           </h2>
 
           {/* Red-bar body text */}
           <div className="mb-10">
-            <p className="sl-quote-body font-sans italic">{body}</p>
+            <p
+              className="sl-quote-body font-sans italic"
+              {...fieldAttr("sledge.homepage.get-to-know-quote")}
+            >
+              {body}
+            </p>
           </div>
 
           {/* Coral buttons */}

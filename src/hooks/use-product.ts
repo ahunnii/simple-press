@@ -2,7 +2,12 @@ import { useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { parseCardAdditionalFields } from "~/lib/products";
+import {
+  resolveVariantCompareAtPrice,
+  resolveVariantPrice,
+} from "~/lib/variant-price";
 import { useCart } from "~/providers/cart-context";
 
 const MAX_UNTRACKED_QTY = 100;
@@ -13,7 +18,7 @@ export function useProduct(
   const { addItem, getItemQuantity, isHydrated } = useCart();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    product.variants[0]?.id ?? null,
+    pickInitialVariant(product.variants, product)?.id ?? null,
   );
 
   const [quantity, setQuantity] = useState(1);
@@ -25,16 +30,17 @@ export function useProduct(
   );
 
   // Calculate price (treat variant price 0 or null as "use product base price")
-  const displayPrice =
-    selectedVariant?.price != null && selectedVariant.price !== 0
-      ? selectedVariant.price
-      : product.price;
+  const displayPrice = resolveVariantPrice(
+    selectedVariant?.price,
+    product.price,
+  );
 
   // Calculate compare-at price for sale display (variant overrides product)
-  const displayCompareAtPrice =
-    selectedVariant?.price != null && selectedVariant.price !== 0
-      ? (selectedVariant.compareAtPrice ?? null)
-      : (product.compareAtPrice ?? null);
+  const displayCompareAtPrice = resolveVariantCompareAtPrice(
+    selectedVariant?.price,
+    selectedVariant?.compareAtPrice,
+    product.compareAtPrice,
+  );
 
   // Get current cart quantity for this variant
   const cartQuantity = getItemQuantity(product.id, selectedVariantId);
@@ -152,6 +158,7 @@ export function useProduct(
     addItem(
       {
         productId: product.id,
+        productSlug: product.slug,
         variantId: selectedVariantId,
         productName: `${product.name} ${tagline ? `- ${tagline}` : ""}`,
         variantName: selectedVariant?.name ?? null,

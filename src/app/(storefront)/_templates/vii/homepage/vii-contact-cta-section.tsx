@@ -5,6 +5,7 @@ import Image from "next/image";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -38,6 +39,16 @@ type Props = {
   showPhone?: boolean;
   /** When false, hide the email link even if an email is set. Default true. */
   showEmail?: boolean;
+  /** Extra data attributes (e.g. `data-sp-group`) spread onto the root `<section>` for the preview overlay. */
+  sectionAttrs?: Record<string, string>;
+  /** Full template field key for `heading`, when it's a live-patchable field. */
+  headingFieldKey?: string;
+  /** Full template field key for `subheading`, when it's a live-patchable field. */
+  subheadingFieldKey?: string;
+  /** Full template field key for `body`, when it's a live-patchable field. */
+  bodyFieldKey?: string;
+  /** Full template field key for `buttonLabel`, when it's a live-patchable field. */
+  buttonLabelFieldKey?: string;
 };
 
 export function ViiContactCtaSection({
@@ -54,12 +65,18 @@ export function ViiContactCtaSection({
   embedReveal = false,
   showPhone = true,
   showEmail = true,
+  sectionAttrs,
+  headingFieldKey,
+  subheadingFieldKey,
+  bodyFieldKey,
+  buttonLabelFieldKey,
 }: Props) {
   const { ref, visible } = useViiReveal(0.08);
 
   return (
     <section
       aria-labelledby="contact-cta-heading"
+      {...sectionAttrs}
       style={{
         position: "relative",
         overflow: "hidden",
@@ -97,7 +114,7 @@ export function ViiContactCtaSection({
       {/* Content */}
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{
           position: "relative",
           zIndex: 1,
@@ -109,6 +126,7 @@ export function ViiContactCtaSection({
         {heading && (
           <h2
             id="contact-cta-heading"
+            {...(headingFieldKey ? fieldAttr(headingFieldKey) : {})}
             style={{
               fontFamily: "var(--font-serif)",
               fontSize: "clamp(36px, 6vw, 72px)",
@@ -124,13 +142,19 @@ export function ViiContactCtaSection({
         )}
 
         {subheading && (
-          <ViiOverline align="center" tone="dark" style={{ marginBottom: 24 }}>
+          <ViiOverline
+            align="center"
+            tone="dark"
+            style={{ marginBottom: 24 }}
+            fieldKey={subheadingFieldKey}
+          >
             {subheading}
           </ViiOverline>
         )}
 
         {body && (
           <p
+            {...(bodyFieldKey ? fieldAttr(bodyFieldKey) : {})}
             style={{
               fontFamily: "var(--font-sans)",
               fontSize: "clamp(14px, 1.3vw, 16px)",
@@ -152,6 +176,7 @@ export function ViiContactCtaSection({
             <a
               href={buttonHref}
               className="vii-cta-btn"
+              {...(buttonLabelFieldKey ? fieldAttr(buttonLabelFieldKey) : {})}
               style={{
                 display: "inline-block",
                 position: "relative",

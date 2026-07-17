@@ -50,6 +50,8 @@ export function FulfillmentTracker({ order }: Props) {
   };
 
   const isFulfilled = order.fulfillmentStatus === "fulfilled";
+  const isPartiallyFulfilled =
+    order.fulfillmentStatus === "partially_fulfilled";
   const isUpdating = updateFulfillmentMutation.isPending;
 
   return (
@@ -61,6 +63,14 @@ export function FulfillmentTracker({ order }: Props) {
             <Badge variant="default" className="gap-1">
               <Package className="h-3 w-3" />
               Fulfilled
+            </Badge>
+          ) : isPartiallyFulfilled ? (
+            <Badge
+              variant="outline"
+              className="gap-1 border-amber-300 bg-amber-50 text-amber-700"
+            >
+              <Package className="h-3 w-3" />
+              Partially fulfilled
             </Badge>
           ) : (
             <Badge variant="secondary">Unfulfilled</Badge>

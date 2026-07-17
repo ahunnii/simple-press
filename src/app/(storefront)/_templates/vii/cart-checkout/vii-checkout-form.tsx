@@ -18,6 +18,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -525,6 +529,14 @@ export function ViiCheckoutForm({
                     : "This is sent to Stripe Checkout prefilled so you can confirm or edit your address before paying."}
                 </p>
 
+                <SavedAddressPicker
+                  className="[font-family:var(--font-sans)] text-[color:var(--vii-ink,inherit)]"
+                  legendClassName="text-[11px] font-normal tracking-[0.18em] uppercase text-[color:var(--vii-ink-soft,inherit)]"
+                  optionClassName="rounded-[var(--radius)] border-[color:var(--vii-hairline,currentColor)]"
+                  accentColor="var(--vii-navy)"
+                  onSelect={(address) => applySavedAddressToForm(f, address)}
+                />
+
                 {/* Address line 1 */}
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 0 }}
@@ -916,146 +928,150 @@ export function ViiCheckoutForm({
               </div>
 
               {/* Discount code input */}
-              <div
-                style={{
-                  paddingTop: 8,
-                  borderTop: "1px solid var(--vii-hairline)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                }}
-              >
-                <label
-                  htmlFor="vii-discount-code"
-                  className="vii-field-label"
-                  style={{ marginBottom: 0 }}
+              {f.couponsEnabled && (
+                <div
+                  style={{
+                    paddingTop: 8,
+                    borderTop: "1px solid var(--vii-hairline)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
                 >
-                  Discount code
-                </label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <div style={{ position: "relative", flex: 1 }}>
-                    <Tag
-                      aria-hidden="true"
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: 0,
-                        transform: "translateY(-50%)",
-                        width: 14,
-                        height: 14,
-                        color: "var(--vii-ink-soft)",
-                      }}
-                    />
-                    <input
-                      id="vii-discount-code"
-                      type="text"
-                      placeholder="CODE"
-                      value={f.discountCodeInput}
-                      onChange={(e) => {
-                        f.setDiscountCodeInput(e.target.value.toUpperCase());
-                        f.setDiscountFieldError(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          f.handleApplyDiscount();
-                        }
-                      }}
-                      aria-invalid={!!f.discountFieldError}
-                      aria-describedby={
-                        f.discountFieldError ? "vii-discount-error" : undefined
-                      }
-                      autoComplete="off"
-                      style={{ paddingLeft: 22 }}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={f.handleApplyDiscount}
-                    disabled={
-                      f.isValidatingDiscount || !f.discountCodeInput.trim()
-                    }
-                    aria-label={
-                      f.isValidatingDiscount
-                        ? "Applying discount code"
-                        : "Apply discount code"
-                    }
-                    style={{
-                      flexShrink: 0,
-                      padding: "0 16px",
-                      background: "transparent",
-                      border: "1.5px solid var(--vii-tan)",
-                      borderRadius: "var(--radius)",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 11,
-                      fontWeight: 500,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "var(--vii-ink-soft)",
-                      cursor: "pointer",
-                      transition: "border-color 0.15s ease, color 0.15s ease",
-                      opacity:
-                        f.isValidatingDiscount || !f.discountCodeInput.trim()
-                          ? 0.45
-                          : 1,
-                      minHeight: 44,
-                    }}
+                  <label
+                    htmlFor="vii-discount-code"
+                    className="vii-field-label"
+                    style={{ marginBottom: 0 }}
                   >
-                    {f.isValidatingDiscount ? (
-                      <Loader2
-                        className="h-3.5 w-3.5 animate-spin"
+                    Discount code
+                  </label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <div style={{ position: "relative", flex: 1 }}>
+                      <Tag
                         aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          left: 0,
+                          transform: "translateY(-50%)",
+                          width: 14,
+                          height: 14,
+                          color: "var(--vii-ink-soft)",
+                        }}
                       />
-                    ) : (
-                      "Apply"
-                    )}
-                  </button>
+                      <input
+                        id="vii-discount-code"
+                        type="text"
+                        placeholder="CODE"
+                        value={f.discountCodeInput}
+                        onChange={(e) => {
+                          f.setDiscountCodeInput(e.target.value.toUpperCase());
+                          f.setDiscountFieldError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            f.handleApplyDiscount();
+                          }
+                        }}
+                        aria-invalid={!!f.discountFieldError}
+                        aria-describedby={
+                          f.discountFieldError
+                            ? "vii-discount-error"
+                            : undefined
+                        }
+                        autoComplete="off"
+                        style={{ paddingLeft: 22 }}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={f.handleApplyDiscount}
+                      disabled={
+                        f.isValidatingDiscount || !f.discountCodeInput.trim()
+                      }
+                      aria-label={
+                        f.isValidatingDiscount
+                          ? "Applying discount code"
+                          : "Apply discount code"
+                      }
+                      style={{
+                        flexShrink: 0,
+                        padding: "0 16px",
+                        background: "transparent",
+                        border: "1.5px solid var(--vii-tan)",
+                        borderRadius: "var(--radius)",
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "var(--vii-ink-soft)",
+                        cursor: "pointer",
+                        transition: "border-color 0.15s ease, color 0.15s ease",
+                        opacity:
+                          f.isValidatingDiscount || !f.discountCodeInput.trim()
+                            ? 0.45
+                            : 1,
+                        minHeight: 44,
+                      }}
+                    >
+                      {f.isValidatingDiscount ? (
+                        <Loader2
+                          className="h-3.5 w-3.5 animate-spin"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        "Apply"
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Discount error — accessible red, not copper */}
+                  {f.discountFieldError && (
+                    <p
+                      id="vii-discount-error"
+                      role="alert"
+                      className="vii-fade-up"
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 12,
+                        lineHeight: 1.4,
+                        color: "var(--vii-error)",
+                        background: "var(--vii-error-bg)",
+                        border: "1px solid var(--vii-error-border)",
+                        borderRadius: "var(--radius)",
+                        padding: "8px 12px",
+                        margin: 0,
+                      }}
+                    >
+                      {f.discountFieldError}
+                    </p>
+                  )}
+
+                  {/* Applied discount success */}
+                  {f.discountCodeLabel && f.discountAmount > 0 && (
+                    <p
+                      role="status"
+                      className="vii-fade-up"
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: 12,
+                        lineHeight: 1.4,
+                        color: "var(--vii-success)",
+                        background: "var(--vii-success-bg)",
+                        border: "1px solid var(--vii-success-border)",
+                        borderRadius: "var(--radius)",
+                        padding: "8px 12px",
+                        margin: 0,
+                      }}
+                    >
+                      Discount applied: <strong>{f.discountCodeLabel}</strong> —
+                      you saved {formatPrice(f.discountAmount)}
+                    </p>
+                  )}
                 </div>
-
-                {/* Discount error — accessible red, not copper */}
-                {f.discountFieldError && (
-                  <p
-                    id="vii-discount-error"
-                    role="alert"
-                    className="vii-fade-up"
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 12,
-                      lineHeight: 1.4,
-                      color: "var(--vii-error)",
-                      background: "var(--vii-error-bg)",
-                      border: "1px solid var(--vii-error-border)",
-                      borderRadius: "var(--radius)",
-                      padding: "8px 12px",
-                      margin: 0,
-                    }}
-                  >
-                    {f.discountFieldError}
-                  </p>
-                )}
-
-                {/* Applied discount success */}
-                {f.discountCodeLabel && f.discountAmount > 0 && (
-                  <p
-                    role="status"
-                    className="vii-fade-up"
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 12,
-                      lineHeight: 1.4,
-                      color: "var(--vii-success)",
-                      background: "var(--vii-success-bg)",
-                      border: "1px solid var(--vii-success-border)",
-                      borderRadius: "var(--radius)",
-                      padding: "8px 12px",
-                      margin: 0,
-                    }}
-                  >
-                    Discount applied: <strong>{f.discountCodeLabel}</strong> —
-                    you saved {formatPrice(f.discountAmount)}
-                  </p>
-                )}
-              </div>
+              )}
 
               {/* Totals */}
               <div

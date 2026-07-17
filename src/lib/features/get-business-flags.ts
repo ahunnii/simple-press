@@ -1,11 +1,7 @@
 import { db } from "~/server/db";
 
 import { checkBusiness } from "../check-business";
-import {
-  FEATURE_REGISTRY,
-  getDefaultFlags,
-  getDisabledDueToDependency,
-} from "./registry";
+import { resolveFlags } from "./resolve-flags";
 
 export async function getBusinessFlags() {
   const business = await checkBusiness();
@@ -17,15 +13,14 @@ export async function getBusinessFlags() {
     select: { featureFlags: true },
   });
 
-  const defaults = getDefaultFlags();
-  const stored = (businessData?.featureFlags as Record<string, boolean>) ?? {};
-  const merged = { ...defaults, ...stored };
-  const disabledByDependency = getDisabledDueToDependency(merged);
+  const { flags, isEnabled, disabledByDependency } = resolveFlags(
+    businessData?.featureFlags,
+  );
 
-  const isEnabled = (key: string): boolean => {
-    if (disabledByDependency.has(key)) return false;
-    return merged[key] ?? FEATURE_REGISTRY[key]?.enabledByDefault ?? false;
+  // Preserve the Set return type that existing callers depend on.
+  return {
+    flags,
+    isEnabled,
+    disabledByDependency: new Set(disabledByDependency),
   };
-
-  return { flags: merged, isEnabled, disabledByDependency };
 }

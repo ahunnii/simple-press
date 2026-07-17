@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import {
-  LayoutDashboardIcon,
+  Heart,
   MessageSquare,
   ShoppingBag,
   X,
@@ -20,6 +20,8 @@ import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -41,10 +43,12 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, isPending } = authClient.useSession();
-  const { isEnabled, isDisabledByDependency } = useFeatureFlags({
+  const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const user = session?.user;
   const shouldReduceMotion = useReducedMotion();
 
@@ -244,6 +248,22 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
             </nav>
 
             <div className="flex items-center gap-3">
+              {/* Wishlist icon — no dedicated feature flag; unconditional like product-card hearts */}
+              {isStorefrontEnabled("wishlist") && (
+                <Link
+                  href="/wishlist"
+                  className="relative flex items-center p-2 text-[#4c566a] transition-colors hover:text-[#215935]"
+                  aria-label={`Wishlist with ${wishlistCount} items`}
+                >
+                  <Heart className="size-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[#215935] text-[10px] font-bold text-white">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+
               {/* Cart icon */}
 
               {isEnabled("cart") && (
@@ -275,12 +295,16 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                   </Link>
                 </Button>
 
-                {isPending ? (
-                  <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-                ) : user ? (
-                  userMenu
-                ) : (
-                  <></>
+                {isStorefrontEnabled("customerAccounts") && (
+                  <>
+                    {isPending ? (
+                      <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                    ) : user ? (
+                      userMenu
+                    ) : (
+                      <></>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -406,7 +430,7 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                   className="border-green-500/30 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800"
                   variant="outline"
                 >
-                  <Link href="/get-quote" onClick={closeMenu}>
+                  <Link href="/contact" onClick={closeMenu}>
                     <MessageSquare className="mr-1.5 h-4 w-4" />
                     Get in Touch
                   </Link>

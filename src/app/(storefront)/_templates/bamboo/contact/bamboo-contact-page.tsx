@@ -3,7 +3,7 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -46,9 +46,17 @@ export function BambooContactPage({
             className="flex flex-1 flex-col items-start gap-6"
           >
             <h1 className="text-foreground font-heading text-4xl leading-tight font-bold tracking-tight md:text-5xl">
-              <span className="text-balance">{f["bamboo.contact.header"]}</span>
+              <span
+                className="text-balance"
+                {...fieldAttr("bamboo.contact.header")}
+              >
+                {f["bamboo.contact.header"]}
+              </span>
             </h1>
-            <p className="text-muted-foreground max-w-lg text-lg leading-relaxed">
+            <p
+              className="text-muted-foreground max-w-lg text-lg leading-relaxed"
+              {...fieldAttr("bamboo.contact.subheader")}
+            >
               {f["bamboo.contact.subheader"]}
             </p>
           </FadeIn>

@@ -1,7 +1,9 @@
+import type { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { normalizeEmail } from "~/lib/utils";
@@ -9,8 +11,27 @@ import {
   createTRPCRouter,
   ownerAdminProcedure,
   protectedProcedure,
-  publicProcedure,
+  staffProcedure,
 } from "~/server/api/trpc";
+
+/**
+ * Owner-private CRM `notes` must never reach a STAFF (fulfillment-only) caller.
+ * `staffProcedure` admits OWNER/MANAGER/STAFF, so we re-resolve the caller's
+ * membership role for the resolved business (PLATFORM_ADMIN always allowed).
+ */
+async function canViewCustomerNotes(
+  db: DbClient,
+  userId: string,
+  platformRole: string | null | undefined,
+  businessId: string,
+): Promise<boolean> {
+  if (platformRole === "PLATFORM_ADMIN") return true;
+  const membership = await db.businessMembership.findUnique({
+    where: { userId_businessId: { userId, businessId } },
+    select: { role: true },
+  });
+  return !!membership && ["OWNER", "MANAGER"].includes(membership.role);
+}
 
 export const customerRouter = createTRPCRouter({
   // Get customer profile for current user
@@ -130,83 +151,6 @@ export const customerRouter = createTRPCRouter({
 
     return orders;
   }),
-
-  // Get orders by email (for guest checkout that later signs in)
-  // getOrdersByEmail: publicProcedure
-  //   .input(z.object({ email: z.string().email() }))
-  //   .query(async ({ ctx, input }) => {
-  //     // This is a public endpoint but requires knowing the exact email
-  //     // Used for "check order status" type features
-
-  //     // Get the current business from the domain
-  //     const business = await checkBusiness();
-  //     if (!business) {
-  //       throw new TRPCError({
-  //         code: "NOT_FOUND",
-  //         message: "Business not found",
-  //       });
-  //     }
-
-  //     const orders = await ctx.db.order.findMany({
-  //       where: {
-  //         customerEmail: input.email.toLowerCase(),
-  //         businessId: business.id,
-  //       },
-  //       include: {
-  //         items: true,
-  //         shippingAddress: {
-  //           select: {
-  //             city: true,
-  //             province: true,
-  //             zip: true,
-  //           },
-  //         },
-  //       },
-  //       orderBy: { createdAt: "desc" },
-  //       take: 10, // Limit to last 10 orders
-  //     });
-
-  //     return orders;
-  //   }),
-
-  // Link customer account to authenticated user (Need to rethink)
-  // linkToUser: protectedProcedure.mutation(async ({ ctx }) => {
-  //   const user = ctx.session.user;
-
-  //   if (!user.businessId) {
-  //     throw new TRPCError({
-  //       code: "BAD_REQUEST",
-  //       message: "User must be associated with a business",
-  //     });
-  //   }
-
-  //   // Find or create customer for this user's email
-  //   const customer = await ctx.db.customer.upsert({
-  //     where: {
-  //       businessId_email: {
-  //         email: user.email,
-  //         businessId: user.businessId,
-  //       },
-  //     },
-  //     create: {
-  //       email: user.email,
-  //       firstName: user.name.split(" ")[0] ?? "",
-  //       lastName: user.name.split(" ").slice(1).join(" ") || "",
-  //       businessId: user.businessId,
-  //       userId: user.id,
-  //     },
-  //     update: {
-  //       userId: user.id,
-  //       // Optionally update name if not set
-  //       firstName: user.name.split(" ")[0] ?? undefined,
-  //       lastName: user.name.split(" ").slice(1).join(" ") || undefined,
-  //     },
-  //   });
-
-  //   console.log(`[Customer] Linked customer ${customer.id} to user ${user.id}`);
-
-  //   return customer;
-  // }),
 
   updateMarketingPreference: protectedProcedure
     .input(z.object({ acceptsMarketing: z.boolean() }))
@@ -687,11 +631,39 @@ export const customerRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  getById: ownerAdminProcedure
+  // Owner-facing CRM notes about a customer (never shown to the customer)
+  updateNotes: ownerAdminProcedure
+    .input(
+      z.object({
+        customerId: z.string(),
+        notes: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const customer = await ctx.db.customer.findFirst({
+        where: { id: input.customerId, businessId },
+      });
+
+      if (!customer) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Customer not found",
+        });
+      }
+
+      return ctx.db.customer.update({
+        where: { id: input.customerId },
+        data: { notes: input.notes },
+      });
+    }),
+
+  getById: staffProcedure
     .input(z.string())
     .query(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
-      return ctx.db.customer.findFirst({
+      const customer = await ctx.db.customer.findFirst({
         where: { id, businessId },
         include: {
           orders: {
@@ -703,28 +675,88 @@ export const customerRouter = createTRPCRouter({
           },
         },
       });
+
+      if (!customer) return null;
+
+      // STAFF is fulfillment-only and must not see owner-private CRM notes.
+      const showNotes = await canViewCustomerNotes(
+        ctx.db,
+        ctx.session.user.id,
+        ctx.session.user.platformRole,
+        businessId,
+      );
+
+      return showNotes ? customer : { ...customer, notes: null };
     }),
 
-  list: ownerAdminProcedure
-    .input(z.object({ search: z.string().optional() }))
+  list: staffProcedure
+    .input(
+      z.object({
+        search: z.string().optional(),
+        page: z.coerce.number().int().positive().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const search = input.search?.trim();
 
-      return ctx.db.customer.findMany({
-        where: {
-          businessId,
-          ...(search
-            ? {
-                OR: [
-                  { email: { contains: search, mode: "insensitive" } },
-                  { firstName: { contains: search, mode: "insensitive" } },
-                  { lastName: { contains: search, mode: "insensitive" } },
-                ],
-              }
-            : {}),
+      const where = {
+        businessId,
+        ...(search
+          ? {
+              OR: [
+                { email: { contains: search, mode: "insensitive" } },
+                { firstName: { contains: search, mode: "insensitive" } },
+                { lastName: { contains: search, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      } satisfies Prisma.CustomerWhereInput;
+
+      // Pagination — mirrors product.secureList
+      const pageSize = 50;
+      const page = input.page ?? 1;
+      const skip = (page - 1) * pageSize;
+
+      // Stats are computed over the FULL filtered set (not just the page).
+      const [customers, totalCount, marketingCount] = await ctx.db.$transaction(
+        [
+          ctx.db.customer.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: pageSize,
+          }),
+          ctx.db.customer.count({ where }),
+          ctx.db.customer.count({
+            where: { AND: [where, { acceptsMarketing: true }] },
+          }),
+        ],
+      );
+
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      // STAFF is fulfillment-only and must not see owner-private CRM notes.
+      const showNotes = await canViewCustomerNotes(
+        ctx.db,
+        ctx.session.user.id,
+        ctx.session.user.platformRole,
+        businessId,
+      );
+      const safeCustomers = showNotes
+        ? customers
+        : customers.map((c) => ({ ...c, notes: null }));
+
+      return {
+        customers: safeCustomers,
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+        stats: {
+          totalCustomers: totalCount,
+          marketingCount,
         },
-        orderBy: { createdAt: "desc" },
-      });
+      };
     }),
 });

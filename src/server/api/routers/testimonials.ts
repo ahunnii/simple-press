@@ -27,7 +27,7 @@ function buildInviteUrl(
   business: {
     subdomain: string;
     customDomain: string | null;
-    domainStatus: import("generated/prisma").BusinessDomainStatus | null;
+    domainStatus: BusinessDomainStatus | null;
   },
   code: string,
 ): string {
@@ -53,18 +53,39 @@ export const testimonialRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const businessId = await checkBusiness();
-      if (!businessId) {
+      const business = await checkBusiness();
+      if (!business) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Business not found",
         });
       }
 
+      // A client flag must NEVER widen visibility on a public procedure. Only an
+      // authenticated OWNER/MANAGER (or platform admin) of THIS business may see
+      // unapproved/hidden testimonials (the admin moderation list). Everyone else
+      // is force-scoped to approved + visible.
+      let canSeeAll = false;
+      if (!input.publicOnly && ctx.session?.user) {
+        const user = ctx.session.user;
+        if (user.platformRole === "PLATFORM_ADMIN") {
+          canSeeAll = true;
+        } else {
+          const membership = await ctx.db.businessMembership.findUnique({
+            where: {
+              userId_businessId: { userId: user.id, businessId: business.id },
+            },
+            select: { role: true },
+          });
+          canSeeAll =
+            !!membership && ["OWNER", "MANAGER"].includes(membership.role);
+        }
+      }
+
       return ctx.db.testimonial.findMany({
         where: {
-          businessId: businessId.id,
-          ...(input.publicOnly && { isApproved: true, isHidden: false }),
+          businessId: business.id,
+          ...(canSeeAll ? {} : { isApproved: true, isHidden: false }),
         },
         orderBy: { testimonialDate: "desc" },
       });

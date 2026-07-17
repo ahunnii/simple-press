@@ -36,7 +36,17 @@ export const env = createEnv({
 
     SIMPLEPRESS_HASH_SECRET: z.string(),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
+    // Dedicated bearer credential for outbound calls to Artisanal Futures API
+    ARTISANAL_FUTURES_API_TOKEN: z.string().min(1),
+    // Bearer token for inbound calls from Artisanal Futures partner API
+    AF_PARTNER_API_TOKEN: z.string().min(1),
+    // Shared HMAC secret for both inbound and outbound partner requests
+    AF_SP_WEBHOOK_SECRET: z.string().min(1),
     REDIS_URL: z.string().url().optional(),
+
+    // Shared secret for the /api/cron endpoint (Bearer token). Optional: when
+    // unset, the cron endpoint refuses all requests.
+    CRON_SECRET: z.string().min(16).optional(),
 
     // PII field-level encryption key for prisma-field-encryption.
     // Format: k1.aesgcm256.<44-char base64> (AES-GCM-256).
@@ -130,7 +140,11 @@ export const env = createEnv({
     HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
     ARTISANAL_FUTURES_API_URL: process.env.ARTISANAL_FUTURES_API_URL,
+    ARTISANAL_FUTURES_API_TOKEN: process.env.ARTISANAL_FUTURES_API_TOKEN,
+    AF_PARTNER_API_TOKEN: process.env.AF_PARTNER_API_TOKEN,
+    AF_SP_WEBHOOK_SECRET: process.env.AF_SP_WEBHOOK_SECRET,
     REDIS_URL: process.env.REDIS_URL,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,

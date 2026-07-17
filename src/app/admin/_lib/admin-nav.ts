@@ -1,6 +1,7 @@
 import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
+  IconBrandWordpress,
   IconChartBar,
   IconCreditCard,
   IconDashboard,
@@ -8,6 +9,8 @@ import {
   IconFolder,
   IconImageInPicture,
   IconLanguage,
+  IconMail,
+  IconMailFast,
   IconMessageStar,
   IconPackage,
   IconPackages,
@@ -27,11 +30,16 @@ import {
   Megaphone,
   Menu,
   Package,
+  Plus,
   PowerOff,
   Search,
   Shield,
+  Users,
   Wrench,
+  Zap,
 } from "lucide-react";
+
+import { getPlatformHubUrl } from "~/lib/domain-utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,9 +48,48 @@ export type NavSection =
   | "catalog"
   | "marketing"
   | "content"
-  | "insights";
+  | "insights"
+  | "platform";
 
 export type NavHub = "settings" | "content";
+
+/** Business membership roles that can access the admin dashboard. */
+export type AdminRole = "OWNER" | "MANAGER" | "STAFF";
+
+/** Roles a nav item is visible to when it declares no explicit `roles`. */
+export const DEFAULT_NAV_ROLES: AdminRole[] = ["OWNER", "MANAGER"];
+
+/**
+ * Human-readable capability summary for each admin role. Used to explain
+ * roles in the team invite dialog and members table.
+ *
+ * Source of truth: `ownerOnlyProcedure` (src/server/api/trpc.ts) restricts
+ * team invite/remove/role-change to OWNER (see src/server/api/routers/team.ts).
+ * `ownerAdminProcedure` — which gates products, orders, payments, content,
+ * and settings mutations — allows both OWNER and MANAGER. `staffProcedure`
+ * additionally allows STAFF, but is only used for fulfillment procedures
+ * (orders, customers); see `STAFF_ALLOWED_PATH_PREFIXES` below.
+ */
+export const ROLE_DESCRIPTIONS: Record<
+  AdminRole,
+  { label: string; summary: string }
+> = {
+  OWNER: {
+    label: "Owner",
+    summary:
+      "Full access, including team management, payments, and store settings.",
+  },
+  MANAGER: {
+    label: "Manager",
+    summary:
+      "Everything an Owner can do except team management — products, orders, payments, content, and settings.",
+  },
+  STAFF: {
+    label: "Staff",
+    summary:
+      "Fulfillment access only — can view and manage orders and customers.",
+  },
+};
 
 /** A top-level sidebar navigation item. */
 export interface NavItem {
@@ -52,6 +99,21 @@ export interface NavItem {
   icon: TablerIcon | LucideIcon;
   section: NavSection;
   featureKey?: string;
+  /**
+   * Membership roles that can see this item. Defaults to OWNER + MANAGER
+   * (`DEFAULT_NAV_ROLES`). Include "STAFF" only for fulfillment-safe pages
+   * (orders, customers). PLATFORM_ADMIN always sees everything.
+   */
+  roles?: AdminRole[];
+  /** Keyword synonyms for command palette matching. */
+  keywords?: string[];
+  /**
+   * True when `href` is an absolute URL to a different host (e.g. the
+   * `platform.*` subdomain). Consumers must not `router.push()` these —
+   * use a plain navigation (`<Link>` renders a real `<a>` for absolute
+   * URLs; the command palette falls back to `window.location.href`).
+   */
+  external?: boolean;
 }
 
 /** A card entry shown on a hub index page (Settings or Content). */
@@ -67,6 +129,29 @@ export interface HubCard {
   icon: LucideIcon | TablerIcon;
   /** Feature flag key — when set and disabled, the card is hidden from its hub. */
   featureKey?: string;
+  /**
+   * True when the card links to a platform-admin-only surface (e.g. the
+   * legacy Template Fields editor). Hidden from owners/managers everywhere;
+   * consumers must opt in via `getHubCards(hub, { includePlatformOnly })`.
+   */
+  platformOnly?: boolean;
+  /** Keyword synonyms for command palette matching. */
+  keywords?: string[];
+}
+
+/** A quick action for the command palette. */
+export interface PaletteAction {
+  key: string;
+  title: string;
+  href: string;
+  icon: TablerIcon | LucideIcon;
+  keywords?: string[];
+  featureKey?: string;
+  /**
+   * Membership roles that can see this action. Defaults to OWNER + MANAGER
+   * (`DEFAULT_NAV_ROLES`). PLATFORM_ADMIN always sees everything.
+   */
+  roles?: AdminRole[];
 }
 
 export const NAV_SECTION_LABELS: Record<NavSection, string> = {
@@ -75,6 +160,7 @@ export const NAV_SECTION_LABELS: Record<NavSection, string> = {
   marketing: "Marketing",
   content: "Content",
   insights: "Insights",
+  platform: "Platform",
 };
 
 // ─── Main nav items ───────────────────────────────────────────────────────────
@@ -95,6 +181,8 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconShoppingCart,
     section: "sell",
     featureKey: "orders",
+    roles: ["OWNER", "MANAGER", "STAFF"],
+    keywords: ["sales", "purchases", "fulfillment"],
   },
   {
     key: "customers",
@@ -102,6 +190,9 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/admin/customers",
     icon: IconUsers,
     section: "sell",
+    featureKey: "customerAccounts",
+    roles: ["OWNER", "MANAGER", "STAFF"],
+    keywords: ["buyers", "shoppers"],
   },
   {
     key: "payments",
@@ -110,6 +201,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconCreditCard,
     section: "sell",
     featureKey: "payments",
+    keywords: ["stripe", "payouts", "balance"],
   },
 
   // Catalog
@@ -120,6 +212,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPackage,
     section: "catalog",
     featureKey: "products",
+    keywords: ["items", "catalog", "listings", "sku"],
   },
   {
     key: "inventory",
@@ -154,6 +247,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconDiscount,
     section: "marketing",
     featureKey: "coupons",
+    keywords: ["coupon", "promo", "promotion", "code", "sale"],
   },
   {
     key: "testimonials",
@@ -179,6 +273,15 @@ export const NAV_ITEMS: NavItem[] = [
     section: "marketing",
     featureKey: "galleries",
   },
+  {
+    key: "marketing",
+    title: "Email Marketing",
+    href: "/admin/marketing",
+    icon: IconMailFast,
+    section: "marketing",
+    featureKey: "emailMarketing",
+    keywords: ["newsletter", "broadcast", "campaign", "email blast"],
+  },
 
   // Content
   {
@@ -195,6 +298,15 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconPhoto,
     section: "content",
     featureKey: "media",
+    keywords: ["images", "files", "uploads", "library"],
+  },
+  {
+    key: "emails",
+    title: "Notification Emails",
+    href: "/admin/emails",
+    icon: IconMail,
+    section: "content",
+    keywords: ["notification", "transactional", "order emails"],
   },
 
   // Insights
@@ -205,6 +317,21 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconChartBar,
     section: "insights",
     featureKey: "analytics",
+    keywords: ["stats", "traffic", "visitors", "reports"],
+  },
+
+  // Platform (PLATFORM_ADMIN only — gated in sidebar rendering). Points at
+  // the dedicated platform-admin subdomain (src/app/platform-hub), which
+  // owns users/businesses/domains management — those pages no longer live
+  // inside tenant /admin.
+  {
+    key: "platform-hub",
+    title: "Platform Hub",
+    href: getPlatformHubUrl("/dashboard"),
+    icon: Shield,
+    section: "platform",
+    external: true,
+    keywords: ["users", "businesses", "domains", "platform admin"],
   },
 ];
 
@@ -261,6 +388,7 @@ export const HUB_CARDS: HubCard[] = [
     hub: "settings",
     color: "orange",
     icon: Shield,
+    keywords: ["url", "website address", "dns"],
   },
   {
     key: "settings-features",
@@ -303,11 +431,45 @@ export const HUB_CARDS: HubCard[] = [
     icon: IconTransfer,
     featureKey: "storeTransfer",
   },
+  {
+    key: "settings-wordpress-export",
+    title: "Export to WordPress",
+    description: "Move your store to WordPress/WooCommerce",
+    body: "Download your content, products, and records in WordPress/WooCommerce import formats",
+    href: "/admin/settings/wordpress-export",
+    hub: "settings",
+    color: "blue",
+    icon: IconBrandWordpress,
+    featureKey: "wordpressExport",
+    keywords: ["woocommerce", "offboard", "migrate", "leave", "cancel"],
+  },
+  {
+    key: "settings-team",
+    title: "Team",
+    description: "Staff and collaborators",
+    body: "Invite team members and manage their roles",
+    href: "/admin/settings/team",
+    hub: "settings",
+    color: "violet",
+    icon: IconUsers,
+    keywords: ["staff", "members", "invite", "roles", "permissions"],
+  },
 
-  // Content hub
+  // Content hub — Site Editor and Brand Identity first
+  {
+    key: "content-site-editor",
+    title: "Site Editor",
+    description: "Edit your site visually",
+    body: "Click any section of your live site to change its text, images, and visibility — then publish when you're happy",
+    href: "/editor",
+    hub: "content",
+    color: "indigo",
+    icon: Globe,
+    keywords: ["editor", "visual", "sections", "theme", "design", "preview"],
+  },
   {
     key: "content-branding",
-    title: "Brand Identity ",
+    title: "Brand Identity",
     description: "Personality of your site",
     body: "Edit your logo, template selection, socials, and more",
     href: "/admin/content/branding",
@@ -318,12 +480,13 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "content-pages",
     title: "Pages",
-    description: "Pages",
+    description: "Standalone pages (About, Contact, FAQ)",
     body: "About, Contact, FAQ, and custom pages",
     href: "/admin/content/pages",
     hub: "content",
     color: "green",
     icon: FileText,
+    featureKey: "pages",
   },
   {
     key: "content-blog",
@@ -338,7 +501,7 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "content-policies",
     title: "Policies",
-    description: "Policies",
+    description: "Privacy, Terms, Refunds, Shipping",
     body: "Privacy, Terms, Refunds, Shipping",
     href: "/admin/content/policies",
     hub: "content",
@@ -376,16 +539,6 @@ export const HUB_CARDS: HubCard[] = [
     icon: FileText,
   },
   {
-    key: "content-template",
-    title: "Template Fields",
-    description: "Custom content",
-    body: "Template-specific custom fields",
-    href: "/admin/content/template",
-    hub: "content",
-    color: "indigo",
-    icon: Globe,
-  },
-  {
     key: "content-announcements",
     title: "Banner & Popup",
     description: "Site-wide announcements",
@@ -402,7 +555,112 @@ export function getNavItemsBySection(section: NavSection): NavItem[] {
   return NAV_ITEMS.filter((item) => item.section === section);
 }
 
-/** Return all hub cards for a given hub. */
-export function getHubCards(hub: NavHub): HubCard[] {
-  return HUB_CARDS.filter((card) => card.hub === hub);
+/**
+ * Whether a nav item is visible to the given membership role.
+ * `role === null` means PLATFORM_ADMIN (or unknown) — no role filtering.
+ */
+export function isNavItemAllowedForRole(
+  item: Pick<NavItem, "roles">,
+  role: AdminRole | null,
+): boolean {
+  if (role === null) return true;
+  return (item.roles ?? DEFAULT_NAV_ROLES).includes(role);
 }
+
+/** Path prefixes a STAFF member may visit inside /admin. */
+const STAFF_ALLOWED_PATH_PREFIXES = ["/admin/orders", "/admin/customers"];
+
+/**
+ * Whether an /admin pathname is accessible to the given role.
+ * OWNER and MANAGER can visit everything; STAFF is limited to fulfillment
+ * pages (orders + customers). Used by the admin layout as a UX guard —
+ * hard enforcement lives in the tRPC procedure roles.
+ */
+export function isPathAllowedForRole(
+  pathname: string,
+  role: AdminRole | null,
+): boolean {
+  if (role !== "STAFF") return true;
+  return STAFF_ALLOWED_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+/**
+ * Return all hub cards for a given hub. Platform-only cards (legacy/advanced
+ * surfaces) are excluded unless the caller opts in for a PLATFORM_ADMIN user.
+ */
+export function getHubCards(
+  hub: NavHub,
+  opts?: { includePlatformOnly?: boolean },
+): HubCard[] {
+  return HUB_CARDS.filter(
+    (card) =>
+      card.hub === hub && (!card.platformOnly || opts?.includePlatformOnly),
+  );
+}
+
+// ─── Palette actions ────────────────────────────────────────────────────────
+
+export const PALETTE_ACTIONS: PaletteAction[] = [
+  {
+    key: "edit-site",
+    title: "Edit site",
+    href: "/editor",
+    icon: Globe,
+    keywords: ["site", "editor", "visual", "design", "theme", "sections"],
+  },
+  {
+    key: "add-product",
+    title: "Add product",
+    href: "/admin/products/new",
+    icon: Plus,
+    featureKey: "products",
+    keywords: ["create", "new", "product"],
+  },
+  {
+    key: "create-discount",
+    title: "Create discount",
+    href: "/admin/discounts/new",
+    icon: Plus,
+    featureKey: "coupons",
+    keywords: ["coupon", "promo", "code"],
+  },
+  {
+    key: "create-order",
+    title: "Create manual order",
+    href: "/admin/orders/new",
+    icon: Plus,
+    featureKey: "orders",
+    keywords: ["order", "manual"],
+  },
+  {
+    key: "invite-team",
+    title: "Invite team member",
+    href: "/admin/settings/team",
+    icon: Users,
+    keywords: ["staff", "member", "invite"],
+  },
+  {
+    key: "send-broadcast",
+    title: "Send email marketing",
+    href: "/admin/marketing",
+    icon: Zap,
+    featureKey: "emailMarketing",
+    keywords: ["broadcast", "newsletter", "campaign"],
+  },
+  {
+    key: "setup-guide",
+    title: "View setup guide",
+    href: "/admin/welcome",
+    icon: Home,
+    keywords: ["onboarding", "help", "tutorial"],
+  },
+  {
+    key: "business-settings",
+    title: "Business settings",
+    href: "/admin/settings/general",
+    icon: Wrench,
+    keywords: ["general", "info", "business"],
+  },
+];

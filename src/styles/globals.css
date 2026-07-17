@@ -149,17 +149,26 @@
 }
 
 /* ── Variant selector buttons (N-5) ── */
-.bamboo .bamboo-variant-btn[aria-disabled="true"] {
+.bamboo .bamboo-variant-btn[aria-disabled="true"],
+.happy-bamboo .bamboo-variant-btn[aria-disabled="true"] {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.bamboo .bamboo-variant-btn:focus-visible {
+.bamboo .bamboo-variant-btn:focus-visible,
+.happy-bamboo .bamboo-variant-btn:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
 .happy-bamboo {
+  /* Brand colors consumed by header/hero/checkout via arbitrary classes
+     (bg-[var(--hb-brand)] etc.) — theme palettes override these. Values are
+     the template's original literals, so no-selection stays pixel-identical. */
+  --hb-brand: #608418;
+  --hb-brand-deep: #3d560d;
+  --hb-brand-muted: #5a6b3a;
+  --hb-gold: #e3cf99;
   --background: oklch(1 0 0);
   --foreground: oklch(0.148 0.004 228.8);
   --card: oklch(1 0 0);
@@ -1892,6 +1901,29 @@
     }
   }
 
+  /* coop keeps the `default-template` root class (its account/cart fallback
+     pages reuse Default components), but the block above stamps Poppins on
+     every element, defeating the inheritance the clone-transcribed markup
+     relies on (e.g. Agdasima set on a nav, links inheriting it). Re-declare
+     with later-in-layer ties so the clone's fonts and normal cascade win. */
+  .coop {
+    font-family: var(--font-coop-body);
+
+    *,
+    p {
+      font-family: inherit;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-coop-heading);
+    }
+  }
+
   /* ─── Judy Sledge — design tokens ──────────────────────────────────────── */
   .sledge {
     --sl-cream: #e7f4dd;
@@ -3011,7 +3043,7 @@
   }
 
   .admin-form-toolbar {
-    @apply bg-background/75 sticky top-0 z-10 flex h-16 justify-between border-b px-4;
+    @apply bg-background/75 sticky top-0 z-10 flex min-h-16 flex-wrap justify-between gap-y-2 border-b px-4 py-2;
   }
 
   .admin-form-toolbar .toolbar-info {
@@ -3019,7 +3051,7 @@
   }
 
   .admin-form-toolbar .toolbar-actions {
-    @apply flex shrink-0 items-center gap-2;
+    @apply flex shrink-0 flex-wrap items-center gap-2;
   }
   .admin-form-toolbar.dirty {
     @apply shadow-sm shadow-amber-200;
@@ -3136,6 +3168,13 @@
     0.36,
     1
   ); /* header / nav micro-interactions */
+  /* Layout & scrim scale (vii refactor) */
+  --vii-section-pad-y: clamp(64px, 9vw, 112px);
+  --vii-section-pad-x: clamp(24px, 6vw, 96px);
+  --vii-container: 1200px;
+  --vii-scrim-strong: 82%;
+  --vii-scrim-medium: 25%;
+  --vii-scrim-soft: 10%;
   --font-serif: var(--font-vii-serif), "Playfair Display", serif;
   --font-sans: var(--font-vii-sans), "Jost", sans-serif;
   background: var(--vii-cream);
@@ -3726,4 +3765,105 @@
 .builders h3,
 .builders h4 {
   font-family: var(--font-builders-display, "Jost", sans-serif);
+}
+
+/* ── coop breakpoints ──────────────────────────────────────────────────────
+   Building Cooperatively is a pixel-exact replica of a Squarespace-era clone
+   whose own Tailwind config used non-stock breakpoints (md=572px, lg=1025px,
+   2xl=1601px). Namespaced here so they never bleed into stock md:/lg:/2xl:. */
+@theme {
+  --breakpoint-coop-md: 572px;
+  --breakpoint-coop-lg: 1025px;
+  --breakpoint-coop-2xl: 1601px;
+}
+
+/* ── coop tokens ────────────────────────────────────────────────────────────
+   Transcribed verbatim from the clone's `:root` (buildingcooperatively.com).
+   Fixed brand — no theme presets/palettes; this block is the single source
+   of truth for every color/font the coop template renders. Raw font family
+   names appear ONLY here and in the coop-layout.tsx-emitted `@font-face`
+   block (fonts are served from MinIO, never committed — see
+   docs/templates/coop/upload-fonts.md). */
+.coop {
+  --coop-background: #fff; /* page background; header/footer link text on dark */
+  --coop-foreground: rgba(40, 26, 23, 0.6); /* body text */
+  --coop-primary: rgba(255, 108, 69, 0.4); /* coral <hr> rules on Contact */
+  --coop-surface: #fafafa; /* page background on About/Gallery/Contact */
+  --coop-color-001: rgba(40, 26, 23, 0.5); /* header nav links on white pages */
+  --coop-color-002: rgba(40, 26, 23, 0.8); /* Agdasima label headings */
+  --coop-color-003: rgb(40, 26, 23); /* futura-pt display headings */
+  --coop-color-004: #262626; /* footer background, mobile menu panel bg */
+  --coop-clr-0: rgba(255, 255, 255, 0); /* transparent (mobile menu layers) */
+  --coop-clr-1: #000; /* mailto link text on Contact */
+  --coop-clr-2: rgba(
+    40,
+    26,
+    23,
+    0.1
+  ); /* declared in source; kept for completeness */
+  --coop-clr-3: rgba(40, 26, 23, 0.3); /* gallery CTA underline border */
+  --coop-clr-4: rgba(
+    0,
+    0,
+    0,
+    0.3
+  ); /* hero photo scrim overlay; mailto underline */
+
+  /* Font tokens — raw Adobe/Google family names, MinIO-hosted (not next/font). */
+  --font-coop-heading: futura-pt, ui-sans-serif, sans-serif;
+  --font-coop-label: Agdasima, ui-sans-serif, sans-serif;
+  --font-coop-body: minion-pro, Georgia, "Times New Roman", serif;
+
+  font-family: var(--font-coop-body);
+  font-size: 19px;
+  line-height: 32.3px;
+  letter-spacing: 0.19px;
+  color: var(--coop-foreground);
+  background: var(--coop-background);
+}
+
+/* Applied by About/Gallery/Contact pages (clone `.cn0` surface base is #fafafa
+   on every page except the homepage, which stays white). */
+.coop-surface-page {
+  background: var(--coop-surface);
+}
+
+/* ── Hover states (ditto.css, re-expressed as semantic classes) ───────────── */
+.coop .coop-footer-link {
+  transition: color 0.15s ease-out;
+}
+.coop .coop-footer-link:hover {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.coop .coop-underline-cta {
+  transition:
+    border-color 0.15s ease-out,
+    color 0.15s ease-out;
+}
+.coop .coop-underline-cta:hover {
+  color: var(--coop-foreground);
+  border-color: rgba(40, 26, 23, 0.15);
+}
+
+.coop .coop-mailto-link {
+  transition:
+    border-color 0.15s ease-out,
+    color 0.15s ease-out;
+}
+.coop .coop-mailto-link:hover {
+  color: rgba(0, 0, 0, 0.6);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* ── Mobile menu open/close (the template's one functional addition — the
+   clone's markup is static; duration matches the clone's declared-but-dead
+   0.525s/linear anim-opacity-99 timing) ──────────────────────────────────── */
+.coop .coop-mobile-menu-panel {
+  transition: opacity 0.525s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coop .coop-mobile-menu-panel {
+    transition: none;
+  }
 }

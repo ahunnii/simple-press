@@ -17,7 +17,11 @@ import {
   getStats,
 } from "~/lib/umami/client";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
-import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  featureGate,
+  ownerAdminProcedure,
+} from "~/server/api/trpc";
 
 const rangeSchema = z.object({
   range: z.enum(["7d", "30d", "90d"]).default("30d"),
@@ -42,6 +46,7 @@ export const analyticsRouter = createTRPCRouter({
    * overview — aggregate stats + active visitor count + daily pageviews series.
    */
   overview: ownerAdminProcedure
+    .use(featureGate("analytics"))
     .input(rangeSchema)
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -82,6 +87,7 @@ export const analyticsRouter = createTRPCRouter({
    * topPages — top URLs by pageview count.
    */
   topPages: ownerAdminProcedure
+    .use(featureGate("analytics"))
     .input(rangeSchema)
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -115,6 +121,7 @@ export const analyticsRouter = createTRPCRouter({
    * topReferrers — top referrer domains.
    */
   topReferrers: ownerAdminProcedure
+    .use(featureGate("analytics"))
     .input(rangeSchema)
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -149,6 +156,7 @@ export const analyticsRouter = createTRPCRouter({
    * websiteId is always derived server-side from ctx.businessId (IDOR guardrail).
    */
   events: ownerAdminProcedure
+    .use(featureGate("analytics"))
     .input(rangeSchema)
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -211,6 +219,7 @@ export const analyticsRouter = createTRPCRouter({
    * Security: websiteId is always derived from ctx.businessId (IDOR guard).
    */
   embedEngagement: ownerAdminProcedure
+    .use(featureGate("analytics"))
     .input(rangeSchema)
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;

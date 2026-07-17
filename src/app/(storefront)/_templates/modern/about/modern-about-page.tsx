@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateTextListRows,
@@ -50,6 +51,8 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       title={f["modern.about.main-title"]}
       subtitle={f["modern.about.main-tagline"]}
       sectionAttrs={sectionGroupAttr("about", "main")}
+      titleFieldKey="modern.about.main-title"
+      subtitleFieldKey="modern.about.main-tagline"
     >
       {/* Mission */}
       <section
@@ -69,13 +72,22 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
               />
             </div>
             <div>
-              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...fieldAttr("modern.about.mission-tagline")}
+              >
                 {f["modern.about.mission-tagline"]}
               </p>
-              <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
+              <h2
+                className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl"
+                {...fieldAttr("modern.about.mission-header")}
+              >
                 {f["modern.about.mission-header"]}
               </h2>
-              <p className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line">
+              <p
+                className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line"
+                {...fieldAttr("modern.about.mission-description")}
+              >
                 {f["modern.about.mission-description"]}
               </p>
             </div>
@@ -84,38 +96,50 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* Values */}
-      <section
-        className="bg-secondary py-20"
-        {...sectionGroupAttr("about", "values")}
-      >
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
-              {f["modern.about.values-tagline"]}
-            </p>
-            <h2 className="text-foreground mt-2 font-serif text-3xl md:text-4xl">
-              {f["modern.about.values-header"]}
-            </h2>
-          </div>
-          <div className="mt-16 grid grid-cols-1 gap-12 md:grid-cols-3">
-            {valuesList?.map((value, index) => (
-              <div className="text-center" key={index}>
-                <div className="bg-primary/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
-                  <span className="text-primary font-serif text-lg">
-                    {index + 1}
-                  </span>
+      {isSectionVisible(
+        business?.siteContent?.customFields,
+        "modern",
+        "about.values",
+      ) && (
+        <section
+          className="bg-secondary py-20"
+          {...sectionGroupAttr("about", "values")}
+        >
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="text-center">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...fieldAttr("modern.about.values-tagline")}
+              >
+                {f["modern.about.values-tagline"]}
+              </p>
+              <h2
+                className="text-foreground mt-2 font-serif text-3xl md:text-4xl"
+                {...fieldAttr("modern.about.values-header")}
+              >
+                {f["modern.about.values-header"]}
+              </h2>
+            </div>
+            <div className="mt-16 grid grid-cols-1 gap-12 md:grid-cols-3">
+              {valuesList?.map((value, index) => (
+                <div className="text-center" key={index}>
+                  <div className="bg-primary/10 mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                    <span className="text-primary font-serif text-lg">
+                      {index + 1}
+                    </span>
+                  </div>
+                  <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
+                    {value.title}
+                  </h3>
+                  <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                    {value.description}
+                  </p>
                 </div>
-                <h3 className="text-foreground mt-6 text-sm font-semibold tracking-widest uppercase">
-                  {value.title}
-                </h3>
-                <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                  {value.description}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Team / Story Section */}
       <section
@@ -134,13 +158,22 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
               />
             </div>
             <div>
-              <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+              <p
+                className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+                {...fieldAttr("modern.about.story-tagline")}
+              >
                 {f["modern.about.story-tagline"]}
               </p>
-              <h2 className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl">
+              <h2
+                className="text-foreground mt-2 font-serif text-3xl text-balance md:text-4xl"
+                {...fieldAttr("modern.about.story-header")}
+              >
                 {f["modern.about.story-header"]}
               </h2>
-              <p className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line">
+              <p
+                className="text-muted-foreground mt-6 leading-relaxed whitespace-pre-line"
+                {...fieldAttr("modern.about.story-description")}
+              >
                 {f["modern.about.story-description"]}
               </p>
             </div>
@@ -149,26 +182,40 @@ export function ModernAboutPage({ business }: DefaultAboutPageTemplateProps) {
       </section>
 
       {/* CTA */}
-      <section
-        className="bg-primary py-20"
-        {...sectionGroupAttr("about", "cta")}
-      >
-        <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
-          <h2 className="text-primary-foreground font-serif text-3xl md:text-4xl">
-            {f["modern.about.cta-header"]}
-          </h2>
-          <p className="text-primary-foreground/70 mx-auto mt-4 max-w-md text-sm">
-            {f["modern.about.cta-description"]}
-          </p>
-          <Link
-            href={f["modern.about.cta-button-link"]!}
-            className="bg-primary-foreground text-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
-          >
-            {f["modern.about.cta-button-text"]}
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </div>
-      </section>
+      {isSectionVisible(
+        business?.siteContent?.customFields,
+        "modern",
+        "about.cta",
+      ) && (
+        <section
+          className="bg-primary py-20"
+          {...sectionGroupAttr("about", "cta")}
+        >
+          <div className="mx-auto max-w-7xl px-6 text-center lg:px-8">
+            <h2
+              className="text-primary-foreground font-serif text-3xl md:text-4xl"
+              {...fieldAttr("modern.about.cta-header")}
+            >
+              {f["modern.about.cta-header"]}
+            </h2>
+            <p
+              className="text-primary-foreground/70 mx-auto mt-4 max-w-md text-sm"
+              {...fieldAttr("modern.about.cta-description")}
+            >
+              {f["modern.about.cta-description"]}
+            </p>
+            <Link
+              href={f["modern.about.cta-button-link"]!}
+              className="bg-primary-foreground text-primary mt-8 inline-flex items-center gap-2 px-8 py-3 text-sm font-medium tracking-wide transition-opacity hover:opacity-90"
+            >
+              <span {...fieldAttr("modern.about.cta-button-text")}>
+                {f["modern.about.cta-button-text"]}
+              </span>
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </section>
+      )}
     </ModernGeneralLayout>
   );
 }

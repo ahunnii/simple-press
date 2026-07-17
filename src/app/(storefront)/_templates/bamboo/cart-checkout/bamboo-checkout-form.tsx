@@ -23,6 +23,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -51,6 +55,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     allowedCountries,
     deliveryMethod,
     setDeliveryMethod,
+    couponsEnabled,
     discountCodeInput,
     setDiscountCodeInput,
     discountAmount,
@@ -91,7 +96,7 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
       <div className="py-16 text-center">
         <p className="text-muted-foreground mb-4">Your cart is empty</p>
         <Button asChild>
-          <Link href="/products">Continue Shopping</Link>
+          <Link href="/shop">Continue Shopping</Link>
         </Button>
       </div>
     );
@@ -160,66 +165,68 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
-            Discount code
-          </legend>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex flex-1 flex-col gap-1.5">
-              <Label htmlFor="discount-code">Code</Label>
-              <Input
-                id="discount-code"
-                type="text"
-                value={discountCodeInput}
-                onChange={(e) =>
-                  setDiscountCodeInput(e.target.value.toUpperCase())
-                }
-                placeholder="SAVE20"
-                autoComplete="off"
-                aria-invalid={!!discountFieldError}
-                aria-describedby={
-                  discountFieldError ? "discount-error" : undefined
-                }
-              />
+        {couponsEnabled && (
+          <fieldset className="flex flex-col gap-3">
+            <legend className="text-foreground font-heading pb-2 text-lg font-semibold">
+              Discount code
+            </legend>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label htmlFor="discount-code">Code</Label>
+                <Input
+                  id="discount-code"
+                  type="text"
+                  value={discountCodeInput}
+                  onChange={(e) =>
+                    setDiscountCodeInput(e.target.value.toUpperCase())
+                  }
+                  placeholder="SAVE20"
+                  autoComplete="off"
+                  aria-invalid={!!discountFieldError}
+                  aria-describedby={
+                    discountFieldError ? "discount-error" : undefined
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleApplyDiscount}
+                disabled={isValidatingDiscount || items.length === 0}
+              >
+                {isValidatingDiscount ? (
+                  <>
+                    <Loader2
+                      className="mr-2 size-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                    Checking…
+                  </>
+                ) : (
+                  "Apply"
+                )}
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleApplyDiscount}
-              disabled={isValidatingDiscount || items.length === 0}
-            >
-              {isValidatingDiscount ? (
-                <>
-                  <Loader2
-                    className="mr-2 size-4 animate-spin"
-                    aria-hidden="true"
-                  />
-                  Checking…
-                </>
-              ) : (
-                "Apply"
-              )}
-            </Button>
-          </div>
-          {discountFieldError && (
-            <p
-              id="discount-error"
-              className="text-destructive text-sm"
-              role="alert"
-            >
-              {discountFieldError}
-            </p>
-          )}
-          {discountCodeLabel && discountAmount > 0 && (
-            <p className="text-sm text-green-700" role="status">
-              Code{" "}
-              <span className="font-mono font-semibold">
-                {discountCodeLabel}
-              </span>{" "}
-              applied.
-            </p>
-          )}
-        </fieldset>
+            {discountFieldError && (
+              <p
+                id="discount-error"
+                className="text-destructive text-sm"
+                role="alert"
+              >
+                {discountFieldError}
+              </p>
+            )}
+            {discountCodeLabel && discountAmount > 0 && (
+              <p className="text-sm text-green-700" role="status">
+                Code{" "}
+                <span className="font-mono font-semibold">
+                  {discountCodeLabel}
+                </span>{" "}
+                applied.
+              </p>
+            )}
+          </fieldset>
+        )}
 
         {shippingConfig.offersInStorePickup && (
           <fieldset className="flex flex-col gap-3">
@@ -287,6 +294,26 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 ? "We price shipping from this address. Make changes here before continuing to payment."
                 : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
             </p>
+            <SavedAddressPicker
+              className="text-foreground"
+              accentColor="var(--primary)"
+              onSelect={(address) =>
+                applySavedAddressToForm(
+                  {
+                    setName,
+                    setPhone,
+                    setAddressLine1,
+                    setAddressLine2,
+                    setCity,
+                    setState,
+                    setPostalCode,
+                    setCountry,
+                    allowedCountries,
+                  },
+                  address,
+                )
+              }
+            />
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="address-line1">Address line 1 *</Label>

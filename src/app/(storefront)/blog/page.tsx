@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import { JsonLd } from "~/components/json-ld";
+import { buildPageMetadata } from "~/lib/seo";
+import { buildItemListSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
@@ -22,21 +24,23 @@ export default async function BlogPage() {
 
   const t = getTemplate(business.templateId);
 
+  const items = pages.map((p) => ({
+    name: p.title,
+    path: `/blog/${p.slug}`,
+    image: p.ogImage ?? null,
+  }));
+
   return (
-    <t.BlogPage pages={pages} customFields={customFields} business={business} />
+    <>
+      <JsonLd data={buildItemListSchema(business, items)} />
+      <t.BlogPage pages={pages} customFields={customFields} business={business} />
+    </>
   );
 }
 
 export async function generateMetadata() {
   const business = await api.business.simplifiedGet().catch(() => null);
-  return {
-    title: "Blog",
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, "/blog"),
-      },
-    }),
-  };
+  return buildPageMetadata({ business, path: "/blog", title: "Blog" });
 }
 
 //TODO: Metadata for the blog listing page 'should' allow for the business owner to edit them

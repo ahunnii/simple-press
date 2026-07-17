@@ -21,7 +21,7 @@
  *    add-ons alongside the standard price chip.
  * 5. Closing CTA (reuses ViiContactCtaSection) with optional button + embed.
  */
-import { useEffect, useState } from "react";
+import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../../hooks/use-vii-hero-motion";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -51,28 +51,7 @@ import { resolveAtelierFields } from "./fields";
  * When no video is set the mosaic is the primary (and only) hero element.
  */
 function AtelierHeroVideo({ src }: { src: string }) {
-  const [shown, setShown] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) setReduced(true);
-  }, []);
-
-  // Ken-Burns scale-settle on the media layer; pause/play button lives outside
-  // this wrapper so it stays fixed in position during the scale.
-  const mediaStyle: React.CSSProperties = reduced
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: "transform 2.2s var(--vii-ease)",
-      };
+  const { shown, reduced } = useViiHeroMotion();
 
   return (
     <div
@@ -90,7 +69,7 @@ function AtelierHeroVideo({ src }: { src: string }) {
       <ServiceHeroVideo
         src={src}
         buttonClassName="vii-atelier-video-btn"
-        style={mediaStyle}
+        style={heroMediaStyle(shown, reduced)}
       />
       <style>{`
         .vii-atelier-video-btn {
@@ -117,48 +96,7 @@ function AtelierMosaic({
   serviceName: string;
   overline: string;
 }) {
-  const [shown, setShown] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setShown(true), 60);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) setReduced(true);
-  }, []);
-
-  // Ken-Burns scale-settle on the primary (large) mosaic cell image.
-  const mediaStyle: React.CSSProperties = reduced
-    ? {}
-    : {
-        transform: shown ? "scale(1)" : "scale(1.08)",
-        transition: "transform 2.2s var(--vii-ease)",
-      };
-
-  // Clip-path line-reveal on the oversized h1 — wipes up from below.
-  const headingStyle: React.CSSProperties = reduced
-    ? { opacity: 1 }
-    : {
-        opacity: shown ? 1 : 0,
-        clipPath: shown ? "inset(0 0 0% 0)" : "inset(0 0 110% 0)",
-        transform: shown ? "translateY(0)" : "translateY(8px)",
-        transition:
-          "opacity 0.95s var(--vii-ease) 0.15s, clip-path 0.95s var(--vii-ease) 0.15s, transform 0.95s var(--vii-ease) 0.15s",
-      };
-
-  // Staggered fade-rise for the overline (delay 0) — matches hero-section cascade.
-  const revealStyle = (delay: number): React.CSSProperties =>
-    reduced
-      ? { opacity: 1 }
-      : {
-          opacity: shown ? 1 : 0,
-          transform: shown ? "translateY(0)" : "translateY(20px)",
-          transition: `opacity 0.9s var(--vii-ease) ${delay}s, transform 0.9s var(--vii-ease) ${delay}s`,
-        };
+  const { shown, reduced } = useViiHeroMotion();
 
   const imgs = galleryImages.slice(0, 5);
   const hasImages = imgs.length > 0;
@@ -203,7 +141,7 @@ function AtelierMosaic({
                 fill
                 priority
                 sizes="33vw"
-                style={{ objectFit: "cover", ...mediaStyle }}
+                style={{ objectFit: "cover", ...heroMediaStyle(shown, reduced) }}
               />
             )}
           </div>
@@ -280,7 +218,7 @@ function AtelierMosaic({
           <ViiOverline
             tone="dark"
             align="left"
-            style={{ ...revealStyle(0), marginBottom: 16 }}
+            style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 16 }}
           >
             {overline}
           </ViiOverline>
@@ -288,7 +226,7 @@ function AtelierMosaic({
 
         <h1
           style={{
-            ...headingStyle,
+            ...heroHeadingStyle(shown, reduced),
             fontFamily: "var(--font-serif)",
             fontWeight: 400,
             fontSize: "clamp(52px, 9vw, 120px)",
@@ -335,7 +273,7 @@ function PullQuote({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={`vii-reveal${visible ? " is-visible" : ""}`}
         style={{ maxWidth: 760, margin: "0 auto" }}
       >
         {/* Opening quotation mark */}
@@ -389,7 +327,7 @@ function PullQuote({
       {/* Optional media beneath the quote — contained within the navy band */}
       <div
         ref={mediaRef}
-        className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+        className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
       >
         <ServiceSectionMedia
           imageSrc={quoteImageSrc}
@@ -845,7 +783,7 @@ function AtelierList({
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal vii-atelier-list-row${headVisible ? "is-visible" : ""}`}
+          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",
@@ -895,7 +833,7 @@ function AtelierList({
         {/* Treatment rows — stagger group: one observer, per-item --i cascade */}
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? "is-visible" : ""}`}
+          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
         >
           {items.map((item, i) => (
             <TreatmentListRow

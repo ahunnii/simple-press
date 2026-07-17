@@ -24,6 +24,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import {
+  applySavedAddressToForm,
+  SavedAddressPicker,
+} from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
@@ -206,6 +210,11 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                     ? "We price shipping from this address. Make changes here before continuing to payment."
                     : "This is sent to Stripe Checkout prefilled so you can confirm or edit your name, phone, and address before paying."}
                 </p>
+                <SavedAddressPicker
+                  className="text-white"
+                  optionClassName="border-white/20"
+                  onSelect={(address) => applySavedAddressToForm(f, address)}
+                />
                 <div>
                   <Label htmlFor="address-line1" className="text-white">
                     Address line 1 *
@@ -398,110 +407,114 @@ export function DarkTrendCheckoutForm({ business }: Props) {
               </div>
 
               {/* Discount Code Input — inline, dark-trend style */}
-              <div className="space-y-3 pt-4">
-                {f.discountCodeLabel && f.discountAmount > 0 ? (
-                  <div
-                    role="status"
-                    className="rounded-md border border-green-500/50 bg-green-500/10 p-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
-                          <span
-                            aria-hidden="true"
-                            className="text-xs font-bold text-green-400"
-                          >
-                            ✓
-                          </span>
+              {f.couponsEnabled && (
+                <div className="space-y-3 pt-4">
+                  {f.discountCodeLabel && f.discountAmount > 0 ? (
+                    <div
+                      role="status"
+                      className="rounded-md border border-green-500/50 bg-green-500/10 p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/20">
+                            <span
+                              aria-hidden="true"
+                              className="text-xs font-bold text-green-400"
+                            >
+                              ✓
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-green-400">
+                              Discount Applied: {f.discountCodeLabel}
+                            </p>
+                            <p className="text-sm text-green-500">
+                              You saved {formatPrice(f.discountAmount)}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-green-400">
-                            Discount Applied: {f.discountCodeLabel}
-                          </p>
-                          <p className="text-sm text-green-500">
-                            You saved {formatPrice(f.discountAmount)}
-                          </p>
-                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={f.clearDiscount}
+                          aria-label={`Remove discount ${f.discountCodeLabel}`}
+                          className="text-green-400 hover:bg-green-500/10 hover:text-green-300"
+                        >
+                          <X aria-hidden="true" className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Tag
+                          aria-hidden="true"
+                          className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40"
+                        />
+                        <Input
+                          type="text"
+                          placeholder="Discount code"
+                          aria-label="Discount code"
+                          value={f.discountCodeInput}
+                          onChange={(e) => {
+                            f.setDiscountCodeInput(
+                              e.target.value.toUpperCase(),
+                            );
+                            f.setDiscountFieldError(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              f.handleApplyDiscount();
+                            }
+                          }}
+                          aria-invalid={!!f.discountFieldError}
+                          aria-describedby={
+                            f.discountFieldError
+                              ? "discount-code-error"
+                              : undefined
+                          }
+                          className="border-white/20 bg-zinc-900/50 pl-10 text-white placeholder:text-white/40"
+                        />
                       </div>
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={f.clearDiscount}
-                        aria-label={`Remove discount ${f.discountCodeLabel}`}
-                        className="text-green-400 hover:bg-green-500/10 hover:text-green-300"
+                        onClick={f.handleApplyDiscount}
+                        disabled={
+                          f.isValidatingDiscount || !f.discountCodeInput.trim()
+                        }
+                        aria-label="Apply discount code"
+                        className="border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
                       >
-                        <X aria-hidden="true" className="h-4 w-4" />
+                        {f.isValidatingDiscount ? (
+                          <>
+                            <Loader2
+                              aria-hidden="true"
+                              className="mr-1 h-4 w-4 animate-spin"
+                            />
+                            Applying…
+                          </>
+                        ) : (
+                          "Apply"
+                        )}
                       </Button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Tag
-                        aria-hidden="true"
-                        className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40"
-                      />
-                      <Input
-                        type="text"
-                        placeholder="Discount code"
-                        aria-label="Discount code"
-                        value={f.discountCodeInput}
-                        onChange={(e) => {
-                          f.setDiscountCodeInput(e.target.value.toUpperCase());
-                          f.setDiscountFieldError(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            f.handleApplyDiscount();
-                          }
-                        }}
-                        aria-invalid={!!f.discountFieldError}
-                        aria-describedby={
-                          f.discountFieldError
-                            ? "discount-code-error"
-                            : undefined
-                        }
-                        className="border-white/20 bg-zinc-900/50 pl-10 text-white placeholder:text-white/40"
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={f.handleApplyDiscount}
-                      disabled={
-                        f.isValidatingDiscount || !f.discountCodeInput.trim()
-                      }
-                      aria-label="Apply discount code"
-                      className="border border-white/60 bg-transparent font-medium text-white hover:bg-white/10"
+                  )}
+                  {f.discountFieldError && (
+                    <Alert
+                      variant="destructive"
+                      className="border-red-500/50 bg-red-500/10"
                     >
-                      {f.isValidatingDiscount ? (
-                        <>
-                          <Loader2
-                            aria-hidden="true"
-                            className="mr-1 h-4 w-4 animate-spin"
-                          />
-                          Applying…
-                        </>
-                      ) : (
-                        "Apply"
-                      )}
-                    </Button>
-                  </div>
-                )}
-                {f.discountFieldError && (
-                  <Alert
-                    variant="destructive"
-                    className="border-red-500/50 bg-red-500/10"
-                  >
-                    <AlertDescription
-                      id="discount-code-error"
-                      className="text-sm text-red-400"
-                    >
-                      {f.discountFieldError}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
+                      <AlertDescription
+                        id="discount-code-error"
+                        className="text-sm text-red-400"
+                      >
+                        {f.discountFieldError}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2 border-t border-white/20 pt-4">
                 <div className="flex justify-between text-sm">

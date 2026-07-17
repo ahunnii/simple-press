@@ -5,24 +5,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { Heart, Menu, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-] as const;
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 
 export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const { data: session, isPending } = authClient.useSession();
+  const { isEnabled } = useStorefrontFlags();
+  const { isEnabled: isBusinessFeatureEnabled } = useFeatureFlags({
+    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Refs for focus management (C-2)
@@ -95,11 +96,21 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", handleTab);
   }, [mobileMenuOpen]);
 
+  const defaultNavLinks = [
+    { href: "/", label: "Home" },
+    { href: "/shop", label: "Shop" },
+    { href: "/about", label: "About Us" },
+    ...(isBusinessFeatureEnabled("services")
+      ? [{ href: "/services", label: "Services" }]
+      : []),
+    { href: "/contact", label: "Contact" },
+  ];
+
   const links =
     (business?.siteContent?.navigationItems as {
       label: string;
       href: string;
-    }[]) ?? NAV_LINKS;
+    }[]) ?? defaultNavLinks;
 
   const authActions = (
     <>
@@ -178,6 +189,22 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           </div>
 
           <div className="flex items-center gap-4">
+            {isEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
+                aria-label={`Wishlist with ${wishlistCount} items`}
+              >
+                {/* M-2: decorative icon inside an aria-labeled link */}
+                <Heart className="h-5 w-5" aria-hidden="true" />
+                {wishlistCount > 0 && (
+                  <span className="bg-accent text-accent-foreground absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-medium">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             <Link
               href="/cart"
               className="text-foreground hover:text-muted-foreground relative flex items-center transition-colors"
@@ -192,12 +219,16 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
               )}
             </Link>
 
-            {isPending ? (
-              <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
-            ) : session?.user ? (
-              userMenu
-            ) : (
-              authActions
+            {isEnabled("customerAccounts") && (
+              <>
+                {isPending ? (
+                  <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authActions
+                )}
+              </>
             )}
 
             {/* Mobile menu toggle — C-2: aria-controls + ref */}
@@ -272,7 +303,21 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
           ))}
         </nav>
 
-        <div className="border-border border-t px-6 py-5">
+        <div className="border-border flex flex-col gap-4 border-t px-6 py-5">
+          {isEnabled("wishlist") && (
+            <Link
+              href="/wishlist"
+              className="text-foreground flex items-center gap-3"
+              onClick={closeMenu}
+            >
+              {/* M-2: decorative icon, link text "Wishlist (n)" provides the name */}
+              <Heart className="h-5 w-5" aria-hidden="true" />
+              <span className="text-sm font-medium">
+                Wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ""}
+              </span>
+            </Link>
+          )}
+
           <Link
             href="/cart"
             className="text-foreground flex items-center gap-3"

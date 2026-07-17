@@ -1,5 +1,5 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { ModernProductsFilterClient } from "./modern-products-filter-client";
@@ -44,13 +44,22 @@ export function ModernProductsPage({
         {...sectionGroupAttr("products", "main")}
       >
         <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+          <p
+            className="text-muted-foreground text-xs font-semibold tracking-widest uppercase"
+            {...fieldAttr("modern.products.tagline")}
+          >
             {f["modern.products.tagline"]}
           </p>
-          <h1 className="text-foreground mt-2 font-serif text-4xl md:text-5xl">
+          <h1
+            className="text-foreground mt-2 font-serif text-4xl md:text-5xl"
+            {...fieldAttr("modern.products.title")}
+          >
             {f["modern.products.title"]}
           </h1>
-          <p className="text-muted-foreground mt-4 max-w-lg">
+          <p
+            className="text-muted-foreground mt-4 max-w-lg"
+            {...fieldAttr("modern.products.description")}
+          >
             {f["modern.products.description"]}
           </p>
         </div>

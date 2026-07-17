@@ -41,6 +41,7 @@ import { toast } from "sonner";
 
 import type { CollectionFormData } from "~/lib/validators/collections";
 import type { RouterOutputs } from "~/trpc/react";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { generateCollectionSlug } from "~/lib/slug";
 import { cn } from "~/lib/utils";
 import { collectionFormSchema } from "~/lib/validators/collections";
@@ -328,7 +329,10 @@ export function CollectionForm({ collection, allProducts }: Props) {
     onError: (err) => {
       createAnotherRef.current = false;
       toast.dismiss();
-      toast.error(err.message ?? "Failed to create collection");
+      applyTrpcErrorToForm(form, err, {
+        fieldMap: { "not found in your store": "productIds" },
+        fallbackMessage: "Failed to create collection",
+      });
     },
     onMutate: () => {
       toast.loading("Creating collection...");
@@ -359,7 +363,10 @@ export function CollectionForm({ collection, allProducts }: Props) {
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message ?? "Failed to update collection");
+      applyTrpcErrorToForm(form, err, {
+        fieldMap: { "not found in your store": "productIds" },
+        fallbackMessage: "Failed to update collection",
+      });
     },
     onMutate: () => {
       toast.loading("Updating collection...");

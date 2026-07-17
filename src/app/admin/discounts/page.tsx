@@ -1,19 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, TicketPercent } from "lucide-react";
 
 import { checkBusiness } from "~/lib/check-business";
 import { deactivateExpiredDiscountCodes } from "~/lib/deactivate-expired-discounts";
 import { db } from "~/server/db";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 
+import { AdminEmpty } from "../_components/admin-empty";
 import { TrailHeader } from "../_components/trail-header";
 import { DiscountsTable } from "./_components/discounts-table";
 
@@ -54,22 +48,19 @@ export default async function DiscountsPage() {
 
         {/* Discounts List */}
         {discounts.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No discount codes yet</CardTitle>
-              <CardDescription>
-                Create your first discount code to offer special deals
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+          <AdminEmpty
+            icon={TicketPercent}
+            title="No discount codes yet"
+            description="Create your first discount code to offer special deals"
+            action={
               <Button asChild>
                 <Link href="/admin/discounts/new">
                   <Plus className="mr-2 h-4 w-4" />
                   Create Your First Discount
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
+            }
+          />
         ) : (
           <DiscountsTable discounts={discounts} />
         )}

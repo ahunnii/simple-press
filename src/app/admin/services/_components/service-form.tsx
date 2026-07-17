@@ -83,6 +83,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
       published: service?.published ?? false,
       metaTitle: service?.metaTitle ?? "",
       metaDescription: service?.metaDescription ?? "",
+      metaKeywords: service?.metaKeywords ?? "",
       ogImage: service?.ogImage ?? undefined,
     },
   });
@@ -114,6 +115,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
         published: data.published,
         metaTitle: data.metaTitle ?? "",
         metaDescription: data.metaDescription ?? "",
+        metaKeywords: data.metaKeywords ?? "",
         ogImage: data.ogImage ?? undefined,
       });
       router.refresh();
@@ -151,6 +153,7 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
       published: data.published ?? false,
       metaTitle: data.metaTitle,
       metaDescription: data.metaDescription,
+      metaKeywords: data.metaKeywords,
       ogImage: data.ogImage,
     } satisfies ServiceFormData;
     if (service?.id) {
@@ -503,6 +506,27 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
                         </FormItem>
                       );
                     }}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="metaKeywords"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Meta Keywords</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., facial, treatments, skincare, spa"
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                          />
+                        </FormControl>
+                        <FormDescription>Comma-separated keywords</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </CardContent>
               </Card>

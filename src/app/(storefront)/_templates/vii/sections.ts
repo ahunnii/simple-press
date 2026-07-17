@@ -1,0 +1,231 @@
+import type { TemplateSection } from "~/lib/template-sections";
+
+/**
+ * Curated section registry for the `vii` template — homepage, about, contact,
+ * and global (header/footer branding) pages. `id` matches the `data-sp-group`
+ * value used by the preview overlay (`${page}.${group}`); `order` reflects
+ * the visual top-to-bottom order in the rendered page.
+ *
+ * Shop/product/blog/cart/services pages are intentionally not covered here
+ * yet — they fall back to the derived (auto-generated) section list via
+ * `getSectionsForTemplate` until a later pass curates them too.
+ */
+export const viiSections: Record<string, TemplateSection[]> = {
+  vii: [
+    // ─── Global ───────────────────────────────────────────────────────────
+    {
+      id: "global.branding",
+      page: "global",
+      title: "Site Branding",
+      description:
+        "Wordmark location tag, footer tagline, and header booking CTA — shown in the header and footer on every page",
+      groupIds: ["global.branding"],
+      order: 0,
+      hideable: false,
+    },
+
+    // ─── Homepage ─────────────────────────────────────────────────────────
+    {
+      id: "homepage.hero",
+      page: "homepage",
+      title: "Hero",
+      description: "Full-viewport hero with background image/video and booking CTA",
+      groupIds: ["homepage.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "homepage.categories",
+      page: "homepage",
+      title: "Categories Grid",
+      description: "Overline, heading, and category tiles",
+      groupIds: ["homepage.categories"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "homepage.video",
+      page: "homepage",
+      title: "Video Feature",
+      description: "Split text-and-video philosophy section",
+      groupIds: ["homepage.video"],
+      order: 2,
+      hideable: false,
+    },
+    {
+      id: "homepage.band",
+      page: "homepage",
+      title: "Image Band",
+      description: "Full-bleed visual break between the video and product rail",
+      groupIds: ["homepage.band"],
+      order: 3,
+      hideable: false,
+    },
+    {
+      id: "homepage.productRail",
+      page: "homepage",
+      title: "Product Rail",
+      description: "Featured product rail — core commerce section",
+      groupIds: ["homepage.productRail"],
+      order: 4,
+      hideable: false,
+    },
+    {
+      id: "homepage.testimonial",
+      page: "homepage",
+      title: "Testimonial",
+      description: "Quote band — auto-shows your latest approved review",
+      groupIds: ["homepage.testimonial"],
+      order: 5,
+      hideable: true,
+    },
+    {
+      id: "homepage.brands",
+      page: "homepage",
+      title: "Brands We Carry",
+      description: "Marquee row of brand logos",
+      groupIds: ["homepage.brands"],
+      order: 6,
+      hideable: true,
+    },
+    {
+      id: "homepage.blog",
+      page: "homepage",
+      title: "Blog Preview",
+      description: "Latest published blog posts",
+      groupIds: ["homepage.blog"],
+      order: 7,
+      hideable: true,
+    },
+    {
+      id: "homepage.instagram",
+      page: "homepage",
+      title: "Instagram Gallery",
+      description: "Handle and photo strip",
+      groupIds: ["homepage.instagram"],
+      order: 8,
+      hideable: true,
+    },
+    {
+      id: "homepage.detroit",
+      page: "homepage",
+      title: "Detroit / Location",
+      description: "Brand-identity section pairing a location photo with roots copy",
+      groupIds: ["homepage.detroit"],
+      order: 9,
+      hideable: false,
+    },
+    {
+      id: "homepage.contact",
+      page: "homepage",
+      title: "Contact CTA",
+      description: "Dark booking CTA band with heading, body, phone, and email",
+      groupIds: ["homepage.contact"],
+      order: 10,
+      hideable: true,
+    },
+
+    // ─── About ────────────────────────────────────────────────────────────
+    {
+      id: "about.hero",
+      page: "about",
+      title: "About Hero",
+      description: "Full-width banner image with overline and page title",
+      groupIds: ["about.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "about.mission",
+      page: "about",
+      title: "Mission Statement",
+      description: "Centered two-part heading and opening paragraph",
+      groupIds: ["about.mission"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "about.steps",
+      page: "about",
+      title: "Facial Steps",
+      description: "Heading, intro, and alternating image-and-text ritual steps",
+      groupIds: ["about.steps"],
+      order: 2,
+      hideable: false,
+    },
+    {
+      id: "about.band",
+      page: "about",
+      title: "Brand Statement Band",
+      description: "Dark image band with a short brand statement overlaid",
+      groupIds: ["about.band"],
+      order: 3,
+      hideable: false,
+    },
+    {
+      id: "about.owner",
+      page: "about",
+      title: "Meet the Owner",
+      description: "Two-column owner spotlight: heading, role, bio, portrait",
+      groupIds: ["about.owner"],
+      order: 4,
+      hideable: false,
+    },
+    {
+      id: "about.team",
+      page: "about",
+      title: "Meet the Team",
+      description: "Heading, intro, and a grid of staff cards",
+      groupIds: ["about.team"],
+      order: 5,
+      hideable: false,
+    },
+    {
+      id: "about.cta",
+      page: "about",
+      title: "Closing Contact CTA",
+      description: "Dark contact/booking section closing the page",
+      groupIds: ["about.cta"],
+      order: 6,
+      hideable: true,
+    },
+
+    // ─── Contact ──────────────────────────────────────────────────────────
+    {
+      id: "contact.hero",
+      page: "contact",
+      title: "Contact Hero",
+      description: "Full-width banner image with overline and page title",
+      groupIds: ["contact.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "contact.main",
+      page: "contact",
+      title: "Intro & Form",
+      description: "Intro heading, info blocks, and the contact form",
+      groupIds: ["contact.main"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "contact.map",
+      page: "contact",
+      title: "Location Map",
+      description: "Interactive map driven by latitude/longitude coordinates",
+      groupIds: ["contact.map"],
+      order: 2,
+      hideable: false,
+    },
+    {
+      id: "contact.review",
+      page: "contact",
+      title: "Leave a Review",
+      description: "Dark band inviting Google/Facebook reviews",
+      groupIds: ["contact.review"],
+      order: 3,
+      hideable: true,
+    },
+  ],
+};

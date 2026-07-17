@@ -6,13 +6,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { ChevronDown, Menu, Phone, ShoppingBag, User, X } from "lucide-react";
+import {
+  ChevronDown,
+  Heart,
+  Menu,
+  Phone,
+  ShoppingBag,
+  User,
+  X,
+} from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { BannerConfig } from "~/lib/validators/site-banner";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
@@ -33,6 +44,7 @@ export function ViiHeader({
   banner,
 }: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -192,6 +204,8 @@ export function ViiHeader({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });
 
+  const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
+
   // ── Nav links ──────────────────────────────────────────────────────────────
   const DEFAULT_NAV_LINKS: NavLink[] = [
     ...(isEnabled("products") ? [{ href: "/shop", label: "Shop" }] : []),
@@ -264,6 +278,7 @@ export function ViiHeader({
         <em>{businessName}</em>
         {locationTag ? (
           <span
+            {...fieldAttr("vii.global.location-tag")}
             style={{
               fontFamily: "var(--font-sans)",
               fontStyle: "normal",
@@ -669,7 +684,10 @@ export function ViiHeader({
 
   return (
     <>
-      <header className="fixed top-0 right-0 left-0 z-50 w-full">
+      <header
+        className="fixed top-0 right-0 left-0 z-50 w-full"
+        {...sectionGroupAttr("global", "branding")}
+      >
         {/* ── Announcement bar — top row, hides on scroll ── */}
         {!scrolled && banner && <ViiAnnouncementBar banner={banner} />}
 
@@ -753,92 +771,132 @@ export function ViiHeader({
                 )}
               </nav>
 
-              <div className="hidden md:block">
-                {session?.user ? (
-                  <UserButton
-                    size="icon"
-                    classNames={{
-                      trigger: {
-                        base: "rounded-full w-auto h-auto p-0",
-                        avatar: {
-                          base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
+              {isStorefrontEnabled("customerAccounts") && (
+                <div className="hidden md:block">
+                  {session?.user ? (
+                    <UserButton
+                      size="icon"
+                      classNames={{
+                        trigger: {
+                          base: "rounded-full w-auto h-auto p-0",
+                          avatar: {
+                            base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
+                          },
                         },
-                      },
-                    }}
-                    additionalLinks={[
-                      {
-                        icon: <IconPackage className="h-4 w-4" />,
-                        label: "Orders",
-                        href: "/account/orders",
-                      },
-                      ...(showAdminLink
-                        ? [
-                            {
-                              icon: <IconLayoutDashboard className="h-4 w-4" />,
-                              label: "Admin",
-                              href: "/admin",
-                            },
-                          ]
-                        : []),
-                    ]}
-                  />
-                ) : (
-                  <Link
-                    href="/auth/sign-in"
-                    aria-label="Sign in to your account"
-                    className="-m-2 flex items-center justify-center p-2"
-                    style={{
-                      color: iconColor,
-                      transition: `color 0.4s ${ease}`,
-                    }}
-                  >
-                    <User
-                      className="h-[18px] w-[18px]"
-                      strokeWidth={1.4}
-                      aria-hidden="true"
+                      }}
+                      additionalLinks={[
+                        {
+                          icon: <IconPackage className="h-4 w-4" />,
+                          label: "Orders",
+                          href: "/account/orders",
+                        },
+                        ...(showAdminLink
+                          ? [
+                              {
+                                icon: (
+                                  <IconLayoutDashboard className="h-4 w-4" />
+                                ),
+                                label: "Admin",
+                                href: "/admin",
+                              },
+                            ]
+                          : []),
+                      ]}
                     />
-                  </Link>
-                )}
-              </div>
+                  ) : (
+                    <Link
+                      href="/auth/sign-in"
+                      aria-label="Sign in to your account"
+                      className="-m-2 flex items-center justify-center p-2"
+                      style={{
+                        color: iconColor,
+                        transition: `color 0.4s ${ease}`,
+                      }}
+                    >
+                      <User
+                        className="h-[18px] w-[18px]"
+                        strokeWidth={1.4}
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  )}
+                </div>
+              )}
+
+              {/* Wishlist — static badge (no bump animation) */}
+              {isStorefrontEnabled("wishlist") && (
+                <Link
+                  href="/wishlist"
+                  aria-label={
+                    wishlistCount > 0
+                      ? `View wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                      : "View wishlist"
+                  }
+                  className="relative -m-2 flex items-center justify-center p-2"
+                  style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
+                >
+                  <Heart
+                    className="h-[18px] w-[18px]"
+                    strokeWidth={1.4}
+                    aria-hidden="true"
+                  />
+                  {wishlistCount > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
+                      style={{
+                        background: "var(--vii-copper-deep)",
+                        color: "var(--vii-paper)",
+                        minWidth: "16px",
+                      }}
+                    >
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Cart — link to /cart (no vii-specific drawer in this pass) */}
-              <Link
-                href="/cart"
-                aria-label={
-                  itemCount > 0
-                    ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
-                    : "View cart"
-                }
-                className="relative -m-2 flex items-center justify-center p-2"
-                style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
-              >
-                <ShoppingBag
-                  className="h-[18px] w-[18px]"
-                  strokeWidth={1.4}
-                  aria-hidden="true"
-                />
-                {itemCount > 0 && (
-                  <span
+              {isEnabled("products") && (
+                <Link
+                  href="/cart"
+                  aria-label={
+                    itemCount > 0
+                      ? `View cart, ${itemCount} ${itemCount === 1 ? "item" : "items"}`
+                      : "View cart"
+                  }
+                  className="relative -m-2 flex items-center justify-center p-2"
+                  style={{ color: iconColor, transition: `color 0.4s ${ease}` }}
+                >
+                  <ShoppingBag
+                    className="h-[18px] w-[18px]"
+                    strokeWidth={1.4}
                     aria-hidden="true"
-                    data-vii-pulse=""
-                    className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
-                    style={{
-                      background: "var(--vii-copper-deep)",
-                      color: "var(--vii-paper)",
-                      minWidth: "16px",
-                      animation: cartBump
-                        ? "vii-pulse 0.42s var(--vii-ease)"
-                        : "none",
-                    }}
-                  >
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
+                  />
+                  {itemCount > 0 && (
+                    <span
+                      aria-hidden="true"
+                      data-vii-pulse=""
+                      className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full font-sans text-[9px] font-semibold"
+                      style={{
+                        background: "var(--vii-copper-deep)",
+                        color: "var(--vii-paper)",
+                        minWidth: "16px",
+                        animation: cartBump
+                          ? "vii-pulse 0.42s var(--vii-ease)"
+                          : "none",
+                      }}
+                    >
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+              )}
 
               {/* Book CTA — prominent copper button (desktop) */}
               <Link
                 href={bookCtaLink}
+                {...fieldAttr("vii.global.book-cta-text")}
                 className="hidden items-center md:inline-flex"
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -910,6 +968,7 @@ export function ViiHeader({
             <Link
               href={bookCtaLink}
               onClick={() => setMobileOpen(false)}
+              {...fieldAttr("vii.global.book-cta-text")}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -971,6 +1030,7 @@ export function ViiHeader({
               <Link
                 href={bookCtaLink}
                 onClick={() => setMobileOpen(false)}
+                {...fieldAttr("vii.global.book-cta-text")}
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontSize: "12px",

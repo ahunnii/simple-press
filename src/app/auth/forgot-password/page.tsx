@@ -5,7 +5,7 @@ type Props = {
   searchParams: Promise<{ redirectTo: string }>;
 };
 
-export default async function SignInPage({ searchParams }: Props) {
+export default async function ForgotPasswordPage({ searchParams }: Props) {
   const { redirectTo } = await searchParams;
 
   const business = await api.business.simplifiedGet();

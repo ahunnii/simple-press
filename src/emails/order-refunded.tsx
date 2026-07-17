@@ -12,11 +12,14 @@ type OrderRefundedEmailProps = {
   businessName: string;
   businessLogoUrl?: string;
   businessUrl: string;
+  /** Optional owner-customized intro paragraph, shown under the heading. */
+  introText?: string;
 };
 
 export default function OrderRefundedEmail({
   orderNumber,
   customerName,
+  introText,
   refundAmountCents,
   orderTotalCents,
   isFullRefund,
@@ -41,6 +44,12 @@ export default function OrderRefundedEmail({
       <Text style={heading}>
         {isFullRefund ? "Your order was refunded" : "Partial refund processed"}
       </Text>
+
+      {introText && (
+        <Text style={{ ...paragraph, whiteSpace: "pre-line" }}>
+          {introText}
+        </Text>
+      )}
 
       <Text style={paragraph}>Hi {customerName},</Text>
 

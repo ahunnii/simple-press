@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import { useProduct } from "~/hooks/use-product";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 import { DefaultVariantSelector } from "./default-variant-selector";
 
@@ -25,27 +26,36 @@ export function DefaultProductActions({
 
   return (
     <>
-      {Object.keys(variantOptions).length > 0 ? (
-        <DefaultVariantSelector
-          product={product}
-          setSelectedVariantId={setSelectedVariantId}
-        />
-      ) : additionalFields?.comingSoon ? (
+      {additionalFields?.comingSoon ? (
         <div className="rounded-[var(--radius)] border border-amber-200 bg-amber-50 px-5 py-4">
           <p className="font-medium text-amber-700">Coming Soon</p>
           <p className="mt-1 text-sm text-amber-700">
             This product isn&apos;t available yet. Check back later!
           </p>
         </div>
+      ) : Object.keys(variantOptions).length > 0 ? (
+        <DefaultVariantSelector
+          product={product}
+          setSelectedVariantId={setSelectedVariantId}
+        />
       ) : !inStock ? (
-        <button
-          type="button"
-          aria-disabled="true"
-          onClick={(e) => e.preventDefault()}
-          className="h-12 w-full cursor-not-allowed rounded-[var(--radius)] border border-[#e8e8e8] text-sm font-medium text-[#6b6b6b]"
-        >
-          Out of Stock
-        </button>
+        <div className="flex flex-col gap-4">
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={(e) => e.preventDefault()}
+            className="h-12 w-full cursor-not-allowed rounded-[var(--radius)] border border-[#e8e8e8] text-sm font-medium text-[#6b6b6b]"
+          >
+            Out of Stock
+          </button>
+          <NotifyMeForm
+            productId={product.id}
+            message="Get notified when it's back in stock."
+            messageClassName="text-sm text-[#6b6b6b]"
+            inputClassName="rounded-[var(--radius)] border-[#e8e8e8]"
+            buttonClassName="rounded-[var(--radius)] border-[#0a0a0a]"
+          />
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           {canAddMore && (

@@ -1,4 +1,6 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -11,9 +13,18 @@ import { ElegantTestimonials } from "./elegant-testimonials";
 import { ElegantTrustBadges } from "./elegant-trust-badges";
 
 export async function ElegantHomePage() {
-  const homepage = await api.business.getHomepage();
+  const [homepage, flags] = await Promise.all([
+    api.business.getHomepage(),
+    getBusinessFlags(),
+  ]);
 
-  const f = resolveFields(homepage?.siteContent?.customFields, [
+  const testimonials = flags.isEnabled("testimonials")
+    ? await api.testimonial.listRandom({ limit: 9 })
+    : [];
+
+  const customFields = homepage?.siteContent?.customFields;
+
+  const f = resolveFields(customFields, [
     "elegant.homepage.hero-image",
     "elegant.homepage.hero-title-line-1",
     "elegant.homepage.hero-title-line-2",
@@ -54,10 +65,12 @@ export async function ElegantHomePage() {
         sectionAttrs={sectionGroupAttr("homepage", "hero")}
       />
 
-      <ElegantTrustBadges
-        homepage={homepage}
-        sectionAttrs={sectionGroupAttr("homepage", "trust-badges")}
-      />
+      {isSectionVisible(customFields, "elegant", "homepage.trust-badges") && (
+        <ElegantTrustBadges
+          homepage={homepage}
+          sectionAttrs={sectionGroupAttr("homepage", "trust-badges")}
+        />
+      )}
 
       <ElegantProductGrid
         homepage={homepage}
@@ -77,16 +90,32 @@ export async function ElegantHomePage() {
         aboutTitle={f["elegant.homepage.about.title"]}
         aboutText={f["elegant.homepage.about.text"]}
         sectionAttrs={sectionGroupAttr("homepage", "about")}
+        featuresVisible={isSectionVisible(
+          customFields,
+          "elegant",
+          "homepage.features",
+        )}
       />
 
-      <ElegantTestimonials />
+      {isSectionVisible(customFields, "elegant", "homepage.testimonials") && (
+        <ElegantTestimonials
+          testimonials={testimonials}
+          sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+        />
+      )}
 
-      <ElegantCTABanner
-        homepage={homepage}
-        sectionAttrs={sectionGroupAttr("homepage", "cta")}
-      />
+      {isSectionVisible(customFields, "elegant", "homepage.cta") && (
+        <ElegantCTABanner
+          homepage={homepage}
+          sectionAttrs={sectionGroupAttr("homepage", "cta")}
+        />
+      )}
 
-      <ElegantNewsletter />
+      {isSectionVisible(customFields, "elegant", "homepage.newsletter") && (
+        <ElegantNewsletter
+          sectionAttrs={sectionGroupAttr("homepage", "newsletter")}
+        />
+      )}
     </>
   );
 }

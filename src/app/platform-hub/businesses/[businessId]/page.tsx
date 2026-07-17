@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
+import { getMainDomainUrl } from "~/lib/domain-utils";
 import { api } from "~/trpc/server";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,10 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { AddMemberButton } from "~/app/admin/platform/_components/add-member-button";
-import { BusinessMembersTable } from "~/app/admin/platform/_components/business-members-table";
-
+import { AddMemberButton } from "../../_components/add-member-button";
+import { BusinessMembersTable } from "../../_components/business-members-table";
 import { PlatformTrailHeader } from "../../_components/platform-trail-header";
+import { BusinessFeatureFlags } from "./_components/business-feature-flags";
 
 type Props = {
   params: Promise<{ businessId: string }>;
@@ -26,6 +28,8 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
     notFound();
   }
 
+  const { flags } = await api.platform.getBusinessFlags({ businessId });
+
   return (
     <>
       <PlatformTrailHeader
@@ -36,6 +40,20 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
       />
       <div className="admin-container">
         <div className="space-y-6">
+          <div className="admin-header">
+            <h1 className="text-2xl font-bold">{business.name}</h1>
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={getMainDomainUrl(
+                  `/admin/media?businessId=${business.id}`,
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Media Library
+              </a>
+            </Button>
+          </div>
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -145,6 +163,8 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
               )}
             </CardContent>
           </Card>
+
+          <BusinessFeatureFlags businessId={business.id} initialFlags={flags} />
         </div>
       </div>
     </>

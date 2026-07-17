@@ -1,10 +1,12 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
-import { Loader2, Star, Upload } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Loader2, Star } from "lucide-react";
 import { toast } from "sonner";
 
+import { authClient } from "~/server/better-auth/client";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -34,21 +36,31 @@ export function WriteReviewDialog({
   onClose,
   onSuccess,
 }: WriteReviewDialogProps) {
+  const pathname = usePathname();
+  const { data: session } = authClient.useSession();
+  const isSignedIn = !!session;
+
   const [rating, setRating] = useState(5);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [title, setTitle] = useState("");
   const [comment, setComment] = useState("");
-  const [images, setImages] = useState<string[]>([]);
-  const [videoUrl, setVideoUrl] = useState("");
 
+  const utils = api.useUtils();
+
+  // Only signed-in visitors can review — `canReview` is a protected procedure,
+  // so gate the query on the session to avoid an UNAUTHORIZED error.
   const { data: canReviewData } = api.review.canReview.useQuery(
     { productId },
-    { enabled: isOpen },
+    { enabled: isOpen && isSignedIn },
   );
 
   const submitMutation = api.review.submit.useMutation({
     onSuccess: () => {
-      toast.success("Review submitted successfully!");
+      toast.success(
+        "Thanks! Your review was submitted and will appear once approved.",
+      );
+      void utils.review.getProductStats.invalidate({ productId });
+      void utils.review.listByProduct.invalidate({ productId });
       onSuccess();
       onClose();
       resetForm();
@@ -62,8 +74,6 @@ export function WriteReviewDialog({
     setRating(5);
     setTitle("");
     setComment("");
-    setImages([]);
-    setVideoUrl("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -84,34 +94,42 @@ export function WriteReviewDialog({
       rating,
       title: title.trim(),
       comment: comment.trim(),
-      images: images.length > 0 ? images : undefined,
-      videoUrl: videoUrl.trim() || undefined,
     });
   };
 
-  const addImage = () => {
-    if (images.length >= 5) {
-      toast.error("Maximum 5 images allowed");
-      return;
-    }
-    const url = prompt("Enter image URL:");
-    if (url) {
-      setImages([...images, url]);
-    }
-  };
+  // Signed-out visitors: prompt sign-in rather than showing the review form.
+  if (!isSignedIn) {
+    const redirect = encodeURIComponent(pathname);
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign in to write a review</DialogTitle>
+            <DialogDescription>
+              You need to be signed in to review {productName}.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button asChild>
+              <Link href={`/auth/sign-in?redirect=${redirect}`}>Sign in</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
-  const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
-  if (!canReviewData?.canReview) {
+  if (canReviewData && !canReviewData.canReview) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Cannot Review</DialogTitle>
             <DialogDescription>
-              {canReviewData?.reason ??
+              {canReviewData.reason ??
                 "You cannot review this product at this time."}
             </DialogDescription>
           </DialogHeader>
@@ -131,7 +149,7 @@ export function WriteReviewDialog({
             <DialogTitle>Write a Review</DialogTitle>
             <DialogDescription>
               Share your experience with {productName}
-              {canReviewData?.verifiedPurchase && (
+              {canReviewData?.canReview && canReviewData.verifiedPurchase && (
                 <span className="mt-1 block text-green-600">
                   ✓ Verified Purchase
                 </span>
@@ -207,55 +225,9 @@ export function WriteReviewDialog({
               </p>
             </div>
 
-            {/* Images */}
-            <div>
-              <Label>Photos (Optional)</Label>
-              <div className="mt-2">
-                {images.length > 0 && (
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    {images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Review ${index + 1}`}
-                          className="h-20 w-20 rounded object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-600 text-xs text-white"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addImage}
-                  disabled={images.length >= 5}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Add Photo ({images.length}/5)
-                </Button>
-              </div>
-            </div>
-
-            {/* Video */}
-            <div>
-              <Label htmlFor="video">Video URL (Optional)</Label>
-              <Input
-                id="video"
-                type="url"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://example.com/video.mp4"
-                className="mt-2"
-              />
-            </div>
+            <p className="text-xs text-gray-500">
+              Reviews are checked by the store before they appear publicly.
+            </p>
           </div>
 
           <DialogFooter>

@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Check, Minus, Plus } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { buildVariantCartItem } from "~/lib/products/build-variant-cart-item";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
+import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
+import { NotifyMeForm } from "~/app/(storefront)/_components/product/notify-me-form";
 
 type VariantSelectorProps = {
   product: NonNullable<RouterOutputs["product"]["get"]>;
@@ -23,7 +27,7 @@ export function ElegantVariantSelector({
   const { setVariantImageUrl } = useVariantImage();
 
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] ?? null,
+    pickInitialVariant(product.variants, product),
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -48,17 +52,7 @@ export function ElegantVariantSelector({
   const handleAddToCart = () => {
     if (!selectedVariant) return;
     addItem(
-      {
-        productId: product.id,
-        productSlug: product.slug,
-        variantId: selectedVariant.id,
-        productName: product.name,
-        variantName: selectedVariant.name,
-        price: selectedVariant.price ?? product.price,
-        imageUrl: selectedVariant?.imageUrl ?? product.images[0]?.url ?? null,
-        sku: selectedVariant.sku,
-        maxInventory: effectiveMax,
-      },
+      buildVariantCartItem(product, selectedVariant, effectiveMax),
       quantity,
     );
     setQuantity(1);
@@ -283,7 +277,7 @@ export function ElegantVariantSelector({
           ) : (
             <>
               Add {quantity > 1 ? `${quantity} ` : ""}to bag
-              {price > 0 && ` · $${((price * quantity) / 100).toFixed(0)}`}
+              {price > 0 && ` · ${formatPrice(price * quantity)}`}
               <ArrowRight
                 aria-hidden={true}
                 style={{ width: 14, height: 14 }}
@@ -294,6 +288,19 @@ export function ElegantVariantSelector({
         <span className="sr-only" aria-live="polite" aria-atomic="true">
           {isAdded ? "Added to bag" : ""}
         </span>
+
+        {/* Notify me when the selected variant is back in stock */}
+        {selectedVariant && effectiveMax === 0 && (
+          <NotifyMeForm
+            productId={product.id}
+            variantId={selectedVariant.id}
+            className="mt-4"
+            message="Get notified when this option is back in stock."
+            messageClassName="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--el-ink-soft)]"
+            inputClassName="rounded-full border-[var(--el-line)] px-4"
+            buttonClassName="rounded-full uppercase tracking-[0.08em] text-xs"
+          />
+        )}
       </div>
     </div>
   );

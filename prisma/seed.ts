@@ -1,11 +1,7 @@
-import { hash } from "bcrypt";
-
 import { db } from "~/server/db";
 
 async function main() {
   // Create a demo business for testing
-  const hashedPassword = await hash("password123", 10);
-
   const business = await db.business.create({
     data: {
       name: "Demo Store",

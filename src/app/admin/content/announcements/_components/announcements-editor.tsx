@@ -60,6 +60,8 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
   const form: UseFormReturn<BannerFormValues> = useForm<BannerFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     resolver: zodResolver(updateBannerConfigSchema) as any,
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       enabled: banner?.enabled ?? false,
       content: banner?.content ?? null,
@@ -217,6 +219,8 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
   const form: UseFormReturn<PopupFormValues> = useForm<PopupFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     resolver: zodResolver(updatePopupConfigSchema) as any,
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       enabled: popup?.enabled ?? false,
       mode: popup?.mode ?? "image",

@@ -2,13 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Save, X } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Textarea } from "~/components/ui/textarea";
+import { Form } from "~/components/ui/form";
+import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+
+const orderNotesFormSchema = z.object({
+  internalNote: z.string(),
+});
+
+type OrderNotesFormData = z.infer<typeof orderNotesFormSchema>;
 
 type Props = {
   orderId: string;
@@ -20,39 +31,48 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [isEditing, setIsEditing] = useState(false);
-  const [draft, setDraft] = useState(internalNote ?? "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const defaultValues: OrderNotesFormData = { internalNote: internalNote ?? "" };
+
+  const form = useForm<OrderNotesFormData>({
+    resolver: zodResolver(orderNotesFormSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues,
+  });
 
   useEffect(() => {
     if (isEditing) textareaRef.current?.focus();
   }, [isEditing]);
 
   const updateNote = api.order.updateNote.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.dismiss();
       toast.success("Note saved");
       setIsEditing(false);
+      form.reset({ internalNote: data.internalNote ?? "" });
       void utils.order.invalidate();
       router.refresh();
     },
     onError: (err) => {
       toast.dismiss();
-      toast.error(err.message ?? "Failed to save note");
+      applyTrpcErrorToForm(form, err);
     },
     onMutate: () => {
       toast.loading("Saving note...");
     },
   });
 
-  const handleSave = () => {
+  const onSubmit = (data: OrderNotesFormData) => {
     updateNote.mutate({
       orderId,
-      internalNote: draft.trim() || null,
+      internalNote: data.internalNote.trim() || null,
     });
   };
 
   const handleCancel = () => {
-    setDraft(internalNote ?? "");
+    form.reset(defaultValues);
     setIsEditing(false);
   };
 
@@ -85,35 +105,40 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
           </p>
 
           {isEditing ? (
-            <div className="space-y-2">
-              <Textarea
-                ref={textareaRef}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder="Add an internal note..."
-                rows={4}
-                className="resize-none text-sm"
-              />
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={updateNote.isPending}
-                >
-                  <Save className="mr-1.5 h-3.5 w-3.5" />
-                  Save
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleCancel}
-                  disabled={updateNote.isPending}
-                >
-                  <X className="mr-1.5 h-3.5 w-3.5" />
-                  Cancel
-                </Button>
-              </div>
-            </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+                <TextareaFormField
+                  form={form}
+                  name="internalNote"
+                  label="Internal Note"
+                  placeholder="Add an internal note..."
+                  rows={4}
+                  textareaClassName="resize-none text-sm"
+                  textareaRef={textareaRef}
+                  labelClassName="sr-only"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={updateNote.isPending}
+                  >
+                    <Save className="mr-1.5 h-3.5 w-3.5" />
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleCancel}
+                    disabled={updateNote.isPending}
+                  >
+                    <X className="mr-1.5 h-3.5 w-3.5" />
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </Form>
           ) : (
             <p
               className="text-foreground min-h-8 cursor-text text-sm whitespace-pre-wrap"

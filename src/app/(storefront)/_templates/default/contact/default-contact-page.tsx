@@ -1,7 +1,8 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -10,10 +11,12 @@ import { DefaultContactForm } from "./default-contact-form";
 function FaqItem({
   question,
   answer,
+  answerFieldKey,
   defaultOpen,
 }: {
   question: string;
   answer: string;
+  answerFieldKey: string;
   defaultOpen?: boolean;
 }) {
   return (
@@ -30,7 +33,12 @@ function FaqItem({
           +
         </span>
       </summary>
-      <p className="pt-3.5 text-sm leading-[1.7] text-[#6b6b6b]">{answer}</p>
+      <p
+        className="pt-3.5 text-sm leading-[1.7] text-[#6b6b6b]"
+        {...fieldAttr(answerFieldKey)}
+      >
+        {answer}
+      </p>
     </details>
   );
 }
@@ -38,7 +46,8 @@ function FaqItem({
 export function DefaultContactPage({
   business,
 }: DefaultContactPageTemplateProps) {
-  const f = resolveFields(business?.siteContent?.customFields, [
+  const customFields = business?.siteContent?.customFields;
+  const f = resolveFields(customFields, [
     "default.contact.eyebrow",
     "default.contact.heading",
     "default.contact.description",
@@ -60,6 +69,7 @@ export function DefaultContactPage({
     .map((n) => ({
       q: f[`default.contact.faq-${n}-q`] ?? "",
       a: f[`default.contact.faq-${n}-a`] ?? "",
+      aField: `default.contact.faq-${n}-a`,
     }))
     .filter((item) => item.q && item.a);
 
@@ -111,15 +121,24 @@ export function DefaultContactPage({
       >
         <div className="mx-auto max-w-[1440px]">
           {f["default.contact.eyebrow"] && (
-            <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+            <span
+              className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase"
+              {...fieldAttr("default.contact.eyebrow")}
+            >
               {f["default.contact.eyebrow"]}
             </span>
           )}
-          <h1 className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]">
+          <h1
+            className="mt-3 font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em]"
+            {...fieldAttr("default.contact.heading")}
+          >
             {f["default.contact.heading"] ?? "Say hello."}
           </h1>
           {f["default.contact.description"] && (
-            <p className="mt-4 max-w-[560px] text-[17px] text-[#6b6b6b]">
+            <p
+              className="mt-4 max-w-[560px] text-[17px] text-[#6b6b6b]"
+              {...fieldAttr("default.contact.description")}
+            >
               {f["default.contact.description"]}
             </p>
           )}
@@ -169,33 +188,35 @@ export function DefaultContactPage({
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      {faqs.length > 0 && (
-        <section
-          {...sectionGroupAttr("contact", "faq")}
-          className="bg-[#efece8] px-6 py-20 lg:px-8"
-        >
-          <div className="mx-auto max-w-[760px]">
-            <div className="mb-12 text-center">
-              <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
-                Frequently asked
-              </span>
-              <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
-                Quick answers.
-              </h2>
+      {faqs.length > 0 &&
+        isSectionVisible(customFields, "default", "contact.faq") && (
+          <section
+            {...sectionGroupAttr("contact", "faq")}
+            className="bg-[#efece8] px-6 py-20 lg:px-8"
+          >
+            <div className="mx-auto max-w-[760px]">
+              <div className="mb-12 text-center">
+                <span className="text-xs font-medium tracking-[0.14em] text-[#6b6b6b] uppercase">
+                  Frequently asked
+                </span>
+                <h2 className="mt-3 font-serif text-[clamp(28px,3vw,40px)] font-medium tracking-[-0.02em]">
+                  Quick answers.
+                </h2>
+              </div>
+              <div>
+                {faqs.map((item, i) => (
+                  <FaqItem
+                    key={i}
+                    question={item.q}
+                    answer={item.a}
+                    answerFieldKey={item.aField}
+                    defaultOpen={i === 0}
+                  />
+                ))}
+              </div>
             </div>
-            <div>
-              {faqs.map((item, i) => (
-                <FaqItem
-                  key={i}
-                  question={item.q}
-                  answer={item.a}
-                  defaultOpen={i === 0}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
     </PageTransition>
   );
 }

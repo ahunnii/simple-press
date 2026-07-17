@@ -19,6 +19,17 @@ type Props = {
    * Pattern: {...sectionGroupAttr("homepage", "hero")}
    */
   sectionAttrs?: Record<string, string>;
+  /**
+   * Per-field click-to-edit hotspot attributes, built by the caller via
+   * `fieldAttr("default.homepage.hero-...")` — matches the convention used
+   * by sibling homepage sections (fieldAttr() call sites live in
+   * default-homepage.tsx; this component just spreads them onto the
+   * corresponding text nodes).
+   */
+  eyebrowAttrs?: Record<string, string>;
+  descriptionAttrs?: Record<string, string>;
+  primaryTextAttrs?: Record<string, string>;
+  secondaryTextAttrs?: Record<string, string>;
 };
 
 export function DefaultParallaxHero({
@@ -31,6 +42,10 @@ export function DefaultParallaxHero({
   secondaryText,
   secondaryHref,
   sectionAttrs,
+  eyebrowAttrs,
+  descriptionAttrs,
+  primaryTextAttrs,
+  secondaryTextAttrs,
 }: Props) {
   const bgRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -83,7 +98,10 @@ export function DefaultParallaxHero({
       >
         <div className="mx-auto flex max-w-[1440px] flex-col gap-6 px-6 pb-24">
           {eyebrow && (
-            <span className="text-xs font-medium tracking-[0.14em] text-white/80 uppercase">
+            <span
+              className="text-xs font-medium tracking-[0.14em] text-white/80 uppercase"
+              {...eyebrowAttrs}
+            >
               {eyebrow}
             </span>
           )}
@@ -91,21 +109,26 @@ export function DefaultParallaxHero({
             {title}
           </h1>
           {description && (
-            <p className="max-w-[480px] text-lg text-white/80">{description}</p>
+            <p
+              className="max-w-[480px] text-lg text-white/80"
+              {...descriptionAttrs}
+            >
+              {description}
+            </p>
           )}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href={primaryHref}
               className="inline-flex h-12 items-center justify-center rounded-(--radius) bg-white px-7 text-sm font-medium tracking-[0.02em] text-[#0a0a0a] transition-colors hover:bg-white/88"
             >
-              {primaryText}
+              <span {...primaryTextAttrs}>{primaryText}</span>
             </Link>
             {secondaryText && (
               <Link
                 href={secondaryHref ?? "/about"}
                 className="inline-flex h-12 items-center justify-center rounded-(--radius) border border-white/40 bg-transparent px-7 text-sm font-medium tracking-[0.02em] text-white transition-colors hover:border-white/70"
               >
-                {secondaryText}
+                <span {...secondaryTextAttrs}>{secondaryText}</span>
               </Link>
             )}
           </div>
