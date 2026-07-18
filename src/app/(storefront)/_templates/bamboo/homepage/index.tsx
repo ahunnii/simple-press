@@ -214,6 +214,20 @@ const homepageSustainabilityData: TemplateField[] = [
   },
 ];
 
+const homepageTestimonialsData: TemplateField[] = [
+  {
+    key: "bamboo.homepage.testimonials-heading",
+    label: "Testimonials Heading",
+    description: "Heading for the homepage testimonials section",
+    type: "text",
+    page: "homepage",
+    group: "homepage.testimonials",
+    gridColumn: "col-span-full",
+    defaultValue: "What Our Customers Say",
+    placeholder: "What Our Customers Say",
+  },
+];
+
 const homepageLocationData: TemplateField[] = [
   {
     key: "bamboo.homepage.location-heading",
@@ -252,6 +266,7 @@ export const homepageBambooData = [
   ...homepageFeaturedData,
   ...homepageAboutTeaserData,
   ...homepageSustainabilityData,
+  ...homepageTestimonialsData,
   ...homepageLocationData,
 ];
 
@@ -295,7 +310,7 @@ export const bambooHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.testimonials",
     title: "Testimonials",
-    description: "Customer testimonials (name, location, quote)",
+    description: "Heading for the testimonials section. Testimonials themselves are managed under Admin → Testimonials.",
     icon: "💬",
     columns: 2,
   },

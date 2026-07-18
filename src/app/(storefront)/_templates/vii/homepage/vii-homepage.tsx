@@ -42,11 +42,12 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
     image: page.image ?? "",
   }));
 
-  // Testimonial for the quote section. Fails gracefully when the feature is
-  // disabled or there are no approved reviews yet.
-  const testimonials = await api.testimonial
-    .listRandom({ limit: 1 })
-    .catch(() => []);
+  // Testimonial for the quote section. Skip the fetch entirely when the
+  // `testimonials` feature is disabled (the public procedure now FORBIDs it);
+  // the `.catch` still covers the "no approved reviews yet" case.
+  const testimonials = isEnabled("testimonials")
+    ? await api.testimonial.listRandom({ limit: 1 }).catch(() => [])
+    : [];
   const latestTestimonial = testimonials[0] ?? null;
 
   const customFields = homepage?.siteContent?.customFields as
@@ -216,7 +217,8 @@ export async function ViiHomepage(props?: DefaultHomepageTemplateProps) {
         />
 
         {/* 8. Testimonial Quote */}
-        {testimonialQuote &&
+        {isEnabled("testimonials") &&
+        testimonialQuote &&
         isSectionVisible(customFields, "vii", "homepage.testimonial") ? (
           <ViiTestimonialQuote
             quoteImage={f["vii.homepage.testimonial-image"] ?? undefined}

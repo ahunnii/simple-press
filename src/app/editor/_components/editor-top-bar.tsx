@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   Loader2,
+  MessageSquare,
   Monitor,
   Smartphone,
   Tablet,
@@ -28,7 +29,9 @@ import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
@@ -45,11 +48,20 @@ function isSafeExitDestination(value: string | null): value is string {
 
 export type EditorTopBarPage = { value: string; label: string };
 
+/** CMS page Select entry (value = `cms:<id>`, label = draft title). */
+export type EditorTopBarCmsPage = {
+  value: string;
+  label: string;
+  unpublished?: boolean;
+};
+
 export type EditorTopBarProps = {
   businessName: string;
   templateId: string;
-  /** Selectable pages (value = page key, label = display name). */
+  /** Selectable template pages (value = page key, label = display name). */
   pages: EditorTopBarPage[];
+  /** Selectable CMS pages, rendered in a second Select group. */
+  cmsPages: EditorTopBarCmsPage[];
   activePage: string;
   onPageChange: (page: string) => void;
   device: DeviceKind;
@@ -70,6 +82,12 @@ export type EditorTopBarProps = {
   saveFailed: boolean;
   onPublish: () => void;
   onDiscard: () => void;
+  /** Whether the Notes panel is currently open. */
+  notesOpen: boolean;
+  /** Count of the owner's still-open notes, shown as a badge. */
+  openNotesCount: number;
+  /** Toggle the Notes panel. */
+  onToggleNotes: () => void;
 };
 
 const DEVICES: { kind: DeviceKind; label: string; Icon: typeof Monitor }[] = [
@@ -87,6 +105,7 @@ export function EditorTopBar({
   businessName,
   templateId,
   pages,
+  cmsPages,
   activePage,
   onPageChange,
   device,
@@ -98,6 +117,9 @@ export function EditorTopBar({
   saveFailed,
   onPublish,
   onDiscard,
+  notesOpen,
+  openNotesCount,
+  onToggleNotes,
 }: EditorTopBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -163,11 +185,30 @@ export function EditorTopBar({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {pages.map((page) => (
-              <SelectItem key={page.value} value={page.value}>
-                {page.label}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectLabel>Site pages</SelectLabel>
+              {pages.map((page) => (
+                <SelectItem key={page.value} value={page.value}>
+                  {page.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            {cmsPages.length > 0 && (
+              <SelectGroup>
+                <SelectLabel>Your pages</SelectLabel>
+                {cmsPages.map((page) => (
+                  <SelectItem key={page.value} value={page.value}>
+                    {page.label}
+                    {page.unpublished && (
+                      <span className="text-muted-foreground">
+                        {" "}
+                        (unpublished)
+                      </span>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
           </SelectContent>
         </Select>
 
@@ -197,6 +238,29 @@ export function EditorTopBar({
 
       {/* Right: status + actions */}
       <div className="flex flex-1 shrink-0 items-center justify-end gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-pressed={notesOpen}
+          onClick={onToggleNotes}
+          className={cn(
+            "shrink-0",
+            notesOpen && "bg-muted text-foreground",
+          )}
+        >
+          <MessageSquare className="h-4 w-4 sm:mr-1.5" />
+          <span className="hidden sm:inline">Notes</span>
+          {openNotesCount > 0 && (
+            <Badge
+              variant="secondary"
+              className="ml-1.5 h-4 min-w-4 justify-center rounded-full px-1 text-[10px] leading-none"
+            >
+              {openNotesCount}
+            </Badge>
+          )}
+        </Button>
+
         <div
           role="status"
           aria-live="polite"

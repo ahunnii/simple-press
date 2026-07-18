@@ -144,6 +144,11 @@ export type InventoryReservation = $Result.DefaultSelection<Prisma.$InventoryRes
  */
 export type Page = $Result.DefaultSelection<Prisma.$PagePayload>
 /**
+ * Model EditorNote
+ * 
+ */
+export type EditorNote = $Result.DefaultSelection<Prisma.$EditorNotePayload>
+/**
  * Model ProductImport
  * 
  */
@@ -629,6 +634,16 @@ export class PrismaClient<
     * ```
     */
   get page(): Prisma.PageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.editorNote`: Exposes CRUD operations for the **EditorNote** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EditorNotes
+    * const editorNotes = await prisma.editorNote.findMany()
+    * ```
+    */
+  get editorNote(): Prisma.EditorNoteDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.productImport`: Exposes CRUD operations for the **ProductImport** model.
@@ -1226,6 +1241,7 @@ export namespace Prisma {
     BaseInventoryUnit: 'BaseInventoryUnit',
     InventoryReservation: 'InventoryReservation',
     Page: 'Page',
+    EditorNote: 'EditorNote',
     ProductImport: 'ProductImport',
     Gallery: 'Gallery',
     GalleryImage: 'GalleryImage',
@@ -1257,7 +1273,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3185,6 +3201,80 @@ export namespace Prisma {
           }
         }
       }
+      EditorNote: {
+        payload: Prisma.$EditorNotePayload<ExtArgs>
+        fields: Prisma.EditorNoteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EditorNoteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EditorNoteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>
+          }
+          findFirst: {
+            args: Prisma.EditorNoteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EditorNoteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>
+          }
+          findMany: {
+            args: Prisma.EditorNoteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>[]
+          }
+          create: {
+            args: Prisma.EditorNoteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>
+          }
+          createMany: {
+            args: Prisma.EditorNoteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EditorNoteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>[]
+          }
+          delete: {
+            args: Prisma.EditorNoteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>
+          }
+          update: {
+            args: Prisma.EditorNoteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>
+          }
+          deleteMany: {
+            args: Prisma.EditorNoteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EditorNoteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EditorNoteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>[]
+          }
+          upsert: {
+            args: Prisma.EditorNoteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EditorNotePayload>
+          }
+          aggregate: {
+            args: Prisma.EditorNoteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEditorNote>
+          }
+          groupBy: {
+            args: Prisma.EditorNoteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EditorNoteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EditorNoteCountArgs<ExtArgs>
+            result: $Utils.Optional<EditorNoteCountAggregateOutputType> | number
+          }
+        }
+      }
       ProductImport: {
         payload: Prisma.$ProductImportPayload<ExtArgs>
         fields: Prisma.ProductImportFieldRefs
@@ -4269,6 +4359,7 @@ export namespace Prisma {
     baseInventoryUnit?: BaseInventoryUnitOmit
     inventoryReservation?: InventoryReservationOmit
     page?: PageOmit
+    editorNote?: EditorNoteOmit
     productImport?: ProductImportOmit
     gallery?: GalleryOmit
     galleryImage?: GalleryImageOmit
@@ -4368,6 +4459,7 @@ export namespace Prisma {
     customers: number
     inventoryHistory: number
     createdInvites: number
+    editorNotes: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4377,6 +4469,7 @@ export namespace Prisma {
     customers?: boolean | UserCountOutputTypeCountCustomersArgs
     inventoryHistory?: boolean | UserCountOutputTypeCountInventoryHistoryArgs
     createdInvites?: boolean | UserCountOutputTypeCountCreatedInvitesArgs
+    editorNotes?: boolean | UserCountOutputTypeCountEditorNotesArgs
   }
 
   // Custom InputTypes
@@ -4432,6 +4525,13 @@ export namespace Prisma {
     where?: PlatformInviteWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountEditorNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EditorNoteWhereInput
+  }
+
 
   /**
    * Count Type BusinessCountOutputType
@@ -4449,6 +4549,7 @@ export namespace Prisma {
     baseInventoryUnits: number
     inventoryReservations: number
     pages: number
+    editorNotes: number
     productImports: number
     galleries: number
     testimonials: number
@@ -4473,6 +4574,7 @@ export namespace Prisma {
     baseInventoryUnits?: boolean | BusinessCountOutputTypeCountBaseInventoryUnitsArgs
     inventoryReservations?: boolean | BusinessCountOutputTypeCountInventoryReservationsArgs
     pages?: boolean | BusinessCountOutputTypeCountPagesArgs
+    editorNotes?: boolean | BusinessCountOutputTypeCountEditorNotesArgs
     productImports?: boolean | BusinessCountOutputTypeCountProductImportsArgs
     galleries?: boolean | BusinessCountOutputTypeCountGalleriesArgs
     testimonials?: boolean | BusinessCountOutputTypeCountTestimonialsArgs
@@ -4571,6 +4673,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountPagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PageWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountEditorNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EditorNoteWhereInput
   }
 
   /**
@@ -5349,6 +5458,7 @@ export namespace Prisma {
     customers?: boolean | User$customersArgs<ExtArgs>
     inventoryHistory?: boolean | User$inventoryHistoryArgs<ExtArgs>
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
+    editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -5393,6 +5503,7 @@ export namespace Prisma {
     customers?: boolean | User$customersArgs<ExtArgs>
     inventoryHistory?: boolean | User$inventoryHistoryArgs<ExtArgs>
     createdInvites?: boolean | User$createdInvitesArgs<ExtArgs>
+    editorNotes?: boolean | User$editorNotesArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -5407,6 +5518,7 @@ export namespace Prisma {
       customers: Prisma.$CustomerPayload<ExtArgs>[]
       inventoryHistory: Prisma.$InventoryHistoryPayload<ExtArgs>[]
       createdInvites: Prisma.$PlatformInvitePayload<ExtArgs>[]
+      editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5817,6 +5929,7 @@ export namespace Prisma {
     customers<T extends User$customersArgs<ExtArgs> = {}>(args?: Subset<T, User$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryHistory<T extends User$inventoryHistoryArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     createdInvites<T extends User$createdInvitesArgs<ExtArgs> = {}>(args?: Subset<T, User$createdInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlatformInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    editorNotes<T extends User$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, User$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6383,6 +6496,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PlatformInviteScalarFieldEnum | PlatformInviteScalarFieldEnum[]
+  }
+
+  /**
+   * User.editorNotes
+   */
+  export type User$editorNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    where?: EditorNoteWhereInput
+    orderBy?: EditorNoteOrderByWithRelationInput | EditorNoteOrderByWithRelationInput[]
+    cursor?: EditorNoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EditorNoteScalarFieldEnum | EditorNoteScalarFieldEnum[]
   }
 
   /**
@@ -11291,6 +11428,7 @@ export namespace Prisma {
     baseInventoryUnits?: boolean | Business$baseInventoryUnitsArgs<ExtArgs>
     inventoryReservations?: boolean | Business$inventoryReservationsArgs<ExtArgs>
     pages?: boolean | Business$pagesArgs<ExtArgs>
+    editorNotes?: boolean | Business$editorNotesArgs<ExtArgs>
     productImports?: boolean | Business$productImportsArgs<ExtArgs>
     galleries?: boolean | Business$galleriesArgs<ExtArgs>
     testimonials?: boolean | Business$testimonialsArgs<ExtArgs>
@@ -11453,6 +11591,7 @@ export namespace Prisma {
     baseInventoryUnits?: boolean | Business$baseInventoryUnitsArgs<ExtArgs>
     inventoryReservations?: boolean | Business$inventoryReservationsArgs<ExtArgs>
     pages?: boolean | Business$pagesArgs<ExtArgs>
+    editorNotes?: boolean | Business$editorNotesArgs<ExtArgs>
     productImports?: boolean | Business$productImportsArgs<ExtArgs>
     galleries?: boolean | Business$galleriesArgs<ExtArgs>
     testimonials?: boolean | Business$testimonialsArgs<ExtArgs>
@@ -11483,6 +11622,7 @@ export namespace Prisma {
       baseInventoryUnits: Prisma.$BaseInventoryUnitPayload<ExtArgs>[]
       inventoryReservations: Prisma.$InventoryReservationPayload<ExtArgs>[]
       pages: Prisma.$PagePayload<ExtArgs>[]
+      editorNotes: Prisma.$EditorNotePayload<ExtArgs>[]
       productImports: Prisma.$ProductImportPayload<ExtArgs>[]
       galleries: Prisma.$GalleryPayload<ExtArgs>[]
       testimonials: Prisma.$TestimonialPayload<ExtArgs>[]
@@ -11943,6 +12083,7 @@ export namespace Prisma {
     baseInventoryUnits<T extends Business$baseInventoryUnitsArgs<ExtArgs> = {}>(args?: Subset<T, Business$baseInventoryUnitsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BaseInventoryUnitPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     inventoryReservations<T extends Business$inventoryReservationsArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryReservationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     pages<T extends Business$pagesArgs<ExtArgs> = {}>(args?: Subset<T, Business$pagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    editorNotes<T extends Business$editorNotesArgs<ExtArgs> = {}>(args?: Subset<T, Business$editorNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     productImports<T extends Business$productImportsArgs<ExtArgs> = {}>(args?: Subset<T, Business$productImportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     galleries<T extends Business$galleriesArgs<ExtArgs> = {}>(args?: Subset<T, Business$galleriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GalleryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     testimonials<T extends Business$testimonialsArgs<ExtArgs> = {}>(args?: Subset<T, Business$testimonialsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12692,6 +12833,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PageScalarFieldEnum | PageScalarFieldEnum[]
+  }
+
+  /**
+   * Business.editorNotes
+   */
+  export type Business$editorNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    where?: EditorNoteWhereInput
+    orderBy?: EditorNoteOrderByWithRelationInput | EditorNoteOrderByWithRelationInput[]
+    cursor?: EditorNoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EditorNoteScalarFieldEnum | EditorNoteScalarFieldEnum[]
   }
 
   /**
@@ -37144,6 +37309,7 @@ export namespace Prisma {
     published: boolean | null
     sortOrder: number | null
     scheduledPublishAt: Date | null
+    previewDraftUpdatedAt: Date | null
     type: string | null
     template: string | null
     businessId: string | null
@@ -37165,6 +37331,7 @@ export namespace Prisma {
     published: boolean | null
     sortOrder: number | null
     scheduledPublishAt: Date | null
+    previewDraftUpdatedAt: Date | null
     type: string | null
     template: string | null
     businessId: string | null
@@ -37187,6 +37354,8 @@ export namespace Prisma {
     published: number
     sortOrder: number
     scheduledPublishAt: number
+    previewDraft: number
+    previewDraftUpdatedAt: number
     type: number
     template: number
     businessId: number
@@ -37218,6 +37387,7 @@ export namespace Prisma {
     published?: true
     sortOrder?: true
     scheduledPublishAt?: true
+    previewDraftUpdatedAt?: true
     type?: true
     template?: true
     businessId?: true
@@ -37239,6 +37409,7 @@ export namespace Prisma {
     published?: true
     sortOrder?: true
     scheduledPublishAt?: true
+    previewDraftUpdatedAt?: true
     type?: true
     template?: true
     businessId?: true
@@ -37261,6 +37432,8 @@ export namespace Prisma {
     published?: true
     sortOrder?: true
     scheduledPublishAt?: true
+    previewDraft?: true
+    previewDraftUpdatedAt?: true
     type?: true
     template?: true
     businessId?: true
@@ -37370,6 +37543,8 @@ export namespace Prisma {
     published: boolean
     sortOrder: number
     scheduledPublishAt: Date | null
+    previewDraft: JsonValue | null
+    previewDraftUpdatedAt: Date | null
     type: string
     template: string
     businessId: string
@@ -37411,6 +37586,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: boolean
     scheduledPublishAt?: boolean
+    previewDraft?: boolean
+    previewDraftUpdatedAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
@@ -37434,6 +37611,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: boolean
     scheduledPublishAt?: boolean
+    previewDraft?: boolean
+    previewDraftUpdatedAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
@@ -37457,6 +37636,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: boolean
     scheduledPublishAt?: boolean
+    previewDraft?: boolean
+    previewDraftUpdatedAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
@@ -37480,12 +37661,14 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: boolean
     scheduledPublishAt?: boolean
+    previewDraft?: boolean
+    previewDraftUpdatedAt?: boolean
     type?: boolean
     template?: boolean
     businessId?: boolean
   }
 
-  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "publishedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "scheduledPublishAt" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
+  export type PageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "publishedAt" | "title" | "slug" | "content" | "excerpt" | "image" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "published" | "sortOrder" | "scheduledPublishAt" | "previewDraft" | "previewDraftUpdatedAt" | "type" | "template" | "businessId", ExtArgs["result"]["page"]>
   export type PageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -37518,6 +37701,8 @@ export namespace Prisma {
       published: boolean
       sortOrder: number
       scheduledPublishAt: Date | null
+      previewDraft: Prisma.JsonValue | null
+      previewDraftUpdatedAt: Date | null
       type: string
       template: string
       businessId: string
@@ -37961,6 +38146,8 @@ export namespace Prisma {
     readonly published: FieldRef<"Page", 'Boolean'>
     readonly sortOrder: FieldRef<"Page", 'Int'>
     readonly scheduledPublishAt: FieldRef<"Page", 'DateTime'>
+    readonly previewDraft: FieldRef<"Page", 'Json'>
+    readonly previewDraftUpdatedAt: FieldRef<"Page", 'DateTime'>
     readonly type: FieldRef<"Page", 'String'>
     readonly template: FieldRef<"Page", 'String'>
     readonly businessId: FieldRef<"Page", 'String'>
@@ -38375,6 +38562,1169 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: PageInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EditorNote
+   */
+
+  export type AggregateEditorNote = {
+    _count: EditorNoteCountAggregateOutputType | null
+    _min: EditorNoteMinAggregateOutputType | null
+    _max: EditorNoteMaxAggregateOutputType | null
+  }
+
+  export type EditorNoteMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    pageKey: string | null
+    pageLabel: string | null
+    body: string | null
+    status: string | null
+    response: string | null
+    resolvedAt: Date | null
+    createdByUserId: string | null
+  }
+
+  export type EditorNoteMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    pageKey: string | null
+    pageLabel: string | null
+    body: string | null
+    status: string | null
+    response: string | null
+    resolvedAt: Date | null
+    createdByUserId: string | null
+  }
+
+  export type EditorNoteCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    pageKey: number
+    pageLabel: number
+    body: number
+    status: number
+    response: number
+    resolvedAt: number
+    createdByUserId: number
+    _all: number
+  }
+
+
+  export type EditorNoteMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    pageKey?: true
+    pageLabel?: true
+    body?: true
+    status?: true
+    response?: true
+    resolvedAt?: true
+    createdByUserId?: true
+  }
+
+  export type EditorNoteMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    pageKey?: true
+    pageLabel?: true
+    body?: true
+    status?: true
+    response?: true
+    resolvedAt?: true
+    createdByUserId?: true
+  }
+
+  export type EditorNoteCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    pageKey?: true
+    pageLabel?: true
+    body?: true
+    status?: true
+    response?: true
+    resolvedAt?: true
+    createdByUserId?: true
+    _all?: true
+  }
+
+  export type EditorNoteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EditorNote to aggregate.
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EditorNotes to fetch.
+     */
+    orderBy?: EditorNoteOrderByWithRelationInput | EditorNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EditorNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EditorNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EditorNotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EditorNotes
+    **/
+    _count?: true | EditorNoteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EditorNoteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EditorNoteMaxAggregateInputType
+  }
+
+  export type GetEditorNoteAggregateType<T extends EditorNoteAggregateArgs> = {
+        [P in keyof T & keyof AggregateEditorNote]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEditorNote[P]>
+      : GetScalarType<T[P], AggregateEditorNote[P]>
+  }
+
+
+
+
+  export type EditorNoteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EditorNoteWhereInput
+    orderBy?: EditorNoteOrderByWithAggregationInput | EditorNoteOrderByWithAggregationInput[]
+    by: EditorNoteScalarFieldEnum[] | EditorNoteScalarFieldEnum
+    having?: EditorNoteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EditorNoteCountAggregateInputType | true
+    _min?: EditorNoteMinAggregateInputType
+    _max?: EditorNoteMaxAggregateInputType
+  }
+
+  export type EditorNoteGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    pageKey: string | null
+    pageLabel: string | null
+    body: string
+    status: string
+    response: string | null
+    resolvedAt: Date | null
+    createdByUserId: string | null
+    _count: EditorNoteCountAggregateOutputType | null
+    _min: EditorNoteMinAggregateOutputType | null
+    _max: EditorNoteMaxAggregateOutputType | null
+  }
+
+  type GetEditorNoteGroupByPayload<T extends EditorNoteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EditorNoteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EditorNoteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EditorNoteGroupByOutputType[P]>
+            : GetScalarType<T[P], EditorNoteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EditorNoteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    pageKey?: boolean
+    pageLabel?: boolean
+    body?: boolean
+    status?: boolean
+    response?: boolean
+    resolvedAt?: boolean
+    createdByUserId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["editorNote"]>
+
+  export type EditorNoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    pageKey?: boolean
+    pageLabel?: boolean
+    body?: boolean
+    status?: boolean
+    response?: boolean
+    resolvedAt?: boolean
+    createdByUserId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["editorNote"]>
+
+  export type EditorNoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    pageKey?: boolean
+    pageLabel?: boolean
+    body?: boolean
+    status?: boolean
+    response?: boolean
+    resolvedAt?: boolean
+    createdByUserId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
+  }, ExtArgs["result"]["editorNote"]>
+
+  export type EditorNoteSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    pageKey?: boolean
+    pageLabel?: boolean
+    body?: boolean
+    status?: boolean
+    response?: boolean
+    resolvedAt?: boolean
+    createdByUserId?: boolean
+  }
+
+  export type EditorNoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "businessId" | "pageKey" | "pageLabel" | "body" | "status" | "response" | "resolvedAt" | "createdByUserId", ExtArgs["result"]["editorNote"]>
+  export type EditorNoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
+  }
+  export type EditorNoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
+  }
+  export type EditorNoteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    createdBy?: boolean | EditorNote$createdByArgs<ExtArgs>
+  }
+
+  export type $EditorNotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EditorNote"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      createdBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      pageKey: string | null
+      pageLabel: string | null
+      body: string
+      status: string
+      response: string | null
+      resolvedAt: Date | null
+      createdByUserId: string | null
+    }, ExtArgs["result"]["editorNote"]>
+    composites: {}
+  }
+
+  type EditorNoteGetPayload<S extends boolean | null | undefined | EditorNoteDefaultArgs> = $Result.GetResult<Prisma.$EditorNotePayload, S>
+
+  type EditorNoteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EditorNoteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EditorNoteCountAggregateInputType | true
+    }
+
+  export interface EditorNoteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EditorNote'], meta: { name: 'EditorNote' } }
+    /**
+     * Find zero or one EditorNote that matches the filter.
+     * @param {EditorNoteFindUniqueArgs} args - Arguments to find a EditorNote
+     * @example
+     * // Get one EditorNote
+     * const editorNote = await prisma.editorNote.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EditorNoteFindUniqueArgs>(args: SelectSubset<T, EditorNoteFindUniqueArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one EditorNote that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EditorNoteFindUniqueOrThrowArgs} args - Arguments to find a EditorNote
+     * @example
+     * // Get one EditorNote
+     * const editorNote = await prisma.editorNote.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EditorNoteFindUniqueOrThrowArgs>(args: SelectSubset<T, EditorNoteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EditorNote that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteFindFirstArgs} args - Arguments to find a EditorNote
+     * @example
+     * // Get one EditorNote
+     * const editorNote = await prisma.editorNote.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EditorNoteFindFirstArgs>(args?: SelectSubset<T, EditorNoteFindFirstArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EditorNote that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteFindFirstOrThrowArgs} args - Arguments to find a EditorNote
+     * @example
+     * // Get one EditorNote
+     * const editorNote = await prisma.editorNote.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EditorNoteFindFirstOrThrowArgs>(args?: SelectSubset<T, EditorNoteFindFirstOrThrowArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more EditorNotes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EditorNotes
+     * const editorNotes = await prisma.editorNote.findMany()
+     * 
+     * // Get first 10 EditorNotes
+     * const editorNotes = await prisma.editorNote.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const editorNoteWithIdOnly = await prisma.editorNote.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EditorNoteFindManyArgs>(args?: SelectSubset<T, EditorNoteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a EditorNote.
+     * @param {EditorNoteCreateArgs} args - Arguments to create a EditorNote.
+     * @example
+     * // Create one EditorNote
+     * const EditorNote = await prisma.editorNote.create({
+     *   data: {
+     *     // ... data to create a EditorNote
+     *   }
+     * })
+     * 
+     */
+    create<T extends EditorNoteCreateArgs>(args: SelectSubset<T, EditorNoteCreateArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many EditorNotes.
+     * @param {EditorNoteCreateManyArgs} args - Arguments to create many EditorNotes.
+     * @example
+     * // Create many EditorNotes
+     * const editorNote = await prisma.editorNote.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EditorNoteCreateManyArgs>(args?: SelectSubset<T, EditorNoteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EditorNotes and returns the data saved in the database.
+     * @param {EditorNoteCreateManyAndReturnArgs} args - Arguments to create many EditorNotes.
+     * @example
+     * // Create many EditorNotes
+     * const editorNote = await prisma.editorNote.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EditorNotes and only return the `id`
+     * const editorNoteWithIdOnly = await prisma.editorNote.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EditorNoteCreateManyAndReturnArgs>(args?: SelectSubset<T, EditorNoteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a EditorNote.
+     * @param {EditorNoteDeleteArgs} args - Arguments to delete one EditorNote.
+     * @example
+     * // Delete one EditorNote
+     * const EditorNote = await prisma.editorNote.delete({
+     *   where: {
+     *     // ... filter to delete one EditorNote
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EditorNoteDeleteArgs>(args: SelectSubset<T, EditorNoteDeleteArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one EditorNote.
+     * @param {EditorNoteUpdateArgs} args - Arguments to update one EditorNote.
+     * @example
+     * // Update one EditorNote
+     * const editorNote = await prisma.editorNote.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EditorNoteUpdateArgs>(args: SelectSubset<T, EditorNoteUpdateArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more EditorNotes.
+     * @param {EditorNoteDeleteManyArgs} args - Arguments to filter EditorNotes to delete.
+     * @example
+     * // Delete a few EditorNotes
+     * const { count } = await prisma.editorNote.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EditorNoteDeleteManyArgs>(args?: SelectSubset<T, EditorNoteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EditorNotes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EditorNotes
+     * const editorNote = await prisma.editorNote.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EditorNoteUpdateManyArgs>(args: SelectSubset<T, EditorNoteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EditorNotes and returns the data updated in the database.
+     * @param {EditorNoteUpdateManyAndReturnArgs} args - Arguments to update many EditorNotes.
+     * @example
+     * // Update many EditorNotes
+     * const editorNote = await prisma.editorNote.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EditorNotes and only return the `id`
+     * const editorNoteWithIdOnly = await prisma.editorNote.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EditorNoteUpdateManyAndReturnArgs>(args: SelectSubset<T, EditorNoteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one EditorNote.
+     * @param {EditorNoteUpsertArgs} args - Arguments to update or create a EditorNote.
+     * @example
+     * // Update or create a EditorNote
+     * const editorNote = await prisma.editorNote.upsert({
+     *   create: {
+     *     // ... data to create a EditorNote
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EditorNote we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EditorNoteUpsertArgs>(args: SelectSubset<T, EditorNoteUpsertArgs<ExtArgs>>): Prisma__EditorNoteClient<$Result.GetResult<Prisma.$EditorNotePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of EditorNotes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteCountArgs} args - Arguments to filter EditorNotes to count.
+     * @example
+     * // Count the number of EditorNotes
+     * const count = await prisma.editorNote.count({
+     *   where: {
+     *     // ... the filter for the EditorNotes we want to count
+     *   }
+     * })
+    **/
+    count<T extends EditorNoteCountArgs>(
+      args?: Subset<T, EditorNoteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EditorNoteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EditorNote.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EditorNoteAggregateArgs>(args: Subset<T, EditorNoteAggregateArgs>): Prisma.PrismaPromise<GetEditorNoteAggregateType<T>>
+
+    /**
+     * Group by EditorNote.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EditorNoteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EditorNoteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EditorNoteGroupByArgs['orderBy'] }
+        : { orderBy?: EditorNoteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EditorNoteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEditorNoteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EditorNote model
+   */
+  readonly fields: EditorNoteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EditorNote.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EditorNoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    createdBy<T extends EditorNote$createdByArgs<ExtArgs> = {}>(args?: Subset<T, EditorNote$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EditorNote model
+   */
+  interface EditorNoteFieldRefs {
+    readonly id: FieldRef<"EditorNote", 'String'>
+    readonly createdAt: FieldRef<"EditorNote", 'DateTime'>
+    readonly updatedAt: FieldRef<"EditorNote", 'DateTime'>
+    readonly businessId: FieldRef<"EditorNote", 'String'>
+    readonly pageKey: FieldRef<"EditorNote", 'String'>
+    readonly pageLabel: FieldRef<"EditorNote", 'String'>
+    readonly body: FieldRef<"EditorNote", 'String'>
+    readonly status: FieldRef<"EditorNote", 'String'>
+    readonly response: FieldRef<"EditorNote", 'String'>
+    readonly resolvedAt: FieldRef<"EditorNote", 'DateTime'>
+    readonly createdByUserId: FieldRef<"EditorNote", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EditorNote findUnique
+   */
+  export type EditorNoteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which EditorNote to fetch.
+     */
+    where: EditorNoteWhereUniqueInput
+  }
+
+  /**
+   * EditorNote findUniqueOrThrow
+   */
+  export type EditorNoteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which EditorNote to fetch.
+     */
+    where: EditorNoteWhereUniqueInput
+  }
+
+  /**
+   * EditorNote findFirst
+   */
+  export type EditorNoteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which EditorNote to fetch.
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EditorNotes to fetch.
+     */
+    orderBy?: EditorNoteOrderByWithRelationInput | EditorNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EditorNotes.
+     */
+    cursor?: EditorNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EditorNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EditorNotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EditorNotes.
+     */
+    distinct?: EditorNoteScalarFieldEnum | EditorNoteScalarFieldEnum[]
+  }
+
+  /**
+   * EditorNote findFirstOrThrow
+   */
+  export type EditorNoteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which EditorNote to fetch.
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EditorNotes to fetch.
+     */
+    orderBy?: EditorNoteOrderByWithRelationInput | EditorNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EditorNotes.
+     */
+    cursor?: EditorNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EditorNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EditorNotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EditorNotes.
+     */
+    distinct?: EditorNoteScalarFieldEnum | EditorNoteScalarFieldEnum[]
+  }
+
+  /**
+   * EditorNote findMany
+   */
+  export type EditorNoteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which EditorNotes to fetch.
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EditorNotes to fetch.
+     */
+    orderBy?: EditorNoteOrderByWithRelationInput | EditorNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EditorNotes.
+     */
+    cursor?: EditorNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EditorNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EditorNotes.
+     */
+    skip?: number
+    distinct?: EditorNoteScalarFieldEnum | EditorNoteScalarFieldEnum[]
+  }
+
+  /**
+   * EditorNote create
+   */
+  export type EditorNoteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a EditorNote.
+     */
+    data: XOR<EditorNoteCreateInput, EditorNoteUncheckedCreateInput>
+  }
+
+  /**
+   * EditorNote createMany
+   */
+  export type EditorNoteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EditorNotes.
+     */
+    data: EditorNoteCreateManyInput | EditorNoteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EditorNote createManyAndReturn
+   */
+  export type EditorNoteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * The data used to create many EditorNotes.
+     */
+    data: EditorNoteCreateManyInput | EditorNoteCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * EditorNote update
+   */
+  export type EditorNoteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a EditorNote.
+     */
+    data: XOR<EditorNoteUpdateInput, EditorNoteUncheckedUpdateInput>
+    /**
+     * Choose, which EditorNote to update.
+     */
+    where: EditorNoteWhereUniqueInput
+  }
+
+  /**
+   * EditorNote updateMany
+   */
+  export type EditorNoteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EditorNotes.
+     */
+    data: XOR<EditorNoteUpdateManyMutationInput, EditorNoteUncheckedUpdateManyInput>
+    /**
+     * Filter which EditorNotes to update
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * Limit how many EditorNotes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EditorNote updateManyAndReturn
+   */
+  export type EditorNoteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * The data used to update EditorNotes.
+     */
+    data: XOR<EditorNoteUpdateManyMutationInput, EditorNoteUncheckedUpdateManyInput>
+    /**
+     * Filter which EditorNotes to update
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * Limit how many EditorNotes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * EditorNote upsert
+   */
+  export type EditorNoteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the EditorNote to update in case it exists.
+     */
+    where: EditorNoteWhereUniqueInput
+    /**
+     * In case the EditorNote found by the `where` argument doesn't exist, create a new EditorNote with this data.
+     */
+    create: XOR<EditorNoteCreateInput, EditorNoteUncheckedCreateInput>
+    /**
+     * In case the EditorNote was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EditorNoteUpdateInput, EditorNoteUncheckedUpdateInput>
+  }
+
+  /**
+   * EditorNote delete
+   */
+  export type EditorNoteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
+    /**
+     * Filter which EditorNote to delete.
+     */
+    where: EditorNoteWhereUniqueInput
+  }
+
+  /**
+   * EditorNote deleteMany
+   */
+  export type EditorNoteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EditorNotes to delete
+     */
+    where?: EditorNoteWhereInput
+    /**
+     * Limit how many EditorNotes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * EditorNote.createdBy
+   */
+  export type EditorNote$createdByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * EditorNote without action
+   */
+  export type EditorNoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EditorNote
+     */
+    select?: EditorNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EditorNote
+     */
+    omit?: EditorNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EditorNoteInclude<ExtArgs> | null
   }
 
 
@@ -53978,12 +55328,31 @@ export namespace Prisma {
     published: 'published',
     sortOrder: 'sortOrder',
     scheduledPublishAt: 'scheduledPublishAt',
+    previewDraft: 'previewDraft',
+    previewDraftUpdatedAt: 'previewDraftUpdatedAt',
     type: 'type',
     template: 'template',
     businessId: 'businessId'
   };
 
   export type PageScalarFieldEnum = (typeof PageScalarFieldEnum)[keyof typeof PageScalarFieldEnum]
+
+
+  export const EditorNoteScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    pageKey: 'pageKey',
+    pageLabel: 'pageLabel',
+    body: 'body',
+    status: 'status',
+    response: 'response',
+    resolvedAt: 'resolvedAt',
+    createdByUserId: 'createdByUserId'
+  };
+
+  export type EditorNoteScalarFieldEnum = (typeof EditorNoteScalarFieldEnum)[keyof typeof EditorNoteScalarFieldEnum]
 
 
   export const ProductImportScalarFieldEnum: {
@@ -54388,6 +55757,7 @@ export namespace Prisma {
     customers?: CustomerListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     createdInvites?: PlatformInviteListRelationFilter
+    editorNotes?: EditorNoteListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -54405,6 +55775,7 @@ export namespace Prisma {
     customers?: CustomerOrderByRelationAggregateInput
     inventoryHistory?: InventoryHistoryOrderByRelationAggregateInput
     createdInvites?: PlatformInviteOrderByRelationAggregateInput
+    editorNotes?: EditorNoteOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -54425,6 +55796,7 @@ export namespace Prisma {
     customers?: CustomerListRelationFilter
     inventoryHistory?: InventoryHistoryListRelationFilter
     createdInvites?: PlatformInviteListRelationFilter
+    editorNotes?: EditorNoteListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -54814,6 +56186,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitListRelationFilter
     inventoryReservations?: InventoryReservationListRelationFilter
     pages?: PageListRelationFilter
+    editorNotes?: EditorNoteListRelationFilter
     productImports?: ProductImportListRelationFilter
     galleries?: GalleryListRelationFilter
     testimonials?: TestimonialListRelationFilter
@@ -54881,6 +56254,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitOrderByRelationAggregateInput
     inventoryReservations?: InventoryReservationOrderByRelationAggregateInput
     pages?: PageOrderByRelationAggregateInput
+    editorNotes?: EditorNoteOrderByRelationAggregateInput
     productImports?: ProductImportOrderByRelationAggregateInput
     galleries?: GalleryOrderByRelationAggregateInput
     testimonials?: TestimonialOrderByRelationAggregateInput
@@ -54951,6 +56325,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitListRelationFilter
     inventoryReservations?: InventoryReservationListRelationFilter
     pages?: PageListRelationFilter
+    editorNotes?: EditorNoteListRelationFilter
     productImports?: ProductImportListRelationFilter
     galleries?: GalleryListRelationFilter
     testimonials?: TestimonialListRelationFilter
@@ -57209,6 +58584,8 @@ export namespace Prisma {
     published?: BoolFilter<"Page"> | boolean
     sortOrder?: IntFilter<"Page"> | number
     scheduledPublishAt?: DateTimeNullableFilter<"Page"> | Date | string | null
+    previewDraft?: JsonNullableFilter<"Page">
+    previewDraftUpdatedAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     type?: StringFilter<"Page"> | string
     template?: StringFilter<"Page"> | string
     businessId?: StringFilter<"Page"> | string
@@ -57232,6 +58609,8 @@ export namespace Prisma {
     published?: SortOrder
     sortOrder?: SortOrder
     scheduledPublishAt?: SortOrderInput | SortOrder
+    previewDraft?: SortOrderInput | SortOrder
+    previewDraftUpdatedAt?: SortOrderInput | SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -57259,6 +58638,8 @@ export namespace Prisma {
     published?: BoolFilter<"Page"> | boolean
     sortOrder?: IntFilter<"Page"> | number
     scheduledPublishAt?: DateTimeNullableFilter<"Page"> | Date | string | null
+    previewDraft?: JsonNullableFilter<"Page">
+    previewDraftUpdatedAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     type?: StringFilter<"Page"> | string
     template?: StringFilter<"Page"> | string
     businessId?: StringFilter<"Page"> | string
@@ -57282,6 +58663,8 @@ export namespace Prisma {
     published?: SortOrder
     sortOrder?: SortOrder
     scheduledPublishAt?: SortOrderInput | SortOrder
+    previewDraft?: SortOrderInput | SortOrder
+    previewDraftUpdatedAt?: SortOrderInput | SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -57312,9 +58695,99 @@ export namespace Prisma {
     published?: BoolWithAggregatesFilter<"Page"> | boolean
     sortOrder?: IntWithAggregatesFilter<"Page"> | number
     scheduledPublishAt?: DateTimeNullableWithAggregatesFilter<"Page"> | Date | string | null
+    previewDraft?: JsonNullableWithAggregatesFilter<"Page">
+    previewDraftUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Page"> | Date | string | null
     type?: StringWithAggregatesFilter<"Page"> | string
     template?: StringWithAggregatesFilter<"Page"> | string
     businessId?: StringWithAggregatesFilter<"Page"> | string
+  }
+
+  export type EditorNoteWhereInput = {
+    AND?: EditorNoteWhereInput | EditorNoteWhereInput[]
+    OR?: EditorNoteWhereInput[]
+    NOT?: EditorNoteWhereInput | EditorNoteWhereInput[]
+    id?: StringFilter<"EditorNote"> | string
+    createdAt?: DateTimeFilter<"EditorNote"> | Date | string
+    updatedAt?: DateTimeFilter<"EditorNote"> | Date | string
+    businessId?: StringFilter<"EditorNote"> | string
+    pageKey?: StringNullableFilter<"EditorNote"> | string | null
+    pageLabel?: StringNullableFilter<"EditorNote"> | string | null
+    body?: StringFilter<"EditorNote"> | string
+    status?: StringFilter<"EditorNote"> | string
+    response?: StringNullableFilter<"EditorNote"> | string | null
+    resolvedAt?: DateTimeNullableFilter<"EditorNote"> | Date | string | null
+    createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type EditorNoteOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    pageKey?: SortOrderInput | SortOrder
+    pageLabel?: SortOrderInput | SortOrder
+    body?: SortOrder
+    status?: SortOrder
+    response?: SortOrderInput | SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    createdByUserId?: SortOrderInput | SortOrder
+    business?: BusinessOrderByWithRelationInput
+    createdBy?: UserOrderByWithRelationInput
+  }
+
+  export type EditorNoteWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: EditorNoteWhereInput | EditorNoteWhereInput[]
+    OR?: EditorNoteWhereInput[]
+    NOT?: EditorNoteWhereInput | EditorNoteWhereInput[]
+    createdAt?: DateTimeFilter<"EditorNote"> | Date | string
+    updatedAt?: DateTimeFilter<"EditorNote"> | Date | string
+    businessId?: StringFilter<"EditorNote"> | string
+    pageKey?: StringNullableFilter<"EditorNote"> | string | null
+    pageLabel?: StringNullableFilter<"EditorNote"> | string | null
+    body?: StringFilter<"EditorNote"> | string
+    status?: StringFilter<"EditorNote"> | string
+    response?: StringNullableFilter<"EditorNote"> | string | null
+    resolvedAt?: DateTimeNullableFilter<"EditorNote"> | Date | string | null
+    createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type EditorNoteOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    pageKey?: SortOrderInput | SortOrder
+    pageLabel?: SortOrderInput | SortOrder
+    body?: SortOrder
+    status?: SortOrder
+    response?: SortOrderInput | SortOrder
+    resolvedAt?: SortOrderInput | SortOrder
+    createdByUserId?: SortOrderInput | SortOrder
+    _count?: EditorNoteCountOrderByAggregateInput
+    _max?: EditorNoteMaxOrderByAggregateInput
+    _min?: EditorNoteMinOrderByAggregateInput
+  }
+
+  export type EditorNoteScalarWhereWithAggregatesInput = {
+    AND?: EditorNoteScalarWhereWithAggregatesInput | EditorNoteScalarWhereWithAggregatesInput[]
+    OR?: EditorNoteScalarWhereWithAggregatesInput[]
+    NOT?: EditorNoteScalarWhereWithAggregatesInput | EditorNoteScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EditorNote"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"EditorNote"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"EditorNote"> | Date | string
+    businessId?: StringWithAggregatesFilter<"EditorNote"> | string
+    pageKey?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
+    pageLabel?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
+    body?: StringWithAggregatesFilter<"EditorNote"> | string
+    status?: StringWithAggregatesFilter<"EditorNote"> | string
+    response?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
+    resolvedAt?: DateTimeNullableWithAggregatesFilter<"EditorNote"> | Date | string | null
+    createdByUserId?: StringNullableWithAggregatesFilter<"EditorNote"> | string | null
   }
 
   export type ProductImportWhereInput = {
@@ -58418,6 +59891,7 @@ export namespace Prisma {
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -58435,6 +59909,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUpdateInput = {
@@ -58452,6 +59927,7 @@ export namespace Prisma {
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -58469,6 +59945,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -58891,6 +60368,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -58958,6 +60436,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -59025,6 +60504,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -59092,6 +60572,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -61693,6 +63174,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     scheduledPublishAt?: Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: Date | string | null
     type?: string
     template?: string
     business: BusinessCreateNestedOneWithoutPagesInput
@@ -61715,6 +63198,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     scheduledPublishAt?: Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: Date | string | null
     type?: string
     template?: string
     businessId: string
@@ -61737,6 +63222,8 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
     business?: BusinessUpdateOneRequiredWithoutPagesNestedInput
@@ -61759,6 +63246,8 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
@@ -61781,6 +63270,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     scheduledPublishAt?: Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: Date | string | null
     type?: string
     template?: string
     businessId: string
@@ -61803,6 +63294,8 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -61824,9 +63317,107 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type EditorNoteCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutEditorNotesInput
+    createdBy?: UserCreateNestedOneWithoutEditorNotesInput
+  }
+
+  export type EditorNoteUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    createdByUserId?: string | null
+  }
+
+  export type EditorNoteUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutEditorNotesNestedInput
+    createdBy?: UserUpdateOneWithoutEditorNotesNestedInput
+  }
+
+  export type EditorNoteUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type EditorNoteCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    createdByUserId?: string | null
+  }
+
+  export type EditorNoteUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type EditorNoteUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProductImportCreateInput = {
@@ -63102,6 +64693,12 @@ export namespace Prisma {
     none?: PlatformInviteWhereInput
   }
 
+  export type EditorNoteListRelationFilter = {
+    every?: EditorNoteWhereInput
+    some?: EditorNoteWhereInput
+    none?: EditorNoteWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -63128,6 +64725,10 @@ export namespace Prisma {
   }
 
   export type PlatformInviteOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type EditorNoteOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -65354,6 +66955,8 @@ export namespace Prisma {
     published?: SortOrder
     sortOrder?: SortOrder
     scheduledPublishAt?: SortOrder
+    previewDraft?: SortOrder
+    previewDraftUpdatedAt?: SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -65379,6 +66982,7 @@ export namespace Prisma {
     published?: SortOrder
     sortOrder?: SortOrder
     scheduledPublishAt?: SortOrder
+    previewDraftUpdatedAt?: SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -65400,6 +67004,7 @@ export namespace Prisma {
     published?: SortOrder
     sortOrder?: SortOrder
     scheduledPublishAt?: SortOrder
+    previewDraftUpdatedAt?: SortOrder
     type?: SortOrder
     template?: SortOrder
     businessId?: SortOrder
@@ -65407,6 +67012,48 @@ export namespace Prisma {
 
   export type PageSumOrderByAggregateInput = {
     sortOrder?: SortOrder
+  }
+
+  export type EditorNoteCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    pageKey?: SortOrder
+    pageLabel?: SortOrder
+    body?: SortOrder
+    status?: SortOrder
+    response?: SortOrder
+    resolvedAt?: SortOrder
+    createdByUserId?: SortOrder
+  }
+
+  export type EditorNoteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    pageKey?: SortOrder
+    pageLabel?: SortOrder
+    body?: SortOrder
+    status?: SortOrder
+    response?: SortOrder
+    resolvedAt?: SortOrder
+    createdByUserId?: SortOrder
+  }
+
+  export type EditorNoteMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    pageKey?: SortOrder
+    pageLabel?: SortOrder
+    body?: SortOrder
+    status?: SortOrder
+    response?: SortOrder
+    resolvedAt?: SortOrder
+    createdByUserId?: SortOrder
   }
 
   export type ProductImportCountOrderByAggregateInput = {
@@ -66083,6 +67730,13 @@ export namespace Prisma {
     connect?: PlatformInviteWhereUniqueInput | PlatformInviteWhereUniqueInput[]
   }
 
+  export type EditorNoteCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<EditorNoteCreateWithoutCreatedByInput, EditorNoteUncheckedCreateWithoutCreatedByInput> | EditorNoteCreateWithoutCreatedByInput[] | EditorNoteUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutCreatedByInput | EditorNoteCreateOrConnectWithoutCreatedByInput[]
+    createMany?: EditorNoteCreateManyCreatedByInputEnvelope
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+  }
+
   export type SessionUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -66123,6 +67777,13 @@ export namespace Prisma {
     connectOrCreate?: PlatformInviteCreateOrConnectWithoutCreatorInput | PlatformInviteCreateOrConnectWithoutCreatorInput[]
     createMany?: PlatformInviteCreateManyCreatorInputEnvelope
     connect?: PlatformInviteWhereUniqueInput | PlatformInviteWhereUniqueInput[]
+  }
+
+  export type EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput = {
+    create?: XOR<EditorNoteCreateWithoutCreatedByInput, EditorNoteUncheckedCreateWithoutCreatedByInput> | EditorNoteCreateWithoutCreatedByInput[] | EditorNoteUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutCreatedByInput | EditorNoteCreateOrConnectWithoutCreatedByInput[]
+    createMany?: EditorNoteCreateManyCreatedByInputEnvelope
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -66229,6 +67890,20 @@ export namespace Prisma {
     deleteMany?: PlatformInviteScalarWhereInput | PlatformInviteScalarWhereInput[]
   }
 
+  export type EditorNoteUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<EditorNoteCreateWithoutCreatedByInput, EditorNoteUncheckedCreateWithoutCreatedByInput> | EditorNoteCreateWithoutCreatedByInput[] | EditorNoteUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutCreatedByInput | EditorNoteCreateOrConnectWithoutCreatedByInput[]
+    upsert?: EditorNoteUpsertWithWhereUniqueWithoutCreatedByInput | EditorNoteUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: EditorNoteCreateManyCreatedByInputEnvelope
+    set?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    disconnect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    delete?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    update?: EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput | EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: EditorNoteUpdateManyWithWhereWithoutCreatedByInput | EditorNoteUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
+  }
+
   export type SessionUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -66311,6 +67986,20 @@ export namespace Prisma {
     update?: PlatformInviteUpdateWithWhereUniqueWithoutCreatorInput | PlatformInviteUpdateWithWhereUniqueWithoutCreatorInput[]
     updateMany?: PlatformInviteUpdateManyWithWhereWithoutCreatorInput | PlatformInviteUpdateManyWithWhereWithoutCreatorInput[]
     deleteMany?: PlatformInviteScalarWhereInput | PlatformInviteScalarWhereInput[]
+  }
+
+  export type EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput = {
+    create?: XOR<EditorNoteCreateWithoutCreatedByInput, EditorNoteUncheckedCreateWithoutCreatedByInput> | EditorNoteCreateWithoutCreatedByInput[] | EditorNoteUncheckedCreateWithoutCreatedByInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutCreatedByInput | EditorNoteCreateOrConnectWithoutCreatedByInput[]
+    upsert?: EditorNoteUpsertWithWhereUniqueWithoutCreatedByInput | EditorNoteUpsertWithWhereUniqueWithoutCreatedByInput[]
+    createMany?: EditorNoteCreateManyCreatedByInputEnvelope
+    set?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    disconnect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    delete?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    update?: EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput | EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput[]
+    updateMany?: EditorNoteUpdateManyWithWhereWithoutCreatedByInput | EditorNoteUpdateManyWithWhereWithoutCreatedByInput[]
+    deleteMany?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutMembershipsInput = {
@@ -66464,6 +68153,13 @@ export namespace Prisma {
     connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
   }
 
+  export type EditorNoteCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<EditorNoteCreateWithoutBusinessInput, EditorNoteUncheckedCreateWithoutBusinessInput> | EditorNoteCreateWithoutBusinessInput[] | EditorNoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutBusinessInput | EditorNoteCreateOrConnectWithoutBusinessInput[]
+    createMany?: EditorNoteCreateManyBusinessInputEnvelope
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+  }
+
   export type ProductImportCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductImportCreateWithoutBusinessInput, ProductImportUncheckedCreateWithoutBusinessInput> | ProductImportCreateWithoutBusinessInput[] | ProductImportUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductImportCreateOrConnectWithoutBusinessInput | ProductImportCreateOrConnectWithoutBusinessInput[]
@@ -66615,6 +68311,13 @@ export namespace Prisma {
     connectOrCreate?: PageCreateOrConnectWithoutBusinessInput | PageCreateOrConnectWithoutBusinessInput[]
     createMany?: PageCreateManyBusinessInputEnvelope
     connect?: PageWhereUniqueInput | PageWhereUniqueInput[]
+  }
+
+  export type EditorNoteUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<EditorNoteCreateWithoutBusinessInput, EditorNoteUncheckedCreateWithoutBusinessInput> | EditorNoteCreateWithoutBusinessInput[] | EditorNoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutBusinessInput | EditorNoteCreateOrConnectWithoutBusinessInput[]
+    createMany?: EditorNoteCreateManyBusinessInputEnvelope
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
   }
 
   export type ProductImportUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -66874,6 +68577,20 @@ export namespace Prisma {
     update?: PageUpdateWithWhereUniqueWithoutBusinessInput | PageUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: PageUpdateManyWithWhereWithoutBusinessInput | PageUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
+  }
+
+  export type EditorNoteUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<EditorNoteCreateWithoutBusinessInput, EditorNoteUncheckedCreateWithoutBusinessInput> | EditorNoteCreateWithoutBusinessInput[] | EditorNoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutBusinessInput | EditorNoteCreateOrConnectWithoutBusinessInput[]
+    upsert?: EditorNoteUpsertWithWhereUniqueWithoutBusinessInput | EditorNoteUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: EditorNoteCreateManyBusinessInputEnvelope
+    set?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    disconnect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    delete?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    update?: EditorNoteUpdateWithWhereUniqueWithoutBusinessInput | EditorNoteUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: EditorNoteUpdateManyWithWhereWithoutBusinessInput | EditorNoteUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
   }
 
   export type ProductImportUpdateManyWithoutBusinessNestedInput = {
@@ -67178,6 +68895,20 @@ export namespace Prisma {
     update?: PageUpdateWithWhereUniqueWithoutBusinessInput | PageUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: PageUpdateManyWithWhereWithoutBusinessInput | PageUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: PageScalarWhereInput | PageScalarWhereInput[]
+  }
+
+  export type EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<EditorNoteCreateWithoutBusinessInput, EditorNoteUncheckedCreateWithoutBusinessInput> | EditorNoteCreateWithoutBusinessInput[] | EditorNoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EditorNoteCreateOrConnectWithoutBusinessInput | EditorNoteCreateOrConnectWithoutBusinessInput[]
+    upsert?: EditorNoteUpsertWithWhereUniqueWithoutBusinessInput | EditorNoteUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: EditorNoteCreateManyBusinessInputEnvelope
+    set?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    disconnect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    delete?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    connect?: EditorNoteWhereUniqueInput | EditorNoteWhereUniqueInput[]
+    update?: EditorNoteUpdateWithWhereUniqueWithoutBusinessInput | EditorNoteUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: EditorNoteUpdateManyWithWhereWithoutBusinessInput | EditorNoteUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
   }
 
   export type ProductImportUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -68834,6 +70565,36 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutPagesInput, BusinessUpdateWithoutPagesInput>, BusinessUncheckedUpdateWithoutPagesInput>
   }
 
+  export type BusinessCreateNestedOneWithoutEditorNotesInput = {
+    create?: XOR<BusinessCreateWithoutEditorNotesInput, BusinessUncheckedCreateWithoutEditorNotesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutEditorNotesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutEditorNotesInput = {
+    create?: XOR<UserCreateWithoutEditorNotesInput, UserUncheckedCreateWithoutEditorNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutEditorNotesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutEditorNotesNestedInput = {
+    create?: XOR<BusinessCreateWithoutEditorNotesInput, BusinessUncheckedCreateWithoutEditorNotesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutEditorNotesInput
+    upsert?: BusinessUpsertWithoutEditorNotesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutEditorNotesInput, BusinessUpdateWithoutEditorNotesInput>, BusinessUncheckedUpdateWithoutEditorNotesInput>
+  }
+
+  export type UserUpdateOneWithoutEditorNotesNestedInput = {
+    create?: XOR<UserCreateWithoutEditorNotesInput, UserUncheckedCreateWithoutEditorNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutEditorNotesInput
+    upsert?: UserUpsertWithoutEditorNotesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutEditorNotesInput, UserUpdateWithoutEditorNotesInput>, UserUncheckedUpdateWithoutEditorNotesInput>
+  }
+
   export type BusinessCreateNestedOneWithoutProductImportsInput = {
     create?: XOR<BusinessCreateWithoutProductImportsInput, BusinessUncheckedCreateWithoutProductImportsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutProductImportsInput
@@ -69813,6 +71574,42 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type EditorNoteCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutEditorNotesInput
+  }
+
+  export type EditorNoteUncheckedCreateWithoutCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+  }
+
+  export type EditorNoteCreateOrConnectWithoutCreatedByInput = {
+    where: EditorNoteWhereUniqueInput
+    create: XOR<EditorNoteCreateWithoutCreatedByInput, EditorNoteUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type EditorNoteCreateManyCreatedByInputEnvelope = {
+    data: EditorNoteCreateManyCreatedByInput | EditorNoteCreateManyCreatedByInput[]
+    skipDuplicates?: boolean
+  }
+
   export type SessionUpsertWithWhereUniqueWithoutUserInput = {
     where: SessionWhereUniqueInput
     update: XOR<SessionUpdateWithoutUserInput, SessionUncheckedUpdateWithoutUserInput>
@@ -70014,6 +71811,39 @@ export namespace Prisma {
     createdBy?: StringNullableFilter<"PlatformInvite"> | string | null
   }
 
+  export type EditorNoteUpsertWithWhereUniqueWithoutCreatedByInput = {
+    where: EditorNoteWhereUniqueInput
+    update: XOR<EditorNoteUpdateWithoutCreatedByInput, EditorNoteUncheckedUpdateWithoutCreatedByInput>
+    create: XOR<EditorNoteCreateWithoutCreatedByInput, EditorNoteUncheckedCreateWithoutCreatedByInput>
+  }
+
+  export type EditorNoteUpdateWithWhereUniqueWithoutCreatedByInput = {
+    where: EditorNoteWhereUniqueInput
+    data: XOR<EditorNoteUpdateWithoutCreatedByInput, EditorNoteUncheckedUpdateWithoutCreatedByInput>
+  }
+
+  export type EditorNoteUpdateManyWithWhereWithoutCreatedByInput = {
+    where: EditorNoteScalarWhereInput
+    data: XOR<EditorNoteUpdateManyMutationInput, EditorNoteUncheckedUpdateManyWithoutCreatedByInput>
+  }
+
+  export type EditorNoteScalarWhereInput = {
+    AND?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
+    OR?: EditorNoteScalarWhereInput[]
+    NOT?: EditorNoteScalarWhereInput | EditorNoteScalarWhereInput[]
+    id?: StringFilter<"EditorNote"> | string
+    createdAt?: DateTimeFilter<"EditorNote"> | Date | string
+    updatedAt?: DateTimeFilter<"EditorNote"> | Date | string
+    businessId?: StringFilter<"EditorNote"> | string
+    pageKey?: StringNullableFilter<"EditorNote"> | string | null
+    pageLabel?: StringNullableFilter<"EditorNote"> | string | null
+    body?: StringFilter<"EditorNote"> | string
+    status?: StringFilter<"EditorNote"> | string
+    response?: StringNullableFilter<"EditorNote"> | string | null
+    resolvedAt?: DateTimeNullableFilter<"EditorNote"> | Date | string | null
+    createdByUserId?: StringNullableFilter<"EditorNote"> | string | null
+  }
+
   export type UserCreateWithoutMembershipsInput = {
     id?: string
     name: string
@@ -70028,6 +71858,7 @@ export namespace Prisma {
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -70044,6 +71875,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -70106,6 +71938,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -70172,6 +72005,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -70213,6 +72047,7 @@ export namespace Prisma {
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -70229,6 +72064,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessUpsertWithoutMembershipsInput = {
@@ -70297,6 +72133,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -70363,6 +72200,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -70388,6 +72226,7 @@ export namespace Prisma {
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -70404,6 +72243,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -70436,6 +72276,7 @@ export namespace Prisma {
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -70452,6 +72293,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -70468,6 +72310,7 @@ export namespace Prisma {
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -70484,6 +72327,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -70516,6 +72360,7 @@ export namespace Prisma {
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -70532,6 +72377,7 @@ export namespace Prisma {
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type ProductCreateWithoutBusinessInput = {
@@ -71136,6 +72982,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     scheduledPublishAt?: Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: Date | string | null
     type?: string
     template?: string
   }
@@ -71157,6 +73005,8 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     scheduledPublishAt?: Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: Date | string | null
     type?: string
     template?: string
   }
@@ -71168,6 +73018,42 @@ export namespace Prisma {
 
   export type PageCreateManyBusinessInputEnvelope = {
     data: PageCreateManyBusinessInput | PageCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type EditorNoteCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    createdBy?: UserCreateNestedOneWithoutEditorNotesInput
+  }
+
+  export type EditorNoteUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    createdByUserId?: string | null
+  }
+
+  export type EditorNoteCreateOrConnectWithoutBusinessInput = {
+    where: EditorNoteWhereUniqueInput
+    create: XOR<EditorNoteCreateWithoutBusinessInput, EditorNoteUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type EditorNoteCreateManyBusinessInputEnvelope = {
+    data: EditorNoteCreateManyBusinessInput | EditorNoteCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -71974,9 +73860,27 @@ export namespace Prisma {
     published?: BoolFilter<"Page"> | boolean
     sortOrder?: IntFilter<"Page"> | number
     scheduledPublishAt?: DateTimeNullableFilter<"Page"> | Date | string | null
+    previewDraft?: JsonNullableFilter<"Page">
+    previewDraftUpdatedAt?: DateTimeNullableFilter<"Page"> | Date | string | null
     type?: StringFilter<"Page"> | string
     template?: StringFilter<"Page"> | string
     businessId?: StringFilter<"Page"> | string
+  }
+
+  export type EditorNoteUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: EditorNoteWhereUniqueInput
+    update: XOR<EditorNoteUpdateWithoutBusinessInput, EditorNoteUncheckedUpdateWithoutBusinessInput>
+    create: XOR<EditorNoteCreateWithoutBusinessInput, EditorNoteUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type EditorNoteUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: EditorNoteWhereUniqueInput
+    data: XOR<EditorNoteUpdateWithoutBusinessInput, EditorNoteUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type EditorNoteUpdateManyWithWhereWithoutBusinessInput = {
+    where: EditorNoteScalarWhereInput
+    data: XOR<EditorNoteUpdateManyMutationInput, EditorNoteUncheckedUpdateManyWithoutBusinessInput>
   }
 
   export type ProductImportUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -72325,6 +74229,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -72391,6 +74296,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -72473,6 +74379,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -72539,6 +74446,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -72606,6 +74514,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -72672,6 +74581,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -72754,6 +74664,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -72820,6 +74731,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -72922,6 +74834,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -72988,6 +74901,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -73373,6 +75287,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -73439,6 +75354,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -73990,6 +75906,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -74056,6 +75973,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -74160,6 +76078,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -74226,6 +76145,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -74584,6 +76504,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -74650,6 +76571,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -74784,6 +76706,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -74850,6 +76773,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -75142,6 +77066,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -75208,6 +77133,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -75389,6 +77315,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -75455,6 +77382,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -75481,6 +77409,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCustomersInput = {
@@ -75497,6 +77426,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCustomersInput = {
@@ -75558,6 +77488,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -75624,6 +77555,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -75930,6 +77862,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCustomersInput = {
@@ -75946,6 +77879,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessUpsertWithoutCustomersInput = {
@@ -76013,6 +77947,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -76079,6 +78014,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -76446,6 +78382,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -76512,6 +78449,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -76889,6 +78827,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -76955,6 +78894,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -77836,6 +79776,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -77902,6 +79843,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -78064,6 +80006,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -78130,6 +80073,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -78381,6 +80325,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -78447,6 +80392,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -78553,6 +80499,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutInventoryHistoryInput = {
@@ -78569,6 +80516,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutInventoryHistoryInput = {
@@ -78828,6 +80776,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -78894,6 +80843,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -79012,6 +80962,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -79028,6 +80979,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessCreateWithoutBaseInventoryUnitsInput = {
@@ -79084,6 +81036,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -79150,6 +81103,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -79370,6 +81324,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -79436,6 +81391,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -79534,6 +81490,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -79600,6 +81557,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -79682,6 +81640,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -79748,6 +81707,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -79814,6 +81774,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -79880,6 +81841,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -79962,6 +81924,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -80028,6 +81991,7 @@ export namespace Prisma {
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -80038,6 +82002,374 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutEditorNotesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutEditorNotesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutEditorNotesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutEditorNotesInput, BusinessUncheckedCreateWithoutEditorNotesInput>
+  }
+
+  export type UserCreateWithoutEditorNotesInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
+    customers?: CustomerCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    createdInvites?: PlatformInviteCreateNestedManyWithoutCreatorInput
+  }
+
+  export type UserUncheckedCreateWithoutEditorNotesInput = {
+    id?: string
+    name: string
+    email: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    platformRole?: $Enums.PlatformRole
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    createdInvites?: PlatformInviteUncheckedCreateNestedManyWithoutCreatorInput
+  }
+
+  export type UserCreateOrConnectWithoutEditorNotesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutEditorNotesInput, UserUncheckedCreateWithoutEditorNotesInput>
+  }
+
+  export type BusinessUpsertWithoutEditorNotesInput = {
+    update: XOR<BusinessUpdateWithoutEditorNotesInput, BusinessUncheckedUpdateWithoutEditorNotesInput>
+    create: XOR<BusinessCreateWithoutEditorNotesInput, BusinessUncheckedCreateWithoutEditorNotesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutEditorNotesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutEditorNotesInput, BusinessUncheckedUpdateWithoutEditorNotesInput>
+  }
+
+  export type BusinessUpdateWithoutEditorNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type UserUpsertWithoutEditorNotesInput = {
+    update: XOR<UserUpdateWithoutEditorNotesInput, UserUncheckedUpdateWithoutEditorNotesInput>
+    create: XOR<UserCreateWithoutEditorNotesInput, UserUncheckedCreateWithoutEditorNotesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutEditorNotesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutEditorNotesInput, UserUncheckedUpdateWithoutEditorNotesInput>
+  }
+
+  export type UserUpdateWithoutEditorNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
+    customers?: CustomerUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    createdInvites?: PlatformInviteUpdateManyWithoutCreatorNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutEditorNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    createdInvites?: PlatformInviteUncheckedUpdateManyWithoutCreatorNestedInput
   }
 
   export type BusinessCreateWithoutProductImportsInput = {
@@ -80095,6 +82427,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
@@ -80161,6 +82494,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
@@ -80243,6 +82577,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
@@ -80309,6 +82644,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -80375,6 +82711,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
@@ -80441,6 +82778,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
@@ -80555,6 +82893,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
@@ -80621,6 +82960,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -80802,6 +83142,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
@@ -80868,6 +83209,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
@@ -80999,6 +83341,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
@@ -81065,6 +83408,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
@@ -81186,6 +83530,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -81252,6 +83597,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -81383,6 +83729,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -81449,6 +83796,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -82188,6 +84536,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -82254,6 +84603,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -82284,6 +84634,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryCreateNestedManyWithoutUserInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedInvitesInput = {
@@ -82300,6 +84651,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
     inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutUserInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutCreatedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedInvitesInput = {
@@ -82373,6 +84725,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -82439,6 +84792,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -82475,6 +84829,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUpdateManyWithoutUserNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutCreatedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedInvitesInput = {
@@ -82491,6 +84846,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
     inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutUserNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutCreatedByNestedInput
   }
 
   export type BusinessCreateWithoutTeamInvitesInput = {
@@ -82548,6 +84904,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -82614,6 +84971,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -82696,6 +85054,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -82762,6 +85121,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -82828,6 +85188,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -82894,6 +85255,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -82998,6 +85360,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -83064,6 +85427,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -83297,6 +85661,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
     pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportCreateNestedManyWithoutBusinessInput
     galleries?: GalleryCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
@@ -83363,6 +85728,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
     inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
     pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
     productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
     galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
     testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
@@ -83544,6 +85910,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
     pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
@@ -83610,6 +85977,7 @@ export namespace Prisma {
     baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
     inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
     pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
     productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
     galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
     testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
@@ -83700,6 +86068,19 @@ export namespace Prisma {
     used?: boolean
     usedAt?: Date | string | null
     usedBy?: string | null
+  }
+
+  export type EditorNoteCreateManyCreatedByInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
   }
 
   export type SessionUpdateWithoutUserInput = {
@@ -83955,6 +86336,45 @@ export namespace Prisma {
     usedBy?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type EditorNoteUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutEditorNotesNestedInput
+  }
+
+  export type EditorNoteUncheckedUpdateWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type EditorNoteUncheckedUpdateManyWithoutCreatedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type ProductCreateManyBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -84158,8 +86578,23 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     scheduledPublishAt?: Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: Date | string | null
     type?: string
     template?: string
+  }
+
+  export type EditorNoteCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pageKey?: string | null
+    pageLabel?: string | null
+    body: string
+    status?: string
+    response?: string | null
+    resolvedAt?: Date | string | null
+    createdByUserId?: string | null
   }
 
   export type ProductImportCreateManyBusinessInput = {
@@ -84899,6 +87334,8 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -84920,6 +87357,8 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
   }
@@ -84941,8 +87380,49 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     scheduledPublishAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    previewDraft?: NullableJsonNullValueInput | InputJsonValue
+    previewDraftUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     type?: StringFieldUpdateOperationsInput | string
     template?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type EditorNoteUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdBy?: UserUpdateOneWithoutEditorNotesNestedInput
+  }
+
+  export type EditorNoteUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type EditorNoteUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pageKey?: NullableStringFieldUpdateOperationsInput | string | null
+    pageLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    body?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    response?: NullableStringFieldUpdateOperationsInput | string | null
+    resolvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdByUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProductImportUpdateWithoutBusinessInput = {

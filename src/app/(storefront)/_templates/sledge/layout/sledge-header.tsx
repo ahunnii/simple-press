@@ -790,27 +790,29 @@ export function SledgeHeader({
                   </Link>
 
                   {/* Mobile wishlist link — mirrors mobile cart link treatment */}
-                  <Link
-                    href="/wishlist"
-                    onClick={closeMobileMenu}
-                    aria-label={
-                      wishlistCount > 0
-                        ? `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
-                        : "Wishlist"
-                    }
-                    className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
-                  >
-                    <Heart className="h-4 w-4" aria-hidden="true" />
-                    <span aria-hidden="true">Wishlist</span>
-                    {wishlistCount > 0 ? (
-                      <span
-                        aria-hidden="true"
-                        className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
-                      >
-                        {wishlistCount}
-                      </span>
-                    ) : null}
-                  </Link>
+                  {isStorefrontEnabled("wishlist") && (
+                    <Link
+                      href="/wishlist"
+                      onClick={closeMobileMenu}
+                      aria-label={
+                        wishlistCount > 0
+                          ? `Wishlist, ${wishlistCount} ${wishlistCount === 1 ? "item" : "items"}`
+                          : "Wishlist"
+                      }
+                      className="relative flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
+                    >
+                      <Heart className="h-4 w-4" aria-hidden="true" />
+                      <span aria-hidden="true">Wishlist</span>
+                      {wishlistCount > 0 ? (
+                        <span
+                          aria-hidden="true"
+                          className="sl-cart-badge ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+                        >
+                          {wishlistCount}
+                        </span>
+                      ) : null}
+                    </Link>
+                  )}
 
                   {session?.user ? (
                     <button

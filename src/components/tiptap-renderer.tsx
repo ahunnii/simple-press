@@ -8,8 +8,9 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
-import { Images } from "lucide-react";
+import { ExternalLink, Images } from "lucide-react";
 
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
@@ -181,6 +182,9 @@ function isEmbedNode(node: ContentNode): node is ContentNode & {
 }
 
 export function TiptapRenderer({ content, className }: TiptapRendererProps) {
+  const { isEnabled } = useStorefrontFlags();
+  const embedsEnabled = isEnabled("embeds");
+
   const elements = useMemo(() => {
     if (!isTiptapDoc(content)) {
       return [];
@@ -219,6 +223,27 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
           typeof node.attrs.triggerLabel === "string"
             ? node.attrs.triggerLabel
             : undefined;
+
+        // Embeds feature disabled — fall back to a plain external link (same
+        // behaviour as ServiceBookingDialog) instead of rendering the iframe.
+        if (!embedsEnabled) {
+          const linkLabel =
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so blank/whitespace labels also fall back
+            triggerLabel?.trim() || title.trim() || "View content";
+          return (
+            <a
+              key={`embed-${index}`}
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring my-4 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium shadow-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {linkLabel}
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="sr-only">(opens in new tab)</span>
+            </a>
+          );
+        }
 
         if (displayMode === "dialog") {
           return (
@@ -259,7 +284,7 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
         return null;
       }
     });
-  }, [content]);
+  }, [content, embedsEnabled]);
 
   return <div className={className}>{elements}</div>;
 }

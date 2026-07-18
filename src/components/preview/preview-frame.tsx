@@ -8,6 +8,8 @@ import {
   useState,
 } from "react";
 
+import { Loader2 } from "lucide-react";
+
 import {
   postToIframe,
   PREVIEW_SOURCE,
@@ -239,6 +241,31 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
           className="h-full w-full border-0"
           style={{ minHeight: "600px" }}
         />
+
+        {/* Navigation overlay: the editor chrome (rail, page select) updates
+            instantly on a page switch, but the iframe document takes a moment
+            to load — without feedback the owner sees a stale/blank page and
+            wonders if their selection registered. Shown whenever the iframe
+            isn't ready (page switch, refresh, initial load); the 150ms
+            animation delay keeps fast loads from flashing. Also blocks clicks
+            on the outgoing document so hotspots can't fire for the old page. */}
+        {!isReady && (
+          <div
+            className={cn(
+              "absolute inset-0 z-20 flex items-center justify-center",
+              "bg-background/50 backdrop-blur-[2px]",
+              "animate-in fade-in fill-mode-backwards duration-200 [animation-delay:150ms]",
+            )}
+          >
+            <div
+              role="status"
+              className="bg-card text-muted-foreground flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm shadow-sm"
+            >
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+              Loading page…
+            </div>
+          </div>
+        )}
 
         {/* Shimmer overlay while a draft save is in-flight */}
         {isUpdating && (

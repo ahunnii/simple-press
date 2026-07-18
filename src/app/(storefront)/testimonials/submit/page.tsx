@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
@@ -17,6 +18,10 @@ export default async function SubmitTestimonialPage({
   searchParams: Promise<{ code?: string }>;
 }) {
   const { code } = await searchParams;
+
+  const { isEnabled } = await getBusinessFlags();
+  if (!isEnabled("testimonials")) notFound();
+
   // Get business from subdomain
   const business = await api.business.simplifiedGet();
   if (!business) notFound();

@@ -1,3 +1,4 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { getRichTextFieldValue } from "~/lib/template-fields";
@@ -13,10 +14,15 @@ import { HappyBambooHeroSection } from "./happy-bamboo-hero-section";
 import { HappyBambooTestimonialsSection } from "./happy-bamboo-testimonials-section";
 
 export async function HappyBambooHomepage() {
-  const [homepage, testimonials] = await Promise.all([
+  const [homepage, flags] = await Promise.all([
     api.business.getHomepage(),
-    api.testimonial.listRandom({ limit: 3 }),
+    getBusinessFlags(),
   ]);
+
+  const testimonialsEnabled = flags.isEnabled("testimonials");
+  const testimonials = testimonialsEnabled
+    ? await api.testimonial.listRandom({ limit: 3 })
+    : [];
 
   const themeSpecificFields = homepage?.siteContent?.customFields as
     | Record<string, string>
@@ -112,11 +118,12 @@ export async function HappyBambooHomepage() {
             sectionAttrs={sectionGroupAttr("homepage", "benefits")}
           />
         )}
-        {isSectionVisible(
-          homepage?.siteContent?.customFields,
-          "happy-bamboo",
-          "homepage.testimonials",
-        ) && (
+        {testimonialsEnabled &&
+          isSectionVisible(
+            homepage?.siteContent?.customFields,
+            "happy-bamboo",
+            "homepage.testimonials",
+          ) && (
           <HappyBambooTestimonialsSection
             heading={themeSpecificFields?.[
               "happy-bamboo.homepage-testimonials-heading"

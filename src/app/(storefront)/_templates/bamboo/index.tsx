@@ -33,22 +33,36 @@ import {
 
 const globalLocationData: TemplateField[] = [
   {
-    key: "bamboo.global.location-map",
-    label: "Global Location Map",
-    description: "Map image for the global location section",
-    type: "image",
+    key: "bamboo.global.map-lat",
+    label: "Map Latitude",
+    description:
+      "Latitude of your location pin. In Google Maps, right-click your spot and click the coordinates to copy them — this is the first number.",
+    type: "number",
     page: "global",
     group: "global.location",
-    gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "42.4305",
+  },
+  {
+    key: "bamboo.global.map-lng",
+    label: "Map Longitude",
+    description:
+      "Longitude of your location pin — the second number from the copied Google Maps coordinates.",
+    type: "number",
+    page: "global",
+    group: "global.location",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+    placeholder: "-83.1419",
   },
 ];
 
 const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.location",
-    title: "Global Location Section",
-    description: "Global location section on the homepage",
+    title: "Map Location",
+    description: "Coordinates for the map pin shown on the homepage and contact page maps.",
     icon: "🗺️",
     columns: 2,
   },

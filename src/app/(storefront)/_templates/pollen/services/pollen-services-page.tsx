@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import {
@@ -57,7 +58,10 @@ export async function PollenServicesPage({ business }: Props) {
     "pollen.testimonials.view-all-text",
   ]);
 
-  const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
+  const { isEnabled } = await getBusinessFlags();
+  const testimonials = isEnabled("testimonials")
+    ? ((await api.testimonial.listRandom({ limit: 3 })) ?? [])
+    : [];
 
   const services = parseTemplateIconListRows(
     getListFieldValue(customFields, "pollen.services.services-list"),

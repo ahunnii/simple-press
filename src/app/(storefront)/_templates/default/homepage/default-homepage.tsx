@@ -317,7 +317,8 @@ export async function DefaultHomePage({
         )}
 
         {/* ── Testimonial preview ───────────────────────────────────────── */}
-        {f["default.homepage.testimonial-quote"] &&
+        {isEnabled("testimonials") &&
+          f["default.homepage.testimonial-quote"] &&
           isSectionVisible(customFields, "default", "homepage.testimonial") && (
             <section
               aria-label="Customer testimonial"

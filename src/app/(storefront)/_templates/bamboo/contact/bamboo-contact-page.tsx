@@ -5,9 +5,11 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { FadeIn, PageTransition } from "~/components/page-animations";
+import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
 import { BambooContactForm } from "./bamboo-contact-form";
+import { BambooMap } from "../shared/bamboo-map";
 
 export function BambooContactPage({
   business,
@@ -16,11 +18,23 @@ export function BambooContactPage({
     "bamboo.contact.header",
     "bamboo.contact.subheader",
     "bamboo.contact.hours",
+    "bamboo.contact.map-heading",
+    "bamboo.global.map-lat",
+    "bamboo.global.map-lng",
   ]);
 
   const email = business?.supportEmail?.trim();
   const location = business?.businessAddress?.trim();
   const phone = business?.phoneNumber?.trim();
+
+  const latRaw = f["bamboo.global.map-lat"]?.trim();
+  const lngRaw = f["bamboo.global.map-lng"]?.trim();
+  const lat = latRaw ? Number(latRaw) : NaN;
+  const lng = lngRaw ? Number(lngRaw) : NaN;
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+  const mapDest = location ? encodeURIComponent(location) : `${lat},${lng}`;
+  const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
 
   const contactInfo = [
     ...(email
@@ -104,6 +118,43 @@ export function BambooContactPage({
           </div>
         </FadeIn>
       </section>
+
+      {hasCoords &&
+        isSectionVisible(
+          business?.siteContent?.customFields,
+          "bamboo",
+          "contact.map",
+        ) && (
+          <section
+            {...sectionGroupAttr("contact", "map")}
+            className="bg-secondary/50 py-20"
+          >
+            <div className="mx-auto max-w-7xl px-4 lg:px-8">
+              <FadeIn direction="up">
+                <div className="mb-12 text-center">
+                  <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+                    <span
+                      className="text-balance"
+                      {...fieldAttr("bamboo.contact.map-heading")}
+                    >
+                      {f["bamboo.contact.map-heading"]}
+                    </span>
+                  </h2>
+                </div>
+              </FadeIn>
+              <FadeIn direction="up" delay={0.1}>
+                <BambooMap
+                  businessName={business?.name ?? ""}
+                  address={location}
+                  latitude={lat}
+                  longitude={lng}
+                  viewUrl={viewUrl}
+                  directionsUrl={directionsUrl}
+                />
+              </FadeIn>
+            </div>
+          </section>
+        )}
     </PageTransition>
   );
 }

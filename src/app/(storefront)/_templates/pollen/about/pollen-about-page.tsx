@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import {
@@ -28,7 +29,10 @@ export async function PollenAboutPage({
     "pollen.about.owner-blurb",
   ]);
 
-  const testimonials = (await api.testimonial.listRandom({ limit: 3 })) ?? [];
+  const { isEnabled } = await getBusinessFlags();
+  const testimonials = isEnabled("testimonials")
+    ? ((await api.testimonial.listRandom({ limit: 3 })) ?? [])
+    : [];
 
   return (
     <PollenGeneralLayout

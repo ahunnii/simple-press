@@ -125,6 +125,78 @@ export async function notifyDiscordDomainRemoved({
   await assertOk(response, "domain-removed");
 }
 
+export async function notifyDiscordEditorNote({
+  businessName,
+  subdomain,
+  authorEmail,
+  pageLabel,
+  body,
+}: {
+  businessName: string;
+  subdomain: string;
+  authorEmail: string;
+  pageLabel: string;
+  body: string;
+}) {
+  const webhookUrl = env.DISCORD_WEBHOOK_URL;
+
+  if (!webhookUrl) return;
+
+  const platformDomain =
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "simplepress.co";
+  const subdomainUrl = `${subdomain}.${platformDomain}`;
+  const adminUrl = `https://platform.${platformDomain}/notes`;
+
+  const truncatedBody =
+    body.length > 950 ? `${body.slice(0, 950)}…` : body;
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      embeds: [
+        {
+          title: "📝 New Site Note",
+          description: "A client left a note in their site editor.",
+          color: 0x5865f2,
+          fields: [
+            {
+              name: "Business",
+              value: businessName,
+              inline: true,
+            },
+            {
+              name: "Site",
+              value: `\`${subdomainUrl}\``,
+              inline: true,
+            },
+            {
+              name: "From",
+              value: authorEmail,
+              inline: true,
+            },
+            {
+              name: "Page",
+              value: pageLabel,
+              inline: false,
+            },
+            {
+              name: "Note",
+              value: truncatedBody,
+              inline: false,
+            },
+          ],
+          footer: {
+            text: `Review notes → ${adminUrl}`,
+          },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    }),
+  });
+  await assertOk(response, "editor-note");
+}
+
 export async function notifyDiscordNewDomain({
   domain,
   businessName,

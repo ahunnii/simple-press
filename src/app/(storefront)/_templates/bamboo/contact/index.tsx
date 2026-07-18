@@ -38,7 +38,21 @@ const contactPageData: TemplateField[] = [
   },
 ];
 
-export const bambooContactData = [...contactPageData];
+const contactMapData: TemplateField[] = [
+  {
+    key: "bamboo.contact.map-heading",
+    label: "Map Heading",
+    description: "Heading above the location map on the contact page",
+    type: "text",
+    page: "contact",
+    group: "contact.map",
+    defaultValue: "Visit Us",
+    placeholder: "Visit Us",
+    gridColumn: "col-span-full",
+  },
+];
+
+export const bambooContactData = [...contactPageData, ...contactMapData];
 
 export const bambooContactFieldGroups: TemplateFieldGroup[] = [
   {
@@ -46,6 +60,13 @@ export const bambooContactFieldGroups: TemplateFieldGroup[] = [
     title: "Contact Info",
     description: "Contact page header and contact details",
     icon: "📧",
+    columns: 2,
+  },
+  {
+    id: "contact.map",
+    title: "Location Map",
+    description: "Interactive map shown below the contact form",
+    icon: "📍",
     columns: 2,
   },
 ];

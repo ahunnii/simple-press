@@ -94,12 +94,22 @@ export function BusinessFeatureFlags({ businessId, initialFlags }: Props) {
                 after saving.
               </CardDescription>
             </div>
-            <Button
-              onClick={handleSave}
-              disabled={!isDirty || setFlagsMutation.isPending}
-            >
-              {setFlagsMutation.isPending ? "Saving..." : "Save changes"}
-            </Button>
+            <div className="flex items-center gap-3">
+              {isDirty && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500 bg-amber-50 text-amber-700 dark:border-amber-500/60 dark:bg-amber-950/40 dark:text-amber-400"
+                >
+                  Unsaved changes
+                </Badge>
+              )}
+              <Button
+                onClick={handleSave}
+                disabled={!isDirty || setFlagsMutation.isPending}
+              >
+                {setFlagsMutation.isPending ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">

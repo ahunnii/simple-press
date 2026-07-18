@@ -37,12 +37,22 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       order: 3,
     },
     {
+      id: "homepage.testimonials",
+      page: "homepage",
+      title: "Testimonials",
+      description: "Three customer testimonials with a link to the testimonials page.",
+      groupIds: ["homepage.testimonials"],
+      order: 4,
+      hideable: true,
+    },
+    {
       id: "homepage.location",
       page: "homepage",
       title: "Location",
-      description: "Store location heading and map image.",
+      description: "Store location heading and interactive map.",
       groupIds: ["homepage.location"],
-      order: 4,
+      order: 5,
+      hideable: true,
     },
 
     // About
@@ -121,6 +131,15 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       groupIds: ["contact.info"],
       order: 0,
     },
+    {
+      id: "contact.map",
+      page: "contact",
+      title: "Location Map",
+      description: "Interactive map with directions, shown below the contact form.",
+      groupIds: ["contact.map"],
+      order: 1,
+      hideable: true,
+    },
 
     // Collections
     {
@@ -172,9 +191,9 @@ export const bambooSections: Record<string, TemplateSection[]> = {
     {
       id: "global.location",
       page: "global",
-      title: "Location Map",
+      title: "Map Location",
       description:
-        "Map image shown in the homepage location section (and anywhere else the location is displayed).",
+        "Coordinates for the map pin used by the homepage and contact page maps.",
       groupIds: ["global.location"],
       order: 0,
     },

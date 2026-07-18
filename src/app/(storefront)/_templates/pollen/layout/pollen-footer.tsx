@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const mainMenuLinks = [
@@ -22,10 +23,18 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
   const email = business?.supportEmail;
   const phoneNumber = business?.phoneNumber;
   const physicalAddress = business?.businessAddress;
+  const { isEnabled } = resolveFlags(business?.featureFlags);
 
   const navigationItems = business?.siteContent?.navigationItems as
     | { label: string; href: string }[]
     | undefined;
+
+  const filteredMainMenuLinks = mainMenuLinks.filter(
+    (l) => l.href !== "/services" || isEnabled("services"),
+  );
+  const filteredAccountLinks = accountLinks.filter(
+    (l) => l.href !== "/testimonials" || isEnabled("testimonials"),
+  );
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -86,7 +95,7 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
               Main Menu
             </h4>
             <ul className="space-y-3">
-              {(navigationItems ?? mainMenuLinks).map((link) => (
+              {(navigationItems ?? filteredMainMenuLinks).map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -105,7 +114,7 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
               Account
             </h4>
             <ul className="space-y-3">
-              {accountLinks.map((link) => (
+              {filteredAccountLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}

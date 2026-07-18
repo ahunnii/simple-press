@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import {
   buildBlogPostingSchema,
   buildBreadcrumbSchema,
@@ -27,6 +28,9 @@ const RELATED_POSTS_CAP = 20;
 
 export default async function PageView({ params }: Props) {
   const { slug } = await params;
+  const { isEnabled } = await getBusinessFlags();
+  if (!isEnabled("blog")) notFound();
+
   const business = await api.business.simplifiedGet();
   if (!business) notFound();
 
@@ -85,7 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   const [page, business] = await Promise.all([
-    api.content.getBlogPostBySlug({ slug }).catch(rethrowTrpcForErrorBoundary),
+    api.content.getBlogPostBySlug({ slug }).catch(() => null),
     api.business.simplifiedGet(),
   ]);
 

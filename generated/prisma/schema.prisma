@@ -45,6 +45,7 @@ model User {
   customers        Customer[]
   inventoryHistory InventoryHistory[]
   createdInvites   PlatformInvite[]     @relation("CreatedInvites")
+  editorNotes      EditorNote[]
 
   // ← removed businessId direct FK, membership table handles this
   @@map("user")
@@ -209,6 +210,7 @@ model Business {
   baseInventoryUnits    BaseInventoryUnit[]
   inventoryReservations InventoryReservation[]
   pages                 Page[]
+  editorNotes           EditorNote[]
   productImports        ProductImport[]
   galleries             Gallery[]
   testimonials          Testimonial[]
@@ -934,6 +936,12 @@ model Page {
   sortOrder          Int       @default(0)
   scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
 
+  // Visual-editor draft: { title, excerpt, content } — null = no draft.
+  // Applied to the live columns + cleared by the editor's Publish; must never be
+  // returned by public procedures.
+  previewDraft          Json?
+  previewDraftUpdatedAt DateTime?
+
   // Page type
   type     String @default("page") // page | policy | blog | custom
   template String @default("default") // default | sidebar | full-width
@@ -945,6 +953,32 @@ model Page {
   @@unique([businessId, slug])
   @@index([businessId, published])
   @@index([businessId, type])
+}
+
+// Owner/manager-authored note from the visual editor (/editor), triaged by the
+// platform operator at platform.<domain>/notes. One-shot flow: open -> resolved,
+// with an optional operator response shown back in the editor.
+model EditorNote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  pageKey   String? // template page key ("homepage"), "cms:<pageId>" for CMS pages, null = whole site
+  pageLabel String? // display snapshot ("Homepage", "Our Story") — survives page rename/delete
+
+  body       String    @db.Text
+  status     String    @default("open") // open | resolved
+  response   String?   @db.Text
+  resolvedAt DateTime?
+
+  createdByUserId String?
+  createdBy       User?   @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, status])
+  @@index([status, createdAt])
 }
 
 model ProductImport {
