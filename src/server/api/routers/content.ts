@@ -4,7 +4,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import type { TxClient } from "~/server/db";
 import {
+  cmsPageDraftSchema,
   pageSchema,
   previewDraftSchema,
   siteContentSchema,
@@ -25,6 +28,18 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "../trpc";
+
+/**
+ * Shape used to validate a page's stored `previewDraft` before we either swap
+ * it into a public response or promote it to the live columns. Kept permissive
+ * (content is TipTap JSON) — a malformed draft is skipped/ignored, never
+ * trusted or promoted.
+ */
+const cmsPageDraftValueSchema = z.object({
+  title: z.string().min(1),
+  excerpt: z.string().nullable(),
+  content: z.any(),
+});
 
 export const contentRouter = createTRPCRouter({
   // ==========================================
@@ -80,26 +95,60 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const { templateId, clearPreviewDraft, ...data } = input;
+      const { templateId, clearPreviewDraft, publishCmsPageDrafts, ...data } =
+        input;
 
-      const siteContent = await ctx.db.siteContent.upsert({
-        where: { businessId },
-        create: {
-          businessId,
-          ...data,
-        },
-        update: {
-          ...data,
-          // Only clear the durable /editor draft when the caller explicitly
-          // says this save supersedes it (the visual editor's Publish
-          // action). Unrelated saves — Branding, Navigation, the legacy
-          // Template Fields editor — must never silently wipe an
-          // in-progress draft.
-          ...(clearPreviewDraft
-            ? { previewCustomFields: Prisma.JsonNull, previewUpdatedAt: null }
-            : {}),
-        },
-      });
+      const upsertSiteContent = (tx: TxClient) =>
+        tx.siteContent.upsert({
+          where: { businessId },
+          create: {
+            businessId,
+            ...data,
+          },
+          update: {
+            ...data,
+            // Only clear the durable /editor draft when the caller explicitly
+            // says this save supersedes it (the visual editor's Publish
+            // action). Unrelated saves — Branding, Navigation, the legacy
+            // Template Fields editor — must never silently wipe an
+            // in-progress draft.
+            ...(clearPreviewDraft
+              ? { previewCustomFields: Prisma.JsonNull, previewUpdatedAt: null }
+              : {}),
+          },
+        });
+
+      const siteContent = publishCmsPageDrafts
+        ? // Visual editor Publish: promote every CMS page's preview draft to
+          // its live columns in the same transaction as the site-content save.
+          await ctx.db.$transaction(async (tx) => {
+            const sc = await upsertSiteContent(tx);
+
+            const drafts = await tx.page.findMany({
+              where: { businessId, previewDraft: { not: Prisma.DbNull } },
+              select: { id: true, previewDraft: true },
+            });
+
+            for (const p of drafts) {
+              const parsed = cmsPageDraftValueSchema.safeParse(p.previewDraft);
+              // Skip a malformed draft silently — a bad row must not fail the
+              // whole publish.
+              if (!parsed.success) continue;
+              await tx.page.update({
+                where: { id: p.id },
+                data: {
+                  title: parsed.data.title,
+                  excerpt: parsed.data.excerpt,
+                  content: parsed.data.content as Prisma.InputJsonValue,
+                  previewDraft: Prisma.DbNull,
+                  previewDraftUpdatedAt: null,
+                },
+              });
+            }
+
+            return sc;
+          })
+        : await upsertSiteContent(ctx.db);
 
       if (templateId) {
         await ctx.db.business.update({
@@ -151,6 +200,32 @@ export const contentRouter = createTRPCRouter({
     return { ok: true };
   }),
 
+  // Discard ALL visual-editor drafts at once — the site-content draft plus
+  // every CMS page draft. Separate from `clearPreviewDraft` (above), which the
+  // legacy Template Fields editor uses and must NOT touch CMS page drafts.
+  discardEditorDrafts: ownerAdminProcedure.mutation(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    await ctx.db.$transaction([
+      ctx.db.siteContent.updateMany({
+        where: { businessId },
+        data: {
+          previewCustomFields: Prisma.JsonNull,
+          previewUpdatedAt: null,
+        },
+      }),
+      ctx.db.page.updateMany({
+        where: { businessId, previewDraft: { not: Prisma.DbNull } },
+        data: {
+          previewDraft: Prisma.DbNull,
+          previewDraftUpdatedAt: null,
+        },
+      }),
+    ]);
+
+    return { ok: true };
+  }),
+
   // ==========================================
   // PAGES
   // ==========================================
@@ -177,8 +252,36 @@ export const contentRouter = createTRPCRouter({
         orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       });
 
-      return pages;
+      // Never expose the visual-editor draft columns to admin list callers.
+      return pages.map(
+        ({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...page }) => page,
+      );
     }),
+
+  getEditorPages: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const pages = await ctx.db.page.findMany({
+      where: { businessId, type: "page" },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+
+    return pages.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      published: p.published,
+      live: { title: p.title, excerpt: p.excerpt, content: p.content },
+      draft:
+        p.previewDraft == null
+          ? null
+          : (p.previewDraft as unknown as {
+              title: string;
+              excerpt: string | null;
+              content: unknown;
+            }),
+      hasDraft: p.previewDraft != null,
+    }));
+  }),
 
   getSimplifiedPages: publicProcedure
     .input(
@@ -229,7 +332,35 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
-      return page;
+      // Never expose the visual-editor draft columns to admin callers.
+      return (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...safe }) =>
+        safe)(page);
+    }),
+
+  // Save a per-page CMS preview draft (visual editor). Owner-only; never
+  // exposed to the public storefront except swapped-in via an authorized
+  // preview.
+  saveCmsPageDraft: ownerAdminProcedure
+    .input(cmsPageDraftSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const { count } = await ctx.db.page.updateMany({
+        where: { id: input.pageId, businessId, type: "page" },
+        data: {
+          previewDraft: input.draft as Prisma.InputJsonValue,
+          previewDraftUpdatedAt: new Date(),
+        },
+      });
+
+      if (count === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "This page no longer exists",
+        });
+      }
+
+      return { ok: true };
     }),
 
   getPageBySlug: publicProcedure
@@ -249,6 +380,10 @@ export const contentRouter = createTRPCRouter({
         });
       }
 
+      // Authorized owner/manager/platform-admin preview of THIS business.
+      const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
+      const isPreview = previewBizId != null;
+
       const page = await ctx.db.page.findUnique({
         where: {
           businessId_slug: {
@@ -256,12 +391,36 @@ export const contentRouter = createTRPCRouter({
             slug: input.slug,
           },
           ...(input.type ? { type: input.type } : {}),
-          // Public route: never leak draft/unpublished pages.
-          published: true,
+          // Public route: never leak unpublished pages. In an authorized
+          // preview we intentionally drop this filter so drafts render.
+          ...(isPreview ? {} : { published: true }),
         },
       });
 
-      return page;
+      if (!page) return page;
+
+      // LEAK-SAFETY INVARIANT: the response returned to the public storefront
+      // route must NEVER contain the raw draft columns. Strip them here
+      // unconditionally; for an authorized preview the draft *values* are
+      // swapped into title/excerpt/content below instead.
+      const previewDraft = page.previewDraft;
+      const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
+        rest)(page);
+
+      if (isPreview && previewDraft != null) {
+        const parsed = cmsPageDraftValueSchema.safeParse(previewDraft);
+        // Ignore a malformed draft — fall through to the live values.
+        if (parsed.success) {
+          return {
+            ...safe,
+            title: parsed.data.title,
+            excerpt: parsed.data.excerpt,
+            content: parsed.data.content,
+          };
+        }
+      }
+
+      return safe;
     }),
 
   getBlogPostBySlug: publicProcedure
@@ -283,9 +442,10 @@ export const contentRouter = createTRPCRouter({
         },
       });
 
-      return page
-        ? { ...page, createdAt: page.publishedAt ?? page.createdAt }
-        : page;
+      if (!page) return page;
+      const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
+        rest)(page);
+      return { ...safe, createdAt: page.publishedAt ?? page.createdAt };
     }),
 
   getBlogPages: publicProcedure
@@ -307,8 +467,15 @@ export const contentRouter = createTRPCRouter({
         ],
       });
 
+      // Blog posts never carry a CMS preview draft (drafts are `type: "page"`
+      // only), so we hard-null the draft columns' VALUES rather than drop them
+      // — the wide `Page`-compatible field types are preserved (the raw
+      // `Page[]` shape `useBlogPosts` and the blog cards consume) while no
+      // draft data is ever exposed here.
       return pages.map((p) => ({
         ...p,
+        previewDraft: null as Prisma.JsonValue,
+        previewDraftUpdatedAt: null as Date | null,
         createdAt: p.publishedAt ?? p.createdAt,
       }));
     }),

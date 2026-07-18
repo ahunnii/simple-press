@@ -3,6 +3,7 @@ import { permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
+import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
@@ -122,9 +123,11 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
             : []),
         ]}
       />
-      <TemplateLayout business={business}>
-        <TemplateComponent business={business} />
-      </TemplateLayout>
+      <StorefrontFlagsProvider flags={business.featureFlags}>
+        <TemplateLayout business={business}>
+          <TemplateComponent business={business} />
+        </TemplateLayout>
+      </StorefrontFlagsProvider>
       {isPreview && <PreviewOverlay />}
     </HydrateClient>
   );

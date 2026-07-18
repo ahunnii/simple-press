@@ -62,7 +62,8 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
     (business?.siteContent?.navigationItems as {
       label: string;
       href: string;
-    }[]) ?? NAV_LINKS;
+    }[]) ??
+    NAV_LINKS.filter((l) => l.href !== "/services" || isEnabled("services"));
 
   // --- Lock body scroll when menu is open ---
   useEffect(() => {

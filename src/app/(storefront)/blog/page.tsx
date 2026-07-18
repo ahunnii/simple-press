@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { JsonLd } from "~/components/json-ld";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { buildPageMetadata } from "~/lib/seo";
 import { buildItemListSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
@@ -9,6 +10,9 @@ import { api } from "~/trpc/server";
 import { getTemplate } from "../_templates/registry";
 
 export default async function BlogPage() {
+  const { isEnabled } = await getBusinessFlags();
+  if (!isEnabled("blog")) notFound();
+
   const business = await api.business
     .simplifiedGet()
     .catch(rethrowTrpcForErrorBoundary);

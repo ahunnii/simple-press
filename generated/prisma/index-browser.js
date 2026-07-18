@@ -581,9 +581,25 @@ exports.Prisma.PageScalarFieldEnum = {
   published: 'published',
   sortOrder: 'sortOrder',
   scheduledPublishAt: 'scheduledPublishAt',
+  previewDraft: 'previewDraft',
+  previewDraftUpdatedAt: 'previewDraftUpdatedAt',
   type: 'type',
   template: 'template',
   businessId: 'businessId'
+};
+
+exports.Prisma.EditorNoteScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  pageKey: 'pageKey',
+  pageLabel: 'pageLabel',
+  body: 'body',
+  status: 'status',
+  response: 'response',
+  resolvedAt: 'resolvedAt',
+  createdByUserId: 'createdByUserId'
 };
 
 exports.Prisma.ProductImportScalarFieldEnum = {
@@ -829,6 +845,7 @@ exports.Prisma.ModelName = {
   BaseInventoryUnit: 'BaseInventoryUnit',
   InventoryReservation: 'InventoryReservation',
   Page: 'Page',
+  EditorNote: 'EditorNote',
   ProductImport: 'ProductImport',
   Gallery: 'Gallery',
   GalleryImage: 'GalleryImage',

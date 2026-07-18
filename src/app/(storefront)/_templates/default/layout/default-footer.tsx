@@ -235,7 +235,9 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
             <nav aria-label="Quick links" className="flex flex-col gap-2.5">
               {[
                 { href: "/about", label: "About us" },
-                { href: "/testimonials", label: "Reviews" },
+                ...(isEnabled("testimonials")
+                  ? [{ href: "/testimonials", label: "Reviews" }]
+                  : []),
                 ...(blogEnabled ? [{ href: "/blog", label: "Blog" }] : []),
                 ...(isEnabled("services")
                   ? [{ href: "/services", label: "Services" }]

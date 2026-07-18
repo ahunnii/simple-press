@@ -82,6 +82,11 @@ export const siteContentSchema = z.object({
   // leave it false so an unrelated save never silently destroys an
   // in-progress /editor draft.
   clearPreviewDraft: z.boolean().optional(),
+
+  // Set only by the visual editor's Publish — promotes every CMS page's
+  // stored preview draft (Page.previewDraft) to its live columns in the same
+  // transaction as this save. Omitted / false for all other callers.
+  publishCmsPageDrafts: z.boolean().optional(),
 }).superRefine((val, ctx) => {
   // Same cap `previewDraftSchema` enforces below — publish (updateSiteContent)
   // must not accept an unbounded customFields payload either. `customFields`
@@ -108,6 +113,31 @@ export const previewDraftSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Preview draft exceeds ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
+      });
+    }
+  });
+
+/**
+ * Input for the visual editor's per-page CMS draft save. `draft` mirrors the
+ * live page columns the editor can edit (title/excerpt/content). Capped at the
+ * same ~1MB budget as every other content-save payload.
+ */
+export const cmsPageDraftSchema = z
+  .object({
+    pageId: z.string().min(1),
+    draft: z.object({
+      title: z.string().min(1).max(255),
+      excerpt: z.string().max(2000).nullable(),
+      content: z.any(), // TipTap JSON — shape validated at render time
+    }),
+  })
+  .superRefine((val, ctx) => {
+    const size = JSON.stringify(val.draft).length;
+    if (size > CUSTOM_FIELDS_MAX_BYTES) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Page draft exceeds ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
+        path: ["draft"],
       });
     }
   });

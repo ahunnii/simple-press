@@ -879,31 +879,33 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
                     ) : null}
                   </button>
 
-                  <Link
-                    href="/wishlist"
-                    onClick={closeMobileMenu}
-                    aria-label="Open wishlist"
-                    className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
-                    style={{
-                      border: "1px solid var(--vn-rule)",
-                      color: "var(--vn-ink-soft)",
-                    }}
-                  >
-                    <Heart className="h-4 w-4" aria-hidden="true" />
-                    <span aria-hidden="true">Wishlist</span>
-                    {wishlistHydrated && wishlistCount > 0 ? (
-                      <span
-                        aria-hidden="true"
-                        className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
-                        style={{
-                          background: "var(--vn-accent)",
-                          color: "#fff",
-                        }}
-                      >
-                        {wishlistCount}
-                      </span>
-                    ) : null}
-                  </Link>
+                  {isStorefrontEnabled("wishlist") && (
+                    <Link
+                      href="/wishlist"
+                      onClick={closeMobileMenu}
+                      aria-label="Open wishlist"
+                      className="vn-mobile-action-btn relative rounded-none transition-opacity hover:opacity-80"
+                      style={{
+                        border: "1px solid var(--vn-rule)",
+                        color: "var(--vn-ink-soft)",
+                      }}
+                    >
+                      <Heart className="h-4 w-4" aria-hidden="true" />
+                      <span aria-hidden="true">Wishlist</span>
+                      {wishlistHydrated && wishlistCount > 0 ? (
+                        <span
+                          aria-hidden="true"
+                          className="ml-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[9px] font-semibold"
+                          style={{
+                            background: "var(--vn-accent)",
+                            color: "#fff",
+                          }}
+                        >
+                          {wishlistCount}
+                        </span>
+                      ) : null}
+                    </Link>
+                  )}
 
                   {session?.user ? (
                     <button

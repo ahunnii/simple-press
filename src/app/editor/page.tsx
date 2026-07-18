@@ -16,19 +16,27 @@ export default async function EditorPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const [business, editorState, flags, session] = await Promise.all([
+  const [business, editorState, flags, session, cmsPages] = await Promise.all([
     api.business.getWith({}),
     api.content.getEditorState(),
     getBusinessFlags(),
     getSession(),
+    api.content.getEditorPages(),
   ]);
 
   const sections = getSectionsForTemplate(business.templateId);
   const isPlatformAdmin = session?.user.platformRole === "PLATFORM_ADMIN";
 
-  // Deep-link support: ?page=homepage&section=homepage.hero
+  // Deep-link support: ?page=homepage&section=homepage.hero, or ?page=cms:<id>
   const sp = await searchParams;
-  const initialPage = typeof sp.page === "string" ? sp.page : "homepage";
+  const rawPage = typeof sp.page === "string" ? sp.page : "homepage";
+  // A `cms:<pageId>` deep link is only honored when it matches a real page —
+  // otherwise fall back to the homepage (as an unknown template page does).
+  const initialPage = rawPage.startsWith("cms:")
+    ? cmsPages.some((p) => `cms:${p.id}` === rawPage)
+      ? rawPage
+      : "homepage"
+    : rawPage;
   const initialSection = typeof sp.section === "string" ? sp.section : null;
 
   return (
@@ -39,6 +47,7 @@ export default async function EditorPage({
       customFields={editorState.customFields}
       previewCustomFields={editorState.previewCustomFields}
       hasDraft={editorState.hasDraft}
+      cmsPages={cmsPages}
       sections={sections}
       embedsEnabled={flags.isEnabled("embeds")}
       mediaEnabled={flags.isEnabled("media")}

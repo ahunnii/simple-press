@@ -10,7 +10,7 @@ import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { cn } from "~/lib/utils";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { authClient } from "~/server/better-auth/client";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
@@ -113,15 +113,15 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const user = session?.user;
   const pathname = usePathname();
 
-  const { isEnabled } = useFeatureFlags({
-    flags: (business?.featureFlags as Record<string, boolean>) ?? {},
-  });
+  const { isEnabled } = useStorefrontFlags();
 
   const defaultNavLinks: NavLink[] = [
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About" },
     ...(isEnabled("services") ? [{ href: "/services", label: "Services" }] : []),
-    { href: "/testimonials", label: "Reviews" },
+    ...(isEnabled("testimonials")
+      ? [{ href: "/testimonials", label: "Reviews" }]
+      : []),
     { href: "/contact", label: "Contact" },
   ];
 

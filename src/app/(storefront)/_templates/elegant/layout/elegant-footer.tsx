@@ -41,6 +41,10 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
 
   const navLinks = navigationItems ?? DEFAULT_NAV_LINKS;
 
+  const brandLinks = BRAND_LINKS.filter(
+    (l) => l.href !== "/testimonials" || isEnabled("testimonials"),
+  );
+
   return (
     <footer
       style={{
@@ -202,7 +206,7 @@ export async function ElegantFooter({ business }: DefaultFooterTemplateProps) {
             {/* Brand links column */}
             <FooterColumn
               title={business?.name ?? "Brand"}
-              links={BRAND_LINKS}
+              links={brandLinks}
             />
 
             {/* Policies / Contact column */}

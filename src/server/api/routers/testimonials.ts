@@ -47,6 +47,7 @@ export const testimonialRouter = createTRPCRouter({
   // ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
   list: publicProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         publicOnly: z.boolean().default(true),
@@ -92,6 +93,7 @@ export const testimonialRouter = createTRPCRouter({
     }),
 
   listRandom: publicProcedure
+    .use(featureGate("testimonials"))
     .input(
       z.object({
         limit: z.number().min(1).max(10).default(3),

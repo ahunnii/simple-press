@@ -32,7 +32,7 @@ const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
  * `checkBusiness()` / membership check server-side — no businessId needs
  * to be threaded through here.
  */
-async function uploadRichTextImage(file: File): Promise<string> {
+export async function uploadRichTextImage(file: File): Promise<string> {
   const result = await uploadFile({
     api: "/api/upload",
     route: "image",

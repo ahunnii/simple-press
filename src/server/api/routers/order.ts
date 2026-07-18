@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { carrierLabel } from "~/data/fulfillment-constants";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
   sendOrderCancelled,
@@ -209,7 +210,7 @@ export const orderRouter = createTRPCRouter({
               customerName: order.customerName ?? "Guest",
               trackingNumber: shipment.trackingNumber!,
               trackingUrl: shipment.trackingUrl ?? "",
-              carrier: shipment.carrier ?? "",
+              carrier: carrierLabel(shipment.carrier),
               business: {
                 name: order.business.name,
                 ownerEmail: order.business.ownerEmail,
@@ -425,7 +426,7 @@ export const orderRouter = createTRPCRouter({
             customerName: order.customerName ?? "Guest",
             trackingNumber: shipment.trackingNumber,
             trackingUrl: shipment.trackingUrl ?? "",
-            carrier: shipment.carrier ?? "",
+            carrier: carrierLabel(shipment.carrier),
             business: {
               name: order.business.name,
               ownerEmail: order.business.ownerEmail,
@@ -584,7 +585,7 @@ export const orderRouter = createTRPCRouter({
             customerName: order.customerName ?? "Guest",
             trackingNumber: shipment.trackingNumber ?? "",
             trackingUrl: shipment.trackingUrl ?? "",
-            carrier: shipment.carrier ?? "",
+            carrier: carrierLabel(shipment.carrier),
             business: {
               name: business.name,
               ownerEmail: business.ownerEmail,

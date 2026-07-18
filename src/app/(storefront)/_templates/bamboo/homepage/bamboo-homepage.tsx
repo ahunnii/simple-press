@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, MapPin, Package } from "lucide-react";
+import { ArrowRight, Package, Quote, Star } from "lucide-react";
 
 import type { Product } from "~/types";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import {
   getListFieldValue,
@@ -11,7 +12,9 @@ import {
 import { isSectionVisible } from "~/lib/sp-meta";
 import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import {
   FadeIn,
   PageTransition,
@@ -22,15 +25,32 @@ import {
 
 import { DEFAULT_BAMBOO_FEATURES } from ".";
 import { resolveFields } from "..";
+import { BambooMap } from "../shared/bamboo-map";
 import { BambooProductCard } from "../shared/bamboo-product-card";
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export async function BambooHomepage() {
-  const homepage = await api.business.getHomepage();
+  const [homepage, flags] = await Promise.all([
+    api.business.getHomepage(),
+    getBusinessFlags(),
+  ]);
+
+  const testimonials = flags.isEnabled("testimonials")
+    ? await api.testimonial.listRandom({ limit: 3 })
+    : [];
 
   const address = homepage?.businessAddress;
 
   const f = resolveFields(homepage?.siteContent?.customFields, [
-    "bamboo.global.location-map",
+    "bamboo.global.map-lat",
+    "bamboo.global.map-lng",
     "bamboo.homepage.hero-background",
     "bamboo.homepage.hero-image",
     "bamboo.homepage.hero-title",
@@ -48,11 +68,17 @@ export async function BambooHomepage() {
     "bamboo.homepage.about-teaser-button-text",
     "bamboo.homepage.about-teaser-button-link",
     "bamboo.homepage.location-heading",
+    "bamboo.homepage.testimonials-heading",
   ]);
 
-  const mapsUrl = address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
-    : null;
+  const latRaw = f["bamboo.global.map-lat"]?.trim();
+  const lngRaw = f["bamboo.global.map-lng"]?.trim();
+  const lat = latRaw ? Number(latRaw) : NaN;
+  const lng = lngRaw ? Number(lngRaw) : NaN;
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng);
+  const mapDest = address ? encodeURIComponent(address) : `${lat},${lng}`;
+  const viewUrl = `https://www.google.com/maps/search/?api=1&query=${mapDest}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapDest}`;
   const heroBackground = f["bamboo.homepage.hero-background"];
 
   const sustainabilityList = parseTemplateIconListRows(
@@ -288,53 +314,137 @@ export async function BambooHomepage() {
           </ScaleIn>
         </section>
 
-        {/* Location */}
-        <section
-          {...sectionGroupAttr("homepage", "location")}
-          className="bg-secondary/50 py-20"
-        >
-          <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <FadeIn direction="up">
-              <div className="mb-12 text-center">
-                <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
-                  <span
-                    className="text-balance"
-                    {...fieldAttr("bamboo.homepage.location-heading")}
-                  >
-                    {f["bamboo.homepage.location-heading"]}
-                  </span>
-                </h2>
-              </div>
-            </FadeIn>
-
-            <a
-              {...sectionGroupAttr("global", "location")}
-              href={mapsUrl ?? "#!"}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View our location on Google Maps (opens in new tab)"
-              className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-slate-100"
+        {/* Testimonials */}
+        {testimonials.length > 0 &&
+          isSectionVisible(
+            homepage?.siteContent?.customFields,
+            "bamboo",
+            "homepage.testimonials",
+          ) && (
+            <section
+              {...sectionGroupAttr("homepage", "testimonials")}
+              className="mx-auto max-w-7xl px-4 py-20 lg:px-8"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={f["bamboo.global.location-map"]}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div
-                aria-hidden="true"
-                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
-              >
-                <div className="flex flex-col items-center justify-center">
-                  <MapPin className="h-12 w-12 text-white" />
-                  <p className="text-lg font-medium text-white drop-shadow">
-                    View on Google Maps
-                  </p>
+              <FadeIn direction="up">
+                <div className="mb-12 text-center">
+                  <span className="text-primary text-sm font-semibold tracking-wider uppercase">
+                    Testimonials
+                  </span>
+                  <h2 className="text-foreground font-heading mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+                    <span
+                      className="text-balance"
+                      {...fieldAttr("bamboo.homepage.testimonials-heading")}
+                    >
+                      {f["bamboo.homepage.testimonials-heading"]}
+                    </span>
+                  </h2>
                 </div>
+              </FadeIn>
+              <StaggerContainer
+                staggerDelay={0.12}
+                className="grid gap-8 md:grid-cols-3"
+              >
+                {testimonials.map((t) => (
+                  <StaggerItem key={t.id}>
+                    <Card className="border-border/60 bg-card h-full">
+                      <CardContent className="flex h-full flex-col p-8">
+                        <div
+                          className="flex gap-0.5"
+                          role="img"
+                          aria-label="5 out of 5 stars"
+                        >
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className="fill-accent text-accent size-4"
+                              aria-hidden="true"
+                            />
+                          ))}
+                        </div>
+                        <Quote
+                          className="text-primary/30 mt-4 mb-3 h-8 w-8"
+                          aria-hidden="true"
+                        />
+                        <p className="text-muted-foreground flex-1 text-sm leading-relaxed">
+                          &ldquo;{t.text}&rdquo;
+                        </p>
+                        <div className="mt-6 flex items-center gap-3">
+                          <Avatar className="h-12 w-12 shrink-0">
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                              {getInitials(t.customerName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="font-heading text-foreground text-sm font-semibold">
+                              {t.customerName}
+                            </p>
+                            {[t.customerTitle, t.customerCompany].filter(
+                              Boolean,
+                            ).length > 0 ? (
+                              <p className="text-muted-foreground text-xs">
+                                {[t.customerTitle, t.customerCompany]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+              <FadeIn direction="up" delay={0.3}>
+                <div className="mt-12 text-center">
+                  <Button variant="outline" size="lg" asChild>
+                    <Link href="/testimonials">
+                      Read All Testimonials
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                </div>
+              </FadeIn>
+            </section>
+          )}
+
+        {/* Location */}
+        {hasCoords &&
+          isSectionVisible(
+            homepage?.siteContent?.customFields,
+            "bamboo",
+            "homepage.location",
+          ) && (
+            <section
+              {...sectionGroupAttr("homepage", "location")}
+              className="bg-secondary/50 py-20"
+            >
+              <div className="mx-auto max-w-7xl px-4 lg:px-8">
+                <FadeIn direction="up">
+                  <div className="mb-12 text-center">
+                    <h2 className="text-foreground font-heading text-3xl font-bold tracking-tight md:text-4xl">
+                      <span
+                        className="text-balance"
+                        {...fieldAttr("bamboo.homepage.location-heading")}
+                      >
+                        {f["bamboo.homepage.location-heading"]}
+                      </span>
+                    </h2>
+                  </div>
+                </FadeIn>
+
+                <ScaleIn>
+                  <BambooMap
+                    businessName={homepage?.name ?? ""}
+                    address={address ?? undefined}
+                    latitude={lat}
+                    longitude={lng}
+                    viewUrl={viewUrl}
+                    directionsUrl={directionsUrl}
+                  />
+                </ScaleIn>
               </div>
-            </a>
-          </div>
-        </section>
+            </section>
+          )}
       </PageTransition>
     </HydrateClient>
   );

@@ -21,15 +21,49 @@ import { api } from "~/trpc/react";
 
 import type { DeviceKind } from "./editor-preview";
 import { DEVICE_WIDTHS, EditorPreview } from "./editor-preview";
-import type { EditorTopBarPage } from "./editor-top-bar";
+import type { CmsPageDraftValues } from "./cms-page-panel";
+import { CmsPagePanel } from "./cms-page-panel";
+import { CmsPageRail } from "./cms-page-rail";
+import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
 import { EditorTopBar } from "./editor-top-bar";
 import { FieldPanel } from "./field-panel";
+import { NotesPanel } from "./notes-panel";
 import { SectionRail } from "./section-rail";
 import { ThemePanel } from "./theme-panel";
 
 const FLUSH_DEBOUNCE_MS = 800;
 const FLUSH_RETRY_MS = 5000;
 const MAX_FLUSH_RETRIES = 3;
+
+/** Fallback used only if a draft is somehow requested for an unknown page. */
+const EMPTY_CMS_VALUES: CmsPageDraftValues = {
+  title: "",
+  excerpt: null,
+  content: { type: "doc", content: [] },
+};
+
+/** A CMS `type:"page"` record as delivered to the editor. */
+export type EditorCmsPage = {
+  id: string;
+  slug: string;
+  published: boolean;
+  /** Currently published values (the dirty-comparison baseline). */
+  live: CmsPageDraftValues;
+  /** Durable per-page draft, or null. */
+  draft: CmsPageDraftValues | null;
+  /** Whether a durable draft exists on the server. */
+  hasDraft: boolean;
+};
+
+/** True for an activePage value that addresses a CMS page (`cms:<pageId>`). */
+function isCmsPage(value: string): boolean {
+  return value.startsWith("cms:");
+}
+
+/** Extract the page id from a `cms:<pageId>` activePage value. */
+function cmsPageId(value: string): string {
+  return value.slice("cms:".length);
+}
 
 export type VisualEditorProps = {
   businessId: string;
@@ -41,6 +75,8 @@ export type VisualEditorProps = {
   previewCustomFields: Record<string, unknown> | null;
   /** Whether a durable draft exists on the server. */
   hasDraft: boolean;
+  /** The business's CMS `type:"page"` pages, editable alongside the template. */
+  cmsPages: EditorCmsPage[];
   /** All sections for the active template (all pages, template order). */
   sections: TemplateSection[];
   embedsEnabled: boolean;
@@ -127,6 +163,12 @@ function pageLabel(pageKey: string): string {
   return meta?.title ?? humanize(pageKey);
 }
 
+/** A page title for display, falling back to a placeholder when blank. */
+function titleOrUntitled(title: string): string {
+  const trimmed = title.trim();
+  return trimmed.length > 0 ? trimmed : "Untitled page";
+}
+
 // ── Component ─────────────────────────────────────────────────────────────
 
 /**
@@ -141,6 +183,7 @@ export function VisualEditor({
   customFields,
   previewCustomFields,
   hasDraft,
+  cmsPages,
   sections,
   embedsEnabled,
   mediaEnabled,
@@ -164,6 +207,12 @@ export function VisualEditor({
     return map;
   }, [templateId]);
 
+  const cmsPageById = useMemo(() => {
+    const map = new Map<string, EditorCmsPage>();
+    for (const p of cmsPages) map.set(p.id, p);
+    return map;
+  }, [cmsPages]);
+
   const defaultPage = pages[0]?.value ?? "homepage";
   // Deep-link guard: if ?section= names a section on a different page than
   // ?page=, honor the SECTION's page so the panel never opens disconnected
@@ -180,13 +229,17 @@ export function VisualEditor({
       ? deepLinkedSection
       : null;
   const clampedInitialPage =
-    initialSectionObj &&
-    initialSectionObj.page !== "global" &&
-    initialSectionObj.page in PAGE_PREVIEW_PATHS
-      ? initialSectionObj.page
-      : initialPage in PAGE_PREVIEW_PATHS
-        ? initialPage
-        : defaultPage;
+    // A validated CMS deep link (page.tsx already checked the id) wins — CMS
+    // pages have no sections, so the section branch never applies to them.
+    isCmsPage(initialPage) && cmsPageById.has(cmsPageId(initialPage))
+      ? initialPage
+      : initialSectionObj &&
+          initialSectionObj.page !== "global" &&
+          initialSectionObj.page in PAGE_PREVIEW_PATHS
+        ? initialSectionObj.page
+        : initialPage in PAGE_PREVIEW_PATHS
+          ? initialPage
+          : defaultPage;
 
   // ── State ──
   const [publishedFields, setPublishedFields] =
@@ -210,6 +263,36 @@ export function VisualEditor({
    * dropped.
    */
   const [mutationPending, setMutationPending] = useState(false);
+
+  // ── CMS page state ──
+  // CMS pages are edited entirely through the right-hand panel (they have no
+  // in-preview hotspots), so opening the editor on a CMS page opens the panel.
+  const [cmsPanelOpen, setCmsPanelOpen] = useState(() =>
+    isCmsPage(clampedInitialPage),
+  );
+  const [notesOpen, setNotesOpen] = useState(false);
+  /** LIVE values per page id — the per-page dirty-comparison baseline. */
+  const [cmsBaselines, setCmsBaselines] = useState<
+    Record<string, CmsPageDraftValues>
+  >(() => {
+    const map: Record<string, CmsPageDraftValues> = {};
+    for (const p of cmsPages) map[p.id] = p.live;
+    return map;
+  });
+  /** Working per-page values — resumes a durable draft when present. */
+  const [cmsDrafts, setCmsDrafts] = useState<
+    Record<string, CmsPageDraftValues>
+  >(() => {
+    const map: Record<string, CmsPageDraftValues> = {};
+    for (const p of cmsPages) map[p.id] = p.draft ?? p.live;
+    return map;
+  });
+  /** Page ids whose draft is persisted server-side. */
+  const [serverCmsDraftIds, setServerCmsDraftIds] = useState<Set<string>>(() => {
+    const set = new Set<string>();
+    for (const p of cmsPages) if (p.hasDraft) set.add(p.id);
+    return set;
+  });
 
   // ── Refs ──
   const previewRef = useRef<PreviewFrameHandle>(null);
@@ -247,8 +330,13 @@ export function VisualEditor({
   const refreshNeededRef = useRef(false);
   /** Patch keys sent but not yet acked — treated as refresh-needed at flush. */
   const unackedPatchKeysRef = useRef<Set<string>>(new Set());
+  /** Page ids with unflushed local CMS edits — mirror of what the flush owes. */
+  const pendingCmsFlushIdsRef = useRef<Set<string>>(new Set());
+  /** Ref mirror of `cmsDrafts` so the flush reads the newest values. */
+  const cmsDraftsRef = useRef(cmsDrafts);
 
   const savePreviewDraft = api.content.savePreviewDraft.useMutation();
+  const saveCmsPageDraft = api.content.saveCmsPageDraft.useMutation();
   const utils = api.useUtils();
 
   // Keep the ref mirror in sync with the `fields` state. This is the single
@@ -259,6 +347,11 @@ export function VisualEditor({
   useEffect(() => {
     latestFieldsRef.current = fields;
   }, [fields]);
+
+  // Same mirror pattern for CMS drafts — the flush reads this ref, not state.
+  useEffect(() => {
+    cmsDraftsRef.current = cmsDrafts;
+  }, [cmsDrafts]);
 
   const setFlushPendingState = useCallback((pending: boolean) => {
     flushPendingRef.current = pending;
@@ -315,26 +408,71 @@ export function VisualEditor({
     setIsUpdating(
       refreshNeededRef.current || unackedPatchKeysRef.current.size > 0,
     );
-    let ok = false;
-    const attempt = savePreviewDraft
+    // Snapshot-and-clear the CMS work this flush owns. New edits that arrive
+    // mid-flight re-populate the ref and are picked up by the queued re-flush.
+    const cmsIds = Array.from(pendingCmsFlushIdsRef.current);
+    pendingCmsFlushIdsRef.current.clear();
+    const failedCmsIds: string[] = [];
+    const deferredCmsIds: string[] = [];
+
+    let draftOk = false;
+    // The site-content preview draft is always saved (unchanged behavior) —
+    // when nothing CMS is pending, this flush is byte-identical to before.
+    const draftAttempt = savePreviewDraft
       .mutateAsync({ customFields: latestFieldsRef.current })
       .then(() => {
-        ok = true;
+        draftOk = true;
       })
       .catch(() => {
-        ok = false;
+        draftOk = false;
       });
+    const cmsAttempts = cmsIds.map((id) => {
+      const values = cmsDraftsRef.current[id];
+      if (!values) return Promise.resolve();
+      // The server rejects an empty title, so a mid-rename flush would just
+      // churn the retry loop. Defer this page (not a failure) until the owner
+      // types a title; the next edit's flush picks it back up.
+      if (values.title.trim() === "") {
+        deferredCmsIds.push(id);
+        return Promise.resolve();
+      }
+      return saveCmsPageDraft
+        .mutateAsync({ pageId: id, draft: values })
+        .then(() => undefined)
+        .catch(() => {
+          failedCmsIds.push(id);
+        });
+    });
+    // Each sub-attempt swallows its own rejection, so this never rejects —
+    // preserving the `inFlightPromiseRef` "never rejects" invariant.
+    const attempt = Promise.all([draftAttempt, ...cmsAttempts]).then(
+      () => undefined,
+    );
     inFlightPromiseRef.current = attempt;
     await attempt;
     inFlightRef.current = false;
     inFlightPromiseRef.current = null;
     setIsUpdating(false);
+    const ok = draftOk && failedCmsIds.length === 0;
 
     // Superseded by publish/discard while in flight — they own state now.
     if (flushEpochRef.current !== epoch) {
       queuedRef.current = false;
       return;
     }
+
+    // Epoch still ours: reflect which CMS drafts landed, and re-queue any that
+    // failed so the retry loop below (which re-reads the ref) covers them.
+    const succeededCmsIds = cmsIds.filter((id) => !failedCmsIds.includes(id));
+    if (succeededCmsIds.length > 0) {
+      setServerCmsDraftIds((prev) => {
+        const next = new Set(prev);
+        for (const id of succeededCmsIds) next.add(id);
+        return next;
+      });
+    }
+    for (const id of failedCmsIds) pendingCmsFlushIdsRef.current.add(id);
+    for (const id of deferredCmsIds) pendingCmsFlushIdsRef.current.add(id);
 
     if (ok) {
       retryCountRef.current = 0;
@@ -380,7 +518,7 @@ export function VisualEditor({
         { duration: 10000 },
       );
     }
-  }, [savePreviewDraft, setFlushPendingState]);
+  }, [savePreviewDraft, saveCmsPageDraft, setFlushPendingState]);
 
   const scheduleFlush = useCallback(() => {
     retryCountRef.current = 0;
@@ -435,6 +573,28 @@ export function VisualEditor({
     [scheduleFlush, fieldTypeByKey, notifyEditBlocked],
   );
 
+  /**
+   * Funnel for every CMS page edit. Mirrors `applyFieldUpdate`'s settling
+   * guard. CMS content renders server-side only — there is no live-patch fast
+   * path, so every edit reloads the preview on the next flush.
+   */
+  const applyCmsUpdate = useCallback(
+    (pageId: string, patch: Partial<CmsPageDraftValues>) => {
+      if (mutationPendingRef.current) {
+        notifyEditBlocked();
+        return;
+      }
+      setCmsDrafts((prev) => {
+        const current = prev[pageId] ?? EMPTY_CMS_VALUES;
+        return { ...prev, [pageId]: { ...current, ...patch } };
+      });
+      pendingCmsFlushIdsRef.current.add(pageId);
+      refreshNeededRef.current = true;
+      scheduleFlush();
+    },
+    [scheduleFlush, notifyEditBlocked],
+  );
+
   // ── Publish ──
   const publish = api.content.updateSiteContent.useMutation({
     onSuccess: (_data, variables) => {
@@ -456,6 +616,11 @@ export function VisualEditor({
       setSaveFailed(false);
       refreshNeededRef.current = false;
       unackedPatchKeysRef.current.clear();
+      // CMS drafts were promoted to live in the same transaction — the current
+      // working set IS the new baseline, and no server drafts remain.
+      setCmsBaselines({ ...cmsDraftsRef.current });
+      setServerCmsDraftIds(new Set());
+      pendingCmsFlushIdsRef.current.clear();
       toast.success("Your changes are live");
       previewRef.current?.refresh();
     },
@@ -480,6 +645,50 @@ export function VisualEditor({
       if (inFlightPromiseRef.current) await inFlightPromiseRef.current;
       setFlushPendingState(false);
 
+      // CMS page drafts publish from their DB column (unlike customFields,
+      // which travel in the payload), so any unflushed page edit must be
+      // persisted BEFORE the publish mutation promotes drafts to live. If this
+      // save fails, abort the whole publish rather than silently drop edits.
+      const pendingCmsIds = Array.from(pendingCmsFlushIdsRef.current);
+      if (pendingCmsIds.length > 0) {
+        // An empty page title can never be saved or published — surface it
+        // now instead of failing the save below with an opaque error.
+        const untitled = pendingCmsIds.find(
+          (id) => cmsDraftsRef.current[id]?.title.trim() === "",
+        );
+        if (untitled) {
+          const label = cmsPageById.get(untitled)?.slug;
+          toast.error(
+            label
+              ? `The "/${label}" page needs a title before you can publish`
+              : "Every page needs a title before you can publish",
+          );
+          setMutationPendingState(false);
+          return;
+        }
+        pendingCmsFlushIdsRef.current.clear();
+        try {
+          await Promise.all(
+            pendingCmsIds.map((id) => {
+              const values = cmsDraftsRef.current[id];
+              if (!values) return Promise.resolve();
+              return saveCmsPageDraft.mutateAsync({ pageId: id, draft: values });
+            }),
+          );
+          setServerCmsDraftIds((prev) => {
+            const next = new Set(prev);
+            for (const id of pendingCmsIds) next.add(id);
+            return next;
+          });
+        } catch {
+          toast.error("Couldn't save page edits — publish canceled");
+          for (const id of pendingCmsIds) pendingCmsFlushIdsRef.current.add(id);
+          scheduleFlush();
+          setMutationPendingState(false);
+          return;
+        }
+      }
+
       // MERGE the draft over the CURRENT live customFields rather than
       // replacing the whole object with the draft snapshot. Re-read the live
       // record now so any keys written since the draft opened (Branding,
@@ -502,11 +711,15 @@ export function VisualEditor({
       publish.mutate({
         customFields: payload,
         clearPreviewDraft: true,
+        publishCmsPageDrafts: true,
       });
     })();
   }, [
     cancelPendingFlush,
+    cmsPageById,
     publish,
+    saveCmsPageDraft,
+    scheduleFlush,
     setFlushPendingState,
     setMutationPendingState,
     utils,
@@ -514,7 +727,7 @@ export function VisualEditor({
   ]);
 
   // ── Discard ──
-  const clearDraft = api.content.clearPreviewDraft.useMutation({
+  const clearDraft = api.content.discardEditorDrafts.useMutation({
     onSuccess: () => {
       setFlushPendingState(false);
       setFields(publishedFields);
@@ -523,6 +736,12 @@ export function VisualEditor({
       setSaveFailed(false);
       refreshNeededRef.current = false;
       unackedPatchKeysRef.current.clear();
+      // CMS drafts were being previewed too — revert them to the live baseline
+      // and drop every pending/server draft. The iframe refresh below re-renders
+      // the preview with the reverted content.
+      setCmsDrafts({ ...cmsBaselines });
+      setServerCmsDraftIds(new Set());
+      pendingCmsFlushIdsRef.current.clear();
       toast.success("Draft discarded");
       previewRef.current?.refresh();
     },
@@ -557,7 +776,15 @@ export function VisualEditor({
       stableStringify(withoutSpMeta(publishedFields)),
     [fields, publishedFields],
   );
-  const hasUnpublishedChanges = serverHasDraft || localDiffers;
+  const cmsDirty = useMemo(() => {
+    if (serverCmsDraftIds.size > 0) return true;
+    for (const [id, draft] of Object.entries(cmsDrafts)) {
+      const base = cmsBaselines[id];
+      if (base && stableStringify(draft) !== stableStringify(base)) return true;
+    }
+    return false;
+  }, [serverCmsDraftIds, cmsDrafts, cmsBaselines]);
+  const hasUnpublishedChanges = serverHasDraft || localDiffers || cmsDirty;
 
   // ── Preview cookie lifecycle ──
   // Set on mount, cleared on unmount + pagehide. The DRAFT is durable, so it is
@@ -620,10 +847,41 @@ export function VisualEditor({
     [sections, activeSectionId],
   );
 
-  const previewPath = PAGE_PREVIEW_PATHS[activePage] ?? "/";
+  // ── Active CMS page ──
+  const activeCmsId = isCmsPage(activePage) ? cmsPageId(activePage) : null;
+  const activeCmsPage = activeCmsId
+    ? (cmsPageById.get(activeCmsId) ?? null)
+    : null;
+  // The rail/panel/label all read the DRAFT title so renames reflect live.
+  const activeCmsTitle =
+    activeCmsId !== null
+      ? (cmsDrafts[activeCmsId]?.title ?? activeCmsPage?.live.title ?? "").trim()
+      : "";
+
+  const previewPath = activeCmsPage
+    ? `/${activeCmsPage.slug}`
+    : (PAGE_PREVIEW_PATHS[activePage] ?? "/");
+
+  // Human label for the active page — template label, or CMS draft title.
+  const activePageLabel = useMemo(() => {
+    if (activeCmsId !== null) return titleOrUntitled(activeCmsTitle);
+    return pages.find((p) => p.value === activePage)?.label ?? pageLabel(activePage);
+  }, [activeCmsId, activeCmsTitle, pages, activePage]);
+
+  // CMS Select entries for the top bar (value `cms:<id>`, label = draft title).
+  const cmsPageSelectItems: EditorTopBarCmsPage[] = useMemo(
+    () =>
+      cmsPages.map((p) => ({
+        value: `cms:${p.id}`,
+        label: titleOrUntitled(cmsDrafts[p.id]?.title ?? p.live.title),
+        unpublished: !p.published,
+      })),
+    [cmsPages, cmsDrafts],
+  );
 
   const handleSelectSection = useCallback(
     (section: TemplateSection) => {
+      setNotesOpen(false);
       setThemeOpen(false);
       setActiveSectionId(section.id);
       // focusGroup expects the BARE group name — the overlay rebuilds the
@@ -640,6 +898,37 @@ export function VisualEditor({
     setActivePage(page);
     // Close the panel — the previously open section belongs to another page.
     setActiveSectionId(null);
+    if (isCmsPage(page)) {
+      // Generic pages have no hotspots — the panel is the only edit surface,
+      // so open it and close the template-only right panels + notes.
+      setThemeOpen(false);
+      setNotesOpen(false);
+      setCmsPanelOpen(true);
+    } else {
+      // Leaving a CMS page closes its panel; template panel behavior (theme,
+      // section) is otherwise unchanged from before.
+      setCmsPanelOpen(false);
+    }
+  }, []);
+
+  const handleOpenCmsPanel = useCallback(() => {
+    setNotesOpen(false);
+    setThemeOpen(false);
+    setActiveSectionId(null);
+    setCmsPanelOpen(true);
+  }, []);
+
+  // One right panel at a time: opening notes closes field/theme/CMS panels.
+  const handleToggleNotes = useCallback(() => {
+    setNotesOpen((open) => {
+      const next = !open;
+      if (next) {
+        setActiveSectionId(null);
+        setThemeOpen(false);
+        setCmsPanelOpen(false);
+      }
+      return next;
+    });
   }, []);
 
   // ── Section visibility ──
@@ -714,9 +1003,13 @@ export function VisualEditor({
   // Hotspot click inside the iframe (sp:edit-group).
   const handleEditGroup = useCallback(
     (page: string, group: string) => {
+      // CMS pages have no hotspots — ignore any stray edit-group message while
+      // one is open rather than opening a (nonexistent) template section panel.
+      if (isCmsPage(activePage)) return;
       if (page !== activePage && page in PAGE_PREVIEW_PATHS) {
         setActivePage(page);
       }
+      setNotesOpen(false);
       setThemeOpen(false);
       setActiveSectionId(group);
     },
@@ -724,11 +1017,20 @@ export function VisualEditor({
   );
 
   const handleSelectTheme = useCallback(() => {
+    setNotesOpen(false);
     setActiveSectionId(null);
     setThemeOpen(true);
   }, []);
 
   const isPublishing = publish.isPending || clearDraft.isPending;
+
+  // Notes badge count. The NotesPanel issues the same query — React Query
+  // dedupes them by key, so this is a single request shared with the panel.
+  const notesListQuery = api.editorNote.listMine.useQuery();
+  const openNotesCount = useMemo(
+    () => (notesListQuery.data ?? []).filter((n) => n.status === "open").length,
+    [notesListQuery.data],
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -736,6 +1038,7 @@ export function VisualEditor({
         businessName={businessName}
         templateId={templateId}
         pages={pages}
+        cmsPages={cmsPageSelectItems}
         activePage={activePage}
         onPageChange={handlePageChange}
         device={device}
@@ -747,21 +1050,33 @@ export function VisualEditor({
         saveFailed={saveFailed}
         onPublish={handlePublish}
         onDiscard={handleDiscard}
+        notesOpen={notesOpen}
+        openNotesCount={openNotesCount}
+        onToggleNotes={handleToggleNotes}
       />
 
       <div className="flex min-h-0 flex-1">
-        <SectionRail
-          sections={sectionsForPage}
-          globalSections={globalSections}
-          activeSectionId={activeSectionId}
-          hiddenSectionIds={hiddenSectionIds}
-          onSelectSection={handleSelectSection}
-          onToggleVisibility={handleToggleVisibility}
-          hasTheme={templateTheme !== null}
-          themeActive={themeOpen}
-          onSelectTheme={handleSelectTheme}
-          isPlatformAdmin={isPlatformAdmin}
-        />
+        {activeCmsPage && activeCmsId !== null ? (
+          <CmsPageRail
+            pageTitle={titleOrUntitled(activeCmsTitle)}
+            adminHref={`/admin/content/pages/${activeCmsId}`}
+            isActive={cmsPanelOpen}
+            onSelect={handleOpenCmsPanel}
+          />
+        ) : (
+          <SectionRail
+            sections={sectionsForPage}
+            globalSections={globalSections}
+            activeSectionId={activeSectionId}
+            hiddenSectionIds={hiddenSectionIds}
+            onSelectSection={handleSelectSection}
+            onToggleVisibility={handleToggleVisibility}
+            hasTheme={templateTheme !== null}
+            themeActive={themeOpen}
+            onSelectTheme={handleSelectTheme}
+            isPlatformAdmin={isPlatformAdmin}
+          />
+        )}
 
         <EditorPreview
           path={previewPath}
@@ -772,7 +1087,28 @@ export function VisualEditor({
           frameRef={previewRef}
         />
 
-        {themeOpen && templateTheme && (
+        {/* One right panel at a time: notes > CMS page > theme > field. The
+            open-handlers keep these states mutually exclusive; this chain is
+            the belt-and-suspenders guarantee. */}
+        {notesOpen ? (
+          <NotesPanel
+            activePageKey={activePage}
+            activePageLabel={activePageLabel}
+            onClose={() => setNotesOpen(false)}
+          />
+        ) : activeCmsPage && cmsPanelOpen && activeCmsId !== null ? (
+          <CmsPagePanel
+            pageId={activeCmsId}
+            pageTitle={activeCmsTitle}
+            published={activeCmsPage.published}
+            values={cmsDrafts[activeCmsId] ?? activeCmsPage.live}
+            baseline={cmsBaselines[activeCmsId] ?? activeCmsPage.live}
+            onChange={(patch) => applyCmsUpdate(activeCmsId, patch)}
+            disabled={isPublishing || mutationPending}
+            onClose={() => setCmsPanelOpen(false)}
+            adminHref={`/admin/content/pages/${activeCmsId}`}
+          />
+        ) : themeOpen && templateTheme ? (
           <ThemePanel
             theme={templateTheme}
             selection={themeSelection}
@@ -780,9 +1116,7 @@ export function VisualEditor({
             disabled={isPublishing || mutationPending}
             onClose={() => setThemeOpen(false)}
           />
-        )}
-
-        {!themeOpen && activeSection && (
+        ) : !themeOpen && activeSection ? (
           <FieldPanel
             section={activeSection}
             templateId={templateId}
@@ -794,7 +1128,7 @@ export function VisualEditor({
             disabled={isPublishing || mutationPending}
             onClose={() => setActiveSectionId(null)}
           />
-        )}
+        ) : null}
       </div>
     </div>
   );

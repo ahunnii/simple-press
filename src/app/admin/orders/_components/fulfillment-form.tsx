@@ -1,9 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CARRIERS } from "~/data/fulfillment-constants";
-import { CheckCircle2, Loader2, Package, Plus, Trash2 } from "lucide-react";
+import {
+  buildTrackingUrl,
+  CARRIERS,
+  detectCarrier,
+} from "~/data/fulfillment-constants";
+import {
+  CheckCircle2,
+  ExternalLink,
+  Loader2,
+  Package,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -169,17 +181,13 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
     }
 
     const shipments = data.packages.map((pkg) => {
-      let trackingUrl = pkg.trackingUrl;
-      if (!trackingUrl) {
-        const carrier = CARRIERS.find((c) => c.value === pkg.carrier);
-        if (carrier?.trackingUrl) {
-          trackingUrl = `${carrier.trackingUrl}${pkg.trackingNumber}`;
-        }
-      }
+      const manualUrl = pkg.trackingUrl ?? "";
+      const trackingUrl =
+        manualUrl || buildTrackingUrl(pkg.carrier, pkg.trackingNumber);
       return {
         carrier: pkg.carrier,
         trackingNumber: pkg.trackingNumber,
-        trackingUrl: trackingUrl ?? "",
+        trackingUrl,
         ...itemsFor(pkg),
       };
     });
@@ -255,6 +263,22 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
 
           {hasTracking && (
             <div className="space-y-4">
+              <div className="border-border flex items-center justify-between gap-3 rounded-lg border p-3">
+                <p className="text-muted-foreground text-sm">
+                  Need a shipping label? Buy discounted postage on PirateShip.
+                </p>
+                <Button size="sm" variant="outline" asChild className="shrink-0">
+                  <a
+                    href="https://www.pirateship.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open PirateShip
+                    <ExternalLink className="ml-2 h-3 w-3" />
+                  </a>
+                </Button>
+              </div>
+
               {fields.map((field, index) => (
                 <PackageEntry
                   key={field.id}
@@ -426,6 +450,19 @@ function PackageEntry({
 }) {
   const carrierValue = form.watch(`packages.${index}.carrier`);
   const errors = form.formState.errors.packages?.[index];
+  const [autoDetected, setAutoDetected] = useState<string | null>(null);
+
+  const handleTrackingChange = (value: string) => {
+    const detected = detectCarrier(value);
+    if (!detected) return;
+    const current = form.getValues(`packages.${index}.carrier`);
+    if (!current || current === autoDetected) {
+      form.setValue(`packages.${index}.carrier`, detected, {
+        shouldValidate: true,
+      });
+      setAutoDetected(detected);
+    }
+  };
 
   return (
     <div className="border-border space-y-3 rounded-lg border p-4">
@@ -454,11 +491,12 @@ function PackageEntry({
         </Label>
         <Select
           value={carrierValue ?? ""}
-          onValueChange={(value) =>
+          onValueChange={(value) => {
+            setAutoDetected(null);
             form.setValue(`packages.${index}.carrier`, value, {
               shouldValidate: true,
-            })
-          }
+            });
+          }}
         >
           <SelectTrigger className="mt-2">
             <SelectValue placeholder="Select carrier" />
@@ -471,6 +509,11 @@ function PackageEntry({
             ))}
           </SelectContent>
         </Select>
+        {autoDetected !== null && carrierValue === autoDetected && (
+          <p className="text-muted-foreground mt-1 text-xs">
+            Detected from tracking number
+          </p>
+        )}
         {errors?.carrier && (
           <p className="text-destructive mt-1 text-sm">
             {errors.carrier.message}
@@ -484,7 +527,10 @@ function PackageEntry({
         </Label>
         <Input
           id={`trackingNumber-${index}`}
-          {...form.register(`packages.${index}.trackingNumber`)}
+          {...form.register(`packages.${index}.trackingNumber`, {
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              handleTrackingChange(e.target.value),
+          })}
           placeholder="1Z999AA10123456784"
           className="mt-2"
         />

@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CARRIERS } from "~/data/fulfillment-constants";
+import {
+  CARRIERS,
+  buildTrackingUrl,
+  detectCarrier,
+} from "~/data/fulfillment-constants";
 import { formatDistanceToNow } from "date-fns";
 import { Edit2, Loader2, Package, Plus, Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -264,7 +268,28 @@ function ShipmentForm({
     defaultValues,
   });
 
+  const [autoDetected, setAutoDetected] = useState<string | null>(null);
+
   const carrierValue = form.watch("carrier");
+
+  const handleTrackingChange = (value: string) => {
+    const detected = detectCarrier(value);
+    if (!detected) return;
+    const current = form.getValues("carrier");
+    if (!current || current === autoDetected) {
+      form.setValue("carrier", detected, { shouldValidate: true });
+      setAutoDetected(detected);
+    }
+  };
+
+  const submit = (values: ShipmentFormValues) => {
+    const trackingUrl =
+      values.carrier && values.carrier !== "other" && values.trackingNumber
+        ? buildTrackingUrl(values.carrier, values.trackingNumber) ||
+          values.trackingUrl
+        : values.trackingUrl;
+    onSubmit({ ...values, trackingUrl });
+  };
 
   return (
     <div className="border-border bg-muted space-y-3 rounded-lg border p-3">
@@ -272,7 +297,10 @@ function ShipmentForm({
         <Label className="text-xs">Carrier</Label>
         <Select
           value={carrierValue ?? ""}
-          onValueChange={(v) => form.setValue("carrier", v)}
+          onValueChange={(v) => {
+            setAutoDetected(null);
+            form.setValue("carrier", v);
+          }}
         >
           <SelectTrigger className="mt-1 h-8 text-sm">
             <SelectValue placeholder="Select carrier" />
@@ -285,12 +313,20 @@ function ShipmentForm({
             ))}
           </SelectContent>
         </Select>
+        {autoDetected !== null && carrierValue === autoDetected && (
+          <p className="text-muted-foreground mt-1 text-xs">
+            Detected from tracking number
+          </p>
+        )}
       </div>
 
       <div>
         <Label className="text-xs">Tracking Number</Label>
         <Input
-          {...form.register("trackingNumber")}
+          {...form.register("trackingNumber", {
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              handleTrackingChange(e.target.value),
+          })}
           placeholder="1Z999AA10123456784"
           className="mt-1 h-8 text-sm"
         />
@@ -310,7 +346,7 @@ function ShipmentForm({
       <div className="flex gap-2">
         <Button
           size="sm"
-          onClick={form.handleSubmit(onSubmit)}
+          onClick={form.handleSubmit(submit)}
           disabled={isPending}
           className="flex-1"
         >
