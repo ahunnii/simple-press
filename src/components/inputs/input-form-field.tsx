@@ -112,7 +112,11 @@ export const InputFormField = <CurrentForm extends FieldValues>({
                   field.onBlur();
                   onBlur?.(e);
                 }}
-                id={inputId}
+                // Only override when a caller supplies an explicit id. Passing
+                // `id={undefined}` beat the id `FormControl` injects, so every
+                // `<FormLabel for=…>` pointed at an element that did not exist
+                // and the input counted as unlabeled (axe: `label`, critical).
+                {...(inputId ? { id: inputId } : {})}
                 required={required}
                 autoFocus={autoFocus}
               />

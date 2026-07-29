@@ -1,6 +1,7 @@
 import { getThemeSelection } from "~/lib/sp-meta";
 import { defaultTemplateTheme } from "~/app/(storefront)/_templates/default/theme";
 import { happyBambooTheme } from "~/app/(storefront)/_templates/happy-bamboo/theme";
+import { pinkTheme } from "~/app/(storefront)/_templates/pink/theme";
 import { viiTheme } from "~/app/(storefront)/_templates/vii/theme";
 
 /**
@@ -46,6 +47,7 @@ export type TemplateTheme = {
 export const TEMPLATE_THEMES: Record<string, TemplateTheme> = {
   ...defaultTemplateTheme,
   ...happyBambooTheme,
+  ...pinkTheme,
   ...viiTheme,
 };
 

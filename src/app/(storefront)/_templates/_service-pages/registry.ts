@@ -20,6 +20,7 @@ import {
 
 import { BUILDERS_SERVICE_COMPONENTS } from "../builders/services/service-pages/components";
 import { DEFAULT_SERVICE_COMPONENTS } from "../default/services/service-pages/components";
+import { PINK_SERVICE_COMPONENTS } from "../pink/services/service-pages/components";
 import { POLLEN_SERVICE_COMPONENTS } from "../pollen/services/service-pages/components";
 import { VII_SERVICE_COMPONENTS } from "../vii/services/service-pages/components";
 import { ServiceTemplateOne } from "./service-one/service-one-page";
@@ -57,6 +58,7 @@ export const SERVICE_TEMPLATE_COMPONENTS: Record<
   ...POLLEN_SERVICE_COMPONENTS,
   ...VII_SERVICE_COMPONENTS,
   ...BUILDERS_SERVICE_COMPONENTS,
+  ...PINK_SERVICE_COMPONENTS,
 };
 
 /**

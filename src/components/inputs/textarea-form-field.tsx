@@ -70,8 +70,11 @@ export const TextareaFormField = <CurrentForm extends FieldValues>({
               </span>
             )}
           </FormLabel>
+          {/* `text-gray-500` was a fixed stock grey that fails AA on tinted
+              surfaces (axe color-contrast on pink's blush request panel).
+              The token follows whatever surface the field is rendered on. */}
           {maxLength && (
-            <span className="text-xs text-gray-500">
+            <span className="text-muted-foreground text-xs">
               {messageLength ?? 0}/{maxLength ?? 0}
             </span>
           )}

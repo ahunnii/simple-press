@@ -53,6 +53,12 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Skinbar VII",
     subdomains: ["skinbar-vii", "demo"],
   },
+  // PinkArt LLC — Evelyn Pinkard, Detroit fiber artist. "demo" is included so
+  // runtime QA can switch the demo business to this template.
+  pink: {
+    label: "PinkArt",
+    subdomains: ["pinkart", "demo"],
+  },
   // Throwaway sp-new-template skill test template — safe to delete.
   testkit: {
     label: "Testkit",

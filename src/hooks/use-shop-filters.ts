@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { Product } from "~/types";
 import { getEffectivePrice } from "~/lib/prices";
+import { isInStock } from "~/lib/product-stock";
 
 export type SortOption =
   | "featured"
@@ -23,20 +24,13 @@ export const SORT_LABELS: Record<SortOption, string> = {
   newest: "Newest",
 };
 
-export function isInStock(p: Product): boolean {
-  if (!p.trackInventory) return true;
-  if (p.allowBackorders) return true;
-  if (p.baseInventoryUnit) {
-    return (
-      p.baseInventoryUnit.allowBackorders ||
-      p.baseInventoryUnit.inventoryQty > 0
-    );
-  }
-  if (p.variants.length > 0) {
-    return p.variants.some((v) => v.inventoryQty > 0);
-  }
-  return (p.inventoryQty ?? 0) > 0;
-}
+/**
+ * Re-exported from `~/lib/product-stock` so server components can import the
+ * predicate directly — this module is `"use client"`, and calling a function
+ * exported from it on the server throws. Existing client-side callers and the
+ * unit tests keep importing it from here unchanged.
+ */
+export { isInStock };
 
 export function useShopFilters(
   products: Product[],

@@ -542,7 +542,9 @@ export const PhoneFormField = <CurrentForm extends FieldValues>({
                 field.onBlur();
                 onBlur?.(e);
               }}
-              id={inputId}
+              // See input-form-field: `id={undefined}` would beat the id
+              // `FormControl` injects and orphan the label's `for`.
+              {...(inputId ? { id: inputId } : {})}
               required={required}
               autoFocus={autoFocus}
               inputRef={inputRef}

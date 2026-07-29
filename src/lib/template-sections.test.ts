@@ -182,7 +182,7 @@ describe("isBlogPostContextSection", () => {
 });
 
 describe("getSectionsForTemplate blog-post section coverage", () => {
-  const curatedTemplateIds = ["happy-bamboo", "bamboo", "noise", "sledge"];
+  const curatedTemplateIds = ["happy-bamboo", "bamboo", "noise", "sledge", "pink"];
 
   for (const templateId of curatedTemplateIds) {
     it(`has exactly one blog-post-context section for '${templateId}', with id 'blog.post'`, () => {

@@ -26,6 +26,7 @@ import {
   buildersFieldGroups,
 } from "~/app/(storefront)/_templates/builders";
 import { coopData, coopFieldGroups } from "~/app/(storefront)/_templates/coop";
+import { pinkData, pinkFieldGroups } from "~/app/(storefront)/_templates/pink";
 import {
   darkTrendData,
   darkTrendFieldGroups,
@@ -439,6 +440,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...elegantFieldGroups,
   ...viiFieldGroups,
   ...coopFieldGroups,
+  ...pinkFieldGroups,
 
   ...defaultTemplateFieldGroups,
 };
@@ -455,6 +457,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...elegantData,
   ...viiData,
   ...coopData,
+  ...pinkData,
 
   ...defaultTemplateData,
 };
