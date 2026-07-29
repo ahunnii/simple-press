@@ -1,45 +1,94 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import {
+  EMPTY_POOL_SALES,
+  poolSalesWhere,
+  summarizePoolSales,
+  type PoolLedgerGroupRow,
+} from "~/lib/inventory";
 import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
 
 export const baseInventoryUnitRouter = createTRPCRouter({
   list: ownerAdminProcedure.query(async ({ ctx }) => {
     const { businessId } = ctx;
-    return ctx.db.baseInventoryUnit.findMany({
-      where: { businessId },
-      include: { _count: { select: { products: true } } },
-      orderBy: { name: "asc" },
-    });
+    const [pools, salesRows] = await Promise.all([
+      ctx.db.baseInventoryUnit.findMany({
+        where: { businessId },
+        include: { _count: { select: { products: true } } },
+        orderBy: { name: "asc" },
+      }),
+      ctx.db.inventoryHistory.groupBy({
+        by: ["baseInventoryUnitId", "reason"],
+        where: poolSalesWhere({ businessId }),
+        _sum: { changeQty: true },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const rows: PoolLedgerGroupRow[] = salesRows.map((r) => ({
+      baseInventoryUnitId: r.baseInventoryUnitId,
+      reason: r.reason,
+      _sum: { changeQty: r._sum.changeQty },
+      _count: { _all: r._count._all },
+    }));
+    const sales = summarizePoolSales(rows);
+
+    return pools.map((p) => ({
+      ...p,
+      sales: sales.get(p.id) ?? EMPTY_POOL_SALES,
+    }));
   }),
 
   getById: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const pool = await ctx.db.baseInventoryUnit.findUnique({
-        where: { id: input.id, businessId },
-        include: {
-          products: {
-            select: {
-              id: true,
-              name: true,
-              baseUnitsConsumed: true,
-              published: true,
+      const [pool, salesRows] = await Promise.all([
+        ctx.db.baseInventoryUnit.findUnique({
+          where: { id: input.id, businessId },
+          include: {
+            products: {
+              select: {
+                id: true,
+                name: true,
+                baseUnitsConsumed: true,
+                published: true,
+              },
+              orderBy: { name: "asc" },
             },
-            orderBy: { name: "asc" },
+            inventoryHistory: {
+              orderBy: { createdAt: "desc" },
+              take: 100,
+              include: {
+                order: { select: { id: true, orderNumber: true } },
+                product: { select: { id: true, name: true } },
+                user: { select: { name: true, email: true } },
+              },
+            },
+            _count: { select: { products: true } },
           },
-          inventoryHistory: {
-            orderBy: { createdAt: "desc" },
-            take: 50,
-          },
-          _count: { select: { products: true } },
-        },
-      });
+        }),
+        ctx.db.inventoryHistory.groupBy({
+          by: ["baseInventoryUnitId", "reason"],
+          where: poolSalesWhere({ businessId, poolId: input.id }),
+          _sum: { changeQty: true },
+          _count: { _all: true },
+        }),
+      ]);
       if (!pool) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Pool not found" });
       }
-      return pool;
+
+      const rows: PoolLedgerGroupRow[] = salesRows.map((r) => ({
+        baseInventoryUnitId: r.baseInventoryUnitId,
+        reason: r.reason,
+        _sum: { changeQty: r._sum.changeQty },
+        _count: { _all: r._count._all },
+      }));
+      const sales = summarizePoolSales(rows).get(input.id) ?? EMPTY_POOL_SALES;
+
+      return { ...pool, sales };
     }),
 
   create: ownerAdminProcedure

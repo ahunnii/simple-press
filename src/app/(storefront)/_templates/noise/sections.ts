@@ -114,6 +114,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
     {
       id: "blog.post",
       page: "blog",
+      renderContext: "blog-post",
       title: "Blog Post — Shop CTA",
       description: "Call-to-action band shown at the bottom of every blog post.",
       groupIds: ["blog.post"],

@@ -54,6 +54,9 @@ export type FieldPanelProps = {
   disabled?: boolean;
   /** Close the panel (deselect the active section). */
   onClose: () => void;
+  /** Contextual note shown under the section description — e.g. telling the
+   *  owner this section appears on individual blog posts. */
+  hint?: string;
 };
 
 /**
@@ -71,6 +74,7 @@ export function FieldPanel({
   mediaEnabled,
   disabled = false,
   onClose,
+  hint,
 }: FieldPanelProps) {
   const pageFields = groupFieldsByPage(templateId)[section.page] ?? [];
   const byGroup = groupFieldsByGroup(pageFields);
@@ -95,6 +99,11 @@ export function FieldPanel({
           {section.description && (
             <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
               {section.description}
+            </p>
+          )}
+          {hint && (
+            <p className="text-muted-foreground/80 mt-1 text-xs italic">
+              {hint}
             </p>
           )}
         </div>

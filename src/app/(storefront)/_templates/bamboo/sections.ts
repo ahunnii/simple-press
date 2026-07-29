@@ -170,6 +170,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
     {
       id: "blog.post",
       page: "blog",
+      renderContext: "blog-post",
       title: "Blog Post CTA",
       description: "Call-to-action shown at the end of every blog article.",
       groupIds: ["blog.post"],

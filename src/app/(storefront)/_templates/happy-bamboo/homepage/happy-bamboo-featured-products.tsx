@@ -34,6 +34,8 @@ export function HappyBambooFeaturedProducts({
   featuredButtonLink = "/shop",
   sectionAttrs,
 }: Props) {
+  if (!featuredProducts?.length) return null;
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8" {...sectionAttrs}>
       <FadeIn direction="up">

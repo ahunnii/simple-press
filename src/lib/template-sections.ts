@@ -36,6 +36,13 @@ export type TemplateSection = {
   /** Whether the owner may toggle this section's visibility. Default false. */
   hideable?: boolean;
   defaultHidden?: boolean;
+  /**
+   * Where this section renders on the storefront. `"page"` (default) — on the
+   * section's own template page. `"blog-post"` — at the end of individual
+   * blog post pages, which the editor previews as CMS entries rather than as
+   * the section's `page`.
+   */
+  renderContext?: "page" | "blog-post";
 };
 
 /**
@@ -164,4 +171,15 @@ export function getSectionById(
   sectionId: string,
 ): TemplateSection | undefined {
   return getSectionsForTemplate(templateId).find((s) => s.id === sectionId);
+}
+
+/**
+ * Whether a section renders on individual blog post pages rather than its
+ * declared `page`. Explicit `renderContext` wins; sections with the
+ * conventional `"blog.post"` id default to blog-post context so templates on
+ * the derived-fallback registry behave correctly without curation.
+ */
+export function isBlogPostContextSection(section: TemplateSection): boolean {
+  if (section.renderContext) return section.renderContext === "blog-post";
+  return section.id === "blog.post";
 }

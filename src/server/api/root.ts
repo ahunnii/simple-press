@@ -15,6 +15,7 @@ import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
 import { faqRouter } from "./routers/faq";
 import { featuresRouter } from "./routers/features";
+import { financeRouter } from "./routers/finance";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
@@ -45,6 +46,7 @@ export const appRouter = createTRPCRouter({
   discount: discountRouter,
   editorNote: editorNoteRouter,
   export: exportRouter,
+  finance: financeRouter,
 
   business: businessRouter,
   product: productRouter,

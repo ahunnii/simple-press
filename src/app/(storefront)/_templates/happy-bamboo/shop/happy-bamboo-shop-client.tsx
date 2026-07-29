@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Leaf, Search, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -121,111 +121,132 @@ export function HappyBambooShopClient({
           )}
         </FadeIn>
 
-        {/* Controls */}
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search
-              aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-            />
-            <Input
-              placeholder="Search products…"
-              aria-label="Search products"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+        {products.length > 0 && (
+          <>
+            {/* Controls */}
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative w-full sm:max-w-xs">
+                <Search
+                  aria-hidden="true"
+                  className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                />
+                <Input
+                  placeholder="Search products…"
+                  aria-label="Search products"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
 
-          <div className="flex items-center gap-2">
-            <Select
-              value={sort}
-              onValueChange={(v) => setSort(v as SortOption)}
-            >
-              <SelectTrigger className="w-48" aria-label="Sort products">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                <SelectItem value="name-asc">Name: A–Z</SelectItem>
-              </SelectContent>
-            </Select>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={sort}
+                  onValueChange={(v) => setSort(v as SortOption)}
+                >
+                  <SelectTrigger className="w-48" aria-label="Sort products">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="price-asc">
+                      Price: Low to High
+                    </SelectItem>
+                    <SelectItem value="price-desc">
+                      Price: High to Low
+                    </SelectItem>
+                    <SelectItem value="name-asc">Name: A–Z</SelectItem>
+                  </SelectContent>
+                </Select>
 
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="text-muted-foreground gap-1.5"
-              >
-                <X className="h-3.5 w-3.5" aria-hidden="true" />
-                Clear
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Collection filter pills */}
-        {collections.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveCollectionId(null)}
-              aria-pressed={activeCollectionId === null}
-              className={cn(
-                "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
-                activeCollectionId === null
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
-              )}
-            >
-              All
-            </button>
-            {collections.map((c) => (
-              <button
-                key={c.id}
-                onClick={() =>
-                  setActiveCollectionId(
-                    c.id === activeCollectionId ? null : c.id,
-                  )
-                }
-                aria-pressed={activeCollectionId === c.id}
-                className={cn(
-                  "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
-                  activeCollectionId === c.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="text-muted-foreground gap-1.5"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    Clear
+                  </Button>
                 )}
-              >
-                {c.name}
-              </button>
-            ))}
-          </div>
+              </div>
+            </div>
+
+            {/* Collection filter pills */}
+            {collections.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setActiveCollectionId(null)}
+                  aria-pressed={activeCollectionId === null}
+                  className={cn(
+                    "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
+                    activeCollectionId === null
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                  )}
+                >
+                  All
+                </button>
+                {collections.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() =>
+                      setActiveCollectionId(
+                        c.id === activeCollectionId ? null : c.id,
+                      )
+                    }
+                    aria-pressed={activeCollectionId === c.id}
+                    className={cn(
+                      "rounded-full border px-3.5 py-1 text-sm font-medium transition-colors",
+                      activeCollectionId === c.id
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                    )}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
-        {/* Product grid */}
-        <div className="grid grid-cols-1 gap-6 py-12 md:py-20 lg:grid-cols-2">
-          {filtered.map((product, index) => (
-            <HappyBambooProductCard
-              key={product.id}
-              index={index}
-              saleBadgeFormat={saleBadgeFormat}
-              product={product}
-            />
-          ))}
-        </div>
+        {products.length === 0 ? (
+          <FadeIn>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Leaf className="text-muted-foreground/50 mb-4 h-12 w-12" />
+              <p className="text-muted-foreground text-lg">
+                No products yet — check back soon.
+              </p>
+            </div>
+          </FadeIn>
+        ) : (
+          <>
+            {/* Product grid */}
+            <div className="grid grid-cols-1 gap-6 py-12 md:py-20 lg:grid-cols-2">
+              {filtered.map((product, index) => (
+                <HappyBambooProductCard
+                  key={product.id}
+                  index={index}
+                  saleBadgeFormat={saleBadgeFormat}
+                  product={product}
+                />
+              ))}
+            </div>
 
-        {filtered.length === 0 && (
-          <p className="text-muted-foreground py-12 text-center text-sm">
-            No products match your search.{" "}
-            <button
-              onClick={clearFilters}
-              className="text-primary underline-offset-2 hover:underline"
-            >
-              Clear filters
-            </button>
-          </p>
+            {filtered.length === 0 && (
+              <p className="text-muted-foreground py-12 text-center text-sm">
+                No products match your search.{" "}
+                <button
+                  onClick={clearFilters}
+                  className="text-primary underline-offset-2 hover:underline"
+                >
+                  Clear filters
+                </button>
+              </p>
+            )}
+          </>
         )}
       </section>
     </PageTransition>

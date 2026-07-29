@@ -382,12 +382,17 @@ export function DashboardContent({
               <div className="text-2xl font-bold">
                 {formatCurrency(stats.todayRevenue)}
               </div>
-              <p className="text-muted-foreground mt-1 text-xs">
-                All time:{" "}
-                <span className="font-medium">
-                  {formatCurrency(stats.totalRevenue)}
-                </span>
-              </p>
+              <div className="text-muted-foreground mt-1 space-y-1 text-xs">
+                <p>
+                  All time (incl. tax & shipping):{" "}
+                  <span className="font-medium">
+                    {formatCurrency(stats.totalRevenue)}
+                  </span>
+                </p>
+                <Link href="/admin/finances" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Full breakdown →
+                </Link>
+              </div>
             </CardContent>
           </Card>
 

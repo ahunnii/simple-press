@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Leaf, Sparkles } from "lucide-react";
+import { ArrowRight, Leaf, Package, Sparkles } from "lucide-react";
 
 import type { DefaultCollectionsPageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -73,52 +73,66 @@ export function HappyBambooCollectionsPage({ collections, business }: Props) {
             </div>
           </FadeIn>
 
-          <StaggerContainer className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {collections?.map((collection) => {
-              const productCount = collection?._count.collectionProducts;
-              return (
-                <StaggerItem key={collection.id}>
-                  <Link
-                    href={`/collections/${collection.slug}`}
-                    className="group block h-full"
-                  >
-                    <article className="border-border bg-card relative flex h-full flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                      {/* Image */}
-                      <div className="relative aspect-4/3 overflow-hidden">
-                        <Image
-                          src={collection?.imageUrl ?? "/placeholder.svg"}
-                          alt={collection.name}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
-                        <div className="absolute right-4 bottom-4 left-4">
-                          <Badge className="text-foreground bg-white/90 hover:bg-white">
-                            {productCount}{" "}
-                            {productCount === 1 ? "Product" : "Products"}
-                          </Badge>
+          {collections && collections.length > 0 ? (
+            <StaggerContainer className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {collections.map((collection) => {
+                const productCount = collection?._count.collectionProducts;
+                return (
+                  <StaggerItem key={collection.id}>
+                    <Link
+                      href={`/collections/${collection.slug}`}
+                      className="group block h-full"
+                    >
+                      <article className="border-border bg-card relative flex h-full flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                        {/* Image */}
+                        <div className="relative aspect-4/3 overflow-hidden">
+                          <Image
+                            src={collection?.imageUrl ?? "/placeholder.svg"}
+                            alt={collection.name}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
+                          <div className="absolute right-4 bottom-4 left-4">
+                            <Badge className="text-foreground bg-white/90 hover:bg-white">
+                              {productCount}{" "}
+                              {productCount === 1 ? "Product" : "Products"}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Content */}
-                      <div className="flex flex-1 flex-col p-6">
-                        <h3 className="group-hover:text-primary mb-2 text-xl font-bold transition-colors">
-                          {collection.name}
-                        </h3>
-                        <p className="text-muted-foreground mb-4 flex-1 text-sm leading-relaxed">
-                          {collection.description}
-                        </p>
-                        <div className="text-primary flex items-center gap-2 text-sm font-semibold">
-                          Explore Collection
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        {/* Content */}
+                        <div className="flex flex-1 flex-col p-6">
+                          <h3 className="group-hover:text-primary mb-2 text-xl font-bold transition-colors">
+                            {collection.name}
+                          </h3>
+                          <p className="text-muted-foreground mb-4 flex-1 text-sm leading-relaxed">
+                            {collection.description}
+                          </p>
+                          <div className="text-primary flex items-center gap-2 text-sm font-semibold">
+                            Explore Collection
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  </Link>
-                </StaggerItem>
-              );
-            })}
-          </StaggerContainer>
+                      </article>
+                    </Link>
+                  </StaggerItem>
+                );
+              })}
+            </StaggerContainer>
+          ) : (
+            <FadeIn>
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <Package className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                <p className="text-muted-foreground text-lg">
+                  No collections yet.
+                </p>
+                <Button asChild className="mt-6">
+                  <Link href="/shop">Browse All Products</Link>
+                </Button>
+              </div>
+            </FadeIn>
+          )}
         </div>
       </section>
 

@@ -1,8 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Edit, MoreVertical, Plus, Trash, Package } from "lucide-react";
+import {
+  AlertTriangle,
+  Edit,
+  Eye,
+  MoreVertical,
+  Plus,
+  Trash,
+  Package,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
@@ -100,6 +109,12 @@ export function PoolsTable({ pools }: Props) {
                     scope="col"
                     className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
                   >
+                    Units sold
+                  </th>
+                  <th
+                    scope="col"
+                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+                  >
                     Products
                   </th>
                   <th
@@ -117,9 +132,12 @@ export function PoolsTable({ pools }: Props) {
                 {pools.map((pool) => (
                   <tr key={pool.id} className="hover:bg-muted/50">
                     <td className="px-6 py-4">
-                      <div className="text-foreground font-medium">
+                      <Link
+                        href={`/admin/inventory/${pool.id}`}
+                        className="text-foreground font-medium hover:underline"
+                      >
                         {pool.name}
-                      </div>
+                      </Link>
                       {pool.description && (
                         <div className="text-muted-foreground text-sm">
                           {pool.description}
@@ -151,6 +169,30 @@ export function PoolsTable({ pools }: Props) {
                         </Button>
                       </div>
                     </td>
+                    <td className="px-6 py-4">
+                      <div className="text-foreground">
+                        {pool.sales.netSoldUnits}
+                      </div>
+                      {pool.sales.returnedUnits > 0 && (
+                        <div className="text-muted-foreground text-sm">
+                          {pool.sales.returnedUnits} returned
+                        </div>
+                      )}
+                      {pool.sales.oversellEvents > 0 && (
+                        <div className="mt-1 flex items-center gap-1 text-amber-600">
+                          <AlertTriangle
+                            className="h-3 w-3 shrink-0"
+                            aria-hidden="true"
+                          />
+                          <span className="text-xs">
+                            <span className="sr-only">Warning: </span>
+                            {pool.sales.oversellEvents} sale
+                            {pool.sales.oversellEvents === 1 ? "" : "s"} could
+                            not be deducted — units sold may be understated
+                          </span>
+                        </div>
+                      )}
+                    </td>
                     <td className="text-foreground px-6 py-4">
                       {pool._count.products}
                     </td>
@@ -172,6 +214,12 @@ export function PoolsTable({ pools }: Props) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/inventory/${pool.id}`}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View details
+                            </Link>
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setEditPool(pool)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit

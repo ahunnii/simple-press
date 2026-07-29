@@ -162,35 +162,30 @@ export function HappyBambooProductPage({
         />
 
         {/* Related Products */}
-        <div className="mb-20">
-          <FadeIn direction="up">
-            <h2 className="text-foreground font-heading text-2xl font-bold">
-              You Might Also Like
-            </h2>
-          </FadeIn>
-          <StaggerContainer
-            className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
-            staggerDelay={0.12}
-          >
-            {relatedProducts?.map((p, index) => {
-              return (
-                <StaggerItem key={p.id}>
-                  <HappyBambooProductCard
-                    product={p as Product}
-                    index={index}
-                  />
-                </StaggerItem>
-              );
-            })}
-            {relatedProducts?.length === 0 && (
-              <div className="col-span-full text-center">
-                <p className="text-muted-foreground">
-                  No related products found
-                </p>
-              </div>
-            )}
-          </StaggerContainer>
-        </div>
+        {relatedProducts && relatedProducts.length > 0 && (
+          <div className="mb-20">
+            <FadeIn direction="up">
+              <h2 className="text-foreground font-heading text-2xl font-bold">
+                You Might Also Like
+              </h2>
+            </FadeIn>
+            <StaggerContainer
+              className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2"
+              staggerDelay={0.12}
+            >
+              {relatedProducts.map((p, index) => {
+                return (
+                  <StaggerItem key={p.id}>
+                    <HappyBambooProductCard
+                      product={p as Product}
+                      index={index}
+                    />
+                  </StaggerItem>
+                );
+              })}
+            </StaggerContainer>
+          </div>
+        )}
       </section>
     </PageTransition>
   );
