@@ -1,5 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import type { TemplateListRow } from "~/lib/template-fields";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolvePopup } from "~/lib/site-banner/resolve";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { api, HydrateClient } from "~/trpc/server";
@@ -11,6 +13,7 @@ import { PinkCollectionSection, type PinkFeaturedProduct } from "./pink-collecti
 import { PinkEventsSection } from "./pink-events-section";
 import type { PinkHeroPanel } from "./pink-hero-strip";
 import { PinkHeroSection } from "./pink-hero-section";
+import { PinkPopup } from "./pink-popup";
 import { PinkPromisesSection } from "./pink-promises-section";
 import { PinkStorySection } from "./pink-story-section";
 
@@ -130,6 +133,12 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   const customFields = rawCustomFields as Record<string, unknown> | undefined;
   const f = resolveFields(rawCustomFields, FIELD_KEYS);
 
+  // F4 (review 2026-07-29): pink previously never called resolvePopup, so an
+  // owner-configured popup could never render on this template regardless of
+  // the `popups` flag. Mirrors default-homepage.tsx's wiring exactly.
+  const { isEnabled } = await getBusinessFlags();
+  const popup = resolvePopup(business.siteContent, isEnabled("popups"));
+
   const heroPanelsRaw = parseTemplateListRows(customFields?.["pink.homepage.hero-panels"]);
   const heroPanels: PinkHeroPanel[] =
     heroPanelsRaw.length > 0
@@ -179,6 +188,7 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
 
   return (
     <HydrateClient>
+      {popup && <PinkPopup popup={popup} />}
       <PageTransition>
         <PinkHeroSection
           kicker={f["pink.homepage.hero-kicker"] ?? ""}

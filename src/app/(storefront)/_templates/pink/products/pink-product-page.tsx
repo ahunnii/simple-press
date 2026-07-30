@@ -16,11 +16,13 @@ import { resolveFields } from "../index";
 import { PinkAccordion } from "../shared/pink-accordion";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkEyebrow } from "../shared/pink-eyebrow";
+import { PinkImageFallback } from "../shared/pink-image-fallback";
 import type { PinkStat } from "../shared/pink-stat-tiles";
 import { PinkStatTiles } from "../shared/pink-stat-tiles";
 import { PinkProductCard } from "../shared/pink-product-card";
 import { PinkProductActions } from "./pink-product-actions";
 import { PinkProductGallery } from "./pink-product-gallery";
+import { PinkProductReviewsSection } from "./pink-product-reviews";
 
 const FIELD_KEYS = [
   "pink.global.product-story-image",
@@ -29,6 +31,7 @@ const FIELD_KEYS = [
   "pink.global.product-story-body",
   "pink.global.product-related-heading",
   "pink.global.product-related-link-label",
+  "pink.global.product-question",
 ];
 
 const DEFAULT_PANELS: TemplateListRow[] = [
@@ -209,6 +212,17 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
             )}
 
             <PinkProductActions product={product} />
+
+            {f["pink.global.product-question"] && (
+              <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+                <span {...fieldAttr("pink.global.product-question")}>
+                  {f["pink.global.product-question"]}
+                </span>{" "}
+                <Link href="/contact" className="underline" style={{ color: "var(--pink-rose)" }}>
+                  Ask us a question
+                </Link>
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -244,12 +258,10 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
       {storyVisible && (
         <PinkDarkBand ariaLabel="How it's made" sectionAttrs={sectionGroupAttr("global", "product-story")}>
           <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-14">
-            {/* Unset → the band keeps its own ink surface. A light placeholder
+            {/* Unset → a designed dark-surface fallback (review 2026-07-29,
+                P1) rather than an empty ink-tint void. A light placeholder
                 slab here reads as a broken image on the dark band. */}
-            <div
-              className="relative aspect-square overflow-hidden"
-              style={{ background: "var(--pink-ink-tint)" }}
-            >
+            <div className="relative aspect-square overflow-hidden">
               {f["pink.global.product-story-image"] ? (
                 <Image
                   src={f["pink.global.product-story-image"]}
@@ -258,7 +270,9 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 45vw"
                 />
-              ) : null}
+              ) : (
+                <PinkImageFallback surface="dark" aspect="1 / 1" />
+              )}
             </div>
             <div className="flex flex-col gap-4">
               <PinkEyebrow tone="dark" fieldKey="pink.global.product-story-eyebrow">
@@ -283,6 +297,9 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
           </div>
         </PinkDarkBand>
       )}
+
+      {/* ── Reviews — flag-gated, no fields (see pink-product-reviews.tsx) ── */}
+      <PinkProductReviewsSection productId={product.id} productName={product.name} />
 
       {/* ── global.product-related ── */}
       {relatedVisible && related.length > 0 && (
@@ -318,6 +335,11 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
                   imageAlt={p.name}
                   title={p.name}
                   price={formatPrice(p.variants[0]?.price ?? p.price)}
+                  wishlist={{
+                    productId: p.id,
+                    slug: p.slug,
+                    rawPrice: p.variants[0]?.price ?? p.price,
+                  }}
                 />
               ))}
             </div>

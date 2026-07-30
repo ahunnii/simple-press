@@ -104,6 +104,11 @@ export function PinkCollectionSection({
                   imageUrl={image?.url}
                   imageAlt={image?.altText ?? product.name}
                   title={product.name}
+                  wishlist={{
+                    productId: product.id,
+                    slug: product.slug,
+                    rawPrice: product.price,
+                  }}
                   price={formatPrice(product.price)}
                   compareAtPrice={
                     product.compareAtPrice && product.compareAtPrice > product.price

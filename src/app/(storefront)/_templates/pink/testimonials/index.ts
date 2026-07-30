@@ -236,12 +236,13 @@ const testimonialsCtaData: TemplateField[] = [
   {
     key: "pink.testimonials.cta-button-link",
     label: "CTA Button Link",
-    description: "Where the closing button goes.",
+    description:
+      "Where the closing button goes — defaults to the shared testimonial submission page.",
     type: "url",
     page: "testimonials",
     group: "testimonials.cta",
     gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: "/testimonials/submit",
   },
 ];
 

@@ -162,6 +162,17 @@ export const pinkBlogData: TemplateField[] = [
     gridColumn: "col-span-1",
     defaultValue: "/shop",
   },
+  {
+    key: "pink.blog.search-empty-state",
+    label: "Search — No Results Message",
+    description:
+      "Shown in the post grid when a visitor's search doesn't match any post.",
+    type: "text",
+    page: "blog",
+    group: "blog.grid",
+    gridColumn: "col-span-full",
+    defaultValue: "No posts match your search.",
+  },
 
   // ── blog.ask (hideable) ──────────────────────────────────────────────────
   {

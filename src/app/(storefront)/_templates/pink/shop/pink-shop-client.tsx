@@ -167,6 +167,12 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // P5 fix: distinguish "no products exist at all" (unfiltered — the filter
+  // rail and sort bar would only promise counts/options that don't exist)
+  // from "a filter narrowed the catalog to zero" (the rail/sort bar must
+  // stay — they're the shopper's way out via Clear/adjusting a filter).
+  const hasProducts = products.length > 0;
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [filtered.length, sortParam, priceMax, inStockOnly, activeCollectionId]);
@@ -283,9 +289,13 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
     >
       <div
         className="mx-auto flex max-w-[1400px] flex-col gap-8 md:grid"
-        style={filtersVisible ? { gridTemplateColumns: "232px 1fr", gap: "48px" } : undefined}
+        style={
+          filtersVisible && hasProducts
+            ? { gridTemplateColumns: "232px 1fr", gap: "48px" }
+            : undefined
+        }
       >
-        {filtersVisible && (
+        {filtersVisible && hasProducts && (
           <div {...sectionGroupAttr("shop", "filters")}>
             <div className="md:hidden">
               <button
@@ -318,30 +328,32 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
         )}
 
         <div>
-          <div
-            className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
-            style={{ borderBottom: "1px solid var(--pink-ink)" }}
-          >
-            <p className="text-[14px]" style={{ color: "var(--pink-muted)" }} aria-live="polite" aria-atomic="true">
-              Showing {summary}
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="ml-3 underline underline-offset-2"
-                  style={{ color: "var(--pink-rose)" }}
-                >
-                  Clear
-                </button>
-              )}
-            </p>
-            <PinkFilterChips
-              items={sortChips}
-              activeId={sortParam}
-              onSelect={(id) => handleSort(id as keyof typeof SORT_LABELS)}
-              aria-label="Sort products"
-            />
-          </div>
+          {hasProducts && (
+            <div
+              className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
+              style={{ borderBottom: "1px solid var(--pink-ink)" }}
+            >
+              <p className="text-[14px]" style={{ color: "var(--pink-muted)" }} aria-live="polite" aria-atomic="true">
+                Showing {summary}
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="ml-3 underline underline-offset-2"
+                    style={{ color: "var(--pink-rose)" }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </p>
+              <PinkFilterChips
+                items={sortChips}
+                activeId={sortParam}
+                onSelect={(id) => handleSort(id as keyof typeof SORT_LABELS)}
+                aria-label="Sort products"
+              />
+            </div>
+          )}
 
           {filtered.length === 0 ? (
             <PinkEmptyState
@@ -372,6 +384,11 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
                             : undefined
                         }
                         badge={additional?.comingSoon ? { label: "Coming soon", tone: "ink" } : undefined}
+                        wishlist={{
+                          productId: product.id,
+                          slug: product.slug,
+                          rawPrice: product.price,
+                        }}
                       />
                       {!additional?.comingSoon && (
                         <AddToBasketButton product={product} copy={copy} />

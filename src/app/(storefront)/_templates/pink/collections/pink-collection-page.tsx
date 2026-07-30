@@ -44,6 +44,24 @@ const DEFAULT_GALLERY: TemplateListRow[] = [
   { _id: "default-g-4", image: "", colSpan: "2", rowSpan: "1" },
 ];
 
+// `Collection.description` is one field, but the design renders it twice —
+// once as the photo-hero's short intro, once as the full "About this series"
+// band below. Showing the identical string in both spots is a literal
+// duplicate with ~90px of void under it (review 2026-07-29, P3). Short
+// descriptions already read completely in the hero, so the band hides for
+// them entirely; long descriptions get a short excerpt in the hero and keep
+// their full text only in the band.
+const HERO_INTRO_MAX_CHARS = 140;
+
+function heroIntroExcerpt(description: string): string {
+  const firstParagraph = description.split(/\n{2,}/)[0]?.trim() ?? description;
+  if (firstParagraph.length <= HERO_INTRO_MAX_CHARS) return firstParagraph;
+  const truncated = firstParagraph.slice(0, HERO_INTRO_MAX_CHARS);
+  const lastSpace = truncated.lastIndexOf(" ");
+  const cut = lastSpace > 40 ? truncated.slice(0, lastSpace) : truncated;
+  return `${cut.trimEnd()}…`;
+}
+
 function isRowInStock(product: {
   trackInventory: boolean;
   allowBackorders: boolean;
@@ -113,7 +131,18 @@ export function PinkCollectionPage({
   const galleryRows = parseTemplateListRows(customFields?.["pink.collections.detail-gallery-images"]);
   const gallery = galleryRows.length > 0 ? galleryRows : DEFAULT_GALLERY;
 
-  const introVisible = isSectionVisible(customFields, "pink", "collections.detail-intro");
+  const description = collection.description?.trim() ?? "";
+  const isLongDescription = description.length > HERO_INTRO_MAX_CHARS;
+  const heroIntro = description
+    ? isLongDescription
+      ? heroIntroExcerpt(description)
+      : description
+    : undefined;
+
+  // Only worth its own band when it holds more than the hero already shows
+  // in full (see the comment on HERO_INTRO_MAX_CHARS above).
+  const introVisible =
+    isSectionVisible(customFields, "pink", "collections.detail-intro") && isLongDescription;
   const galleryVisible = isSectionVisible(customFields, "pink", "collections.detail-gallery");
   const navVisible = isSectionVisible(customFields, "pink", "collections.detail-nav");
 
@@ -130,12 +159,12 @@ export function PinkCollectionPage({
         ]}
         eyebrow={`${f["pink.collections.detail-hero-eyebrow-prefix"] ?? "Series"} ${String(seriesNumber).padStart(2, "0")} · ${new Date(collection.createdAt).getFullYear()}`}
         heading={collection.name}
-        intro={collection.description ?? undefined}
+        intro={heroIntro}
         factRows={<PinkFactRows rows={factRows} />}
         sectionAttrs={sectionGroupAttr("collections", "detail-hero")}
       />
 
-      {introVisible && collection.description && (
+      {introVisible && (
         <section
           aria-label="About this series"
           className="px-5 py-14 md:px-10"
@@ -158,7 +187,7 @@ export function PinkCollectionPage({
               className="max-w-[62ch] text-[17px] leading-[1.8] whitespace-pre-line"
               style={{ color: "var(--pink-body)" }}
             >
-              {collection.description}
+              {description}
             </p>
           </div>
         </section>
@@ -210,35 +239,43 @@ export function PinkCollectionPage({
         }}
       />
 
+      {/* P3 (review 2026-07-29): whichever side has no sibling collection is
+          omitted entirely — rendering it as a disabled link to a bare "—"
+          read as a broken/unfinished card. The remaining side takes the full
+          band on its own instead. */}
       {navVisible && (prevCollection ?? nextCollection) && (
         <PinkDarkBand ariaLabel="More series" sectionAttrs={sectionGroupAttr("collections", "detail-nav")}>
-          <div className="grid gap-[2px] sm:grid-cols-2">
-            <Link
-              href={prevCollection ? `/collections/${prevCollection.slug}` : "/collections"}
-              className="flex flex-col gap-2 p-8"
-              style={{ background: "var(--pink-ink-panel)", pointerEvents: prevCollection ? "auto" : "none" }}
-              aria-disabled={!prevCollection}
-            >
-              <span {...fieldAttr("pink.collections.detail-nav-prev-label")} className="pink-label-dark">
-                {f["pink.collections.detail-nav-prev-label"] ?? "Previous series"}
-              </span>
-              <span className="pink-display" style={{ fontSize: "22px", fontWeight: 600, color: "var(--pink-paper)" }}>
-                {prevCollection?.name ?? "—"}
-              </span>
-            </Link>
-            <Link
-              href={nextCollection ? `/collections/${nextCollection.slug}` : "/collections"}
-              className="flex flex-col items-end gap-2 p-8 text-right"
-              style={{ background: "var(--pink-ink-panel)", pointerEvents: nextCollection ? "auto" : "none" }}
-              aria-disabled={!nextCollection}
-            >
-              <span {...fieldAttr("pink.collections.detail-nav-next-label")} className="pink-label-dark">
-                {f["pink.collections.detail-nav-next-label"] ?? "Next series"}
-              </span>
-              <span className="pink-display" style={{ fontSize: "22px", fontWeight: 600, color: "var(--pink-paper)" }}>
-                {nextCollection?.name ?? "—"}
-              </span>
-            </Link>
+          <div
+            className={`grid gap-[2px] ${prevCollection && nextCollection ? "sm:grid-cols-2" : "sm:grid-cols-1"}`}
+          >
+            {prevCollection && (
+              <Link
+                href={`/collections/${prevCollection.slug}`}
+                className="flex flex-col gap-2 p-8"
+                style={{ background: "var(--pink-ink-panel)" }}
+              >
+                <span {...fieldAttr("pink.collections.detail-nav-prev-label")} className="pink-label-dark">
+                  {f["pink.collections.detail-nav-prev-label"] ?? "Previous series"}
+                </span>
+                <span className="pink-display" style={{ fontSize: "22px", fontWeight: 600, color: "var(--pink-paper)" }}>
+                  {prevCollection.name}
+                </span>
+              </Link>
+            )}
+            {nextCollection && (
+              <Link
+                href={`/collections/${nextCollection.slug}`}
+                className="flex flex-col items-end gap-2 p-8 text-right"
+                style={{ background: "var(--pink-ink-panel)" }}
+              >
+                <span {...fieldAttr("pink.collections.detail-nav-next-label")} className="pink-label-dark">
+                  {f["pink.collections.detail-nav-next-label"] ?? "Next series"}
+                </span>
+                <span className="pink-display" style={{ fontSize: "22px", fontWeight: 600, color: "var(--pink-paper)" }}>
+                  {nextCollection.name}
+                </span>
+              </Link>
+            )}
           </div>
         </PinkDarkBand>
       )}

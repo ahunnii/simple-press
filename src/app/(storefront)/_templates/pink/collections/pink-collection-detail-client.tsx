@@ -76,6 +76,25 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
     { id: "archive", label: copy.filterArchive },
   ];
 
+  // P6 (review 2026-07-29): a raw count reads badly at 0 ("The 0") and 1
+  // ("The 1"). At 0 the empty state below already explains the situation in
+  // full, so the heading/filter row above it is just noise — hide it. At 1,
+  // spell the numeral out so "The One" reads as a design choice rather than
+  // a bug.
+  const countWord = products.length === 1 ? "One" : String(products.length);
+
+  // P3 (review 2026-07-29): a 1-2 piece series stretched across the full
+  // 4-column desktop grid left 2-3 visibly empty columns. Below 4 pieces the
+  // grid is capped and centered instead of stretched.
+  const gridClassName =
+    filtered.length === 1
+      ? "mx-auto grid max-w-[240px] grid-cols-1 gap-6"
+      : filtered.length === 2
+        ? "mx-auto grid max-w-[520px] grid-cols-2 gap-6"
+        : filtered.length === 3
+          ? "mx-auto grid max-w-[800px] grid-cols-2 gap-6 sm:grid-cols-3"
+          : "grid grid-cols-2 gap-6 lg:grid-cols-4";
+
   return (
     <section
       aria-label="Pieces in this series"
@@ -83,16 +102,18 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
       {...sectionGroupAttr("collections", "detail-grid")}
     >
       <div className="mx-auto max-w-[1400px]">
-        <div
-          className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
-          style={{ borderBottom: "1px solid var(--pink-ink)" }}
-        >
-          <h2 className="pink-display" style={{ fontSize: "clamp(24px, 2.6vw, 32px)", fontWeight: 600 }}>
-            <span {...fieldAttr("pink.collections.detail-grid-heading-prefix")}>{copy.headingPrefix}</span>{" "}
-            {products.length}
-          </h2>
-          <PinkFilterChips items={chips} activeId={filter} onSelect={(id) => setFilter(id as typeof filter)} aria-label="Filter pieces" />
-        </div>
+        {products.length > 0 && (
+          <div
+            className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
+            style={{ borderBottom: "1px solid var(--pink-ink)" }}
+          >
+            <h2 className="pink-display" style={{ fontSize: "clamp(24px, 2.6vw, 32px)", fontWeight: 600 }}>
+              <span {...fieldAttr("pink.collections.detail-grid-heading-prefix")}>{copy.headingPrefix}</span>{" "}
+              {countWord}
+            </h2>
+            <PinkFilterChips items={chips} activeId={filter} onSelect={(id) => setFilter(id as typeof filter)} aria-label="Filter pieces" />
+          </div>
+        )}
 
         {filtered.length === 0 ? (
           products.length === 0 ? (
@@ -106,7 +127,7 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
             <PinkEmptyState heading="No pieces here." body="Try a different filter." />
           )
         ) : (
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+          <div className={gridClassName}>
             {filtered.map((product, i) => {
               const inStock = isRowInStock(product);
               return (
@@ -123,6 +144,11 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
                         ? undefined
                         : { label: copy.soldCta, disabled: true, onClick: () => undefined }
                     }
+                    wishlist={{
+                      productId: product.id,
+                      slug: product.slug,
+                      rawPrice: effectivePrice(product),
+                    }}
                   />
                 </PinkReveal>
               );

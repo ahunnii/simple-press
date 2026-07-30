@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
+
 import { PinkBadge } from "./pink-badge";
 
 type PinkAddToBasketSlot = {
@@ -26,6 +28,20 @@ type PinkProductCardProps = {
   compareAtPrice?: string;
   badge?: { label: string; tone?: "rose" | "ink" };
   addToBasket?: PinkAddToBasketSlot;
+  /**
+   * Wishlist heart shown top-right of the image frame. Omit to render no
+   * affordance (e.g. a card built from data with no stable product id).
+   * `WishlistButton` self-gates on the `wishlist` feature flag, so passing
+   * this costs nothing when the flag is off.
+   */
+  wishlist?: {
+    productId: string;
+    slug: string;
+    /** Raw numeric price — `price`/`compareAtPrice` above are already
+        formatted strings for display and can't be reused for the wishlist
+        snapshot. */
+    rawPrice: number;
+  };
   className?: string;
 };
 
@@ -46,30 +62,48 @@ export function PinkProductCard({
   compareAtPrice,
   badge,
   addToBasket,
+  wishlist,
   className,
 }: PinkProductCardProps) {
   const image = imageUrl ?? "/placeholder.svg";
 
   return (
     <div className={`group flex flex-col${className ? ` ${className}` : ""}`}>
-      <Link
-        href={href}
-        className="pink-lift relative block overflow-hidden"
-        style={{ aspectRatio: "4 / 5", background: "var(--pink-panel)" }}
-      >
-        <Image
-          src={image}
-          alt={imageAlt}
-          fill
-          className="object-cover"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-        {badge && (
-          <span className="absolute top-2.5 left-2.5">
-            <PinkBadge tone={badge.tone}>{badge.label}</PinkBadge>
-          </span>
+      {/* Relative wrapper keeps the wishlist button a sibling of the card
+          link (no <button> inside <a>) while overlaying the image's
+          top-right corner — mirrors default-product-card.tsx. */}
+      <div className="relative">
+        <Link
+          href={href}
+          className="pink-lift relative block overflow-hidden"
+          style={{ aspectRatio: "4 / 5", background: "var(--pink-panel)" }}
+        >
+          <Image
+            src={image}
+            alt={imageAlt}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+          {badge && (
+            <span className="absolute top-2.5 left-2.5">
+              <PinkBadge tone={badge.tone}>{badge.label}</PinkBadge>
+            </span>
+          )}
+        </Link>
+        {wishlist && (
+          <WishlistButton
+            item={{
+              productId: wishlist.productId,
+              name: title,
+              slug: wishlist.slug,
+              price: wishlist.rawPrice,
+              imageUrl: imageUrl ?? null,
+            }}
+            className="absolute top-2.5 right-2.5 z-10 size-8 rounded-none border border-[var(--pink-line)] bg-[var(--pink-white)] text-[var(--pink-ink)] shadow-none backdrop-blur-none hover:scale-100 hover:border-[var(--pink-rose)] hover:text-[var(--pink-rose)]"
+          />
         )}
-      </Link>
+      </div>
 
       <div
         className="mt-3 flex items-baseline justify-between gap-3 pt-3"

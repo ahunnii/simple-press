@@ -9,6 +9,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { PinkEmptyState } from "../shared/pink-empty-state";
 import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { PinkFilterChips } from "../shared/pink-filter-chips";
+import { PinkImageFallback } from "../shared/pink-image-fallback";
 
 type Testimonial = RouterOutputs["testimonial"]["list"][number];
 
@@ -27,6 +28,22 @@ const CATEGORY_STUDIO = "studio";
 
 function categoryOf(t: Testimonial): typeof CATEGORY_KEEPER | typeof CATEGORY_STUDIO {
   return t.source === "owner" ? CATEGORY_STUDIO : CATEGORY_KEEPER;
+}
+
+/**
+ * Best-effort singular form of an owner-set plural suffix (e.g. "notes back"
+ * → "note back") for the count === 1 case (review 2026-07-29, P6). The field
+ * is free text, so this is a naive trailing-`s` strip rather than real
+ * grammar — safe for the shipped default and for any similarly-shaped
+ * owner-authored suffix ("reviews" → "review", "pieces" → "piece"); a suffix
+ * that doesn't end in a plain "s" (no change) is the graceful fallback.
+ */
+function singularize(suffix: string): string {
+  const [firstWord, ...rest] = suffix.trim().split(" ");
+  if (!firstWord || !firstWord.endsWith("s") || firstWord.endsWith("ss")) {
+    return suffix;
+  }
+  return [firstWord.slice(0, -1), ...rest].join(" ");
 }
 
 /**
@@ -68,22 +85,23 @@ export function PinkTestimonialsGrid({
       {...sectionGroupAttr("testimonials", "grid")}
     >
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2
-            className="pink-display"
-            style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
-          >
-            {testimonials.length} {headingSuffix}
-          </h2>
-          {testimonials.length > 0 && (
+        {testimonials.length > 0 && (
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2
+              className="pink-display"
+              style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
+            >
+              {testimonials.length}{" "}
+              {testimonials.length === 1 ? singularize(headingSuffix) : headingSuffix}
+            </h2>
             <PinkFilterChips
               items={filters}
               activeId={activeFilter}
               onSelect={setActiveFilter}
               aria-label="Filter notes"
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {testimonials.length === 0 ? (
           <PinkEmptyState heading={emptyHeading} body={emptyBody} />
@@ -128,11 +146,12 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         className="flex items-center gap-3 pt-3"
         style={{ borderTop: "1px solid var(--pink-line-soft)" }}
       >
-        <div
-          className="relative h-[42px] w-[42px] shrink-0 overflow-hidden"
-          style={{ background: "var(--pink-panel)" }}
-        >
-          {avatar && <Image src={avatar} alt="" fill className="object-cover" sizes="42px" />}
+        <div className="relative h-[42px] w-[42px] shrink-0 overflow-hidden">
+          {avatar ? (
+            <Image src={avatar} alt="" fill className="object-cover" sizes="42px" />
+          ) : (
+            <PinkImageFallback surface="paper" />
+          )}
         </div>
         <div className="flex flex-col">
           <span className="text-[14px] font-medium" style={{ color: "var(--pink-ink)" }}>

@@ -26,6 +26,7 @@ type Props = {
   body: string;
   itemsHeading: string;
   summaryHeading: string;
+  nextStepsLabel: string;
   nextSteps: string;
   continueCta: string;
   loadingText: string;
@@ -73,6 +74,7 @@ export function PinkOrderConfirmation({
   body,
   itemsHeading,
   summaryHeading,
+  nextStepsLabel,
   nextSteps,
   continueCta,
   loadingText,
@@ -292,7 +294,9 @@ export function PinkOrderConfirmation({
               {factRows.length > 0 && <PinkFactRows rows={factRows} />}
               {nextStepsLines.length > 0 && (
                 <div className="flex flex-col gap-3 p-7 pt-0 md:p-8 md:pt-0">
-                  <p className="pink-label-dark">What happens next</p>
+                  <p className="pink-label-dark" {...fieldAttr("pink.checkout.next-steps-label")}>
+                    {nextStepsLabel}
+                  </p>
                   <ul className="flex flex-col gap-2.5">
                     {nextStepsLines.map((line, i) => (
                       <li

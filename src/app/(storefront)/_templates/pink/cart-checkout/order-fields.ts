@@ -77,6 +77,17 @@ export const pinkOrderData: TemplateField[] = [
     defaultValue: "Order summary",
   },
   {
+    key: "pink.checkout.next-steps-label",
+    label: "What Happens Next — Label",
+    description:
+      "Small uppercase label shown above the next-steps list in the order summary panel.",
+    type: "text",
+    page: "checkout",
+    group: "checkout.success",
+    gridColumn: "col-span-1",
+    defaultValue: "What happens next",
+  },
+  {
     key: "pink.order.next-steps",
     label: "What Happens Next",
     description:

@@ -25,6 +25,7 @@ const FIELD_KEYS = [
   "pink.blog.grid-empty-body",
   "pink.blog.grid-empty-cta-label",
   "pink.blog.grid-empty-cta-link",
+  "pink.blog.search-empty-state",
   "pink.blog.ask-eyebrow",
   "pink.blog.ask-heading",
   "pink.blog.ask-body",
@@ -124,6 +125,7 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
         emptyBody={f["pink.blog.grid-empty-body"] ?? ""}
         emptyCtaLabel={f["pink.blog.grid-empty-cta-label"] ?? ""}
         emptyCtaLink={f["pink.blog.grid-empty-cta-link"] ?? "/shop"}
+        searchEmptyMessage={f["pink.blog.search-empty-state"] ?? "No posts match your search."}
       />
 
       {showAsk && (

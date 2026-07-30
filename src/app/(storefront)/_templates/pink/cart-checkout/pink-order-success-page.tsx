@@ -44,6 +44,7 @@ export function PinkOrderSuccessPage({ business }: Props) {
     "pink.order.body",
     "pink.order.items-heading",
     "pink.order.summary-heading",
+    "pink.checkout.next-steps-label",
     "pink.order.next-steps",
     "pink.order.continue-cta",
     "pink.order.loading-text",
@@ -70,6 +71,7 @@ export function PinkOrderSuccessPage({ business }: Props) {
         body={f["pink.order.body"] ?? ""}
         itemsHeading={f["pink.order.items-heading"] ?? ""}
         summaryHeading={f["pink.order.summary-heading"] ?? ""}
+        nextStepsLabel={f["pink.checkout.next-steps-label"] ?? ""}
         nextSteps={f["pink.order.next-steps"] ?? ""}
         continueCta={f["pink.order.continue-cta"] ?? ""}
         loadingText={loadingText}

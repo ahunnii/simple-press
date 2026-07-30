@@ -107,9 +107,52 @@ export function PinkCheckoutForm({ business }: Props) {
     form.state.trim().length > 0 &&
     form.shippingPending;
 
+  // P4 fix: `useCheckoutForm.handleSubmit` (shared hook, not owned by this
+  // template) validates required fields and surfaces a single form-level
+  // banner via `form.error`, but never marks which control is at fault. These
+  // mirror its exact required-field rules so the offending input can be
+  // styled + focused without touching the shared hook.
+  const shippingRequired = form.deliveryMethod === "ship";
+  const invalid = {
+    email: submitAttempted && !form.email,
+    name: submitAttempted && !form.name.trim(),
+    phone: submitAttempted && !form.phone.trim(),
+    addressLine1: submitAttempted && shippingRequired && !form.addressLine1.trim(),
+    city: submitAttempted && shippingRequired && !form.city.trim(),
+    state: submitAttempted && shippingRequired && !form.state.trim(),
+    postalCode: submitAttempted && shippingRequired && !form.postalCode.trim(),
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     setSubmitAttempted(true);
     await form.handleSubmit(e);
+
+    // Recompute directly from `form.*` rather than reusing the `invalid` map
+    // above: that map closes over this render's `submitAttempted`, which is
+    // still `false` during the very first submit attempt (the `setState`
+    // call above only takes effect on the *next* render) — reusing it here
+    // would silently no-op focus-management on exactly the first failure.
+    // Field order matches the visual top-to-bottom layout.
+    const shippingRequiredNow = form.deliveryMethod === "ship";
+    const invalidFieldId = !form.email
+      ? "pink-checkout-email"
+      : !form.name.trim()
+        ? "pink-checkout-name"
+        : !form.phone.trim()
+          ? "pink-checkout-phone"
+          : shippingRequiredNow && !form.addressLine1.trim()
+            ? "pink-checkout-address1"
+            : shippingRequiredNow && !form.city.trim()
+              ? "pink-checkout-city"
+              : shippingRequiredNow && !form.state.trim()
+                ? "pink-checkout-state"
+                : shippingRequiredNow && !form.postalCode.trim()
+                  ? "pink-checkout-postal"
+                  : null;
+
+    if (invalidFieldId) {
+      document.getElementById(invalidFieldId)?.focus();
+    }
   };
 
   if (form.items.length === 0) {
@@ -368,7 +411,18 @@ export function PinkCheckoutForm({ business }: Props) {
         </div>
 
         {/* Who it's for */}
-        <fieldset aria-labelledby="pink-co-contact-heading" className="flex flex-col gap-6">
+        <fieldset
+          aria-labelledby="pink-co-contact-heading"
+          className="flex flex-col gap-6"
+          // `PhoneInput` (shared component) wraps shadcn's `<Input>`, which
+          // already ships an `aria-invalid:border-destructive` utility class —
+          // it just resolves `--destructive` to the platform's generic red
+          // instead of pink's own `--pink-error` token, since `.pink` never
+          // overrides `--destructive` (only `.pink-account` does). Scoping the
+          // override here lets that existing utility read the right color
+          // without touching the shared component.
+          style={{ "--destructive": "var(--pink-error)" } as React.CSSProperties}
+        >
           <h2
             id="pink-co-contact-heading"
             className="pink-display pb-3"
@@ -396,8 +450,8 @@ export function PinkCheckoutForm({ business }: Props) {
                 placeholder="you@example.com"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !form.email ? true : undefined}
-                className="pink-input"
+                aria-invalid={invalid.email ? true : undefined}
+                className={`pink-input${invalid.email ? " pink-input-invalid" : ""}`}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -413,8 +467,8 @@ export function PinkCheckoutForm({ business }: Props) {
                 placeholder="First & last name"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !form.name.trim() ? true : undefined}
-                className="pink-input"
+                aria-invalid={invalid.name ? true : undefined}
+                className={`pink-input${invalid.name ? " pink-input-invalid" : ""}`}
               />
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
@@ -429,7 +483,7 @@ export function PinkCheckoutForm({ business }: Props) {
                 placeholder="+1 313 555 0100"
                 required
                 aria-required="true"
-                aria-invalid={submitAttempted && !form.phone.trim() ? true : undefined}
+                aria-invalid={invalid.phone ? true : undefined}
               />
             </div>
           </div>
@@ -529,10 +583,8 @@ export function PinkCheckoutForm({ business }: Props) {
                     placeholder="Street address, P.O. box"
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={
-                      submitAttempted && !form.addressLine1.trim() ? true : undefined
-                    }
-                    className="pink-input"
+                    aria-invalid={invalid.addressLine1 ? true : undefined}
+                    className={`pink-input${invalid.addressLine1 ? " pink-input-invalid" : ""}`}
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:col-span-2">
@@ -560,8 +612,8 @@ export function PinkCheckoutForm({ business }: Props) {
                     onChange={(e) => form.setCity(e.target.value)}
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={submitAttempted && !form.city.trim() ? true : undefined}
-                    className="pink-input"
+                    aria-invalid={invalid.city ? true : undefined}
+                    className={`pink-input${invalid.city ? " pink-input-invalid" : ""}`}
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:col-span-1">
@@ -573,8 +625,12 @@ export function PinkCheckoutForm({ business }: Props) {
                       id="pink-checkout-state"
                       aria-labelledby="pink-checkout-state-label"
                       aria-required="true"
-                      aria-invalid={submitAttempted && !form.state ? true : undefined}
-                      style={selectTriggerStyle}
+                      aria-invalid={invalid.state ? true : undefined}
+                      style={
+                        invalid.state
+                          ? { ...selectTriggerStyle, borderColor: "var(--pink-error)" }
+                          : selectTriggerStyle
+                      }
                     >
                       <SelectValue placeholder="—" />
                     </SelectTrigger>
@@ -599,10 +655,8 @@ export function PinkCheckoutForm({ business }: Props) {
                     onChange={(e) => form.setPostalCode(e.target.value)}
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
-                    aria-invalid={
-                      submitAttempted && !form.postalCode.trim() ? true : undefined
-                    }
-                    className="pink-input"
+                    aria-invalid={invalid.postalCode ? true : undefined}
+                    className={`pink-input${invalid.postalCode ? " pink-input-invalid" : ""}`}
                   />
                 </div>
 

@@ -181,6 +181,11 @@ function PinkPostProductRail() {
               imageAlt={p.name}
               title={p.name}
               price={formatPrice(getEffectivePrice(p))}
+              wishlist={{
+                productId: p.id,
+                slug: p.slug,
+                rawPrice: getEffectivePrice(p),
+              }}
             />
           ))}
         </div>

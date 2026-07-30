@@ -43,6 +43,7 @@ export function PinkProductActions({ product }: Props) {
     showLowStockWarning,
     justAdded,
     additionalFields,
+    displayTrustBadges,
   } = useProduct(product);
 
   const { setVariantImageUrl } = useVariantImage();
@@ -180,6 +181,24 @@ export function PinkProductActions({ product }: Props) {
               : "Made to order"}
           </p>
         </>
+      )}
+
+      {/* Per-product trust badges — `Product.additionalFields.productFeatures`,
+          set in admin. Silently unused before this fix (review 2026-07-29,
+          F7). Rendered as a restrained check row, not a badge wall. */}
+      {displayTrustBadges.length > 0 && (
+        <ul className="flex flex-col gap-1.5" style={{ borderTop: "1px solid var(--pink-line)", paddingTop: "16px" }}>
+          {displayTrustBadges.map((badge, i) => (
+            <li
+              key={`${badge.label}-${i}`}
+              className="flex items-center gap-2 text-[13px]"
+              style={{ color: "var(--pink-muted)" }}
+            >
+              <badge.Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--pink-rose)" }} aria-hidden="true" />
+              {badge.label}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

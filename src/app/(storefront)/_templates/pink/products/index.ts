@@ -32,6 +32,17 @@ export const pinkProductData: TemplateField[] = [
       { key: "body", label: "Body", type: "textarea", placeholder: "…" },
     ],
   },
+  {
+    key: "pink.global.product-question",
+    label: "Ask a Question Line",
+    description:
+      "One short line shown under the buy box, e.g. \"Have a question about this piece?\" — followed by an \"Ask us a question\" link to /contact. Leave blank to hide (review 2026-07-29, F7).",
+    type: "text",
+    page: "global",
+    group: "global.product-panels",
+    gridColumn: "col-span-full",
+    defaultValue: "Have a question about this piece before you buy?",
+  },
 
   // ── global.product-story ────────────────────────────────────────────────
   {

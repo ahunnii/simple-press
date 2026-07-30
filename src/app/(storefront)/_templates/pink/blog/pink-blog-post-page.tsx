@@ -9,10 +9,11 @@ import { isSectionVisible } from "~/lib/sp-meta";
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
+import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkBlogAuthorCard } from "./pink-blog-author-card";
 import { PinkBlogPostArticle } from "./pink-blog-post-article";
-import { estimateReadMinutes, formatBlogDate } from "./pink-blog-shared";
+import { estimateReadMinutes, formatBlogDate, hasCustomImage } from "./pink-blog-shared";
 
 type PinkBlogPostPageProps = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
@@ -83,11 +84,12 @@ export function PinkBlogPostPage({
         rightSlot={
           hasAuthor ? (
             <div className="flex items-center gap-3" {...sectionGroupAttr("blog", "post-author")}>
-              <div
-                className="relative h-12 w-12 shrink-0 overflow-hidden"
-                style={{ background: "var(--pink-ink-panel)" }}
-              >
-                <Image src={authorAvatar} alt="" fill className="object-cover" sizes="48px" />
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden">
+                {hasCustomImage(authorAvatar) ? (
+                  <Image src={authorAvatar} alt="" fill className="object-cover" sizes="48px" />
+                ) : (
+                  <PinkImageFallback surface="dark" />
+                )}
               </div>
               <div className="flex flex-col">
                 <span
@@ -171,8 +173,6 @@ export function PinkBlogPostPage({
                   className="relative overflow-hidden"
                   style={{ aspectRatio: "4/3", background: "var(--pink-ink-tint)" }}
                 >
-                  {/* Coverless posts keep the tile bare on `--pink-ink-tint` —
-                      a light placeholder slab breaks this dark band. */}
                   {post.image ? (
                     <Image
                       src={post.image}
@@ -183,7 +183,9 @@ export function PinkBlogPostPage({
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
-                  ) : null}
+                  ) : (
+                    <PinkImageFallback surface="dark" className="absolute inset-0" />
+                  )}
                 </div>
                 <p
                   className="pink-display"

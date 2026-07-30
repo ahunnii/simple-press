@@ -159,6 +159,10 @@ export function PinkTableBody({
               </p>
             )}
 
+            {/* B3: the empty-trailing-cell frame this grid used to show at counts
+                that aren't a multiple of the column count is fixed at the source —
+                `.pink-hairline-grid` no longer sets a container border (globals.css),
+                so no local override is needed here. Verified at 1/2/4/5 items. */}
             <div
               role="group"
               aria-label={pickerHeading}

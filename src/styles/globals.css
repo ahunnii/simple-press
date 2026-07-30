@@ -4082,11 +4082,16 @@
    container showing through the gaps. With the old container-background
    technique a last row that did not fill every column bled `--pink-line`
    as one large slab (e.g. 4 service items in a 3-up grid). */
+/* No container-level `border` here on purpose. Each child below draws its own
+   1px ring via box-shadow, which already outlines the grid's perimeter — while a
+   border on the container also wrapped the empty trailing tracks whenever the
+   item count wasn't a multiple of the column count, framing them as a visible
+   empty box (review 2026-07-29, B3: 4 service items in a 3-up grid). Dropping it
+   leaves populated cells looking identical and lets unused tracks fall away. */
 .pink .pink-hairline-grid {
   display: grid;
   gap: 1px;
   background: var(--pink-paper);
-  border: 1px solid var(--pink-line);
 }
 .pink .pink-hairline-grid > * {
   background: var(--pink-paper);

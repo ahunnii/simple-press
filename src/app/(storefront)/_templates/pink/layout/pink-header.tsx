@@ -4,7 +4,9 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag } from "lucide-react";
+import { UserButton } from "@daveyplate/better-auth-ui";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
+import { Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
@@ -14,6 +16,7 @@ import { resolveThemeVars } from "~/lib/template-themes";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
+import { isActiveNavLink } from "./pink-nav-utils";
 import { PinkMobileMenu } from "./pink-mobile-menu";
 
 export type PinkNavLink = { href: string; label: string; fieldKey?: string };
@@ -51,13 +54,19 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
+export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
   const { itemCount, setIsOpen } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuId = useId();
+
+  // Mirrors vii/happy-bamboo's UserButton wiring — same additionalLinks shape,
+  // same admin-visibility rule.
+  const showAdminLink =
+    session?.user?.platformRole === "PLATFORM_ADMIN" ||
+    !!session?.session?.membershipId;
 
   // Route change — always close the mobile menu (mirrors NoiseHeader).
   useEffect(() => {
@@ -90,11 +99,15 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
       label: f["pink.global.nav-shop"] ?? "Shop",
       fieldKey: "pink.global.nav-shop",
     },
-    {
-      href: "/collections",
-      label: f["pink.global.nav-collections"] ?? "Collections",
-      fieldKey: "pink.global.nav-collections",
-    },
+    ...(isEnabled("collections")
+      ? [
+          {
+            href: "/collections",
+            label: f["pink.global.nav-collections"] ?? "Collections",
+            fieldKey: "pink.global.nav-collections",
+          },
+        ]
+      : []),
     ...(isEnabled("services")
       ? [
           {
@@ -125,14 +138,7 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
     | undefined;
   const navLinks = customNav?.length ? customNav : defaultNavLinks;
 
-  // An owner-configured nav item can carry an empty/relative href. Without the
-  // guard, `"".startsWith`-style matching marks EVERY page active, so two links
-  // rendered aria-current="page" at once (an a11y violation and visibly wrong).
-  const isActive = (href: string) => {
-    if (!href?.startsWith("/")) return false;
-    if (href === "/") return pathname === "/";
-    return pathname === href || pathname?.startsWith(`${href}/`);
-  };
+  const isActive = (href: string) => isActiveNavLink(pathname ?? "/", href);
 
   const openCart = () => setIsOpen(true);
 
@@ -219,6 +225,49 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
           </nav>
 
           <div className="flex items-center gap-3">
+            {isEnabled("customerAccounts") && (
+              <div className="hidden lg:block">
+                {session?.user ? (
+                  <UserButton
+                    size="icon"
+                    classNames={{
+                      trigger: {
+                        base: "rounded-full w-auto h-auto p-0",
+                        avatar: {
+                          base: "size-8 ring-1 ring-[var(--pink-blush)] ring-offset-1 ring-offset-[var(--pink-ink)]",
+                        },
+                      },
+                    }}
+                    additionalLinks={[
+                      {
+                        icon: <IconPackage className="h-4 w-4" />,
+                        label: "Orders",
+                        href: "/account/orders",
+                      },
+                      ...(showAdminLink
+                        ? [
+                            {
+                              icon: <IconLayoutDashboard className="h-4 w-4" />,
+                              label: "Admin",
+                              href: "/admin",
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                ) : (
+                  <Link
+                    href="/auth/sign-in"
+                    aria-label="Sign in to your account"
+                    className="flex items-center justify-center"
+                    style={{ color: "var(--pink-paper)" }}
+                  >
+                    <User className="h-[18px] w-[18px]" aria-hidden="true" />
+                  </Link>
+                )}
+              </div>
+            )}
+
             {ctaText && (
               <Link
                 href={ctaLink}
@@ -308,6 +357,14 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
         ctaLink={ctaLink}
         basketLabel={basketLabel}
         itemCount={itemCount}
+        account={
+          isEnabled("customerAccounts")
+            ? {
+                href: session?.user ? "/account/orders" : "/auth/sign-in",
+                label: session?.user ? "My account" : "Sign in",
+              }
+            : null
+        }
         onOpenCart={() => {
           setMobileOpen(false);
           openCart();

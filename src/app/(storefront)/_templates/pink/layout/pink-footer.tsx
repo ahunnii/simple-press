@@ -19,6 +19,14 @@ type PinkFooterProps = DefaultFooterTemplateProps & {
    * the footer for every page) doesn't need route awareness itself.
    */
   tone?: "dark" | "light";
+  /**
+   * Privacy Policy / Terms of Service, resolved server-side in `PinkLayout`
+   * (real published pages, or the `/platform/policies/*` fallback — see
+   * `default-footer.tsx`). Merged ahead of the owner's custom
+   * `pink.global.footer-legal-links` so a fresh store always ships real
+   * legal links (review-2026-07-29.md F6).
+   */
+  resolvedLegalLinks?: { label: string; url: string }[];
 };
 
 const FIELD_KEYS = [
@@ -52,7 +60,7 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkFooter({ business, tone }: PinkFooterProps) {
+export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterProps) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
   const resolvedTone: "dark" | "light" =
@@ -89,7 +97,7 @@ export function PinkFooter({ business, tone }: PinkFooterProps) {
       ? col1LinksRaw
       : [
           { label: "Shop all", url: "/shop" },
-          { label: "Collections", url: "/collections" },
+          ...(isEnabled("collections") ? [{ label: "Collections", url: "/collections" }] : []),
           ...(isEnabled("services") ? [{ label: "Make & takes", url: "/services" }] : []),
         ];
   const col2Links =
@@ -112,9 +120,17 @@ export function PinkFooter({ business, tone }: PinkFooterProps) {
   // No hardcoded location in the fallback — the field's own defaultValue carries
   // PinkArt's, and a different owner on this template must not inherit it.
   const copyrightLine = f["pink.global.footer-copyright"] ?? businessName;
-  const legalLinks = parseTemplateListRows(
+  const ownerLegalLinks = parseTemplateListRows(
     customFields?.["pink.global.footer-legal-links"],
   ) as { _id?: string; label?: string; url?: string }[];
+  // Merge the auto-resolved policy pages ahead of the owner's custom list,
+  // deduped by url so an owner who's already added their own Privacy Policy /
+  // Terms of Service link doesn't get a second copy of it.
+  const resolvedUrls = new Set((resolvedLegalLinks ?? []).map((l) => l.url));
+  const legalLinks: { _id?: string; label?: string; url?: string }[] = [
+    ...(resolvedLegalLinks ?? []),
+    ...ownerLegalLinks.filter((l) => l.url && !resolvedUrls.has(l.url)),
+  ];
 
   const bg = isLight ? "var(--pink-paper)" : "var(--pink-ink)";
   const fg = isLight ? "var(--pink-ink)" : "var(--pink-paper)";

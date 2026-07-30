@@ -264,7 +264,7 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
             </p>
             {f["pink.testimonials.cta-button-label"] && (
               <Link
-                href={f["pink.testimonials.cta-button-link"] ?? "/contact"}
+                href={f["pink.testimonials.cta-button-link"] ?? "/testimonials/submit"}
                 className="pink-btn pink-btn-solid mt-2"
                 {...fieldAttr("pink.testimonials.cta-button-label")}
               >

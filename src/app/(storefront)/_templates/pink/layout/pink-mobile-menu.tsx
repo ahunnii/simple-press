@@ -3,9 +3,12 @@
 import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ShoppingBag, X } from "lucide-react";
+import { ShoppingBag, User, X } from "lucide-react";
 
 import type { PinkNavLink } from "./pink-header";
+import { isActiveNavLink } from "./pink-nav-utils";
+
+type PinkAccountLink = { href: string; label: string };
 
 type PinkMobileMenuProps = {
   open: boolean;
@@ -18,6 +21,8 @@ type PinkMobileMenuProps = {
   basketLabel: string;
   itemCount: number;
   onOpenCart: () => void;
+  /** Sign-in / My-account link — `null` hides the row (customerAccounts off). */
+  account: PinkAccountLink | null;
   /** DOM id for the dialog panel — pass the same id used by the trigger's `aria-controls`. */
   id?: string;
 };
@@ -40,6 +45,7 @@ export function PinkMobileMenu({
   basketLabel,
   itemCount,
   onOpenCart,
+  account,
   id,
 }: PinkMobileMenuProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -131,8 +137,7 @@ export function PinkMobileMenu({
 
   if (!open) return null;
 
-  const isActive = (href: string) =>
-    href === "/" ? activeHref === "/" : activeHref === href || activeHref.startsWith(`${href}/`);
+  const isActive = (href: string) => isActiveNavLink(activeHref, href);
 
   return (
     <div
@@ -153,7 +158,7 @@ export function PinkMobileMenu({
           type="button"
           onClick={onClose}
           aria-label="Close navigation menu"
-          className="flex h-10 w-10 items-center justify-center"
+          className="flex h-11 w-11 items-center justify-center"
           style={{ color: "var(--pink-paper)" }}
         >
           <X className="h-5 w-5" aria-hidden="true" />
@@ -161,7 +166,7 @@ export function PinkMobileMenu({
       </div>
 
       <nav
-        className="flex flex-1 flex-col justify-center gap-6 overflow-y-auto px-8"
+        className="flex flex-1 flex-col justify-center gap-4 overflow-y-auto px-8"
         aria-label="Mobile navigation"
       >
         {links.map((link) => (
@@ -170,7 +175,10 @@ export function PinkMobileMenu({
             href={link.href}
             onClick={onClose}
             aria-current={isActive(link.href) ? "page" : undefined}
-            className="pink-display"
+            // `py-1.5` brings the 24px/1.5-line-height text (36px) up to a
+            // 48px hit target without changing the type scale (design.md's
+            // 24px display size) — see review-2026-07-29.md B5.
+            className="pink-display py-1.5"
             style={{
               fontSize: "24px",
               fontWeight: 600,
@@ -204,6 +212,16 @@ export function PinkMobileMenu({
           {basketLabel}
           {itemCount > 0 && <span style={{ opacity: 0.7 }}>({itemCount})</span>}
         </button>
+        {account && (
+          <Link
+            href={account.href}
+            onClick={onClose}
+            className="pink-btn pink-btn-ghost w-full justify-center gap-2 py-3.5"
+          >
+            <User className="h-4 w-4" aria-hidden="true" />
+            {account.label}
+          </Link>
+        )}
       </div>
     </div>
   );

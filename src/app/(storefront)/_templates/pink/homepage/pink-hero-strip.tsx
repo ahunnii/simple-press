@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
+import { PinkImageFallback } from "../shared/pink-image-fallback";
+
 export type PinkHeroPanel = {
   image: string;
   caption: string;
@@ -174,8 +176,13 @@ export function PinkHeroStrip({ panels }: Props) {
             {/* Mousemove-parallax layer */}
             <div ref={setMouseLayerRef(i)} className="absolute inset-0">
               {/* Ken-burns layer */}
-              {/* No image yet → leave the dark panel bare rather than stretching
-                  a light placeholder across the hero's dark band. */}
+              {/* No image yet → a designed dark-surface fallback fills the tile
+                  instead of stretching a light placeholder across the hero's
+                  dark band, and instead of leaving it visually bare (review
+                  2026-07-29, P1: this rendered as an unexplained black
+                  rectangle under the caption chip). The caption itself is
+                  already rendered as the overlay chip below, so it isn't
+                  duplicated here. */}
               {panel.image ? (
                 <div className="pink-anim-ken absolute inset-0">
                   <Image
@@ -186,7 +193,9 @@ export function PinkHeroStrip({ panels }: Props) {
                     sizes="(max-width: 768px) 50vw, 25vw"
                   />
                 </div>
-              ) : null}
+              ) : (
+                <PinkImageFallback surface="dark" className="absolute inset-0" />
+              )}
             </div>
           </div>
 

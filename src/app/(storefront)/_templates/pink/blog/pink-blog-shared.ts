@@ -54,3 +54,14 @@ export function formatBlogDate(d: Date | string): string {
     day: "numeric",
   });
 }
+
+/**
+ * True when an `image`-type field carries a real owner-set value, rather than
+ * empty or the field system's stock `/placeholder.svg` sentinel. Used to
+ * decide when to render `PinkImageFallback` instead of the generic
+ * placeholder graphic (review 2026-07-29, P2) — e.g. the author avatar
+ * field, which always resolves to a string but may just be the default.
+ */
+export function hasCustomImage(src: string | undefined | null): boolean {
+  return !!src && src.trim().length > 0 && src !== "/placeholder.svg";
+}

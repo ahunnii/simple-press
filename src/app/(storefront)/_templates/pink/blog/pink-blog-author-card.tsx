@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import { PinkImageFallback } from "../shared/pink-image-fallback";
+import { hasCustomImage } from "./pink-blog-shared";
+
 type Props = {
   name: string;
   role?: string;
@@ -26,11 +29,12 @@ export function PinkBlogAuthorCard({ name, role, avatar, bio, ctaLabel, ctaHref 
       style={{ background: "var(--pink-white)", border: "1px solid var(--pink-line)" }}
       {...sectionGroupAttr("blog", "post-author")}
     >
-      <div
-        className="relative h-[72px] w-[72px] shrink-0 overflow-hidden"
-        style={{ background: "var(--pink-panel)" }}
-      >
-        <Image src={avatar} alt="" fill className="object-cover" sizes="72px" />
+      <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden">
+        {hasCustomImage(avatar) ? (
+          <Image src={avatar} alt="" fill className="object-cover" sizes="72px" />
+        ) : (
+          <PinkImageFallback surface="paper" />
+        )}
       </div>
       <div className="flex flex-col gap-1.5">
         <p

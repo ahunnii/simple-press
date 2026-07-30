@@ -12,6 +12,7 @@ import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { PinkBadge } from "../shared/pink-badge";
 import { PinkEmptyState } from "../shared/pink-empty-state";
 import { PinkFilterChips } from "../shared/pink-filter-chips";
+import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkReveal } from "../shared/pink-reveal";
 import { estimateReadMinutes, formatBlogDate } from "./pink-blog-shared";
 
@@ -28,6 +29,7 @@ type Props = {
   emptyBody: string;
   emptyCtaLabel: string;
   emptyCtaLink: string;
+  searchEmptyMessage: string;
 };
 
 /**
@@ -50,6 +52,7 @@ export function PinkBlogListing({
   emptyBody,
   emptyCtaLabel,
   emptyCtaLink,
+  searchEmptyMessage,
 }: Props) {
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -120,14 +123,18 @@ export function PinkBlogListing({
               className="group relative block overflow-hidden"
               style={{ aspectRatio: "16/10", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={featured.image ?? "/placeholder.svg"}
-                alt={featured.title}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 55vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              {featured.image ? (
+                <Image
+                  src={featured.image}
+                  alt={featured.title}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 55vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <PinkImageFallback surface="paper" className="absolute inset-0" />
+              )}
               <span className="absolute top-3 left-3" {...fieldAttr("pink.blog.featured-badge")}>
                 <PinkBadge>{featuredBadge}</PinkBadge>
               </span>
@@ -244,7 +251,12 @@ export function PinkBlogListing({
                 className="flex flex-col items-center gap-2 p-12 text-center"
                 style={{ background: "var(--pink-panel)", border: "1px solid var(--pink-line)" }}
               >
-                <p className="pink-display text-[18px] font-semibold">No posts match your search.</p>
+                <p
+                  className="pink-display text-[18px] font-semibold"
+                  {...fieldAttr("pink.blog.search-empty-state")}
+                >
+                  {searchEmptyMessage}
+                </p>
                 <p className="text-[14px]" style={{ color: "var(--pink-muted)" }}>
                   Try a different word, or{" "}
                   <button
@@ -276,13 +288,17 @@ export function PinkBlogListing({
                       className="pink-lift relative block overflow-hidden"
                       style={{ aspectRatio: "4/3", background: "var(--pink-panel)" }}
                     >
-                      <Image
-                        src={post.image ?? "/placeholder.svg"}
-                        alt={post.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover"
-                      />
+                      {post.image ? (
+                        <Image
+                          src={post.image}
+                          alt={post.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <PinkImageFallback surface="paper" className="absolute inset-0" />
+                      )}
                     </Link>
                     <div
                       className="mt-4 flex flex-1 flex-col gap-2 pt-4"

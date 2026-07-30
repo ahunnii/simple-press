@@ -12,6 +12,7 @@ import { PinkBadge } from "../shared/pink-badge";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkEmptyState } from "../shared/pink-empty-state";
 import { PinkEyebrow } from "../shared/pink-eyebrow";
+import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 
 const FIELD_KEYS = [
@@ -289,8 +290,10 @@ export async function PinkCollectionsPage({ collections, business }: DefaultColl
                 )}
               </div>
             </div>
-            {/* Unset images stay bare on the band's own ink surface — light
-                placeholder slabs read as broken images here. */}
+            {/* Unset images get a designed dark-surface fallback rather than
+                either a light placeholder slab or a bare void (review
+                2026-07-29, P1 — this pair rendered as two empty black cells
+                on a fresh store). */}
             <div className="grid grid-cols-2 gap-[2px]">
               {[f["pink.collections.next-image-1"], f["pink.collections.next-image-2"]].map((src, i) => (
                 <div
@@ -300,7 +303,9 @@ export async function PinkCollectionsPage({ collections, business }: DefaultColl
                 >
                   {src ? (
                     <Image src={src} alt="" fill className="object-cover" sizes="(max-width: 768px) 50vw, 25vw" />
-                  ) : null}
+                  ) : (
+                    <PinkImageFallback surface="dark" className="absolute inset-0" />
+                  )}
                 </div>
               ))}
             </div>

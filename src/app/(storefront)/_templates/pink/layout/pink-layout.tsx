@@ -5,6 +5,7 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { getSession } from "~/server/better-auth/server";
+import { api } from "~/trpc/server";
 
 import { PinkAnnouncementBar } from "./pink-announcement-bar";
 import { PinkFooter } from "./pink-footer";
@@ -17,9 +18,10 @@ export async function PinkLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const [session, { isEnabled }] = await Promise.all([
+  const [session, { isEnabled }, policies] = await Promise.all([
     getSession(),
     getBusinessFlags(),
+    api.content.getSimplifiedPages({ type: "policy" }),
   ]);
 
   const customFields = business.siteContent?.customFields;
@@ -28,6 +30,25 @@ export async function PinkLayout({
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
 
   const themeVars = resolveThemeVars("pink", customFields);
+
+  // F6: a fresh pink store has no owner-authored footer-legal-links, so the
+  // footer shipped with NO legal links at all. Resolve real policy pages the
+  // same way `default-footer.tsx` does, falling back to the platform-wide
+  // policy pages when the business hasn't published its own yet.
+  const privacyPolicy = policies.find((p) => p.slug === "privacy-policy");
+  const termsOfService = policies.find((p) => p.slug === "terms-of-service");
+  const resolvedLegalLinks = [
+    {
+      label: "Privacy Policy",
+      url: privacyPolicy ? `/${privacyPolicy.slug}` : "/platform/policies/privacy-policy",
+    },
+    {
+      label: "Terms of Service",
+      url: termsOfService
+        ? `/${termsOfService.slug}`
+        : "/platform/policies/terms-of-service",
+    },
+  ];
 
   return (
     <div
@@ -55,7 +76,7 @@ export async function PinkLayout({
         {children}
       </main>
 
-      <PinkFooter business={business} />
+      <PinkFooter business={business} resolvedLegalLinks={resolvedLegalLinks} />
     </div>
   );
 }
