@@ -77,7 +77,16 @@ export const collectionsRouter = createTRPCRouter({
       const { businessId } = ctx;
       const collections = await ctx.db.collection.findMany({
         where: { businessId, published: true },
-        include: { _count: { select: { collectionProducts: true } } },
+        include: {
+          // Count only published products — this renders as the "N items" label
+          // on the storefront, and drafts would inflate it past what a shopper
+          // can actually see in the collection.
+          _count: {
+            select: {
+              collectionProducts: { where: { product: { published: true } } },
+            },
+          },
+        },
         orderBy: { sortOrder: "asc" },
       });
 
@@ -101,6 +110,12 @@ export const collectionsRouter = createTRPCRouter({
         },
         include: {
           collectionProducts: {
+            // Gating the collection above is not enough: without this the
+            // relation returns the collection's unpublished products too, and
+            // every template's CollectionPage renders them as cards linking to
+            // a 404. It also feeds `buildCollectionSchema`, which would emit
+            // those dead URLs into the page's schema.org ItemList.
+            where: { product: { published: true } },
             include: {
               product: {
                 include: {
@@ -634,6 +649,8 @@ export const collectionsRouter = createTRPCRouter({
           slug: true,
           description: true,
           collectionProducts: {
+            // Public homepage/service rails read this — never surface drafts.
+            where: { product: { published: true } },
             include: {
               product: {
                 include: {

@@ -144,6 +144,38 @@ export function createVariant(
   });
 }
 
+export function createCollection(
+  businessId: string,
+  opts: {
+    name?: string;
+    slug?: string;
+    /** Mirrors the schema default — Collection.published defaults to true. */
+    published?: boolean;
+    sortOrder?: number;
+  } = {},
+) {
+  return db.collection.create({
+    data: {
+      businessId,
+      name: opts.name ?? "Test Collection",
+      slug: opts.slug ?? uniq("coll"),
+      published: opts.published ?? true,
+      sortOrder: opts.sortOrder ?? 0,
+    },
+  });
+}
+
+/** Joins a product into a collection (the CollectionProduct pivot row). */
+export function createCollectionProduct(
+  collectionId: string,
+  productId: string,
+  opts: { sortOrder?: number } = {},
+) {
+  return db.collectionProduct.create({
+    data: { collectionId, productId, sortOrder: opts.sortOrder ?? 0 },
+  });
+}
+
 export function createCustomer(
   businessId: string,
   opts: { email?: string; userId?: string } = {},

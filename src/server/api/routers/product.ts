@@ -51,8 +51,11 @@ export const productRouter = createTRPCRouter({
     .use(featureGate("products"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
+      // `published: true` is REQUIRED — same reasoning as `getRelated` below.
+      // This feeds the dark-trend homepage's featured grid, so without it a
+      // draft product renders a card linking to a 404.
       const products = await ctx.db.product.findMany({
-        where: { businessId },
+        where: { businessId, published: true },
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
           variants: true,

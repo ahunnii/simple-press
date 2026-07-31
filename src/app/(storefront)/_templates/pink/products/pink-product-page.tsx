@@ -91,7 +91,12 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
 
   const [collectionLink, related] = await Promise.all([
     db.collectionProduct.findFirst({
-      where: { productId: product.id, collection: { businessId: business.id } },
+      // `published: true` gates the breadcrumb: an unpublished collection 404s
+      // at /collections/[slug], so linking to one strands the shopper.
+      where: {
+        productId: product.id,
+        collection: { businessId: business.id, published: true },
+      },
       select: { collection: { select: { name: true, slug: true } } },
       orderBy: { sortOrder: "asc" },
     }),

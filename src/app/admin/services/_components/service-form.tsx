@@ -80,7 +80,10 @@ export function ServiceForm({ service, storefrontTemplateId }: Props) {
       serviceTemplateId:
         service?.serviceTemplateId ??
         getDefaultServiceTemplateId(storefrontTemplateId),
-      published: service?.published ?? false,
+      // New services start published, matching products, collections, and
+      // service items — an owner creating one almost always intends it to go
+      // live, and the toolbar Switch is right there to opt out.
+      published: service?.published ?? true,
       metaTitle: service?.metaTitle ?? "",
       metaDescription: service?.metaDescription ?? "",
       metaKeywords: service?.metaKeywords ?? "",

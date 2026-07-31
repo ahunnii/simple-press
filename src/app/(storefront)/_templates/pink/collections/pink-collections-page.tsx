@@ -65,7 +65,13 @@ function isRowInStock(product: {
  */
 async function buildCollectionStats(businessId: string): Promise<Map<string, CollStats>> {
   const rows = await db.collectionProduct.findMany({
-    where: { collection: { businessId, published: true } },
+    // Both sides need gating: `collection.published` alone still lets draft
+    // products into the counts and — worse — into `fromCents`, so a cheap
+    // unpublished draft would set the collection's displayed "from" price.
+    where: {
+      collection: { businessId, published: true },
+      product: { published: true },
+    },
     select: {
       collectionId: true,
       product: {
