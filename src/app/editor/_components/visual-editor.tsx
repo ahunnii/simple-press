@@ -15,6 +15,7 @@ import {
   setThemeSelection,
   SP_META_KEY,
 } from "~/lib/sp-meta";
+import { isBlogPostContextSection } from "~/lib/template-sections";
 import { getTemplateTheme } from "~/lib/template-themes";
 import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { api } from "~/trpc/react";
@@ -42,10 +43,12 @@ const EMPTY_CMS_VALUES: CmsPageDraftValues = {
   content: { type: "doc", content: [] },
 };
 
-/** A CMS `type:"page"` record as delivered to the editor. */
+/** A CMS `type:"page"` or `type:"blog"` record as delivered to the editor. */
 export type EditorCmsPage = {
   id: string;
   slug: string;
+  /** Which CMS kind this is — drives storefront path and admin deep link. */
+  type: "page" | "blog";
   published: boolean;
   /** Currently published values (the dirty-comparison baseline). */
   live: CmsPageDraftValues;
@@ -55,7 +58,7 @@ export type EditorCmsPage = {
   hasDraft: boolean;
 };
 
-/** True for an activePage value that addresses a CMS page (`cms:<pageId>`). */
+/** True for an activePage value that addresses a page or blog post (`cms:<pageId>`). */
 function isCmsPage(value: string): boolean {
   return value.startsWith("cms:");
 }
@@ -63,6 +66,18 @@ function isCmsPage(value: string): boolean {
 /** Extract the page id from a `cms:<pageId>` activePage value. */
 function cmsPageId(value: string): string {
   return value.slice("cms:".length);
+}
+
+/** Storefront path for a CMS entry — blog posts live under `/blog/`. */
+function cmsPreviewPath(p: EditorCmsPage): string {
+  return p.type === "blog" ? `/blog/${p.slug}` : `/${p.slug}`;
+}
+
+/** Advanced-editor deep link for a CMS entry (pages and blog posts differ). */
+function cmsAdminHref(p: EditorCmsPage): string {
+  return p.type === "blog"
+    ? `/admin/content/blog/${p.id}`
+    : `/admin/content/pages/${p.id}`;
 }
 
 export type VisualEditorProps = {
@@ -75,7 +90,12 @@ export type VisualEditorProps = {
   previewCustomFields: Record<string, unknown> | null;
   /** Whether a durable draft exists on the server. */
   hasDraft: boolean;
-  /** The business's CMS `type:"page"` pages, editable alongside the template. */
+  /**
+   * The business's CMS entries — `type:"page"` pages plus `type:"blog"` posts
+   * (blog posts only when the `blog` flag is on) — editable alongside the
+   * template. Both kinds share the same draft/publish machinery; they are split
+   * only for display (top-bar groups, storefront path, admin deep link).
+   */
   cmsPages: EditorCmsPage[];
   /** All sections for the active template (all pages, template order). */
   sections: TemplateSection[];
@@ -657,10 +677,12 @@ export function VisualEditor({
           (id) => cmsDraftsRef.current[id]?.title.trim() === "",
         );
         if (untitled) {
-          const label = cmsPageById.get(untitled)?.slug;
+          const entry = cmsPageById.get(untitled);
           toast.error(
-            label
-              ? `The "/${label}" page needs a title before you can publish`
+            entry
+              ? `The "${cmsPreviewPath(entry)}" ${
+                  entry.type === "blog" ? "post" : "page"
+                } needs a title before you can publish`
               : "Every page needs a title before you can publish",
           );
           setMutationPendingState(false);
@@ -852,6 +874,15 @@ export function VisualEditor({
   const activeCmsPage = activeCmsId
     ? (cmsPageById.get(activeCmsId) ?? null)
     : null;
+  // Sections rendered on individual blog posts (e.g. the end-of-article CTA) —
+  // offered in the rail while previewing a blog post CMS entry.
+  const blogPostSections = useMemo(
+    () =>
+      activeCmsPage?.type === "blog"
+        ? sections.filter(isBlogPostContextSection)
+        : [],
+    [sections, activeCmsPage],
+  );
   // The rail/panel/label all read the DRAFT title so renames reflect live.
   const activeCmsTitle =
     activeCmsId !== null
@@ -859,7 +890,7 @@ export function VisualEditor({
       : "";
 
   const previewPath = activeCmsPage
-    ? `/${activeCmsPage.slug}`
+    ? cmsPreviewPath(activeCmsPage)
     : (PAGE_PREVIEW_PATHS[activePage] ?? "/");
 
   // Human label for the active page — template label, or CMS draft title.
@@ -869,13 +900,29 @@ export function VisualEditor({
   }, [activeCmsId, activeCmsTitle, pages, activePage]);
 
   // CMS Select entries for the top bar (value `cms:<id>`, label = draft title).
+  // Split by kind so the top bar can render pages and blog posts as separate
+  // groups — the underlying page keys and draft machinery are identical.
   const cmsPageSelectItems: EditorTopBarCmsPage[] = useMemo(
     () =>
-      cmsPages.map((p) => ({
-        value: `cms:${p.id}`,
-        label: titleOrUntitled(cmsDrafts[p.id]?.title ?? p.live.title),
-        unpublished: !p.published,
-      })),
+      cmsPages
+        .filter((p) => p.type === "page")
+        .map((p) => ({
+          value: `cms:${p.id}`,
+          label: titleOrUntitled(cmsDrafts[p.id]?.title ?? p.live.title),
+          unpublished: !p.published,
+        })),
+    [cmsPages, cmsDrafts],
+  );
+
+  const blogPostSelectItems: EditorTopBarCmsPage[] = useMemo(
+    () =>
+      cmsPages
+        .filter((p) => p.type === "blog")
+        .map((p) => ({
+          value: `cms:${p.id}`,
+          label: titleOrUntitled(cmsDrafts[p.id]?.title ?? p.live.title),
+          unpublished: !p.published,
+        })),
     [cmsPages, cmsDrafts],
   );
 
@@ -883,6 +930,9 @@ export function VisualEditor({
     (section: TemplateSection) => {
       setNotesOpen(false);
       setThemeOpen(false);
+      // A section can be picked while a CMS preview is open (blog posts list
+      // their article + site-wide sections) — swap the right panel to fields.
+      setCmsPanelOpen(false);
       setActiveSectionId(section.id);
       // focusGroup expects the BARE group name — the overlay rebuilds the
       // full data-sp-group value as `${page}.${group}` (see preview-overlay).
@@ -1003,9 +1053,25 @@ export function VisualEditor({
   // Hotspot click inside the iframe (sp:edit-group).
   const handleEditGroup = useCallback(
     (page: string, group: string) => {
-      // CMS pages have no hotspots — ignore any stray edit-group message while
-      // one is open rather than opening a (nonexistent) template section panel.
-      if (isCmsPage(activePage)) return;
+      // A CMS preview shows no template page, so the page-switch branch below
+      // must never run here — it would navigate away from the entry the owner
+      // is editing. Blog posts DO render template sections (the end-of-article
+      // CTA, plus site-wide chrome), so accept hotspots for those in place and
+      // ignore anything else.
+      if (isCmsPage(activePage)) {
+        if (activeCmsPage?.type !== "blog") return;
+        const section = sections.find(
+          (s) =>
+            s.id === group &&
+            (isBlogPostContextSection(s) || s.page === "global"),
+        );
+        if (!section) return;
+        setNotesOpen(false);
+        setThemeOpen(false);
+        setCmsPanelOpen(false);
+        setActiveSectionId(group);
+        return;
+      }
       if (page !== activePage && page in PAGE_PREVIEW_PATHS) {
         setActivePage(page);
       }
@@ -1013,7 +1079,7 @@ export function VisualEditor({
       setThemeOpen(false);
       setActiveSectionId(group);
     },
-    [activePage],
+    [activePage, activeCmsPage, sections],
   );
 
   const handleSelectTheme = useCallback(() => {
@@ -1039,6 +1105,7 @@ export function VisualEditor({
         templateId={templateId}
         pages={pages}
         cmsPages={cmsPageSelectItems}
+        blogPosts={blogPostSelectItems}
         activePage={activePage}
         onPageChange={handlePageChange}
         device={device}
@@ -1059,9 +1126,16 @@ export function VisualEditor({
         {activeCmsPage && activeCmsId !== null ? (
           <CmsPageRail
             pageTitle={titleOrUntitled(activeCmsTitle)}
-            adminHref={`/admin/content/pages/${activeCmsId}`}
+            kind={activeCmsPage.type}
+            adminHref={cmsAdminHref(activeCmsPage)}
             isActive={cmsPanelOpen}
             onSelect={handleOpenCmsPanel}
+            sections={blogPostSections}
+            globalSections={globalSections}
+            activeSectionId={activeSectionId}
+            hiddenSectionIds={hiddenSectionIds}
+            onSelectSection={handleSelectSection}
+            onToggleVisibility={handleToggleVisibility}
           />
         ) : (
           <SectionRail
@@ -1100,13 +1174,14 @@ export function VisualEditor({
           <CmsPagePanel
             pageId={activeCmsId}
             pageTitle={activeCmsTitle}
+            kind={activeCmsPage.type}
             published={activeCmsPage.published}
             values={cmsDrafts[activeCmsId] ?? activeCmsPage.live}
             baseline={cmsBaselines[activeCmsId] ?? activeCmsPage.live}
             onChange={(patch) => applyCmsUpdate(activeCmsId, patch)}
             disabled={isPublishing || mutationPending}
             onClose={() => setCmsPanelOpen(false)}
-            adminHref={`/admin/content/pages/${activeCmsId}`}
+            adminHref={cmsAdminHref(activeCmsPage)}
           />
         ) : themeOpen && templateTheme ? (
           <ThemePanel
@@ -1127,6 +1202,13 @@ export function VisualEditor({
             mediaEnabled={mediaEnabled}
             disabled={isPublishing || mutationPending}
             onClose={() => setActiveSectionId(null)}
+            hint={
+              // Opened from a template page, but it only renders on posts —
+              // point the owner at the preview that actually shows it.
+              isBlogPostContextSection(activeSection) && !isCmsPage(activePage)
+                ? "This section appears at the end of every blog post — open a post from the page menu to preview it."
+                : undefined
+            }
           />
         ) : null}
       </div>

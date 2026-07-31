@@ -16,6 +16,7 @@ import {
   IconPackages,
   IconPhoto,
   IconReceiptTax,
+  IconReportMoney,
   IconShoppingCart,
   IconSparkles,
   IconStar,
@@ -318,6 +319,15 @@ export const NAV_ITEMS: NavItem[] = [
     section: "insights",
     featureKey: "analytics",
     keywords: ["stats", "traffic", "visitors", "reports"],
+  },
+  {
+    key: "finances",
+    title: "Finances",
+    href: "/admin/finances",
+    icon: IconReportMoney,
+    section: "insights",
+    featureKey: "payments",
+    keywords: ["revenue", "tax", "fees", "stripe", "profit", "breakdown", "money"],
   },
 
   // Platform (PLATFORM_ADMIN only — gated in sidebar rendering). Points at

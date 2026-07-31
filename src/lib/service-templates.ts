@@ -25,6 +25,7 @@ import {
 } from "~/app/(storefront)/_templates/_service-pages/service-two";
 import { buildersServiceTemplateDefs } from "~/app/(storefront)/_templates/builders/services/service-pages/fields";
 import { defaultServiceTemplateDefs } from "~/app/(storefront)/_templates/default/services/service-pages/fields";
+import { pinkServiceTemplateDefs } from "~/app/(storefront)/_templates/pink/services/service-pages/fields";
 import { pollenServiceTemplateDefs } from "~/app/(storefront)/_templates/pollen/services/service-pages/fields";
 import { viiServiceTemplateDefs } from "~/app/(storefront)/_templates/vii/services/service-pages/fields";
 
@@ -103,6 +104,7 @@ export const SERVICE_TEMPLATES_BY_STOREFRONT: Record<
   builders: buildersServiceTemplateDefs,
   pollen: pollenServiceTemplateDefs,
   vii: viiServiceTemplateDefs,
+  pink: pinkServiceTemplateDefs,
 };
 
 // ─── Flat lookup map (id → def) ──────────────────────────────────────────────
@@ -120,6 +122,7 @@ export const SERVICE_TEMPLATE_DEFS: Record<string, ServiceTemplateDef> =
       ...buildersServiceTemplateDefs,
       ...pollenServiceTemplateDefs,
       ...viiServiceTemplateDefs,
+      ...pinkServiceTemplateDefs,
     ].map((def) => [def.id, def]),
   );
 

@@ -11,11 +11,12 @@ import { ElegantCheckoutForm } from "~/app/(storefront)/_templates/elegant/cart-
 import { HappyBambooCheckoutForm } from "~/app/(storefront)/_templates/happy-bamboo/cart-checkout/happy-bamboo-checkout-form";
 import { ModernCheckoutForm } from "~/app/(storefront)/_templates/modern/cart-checkout/modern-checkout-form";
 import { NoiseCheckoutForm } from "~/app/(storefront)/_templates/noise/cart-checkout/noise-checkout-form";
+import { PinkCheckoutForm } from "~/app/(storefront)/_templates/pink/cart-checkout/pink-checkout-form";
 import { PollenCheckoutForm } from "~/app/(storefront)/_templates/pollen/cart-checkout/pollen-checkout-form";
 import { SledgeCheckoutForm } from "~/app/(storefront)/_templates/sledge/cart-checkout/sledge-checkout-form";
 
 // --- Shared mocks: every template form imports the same externals, so mocking
-// them here covers all nine. ---
+// them here covers all ten. ---
 
 // tRPC react client: a recursive proxy whose hooks return inert results. Lets the
 // discount-input children (api.discount.*.useMutation/useQuery) mount.
@@ -130,6 +131,7 @@ const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["noise", NoiseCheckoutForm],
   ["dark-trend", DarkTrendCheckoutForm],
   ["sledge", SledgeCheckoutForm],
+  ["pink", PinkCheckoutForm],
 ];
 
 describe("checkout form renders for every template", () => {

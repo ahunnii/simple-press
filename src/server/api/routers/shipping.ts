@@ -91,7 +91,7 @@ export const shippingRouter = createTRPCRouter({
           ? ctx.db.productVariant.findMany({
               where: {
                 id: { in: variantIds },
-                product: { businessId: business.id },
+                product: { businessId: business.id, published: true },
               },
               select: {
                 id: true,
@@ -110,6 +110,10 @@ export const shippingRouter = createTRPCRouter({
           where: {
             id: { in: productIds },
             businessId: business.id,
+            // Drafts are not purchasable (checkout rejects them in
+            // `validate-cart`), so they must not contribute a price or weight
+            // to a quote either.
+            published: true,
           },
           select: {
             id: true,

@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
+import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import type { TxClient } from "~/server/db";
 import {
@@ -119,8 +120,9 @@ export const contentRouter = createTRPCRouter({
         });
 
       const siteContent = publishCmsPageDrafts
-        ? // Visual editor Publish: promote every CMS page's preview draft to
-          // its live columns in the same transaction as the site-content save.
+        ? // Visual editor Publish: promote every editable page's preview draft
+          // (CMS pages and blog posts alike) to its live columns in the same
+          // transaction as the site-content save.
           await ctx.db.$transaction(async (tx) => {
             const sc = await upsertSiteContent(tx);
 
@@ -201,8 +203,9 @@ export const contentRouter = createTRPCRouter({
   }),
 
   // Discard ALL visual-editor drafts at once — the site-content draft plus
-  // every CMS page draft. Separate from `clearPreviewDraft` (above), which the
-  // legacy Template Fields editor uses and must NOT touch CMS page drafts.
+  // every page and blog-post draft. Separate from `clearPreviewDraft` (above),
+  // which the legacy Template Fields editor uses and must NOT touch page or
+  // blog-post drafts.
   discardEditorDrafts: ownerAdminProcedure.mutation(async ({ ctx }) => {
     const { businessId } = ctx;
 
@@ -261,14 +264,30 @@ export const contentRouter = createTRPCRouter({
   getEditorPages: ownerAdminProcedure.query(async ({ ctx }) => {
     const { businessId } = ctx;
 
+    // Resolve the blog flag off the session-scoped business rather than
+    // `getBusinessFlags()` — that helper resolves the business by hostname,
+    // which this admin-session procedure has no business depending on.
+    // `isEnabled` already folds in dependency-disabled flags.
+    const flagRow = await ctx.db.business.findUnique({
+      where: { id: businessId },
+      select: { featureFlags: true },
+    });
+    const blogEnabled = resolveFlags(flagRow?.featureFlags).isEnabled("blog");
+
     const pages = await ctx.db.page.findMany({
-      where: { businessId, type: "page" },
+      where: {
+        businessId,
+        // Blog posts are editable in the visual editor too, but only surface
+        // them when the business actually has the blog feature on.
+        type: { in: blogEnabled ? ["page", "blog"] : ["page"] },
+      },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
 
     return pages.map((p) => ({
       id: p.id,
       slug: p.slug,
+      type: p.type as "page" | "blog",
       published: p.published,
       live: { title: p.title, excerpt: p.excerpt, content: p.content },
       draft:
@@ -345,8 +364,11 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      // Deliberately NOT feature-gated on `blog`: if the flag is toggled off
+      // mid-session, in-flight autosaves must not start erroring. Drafts are
+      // owner-only and publicly invisible, so accepting one costs nothing.
       const { count } = await ctx.db.page.updateMany({
-        where: { id: input.pageId, businessId, type: "page" },
+        where: { id: input.pageId, businessId, type: { in: ["page", "blog"] } },
         data: {
           previewDraft: input.draft as Prisma.InputJsonValue,
           previewDraftUpdatedAt: new Date(),
@@ -430,6 +452,10 @@ export const contentRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
+      // Authorized owner/manager/platform-admin preview of THIS business.
+      const previewBizId = await getAuthorizedPreviewBusinessId(businessId);
+      const isPreview = previewBizId != null;
+
       const page = await ctx.db.page.findUnique({
         where: {
           businessId_slug: {
@@ -437,15 +463,42 @@ export const contentRouter = createTRPCRouter({
             slug: input.slug,
           },
           type: "blog",
-          // Public route: never leak draft/unpublished blog posts.
-          published: true,
+          // Public route: never leak draft/unpublished blog posts. In an
+          // authorized preview we intentionally drop this filter so drafts
+          // render.
+          ...(isPreview ? {} : { published: true }),
         },
       });
 
       if (!page) return page;
+
+      // LEAK-SAFETY INVARIANT: the response returned to the public storefront
+      // route must NEVER contain the raw draft columns. Strip them here
+      // unconditionally; for an authorized preview the draft *values* are
+      // swapped into title/excerpt/content below instead.
+      const previewDraft = page.previewDraft;
       const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
         rest)(page);
-      return { ...safe, createdAt: page.publishedAt ?? page.createdAt };
+
+      // An unpublished preview has no `publishedAt`, so the fallback to
+      // `createdAt` still yields a sensible date on every path.
+      const createdAt = page.publishedAt ?? page.createdAt;
+
+      if (isPreview && previewDraft != null) {
+        const parsed = cmsPageDraftValueSchema.safeParse(previewDraft);
+        // Ignore a malformed draft — fall through to the live values.
+        if (parsed.success) {
+          return {
+            ...safe,
+            title: parsed.data.title,
+            excerpt: parsed.data.excerpt,
+            content: parsed.data.content,
+            createdAt,
+          };
+        }
+      }
+
+      return { ...safe, createdAt };
     }),
 
   getBlogPages: publicProcedure
@@ -467,11 +520,13 @@ export const contentRouter = createTRPCRouter({
         ],
       });
 
-      // Blog posts never carry a CMS preview draft (drafts are `type: "page"`
-      // only), so we hard-null the draft columns' VALUES rather than drop them
-      // — the wide `Page`-compatible field types are preserved (the raw
+      // Blog posts CAN carry a visual-editor draft, so hard-nulling the draft
+      // columns' VALUES here is the leak guard — we null rather than drop them
+      // so the wide `Page`-compatible field types are preserved (the raw
       // `Page[]` shape `useBlogPosts` and the blog cards consume) while no
-      // draft data is ever exposed here.
+      // draft data is ever exposed. The listing (and related posts) stays
+      // live-only on purpose: the previewed post itself is the only draft
+      // surface.
       return pages.map((p) => ({
         ...p,
         previewDraft: null as Prisma.JsonValue,

@@ -30,7 +30,13 @@ type TiptapRendererProps = {
 const ALLOWED_LINK_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
 
 const extensions = [
-  StarterKit,
+  // StarterKit now bundles its own `link` and `underline`, so registering the
+  // standalone extensions alongside it made TipTap log
+  // `Duplicate extension names found: ['link', 'underline']` on every page that
+  // renders rich text. Turning StarterKit's copies off keeps the configured
+  // Link below (with the nofollow/protocol allowlist) authoritative instead of
+  // leaving which one wins to registration order.
+  StarterKit.configure({ link: false, underline: false }),
   Link.configure({
     HTMLAttributes: {
       rel: "noopener noreferrer nofollow",

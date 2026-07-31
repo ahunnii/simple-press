@@ -14,8 +14,21 @@ import {
 import {
   getSectionById,
   getSectionsForTemplate,
+  isBlogPostContextSection,
   TEMPLATE_SECTIONS,
+  type TemplateSection,
 } from "./template-sections";
+
+function makeSection(overrides: Partial<TemplateSection>): TemplateSection {
+  return {
+    id: "homepage.hero",
+    page: "homepage",
+    title: "Hero",
+    groupIds: ["homepage.hero"],
+    order: 0,
+    ...overrides,
+  };
+}
 
 describe("getSectionsForTemplate (derived fallback)", () => {
   it("derives section ids that exactly match TemplateFieldGroup ids (the data-sp-group contract)", () => {
@@ -133,4 +146,51 @@ describe("sp-meta", () => {
     const reshown = setSectionHidden(hidden, "homepage.hero", false);
     expect(isSectionVisible(reshown, "default", "homepage.hero")).toBe(true);
   });
+});
+
+describe("isBlogPostContextSection", () => {
+  it("returns true for explicit renderContext: 'blog-post', even with a non-blog.post id", () => {
+    const section = makeSection({
+      id: "homepage.hero",
+      renderContext: "blog-post",
+    });
+
+    expect(isBlogPostContextSection(section)).toBe(true);
+  });
+
+  it("returns false for explicit renderContext: 'page', even when id is 'blog.post'", () => {
+    const section = makeSection({
+      id: "blog.post",
+      page: "blog",
+      renderContext: "page",
+    });
+
+    expect(isBlogPostContextSection(section)).toBe(false);
+  });
+
+  it("defaults to true via the id convention when renderContext is absent and id is 'blog.post'", () => {
+    const section = makeSection({ id: "blog.post", page: "blog" });
+
+    expect(isBlogPostContextSection(section)).toBe(true);
+  });
+
+  it("defaults to false when renderContext is absent and id is not 'blog.post'", () => {
+    const section = makeSection({ id: "homepage.hero" });
+
+    expect(isBlogPostContextSection(section)).toBe(false);
+  });
+});
+
+describe("getSectionsForTemplate blog-post section coverage", () => {
+  const curatedTemplateIds = ["happy-bamboo", "bamboo", "noise", "sledge", "pink"];
+
+  for (const templateId of curatedTemplateIds) {
+    it(`has exactly one blog-post-context section for '${templateId}', with id 'blog.post'`, () => {
+      const sections = getSectionsForTemplate(templateId);
+      const blogPostSections = sections.filter(isBlogPostContextSection);
+
+      expect(blogPostSections).toHaveLength(1);
+      expect(blogPostSections[0]?.id).toBe("blog.post");
+    });
+  }
 });

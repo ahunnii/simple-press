@@ -62,6 +62,8 @@ export type EditorTopBarProps = {
   pages: EditorTopBarPage[];
   /** Selectable CMS pages, rendered in a second Select group. */
   cmsPages: EditorTopBarCmsPage[];
+  /** Selectable blog posts, rendered in a third Select group. */
+  blogPosts: EditorTopBarCmsPage[];
   activePage: string;
   onPageChange: (page: string) => void;
   device: DeviceKind;
@@ -96,6 +98,22 @@ const DEVICES: { kind: DeviceKind; label: string; Icon: typeof Monitor }[] = [
   { kind: "mobile", label: "Mobile preview (390px)", Icon: Smartphone },
 ];
 
+/** Shared item rendering for CMS-backed Select groups (pages, blog posts). */
+function CmsSelectItems({ items }: { items: EditorTopBarCmsPage[] }) {
+  return (
+    <>
+      {items.map((item) => (
+        <SelectItem key={item.value} value={item.value}>
+          {item.label}
+          {item.unpublished && (
+            <span className="text-muted-foreground"> (unpublished)</span>
+          )}
+        </SelectItem>
+      ))}
+    </>
+  );
+}
+
 /**
  * Fixed-height editor header: Exit + identity (left), page + device controls
  * (center), publish status + actions (right). Owns the confirm dialogs for
@@ -106,6 +124,7 @@ export function EditorTopBar({
   templateId,
   pages,
   cmsPages,
+  blogPosts,
   activePage,
   onPageChange,
   device,
@@ -196,17 +215,13 @@ export function EditorTopBar({
             {cmsPages.length > 0 && (
               <SelectGroup>
                 <SelectLabel>Your pages</SelectLabel>
-                {cmsPages.map((page) => (
-                  <SelectItem key={page.value} value={page.value}>
-                    {page.label}
-                    {page.unpublished && (
-                      <span className="text-muted-foreground">
-                        {" "}
-                        (unpublished)
-                      </span>
-                    )}
-                  </SelectItem>
-                ))}
+                <CmsSelectItems items={cmsPages} />
+              </SelectGroup>
+            )}
+            {blogPosts.length > 0 && (
+              <SelectGroup>
+                <SelectLabel>Blog posts</SelectLabel>
+                <CmsSelectItems items={blogPosts} />
               </SelectGroup>
             )}
           </SelectContent>

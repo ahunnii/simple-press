@@ -106,7 +106,15 @@ export function PaymentsOverview({ data }: { data: Data }) {
 
   return (
     <div className="admin-container space-y-6">
-      <h1 className="text-2xl font-bold">Payments</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Payments</h1>
+        <Link
+          href="/admin/finances"
+          className="text-muted-foreground hover:text-foreground text-sm transition-colors underline underline-offset-2"
+        >
+          View full breakdown →
+        </Link>
+      </div>
 
       {/* INFORM Act warning — shown at 75% so owners can verify before being required to */}
       {isApproachingThreshold && (

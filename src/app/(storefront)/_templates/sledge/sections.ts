@@ -104,6 +104,7 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
     {
       id: "blog.post",
       page: "blog",
+      renderContext: "blog-post",
       title: "Blog Post — Shop CTA",
       description: "Call-to-action band at the bottom of every blog post.",
       groupIds: ["blog.post"],

@@ -52,6 +52,31 @@ import { CoopContactPage } from "./coop/contact/coop-contact-page";
 import { CoopGenericPage } from "./coop/generic/coop-generic-page";
 import { CoopLayout } from "./coop/layout/coop-layout";
 // ---------------------------------------------------------------------------
+// PinkArt
+// ---------------------------------------------------------------------------
+import { PinkAboutPage } from "./pink/about/pink-about-page";
+import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
+import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
+import { PinkAddressBookPage } from "./pink/account/pink-address-book-page";
+import { PinkOrderDetailPage } from "./pink/account/pink-order-detail-page";
+import { PinkOrdersPage } from "./pink/account/pink-orders-page";
+import { PinkPreferencesPage } from "./pink/account/pink-preferences-page";
+import { PinkBlogPage } from "./pink/blog/pink-blog-page";
+import { PinkBlogPostPage } from "./pink/blog/pink-blog-post-page";
+import { PinkCartPage } from "./pink/cart-checkout/pink-cart-page";
+import { PinkCheckoutPage } from "./pink/cart-checkout/pink-checkout-page";
+import { PinkCheckoutUnavailable } from "./pink/cart-checkout/pink-checkout-unavailable";
+import { PinkOrderSuccessPage } from "./pink/cart-checkout/pink-order-success-page";
+import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
+import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
+import { PinkContactPage } from "./pink/contact/pink-contact-page";
+import { PinkGenericPage } from "./pink/generic/pink-generic-page";
+import { PinkLayout } from "./pink/layout/pink-layout";
+import { PinkProductPage } from "./pink/products/pink-product-page";
+import { PinkServicesIndexPage } from "./pink/services/pink-services-index-page";
+import { PinkShopPage } from "./pink/shop/pink-shop-page";
+import { PinkTestimonialsPage } from "./pink/testimonials/pink-testimonials-page";
+// ---------------------------------------------------------------------------
 // Dark Trend
 // ---------------------------------------------------------------------------
 import { DarkTrendAboutPage } from "./dark-trend/about/dark-trend-about-page";
@@ -475,6 +500,36 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     AboutPage: CoopAboutPage,
     ContactPage: CoopContactPage,
     GenericPage: CoopGenericPage,
+  },
+
+  // PinkArt LLC — hybrid archetype: full commerce + services + content, plus a
+  // custom account set. `ServicesPage` is deliberately omitted (that slot is the
+  // legacy flag-off path, used only by pollen); `ServicesIndexPage` is the
+  // flag-on one. Service DETAIL pages dispatch separately through
+  // `_service-pages/registry.ts` via the `pink-table` def.
+  pink: {
+    Layout: PinkLayout,
+    AboutPage: PinkAboutPage,
+    BlogPage: PinkBlogPage,
+    BlogPostPage: PinkBlogPostPage,
+    CartPage: PinkCartPage,
+    CheckoutPage: PinkCheckoutPage,
+    CheckoutUnavailable: PinkCheckoutUnavailable,
+    OrderSuccessPage: PinkOrderSuccessPage,
+    CollectionPage: PinkCollectionPage,
+    CollectionsPage: PinkCollectionsPage,
+    ContactPage: PinkContactPage,
+    GenericPage: PinkGenericPage,
+    ProductPage: PinkProductPage,
+    ShopPage: PinkShopPage,
+    TestimonialsPage: PinkTestimonialsPage,
+    ServicesIndexPage: PinkServicesIndexPage,
+    AccountSettingsPage: PinkAccountSettingsPage,
+    AccountSecurityPage: PinkAccountSecurityPage,
+    AddressBookPage: PinkAddressBookPage,
+    OrderDetailPage: PinkOrderDetailPage,
+    OrdersPage: PinkOrdersPage,
+    PreferencesPage: PinkPreferencesPage,
   },
 
   noise: {

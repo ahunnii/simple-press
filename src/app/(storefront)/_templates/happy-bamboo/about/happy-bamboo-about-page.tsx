@@ -458,98 +458,104 @@ export function HappyBambooAboutPage({
                       </Button>
                     </div>
 
-                    <div className="flex flex-col items-center gap-2 sm:shrink-0">
-                      <div className="rounded-lg bg-white p-3 shadow-sm">
-                        <Image
-                          src={f["happy-bamboo.about-connect-with-us-qr-code"]!}
-                          alt="QR Code to leave a Google review"
-                          width={140}
-                          height={140}
-                          className="rounded-lg"
-                        />
+                    {f["happy-bamboo.about-connect-with-us-qr-code"] && (
+                      <div className="flex flex-col items-center gap-2 sm:shrink-0">
+                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                          <Image
+                            src={f["happy-bamboo.about-connect-with-us-qr-code"]}
+                            alt="QR Code to leave a Google review"
+                            width={140}
+                            height={140}
+                            className="rounded-lg"
+                          />
+                        </div>
+                        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                          Scan to review
+                        </p>
                       </div>
-                      <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                        Scan to review
-                      </p>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               </FadeIn>
 
               {/* Social Follow */}
-              <FadeIn delay={0.2}>
-                <Card className="h-full">
-                  <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-                    <div className="flex flex-col gap-4 sm:flex-1">
-                      <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
-                        <Heart className="text-primary h-7 w-7" />
+              {(socialLinks?.facebook ??
+                socialLinks?.instagram ??
+                socialLinks?.tiktok) && (
+                <FadeIn delay={0.2}>
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
+                      <div className="flex flex-col gap-4 sm:flex-1">
+                        <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full">
+                          <Heart className="text-primary h-7 w-7" />
+                        </div>
+                        <div>
+                          <h3
+                            className="mb-2 text-xl font-semibold"
+                            {...fieldAttr(
+                              "happy-bamboo.about-connect-with-us-social-follow-header",
+                            )}
+                          >
+                            {
+                              f[
+                                "happy-bamboo.about-connect-with-us-social-follow-header"
+                              ]
+                            }
+                          </h3>
+                          <p
+                            className="text-muted-foreground max-w-sm text-sm leading-relaxed"
+                            {...fieldAttr(
+                              "happy-bamboo.about-connect-with-us-social-follow-text",
+                            )}
+                          >
+                            {
+                              f[
+                                "happy-bamboo.about-connect-with-us-social-follow-text"
+                              ]
+                            }
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3
-                          className="mb-2 text-xl font-semibold"
-                          {...fieldAttr(
-                            "happy-bamboo.about-connect-with-us-social-follow-header",
-                          )}
-                        >
-                          {
-                            f[
-                              "happy-bamboo.about-connect-with-us-social-follow-header"
-                            ]
-                          }
-                        </h3>
-                        <p
-                          className="text-muted-foreground max-w-sm text-sm leading-relaxed"
-                          {...fieldAttr(
-                            "happy-bamboo.about-connect-with-us-social-follow-text",
-                          )}
-                        >
-                          {
-                            f[
-                              "happy-bamboo.about-connect-with-us-social-follow-text"
-                            ]
-                          }
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="flex shrink-0 gap-3 sm:self-center">
-                      {socialLinks?.facebook && (
-                        <a
-                          href={socialLinks.facebook}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
-                          aria-label="Follow us on Facebook"
-                        >
-                          <FacebookIcon className="h-6 w-6" />
-                        </a>
-                      )}
-                      {socialLinks?.instagram && (
-                        <a
-                          href={socialLinks.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
-                          aria-label="Follow us on Instagram"
-                        >
-                          <InstagramIcon className="h-6 w-6" />
-                        </a>
-                      )}
-                      {socialLinks?.tiktok && (
-                        <a
-                          href={socialLinks.tiktok}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
-                          aria-label="Follow us on TikTok"
-                        >
-                          <TikTokIcon className="h-6 w-6" />
-                        </a>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </FadeIn>
+                      <div className="flex shrink-0 gap-3 sm:self-center">
+                        {socialLinks?.facebook && (
+                          <a
+                            href={socialLinks.facebook}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
+                            aria-label="Follow us on Facebook"
+                          >
+                            <FacebookIcon className="h-6 w-6" />
+                          </a>
+                        )}
+                        {socialLinks?.instagram && (
+                          <a
+                            href={socialLinks.instagram}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
+                            aria-label="Follow us on Instagram"
+                          >
+                            <InstagramIcon className="h-6 w-6" />
+                          </a>
+                        )}
+                        {socialLinks?.tiktok && (
+                          <a
+                            href={socialLinks.tiktok}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground flex h-14 w-14 items-center justify-center rounded-full transition-all hover:scale-110"
+                            aria-label="Follow us on TikTok"
+                          >
+                            <TikTokIcon className="h-6 w-6" />
+                          </a>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </FadeIn>
+              )}
             </div>
           </div>
         </section>

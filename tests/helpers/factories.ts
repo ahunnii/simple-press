@@ -15,6 +15,8 @@ export function createBusiness(
     name?: string;
     customDomain?: string | null;
     status?: string;
+    /** Overrides on top of the feature registry defaults (e.g. `{ blog: true }`). */
+    featureFlags?: Record<string, boolean>;
   } = {},
 ) {
   const sub = opts.subdomain ?? uniq("biz");
@@ -27,6 +29,9 @@ export function createBusiness(
       ownerEmail: `owner-${sub}@test.dev`,
       status: opts.status ?? "active",
       templateId: opts.templateId ?? "modern",
+      ...(opts.featureFlags !== undefined
+        ? { featureFlags: opts.featureFlags as Prisma.InputJsonValue }
+        : {}),
     },
   });
 }
@@ -139,6 +144,38 @@ export function createVariant(
   });
 }
 
+export function createCollection(
+  businessId: string,
+  opts: {
+    name?: string;
+    slug?: string;
+    /** Mirrors the schema default — Collection.published defaults to true. */
+    published?: boolean;
+    sortOrder?: number;
+  } = {},
+) {
+  return db.collection.create({
+    data: {
+      businessId,
+      name: opts.name ?? "Test Collection",
+      slug: opts.slug ?? uniq("coll"),
+      published: opts.published ?? true,
+      sortOrder: opts.sortOrder ?? 0,
+    },
+  });
+}
+
+/** Joins a product into a collection (the CollectionProduct pivot row). */
+export function createCollectionProduct(
+  collectionId: string,
+  productId: string,
+  opts: { sortOrder?: number } = {},
+) {
+  return db.collectionProduct.create({
+    data: { collectionId, productId, sortOrder: opts.sortOrder ?? 0 },
+  });
+}
+
 export function createCustomer(
   businessId: string,
   opts: { email?: string; userId?: string } = {},
@@ -184,6 +221,7 @@ export function createOrder(
     stripePaymentIntentId?: string | null;
     stripeSessionId?: string | null;
     refundAmountCents?: number | null;
+    createdAt?: Date;
     items?: CreateOrderItemInput[];
   } = {},
 ) {
@@ -209,6 +247,7 @@ export function createOrder(
           : opts.stripePaymentIntentId,
       stripeSessionId: opts.stripeSessionId ?? null,
       refundAmountCents: opts.refundAmountCents ?? null,
+      ...(opts.createdAt !== undefined ? { createdAt: opts.createdAt } : {}),
       ...(opts.items
         ? {
             items: {
@@ -275,6 +314,75 @@ export function createDiscount(
       perCustomerLimit: opts.perCustomerLimit ?? null,
       minPurchase: opts.minPurchase ?? null,
       maxDiscount: opts.maxDiscount ?? null,
+    },
+  });
+}
+
+/** A small, valid TipTap doc literal — good enough for content/excerpt round-trip tests. */
+const TEST_TIPTAP_DOC = {
+  type: "doc",
+  content: [
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "Test content" }],
+    },
+  ],
+};
+
+export function createPage(
+  businessId: string,
+  opts: {
+    slug?: string;
+    title?: string;
+    type?: "page" | "policy" | "blog" | "custom";
+    published?: boolean;
+    content?: Prisma.InputJsonValue;
+    excerpt?: string | null;
+    previewDraft?: Prisma.InputJsonValue;
+    previewDraftUpdatedAt?: Date | null;
+    publishedAt?: Date | null;
+  } = {},
+) {
+  return db.page.create({
+    data: {
+      businessId,
+      slug: opts.slug ?? uniq("page"),
+      title: opts.title ?? "Test Page",
+      type: opts.type ?? "page",
+      published: opts.published ?? true,
+      content: (opts.content ?? TEST_TIPTAP_DOC) as Prisma.InputJsonValue,
+      excerpt: opts.excerpt ?? null,
+      ...(opts.previewDraft !== undefined
+        ? { previewDraft: opts.previewDraft }
+        : {}),
+      ...(opts.previewDraftUpdatedAt !== undefined
+        ? { previewDraftUpdatedAt: opts.previewDraftUpdatedAt }
+        : {}),
+      ...(opts.publishedAt !== undefined
+        ? { publishedAt: opts.publishedAt }
+        : {}),
+    },
+  });
+}
+
+export function createBaseInventoryUnit(
+  businessId: string,
+  opts: {
+    name?: string;
+    description?: string;
+    inventoryQty?: number;
+    lowInventoryThreshold?: number | null;
+    allowBackorders?: boolean;
+  } = {},
+) {
+  return db.baseInventoryUnit.create({
+    data: {
+      businessId,
+      name: opts.name ?? "Test Inventory Unit",
+      description: opts.description ?? null,
+      inventoryQty: opts.inventoryQty ?? 0,
+      lowInventoryThreshold: opts.lowInventoryThreshold ?? null,
+      allowBackorders: opts.allowBackorders ?? false,
     },
   });
 }

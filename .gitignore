@@ -69,3 +69,9 @@ e2e/.seed-data.json
 node_modules/
 # coop template fonts — Adobe-licensed woff2, NEVER commit (served from MinIO; see docs/templates/coop/upload-fonts.md)
 public/templates/coop/fonts/
+
+# throwaway QA/dev scripts from /sp-new-template runs
+scripts/.tmp/
+
+# impeccable skill local state
+.impeccable/

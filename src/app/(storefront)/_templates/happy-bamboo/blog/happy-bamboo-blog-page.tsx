@@ -5,13 +5,21 @@ import type { Page } from "generated/prisma";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Leaf, Search, Tag } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Leaf,
+  Newspaper,
+  Search,
+  Tag,
+} from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
   InputGroup,
@@ -112,6 +120,15 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
     query.trim() === "" ? filtered.find((p) => p.featured) : null;
   const listResults =
     query.trim() === "" ? filtered.filter((p) => !p.featured) : filtered;
+
+  const isSearching = query.trim() !== "";
+  // No published posts at all — nothing to search, nothing to list.
+  const hasPosts = allPosts.length > 0;
+  // Only render the list section when there is something to show, or when the
+  // reader actually searched and deserves a "no matches" answer. A store with a
+  // single post (already rendered as the featured card) skips it entirely.
+  const showListSection = hasPosts && (listResults.length > 0 || isSearching);
+
   return (
     <PageTransition>
       {/* Page Header */}
@@ -193,29 +210,32 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
         </div>
       </section>
 
-      <FadeIn className="container mx-auto mt-12 px-4 py-4 md:py-8">
-        <div className="mx-auto max-w-lg">
-          <InputGroup>
-            <InputGroupAddon>
-              <Search className="text-muted-foreground h-4 w-4" />
-            </InputGroupAddon>
-            <InputGroupInput
-              type="search"
-              placeholder="Search articles..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search blog posts"
-            />
-          </InputGroup>
-          {query.trim() !== "" && (
-            <p className="text-muted-foreground mt-2 text-sm">
-              {filtered.length === 0
-                ? "No articles found. Try a different keyword."
-                : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
-            </p>
-          )}
-        </div>
-      </FadeIn>
+      {/* Search — hidden when there are no posts to search */}
+      {hasPosts && (
+        <FadeIn className="container mx-auto mt-12 px-4 py-4 md:py-8">
+          <div className="mx-auto max-w-lg">
+            <InputGroup>
+              <InputGroupAddon>
+                <Search className="text-muted-foreground h-4 w-4" />
+              </InputGroupAddon>
+              <InputGroupInput
+                type="search"
+                placeholder="Search articles..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="Search blog posts"
+              />
+            </InputGroup>
+            {isSearching && (
+              <p className="text-muted-foreground mt-2 text-sm">
+                {filtered.length === 0
+                  ? "No articles found. Try a different keyword."
+                  : `${filtered.length} article${filtered.length !== 1 ? "s" : ""} found`}
+              </p>
+            )}
+          </div>
+        </FadeIn>
+      )}
 
       {/* Featured Post — only shown when not searching */}
       {featuredResult && (
@@ -274,79 +294,103 @@ export function HappyBambooBlogPage({ pages, customFields, business }: Props) {
         </section>
       )}
 
-      {featuredResult && <Separator className="container mx-auto" />}
+      {featuredResult && showListSection && (
+        <Separator className="container mx-auto" />
+      )}
 
-      {/* Articles grid — "More Articles" in default view, full results when searching */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <FadeIn className="mb-12">
-            <h2 className="font-serif text-2xl font-bold md:text-3xl">
-              {query.trim() !== "" ? "Search Results" : "More Articles"}
-            </h2>
-          </FadeIn>
-
-          {listResults.length > 0 ? (
-            <StaggerContainer
-              key={listResults.map((p) => p.id).join("|")}
-              className="grid gap-8 md:grid-cols-2"
-            >
-              {listResults.map((post) => (
-                <StaggerItem key={post.slug}>
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="group block h-full"
-                  >
-                    <Card className="border-border h-full overflow-hidden transition-shadow hover:shadow-lg">
-                      <div className="relative aspect-video overflow-hidden">
-                        <Image
-                          src={post.image ?? "/placeholder.svg"}
-                          alt={post.title}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                      <CardContent className="p-6">
-                        {/* <Badge
-                          variant="secondary"
-                          className="mb-3 w-fit text-xs"
-                        >
-                          <Tag className="mr-1 h-3 w-3" />
-                          {post.category}
-                        </Badge> */}
-                        <h3 className="group-hover:text-primary mb-3 text-xl leading-snug font-bold transition-colors">
-                          {post.title}
-                        </h3>
-                        <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                          {post.excerpt}
-                        </p>
-                        <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                          <span className="flex items-center gap-1.5">
-                            <CalendarDays className="h-3.5 w-3.5" />
-                            {formatDate(post.createdAt)}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          ) : (
+      {/* No published posts at all */}
+      {!hasPosts && (
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
             <FadeIn>
-              <div className="text-muted-foreground flex flex-col items-center py-16 text-center">
-                <Search className="mb-4 h-10 w-10 opacity-30" />
-                <p className="text-lg font-medium">
-                  No articles matched &ldquo;{query}&rdquo;
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <Newspaper className="text-muted-foreground/50 mb-4 h-12 w-12" />
+                <p className="text-muted-foreground text-lg">
+                  No posts yet — check back soon.
                 </p>
-                <p className="mt-1 text-sm">
-                  Try searching for &ldquo;bamboo&rdquo;,
-                  &ldquo;sustainability&rdquo;, or &ldquo;eco living&rdquo;.
-                </p>
+                <Button asChild className="mt-6">
+                  <Link href="/shop">Browse All Products</Link>
+                </Button>
               </div>
             </FadeIn>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
+
+      {/* Articles grid — "More Articles" in default view, full results when searching.
+          Hidden entirely when the only post is already shown as the featured card. */}
+      {showListSection && (
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <FadeIn className="mb-12">
+              <h2 className="font-serif text-2xl font-bold md:text-3xl">
+                {isSearching ? "Search Results" : "More Articles"}
+              </h2>
+            </FadeIn>
+
+            {listResults.length > 0 ? (
+              <StaggerContainer
+                key={listResults.map((p) => p.id).join("|")}
+                className="grid gap-8 md:grid-cols-2"
+              >
+                {listResults.map((post) => (
+                  <StaggerItem key={post.slug}>
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="group block h-full"
+                    >
+                      <Card className="border-border h-full overflow-hidden transition-shadow hover:shadow-lg">
+                        <div className="relative aspect-video overflow-hidden">
+                          <Image
+                            src={post.image ?? "/placeholder.svg"}
+                            alt={post.title}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                        <CardContent className="p-6">
+                          {/* <Badge
+                            variant="secondary"
+                            className="mb-3 w-fit text-xs"
+                          >
+                            <Tag className="mr-1 h-3 w-3" />
+                            {post.category}
+                          </Badge> */}
+                          <h3 className="group-hover:text-primary mb-3 text-xl leading-snug font-bold transition-colors">
+                            {post.title}
+                          </h3>
+                          <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                            {post.excerpt}
+                          </p>
+                          <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                            <span className="flex items-center gap-1.5">
+                              <CalendarDays className="h-3.5 w-3.5" />
+                              {formatDate(post.createdAt)}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            ) : (
+              <FadeIn>
+                <div className="text-muted-foreground flex flex-col items-center py-16 text-center">
+                  <Search className="mb-4 h-10 w-10 opacity-30" />
+                  <p className="text-lg font-medium">
+                    No articles matched &ldquo;{query}&rdquo;
+                  </p>
+                  <p className="mt-1 text-sm">
+                    Try searching for &ldquo;bamboo&rdquo;,
+                    &ldquo;sustainability&rdquo;, or &ldquo;eco living&rdquo;.
+                  </p>
+                </div>
+              </FadeIn>
+            )}
+          </div>
+        </section>
+      )}
     </PageTransition>
   );
 }

@@ -3867,3 +3867,576 @@
     transition: none;
   }
 }
+
+/* ─── PinkArt — design tokens ──────────────────────────────────────────────
+   Scoped to .pink so they never bleed into other templates.
+   Authority: docs/templates/pink/design.md                                  */
+
+.pink {
+  /* ── Paper surface ── */
+  --pink-paper: #f6f4f2; /* page background */
+  --pink-white: #ffffff; /* raised card surface */
+  --pink-panel: #efeae7; /* inset panel */
+  --pink-ink: #111011; /* text on paper AND the dark-chrome background */
+  --pink-body: #3f3a3b; /* long-form body copy — 9.9:1 on paper */
+  --pink-body-article: #262324; /* blog-post article body — 12.3:1 on paper */
+  --pink-muted: #5c5557; /* secondary body copy — 7.0:1 on paper */
+  --pink-subtle: #6f686a; /* meta / captions — 4.98:1 on paper.
+                             NOTE: the source design used #8b8385 here, which is
+                             3.43:1 and fails AA. Never use #8b8385 on paper. */
+  /* Shared platform components (the shadcn form fields the request/contact
+     forms are built from) resolve their meta text through --muted-foreground.
+     The global value is a mid grey that fails AA on pink's tinted panels, so
+     the scope maps it onto pink's own accessible meta color. */
+  --muted-foreground: #6f686a;
+  --pink-line: #e2dcda; /* hairline rule + grid bleed on paper */
+  --pink-line-soft: #eae4e1; /* softer hairline (TOC rows) */
+  --pink-line-strong: #ddd6d3; /* form input border */
+  --pink-line-button: #d9d2cf; /* secondary button border on paper */
+
+  /* ── Dark surface ── */
+  --pink-ink-panel: #181617; /* raised panel on dark */
+  --pink-ink-panel-hover: #1f1c1d;
+  --pink-ink-tint: #1c1a1b; /* image-placeholder fill on dark */
+  --pink-ink-line: #262324; /* hairline rule on dark */
+  --pink-ink-line-strong: #3a3536; /* button / input border on dark */
+  --pink-ink-body: #ded6d8; /* body copy on dark — 13.1:1 */
+  --pink-ink-muted: #a99fa2; /* secondary copy on dark — 7.3:1 */
+  --pink-ink-subtle: #8b8385; /* meta on dark — 5.1:1 (dark surfaces ONLY) */
+  --pink-over-photo: #c3bbbd; /* breadcrumbs over a photographic hero */
+
+  /* ── Accent ── */
+  --pink-rose: #a62e52; /* primary CTA, links, eyebrows — 6.2:1 on paper */
+  --pink-blush: #d8577c; /* accent on dark — 5.1:1 on ink */
+  --pink-petal: #f0b8ca; /* eyebrow over photographic dark heroes */
+  --pink-petal-badge: #f6b3c6; /* hero-panel caption text on a scrim */
+  --pink-on-accent: #ffffff; /* text on a rose fill — 6.7:1 */
+
+  /* ── Derived — computed so theme presets update them for free ── */
+  --pink-scrim: color-mix(in srgb, var(--pink-ink) 72%, transparent);
+  --pink-glow-rose: color-mix(in srgb, var(--pink-rose) 42%, transparent);
+  --pink-glow-blush: color-mix(in srgb, var(--pink-blush) 24%, transparent);
+
+  /* ── Semantic form states — constant across theme palettes ── */
+  --pink-error: #a11b3f;
+  --pink-error-bg: #fdf1f4;
+  --pink-error-border: #edc3ce;
+  --pink-success: #166534;
+  --pink-success-bg: #f0f7f1;
+  --pink-success-border: #c2dbc8;
+
+  /* ── Shape — square edges are load-bearing for this template ── */
+  --radius: 0;
+
+  /* ── Motion ── */
+  --pink-ease: cubic-bezier(0.16, 0.84, 0.16, 1);
+  --pink-ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --pink-reveal-duration: 0.8s;
+
+  /* ── Layout scale ── */
+  --pink-gutter: 40px;
+  --pink-gutter-sm: 20px;
+  --pink-band-pad-y: 88px;
+  --pink-header-h: 63px;
+  --pink-sticky-top: 103px; /* header height + 40px breathing room */
+
+  /* ── Fonts — map to the next/font variables the layout loads ── */
+  --font-pink-display: var(--font-pink-syne);
+  --font-pink-display-alt: var(--font-pink-fraunces);
+  --font-pink-body: var(--font-pink-manrope);
+
+  background: var(--pink-paper);
+  color: var(--pink-ink);
+  font-family: var(--font-pink-body), Helvetica, Arial, sans-serif;
+  overflow-x: clip;
+}
+
+/* Square everything. The design has no rounded corner anywhere. */
+.pink *,
+.pink *::before,
+.pink *::after {
+  border-radius: 0;
+}
+
+.pink ::selection {
+  background: var(--pink-rose);
+  color: var(--pink-on-accent);
+}
+
+/* ── Typography helpers ── */
+
+.pink .pink-display {
+  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-weight: 600;
+}
+
+.pink .pink-eyebrow {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pink-rose);
+}
+.pink .pink-eyebrow-dark {
+  color: var(--pink-blush);
+}
+.pink .pink-eyebrow-photo {
+  color: var(--pink-petal);
+}
+
+.pink .pink-label {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pink-subtle);
+}
+.pink .pink-label-dark {
+  color: var(--pink-ink-subtle);
+}
+
+.pink .pink-prose {
+  color: var(--pink-body);
+  font-size: 17px;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+.pink .pink-prose > * + * {
+  margin-top: 16px;
+}
+
+/* Long-form article variant — used by the blog post body. Slightly larger,
+   airier and a touch darker than the standard prose block (design.md →
+   "Blog (post)"). A modifier rather than an inline override so theme presets
+   and the reduced-motion block keep working. */
+.pink .pink-prose-article {
+  color: var(--pink-body-article);
+  font-size: 18px;
+  line-height: 1.85;
+}
+.pink .pink-prose h2 {
+  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--pink-ink);
+  scroll-margin-top: 120px;
+  margin-top: 44px;
+}
+.pink .pink-prose h3 {
+  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--pink-ink);
+  margin-top: 32px;
+}
+.pink .pink-prose blockquote {
+  border-left: 3px solid var(--pink-rose);
+  padding: 6px 0 6px 24px;
+  margin: 28px 0 0;
+  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  color: var(--pink-ink);
+}
+.pink .pink-prose ul,
+.pink .pink-prose ol {
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pink .pink-prose ul {
+  list-style: disc;
+}
+.pink .pink-prose ol {
+  list-style: decimal;
+}
+.pink .pink-prose a {
+  color: var(--pink-rose);
+  text-underline-offset: 3px;
+  text-decoration: underline;
+}
+.pink .pink-prose a:hover {
+  color: var(--pink-ink);
+}
+
+/* ── Focus visibility — square ring in the accent, both surfaces ── */
+
+.pink :focus-visible {
+  outline: 2px solid var(--pink-rose);
+  outline-offset: 2px;
+}
+.pink .pink-dark :focus-visible,
+.pink-dark :focus-visible {
+  outline-color: var(--pink-blush);
+}
+
+/* ── Hairline grid: the container bleeds through a 1px gap ── */
+
+/* Hairlines come from a 1px ring on each CELL, not from a line-colored
+   container showing through the gaps. With the old container-background
+   technique a last row that did not fill every column bled `--pink-line`
+   as one large slab (e.g. 4 service items in a 3-up grid). */
+/* No container-level `border` here on purpose. Each child below draws its own
+   1px ring via box-shadow, which already outlines the grid's perimeter — while a
+   border on the container also wrapped the empty trailing tracks whenever the
+   item count wasn't a multiple of the column count, framing them as a visible
+   empty box (review 2026-07-29, B3: 4 service items in a 3-up grid). Dropping it
+   leaves populated cells looking identical and lets unused tracks fall away. */
+.pink .pink-hairline-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--pink-paper);
+}
+.pink .pink-hairline-grid > * {
+  background: var(--pink-paper);
+  box-shadow: 0 0 0 1px var(--pink-line);
+}
+.pink .pink-hairline-grid-dark {
+  gap: 2px;
+  background: transparent;
+  border: 0;
+}
+.pink .pink-hairline-grid-dark > * {
+  background: var(--pink-ink-panel);
+}
+.pink .pink-hairline-grid-dark > *:hover {
+  background: var(--pink-ink-panel-hover);
+}
+
+/* ── Buttons ── */
+
+.pink .pink-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1;
+  /* Padding lives on the class: no pink component supplies its own, and the
+     design's square buttons are defined by their generous padding. Size
+     modifiers below cover the design's three recurring scales. */
+  padding: 15px 26px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.25s var(--pink-ease),
+    border-color 0.25s var(--pink-ease),
+    color 0.25s var(--pink-ease);
+}
+/* Size modifiers — design.md: hero/primary CTAs 18x32, header chrome 11x20,
+   full-width panel actions stretch with their container. */
+.pink .pink-btn-lg {
+  padding: 18px 32px;
+  font-size: 15px;
+}
+.pink .pink-btn-sm {
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.pink .pink-btn-block {
+  display: flex;
+  width: 100%;
+}
+
+.pink .pink-btn-solid {
+  background: var(--pink-rose);
+  border-color: var(--pink-rose);
+  color: var(--pink-on-accent);
+}
+.pink .pink-btn-solid:hover {
+  background: var(--pink-ink);
+  border-color: var(--pink-ink);
+  color: var(--pink-paper);
+}
+.pink .pink-dark .pink-btn-solid:hover,
+.pink-dark .pink-btn-solid:hover {
+  background: var(--pink-paper);
+  border-color: var(--pink-paper);
+  color: var(--pink-ink);
+}
+.pink .pink-btn-ghost {
+  background: transparent;
+  border-color: var(--pink-line-button);
+  color: var(--pink-ink);
+  font-weight: 500;
+}
+.pink .pink-btn-ghost:hover {
+  border-color: var(--pink-rose);
+  color: var(--pink-rose);
+}
+.pink .pink-dark .pink-btn-ghost,
+.pink-dark .pink-btn-ghost {
+  border-color: var(--pink-ink-line-strong);
+  color: var(--pink-paper);
+}
+.pink .pink-dark .pink-btn-ghost:hover,
+.pink-dark .pink-btn-ghost:hover {
+  border-color: var(--pink-blush);
+  color: var(--pink-blush);
+}
+.pink .pink-btn-outline {
+  background: transparent;
+  border-color: var(--pink-ink);
+  color: var(--pink-ink);
+}
+.pink .pink-btn-outline:hover {
+  background: var(--pink-ink);
+  color: var(--pink-paper);
+}
+.pink .pink-btn:disabled {
+  cursor: not-allowed;
+  border-color: var(--pink-line);
+  background: transparent;
+  color: var(--pink-subtle);
+}
+
+/* ── Form controls ── */
+
+.pink .pink-input {
+  background: var(--pink-white);
+  border: 1px solid var(--pink-line-strong);
+  outline: none;
+  color: var(--pink-ink);
+  font-family: inherit;
+  font-size: 15px;
+  padding: 14px 16px;
+  width: 100%;
+}
+.pink .pink-input::placeholder {
+  color: var(--pink-subtle);
+}
+.pink .pink-input:focus-visible {
+  border-color: var(--pink-rose);
+}
+.pink .pink-input-invalid {
+  border-color: var(--pink-error);
+}
+.pink .pink-dark .pink-input,
+.pink-dark .pink-input {
+  background: var(--pink-ink-panel);
+  border-color: var(--pink-ink-line-strong);
+  color: var(--pink-paper);
+}
+.pink .pink-dark .pink-input::placeholder,
+.pink-dark .pink-input::placeholder {
+  color: var(--pink-ink-subtle);
+}
+.pink .pink-dark .pink-input:focus-visible,
+.pink-dark .pink-input:focus-visible {
+  border-color: var(--pink-blush);
+}
+.pink input[type="checkbox"],
+.pink input[type="radio"],
+.pink input[type="range"] {
+  accent-color: var(--pink-rose);
+}
+
+/* ── Nav links ── */
+
+.pink .pink-nav-link {
+  color: var(--pink-paper);
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.25s var(--pink-ease);
+}
+.pink .pink-nav-link:hover,
+.pink .pink-nav-link[aria-current="page"] {
+  color: var(--pink-blush);
+}
+
+/* ── Card lift ── */
+
+.pink .pink-lift {
+  transition: transform 0.4s var(--pink-ease);
+}
+.pink .pink-lift:hover {
+  transform: translateY(-8px);
+}
+
+/* ── Keyframes ── */
+
+@keyframes pink-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pink-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pink-panel {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(40px);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: translateY(0);
+  }
+}
+@keyframes pink-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes pink-ken {
+  0% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.16) translate3d(-2.5%, -2%, 0);
+  }
+  100% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+}
+@keyframes pink-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-40px, 30px, 0) scale(1.15);
+  }
+}
+
+/* Entrance animations only run once JS has armed the gate, so content is
+   fully visible with JS disabled (progressive enhancement). */
+.pink-js .pink-anim-rise {
+  animation: pink-rise 1.1s var(--pink-ease) both;
+}
+.pink-js .pink-anim-fade {
+  animation: pink-fade 1s ease both;
+}
+.pink-js .pink-anim-panel {
+  animation: pink-panel 1.2s var(--pink-ease) both;
+}
+.pink-js .pink-anim-rule {
+  transform-origin: left;
+  animation: pink-rule 0.9s var(--pink-ease-soft) 0.1s both;
+}
+.pink-js .pink-anim-ken {
+  animation: pink-ken 22s ease-in-out infinite;
+}
+.pink-js .pink-anim-drift {
+  animation: pink-drift 18s ease-in-out infinite;
+}
+.pink-js .pink-anim-drift-slow {
+  animation: pink-drift 24s ease-in-out 3s infinite;
+}
+
+/* ── Scroll reveal (use-pink-reveal.ts arms .pink-js on the layout root) ── */
+
+.pink-js .pink-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity var(--pink-reveal-duration) var(--pink-ease),
+    transform var(--pink-reveal-duration) var(--pink-ease);
+}
+.pink-js .pink-reveal.pink-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Reduced motion: zero every transform and transition ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .pink *,
+  .pink *::before,
+  .pink *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pink-js .pink-reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .pink .pink-lift:hover {
+    transform: none;
+  }
+}
+
+/* ── Account bridge: maps pink tokens onto the shadcn variables the shared
+   better-auth-ui cards read. Set on the outermost wrapper of PinkAccountLayout. */
+
+.pink-account {
+  --background: var(--pink-paper);
+  --foreground: var(--pink-ink);
+  --card: var(--pink-white);
+  --card-foreground: var(--pink-ink);
+  --popover: var(--pink-white);
+  --popover-foreground: var(--pink-ink);
+  --primary: var(--pink-rose);
+  --primary-foreground: var(--pink-on-accent);
+  --secondary: var(--pink-panel);
+  --secondary-foreground: var(--pink-ink);
+  --muted: var(--pink-panel);
+  --muted-foreground: var(--pink-muted);
+  --accent: var(--pink-panel);
+  --accent-foreground: var(--pink-ink);
+  --destructive: var(--pink-error);
+  --border: var(--pink-line);
+  --input: var(--pink-line-strong);
+  --ring: var(--pink-rose);
+  --radius: 0;
+  font-family: var(--font-pink-body), Helvetica, Arial, sans-serif;
+}
+.pink-account [data-slot="card"] {
+  background: var(--pink-white);
+  border: 1px solid var(--pink-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+.pink-account [data-slot="card-title"] {
+  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--pink-ink);
+}
+.pink-account [data-slot="card-footer"] {
+  background: transparent;
+  border-top: 1px solid var(--pink-line);
+}
+.pink-account
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.pink-account textarea,
+.pink-account [data-slot="select-trigger"] {
+  background: var(--pink-paper);
+  border: 1px solid var(--pink-line-strong);
+  border-radius: 0;
+  color: var(--pink-ink);
+}
+.pink-account
+  input:not([type="checkbox"]):not([type="radio"]):not(
+    [type="submit"]
+  ):focus-visible,
+.pink-account textarea:focus-visible,
+.pink-account [data-slot="select-trigger"]:focus-visible {
+  border-color: var(--pink-rose);
+  outline: none;
+  box-shadow: 0 0 0 1px var(--pink-rose);
+}

@@ -29,7 +29,8 @@ export type SectionRailProps = {
   isPlatformAdmin?: boolean;
 };
 
-function SectionRow({
+/** Shared with `CmsPageRail` for the blog-post "Article sections" group. */
+export function SectionRow({
   section,
   isActive,
   isHidden,

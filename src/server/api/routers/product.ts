@@ -51,8 +51,11 @@ export const productRouter = createTRPCRouter({
     .use(featureGate("products"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
+      // `published: true` is REQUIRED — same reasoning as `getRelated` below.
+      // This feeds the dark-trend homepage's featured grid, so without it a
+      // draft product renders a card linking to a 404.
       const products = await ctx.db.product.findMany({
-        where: { businessId },
+        where: { businessId, published: true },
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
           variants: true,
@@ -111,8 +114,14 @@ export const productRouter = createTRPCRouter({
         });
       }
 
+      // `published: true` is REQUIRED here. This is a public procedure feeding
+      // the storefront's related-products grids, so without it every template
+      // that calls getRelated renders the business's unpublished/draft products
+      // — and those cards link to a 404, because `product.get` (correctly) only
+      // resolves published rows. Found on the pink review, 2026-07-29; the leak
+      // affected all nine templates that call this.
       const products = await ctx.db.product.findMany({
-        where: { businessId, id: { not: product.id } },
+        where: { businessId, published: true, id: { not: product.id } },
         include: {
           images: { orderBy: { sortOrder: "asc" }, take: 4 },
           variants: true,

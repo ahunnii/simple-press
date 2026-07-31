@@ -60,6 +60,8 @@ export type CmsPagePanelProps = {
   onClose: () => void;
   /** Link to the full page editor in Site Admin (opened in a new tab). */
   adminHref: string;
+  /** "page" for CMS pages, "blog" for blog posts. */
+  kind: "page" | "blog";
 };
 
 function ModifiedBadge() {
@@ -71,8 +73,8 @@ function ModifiedBadge() {
 }
 
 /**
- * Right-hand contextual editor for a CMS page (About, Contact, generic
- * pages, etc.) selected from the visual editor. Mirrors `FieldPanel`'s
+ * Right-hand contextual editor for a page or blog post (About, Contact,
+ * generic pages, etc.) selected from the visual editor. Mirrors `FieldPanel`'s
  * chrome so the two panels are visually interchangeable in the editor
  * shell. Content editing reuses the same `MinimalTiptapEditor` + S3 uploader
  * pair as `/admin` so owners get identical richtext capabilities here.
@@ -87,7 +89,9 @@ export function CmsPagePanel({
   disabled = false,
   onClose,
   adminHref,
+  kind,
 }: CmsPagePanelProps) {
+  const isBlog = kind === "blog";
   const titleModified = values.title !== baseline.title;
   const excerptModified = (values.excerpt ?? "") !== (baseline.excerpt ?? "");
   const contentModified =
@@ -101,9 +105,11 @@ export function CmsPagePanel({
       <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold">
-            {pageTitle || "Untitled page"}
+            {pageTitle || (isBlog ? "Untitled post" : "Untitled page")}
           </h2>
-          <p className="text-muted-foreground mt-0.5 text-xs">Page</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            {isBlog ? "Blog post" : "Page"}
+          </p>
         </div>
         <Button
           type="button"
@@ -131,8 +137,8 @@ export function CmsPagePanel({
       >
         {!published && (
           <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            This page is unpublished — visitors can&apos;t see it. You&apos;re
-            viewing it in preview.
+            This {isBlog ? "post" : "page"} is unpublished — visitors
+            can&apos;t see it. You&apos;re viewing it in preview.
           </div>
         )}
 
@@ -201,7 +207,9 @@ export function CmsPagePanel({
 
         <div className="border-t pt-4">
           <p className="text-muted-foreground text-xs">
-            Slug, SEO and publish settings are managed in{" "}
+            {isBlog
+              ? "Slug, hero image, SEO and publish settings are managed in"
+              : "Slug, SEO and publish settings are managed in"}{" "}
             <a
               href={adminHref}
               target="_blank"

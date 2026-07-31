@@ -11,6 +11,7 @@ export const TEMPLATE_IDS = {
   VII: "vii",
   BUILDERS: "builders",
   COOP: "coop",
+  PINK: "pink",
 } as const;
 
 export const TEMPLATES = [
@@ -97,6 +98,13 @@ export const TEMPLATES = [
     description:
       "Pixel-exact replica of buildingcooperatively.com — minimal 4-page service site with a parallax hero and project photo gallery (no shop or checkout)",
     previewImage: "/templates/coop-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.PINK,
+    name: "PinkArt",
+    description:
+      "Editorial gallery storefront for makers — near-black chrome against warm paper, square edges and hairline grids; full commerce plus workshops, journal and keeper stories",
+    previewImage: "/templates/pink-preview.png",
   },
 ] as const;
 
