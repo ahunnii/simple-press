@@ -60,12 +60,25 @@ export function usePinkReveal(index = 0): {
       ([entry]) => {
         if (entry?.isIntersecting) {
           scheduleReveal();
-          io.disconnect();
+          stop();
         }
       },
       { rootMargin: REVEAL_ROOT_MARGIN, threshold: REVEAL_THRESHOLD },
     );
     io.observe(el);
+
+    // Single teardown for every path. Previously only the observer was
+    // disconnected on reveal while the passive `scroll` listener was removed
+    // on unmount, so each revealed element kept a listener calling
+    // `getBoundingClientRect()` for the page's lifetime — 14 on `/`, 13 on
+    // `/about` (audit 2026-07-31, P3-3). Measured cost was low (the sweep only
+    // reads, so it never forced a layout), so this is cleanliness, not a perf
+    // fix. Safe to call more than once: both operations are idempotent.
+    // Declared before `sweep` so the immediate `sweep()` below can call it.
+    const stop = () => {
+      io.disconnect();
+      window.removeEventListener("scroll", sweep);
+    };
 
     // Sweep pass — force-reveal anything already scrolled past so
     // back-navigation (or a mid-page deep link) never leaves blank regions.
@@ -73,15 +86,20 @@ export function usePinkReveal(index = 0): {
       const rect = el.getBoundingClientRect();
       if (rect.bottom < 0) {
         setRevealed(true);
-        io.disconnect();
+        stop();
       }
     };
-    sweep();
+    // Attach BEFORE the first synchronous sweep. If that sweep immediately
+    // reveals (element already scrolled past) it calls `stop()`, and a
+    // `removeEventListener` for a listener that had not been added yet is a
+    // no-op — so attaching afterwards would re-leak the listener for exactly
+    // the case P3-3 set out to fix. This order makes `stop()` authoritative
+    // whenever it runs.
     window.addEventListener("scroll", sweep, { passive: true });
+    sweep();
 
     return () => {
-      io.disconnect();
-      window.removeEventListener("scroll", sweep);
+      stop();
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;

@@ -4,7 +4,6 @@ import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkBlogListing } from "./pink-blog-listing";
 
@@ -13,7 +12,6 @@ type PinkBlogPageProps = DefaultBlogPageTemplateProps & {
 };
 
 const FIELD_KEYS = [
-  "pink.blog.header-eyebrow",
   "pink.blog.header-heading",
   "pink.blog.header-intro",
   "pink.blog.subscribe-heading",
@@ -26,7 +24,6 @@ const FIELD_KEYS = [
   "pink.blog.grid-empty-cta-label",
   "pink.blog.grid-empty-cta-link",
   "pink.blog.search-empty-state",
-  "pink.blog.ask-eyebrow",
   "pink.blog.ask-heading",
   "pink.blog.ask-body",
   "pink.blog.ask-button",
@@ -43,7 +40,6 @@ const FIELD_KEYS = [
 export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
   const f = resolveFields(customFields, FIELD_KEYS);
 
-  const eyebrow = f["pink.blog.header-eyebrow"] ?? "";
   const heading = f["pink.blog.header-heading"] ?? "The journal";
   const intro = f["pink.blog.header-intro"] ?? "";
 
@@ -60,7 +56,6 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
   const showFeatured = isSectionVisible(customFields, "pink", "blog.featured");
   const featuredBadge = f["pink.blog.featured-badge"] ?? "Latest";
 
-  const askEyebrow = f["pink.blog.ask-eyebrow"] ?? "";
   const askHeading = (f["pink.blog.ask-heading"] ?? "").trim();
   const askBody = f["pink.blog.ask-body"] ?? "";
   const askButton = (f["pink.blog.ask-button"] ?? "").trim();
@@ -74,8 +69,6 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
     <div>
       <PinkPageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: heading }]}
-        eyebrow={eyebrow}
-        eyebrowFieldKey="pink.blog.header-eyebrow"
         heading={heading}
         headingFieldKey="pink.blog.header-heading"
         intro={intro}
@@ -83,14 +76,18 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
         sectionAttrs={sectionGroupAttr("blog", "header")}
         rightSlot={
           showSubscribe ? (
+            // This block keeps its dark panel inside the now-light PinkPageHeader,
+            // so it has to opt back into the dark ramp explicitly: `pink-dark`
+            // for descendant rules, and an explicit heading colour because the
+            // h2 was inheriting the header's ink (black on #1a1a1a).
             <div
-              className="flex max-w-[280px] flex-col gap-3 px-6 py-6"
+              className="pink-dark flex max-w-[280px] flex-col gap-3 px-6 py-6"
               style={{ background: "var(--pink-ink-panel)" }}
               {...sectionGroupAttr("blog", "subscribe-cta")}
             >
               <h2
                 className="pink-display"
-                style={{ fontSize: "18px", fontWeight: 600, letterSpacing: "-0.01em" }}
+                style={{ fontSize: "18px", fontWeight: 600, letterSpacing: "-0.01em", color: "var(--pink-paper)" }}
                 {...fieldAttr("pink.blog.subscribe-heading")}
               >
                 {subscribeHeading}
@@ -132,14 +129,9 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
         <PinkDarkBand ariaLabel="Have a question" sectionAttrs={sectionGroupAttr("blog", "ask")}>
           <div className="grid gap-8 md:grid-cols-[1fr_.9fr] md:items-center">
             <div className="flex flex-col gap-4">
-              {askEyebrow && (
-                <PinkEyebrow tone="dark" fieldKey="pink.blog.ask-eyebrow">
-                  {askEyebrow}
-                </PinkEyebrow>
-              )}
               <h2
                 className="pink-display max-w-[24ch]"
-                style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1.1 }}
+                style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1.1 }}
                 {...fieldAttr("pink.blog.ask-heading")}
               >
                 {askHeading}

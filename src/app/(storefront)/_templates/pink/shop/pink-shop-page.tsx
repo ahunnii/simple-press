@@ -9,7 +9,6 @@ import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkShopClient } from "./pink-shop-client";
 
 const FIELD_KEYS = [
-  "pink.shop.header-eyebrow",
   "pink.shop.header-heading",
   "pink.shop.header-intro",
   "pink.shop.filters-cta-heading",
@@ -54,21 +53,22 @@ export function PinkShopPage({ business }: DefaultProductsPageTemplateProps) {
     <>
       <PinkPageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Shop" }]}
-        eyebrow={f["pink.shop.header-eyebrow"] ?? ""}
-        eyebrowFieldKey="pink.shop.header-eyebrow"
         heading={f["pink.shop.header-heading"] ?? ""}
         headingFieldKey="pink.shop.header-heading"
         intro={f["pink.shop.header-intro"] ?? ""}
         introFieldKey="pink.shop.header-intro"
         sectionAttrs={sectionGroupAttr("shop", "header")}
         rightSlot={
+          // PinkPageHeader became a LIGHT band on 2026-07-31, so these counts
+          // moved from the dark ramp to the light one. `--pink-paper` here was
+          // white-on-white and `--pink-ink-subtle` measured 2.6:1.
           <div className="flex flex-col items-start gap-1 md:items-end">
-            <p className="text-[15px]" style={{ color: "var(--pink-paper)" }}>
+            <p className="text-[15px]" style={{ color: "var(--pink-ink)" }}>
               <span className="font-semibold">{totalShown}</span>{" "}
               {totalShown === 1 ? "piece shown" : "pieces shown"}
             </p>
-            <p className="text-[15px]" style={{ color: "var(--pink-ink-subtle)" }}>
-              <span className="font-semibold" style={{ color: "var(--pink-paper)" }}>
+            <p className="text-[15px]" style={{ color: "var(--pink-subtle)" }}>
+              <span className="font-semibold" style={{ color: "var(--pink-ink)" }}>
                 {readyToShip}
               </span>{" "}
               ready to ship

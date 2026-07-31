@@ -39,13 +39,29 @@ function PinkScrollProgress() {
   }, []);
 
   return (
+    // Pinned to the very top of the viewport rather than to a hard-coded header
+    // height. It previously sat at `top: var(--pink-header-h)` (63px) beneath an
+    // 82px z-50 header, which meant the whole feature was occluded and had never
+    // actually been visible (audit 2026-07-31, P1-4). Anchoring at 0 also makes
+    // it immune to the header wrapping to 133px at narrow widths. z-51 clears
+    // the header by one step only — enough to show a 3px line, not enough to
+    // repeat the z-[60] bug where the header painted over the cart drawer.
     <div
       aria-hidden="true"
-      className="sticky z-40"
-      style={{ top: "var(--pink-header-h)", height: "3px", background: "var(--pink-line)" }}
+      className="sticky top-0 z-51"
+      style={{ height: "3px", background: "var(--pink-line)" }}
     >
+      {/* scaleX, not width: width is a layout property and this updates on every
+          scroll event (audit 2026-07-31, P3-4). */}
       <div
-        style={{ height: "100%", width: `${pct}%`, background: "var(--pink-rose)", transition: "width .12s linear" }}
+        style={{
+          height: "100%",
+          width: "100%",
+          transformOrigin: "left",
+          transform: `scaleX(${pct / 100})`,
+          background: "var(--pink-rose)",
+          transition: "transform .12s linear",
+        }}
       />
     </div>
   );

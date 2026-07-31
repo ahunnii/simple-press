@@ -120,6 +120,11 @@ export function PinkBlogListing({
           >
             <Link
               href={`/blog/${featured.slug}`}
+              // Same reasoning as the grid cards below: the title link carries
+              // the accessible name, and without a cover image this anchor could
+              // be left unnamed in the tab order (audit 2026-07-31 P1-1).
+              aria-hidden="true"
+              tabIndex={-1}
               className="group relative block overflow-hidden"
               style={{ aspectRatio: "16/10", background: "var(--pink-panel)" }}
             >
@@ -151,7 +156,7 @@ export function PinkBlogListing({
                 href={`/blog/${featured.slug}`}
                 className="pink-display block max-w-[22ch]"
                 style={{
-                  fontSize: "clamp(24px, 2.6vw, 32px)",
+                  fontSize: "clamp(1.5rem, 2.6vw, 2rem)",
                   fontWeight: 600,
                   letterSpacing: "-0.02em",
                   lineHeight: 1.15,
@@ -223,7 +228,7 @@ export function PinkBlogListing({
           >
             <h2
               className="pink-display"
-              style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
+              style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
             >
               {isSearching
                 ? `${searchResults.length} ${searchResults.length === 1 ? "result" : "results"}`
@@ -285,6 +290,14 @@ export function PinkBlogListing({
                   <PinkReveal as="article" key={post.slug} index={i % 6} className="flex flex-col">
                     <Link
                       href={`/blog/${post.slug}`}
+                      // The title link directly below points at the same URL and
+                      // carries the accessible name. When a post has no cover the
+                      // fallback renders no text, which left this anchor with an
+                      // empty accessible name in the tab order (axe `link-name`,
+                      // audit 2026-07-31 P1-1). Hiding it also removes a
+                      // duplicate tab stop.
+                      aria-hidden="true"
+                      tabIndex={-1}
                       className="pink-lift relative block overflow-hidden"
                       style={{ aspectRatio: "4/3", background: "var(--pink-panel)" }}
                     >

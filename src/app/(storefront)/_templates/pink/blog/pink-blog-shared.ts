@@ -62,6 +62,6 @@ export function formatBlogDate(d: Date | string): string {
  * placeholder graphic (review 2026-07-29, P2) — e.g. the author avatar
  * field, which always resolves to a string but may just be the default.
  */
-export function hasCustomImage(src: string | undefined | null): boolean {
-  return !!src && src.trim().length > 0 && src !== "/placeholder.svg";
-}
+// Moved to `shared/pink-image-fallback` — it now gates every domain's empty
+// image, not just the blog's. Re-exported here so blog call sites are unchanged.
+export { hasCustomImage } from "../shared/pink-image-fallback";

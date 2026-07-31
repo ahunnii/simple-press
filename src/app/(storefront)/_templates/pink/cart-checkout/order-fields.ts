@@ -15,16 +15,6 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
  */
 export const pinkOrderData: TemplateField[] = [
   {
-    key: "pink.order.eyebrow",
-    label: "Confirmation Eyebrow",
-    description: "Small uppercase label above the thank-you heading.",
-    type: "text",
-    page: "checkout",
-    group: "checkout.success",
-    gridColumn: "col-span-1",
-    defaultValue: "Order confirmed",
-  },
-  {
     key: "pink.order.heading",
     label: "Thank You Heading",
     description: "The first word of the thank-you heading, in ink.",
@@ -151,16 +141,6 @@ export const pinkOrderData: TemplateField[] = [
     defaultValue: "Back to shop",
   },
   {
-    key: "pink.order.cta-eyebrow",
-    label: "Closing CTA Eyebrow",
-    description: "Small label above the closing CTA panel heading.",
-    type: "text",
-    page: "checkout",
-    group: "checkout.success",
-    gridColumn: "col-span-1",
-    defaultValue: "While you're here",
-  },
-  {
     key: "pink.order.cta-heading",
     label: "Closing CTA Heading",
     description: "Heading in the closing CTA panel.",
@@ -178,7 +158,7 @@ export const pinkOrderData: TemplateField[] = [
     page: "checkout",
     group: "checkout.success",
     gridColumn: "col-span-full",
-    defaultValue: "New pieces post to the shop first. Make & takes run twice a month.",
+    defaultValue: "New pieces post to the shop first. Make & takes are booked by request.",
   },
   {
     key: "pink.order.cta-button",
@@ -208,7 +188,7 @@ export const pinkOrderData: TemplateField[] = [
     page: "checkout",
     group: "checkout.success",
     gridColumn: "col-span-1",
-    defaultValue: "See upcoming make & takes",
+    defaultValue: "See the make & takes",
   },
   {
     key: "pink.order.cta-secondary-link",

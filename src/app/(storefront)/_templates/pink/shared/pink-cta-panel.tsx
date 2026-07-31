@@ -3,13 +3,10 @@ import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-import { PinkEyebrow } from "./pink-eyebrow";
 
 type PinkCtaLink = { label: string; href: string };
 
 type PinkCtaPanelProps = {
-  eyebrow?: string;
-  eyebrowFieldKey?: string;
   heading: string;
   headingFieldKey?: string;
   body?: string;
@@ -29,8 +26,6 @@ type PinkCtaPanelProps = {
  * inventory). Server-safe.
  */
 export function PinkCtaPanel({
-  eyebrow,
-  eyebrowFieldKey,
   heading,
   headingFieldKey,
   body,
@@ -49,15 +44,10 @@ export function PinkCtaPanel({
       {...sectionAttrs}
     >
       <div className="flex flex-col gap-4">
-        {eyebrow && (
-          <PinkEyebrow tone="paper" fieldKey={eyebrowFieldKey}>
-            {eyebrow}
-          </PinkEyebrow>
-        )}
         <h2
           className="pink-display max-w-[24ch]"
           style={{
-            fontSize: "clamp(26px, 2.8vw, 38px)",
+            fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
             fontWeight: 600,
             letterSpacing: "-0.025em",
             lineHeight: 1.1,

@@ -107,7 +107,7 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
             className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
             style={{ borderBottom: "1px solid var(--pink-ink)" }}
           >
-            <h2 className="pink-display" style={{ fontSize: "clamp(24px, 2.6vw, 32px)", fontWeight: 600 }}>
+            <h2 className="pink-display" style={{ fontSize: "clamp(1.5rem, 2.6vw, 2rem)", fontWeight: 600 }}>
               <span {...fieldAttr("pink.collections.detail-grid-heading-prefix")}>{copy.headingPrefix}</span>{" "}
               {countWord}
             </h2>
@@ -133,6 +133,7 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
               return (
                 <PinkReveal key={product.id} index={i % 8}>
                   <PinkProductCard
+                    priority={i < 3}
                     href={`/shop/${product.slug}`}
                     imageUrl={product.images[0]?.url}
                     imageAlt={product.name}

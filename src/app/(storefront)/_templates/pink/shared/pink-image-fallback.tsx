@@ -88,3 +88,14 @@ export function PinkImageFallback({
     </div>
   );
 }
+
+/**
+ * True when `src` is a real, owner-supplied image — i.e. not empty and not the
+ * platform's generic `/placeholder.svg`, which several template fields still
+ * carry as their `defaultValue`. Callers use this to decide between rendering
+ * `<Image>` and rendering `<PinkImageFallback>`, so a fresh store shows one
+ * consistent empty-image treatment instead of two (audit 2026-07-31, P2-7).
+ */
+export function hasCustomImage(src: string | undefined | null): boolean {
+  return !!src && src.trim().length > 0 && src !== "/placeholder.svg";
+}

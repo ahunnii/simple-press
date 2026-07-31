@@ -13,7 +13,7 @@ import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkBlogAuthorCard } from "./pink-blog-author-card";
 import { PinkBlogPostArticle } from "./pink-blog-post-article";
-import { estimateReadMinutes, formatBlogDate, hasCustomImage } from "./pink-blog-shared";
+import { hasCustomImage } from "./pink-blog-shared";
 
 type PinkBlogPostPageProps = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
@@ -52,8 +52,6 @@ export function PinkBlogPostPage({
   const f = resolveFields(customFields, FIELD_KEYS);
 
   const journalLabel = f["pink.global.nav-blog"] ?? "Journal";
-  const readMinutes = estimateReadMinutes(page.content);
-  const metaLine = `${journalLabel} · ${formatBlogDate(page.createdAt)} · ${readMinutes} min read`;
 
   const showAuthor = isSectionVisible(customFields, "pink", "blog.post-author");
   const authorName = f["pink.blog.post-author-name"] ?? "";
@@ -78,7 +76,6 @@ export function PinkBlogPostPage({
           { label: journalLabel, href: "/blog" },
           { label: page.title },
         ]}
-        eyebrow={metaLine}
         heading={page.title}
         intro={page.excerpt ?? undefined}
         rightSlot={
@@ -152,7 +149,7 @@ export function PinkBlogPostPage({
           >
             <h2
               className="pink-display"
-              style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
+              style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
               {...fieldAttr("pink.blog.post-related-heading")}
             >
               {relatedHeading}

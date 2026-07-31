@@ -3,7 +3,6 @@ import Link from "next/link";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import { PinkFilterChips, type PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { PinkProductCard } from "../shared/pink-product-card";
 import { PinkReveal } from "../shared/pink-reveal";
@@ -21,7 +20,6 @@ export type PinkFeaturedProduct = {
 };
 
 type Props = {
-  eyebrow: string;
   heading: string;
   note: string;
   ctaLabel: string;
@@ -37,7 +35,6 @@ type Props = {
  * Per-page section concepts → Homepage). Hideable.
  */
 export function PinkCollectionSection({
-  eyebrow,
   heading,
   note,
   ctaLabel,
@@ -56,12 +53,9 @@ export function PinkCollectionSection({
       <div className="mx-auto max-w-[1400px]">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-3">
-            {eyebrow && (
-              <PinkEyebrow fieldKey="pink.homepage.collection-eyebrow">{eyebrow}</PinkEyebrow>
-            )}
             <h2
               id="pink-collection-heading"
-              className="pink-display text-[clamp(26px,2.8vw,38px)] font-semibold tracking-[-0.025em]"
+              className="pink-display text-[clamp(1.625rem,2.8vw,2.375rem)] font-semibold tracking-[-0.025em]"
               style={{ color: "var(--pink-ink)" }}
               {...fieldAttr("pink.homepage.collection-heading")}
             >
@@ -100,6 +94,7 @@ export function PinkCollectionSection({
             return (
               <PinkReveal key={product.id} index={i} as="div">
                 <PinkProductCard
+                  priority={i < 3}
                   href={`/shop/${product.slug}`}
                   imageUrl={image?.url}
                   imageAlt={image?.altText ?? product.name}

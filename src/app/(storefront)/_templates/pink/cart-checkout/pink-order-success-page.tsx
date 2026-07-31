@@ -38,7 +38,6 @@ export function PinkOrderSuccessPage({ business }: Props) {
     | undefined;
 
   const f = resolveFields(customFields, [
-    "pink.order.eyebrow",
     "pink.order.heading",
     "pink.order.heading-accent",
     "pink.order.body",
@@ -51,7 +50,6 @@ export function PinkOrderSuccessPage({ business }: Props) {
     "pink.order.no-order-heading",
     "pink.order.no-order-body",
     "pink.order.no-order-cta",
-    "pink.order.cta-eyebrow",
     "pink.order.cta-heading",
     "pink.order.cta-body",
     "pink.order.cta-button",
@@ -65,7 +63,6 @@ export function PinkOrderSuccessPage({ business }: Props) {
   return (
     <Suspense fallback={<PinkOrderLoadingFallback loadingText={loadingText} />}>
       <PinkOrderConfirmation
-        eyebrow={f["pink.order.eyebrow"] ?? ""}
         heading={f["pink.order.heading"] ?? ""}
         headingAccent={f["pink.order.heading-accent"] ?? ""}
         body={f["pink.order.body"] ?? ""}
@@ -78,7 +75,6 @@ export function PinkOrderSuccessPage({ business }: Props) {
         noOrderHeading={f["pink.order.no-order-heading"] ?? ""}
         noOrderBody={f["pink.order.no-order-body"] ?? ""}
         noOrderCta={f["pink.order.no-order-cta"] ?? ""}
-        ctaEyebrow={f["pink.order.cta-eyebrow"] ?? ""}
         ctaHeading={f["pink.order.cta-heading"] ?? ""}
         ctaBody={f["pink.order.cta-body"] ?? ""}
         ctaButton={f["pink.order.cta-button"] ?? ""}

@@ -37,7 +37,7 @@ export async function PinkCartPage({ business }: DefaultCartPageTemplateProps) {
     >
       <div className="mx-auto flex max-w-[1400px] flex-col gap-4">
         <h1
-          className="pink-display max-w-[16ch] text-[clamp(30px,3.6vw,48px)] leading-[1.05] tracking-[-0.03em]"
+          className="pink-display max-w-[16ch] text-[clamp(1.875rem,3.6vw,3rem)] leading-[1.05] tracking-[-0.03em]"
           {...fieldAttr("pink.cart.heading")}
         >
           {heading}

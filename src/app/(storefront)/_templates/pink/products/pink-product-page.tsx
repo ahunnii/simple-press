@@ -15,10 +15,7 @@ import { api } from "~/trpc/server";
 import { resolveFields } from "../index";
 import { PinkAccordion } from "../shared/pink-accordion";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
-import type { PinkStat } from "../shared/pink-stat-tiles";
-import { PinkStatTiles } from "../shared/pink-stat-tiles";
 import { PinkProductCard } from "../shared/pink-product-card";
 import { PinkProductActions } from "./pink-product-actions";
 import { PinkProductGallery } from "./pink-product-gallery";
@@ -26,7 +23,6 @@ import { PinkProductReviewsSection } from "./pink-product-reviews";
 
 const FIELD_KEYS = [
   "pink.global.product-story-image",
-  "pink.global.product-story-eyebrow",
   "pink.global.product-story-heading",
   "pink.global.product-story-body",
   "pink.global.product-related-heading",
@@ -38,24 +34,18 @@ const DEFAULT_PANELS: TemplateListRow[] = [
   {
     _id: "default-panel-1",
     title: "Care & keeping",
-    body: "Keep out of direct sun and away from damp. Spot clean only — a dry cloth handles most dust.",
+    body: "Wool filling, cotton fabric, polymer clay. Keep out of direct sun and away from damp, and spot clean only — a dry cloth handles most dust.",
   },
   {
     _id: "default-panel-2",
     title: "Shipping & returns",
-    body: "Ships in 3–5 days, boxed by hand. Each piece is one of one, so returns are accepted only if something arrives damaged.",
+    body: "Ships in 3–5 days, boxed by hand. Each piece is one of a kind, so returns are accepted only if something arrives damaged.",
   },
   {
     _id: "default-panel-3",
-    title: "Commissions",
-    body: "Want something close to this but not quite? Reach out — most commissions take 2–4 weeks.",
+    title: "Custom orders",
+    body: "Want something close to this but not quite? Reach out and we'll talk it through.",
   },
-];
-
-const DEFAULT_STATS: PinkStat[] = [
-  { _id: "default-stat-1", value: "1 of 1", label: "Editions" },
-  { _id: "default-stat-2", value: "100%", label: "Hand sewn" },
-  { _id: "default-stat-3", value: "3–5 days", label: "To ship" },
 ];
 
 /** `Product.additionalFields.productSpecs` — label/value pairs (design.md → Product → "Details"). */
@@ -113,16 +103,6 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
   const panelsRows = parseTemplateListRows(customFields?.["pink.global.product-panels"]);
   const panels = panelsRows.length > 0 ? panelsRows : DEFAULT_PANELS;
 
-  const statsRows = parseTemplateListRows(customFields?.["pink.global.product-story-stats"]);
-  const stats: PinkStat[] =
-    statsRows.length > 0
-      ? statsRows.map((row, i) => ({
-          _id: typeof row._id === "string" ? row._id : `stat-${i}`,
-          value: typeof row.value === "string" ? row.value : "",
-          label: typeof row.label === "string" ? row.label : "",
-        }))
-      : DEFAULT_STATS;
-
   const panelsVisible = isSectionVisible(customFields, "pink", "global.product-panels");
   const storyVisible = isSectionVisible(customFields, "pink", "global.product-story");
   const relatedVisible = isSectionVisible(customFields, "pink", "global.product-related");
@@ -174,12 +154,11 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
           />
 
           <div className="flex flex-col gap-5">
-            <PinkEyebrow tone="paper">{firstCollection?.name ?? "One of one"}</PinkEyebrow>
 
             <h1
               className="pink-display"
               style={{
-                fontSize: "clamp(30px, 3.6vw, 48px)",
+                fontSize: "clamp(1.875rem, 3.6vw, 3rem)",
                 fontWeight: 600,
                 letterSpacing: "-0.02em",
                 lineHeight: 1.05,
@@ -280,12 +259,9 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
               )}
             </div>
             <div className="flex flex-col gap-4">
-              <PinkEyebrow tone="dark" fieldKey="pink.global.product-story-eyebrow">
-                {f["pink.global.product-story-eyebrow"] ?? ""}
-              </PinkEyebrow>
               <h2
                 className="pink-display"
-                style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
+                style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
                 {...fieldAttr("pink.global.product-story-heading")}
               >
                 {f["pink.global.product-story-heading"] ?? ""}
@@ -297,7 +273,6 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
               >
                 {f["pink.global.product-story-body"] ?? ""}
               </p>
-              <PinkStatTiles stats={stats} columns={4} className="mt-2" />
             </div>
           </div>
         </PinkDarkBand>
@@ -317,7 +292,7 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
             <div className="mb-8 flex items-end justify-between gap-4">
               <h2
                 className="pink-display"
-                style={{ fontSize: "clamp(24px, 2.6vw, 32px)", fontWeight: 600, letterSpacing: "-0.02em" }}
+                style={{ fontSize: "clamp(1.5rem, 2.6vw, 2rem)", fontWeight: 600, letterSpacing: "-0.02em" }}
                 {...fieldAttr("pink.global.product-related-heading")}
               >
                 {f["pink.global.product-related-heading"] ?? ""}

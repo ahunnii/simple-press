@@ -27,6 +27,7 @@ import {
 } from "~/app/(storefront)/_components/checkout/saved-address-picker";
 
 import { resolveFields } from "..";
+import { PINK_SCOPE_CLASS } from "../layout/pink-scope";
 import { PinkEmptyState } from "../shared/pink-empty-state";
 
 type Props = {
@@ -156,13 +157,31 @@ export function PinkCheckoutForm({ business }: Props) {
   };
 
   if (form.items.length === 0) {
+    // The page `<h1>` lives in the form column below, so an empty basket used
+    // to leave the whole route topped by `PinkEmptyState`'s `<h2>` — axe
+    // `page-has-heading-one`, and a broken heading hierarchy under WCAG 1.3.1
+    // (audit 2026-07-31, P2-4). `PinkEmptyState` hardcodes its `<h2>`, so the
+    // page heading is rendered here instead, above the early return. This
+    // mirrors `PinkCartPage`, which already puts its `<h1>` above the empty
+    // basket; the empty state itself is unchanged.
     return (
-      <PinkEmptyState
-        heading={f["pink.checkout.empty-heading"] ?? ""}
-        body={f["pink.checkout.empty-body"] ?? ""}
-        ctaLabel={f["pink.checkout.empty-cta"] ?? ""}
-        ctaHref="/shop"
-      />
+      <div
+        className="flex max-w-[760px] flex-col gap-10"
+        {...sectionGroupAttr("checkout", "main")}
+      >
+        <h1
+          className="pink-display text-[clamp(1.75rem,3.2vw,2.625rem)] leading-[1.05] tracking-[-0.03em]"
+          {...fieldAttr("pink.checkout.heading")}
+        >
+          {f["pink.checkout.heading"] ?? ""}
+        </h1>
+        <PinkEmptyState
+          heading={f["pink.checkout.empty-heading"] ?? ""}
+          body={f["pink.checkout.empty-body"] ?? ""}
+          ctaLabel={f["pink.checkout.empty-cta"] ?? ""}
+          ctaHref="/shop"
+        />
+      </div>
     );
   }
 
@@ -394,7 +413,7 @@ export function PinkCheckoutForm({ business }: Props) {
       >
         <div className="flex flex-col gap-3">
           <h1
-            className="pink-display text-[clamp(28px,3.2vw,42px)] leading-[1.05] tracking-[-0.03em]"
+            className="pink-display text-[clamp(1.75rem,3.2vw,2.625rem)] leading-[1.05] tracking-[-0.03em]"
             {...fieldAttr("pink.checkout.heading")}
           >
             {f["pink.checkout.heading"] ?? ""}
@@ -634,7 +653,7 @@ export function PinkCheckoutForm({ business }: Props) {
                     >
                       <SelectValue placeholder="—" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className={`${PINK_SCOPE_CLASS} rounded-none`}>
                       {getRegionOptions(form.country).map((opt) => (
                         <SelectItem key={opt.code} value={opt.code}>
                           {opt.name}
@@ -675,7 +694,7 @@ export function PinkCheckoutForm({ business }: Props) {
                     >
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className={`${PINK_SCOPE_CLASS} rounded-none`}>
                       {form.allowedCountries.map((c) => (
                         <SelectItem key={c} value={c}>
                           {COUNTRY_LABELS[c]}

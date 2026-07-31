@@ -53,6 +53,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     onSuccess: ({ message }) => {
       toast.dismiss();
       toast.success(message);
+      setIsSuccess(true);
       setCaptchaToken("");
       const handle = captchaRef.current;
       if (handle) handle.reset();
@@ -60,7 +61,9 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     },
     onError: (err: { message?: string }) => {
       toast.dismiss();
-      toast.error(err.message ?? "Something went wrong. Please try again.");
+      const errorMessage = err.message ?? "Something went wrong. Please try again.";
+      toast.error(errorMessage);
+      setError(errorMessage);
       const handle = captchaRef.current;
       if (handle) handle.reset();
       setCaptchaToken("");

@@ -3,12 +3,15 @@
 import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ShoppingBag, User, X } from "lucide-react";
+import { Heart, ShoppingBag, User, X } from "lucide-react";
 
 import type { PinkNavLink } from "./pink-header";
 import { isActiveNavLink } from "./pink-nav-utils";
 
 type PinkAccountLink = { href: string; label: string };
+
+/** Wishlist entry data — `null` hides the row (`wishlist` flag off). */
+type PinkWishlistInfo = { count: number; hydrated: boolean } | null;
 
 type PinkMobileMenuProps = {
   open: boolean;
@@ -23,13 +26,14 @@ type PinkMobileMenuProps = {
   onOpenCart: () => void;
   /** Sign-in / My-account link — `null` hides the row (customerAccounts off). */
   account: PinkAccountLink | null;
+  wishlist: PinkWishlistInfo;
   /** DOM id for the dialog panel — pass the same id used by the trigger's `aria-controls`. */
   id?: string;
 };
 
 /**
  * Full-screen ink overlay mobile nav (design.md → Chrome → Header →
- * "Mobile"). Nav items stacked at Syne 600 24px; secondary CTA + basket
+ * "Mobile"). Nav items stacked at display 600 24px; secondary CTA + basket
  * pinned to the bottom. Focus-trapped, closes on Escape, body scroll locked
  * while open — mirrors `coop/layout/coop-mobile-menu.tsx`. Route-change
  * close is handled by the parent (`pink-header.tsx`), which owns `open`.
@@ -46,6 +50,7 @@ export function PinkMobileMenu({
   itemCount,
   onOpenCart,
   account,
+  wishlist,
   id,
 }: PinkMobileMenuProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -212,6 +217,19 @@ export function PinkMobileMenu({
           {basketLabel}
           {itemCount > 0 && <span style={{ opacity: 0.7 }}>({itemCount})</span>}
         </button>
+        {wishlist && (
+          <Link
+            href="/wishlist"
+            onClick={onClose}
+            className="pink-btn pink-btn-ghost w-full justify-center gap-2 py-3.5"
+          >
+            <Heart className="h-4 w-4" aria-hidden="true" />
+            Wishlist
+            {wishlist.hydrated && wishlist.count > 0 && (
+              <span style={{ opacity: 0.7 }}>({wishlist.count})</span>
+            )}
+          </Link>
+        )}
         {account && (
           <Link
             href={account.href}

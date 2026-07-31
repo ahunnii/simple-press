@@ -6,12 +6,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@daveyplate/better-auth-ui";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import { Menu, ShoppingBag, User } from "lucide-react";
+import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
+import { useWishlist } from "~/providers/wishlist-context";
 import { resolveThemeVars } from "~/lib/template-themes";
 
 import { resolveFields } from "..";
@@ -58,6 +59,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
   const { itemCount, setIsOpen } = useCart();
+  const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuId = useId();
@@ -90,7 +92,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
   const wordmark = splitAccentWordmark(businessName, accentWord);
 
   const ctaText = (f["pink.global.header-cta-text"] ?? "").trim();
-  const ctaLink = f["pink.global.header-cta-link"] ?? "/testimonials";
+  const ctaLink = f["pink.global.header-cta-link"] ?? "/contact";
   const basketLabel = f["pink.global.basket-label"] ?? "Basket";
 
   const defaultNavLinks: PinkNavLink[] = [
@@ -151,8 +153,8 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
         // leaving the header undimmed above the scrim.
         className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-x-6 gap-y-3.5 px-5 py-[18px] md:px-10"
         style={{
-          background: "var(--pink-ink)",
-          borderBottom: "1px solid var(--pink-ink-line)",
+          background: "var(--pink-paper)",
+          borderBottom: "1px solid var(--pink-line)",
         }}
       >
         {/* ── Wordmark + locality ── */}
@@ -178,13 +180,13 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
                 fontSize: "23px",
                 fontWeight: 700,
                 letterSpacing: "-0.02em",
-                color: "var(--pink-paper)",
+                color: "var(--pink-ink)",
               }}
             >
               {wordmark.matches ? (
                 <>
                   {wordmark.prefix}
-                  <span style={{ color: "var(--pink-blush)" }}>{wordmark.tail}</span>
+                  <span style={{ color: "var(--pink-rose)" }}>{wordmark.tail}</span>
                 </>
               ) : (
                 businessName
@@ -194,7 +196,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
           {localityTag && (
             <span
               className="shrink-0 text-[11px] font-medium tracking-[0.2em] uppercase"
-              style={{ color: "var(--pink-ink-subtle)" }}
+              style={{ color: "var(--pink-subtle)" }}
               {...fieldAttr("pink.global.locality-tag")}
             >
               {localityTag}
@@ -234,7 +236,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
                       trigger: {
                         base: "rounded-full w-auto h-auto p-0",
                         avatar: {
-                          base: "size-8 ring-1 ring-[var(--pink-blush)] ring-offset-1 ring-offset-[var(--pink-ink)]",
+                          base: "size-8 ring-1 ring-[var(--pink-rose)] ring-offset-1 ring-offset-[var(--pink-paper)]",
                         },
                       },
                     }}
@@ -260,7 +262,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
                     href="/auth/sign-in"
                     aria-label="Sign in to your account"
                     className="flex items-center justify-center"
-                    style={{ color: "var(--pink-paper)" }}
+                    style={{ color: "var(--pink-ink)" }}
                   >
                     <User className="h-[18px] w-[18px]" aria-hidden="true" />
                   </Link>
@@ -268,22 +270,54 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
               </div>
             )}
 
+            {isEnabled("wishlist") && (
+              <Link
+                href="/wishlist"
+                aria-label={
+                  wishlistHydrated && wishlistCount > 0
+                    ? `Open wishlist, ${wishlistCount} saved ${wishlistCount === 1 ? "item" : "items"}`
+                    : "Open wishlist"
+                }
+                // 24x24 box around an 18px glyph: the painted icon stays the
+                // same size as the account icon beside it, but the target
+                // clears WCAG 2.5.8's 24px AA bar. (The account icon is 18px
+                // and predates this — same fix applies there, out of scope here.)
+                className="relative hidden size-6 items-center justify-center lg:inline-flex"
+                style={{ color: "var(--pink-ink)" }}
+              >
+                <Heart className="h-[18px] w-[18px]" aria-hidden="true" />
+                {wishlistHydrated && wishlistCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    // rem, not px: the type scale is rem throughout for WCAG 1.4.4.
+                    className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center px-[3px] text-[0.625rem] leading-none font-semibold"
+                    style={{
+                      background: "var(--pink-rose)",
+                      color: "var(--pink-on-accent)",
+                    }}
+                  >
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
             {ctaText && (
               <Link
                 href={ctaLink}
                 className="hidden text-[14px] font-medium transition-colors sm:inline-flex"
                 style={{
-                  border: "1px solid var(--pink-ink-line-strong)",
-                  color: "var(--pink-paper)",
+                  border: "1px solid var(--pink-line-button)",
+                  color: "var(--pink-ink)",
                   padding: "11px 16px",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--pink-blush)";
-                  e.currentTarget.style.color = "var(--pink-blush)";
+                  e.currentTarget.style.borderColor = "var(--pink-rose)";
+                  e.currentTarget.style.color = "var(--pink-rose)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--pink-ink-line-strong)";
-                  e.currentTarget.style.color = "var(--pink-paper)";
+                  e.currentTarget.style.borderColor = "var(--pink-line-button)";
+                  e.currentTarget.style.color = "var(--pink-ink)";
                 }}
                 {...fieldAttr("pink.global.header-cta-text")}
               >
@@ -307,9 +341,9 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
                 padding: "11px 20px",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--pink-paper)";
-                e.currentTarget.style.borderColor = "var(--pink-paper)";
-                e.currentTarget.style.color = "var(--pink-ink)";
+                e.currentTarget.style.background = "var(--pink-ink)";
+                e.currentTarget.style.borderColor = "var(--pink-ink)";
+                e.currentTarget.style.color = "var(--pink-paper)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "var(--pink-rose)";
@@ -337,8 +371,17 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
               aria-expanded={mobileOpen}
               aria-controls={mobileMenuId}
               onClick={() => setMobileOpen(true)}
-              className="flex h-10 w-10 items-center justify-center lg:hidden"
-              style={{ color: "var(--pink-paper)" }}
+              // The 40x40 box is optical, not arbitrary: it centres the icon
+              // against the basket button beside it and keeps the header row
+              // at its designed height. It clears WCAG 2.5.8 (24px AA) but
+              // sits under the template's own 44px bar, so on touch pointers
+              // only, a 2px `::after` ring extends the *hit area* to 44x44
+              // while the painted box, and therefore the header layout,
+              // stays exactly as designed (audit 2026-07-31, P3-1). The
+              // 12px `gap-3` to the basket button leaves 8px of clearance,
+              // so the expanded areas never overlap.
+              className="relative flex h-10 w-10 items-center justify-center lg:hidden [@media(pointer:coarse)]:after:absolute [@media(pointer:coarse)]:after:-inset-0.5 [@media(pointer:coarse)]:after:content-['']"
+              style={{ color: "var(--pink-ink)" }}
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </button>
@@ -357,6 +400,11 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
         ctaLink={ctaLink}
         basketLabel={basketLabel}
         itemCount={itemCount}
+        wishlist={
+          isEnabled("wishlist")
+            ? { count: wishlistCount, hydrated: wishlistHydrated }
+            : null
+        }
         account={
           isEnabled("customerAccounts")
             ? {

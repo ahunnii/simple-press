@@ -3873,57 +3873,72 @@
    Authority: docs/templates/pink/design.md                                  */
 
 .pink {
-  /* ── Paper surface ── */
-  --pink-paper: #f6f4f2; /* page background */
-  --pink-white: #ffffff; /* raised card surface */
-  --pink-panel: #efeae7; /* inset panel */
-  --pink-ink: #111011; /* text on paper AND the dark-chrome background */
-  --pink-body: #3f3a3b; /* long-form body copy — 9.9:1 on paper */
-  --pink-body-article: #262324; /* blog-post article body — 12.3:1 on paper */
-  --pink-muted: #5c5557; /* secondary body copy — 7.0:1 on paper */
-  --pink-subtle: #6f686a; /* meta / captions — 4.98:1 on paper.
-                             NOTE: the source design used #8b8385 here, which is
-                             3.43:1 and fails AA. Never use #8b8385 on paper. */
+  /* ── Light surface — white ground, pink washes ──
+     Direction (2026-07-31, client): clean, upbeat, all-ages "white / pink /
+     black". The previous palette was a warm off-white with muddy warm greys,
+     which read as grungy. Neutrals are now genuinely neutral and the brand's
+     pink is carried by tinted SURFACES (`--pink-panel`) rather than by a warm
+     tint in the body colour — the site should read "PinkArt" without pink ever
+     touching a contrast boundary. Every pair below is verified ≥4.5:1 (text)
+     or ≥3:1 (non-text UI); see docs/templates/pink/design.md → Colour. */
+  --pink-paper: #ffffff; /* page background — pure white */
+  --pink-white: #ffffff; /* raised card surface (defined by its border) */
+  --pink-panel: #fef4f8; /* inset panel — the pale pink wash */
+  --pink-panel-strong: #fce9f1; /* deeper wash: hover / stacked panels */
+  --pink-ink: #101010; /* neutral black — text on white AND dark bands */
+  --pink-body: #3d3d3d; /* long-form body copy — 10.9:1 on white */
+  --pink-body-article: #262626; /* blog-post article body — 15.1:1 */
+  --pink-muted: #595959; /* secondary body copy — 7.0:1 */
+  --pink-subtle: #666666; /* meta / captions — 5.3:1 on white, 5.3:1 on wash */
   /* Shared platform components (the shadcn form fields the request/contact
      forms are built from) resolve their meta text through --muted-foreground.
-     The global value is a mid grey that fails AA on pink's tinted panels, so
-     the scope maps it onto pink's own accessible meta color. */
-  --muted-foreground: #6f686a;
-  --pink-line: #e2dcda; /* hairline rule + grid bleed on paper */
-  --pink-line-soft: #eae4e1; /* softer hairline (TOC rows) */
-  --pink-line-strong: #ddd6d3; /* form input border */
-  --pink-line-button: #d9d2cf; /* secondary button border on paper */
+     The global value fails AA on pink's tinted panels, so the scope maps it
+     onto pink's own accessible meta colour. */
+  --muted-foreground: var(--pink-subtle);
+  --pink-line: #ececec; /* decorative hairline — exempt from 1.4.11 */
+  --pink-line-soft: #f5f5f5; /* softer hairline (TOC rows) */
+  /* Interactive boundaries must clear 3:1 (WCAG 1.4.11). These were 1.31–1.44:1
+     before — an input's border is its only edge, so the control was effectively
+     invisible. Kept separate from `--pink-line` so decorative rules stay light.
+     (audit 2026-07-31, P1-3) */
+  --pink-line-strong: #8c8c8c; /* form input border — 3.36:1 on white */
+  --pink-line-button: #8c8c8c; /* secondary button border — 3.36:1 on white */
 
-  /* ── Dark surface ── */
-  --pink-ink-panel: #181617; /* raised panel on dark */
-  --pink-ink-panel-hover: #1f1c1d;
-  --pink-ink-tint: #1c1a1b; /* image-placeholder fill on dark */
-  --pink-ink-line: #262324; /* hairline rule on dark */
-  --pink-ink-line-strong: #3a3536; /* button / input border on dark */
-  --pink-ink-body: #ded6d8; /* body copy on dark — 13.1:1 */
-  --pink-ink-muted: #a99fa2; /* secondary copy on dark — 7.3:1 */
-  --pink-ink-subtle: #8b8385; /* meta on dark — 5.1:1 (dark surfaces ONLY) */
-  --pink-over-photo: #c3bbbd; /* breadcrumbs over a photographic hero */
+  /* ── Dark surface — used selectively (footer + feature bands) ── */
+  --pink-ink-panel: #1a1a1a; /* raised panel on dark */
+  --pink-ink-panel-hover: #242424;
+  --pink-ink-tint: #1c1c1c; /* image-placeholder fill on dark */
+  --pink-ink-line: #2e2e2e; /* hairline rule on dark */
+  --pink-ink-line-strong: #666666; /* button / input border on dark — 3.31:1 */
+  --pink-ink-body: #e8e8e8; /* body copy on dark — 15.5:1 */
+  --pink-ink-muted: #b3b3b3; /* secondary copy on dark — 9.1:1 */
+  --pink-ink-subtle: #949494; /* meta on dark — 6.3:1 (dark surfaces ONLY) */
+  --pink-over-photo: #e8e8e8; /* breadcrumbs over a photographic hero */
 
-  /* ── Accent ── */
-  --pink-rose: #a62e52; /* primary CTA, links, eyebrows — 6.2:1 on paper */
-  --pink-blush: #d8577c; /* accent on dark — 5.1:1 on ink */
-  --pink-petal: #f0b8ca; /* eyebrow over photographic dark heroes */
-  --pink-petal-badge: #f6b3c6; /* hero-panel caption text on a scrim */
-  --pink-on-accent: #ffffff; /* text on a rose fill — 6.7:1 */
+  /* ── Accent — the brand ──
+     `--pink-rose` is the brightest pink that still clears 4.5:1 on white at any
+     text size, so it needs no size-dependent usage rules. `--pink-blush` is the
+     brighter, more upbeat pink; it only ever sits on a dark surface, where it
+     measures 6.1:1. */
+  --pink-rose: #d81b60; /* primary CTA, links — 4.95:1 on white, both ways */
+  --pink-blush: #ff4d8d; /* accent on dark — 6.1:1 on ink */
+  --pink-petal: #f8bbd0; /* accent over photographic dark heroes — 11.8:1 */
+  --pink-petal-badge: #fbd0e0; /* hero-panel caption text on a scrim */
+  --pink-on-accent: #ffffff; /* text on a rose fill — 4.95:1 */
 
   /* ── Derived — computed so theme presets update them for free ── */
   --pink-scrim: color-mix(in srgb, var(--pink-ink) 72%, transparent);
-  --pink-glow-rose: color-mix(in srgb, var(--pink-rose) 42%, transparent);
-  --pink-glow-blush: color-mix(in srgb, var(--pink-blush) 24%, transparent);
 
-  /* ── Semantic form states — constant across theme palettes ── */
-  --pink-error: #a11b3f;
-  --pink-error-bg: #fdf1f4;
-  --pink-error-border: #edc3ce;
-  --pink-success: #166534;
-  --pink-success-bg: #f0f7f1;
-  --pink-success-border: #c2dbc8;
+  /* ── Semantic form states — constant across theme palettes ──
+     Error deliberately sits in the orange-red band, not the pink-red band, so
+     it stays distinguishable from the brand accent now that the accent is a
+     saturated pink. */
+  --pink-error: #b3261e; /* 6.5:1 on white, 5.7:1 on its own bg */
+  --pink-error-bg: #fdecea;
+  --pink-error-border: #e6a49e;
+  --pink-success: #1b6b3a; /* 6.5:1 on white */
+  --pink-success-bg: #eaf6ee;
+  --pink-success-border: #b6dcc4;
 
   /* ── Shape — square edges are load-bearing for this template ── */
   --radius: 0;
@@ -3937,17 +3952,26 @@
   --pink-gutter: 40px;
   --pink-gutter-sm: 20px;
   --pink-band-pad-y: 88px;
-  --pink-header-h: 63px;
-  --pink-sticky-top: 103px; /* header height + 40px breathing room */
+  /* Measured, not taken from the comp. These were 63px/103px against a header
+     that has always rendered at 82px — so every sticky rail got 21px of
+     clearance instead of the 40px documented here, and the blog progress bar
+     (which pinned at 63px under an 82px z-50 header) was never visible at all.
+     (audit 2026-07-31, P1-4.) The header wraps to 133px at 320px, so anything
+     that must clear it at every width should not rely on these alone. */
+  --pink-header-h: 82px;
+  --pink-sticky-top: 122px; /* header height + 40px breathing room */
 
   /* ── Fonts — map to the next/font variables the layout loads ── */
-  --font-pink-display: var(--font-pink-syne);
-  --font-pink-display-alt: var(--font-pink-fraunces);
-  --font-pink-body: var(--font-pink-manrope);
+  --font-pink-display: var(--font-pink-fraunces);
+  --font-pink-body: var(--font-pink-nunito);
 
   background: var(--pink-paper);
   color: var(--pink-ink);
-  font-family: var(--font-pink-body), Helvetica, Arial, sans-serif;
+  /* "Segoe UI" and Roboto are closer metric matches to Nunito Sans'
+     generous x-height and rounded terminals than Helvetica/Arial alone;
+     both kept as a final tail for maximum coverage. */
+  font-family:
+    var(--font-pink-body), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow-x: clip;
 }
 
@@ -3966,12 +3990,17 @@
 /* ── Typography helpers ── */
 
 .pink .pink-display {
-  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-family: var(--font-pink-display), Georgia, "Times New Roman", serif;
   font-weight: 600;
 }
 
+/* Type sizes on these utilities are `rem`, not `px`, so a reader who raises the
+   browser's default font size actually gets larger text (WCAG 1.4.4; audit
+   2026-07-31, P2-5). 16px base — the values below render identically at default
+   settings; this was a unit change, not a re-scale. Padding, gaps and border
+   widths stay in px on purpose: only the type responds. */
 .pink .pink-eyebrow {
-  font-size: 13px;
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -3985,7 +4014,7 @@
 }
 
 .pink .pink-label {
-  font-size: 12px;
+  font-size: 0.75rem; /* 12px */
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--pink-subtle);
@@ -3996,7 +4025,7 @@
 
 .pink .pink-prose {
   color: var(--pink-body);
-  font-size: 17px;
+  font-size: 1.0625rem; /* 17px */
   line-height: 1.8;
   text-wrap: pretty;
 }
@@ -4010,13 +4039,13 @@
    and the reduced-motion block keep working. */
 .pink .pink-prose-article {
   color: var(--pink-body-article);
-  font-size: 18px;
+  font-size: 1.125rem; /* 18px */
   line-height: 1.85;
 }
 .pink .pink-prose h2 {
-  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-family: var(--font-pink-display), Georgia, "Times New Roman", serif;
   font-weight: 600;
-  font-size: 30px;
+  font-size: 1.875rem; /* 30px */
   line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--pink-ink);
@@ -4024,9 +4053,9 @@
   margin-top: 44px;
 }
 .pink .pink-prose h3 {
-  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-family: var(--font-pink-display), Georgia, "Times New Roman", serif;
   font-weight: 600;
-  font-size: 22px;
+  font-size: 1.375rem; /* 22px */
   line-height: 1.25;
   letter-spacing: -0.015em;
   color: var(--pink-ink);
@@ -4036,9 +4065,9 @@
   border-left: 3px solid var(--pink-rose);
   padding: 6px 0 6px 24px;
   margin: 28px 0 0;
-  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-family: var(--font-pink-display), Georgia, "Times New Roman", serif;
   font-weight: 600;
-  font-size: 22px;
+  font-size: 1.375rem; /* 22px */
   line-height: 1.4;
   letter-spacing: -0.015em;
   color: var(--pink-ink);
@@ -4088,14 +4117,17 @@
    item count wasn't a multiple of the column count, framing them as a visible
    empty box (review 2026-07-29, B3: 4 service items in a 3-up grid). Dropping it
    leaves populated cells looking identical and lets unused tracks fall away. */
+/* 2026-07-31: the 1px ring on every cell was removed. It was the most
+   "editorial-grid" thing in the template and read as busy rather than clean.
+   Cells now separate by whitespace alone; the gap is widened to carry the
+   grouping the border used to. */
 .pink .pink-hairline-grid {
   display: grid;
-  gap: 1px;
+  gap: 32px;
   background: var(--pink-paper);
 }
 .pink .pink-hairline-grid > * {
-  background: var(--pink-paper);
-  box-shadow: 0 0 0 1px var(--pink-line);
+  background: transparent;
 }
 .pink .pink-hairline-grid-dark {
   gap: 2px;
@@ -4118,7 +4150,7 @@
   gap: 8px;
   font-family: inherit;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   line-height: 1;
   /* Padding lives on the class: no pink component supplies its own, and the
      design's square buttons are defined by their generous padding. Size
@@ -4135,11 +4167,11 @@
    full-width panel actions stretch with their container. */
 .pink .pink-btn-lg {
   padding: 18px 32px;
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
 }
 .pink .pink-btn-sm {
   padding: 11px 18px;
-  font-size: 14px;
+  font-size: 0.875rem; /* 14px */
   font-weight: 500;
 }
 .pink .pink-btn-block {
@@ -4199,15 +4231,33 @@
   color: var(--pink-subtle);
 }
 
+/* Touch sizing. `.pink-btn` (45px) and `.pink-btn-lg` (51px) already clear the
+   template's own 44px bar — the one established when the 2026-07-29 review
+   raised mobile nav links to 47–48px — but `.pink-btn-sm` renders ~37px and the
+   pagination-style buttons built on it ~30px. WCAG 2.5.8 (AA) only asks for
+   24x24, so these were never failures; they simply missed the house standard.
+   Gated on a coarse pointer so the desktop design is untouched: padding and
+   type stay exactly as authored, and `min-height` is inert wherever the button
+   is already tall enough. Relies on the global `box-sizing: border-box`, so 44px
+   is the outer height including padding + border. (audit 2026-07-31, P3-1.) */
+@media (pointer: coarse) {
+  .pink .pink-btn {
+    min-height: 44px;
+  }
+}
+
 /* ── Form controls ── */
 
 .pink .pink-input {
   background: var(--pink-white);
   border: 1px solid var(--pink-line-strong);
-  outline: none;
+  /* NO `outline: none` here. It used to sit on this rule and, at equal
+     specificity (0,2,0) but later in the file, it silently beat
+     `.pink :focus-visible`'s 2px ring — so text inputs were the one control
+     class with no focus ring. (audit 2026-07-31, P2-9) */
   color: var(--pink-ink);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 0.9375rem; /* 15px */
   padding: 14px 16px;
   width: 100%;
 }
@@ -4242,14 +4292,29 @@
 
 /* ── Nav links ── */
 
+/* The header is a light surface as of 2026-07-31, so nav links default to ink.
+   The mobile-menu overlay is still a dark band, so it opts back in via
+   `.pink-dark` (matched standalone too — the overlay portals out of `.pink`). */
 .pink .pink-nav-link {
-  color: var(--pink-paper);
-  font-size: 15px;
+  color: var(--pink-ink);
+  font-size: 0.9375rem; /* 15px */
   font-weight: 500;
   transition: color 0.25s var(--pink-ease);
 }
+.pink .pink-dark .pink-nav-link,
+.pink-dark .pink-nav-link {
+  color: var(--pink-paper);
+}
+/* Rose on light (4.95:1); blush is reserved for dark surfaces, where it is
+   6.1:1 — on white it would be 3.14:1 and fail AA at nav-link size. */
 .pink .pink-nav-link:hover,
 .pink .pink-nav-link[aria-current="page"] {
+  color: var(--pink-rose);
+}
+.pink .pink-dark .pink-nav-link:hover,
+.pink .pink-dark .pink-nav-link[aria-current="page"],
+.pink-dark .pink-nav-link:hover,
+.pink-dark .pink-nav-link[aria-current="page"] {
   color: var(--pink-blush);
 }
 
@@ -4300,26 +4365,11 @@
     transform: scaleX(1);
   }
 }
-@keyframes pink-ken {
-  0% {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-  50% {
-    transform: scale(1.16) translate3d(-2.5%, -2%, 0);
-  }
-  100% {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-}
-@keyframes pink-drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-40px, 30px, 0) scale(1.15);
-  }
-}
+/* `pink-ken` (22s ken-burns) and `pink-drift` (18s/24s radial glows) were
+   removed on 2026-07-31. They were the main source of the "grungy" read the
+   client flagged, and they were also the measured cause of the homepage running
+   655 layout/style passes while completely idle vs 6 on a control page
+   (audit 2026-07-31, P3-2). The clean palette carries the hero on its own. */
 
 /* Entrance animations only run once JS has armed the gate, so content is
    fully visible with JS disabled (progressive enhancement). */
@@ -4335,15 +4385,6 @@
 .pink-js .pink-anim-rule {
   transform-origin: left;
   animation: pink-rule 0.9s var(--pink-ease-soft) 0.1s both;
-}
-.pink-js .pink-anim-ken {
-  animation: pink-ken 22s ease-in-out infinite;
-}
-.pink-js .pink-anim-drift {
-  animation: pink-drift 18s ease-in-out infinite;
-}
-.pink-js .pink-anim-drift-slow {
-  animation: pink-drift 24s ease-in-out 3s infinite;
 }
 
 /* ── Scroll reveal (use-pink-reveal.ts arms .pink-js on the layout root) ── */
@@ -4403,7 +4444,7 @@
   --input: var(--pink-line-strong);
   --ring: var(--pink-rose);
   --radius: 0;
-  font-family: var(--font-pink-body), Helvetica, Arial, sans-serif;
+  font-family: var(--font-pink-body), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 .pink-account [data-slot="card"] {
   background: var(--pink-white);
@@ -4412,7 +4453,7 @@
   box-shadow: none;
 }
 .pink-account [data-slot="card-title"] {
-  font-family: var(--font-pink-display), Helvetica, sans-serif;
+  font-family: var(--font-pink-display), Georgia, "Times New Roman", serif;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--pink-ink);
@@ -4439,4 +4480,116 @@
   border-color: var(--pink-rose);
   outline: none;
   box-shadow: 0 0 0 1px var(--pink-rose);
+}
+
+/* ─── Windows High Contrast Mode ───────────────────────────────────────────
+   This template carries nearly all of its structure in 1px hairlines and
+   `--pink-*` colours — both of which forced-colors mode discards. Untreated:
+   an input's border is its only edge, so the control vanishes; the solid vs
+   ghost button distinction is a background swap, so it collapses; and the
+   current-page nav state is colour-only, so it disappears. This block restates
+   those boundaries in CSS system colours, which are the only colours HCM
+   honours and the required mechanism inside this media query — they are not
+   "hardcoded colours" in the `--pink-*` sense. Placed last so it wins the
+   cascade against the equal-specificity rules above.
+   (audit 2026-07-31, P3-5.) */
+@media (forced-colors: active) {
+  /* Focus must stay locatable: HCM flattens the rose/blush ring into the
+     system foreground, which can match the border it sits next to. */
+  .pink :focus-visible,
+  .pink .pink-dark :focus-visible,
+  .pink-dark :focus-visible,
+  .pink-account :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  /* `.pink-btn` is worn by <a> as often as <button>, so the button surface is
+     stated explicitly rather than left to the element's default forced colours
+     (links would otherwise resolve to LinkText on Canvas and read as text). */
+  .pink .pink-btn,
+  .pink .pink-btn-ghost,
+  .pink .pink-btn-outline,
+  .pink .pink-dark .pink-btn-ghost,
+  .pink-dark .pink-btn-ghost {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonBorder;
+  }
+  /* The primary CTA keeps its inverted read (filled vs outlined) without
+     depending on the accent colour surviving. */
+  .pink .pink-btn-solid {
+    background: ButtonText;
+    color: ButtonFace;
+    border-color: ButtonText;
+  }
+  .pink .pink-btn:hover,
+  .pink .pink-btn-solid:hover,
+  .pink .pink-dark .pink-btn-solid:hover,
+  .pink-dark .pink-btn-solid:hover,
+  .pink .pink-btn-ghost:hover,
+  .pink .pink-dark .pink-btn-ghost:hover,
+  .pink-dark .pink-btn-ghost:hover,
+  .pink .pink-btn-outline:hover {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .pink .pink-btn:disabled,
+  .pink .pink-btn:disabled:hover {
+    background: ButtonFace;
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  /* Form fields: the 1px border IS the control. */
+  .pink .pink-input,
+  .pink .pink-dark .pink-input,
+  .pink-dark .pink-input,
+  .pink-account
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+  .pink-account textarea,
+  .pink-account [data-slot="select-trigger"] {
+    background: Field;
+    color: FieldText;
+    border: 1px solid ButtonBorder;
+  }
+  .pink .pink-input:focus-visible,
+  .pink .pink-dark .pink-input:focus-visible,
+  .pink-dark .pink-input:focus-visible {
+    border-color: Highlight;
+  }
+  /* Invalid is a border-colour swap, which HCM erases. Restated as a shape
+     change so the state is still perceivable without colour. */
+  .pink .pink-input-invalid {
+    border-style: dashed;
+    border-width: 2px;
+  }
+
+  /* Current page is signalled by colour alone in the design. */
+  .pink .pink-nav-link[aria-current="page"],
+  .pink .pink-dark .pink-nav-link[aria-current="page"],
+  .pink-dark .pink-nav-link[aria-current="page"] {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* Dark-band grid cells are separated by a 2px background gap only; without a
+     drawn edge the whole grid merges into one slab. */
+  .pink .pink-hairline-grid-dark > * {
+    border: 1px solid CanvasText;
+  }
+
+  /* Account cards read as raised surfaces via a decorative hairline. */
+  .pink-account [data-slot="card"] {
+    border: 1px solid CanvasText;
+  }
+  .pink-account [data-slot="card-footer"] {
+    border-top: 1px solid CanvasText;
+  }
+
+  .pink ::selection {
+    background: Highlight;
+    color: HighlightText;
+  }
 }

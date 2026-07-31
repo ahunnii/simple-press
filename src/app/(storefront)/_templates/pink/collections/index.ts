@@ -11,16 +11,6 @@ import type { TemplateSection } from "~/lib/template-sections";
 export const pinkCollectionsData: TemplateField[] = [
   // ── collections.header (index) ──────────────────────────────────────────
   {
-    key: "pink.collections.header-eyebrow",
-    label: "Header Eyebrow",
-    description: "Small label above the collections heading.",
-    type: "text",
-    page: "collections",
-    group: "collections.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Bodies of work",
-  },
-  {
     key: "pink.collections.header-heading",
     label: "Header Heading",
     description: "The main H1 on the collections index.",
@@ -39,7 +29,7 @@ export const pinkCollectionsData: TemplateField[] = [
     group: "collections.header",
     gridColumn: "col-span-full",
     defaultValue:
-      "Pieces get grouped by what they're for and when they were made. Some are still open. Some are closed for good.",
+      "Pieces get grouped by what they're for and when they were made. Every one is one of a kind. Some series are still open, some are closed for good.",
   },
 
   // ── collections.featured (index) ────────────────────────────────────────
@@ -88,16 +78,6 @@ export const pinkCollectionsData: TemplateField[] = [
 
   // ── collections.next (index) ────────────────────────────────────────────
   {
-    key: "pink.collections.next-eyebrow",
-    label: "Next Series Eyebrow",
-    type: "text",
-    page: "collections",
-    group: "collections.next",
-    gridColumn: "col-span-1",
-    description: "Small label above the closing-band heading.",
-    defaultValue: "What's coming",
-  },
-  {
     key: "pink.collections.next-heading",
     label: "Next Series Heading",
     type: "text",
@@ -116,7 +96,7 @@ export const pinkCollectionsData: TemplateField[] = [
     gridColumn: "col-span-full",
     description: "One or two sentences under the closing-band heading.",
     defaultValue:
-      "Sign up to hear when new work goes up, or get in touch about a custom piece.",
+      "Get in touch to hear when new work goes up, or to ask about a piece of your own.",
   },
   {
     key: "pink.collections.next-cta-primary-label",
@@ -183,16 +163,6 @@ export const pinkCollectionsData: TemplateField[] = [
 
   // ── collections.detail-hero (detail) ────────────────────────────────────
   {
-    key: "pink.collections.detail-hero-eyebrow-prefix",
-    label: "Detail Hero Eyebrow Prefix",
-    type: "text",
-    page: "collections",
-    group: "collections.detail-hero",
-    gridColumn: "col-span-1",
-    description: "Prefix word before the series number and year, e.g. 'Series'.",
-    defaultValue: "Series",
-  },
-  {
     key: "pink.collections.detail-hero-fact-pieces-label",
     label: "Fact Row — Pieces Label",
     type: "text",
@@ -224,16 +194,6 @@ export const pinkCollectionsData: TemplateField[] = [
   },
 
   // ── collections.detail-intro (detail) ───────────────────────────────────
-  {
-    key: "pink.collections.detail-intro-eyebrow",
-    label: "Detail Intro Eyebrow",
-    type: "text",
-    page: "collections",
-    group: "collections.detail-intro",
-    gridColumn: "col-span-1",
-    description: "Small label above the intro heading.",
-    defaultValue: "About this series",
-  },
   {
     key: "pink.collections.detail-intro-heading",
     label: "Detail Intro Heading",
@@ -332,7 +292,7 @@ export const pinkCollectionsData: TemplateField[] = [
     page: "collections",
     group: "collections.detail-grid",
     gridColumn: "col-span-1",
-    defaultValue: "Ask for a commission",
+    defaultValue: "Ask about a custom order",
   },
 
   // ── collections.detail-nav (detail) ─────────────────────────────────────

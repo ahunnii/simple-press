@@ -41,19 +41,13 @@ function trimmedOrFallback(raw: string | undefined, fallback: string): string {
 const DEFAULT_TOPICS: PinkContactTopic[] = [
   {
     name: "Custom orders",
-    blurb: "A spirit doll or piece made just for you.",
+    blurb: "A doll, a piece of jewelry, or something else made just for you.",
     messageLabel: "Tell me what you have in mind",
     messagePlaceholder: "Sizes, colors, timeline — whatever you've got.",
   },
   {
-    name: "Wholesale & shops",
-    blurb: "Carrying PinkArt pieces in your store.",
-    messageLabel: "Tell me about your shop",
-    messagePlaceholder: "Where you're located and what you're looking for.",
-  },
-  {
     name: "Make & takes",
-    blurb: "Booking a workshop for your group.",
+    blurb: "Bringing a workshop to your group.",
     messageLabel: "Tell me about your group",
     messagePlaceholder: "Group size, dates that work, and where.",
   },
@@ -376,7 +370,18 @@ export function PinkContactForm({
                 )}
               />
 
-              <label className="flex cursor-pointer items-center gap-3 text-[14px]" style={{ color: "var(--pink-muted)" }}>
+              {/* The whole row is the target — the wrapping <label> means the
+                  text toggles the box, so the 16px input is not the hit area.
+                  At one line the row still measured ~21px, 3px under WCAG
+                  2.5.8's 24px floor; the spacing exception most likely covered
+                  it (the control is isolated), but a min-height removes the
+                  argument, and 44px on touch pointers meets the template's own
+                  bar. The checkbox stays 16px so the form's density is
+                  unchanged (audit 2026-07-31, P3-1). */}
+              <label
+                className="flex min-h-6 cursor-pointer items-center gap-3 text-[14px] [@media(pointer:coarse)]:min-h-11"
+                style={{ color: "var(--pink-muted)" }}
+              >
                 <input
                   type="checkbox"
                   checked={wantsUpdates}

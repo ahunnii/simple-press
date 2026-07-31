@@ -2,7 +2,44 @@ import "./test-env";
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup } from "@testing-library/react";
-import { afterEach } from "vitest";
+import { afterEach, vi } from "vitest";
+
+// `next/font/google` is a build-time construct the Next compiler replaces; under
+// vitest the module resolves to an object whose font functions don't exist, so
+// any component that transitively imports a template's font scope throws
+// "Syne is not a function" at import time. Return the same shape next/font does
+// (className + variable + style) for any font requested.
+// Vitest validates named exports against the returned object, so each font has
+// to be listed explicitly. Keep in sync with:
+//   grep -rhoP 'import \{[^}]+\} from "next/font/google"' src/
+vi.mock("next/font/google", () => {
+  const font = (name: string) => () => ({
+    className: `mock-font-${name}`,
+    variable: `--mock-font-${name}`,
+    style: { fontFamily: name },
+  });
+  return Object.fromEntries(
+    [
+      "Agdasima",
+      "Amatic_SC",
+      "Cormorant_Garamond",
+      "DM_Sans",
+      "Fraunces",
+      "Geist",
+      "Inter",
+      "JetBrains_Mono",
+      "Jost",
+      "Manrope",
+      "Nunito_Sans",
+      "Outfit",
+      "Playfair_Display",
+      "Plus_Jakarta_Sans",
+      "Poppins",
+      "Raleway",
+      "Spectral",
+    ].map((n) => [n, font(n)]),
+  );
+});
 
 // happy-dom + Node can leave the global `localStorage` without working methods.
 // Install a single in-memory Storage shared by `globalThis` and `window` so both

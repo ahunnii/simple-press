@@ -14,16 +14,6 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 const servicesHeaderData: TemplateField[] = [
   {
-    key: "pink.services.header-eyebrow",
-    label: "Header Eyebrow",
-    description: "Small uppercase label above the services heading.",
-    type: "text",
-    page: "services",
-    group: "services.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Make & takes",
-  },
-  {
     key: "pink.services.header-heading",
     label: "Header Heading",
     description: "The H1 for the services index page.",
@@ -42,33 +32,7 @@ const servicesHeaderData: TemplateField[] = [
     group: "services.header",
     gridColumn: "col-span-full",
     defaultValue:
-      "Bring a make & take into your classroom, sanctuary, break room or library. Or commission a spirit doll made just for you.",
-  },
-  {
-    key: "pink.services.header-stats",
-    label: "Header Stat Tiles",
-    description:
-      "Four numeral + label tiles shown beside the header, e.g. '60+' / 'Make & takes led'.",
-    type: "list",
-    page: "services",
-    group: "services.header",
-    gridColumn: "col-span-full",
-    maxItems: 4,
-    itemSchema: [
-      { key: "value", label: "Value", type: "text", placeholder: "60+" },
-      {
-        key: "label",
-        label: "Label",
-        type: "text",
-        placeholder: "Make & takes led",
-      },
-    ],
-    defaultValue: JSON.stringify([
-      { value: "60+", label: "Make & takes led" },
-      { value: "12", label: "Schools, churches & libraries visited" },
-      { value: "1:1", label: "Commissions taken by hand" },
-      { value: "2019", label: "Doing this since" },
-    ]),
+      "Bring a make & take into your classroom, sanctuary, library, break room or back yard. Or order a doll made just for you.",
   },
 ];
 
@@ -79,12 +43,12 @@ const servicesFeaturedData: TemplateField[] = [
     key: "pink.services.featured-badge",
     label: "Featured Badge Label",
     description:
-      "Corner badge on the featured service card (the one marked as your signature offering).",
+      "Corner badge on the featured service card (the one marked as your signature offering). Keep it neutral — it is not a popularity claim.",
     type: "text",
     page: "services",
     group: "services.featured",
     gridColumn: "col-span-1",
-    defaultValue: "Most booked",
+    defaultValue: "Featured",
   },
   {
     key: "pink.services.featured-cta-label",
@@ -140,7 +104,7 @@ const servicesGridData: TemplateField[] = [
     page: "services",
     group: "services.grid",
     gridColumn: "col-span-full",
-    defaultValue: "Nothing scheduled yet",
+    defaultValue: "Nothing listed yet",
   },
   {
     key: "pink.services.grid-empty-body",
@@ -151,7 +115,7 @@ const servicesGridData: TemplateField[] = [
     group: "services.grid",
     gridColumn: "col-span-full",
     defaultValue:
-      "New make & takes go up as they're booked. Send a note and we'll find a date that works.",
+      "Make & takes are booked by enquiry. Send a note with your group and your room, and we'll take it from there.",
   },
   {
     key: "pink.services.grid-empty-cta-label",
@@ -221,7 +185,7 @@ const servicesStepsData: TemplateField[] = [
       {
         ordinal: "01",
         title: "You reach out",
-        body: "Tell us the room — a classroom, a sanctuary, a break room — and how many hands.",
+        body: "Tell us the room — a classroom, a sanctuary, a break room, a back yard — and how many hands.",
       },
       {
         ordinal: "02",
@@ -246,16 +210,6 @@ const servicesStepsData: TemplateField[] = [
 
 const servicesCtaData: TemplateField[] = [
   {
-    key: "pink.services.cta-eyebrow",
-    label: "CTA Eyebrow",
-    description: "Small uppercase label above the closing CTA heading.",
-    type: "text",
-    page: "services",
-    group: "services.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "Bring this to your people",
-  },
-  {
     key: "pink.services.cta-heading",
     label: "CTA Heading",
     description: "Closing call-to-action heading.",
@@ -263,7 +217,7 @@ const servicesCtaData: TemplateField[] = [
     page: "services",
     group: "services.cta",
     gridColumn: "col-span-1",
-    defaultValue: "Nobody is turned away for money.",
+    defaultValue: "Let's find a date.",
   },
   {
     key: "pink.services.cta-body",
@@ -274,7 +228,7 @@ const servicesCtaData: TemplateField[] = [
     group: "services.cta",
     gridColumn: "col-span-full",
     defaultValue:
-      "Ask about a make & take for your school, church, library or workplace. Materials, timing and group size all flex to fit the room.",
+      "Ask about a make & take for your school, church, library, workplace or back yard. Materials, timing and group size all flex to fit the room.",
   },
   {
     key: "pink.services.cta-primary-label",

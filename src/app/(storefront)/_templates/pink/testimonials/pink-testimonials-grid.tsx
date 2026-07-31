@@ -49,7 +49,7 @@ function singularize(suffix: string): string {
 /**
  * `testimonials.grid` — CSS `columns: 3` masonry, collapsing to 2 then 1.
  * The `Testimonial` model has no `category` column, so the filter chips are
- * derived from `source` ("customer" → "From keepers", "owner" → "From the
+ * derived from `source` ("customer" → "From customers", "owner" → "From the
  * studio") rather than an owner-authored taxonomy — see build report.
  */
 export function PinkTestimonialsGrid({
@@ -89,7 +89,7 @@ export function PinkTestimonialsGrid({
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h2
               className="pink-display"
-              style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
+              style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
             >
               {testimonials.length}{" "}
               {testimonials.length === 1 ? singularize(headingSuffix) : headingSuffix}
@@ -134,7 +134,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         className="pink-eyebrow"
         style={{ fontSize: "12px" }}
       >
-        {category === CATEGORY_STUDIO ? "From the studio" : "From a keeper"}
+        {category === CATEGORY_STUDIO ? "From the studio" : "From a customer"}
       </span>
       {t.title && (
         <p className="pink-display text-[16px] font-semibold">{t.title}</p>

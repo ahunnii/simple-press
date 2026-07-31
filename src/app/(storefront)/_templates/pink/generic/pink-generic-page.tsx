@@ -68,7 +68,7 @@ export function PinkGenericPage({ business, page }: { business: Business; page: 
         rightSlot={
           showFacts ? (
             <div {...sectionGroupAttr("global", "page-facts")}>
-              <PinkFactRows rows={factRows} />
+              <PinkFactRows rows={factRows} surface="paper" />
             </div>
           ) : undefined
         }

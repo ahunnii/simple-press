@@ -7,7 +7,7 @@ import { ProductReviews } from "~/components/product-reviews";
 import { WriteReviewDialog } from "~/components/write-review-dialog";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
-import { PinkEyebrow } from "../shared/pink-eyebrow";
+import { PINK_SCOPE_CLASS } from "../layout/pink-scope";
 
 type Props = {
   productId: string;
@@ -30,11 +30,11 @@ type Props = {
  * wrapper remaps them onto pink's own tokens via an inline style — the same
  * technique `pink-account-layout.tsx` uses through the global `.pink-account`
  * class, reproduced here inline since this file can't add a class to
- * globals.css. One known gap: shadcn's `<Select>` (the reviews sort control)
- * portals its open dropdown to `document.body`, outside this wrapper's DOM
- * subtree, so the *closed* trigger is themed but the briefly-open menu falls
- * back to the app's default palette — a shared-component constraint, not
- * fixable from a template directory.
+ * globals.css. The shadcn `<Select>` (reviews sort control) portals its
+ * dropdown to `document.body`, outside this wrapper's DOM subtree; the
+ * `sortSelectContentClassName` prop (added to `ProductReviews`) carries
+ * `PINK_SCOPE_CLASS` + `rounded-none` to scope the dropdown's styling back
+ * into pink's palette and remove its border radius.
  */
 const PINK_SHADCN_VARS: CSSProperties = {
   ["--background" as string]: "var(--pink-paper)",
@@ -72,10 +72,9 @@ export function PinkProductReviewsSection({ productId, productName }: Props) {
     >
       <div className="mx-auto max-w-[1400px]">
         <div className="mb-8">
-          <PinkEyebrow>Reviews</PinkEyebrow>
           <h2
             className="pink-display mt-2"
-            style={{ fontSize: "clamp(24px, 2.6vw, 32px)", fontWeight: 600, letterSpacing: "-0.02em" }}
+            style={{ fontSize: "clamp(1.5rem, 2.6vw, 2rem)", fontWeight: 600, letterSpacing: "-0.02em" }}
           >
             What people are saying
           </h2>
@@ -83,6 +82,7 @@ export function PinkProductReviewsSection({ productId, productName }: Props) {
 
         <ProductReviews
           productId={productId}
+          sortSelectContentClassName={`${PINK_SCOPE_CLASS} rounded-none`}
           onWriteReviewClick={() => setReviewDialogOpen(true)}
         />
         <WriteReviewDialog
