@@ -11,9 +11,21 @@
 // not set here.
 process.env.SKIP_ENV_VALIDATION ??= "1";
 
-// Point at the throwaway Postgres from docker-compose.test.yml (port 5433).
-process.env.DATABASE_URL ??=
-  "postgresql://test:test@localhost:5433/simplepress_test";
+// Point at the throwaway Postgres from docker-compose.test.yml.
+//
+// The port is overridable via TEST_PG_PORT because 5433 (the historical
+// hard-coded default) is not reliably free — on at least one dev machine here
+// it is held by an unrelated project's Postgres, and the failure mode was ugly:
+// the DSN still *looked* right, so `prisma db push --accept-data-loss` in
+// global-setup.ts was aimed at a stranger's database. TEST_PG_PORT is read by
+// docker-compose.test.yml and scripts/e2e-pg.sh too, so one value moves the
+// container, the e2e cluster, and this DSN together — they can no longer drift
+// apart, which is what made the old failure possible.
+//
+// `??=` means a fully-specified DATABASE_URL still wins over all of this.
+const TEST_PG_PORT = process.env.TEST_PG_PORT ?? "5436";
+
+process.env.DATABASE_URL ??= `postgresql://test:test@localhost:${TEST_PG_PORT}/simplepress_test`;
 
 // Valid-format AES-GCM-256 key for prisma-field-encryption. Round-trips within
 // the test DB only — not a secret.

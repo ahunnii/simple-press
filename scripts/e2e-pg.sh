@@ -3,9 +3,15 @@
 # Throwaway PostgreSQL cluster for the Playwright E2E suite.
 #
 # Uses the Homebrew `postgresql@16` binaries (no Docker required) and boots a
-# disposable cluster on port 5433 — the same DSN the Vitest integration suite
-# expects (postgresql://test:test@localhost:5433/simplepress_test). The cluster
-# lives entirely under a temp dir and is wiped by `down`.
+# disposable cluster on the shared test port — the same DSN the Vitest
+# integration suite expects
+# (postgresql://test:test@localhost:${TEST_PG_PORT}/simplepress_test). The
+# cluster lives entirely under a temp dir and is wiped by `down`.
+#
+# TEST_PG_PORT (default 5436) is the single source of truth for the test
+# database port, shared with docker-compose.test.yml and
+# tests/helpers/test-env.ts. Override it if 5436 is taken on your machine —
+# but override it for ALL of them, which is exactly why it is one variable.
 #
 #   scripts/e2e-pg.sh up     # initdb + start + create role/db + prisma db push
 #   scripts/e2e-pg.sh down   # stop + remove the temp cluster
@@ -13,7 +19,7 @@
 set -euo pipefail
 
 PG_BIN="/opt/homebrew/opt/postgresql@16/bin"
-PG_PORT=5433
+PG_PORT="${TEST_PG_PORT:-5436}"
 PG_DB="simplepress_test"
 PG_USER="test"
 PG_PASS="test"
