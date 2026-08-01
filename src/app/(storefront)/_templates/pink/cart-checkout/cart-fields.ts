@@ -29,7 +29,7 @@ export const pinkCartData: TemplateField[] = [
     group: "cart.main",
     gridColumn: "col-span-full",
     defaultValue:
-      "Everything here is held for you. Nothing ships until you check out.",
+      "Every piece is one of a kind, so nothing is set aside until you check out.",
   },
   {
     key: "pink.cart.summary-note",
@@ -81,7 +81,7 @@ export const pinkCartData: TemplateField[] = [
     group: "cart.main",
     gridColumn: "col-span-full",
     defaultValue:
-      "Anything you add will start here — a spirit doll, a magnet, a seat at the table.",
+      "Anything you add will start here — a doll, a magnet, a piece of jewelry.",
   },
   {
     key: "pink.cart.empty-cta",

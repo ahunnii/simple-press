@@ -6,6 +6,7 @@ import {
   createBusiness,
   createCollection,
   createCollectionProduct,
+  createEvent,
   createProduct,
 } from "../helpers/factories";
 
@@ -159,9 +160,10 @@ describe("unpublished products never leak to the storefront", () => {
 
     const shop = await caller.business.getWithProducts();
     expect(shop).not.toBeNull();
-    expect(ids(shop!.products), "getWithProducts leaked the draft").not.toContain(
-      draft.id,
-    );
+    expect(
+      ids(shop!.products),
+      "getWithProducts leaked the draft",
+    ).not.toContain(draft.id);
     expect(ids(shop!.products)).toContain(live.id);
   });
 
@@ -189,5 +191,43 @@ describe("unpublished products never leak to the storefront", () => {
     expect(quote.shippingCents, "shipping.quote priced a draft product").toBe(
       500,
     );
+  });
+});
+
+/**
+ * Same bug class, different model: `events.getUpcomingPublic` is a new public
+ * procedure that enumerates records, so it belongs in this file per the note
+ * above.
+ */
+describe("draft events never leak to the storefront", () => {
+  beforeEach(resetDb);
+
+  it("omits an unpublished event from the public upcoming list", async () => {
+    const business = await createBusiness({
+      subdomain: "leaktest-events",
+      // `events` is enabledByDefault: false, same trap as `collections` above.
+      featureFlags: { events: true },
+    });
+    reqHost.value = "leaktest-events.simplepress.test";
+
+    const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const live = await createEvent(business.id, {
+      name: "Live Event",
+      published: true,
+      startAt: future,
+    });
+    const draft = await createEvent(business.id, {
+      name: "Draft Event",
+      published: false,
+      startAt: future,
+    });
+
+    const result = await createTestCaller({}).events.getUpcomingPublic();
+    const ids = result.map((e) => e.id);
+
+    expect(ids, "events.getUpcomingPublic leaked the draft").not.toContain(
+      draft.id,
+    );
+    expect(ids).toContain(live.id);
   });
 });

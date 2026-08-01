@@ -51,6 +51,12 @@ export type DefaultTestimonialsPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
 };
 
+export type DefaultEventsPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  events: RouterOutputs["events"]["getUpcomingPublic"];
+  timeZone: string;
+};
+
 export type DefaultCartPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
 };

@@ -102,7 +102,7 @@ export function PinkOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           >
             <p className="pink-label-dark mb-5">Summary</p>
 
-            <PinkFactRows rows={totalsRows} />
+            <PinkFactRows rows={totalsRows} surface="paper" />
 
             <div
               className="mt-4 flex items-baseline justify-between pt-4"

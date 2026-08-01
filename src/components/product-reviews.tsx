@@ -23,6 +23,7 @@ type ProductReviewsProps = {
   productId: string;
   showWriteReview?: boolean;
   onWriteReviewClick?: () => void;
+  sortSelectContentClassName?: string;
 };
 
 /**
@@ -39,6 +40,7 @@ export function ProductReviews({
   productId,
   showWriteReview = true,
   onWriteReviewClick,
+  sortSelectContentClassName,
 }: ProductReviewsProps) {
   const [sortBy, setSortBy] = useState<
     "recent" | "helpful" | "rating_high" | "rating_low"
@@ -182,7 +184,7 @@ export function ProductReviews({
             <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={sortSelectContentClassName}>
               <SelectItem value="recent">Most Recent</SelectItem>
               <SelectItem value="helpful">Most Helpful</SelectItem>
               <SelectItem value="rating_high">Highest Rating</SelectItem>

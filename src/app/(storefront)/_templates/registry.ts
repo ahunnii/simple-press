@@ -52,31 +52,6 @@ import { CoopContactPage } from "./coop/contact/coop-contact-page";
 import { CoopGenericPage } from "./coop/generic/coop-generic-page";
 import { CoopLayout } from "./coop/layout/coop-layout";
 // ---------------------------------------------------------------------------
-// PinkArt
-// ---------------------------------------------------------------------------
-import { PinkAboutPage } from "./pink/about/pink-about-page";
-import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
-import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
-import { PinkAddressBookPage } from "./pink/account/pink-address-book-page";
-import { PinkOrderDetailPage } from "./pink/account/pink-order-detail-page";
-import { PinkOrdersPage } from "./pink/account/pink-orders-page";
-import { PinkPreferencesPage } from "./pink/account/pink-preferences-page";
-import { PinkBlogPage } from "./pink/blog/pink-blog-page";
-import { PinkBlogPostPage } from "./pink/blog/pink-blog-post-page";
-import { PinkCartPage } from "./pink/cart-checkout/pink-cart-page";
-import { PinkCheckoutPage } from "./pink/cart-checkout/pink-checkout-page";
-import { PinkCheckoutUnavailable } from "./pink/cart-checkout/pink-checkout-unavailable";
-import { PinkOrderSuccessPage } from "./pink/cart-checkout/pink-order-success-page";
-import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
-import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
-import { PinkContactPage } from "./pink/contact/pink-contact-page";
-import { PinkGenericPage } from "./pink/generic/pink-generic-page";
-import { PinkLayout } from "./pink/layout/pink-layout";
-import { PinkProductPage } from "./pink/products/pink-product-page";
-import { PinkServicesIndexPage } from "./pink/services/pink-services-index-page";
-import { PinkShopPage } from "./pink/shop/pink-shop-page";
-import { PinkTestimonialsPage } from "./pink/testimonials/pink-testimonials-page";
-// ---------------------------------------------------------------------------
 // Dark Trend
 // ---------------------------------------------------------------------------
 import { DarkTrendAboutPage } from "./dark-trend/about/dark-trend-about-page";
@@ -119,6 +94,7 @@ import { DefaultCollectionPage } from "./default/collections/default-collection-
 import { DefaultCollectionsPage } from "./default/collections/default-collections-page";
 import { DefaultContactPage } from "./default/contact/default-contact-page";
 import { DefaultGenericPage } from "./default/default-generic-page";
+import { DefaultEventsPage } from "./default/events/default-events-page";
 import { DefaultLayout } from "./default/layout/default-layout";
 import { DefaultProductPage } from "./default/products/default-product-page";
 import { DefaultServicesIndexPage } from "./default/services/default-services-index-page";
@@ -216,6 +192,32 @@ import { NoiseGenericPage } from "./noise/noise-generic-page";
 import { NoiseProductPage } from "./noise/products/noise-product-page";
 import { NoiseShopPage } from "./noise/shop/noise-shop-page";
 import { NoiseTestimonialsPage } from "./noise/testimonials/noise-testimonials-page";
+// ---------------------------------------------------------------------------
+// PinkArt
+// ---------------------------------------------------------------------------
+import { PinkAboutPage } from "./pink/about/pink-about-page";
+import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
+import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
+import { PinkAddressBookPage } from "./pink/account/pink-address-book-page";
+import { PinkOrderDetailPage } from "./pink/account/pink-order-detail-page";
+import { PinkOrdersPage } from "./pink/account/pink-orders-page";
+import { PinkPreferencesPage } from "./pink/account/pink-preferences-page";
+import { PinkBlogPage } from "./pink/blog/pink-blog-page";
+import { PinkBlogPostPage } from "./pink/blog/pink-blog-post-page";
+import { PinkCartPage } from "./pink/cart-checkout/pink-cart-page";
+import { PinkCheckoutPage } from "./pink/cart-checkout/pink-checkout-page";
+import { PinkCheckoutUnavailable } from "./pink/cart-checkout/pink-checkout-unavailable";
+import { PinkOrderSuccessPage } from "./pink/cart-checkout/pink-order-success-page";
+import { PinkCollectionPage } from "./pink/collections/pink-collection-page";
+import { PinkCollectionsPage } from "./pink/collections/pink-collections-page";
+import { PinkContactPage } from "./pink/contact/pink-contact-page";
+import { PinkEventsIndexPage } from "./pink/events/pink-events-index-page";
+import { PinkGenericPage } from "./pink/generic/pink-generic-page";
+import { PinkLayout } from "./pink/layout/pink-layout";
+import { PinkProductPage } from "./pink/products/pink-product-page";
+import { PinkServicesIndexPage } from "./pink/services/pink-services-index-page";
+import { PinkShopPage } from "./pink/shop/pink-shop-page";
+import { PinkTestimonialsPage } from "./pink/testimonials/pink-testimonials-page";
 // ---------------------------------------------------------------------------
 // Pollen
 // ---------------------------------------------------------------------------
@@ -335,6 +337,7 @@ export type TemplateComponentSet = {
   // Optional — only some templates implement this
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
+  EventsPage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -364,6 +367,7 @@ const defaultEntry: TemplateComponentSet = {
   OrdersPage: DefaultOrdersPage,
   PreferencesPage: DefaultPreferencesFallback,
   ServicesIndexPage: DefaultServicesIndexPage,
+  EventsPage: DefaultEventsPage,
 };
 
 const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
@@ -519,6 +523,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionPage: PinkCollectionPage,
     CollectionsPage: PinkCollectionsPage,
     ContactPage: PinkContactPage,
+    EventsPage: PinkEventsIndexPage,
     GenericPage: PinkGenericPage,
     ProductPage: PinkProductPage,
     ShopPage: PinkShopPage,

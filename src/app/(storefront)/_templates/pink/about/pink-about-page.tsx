@@ -14,17 +14,14 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import { PinkFactRows } from "../shared/pink-fact-rows";
-import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
-import { PinkPhotoHeader } from "../shared/pink-photo-header";
+import { PinkPortraitHeader } from "../shared/pink-portrait-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
 
 const FIELD_KEYS = [
   "pink.about.hero-image",
-  "pink.about.hero-eyebrow",
   "pink.about.hero-heading",
   "pink.about.hero-intro",
   "pink.about.story-heading",
@@ -39,10 +36,8 @@ const FIELD_KEYS = [
   "pink.about.story-image-3",
   "pink.about.values-heading",
   "pink.about.values-note",
-  "pink.about.timeline-eyebrow",
   "pink.about.timeline-heading",
   "pink.about.timeline-note",
-  "pink.about.commissions-eyebrow",
   "pink.about.commissions-heading",
   "pink.about.commissions-body",
   "pink.about.commissions-cta-label",
@@ -56,18 +51,17 @@ type TimelineItem = { year?: string; title?: string; body?: string; _id?: string
 type GalleryItem = { image?: string; colSpan?: string; rowSpan?: string; _id?: string };
 
 const DEFAULT_VALUES: ValueItem[] = [
-  { title: "Made by hand", body: "No molds, no printing. Every piece passes through Evelyn's hands start to finish." },
+  { title: "One of a kind", body: "Made one at a time, never in runs. No two pieces are exactly alike." },
   { title: "Priced plainly", body: "The price on the tag is the price. No markups dressed up as scarcity." },
-  { title: "Repairs are free", body: "If a seam gives out, bring it back. We'll fix what we made, always." },
-  { title: "Nobody turned away", body: "Payment plans and trades are on the table — just ask before you walk." },
+  { title: "Natural materials", body: "100% wool filling, cotton fabrics, polymer clay faces." },
+  { title: "Made by hand", body: "Every piece passes through Evelyn's hands start to finish." },
 ];
 
-const DEFAULT_TIMELINE: TimelineItem[] = [
-  { year: "2004", title: "First stitches", body: "Evelyn starts sewing dolls at her kitchen table, mostly for family." },
-  { year: "2012", title: "First market table", body: "PinkArt's first pieces go out at a Detroit maker's market." },
-  { year: "2018", title: "The studio opens", body: "A dedicated workshop space, and the first make & takes begin." },
-  { year: "Today", title: "Still one at a time", body: "Same process, same table, a few more hands helping on busy weeks." },
-];
+// Deliberately empty (2026-07-31, client direction): the shipped defaults
+// asserted dates — 2004 / 2012 / 2018 — that nobody has verified. The section
+// self-hides on an empty list (see the `timeline.length > 0` guard below) so a
+// fresh store shows nothing here until the owner fills it in.
+const DEFAULT_TIMELINE: TimelineItem[] = [];
 
 // Empty `image` on purpose: six placeholder slabs read as a broken photo grid
 // on a fresh store. The section collapses entirely until the owner adds at
@@ -81,11 +75,11 @@ const DEFAULT_GALLERY: GalleryItem[] = [
   { image: "", colSpan: "1", rowSpan: "1" },
 ];
 
-const DEFAULT_COMMISSION_FACTS: PinkFactRow[] = [
-  { label: "Turnaround", value: "3–6 weeks" },
-  { label: "Starting at", value: "$185" },
-  { label: "Deposit", value: "Half up front" },
-];
+// Deliberately empty (2026-07-31, client direction): turnaround, starting
+// price and deposit terms were all invented. `PinkFactRows` returns `null` on
+// an empty list, so the band drops to a single copy column until the owner
+// adds rows of her own.
+const DEFAULT_COMMISSION_FACTS: PinkFactRow[] = [];
 
 function clampSpan(raw: string | undefined, max = 2): number {
   const n = Number.parseInt(raw ?? "1", 10);
@@ -141,17 +135,20 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
   return (
     <>
       {/* ── about.hero ─────────────────────────────────────────────────── */}
-      <PinkPhotoHeader
-        imageUrl={f["pink.about.hero-image"] ?? ""}
+      {/* Pale wash + a 4:5 portrait as of 2026-07-31 (client direction). This
+          was a 66vh `PinkPhotoHeader`, i.e. the third dark band on a page that
+          also had two more below it — and because `pink.about.hero-image` had
+          no default, a fresh store opened About on an empty near-black slab.
+          `PinkPortraitHeader` drops the image column entirely when no portrait
+          is set, so the unset state is a clean band rather than a void. */}
+      <PinkPortraitHeader
+        imageUrl={f["pink.about.hero-image"]}
         imageAlt=""
         breadcrumb={[{ label: "Home", href: "/" }, { label: "About" }]}
-        eyebrow={f["pink.about.hero-eyebrow"] ?? ""}
-        eyebrowFieldKey="pink.about.hero-eyebrow"
         heading={f["pink.about.hero-heading"] ?? ""}
         headingFieldKey="pink.about.hero-heading"
         intro={f["pink.about.hero-intro"] ?? ""}
         introFieldKey="pink.about.hero-intro"
-        minHeight="66vh"
         sectionAttrs={sectionGroupAttr("about", "hero")}
       />
 
@@ -165,7 +162,7 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
             <h2
               className="pink-display max-w-[24ch]"
               style={{
-                fontSize: "clamp(26px, 2.8vw, 38px)",
+                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                 fontWeight: 600,
                 letterSpacing: "-0.025em",
                 lineHeight: 1.1,
@@ -280,69 +277,87 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
 
       {/* ── about.values ───────────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "about.values") && (
-        <PinkDarkBand
-          ariaLabel="What doesn't change"
-          sectionAttrs={sectionGroupAttr("about", "values")}
+        <section
+          aria-label="What doesn't change"
+          // Lightened from `PinkDarkBand` on 2026-07-31 (client direction):
+          // black is used selectively — the homepage events band and the
+          // footer — and About was carrying three dark bands. The pale wash
+          // still reads as a distinct band without another black slab.
+          // EVERY descendant colour moved to the light ramp with it: the
+          // `--pink-ink-*` family and `--pink-blush` are dark-surface tokens
+          // and land at 1.2:1–3.1:1 here. Padding matches `PinkDarkBand` so
+          // the rhythm against the commissions band (still dark) holds.
+          className="px-5 py-[76px] md:px-10 md:py-[88px]"
+          style={{ background: "var(--pink-panel)", color: "var(--pink-ink)" }}
+          {...sectionGroupAttr("about", "values")}
         >
-          <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <h2
-              className="pink-display max-w-[20ch]"
-              style={{
-                fontSize: "clamp(26px, 2.8vw, 38px)",
-                fontWeight: 600,
-                letterSpacing: "-0.025em",
-                color: "var(--pink-paper)",
-              }}
-              {...fieldAttr("pink.about.values-heading")}
-            >
-              {f["pink.about.values-heading"] ?? ""}
-            </h2>
-            <p
-              className="max-w-[40ch] text-[15px] leading-[1.7]"
-              style={{ color: "var(--pink-ink-muted)" }}
-              {...fieldAttr("pink.about.values-note")}
-            >
-              {f["pink.about.values-note"] ?? ""}
-            </p>
-          </div>
+          <div className="mx-auto max-w-[1400px]">
+            <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <h2
+                className="pink-display max-w-[20ch]"
+                style={{
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.025em",
+                  color: "var(--pink-ink)",
+                }}
+                {...fieldAttr("pink.about.values-heading")}
+              >
+                {f["pink.about.values-heading"] ?? ""}
+              </h2>
+              <p
+                className="max-w-[40ch] text-[0.9375rem] leading-[1.7]"
+                style={{ color: "var(--pink-muted)" }}
+                {...fieldAttr("pink.about.values-note")}
+              >
+                {f["pink.about.values-note"] ?? ""}
+              </p>
+            </div>
 
-          <PinkHairlineGrid tone="dark" columnsClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((v, i) => (
-              <PinkReveal key={v._id ?? i} index={i} className="flex flex-col gap-3 p-6">
-                <PinkRule tone="dark" width={34} />
-                <h3
-                  className="pink-display"
-                  style={{ fontSize: "19px", fontWeight: 600, color: "var(--pink-paper)" }}
-                >
-                  {v.title ?? ""}
-                </h3>
-                <p
-                  className="text-[15px] leading-[1.7]"
-                  style={{ color: "var(--pink-ink-muted)" }}
-                >
-                  {v.body ?? ""}
-                </p>
-              </PinkReveal>
-            ))}
-          </PinkHairlineGrid>
-        </PinkDarkBand>
+            {/* Deliberately not `PinkHairlineGrid`: its paper tone paints the
+                container `--pink-paper`, which would cut a white rectangle out
+                of the wash. Since the 1px cell rings were removed on
+                2026-07-31 that tone is now just `display:grid; gap:32px`, so a
+                plain grid is visually identical — and the cells drop their
+                padding here so column one lines up with the heading above
+                instead of floating 24px inside the band. */}
+            <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              {values.map((v, i) => (
+                <PinkReveal key={v._id ?? i} index={i} className="flex min-w-0 flex-col gap-3">
+                  <PinkRule width={34} />
+                  <h3
+                    className="pink-display text-[1.1875rem]"
+                    style={{ fontWeight: 600, color: "var(--pink-ink)" }}
+                  >
+                    {v.title ?? ""}
+                  </h3>
+                  <p
+                    className="text-[0.9375rem] leading-[1.7]"
+                    style={{ color: "var(--pink-body)" }}
+                  >
+                    {v.body ?? ""}
+                  </p>
+                </PinkReveal>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* ── about.timeline ─────────────────────────────────────────────── */}
-      {isSectionVisible(customFields, "pink", "about.timeline") && (
+      {/* `timeline.length > 0` matches the gallery guard below: with no rows
+          the band would render a heading and note over nothing at all. */}
+      {isSectionVisible(customFields, "pink", "about.timeline") && timeline.length > 0 && (
         <section
           className="px-5 py-16 md:px-10 md:py-24"
           {...sectionGroupAttr("about", "timeline")}
         >
           <div className="mx-auto grid max-w-[1400px] gap-10 md:grid-cols-[0.72fr_1fr]">
             <PinkReveal className="flex flex-col gap-4">
-              <PinkEyebrow tone="paper" fieldKey="pink.about.timeline-eyebrow">
-                {f["pink.about.timeline-eyebrow"] ?? ""}
-              </PinkEyebrow>
               <h2
                 className="pink-display max-w-[16ch]"
                 style={{
-                  fontSize: "clamp(26px, 2.8vw, 38px)",
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                   fontWeight: 600,
                   letterSpacing: "-0.025em",
                   lineHeight: 1.1,
@@ -431,18 +446,15 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
       {isSectionVisible(customFields, "pink", "about.commissions") && (
         <PinkDarkBand
           id="commissions"
-          ariaLabel="Commissions"
+          ariaLabel="Custom orders"
           sectionAttrs={sectionGroupAttr("about", "commissions")}
         >
           <div className="grid gap-10 md:grid-cols-[1fr_0.9fr] md:items-center">
             <PinkReveal className="flex flex-col gap-4">
-              <PinkEyebrow tone="dark" fieldKey="pink.about.commissions-eyebrow">
-                {f["pink.about.commissions-eyebrow"] ?? ""}
-              </PinkEyebrow>
               <h2
                 className="pink-display max-w-[22ch]"
                 style={{
-                  fontSize: "clamp(26px, 2.8vw, 38px)",
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                   fontWeight: 600,
                   letterSpacing: "-0.025em",
                   color: "var(--pink-paper)",

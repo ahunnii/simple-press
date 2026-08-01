@@ -20,7 +20,6 @@ type OrderDetails = {
 };
 
 type Props = {
-  eyebrow: string;
   heading: string;
   headingAccent: string;
   body: string;
@@ -33,7 +32,6 @@ type Props = {
   noOrderHeading: string;
   noOrderBody: string;
   noOrderCta: string;
-  ctaEyebrow: string;
   ctaHeading: string;
   ctaBody: string;
   ctaButton: string;
@@ -68,7 +66,6 @@ function titleCasePaymentStatus(status: string): string {
  * though the session endpoint itself returns only email/total/status.
  */
 export function PinkOrderConfirmation({
-  eyebrow,
   heading,
   headingAccent,
   body,
@@ -81,7 +78,6 @@ export function PinkOrderConfirmation({
   noOrderHeading,
   noOrderBody,
   noOrderCta,
-  ctaEyebrow,
   ctaHeading,
   ctaBody,
   ctaButton,
@@ -153,7 +149,7 @@ export function PinkOrderConfirmation({
         style={{ background: "var(--pink-paper)" }}
       >
         <h1
-          className="pink-display max-w-[20ch] text-[clamp(28px,3.4vw,42px)] leading-[1.1] tracking-[-0.02em]"
+          className="pink-display max-w-[20ch] text-[clamp(1.75rem,3.4vw,2.625rem)] leading-[1.1] tracking-[-0.02em]"
           {...fieldAttr("pink.order.no-order-heading")}
         >
           {noOrderHeading}
@@ -208,13 +204,8 @@ export function PinkOrderConfirmation({
         style={{ background: "var(--pink-ink)", color: "var(--pink-paper)" }}
       >
         <div className="mx-auto flex max-w-[1400px] flex-col gap-4">
-          {eyebrow && (
-            <p className="pink-eyebrow pink-eyebrow-dark" {...fieldAttr("pink.order.eyebrow")}>
-              {eyebrow}
-            </p>
-          )}
           <h1
-            className="pink-display max-w-[16ch] text-[clamp(34px,4.6vw,62px)] leading-[1.02] tracking-[-0.03em]"
+            className="pink-display max-w-[16ch] text-[clamp(2.125rem,4.6vw,3.875rem)] leading-[1.02] tracking-[-0.03em]"
           >
             <span {...fieldAttr("pink.order.heading")}>{heading}</span>{" "}
             <span style={{ color: "var(--pink-blush)" }} {...fieldAttr("pink.order.heading-accent")}>
@@ -330,8 +321,6 @@ export function PinkOrderConfirmation({
       {/* Closing CTA */}
       <div className="mx-auto max-w-[1400px] px-5 pb-20 md:px-10 md:pb-28">
         <PinkCtaPanel
-          eyebrow={ctaEyebrow}
-          eyebrowFieldKey="pink.order.cta-eyebrow"
           heading={ctaHeading}
           headingFieldKey="pink.order.cta-heading"
           body={ctaBody}

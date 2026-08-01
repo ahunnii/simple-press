@@ -15,16 +15,6 @@ import type { TemplateSection } from "~/lib/template-sections";
 export const pinkShopData: TemplateField[] = [
   // ── shop.header ──────────────────────────────────────────────────────────
   {
-    key: "pink.shop.header-eyebrow",
-    label: "Header Eyebrow",
-    description: "Small label above the shop heading.",
-    type: "text",
-    page: "shop",
-    group: "shop.header",
-    gridColumn: "col-span-1",
-    defaultValue: "The shop",
-  },
-  {
     key: "pink.shop.header-heading",
     label: "Header Heading",
     description: "The main H1 on the shop page.",
@@ -43,7 +33,7 @@ export const pinkShopData: TemplateField[] = [
     group: "shop.header",
     gridColumn: "col-span-full",
     defaultValue:
-      "Spirit dolls, magnets, and one-of-one pieces, made by hand in Detroit. New work goes up as it's finished.",
+      "Dolls, magnets, jewelry and small pieces — made by hand in Detroit from wool, cotton and polymer clay. Every one is one of a kind, and new work goes up as it's finished.",
   },
 
   // ── shop.filters ─────────────────────────────────────────────────────────
@@ -65,7 +55,7 @@ export const pinkShopData: TemplateField[] = [
     page: "shop",
     group: "shop.filters",
     gridColumn: "col-span-full",
-    defaultValue: "Commissions are open. Tell me what you have in mind.",
+    defaultValue: "Custom orders are open. Tell me what you have in mind.",
   },
   {
     key: "pink.shop.filters-cta-label",
@@ -159,7 +149,7 @@ export const pinkShopData: TemplateField[] = [
     group: "shop.grid",
     gridColumn: "col-span-full",
     defaultValue:
-      "New pieces go up as they're finished. Check back soon, or get in touch about a commission.",
+      "New pieces go up as they're finished. Check back soon, or get in touch about a custom order.",
   },
   {
     key: "pink.shop.empty-cta-label",

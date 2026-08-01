@@ -18,16 +18,6 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 const contactHeaderData: TemplateField[] = [
   {
-    key: "pink.contact.header-eyebrow",
-    label: "Header Eyebrow",
-    type: "text",
-    page: "contact",
-    group: "contact.header",
-    gridColumn: "col-span-1",
-    description: "Small label above the heading.",
-    defaultValue: "Say hello",
-  },
-  {
     key: "pink.contact.header-heading",
     label: "Header Heading",
     type: "text",
@@ -46,7 +36,7 @@ const contactHeaderData: TemplateField[] = [
     gridColumn: "col-span-full",
     description: "One or two sentences under the heading.",
     defaultValue:
-      "Questions about an order, a commission, or booking a make & take — write in and we'll get back to you.",
+      "Questions about an order, a custom order, or booking a make & take — write in and we'll get back to you.",
   },
   {
     key: "pink.contact.header-facts",
@@ -90,7 +80,7 @@ const contactTopicsData: TemplateField[] = [
     maxItems: 6,
     itemSchema: [
       { key: "name", label: "Name", type: "text", placeholder: "Custom orders" },
-      { key: "blurb", label: "Blurb", type: "textarea", placeholder: "A spirit doll or piece made just for you." },
+      { key: "blurb", label: "Blurb", type: "textarea", placeholder: "A doll, a piece of jewelry, or something else made just for you." },
       { key: "messageLabel", label: "Message Field Label", type: "text", placeholder: "Tell me what you have in mind" },
       { key: "messagePlaceholder", label: "Message Field Placeholder", type: "text", placeholder: "Sizes, colors, timeline — whatever you've got." },
     ],

@@ -20,16 +20,6 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 const testimonialsHeaderData: TemplateField[] = [
   {
-    key: "pink.testimonials.header-eyebrow",
-    label: "Header Eyebrow",
-    type: "text",
-    page: "testimonials",
-    group: "testimonials.header",
-    gridColumn: "col-span-1",
-    description: "Small label above the heading.",
-    defaultValue: "Word of mouth",
-  },
-  {
     key: "pink.testimonials.header-heading",
     label: "Header Heading",
     type: "text",
@@ -37,7 +27,7 @@ const testimonialsHeaderData: TemplateField[] = [
     group: "testimonials.header",
     gridColumn: "col-span-full",
     description: "The page's H1.",
-    defaultValue: "Notes from the keepers",
+    defaultValue: "What people say",
   },
   {
     key: "pink.testimonials.header-intro",
@@ -48,22 +38,7 @@ const testimonialsHeaderData: TemplateField[] = [
     gridColumn: "col-span-full",
     description: "One or two sentences under the heading.",
     defaultValue:
-      "People who've bought a piece, booked a make & take, or commissioned something of their own — in their own words.",
-  },
-  {
-    key: "pink.testimonials.header-stats",
-    label: "Header Stats",
-    description: "2 or 4 numeral/label tiles on the right. Leave empty to use the defaults.",
-    type: "list",
-    page: "testimonials",
-    group: "testimonials.header",
-    gridColumn: "col-span-full",
-    maxItems: 4,
-    itemSchema: [
-      { key: "value", label: "Value", type: "text", placeholder: "400+" },
-      { key: "label", label: "Label", type: "text", placeholder: "Keepers so far" },
-    ],
-    defaultValue: "",
+      "People who've bought a piece, booked a make & take, or ordered something custom — in their own words.",
   },
 ];
 
@@ -113,7 +88,7 @@ const testimonialsGridData: TemplateField[] = [
     page: "testimonials",
     group: "testimonials.grid",
     gridColumn: "col-span-1",
-    defaultValue: "From keepers",
+    defaultValue: "From customers",
   },
   {
     key: "pink.testimonials.grid-filter-studio-label",
@@ -174,7 +149,8 @@ const testimonialsPressData: TemplateField[] = [
   {
     key: "pink.testimonials.press-items",
     label: "Press Mentions",
-    description: "Up to 4 press mentions. Leave empty to use the defaults.",
+    description:
+      "Up to 4 press mentions. Ships empty — the whole band stays hidden until you add a real one.",
     type: "list",
     page: "testimonials",
     group: "testimonials.press",
@@ -193,16 +169,6 @@ const testimonialsPressData: TemplateField[] = [
 // ── testimonials.cta ─────────────────────────────────────────────────────────
 
 const testimonialsCtaData: TemplateField[] = [
-  {
-    key: "pink.testimonials.cta-eyebrow",
-    label: "CTA Eyebrow",
-    description: "Small label above the closing CTA heading.",
-    type: "text",
-    page: "testimonials",
-    group: "testimonials.cta",
-    gridColumn: "col-span-1",
-    defaultValue: "Got a piece of your own?",
-  },
   {
     key: "pink.testimonials.cta-heading",
     label: "CTA Heading",

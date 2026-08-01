@@ -11,19 +11,16 @@ import { resolveFields } from "../index";
 import { PinkBadge } from "../shared/pink-badge";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkEmptyState } from "../shared/pink-empty-state";
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 
 const FIELD_KEYS = [
-  "pink.collections.header-eyebrow",
   "pink.collections.header-heading",
   "pink.collections.header-intro",
   "pink.collections.featured-badge",
   "pink.collections.featured-cta-label",
   "pink.collections.grid-badge-open",
   "pink.collections.grid-badge-closed",
-  "pink.collections.next-eyebrow",
   "pink.collections.next-heading",
   "pink.collections.next-body",
   "pink.collections.next-cta-primary-label",
@@ -124,8 +121,6 @@ export async function PinkCollectionsPage({ collections, business }: DefaultColl
     <>
       <PinkPageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Collections" }]}
-        eyebrow={f["pink.collections.header-eyebrow"] ?? ""}
-        eyebrowFieldKey="pink.collections.header-eyebrow"
         heading={f["pink.collections.header-heading"] ?? ""}
         headingFieldKey="pink.collections.header-heading"
         sectionAttrs={sectionGroupAttr("collections", "header")}
@@ -133,7 +128,9 @@ export async function PinkCollectionsPage({ collections, business }: DefaultColl
           f["pink.collections.header-intro"] ? (
             <p
               className="max-w-[40ch] text-[17px] leading-[1.7]"
-              style={{ color: "var(--pink-ink-body)" }}
+              // Light ramp: PinkPageHeader is no longer a dark band (2026-07-31).
+              // `--pink-ink-body` measured 1.2:1 here — effectively invisible.
+              style={{ color: "var(--pink-body)" }}
               {...fieldAttr("pink.collections.header-intro")}
             >
               {f["pink.collections.header-intro"]}
@@ -178,10 +175,9 @@ export async function PinkCollectionsPage({ collections, business }: DefaultColl
                   )}
                 </Link>
                 <div className="flex flex-col justify-center gap-4 p-8 md:p-10">
-                  <PinkEyebrow tone="paper">Featured series</PinkEyebrow>
                   <h2
                     className="pink-display"
-                    style={{ fontSize: "clamp(24px, 2.6vw, 34px)", fontWeight: 600, letterSpacing: "-0.02em" }}
+                    style={{ fontSize: "clamp(1.5rem, 2.6vw, 2.125rem)", fontWeight: 600, letterSpacing: "-0.02em" }}
                   >
                     {featured.name}
                   </h2>
@@ -266,12 +262,9 @@ export async function PinkCollectionsPage({ collections, business }: DefaultColl
         <PinkDarkBand ariaLabel="What's coming" sectionAttrs={sectionGroupAttr("collections", "next")}>
           <div className="grid gap-10 md:grid-cols-[1fr_0.9fr] md:items-center md:gap-14">
             <div className="flex flex-col gap-4">
-              <PinkEyebrow tone="dark" fieldKey="pink.collections.next-eyebrow">
-                {f["pink.collections.next-eyebrow"] ?? ""}
-              </PinkEyebrow>
               <h2
                 className="pink-display max-w-[24ch]"
-                style={{ fontSize: "clamp(26px, 2.8vw, 38px)", fontWeight: 600, letterSpacing: "-0.025em" }}
+                style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
                 {...fieldAttr("pink.collections.next-heading")}
               >
                 {f["pink.collections.next-heading"] ?? ""}

@@ -81,6 +81,11 @@ const exportedBusinessSchema = z.object({
   shippingDefaultItemWeightLb: nullableNumber.optional(),
   salesCountries: z.array(z.string()),
   featureFlags: z.unknown(),
+  // `timeZone` was added after the original export format shipped. It MUST
+  // stay optional (no default here — import.ts falls back to the Business
+  // model's own Prisma default) so ZIPs exported before this field existed
+  // still parse instead of hard-failing. Do not make this required.
+  timeZone: z.string().optional(),
 });
 
 const exportedSiteContentSchema = z.object({
@@ -331,6 +336,23 @@ const exportedShippingZoneSchema = z.object({
   rates: z.array(exportedShippingRateSchema),
 });
 
+const exportedEventSchema = z.object({
+  exportId: z.string(),
+  name: z.string(),
+  blurb: nullableString.optional(),
+  coverImage: nullableString.optional(),
+  startAt: z.string(),
+  endAt: nullableString.optional(),
+  allDay: z.boolean(),
+  location: nullableString.optional(),
+  externalUrl: nullableString.optional(),
+  externalUrlLabel: nullableString.optional(),
+  priceLabel: nullableString.optional(),
+  published: z.boolean(),
+  sortOrder: z.number(),
+  isArchived: z.boolean(),
+});
+
 // ─── Content block ────────────────────────────────────────────────────────────
 
 const storeTransferContentSchema = z.object({
@@ -346,6 +368,11 @@ const storeTransferContentSchema = z.object({
   discountCodes: z.array(exportedDiscountCodeSchema),
   testimonials: z.array(exportedTestimonialSchema),
   faqItems: z.array(exportedFaqItemSchema),
+  // `events` was added after the original export format shipped. It MUST stay
+  // optional with a default (not required, and not solved by bumping
+  // STORE_TRANSFER_FORMAT_VERSION — that would hard-reject every ZIP exported
+  // before this field existed). Do not "tidy" this into a required array.
+  events: z.array(exportedEventSchema).optional().default([]),
   shippingZones: z.array(exportedShippingZoneSchema),
 });
 

@@ -21,7 +21,7 @@ export const pinkProductData: TemplateField[] = [
     key: "pink.global.product-panels",
     label: "Product Page Accordion",
     description:
-      "Rows shown in the accordion under every product's buy box — care instructions, shipping, commissions, etc. Leave empty to use the built-in example rows.",
+      "Rows shown in the accordion under every product's buy box — care instructions, shipping, custom orders, etc. Leave empty to use the built-in example rows.",
     type: "list",
     page: "global",
     group: "global.product-panels",
@@ -57,16 +57,6 @@ export const pinkProductData: TemplateField[] = [
     defaultValue: "",
   },
   {
-    key: "pink.global.product-story-eyebrow",
-    label: "Product Story Eyebrow",
-    description: "Small label above the story heading.",
-    type: "text",
-    page: "global",
-    group: "global.product-story",
-    gridColumn: "col-span-1",
-    defaultValue: "How it's made",
-  },
-  {
     key: "pink.global.product-story-heading",
     label: "Product Story Heading",
     type: "text",
@@ -85,22 +75,7 @@ export const pinkProductData: TemplateField[] = [
     group: "global.product-story",
     gridColumn: "col-span-full",
     defaultValue:
-      "Cloth, thread, and whatever the piece calls for. Nothing is cast or molded — every shape gets worked by hand, one at a time.",
-  },
-  {
-    key: "pink.global.product-story-stats",
-    label: "Product Story Stats",
-    description:
-      "Up to 3 numeral + label stat tiles under the story text. Leave empty to use the built-in example stats.",
-    type: "list",
-    page: "global",
-    group: "global.product-story",
-    gridColumn: "col-span-full",
-    maxItems: 3,
-    itemSchema: [
-      { key: "value", label: "Value", type: "text", placeholder: "1 of 1" },
-      { key: "label", label: "Label", type: "text", placeholder: "Editions" },
-    ],
+      "100% wool filling, cotton fabrics, polymer clay faces. Every piece is worked by hand, one at a time, and no two come out the same.",
   },
 
   // ── global.product-related ──────────────────────────────────────────────
@@ -130,7 +105,7 @@ export const pinkProductFieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.product-panels",
     title: "Product Page — Accordion",
-    description: "Care, shipping and commission rows shown under every product's buy box",
+    description: "Care, shipping and custom order rows shown under every product's buy box",
     icon: "📦",
     columns: 1,
   } satisfies TemplateFieldGroup,
@@ -155,7 +130,7 @@ export const pinkProductSections: TemplateSection[] = [
     id: "global.product-panels",
     page: "global",
     title: "Product Page — Accordion",
-    description: "Care, shipping and commission rows shown under every product's buy box",
+    description: "Care, shipping and custom order rows shown under every product's buy box",
     groupIds: ["global.product-panels"],
     order: 20,
     hideable: true,

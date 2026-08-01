@@ -4,14 +4,11 @@ import Link from "next/link";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import type { PinkBreadcrumbItem } from "./pink-page-header";
-import { PinkEyebrow } from "./pink-eyebrow";
 
 type PinkPhotoHeaderProps = {
   imageUrl: string;
   imageAlt?: string;
   breadcrumb?: PinkBreadcrumbItem[];
-  eyebrow?: string;
-  eyebrowFieldKey?: string;
   heading: string;
   headingFieldKey?: string;
   intro?: string;
@@ -30,15 +27,13 @@ type PinkPhotoHeaderProps = {
  * panel. Used by about, collection detail, and service detail (design.md →
  * Shared component inventory). Server-safe.
  *
- * H1 scale per design.md → Typography: `clamp(38px, 5.6vw, 92px)` / 600 /
+ * H1 scale per design.md → Typography: `clamp(2.375rem, 5.6vw, 5.75rem)` / 600 /
  * `-.035em` / `.98`.
  */
 export function PinkPhotoHeader({
   imageUrl,
   imageAlt = "",
   breadcrumb,
-  eyebrow,
-  eyebrowFieldKey,
   heading,
   headingFieldKey,
   intro,
@@ -116,16 +111,10 @@ export function PinkPhotoHeader({
               </nav>
             )}
 
-            {eyebrow && (
-              <PinkEyebrow tone="photo" fieldKey={eyebrowFieldKey}>
-                {eyebrow}
-              </PinkEyebrow>
-            )}
-
             <h1
               className="pink-display"
               style={{
-                fontSize: "clamp(38px, 5.6vw, 92px)",
+                fontSize: "clamp(2.375rem, 5.6vw, 5.75rem)",
                 fontWeight: 600,
                 letterSpacing: "-0.035em",
                 lineHeight: 0.98,

@@ -26,27 +26,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const baseUrl = getCanonicalBaseUrl(business);
 
-  const [products, collections, pages, services, faqCount] = await Promise.all([
-    db.product.findMany({
-      where: { businessId: business.id, published: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    db.collection.findMany({
-      where: { businessId: business.id, published: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    db.page.findMany({
-      where: { businessId: business.id, published: true },
-      select: { slug: true, updatedAt: true, type: true },
-    }),
-    db.service.findMany({
-      where: { businessId: business.id, published: true },
-      select: { slug: true, updatedAt: true },
-    }),
-    db.faqItem.count({
-      where: { businessId: business.id, published: true },
-    }),
-  ]);
+  const [products, collections, pages, services, faqCount, eventCount] =
+    await Promise.all([
+      db.product.findMany({
+        where: { businessId: business.id, published: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      db.collection.findMany({
+        where: { businessId: business.id, published: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      db.page.findMany({
+        where: { businessId: business.id, published: true },
+        select: { slug: true, updatedAt: true, type: true },
+      }),
+      db.service.findMany({
+        where: { businessId: business.id, published: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      db.faqItem.count({
+        where: { businessId: business.id, published: true },
+      }),
+      db.event.count({
+        where: { businessId: business.id, published: true, isArchived: false },
+      }),
+    ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "daily", priority: 1 },
@@ -97,6 +101,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/faq`,
       changeFrequency: "weekly",
       priority: 0.5,
+    });
+  }
+
+  // Events static index page — only when there are published events
+  if (eventCount > 0) {
+    staticRoutes.push({
+      url: `${baseUrl}/events`,
+      changeFrequency: "weekly",
+      priority: 0.7,
     });
   }
 

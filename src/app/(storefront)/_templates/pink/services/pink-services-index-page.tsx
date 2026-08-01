@@ -11,12 +11,10 @@ import { resolveFields } from "..";
 import { PinkBadge } from "../shared/pink-badge";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
-import { PinkStatTiles } from "../shared/pink-stat-tiles";
 import type { PinkServiceCard } from "./pink-services-grid";
 import { PinkServicesGrid } from "./pink-services-grid";
 
@@ -43,18 +41,11 @@ function isOneToOneCategory(category: string | null): boolean {
 // entirely — see field-conventions.md), so a fresh store needs a real
 // hardcoded fallback here or these sections render empty. Mirrors vii's
 // `DEFAULT_STEPS` pattern (`vii-about-page.tsx`).
-const DEFAULT_HEADER_STATS: TemplateListRow[] = [
-  { value: "60+", label: "Make & takes led" },
-  { value: "12", label: "Schools, churches & libraries visited" },
-  { value: "1:1", label: "Commissions taken by hand" },
-  { value: "2019", label: "Doing this since" },
-];
-
 const DEFAULT_STEPS: TemplateListRow[] = [
   {
     ordinal: "01",
     title: "You reach out",
-    body: "Tell us the room — a classroom, a sanctuary, a break room — and how many hands.",
+    body: "Tell us the room — a classroom, a sanctuary, a break room, a back yard — and how many hands.",
   },
   {
     ordinal: "02",
@@ -77,7 +68,6 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
   const customFields = business.siteContent?.customFields;
 
   const f = resolveFields(customFields, [
-    "pink.services.header-eyebrow",
     "pink.services.header-heading",
     "pink.services.header-intro",
     "pink.services.featured-badge",
@@ -91,7 +81,6 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
     "pink.services.grid-empty-cta-link",
     "pink.services.steps-heading",
     "pink.services.steps-note",
-    "pink.services.cta-eyebrow",
     "pink.services.cta-heading",
     "pink.services.cta-body",
     "pink.services.cta-primary-label",
@@ -103,17 +92,6 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
   ]);
 
   const rawCustomFields = customFields as Record<string, unknown> | null | undefined;
-
-  const parsedStatRows = parseTemplateListRows(
-    rawCustomFields?.["pink.services.header-stats"],
-  );
-  const statRows = (parsedStatRows.length > 0 ? parsedStatRows : DEFAULT_HEADER_STATS).map(
-    (row) => ({
-      value: typeof row.value === "string" ? row.value : "",
-      label: typeof row.label === "string" ? row.label : "",
-      _id: row._id,
-    }),
-  );
 
   const parsedStepsRows = parseTemplateListRows(
     rawCustomFields?.["pink.services.steps-list"],
@@ -152,13 +130,10 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
       <PinkPageHeader
         sectionAttrs={sectionGroupAttr("services", "header")}
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Services" }]}
-        eyebrow={f["pink.services.header-eyebrow"] ?? ""}
-        eyebrowFieldKey="pink.services.header-eyebrow"
         heading={f["pink.services.header-heading"] ?? ""}
         headingFieldKey="pink.services.header-heading"
         intro={f["pink.services.header-intro"] ?? ""}
         introFieldKey="pink.services.header-intro"
-        rightSlot={<PinkStatTiles stats={statRows} columns={4} />}
       />
 
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-20 px-5 py-16 md:px-10 md:py-20">
@@ -192,15 +167,10 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                   </div>
 
                   <div className="flex flex-col justify-center gap-4 p-8 md:p-12">
-                    {signatureItem.item.durationLabel && (
-                      <PinkEyebrow tone="paper">
-                        {signatureItem.item.durationLabel}
-                      </PinkEyebrow>
-                    )}
                     <h2
                       className="pink-display"
                       style={{
-                        fontSize: "clamp(26px, 2.8vw, 38px)",
+                        fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                         fontWeight: 600,
                         letterSpacing: "-0.025em",
                         lineHeight: 1.1,
@@ -261,7 +231,7 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
               <h2
                 className="pink-display"
                 style={{
-                  fontSize: "clamp(26px, 2.8vw, 38px)",
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                   fontWeight: 600,
                   letterSpacing: "-0.025em",
                 }}
@@ -313,8 +283,6 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
           <PinkReveal>
             <PinkCtaPanel
               sectionAttrs={sectionGroupAttr("services", "cta")}
-              eyebrow={f["pink.services.cta-eyebrow"] ?? ""}
-              eyebrowFieldKey="pink.services.cta-eyebrow"
               heading={f["pink.services.cta-heading"] ?? ""}
               headingFieldKey="pink.services.cta-heading"
               body={f["pink.services.cta-body"] ?? ""}

@@ -434,6 +434,27 @@ export async function buildUsedMediaIndex(
       }
     });
 
+  // ── 5b. Events (flier cover image) ──────────────────────────────────────────
+  const eventsPromise = db.event
+    .findMany({
+      where: { businessId },
+      select: { id: true, name: true, coverImage: true },
+    })
+    .then((events) => {
+      for (const e of events) {
+        if (e.coverImage) {
+          addUsage(map, e.coverImage, {
+            url: e.coverImage,
+            location: "Event flier",
+            entityType: "event",
+            entityId: e.id,
+            entityLabel: e.name,
+            adminHref: `/admin/events/${e.id}`,
+          });
+        }
+      }
+    });
+
   // ── 6. Images (product image gallery rows) ─────────────────────────────────
   const imagesPromise = db.image
     .findMany({
@@ -613,6 +634,7 @@ export async function buildUsedMediaIndex(
     variantsPromise,
     collectionsPromise,
     servicesPromise,
+    eventsPromise,
     imagesPromise,
     pagesPromise,
     galleryImagesPromise,

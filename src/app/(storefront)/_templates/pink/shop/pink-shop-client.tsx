@@ -244,7 +244,15 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
       </FilterBlock>
 
       <FilterBlock label="Availability">
-        <label className="flex cursor-pointer items-center gap-2.5 text-[15px]" style={{ color: "var(--pink-ink)" }}>
+        {/* Same treatment as the contact opt-in row: the <label> is the real
+            target, so the row — not the 17px box — is what has to clear WCAG
+            2.5.8's 24px floor, and 44px on touch pointers meets the template's
+            own bar. The desktop filter rail is unaffected because a mouse
+            reports `pointer: fine` (audit 2026-07-31, P3-1). */}
+        <label
+          className="flex min-h-6 cursor-pointer items-center gap-2.5 text-[15px] [@media(pointer:coarse)]:min-h-11"
+          style={{ color: "var(--pink-ink)" }}
+        >
           <input
             type="checkbox"
             checked={inStockOnly}
@@ -372,6 +380,7 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
                   return (
                     <PinkReveal key={product.id} index={i % PAGE_SIZE} as="div">
                       <PinkProductCard
+                        priority={i < 3}
                         href={`/shop/${product.slug}`}
                         imageUrl={product.images[0]?.url}
                         imageAlt={product.name}

@@ -40,6 +40,7 @@ export const businessRouter = createTRPCRouter({
         templateId: true,
         businessAddress: true,
         businessHours: true,
+        timeZone: true,
         supportEmail: true,
         phoneNumber: true,
         customDomain: true,
@@ -128,6 +129,7 @@ export const businessRouter = createTRPCRouter({
         featureFlags: true,
         businessAddress: true,
         businessHours: true,
+        timeZone: true,
         stripeAccountId: true,
         supportEmail: true,
         phoneNumber: true,
@@ -857,6 +859,7 @@ export const businessRouter = createTRPCRouter({
         businessAddress: z.string().optional(),
         phoneNumber: z.string().optional(),
         sendAbandonedCheckoutEmails: z.boolean().optional(),
+        timeZone: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -868,6 +871,7 @@ export const businessRouter = createTRPCRouter({
         businessAddress,
         phoneNumber,
         sendAbandonedCheckoutEmails,
+        timeZone,
       } = input;
 
       const updatedBusiness = await ctx.db.business.update({
@@ -879,6 +883,7 @@ export const businessRouter = createTRPCRouter({
           businessAddress,
           phoneNumber,
           sendAbandonedCheckoutEmails,
+          timeZone,
         },
       });
       return {

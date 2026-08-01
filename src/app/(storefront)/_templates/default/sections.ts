@@ -149,6 +149,34 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       hideable: true,
     },
 
+    // ── Events ────────────────────────────────────────────────────────────
+    {
+      id: "events.hero",
+      page: "events",
+      title: "Hero",
+      groupIds: ["events.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "events.list",
+      page: "events",
+      title: "List",
+      description: "Upcoming event rows and empty-state copy",
+      groupIds: ["events.list"],
+      order: 1,
+      hideable: false,
+    },
+    {
+      id: "events.cta",
+      page: "events",
+      title: "CTA",
+      description: "Bottom call-to-action strip",
+      groupIds: ["events.cta"],
+      order: 2,
+      hideable: true,
+    },
+
     // ── Blog ──────────────────────────────────────────────────────────────
     {
       id: "blog.header",

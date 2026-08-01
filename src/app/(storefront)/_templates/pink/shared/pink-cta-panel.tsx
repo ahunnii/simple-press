@@ -3,13 +3,10 @@ import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-import { PinkEyebrow } from "./pink-eyebrow";
 
 type PinkCtaLink = { label: string; href: string };
 
 type PinkCtaPanelProps = {
-  eyebrow?: string;
-  eyebrowFieldKey?: string;
   heading: string;
   headingFieldKey?: string;
   body?: string;
@@ -29,8 +26,6 @@ type PinkCtaPanelProps = {
  * inventory). Server-safe.
  */
 export function PinkCtaPanel({
-  eyebrow,
-  eyebrowFieldKey,
   heading,
   headingFieldKey,
   body,
@@ -49,15 +44,10 @@ export function PinkCtaPanel({
       {...sectionAttrs}
     >
       <div className="flex flex-col gap-4">
-        {eyebrow && (
-          <PinkEyebrow tone="paper" fieldKey={eyebrowFieldKey}>
-            {eyebrow}
-          </PinkEyebrow>
-        )}
         <h2
           className="pink-display max-w-[24ch]"
           style={{
-            fontSize: "clamp(26px, 2.8vw, 38px)",
+            fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
             fontWeight: 600,
             letterSpacing: "-0.025em",
             lineHeight: 1.1,
@@ -92,7 +82,12 @@ export function PinkCtaPanel({
       </div>
 
       {hasImages && (
-        <div className="grid grid-cols-2 gap-3">
+        // One image gets the whole column rather than half of a 2-up grid with
+        // a hole beside it — the events CTA only passes images the owner has
+        // actually set, so a lone image is a real state here.
+        <div
+          className={`grid gap-3 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
+        >
           {images.slice(0, 2).map((img, i) => (
             <div key={img.src + i} className="relative aspect-square overflow-hidden">
               <Image

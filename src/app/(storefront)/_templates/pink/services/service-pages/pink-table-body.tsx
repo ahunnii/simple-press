@@ -50,6 +50,7 @@ type Props = {
   faq: FaqRow[];
 
   priceEyebrow: string;
+  priceFallback: string;
   priceQualifier: string;
   priceCtaLabel: string;
   quicklink1Label: string;
@@ -94,6 +95,7 @@ export function PinkTableBody({
   faqHeading,
   faq,
   priceEyebrow,
+  priceFallback,
   priceQualifier,
   priceCtaLabel,
   quicklink1Label,
@@ -111,6 +113,7 @@ export function PinkTableBody({
     [items, selectedId],
   );
 
+  const itemPriceLabel = selectedItem?.priceLabel?.trim() ?? "";
   const priceTiers = selectedItem ? parseServicePriceTiers(selectedItem.priceTiers) : [];
   const addOns = selectedItem ? parseServiceAddOns(selectedItem.addOns) : [];
 
@@ -366,8 +369,14 @@ export function PinkTableBody({
       <aside className="flex h-fit flex-col gap-[2px] lg:sticky" style={{ top: "var(--pink-sticky-top)" }}>
         <div className="flex flex-col gap-4 p-6" style={{ background: "var(--pink-ink)" }}>
           <p className="pink-label-dark">{priceEyebrow}</p>
-          <p className="pink-display text-[34px]" style={{ fontWeight: 600, color: "var(--pink-paper)" }}>
-            {selectedItem?.priceLabel ?? "Ask for pricing"}
+          {/* The owner does not sell seats: a make & take is quoted per group on
+              enquiry. A price only ever appears here if the owner typed one into
+              the ServiceItem's own `priceLabel` in /admin/services — otherwise
+              this stays a contact-for-cost panel. (`?? ` alone was not enough:
+              `priceLabel` is a nullable free-text column, so a cleared field
+              arrives as "" and used to render a blank 34px line.) */}
+          <p className="pink-display text-[2.125rem]" style={{ fontWeight: 600, color: "var(--pink-paper)" }}>
+            {itemPriceLabel || priceFallback}
           </p>
           {priceQualifier && (
             <p className="text-[13px]" style={{ color: "var(--pink-ink-muted)" }}>

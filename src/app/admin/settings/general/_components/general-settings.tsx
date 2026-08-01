@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import type { GeneralBusinessFormSchema } from "~/lib/validators/general-business";
 import type { RouterOutputs } from "~/trpc/react";
+import { COMMON_TIME_ZONES } from "~/lib/time-zones";
 import { cn } from "~/lib/utils";
 import { generalBusinessFormSchema } from "~/lib/validators/general-business";
 import { api } from "~/trpc/react";
@@ -24,7 +25,22 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Form } from "~/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
@@ -55,6 +71,7 @@ export function GeneralSettings({ business }: Props) {
       businessAddress: business.businessAddress ?? "",
       slug: business.slug ?? "",
       sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
+      timeZone: business.timeZone ?? "America/Detroit",
     },
   });
 
@@ -72,6 +89,7 @@ export function GeneralSettings({ business }: Props) {
         slug: data.business.slug,
         sendAbandonedCheckoutEmails:
           data.business.sendAbandonedCheckoutEmails ?? false,
+        timeZone: data.business.timeZone ?? "America/Detroit",
       });
       void utils.business.invalidate();
       router.refresh();
@@ -92,6 +110,7 @@ export function GeneralSettings({ business }: Props) {
       businessAddress: data.businessAddress ?? undefined,
       phoneNumber: data.phoneNumber ?? undefined,
       sendAbandonedCheckoutEmails: data.sendAbandonedCheckoutEmails,
+      timeZone: data.timeZone,
     });
   };
 
@@ -104,6 +123,7 @@ export function GeneralSettings({ business }: Props) {
         businessAddress: business.businessAddress ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
         sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
+        timeZone: business.timeZone ?? "America/Detroit",
       },
     );
   };
@@ -199,6 +219,43 @@ export function GeneralSettings({ business }: Props) {
                   description="Your unique store identifier (cannot be changed)"
                   required
                   disabled
+                />
+
+                <FormField
+                  control={form.control}
+                  name="timeZone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Time Zone</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {COMMON_TIME_ZONES.map((tz) => (
+                            <SelectItem key={tz.value} value={tz.value}>
+                              {tz.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Used when showing event dates and times to you and
+                        your shoppers. Pick the zone your shop actually
+                        operates in — this also applies to the hours shown on{" "}
+                        <Link
+                          href="/admin/settings/hours"
+                          className="underline underline-offset-2"
+                        >
+                          Business Hours
+                        </Link>
+                        .
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </CardContent>
             </Card>

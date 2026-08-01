@@ -13,7 +13,7 @@ import { PinkTableBody } from "./pink-table-body";
 // hardcoded fallback or a fresh Service renders an empty panel.
 const DEFAULT_FACT_ROWS: TemplateListRow[] = [
   { label: "Where", value: "Your space — school, church, library or workplace" },
-  { label: "Group size", value: "Up to 20 at a table" },
+  { label: "Group size", value: "10 to 12 at a table" },
   { label: "Materials", value: "Everything included" },
   { label: "Notice", value: "Book at least 2 weeks out" },
 ];
@@ -49,6 +49,7 @@ export function PinkTableServicePage({
     "pink-table.quote-attribution",
     "pink-table.faq-heading",
     "pink-table.price-eyebrow",
+    "pink-table.price-fallback",
     "pink-table.price-qualifier",
     "pink-table.price-cta-label",
     "pink-table.quicklink-1-label",
@@ -101,10 +102,6 @@ export function PinkTableServicePage({
     _id: row._id,
   }));
 
-  const heroEyebrow = [f["pink-table.duration-label"], f["pink-table.group-size-label"]]
-    .filter(Boolean)
-    .join(" · ");
-
   return (
     <div className="flex flex-col">
       <PinkPhotoHeader
@@ -116,7 +113,6 @@ export function PinkTableServicePage({
           { label: "Services", href: "/services" },
           { label: service.name },
         ]}
-        eyebrow={heroEyebrow}
         heading={service.name}
         intro={f["pink-table.hero-intro"] ?? ""}
         factRows={factRows.length > 0 ? <PinkFactRows rows={factRows} /> : undefined}
@@ -146,6 +142,7 @@ export function PinkTableServicePage({
         faqHeading={f["pink-table.faq-heading"] ?? ""}
         faq={faq}
         priceEyebrow={f["pink-table.price-eyebrow"] ?? ""}
+        priceFallback={f["pink-table.price-fallback"] ?? ""}
         priceQualifier={f["pink-table.price-qualifier"] ?? ""}
         priceCtaLabel={f["pink-table.price-cta-label"] ?? ""}
         quicklink1Label={f["pink-table.quicklink-1-label"] ?? ""}

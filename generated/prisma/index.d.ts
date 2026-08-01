@@ -84,6 +84,16 @@ export type Service = $Result.DefaultSelection<Prisma.$ServicePayload>
  */
 export type ServiceItem = $Result.DefaultSelection<Prisma.$ServiceItemPayload>
 /**
+ * Model Event
+ * An upcoming event the owner wants shoppers to know about — a market, a class,
+ * a make & take. Owners typically upload a flier as `coverImage`.
+ * 
+ * Deliberately NOT a commerce object: `priceLabel` is a display string, there is
+ * no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
+ * opened full-size in a lightbox from the list.
+ */
+export type Event = $Result.DefaultSelection<Prisma.$EventPayload>
+/**
  * Model Image
  * 
  */
@@ -514,6 +524,16 @@ export class PrismaClient<
     * ```
     */
   get serviceItem(): Prisma.ServiceItemDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.event`: Exposes CRUD operations for the **Event** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Events
+    * const events = await prisma.event.findMany()
+    * ```
+    */
+  get event(): Prisma.EventDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.image`: Exposes CRUD operations for the **Image** model.
@@ -1229,6 +1249,7 @@ export namespace Prisma {
     CollectionProduct: 'CollectionProduct',
     Service: 'Service',
     ServiceItem: 'ServiceItem',
+    Event: 'Event',
     Image: 'Image',
     Customer: 'Customer',
     ShippingAddress: 'ShippingAddress',
@@ -1273,7 +1294,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2310,6 +2331,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ServiceItemCountArgs<ExtArgs>
             result: $Utils.Optional<ServiceItemCountAggregateOutputType> | number
+          }
+        }
+      }
+      Event: {
+        payload: Prisma.$EventPayload<ExtArgs>
+        fields: Prisma.EventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>
+          }
+          findFirst: {
+            args: Prisma.EventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>
+          }
+          findMany: {
+            args: Prisma.EventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>[]
+          }
+          create: {
+            args: Prisma.EventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>
+          }
+          createMany: {
+            args: Prisma.EventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>[]
+          }
+          delete: {
+            args: Prisma.EventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>
+          }
+          update: {
+            args: Prisma.EventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>
+          }
+          deleteMany: {
+            args: Prisma.EventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>[]
+          }
+          upsert: {
+            args: Prisma.EventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventPayload>
+          }
+          aggregate: {
+            args: Prisma.EventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEvent>
+          }
+          groupBy: {
+            args: Prisma.EventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EventCountArgs<ExtArgs>
+            result: $Utils.Optional<EventCountAggregateOutputType> | number
           }
         }
       }
@@ -4347,6 +4442,7 @@ export namespace Prisma {
     collectionProduct?: CollectionProductOmit
     service?: ServiceOmit
     serviceItem?: ServiceItemOmit
+    event?: EventOmit
     image?: ImageOmit
     customer?: CustomerOmit
     shippingAddress?: ShippingAddressOmit
@@ -4559,6 +4655,7 @@ export namespace Prisma {
     memberships: number
     zones: number
     faqItems: number
+    events: number
     backInStockRequests: number
   }
 
@@ -4584,6 +4681,7 @@ export namespace Prisma {
     memberships?: boolean | BusinessCountOutputTypeCountMembershipsArgs
     zones?: boolean | BusinessCountOutputTypeCountZonesArgs
     faqItems?: boolean | BusinessCountOutputTypeCountFaqItemsArgs
+    events?: boolean | BusinessCountOutputTypeCountEventsArgs
     backInStockRequests?: boolean | BusinessCountOutputTypeCountBackInStockRequestsArgs
   }
 
@@ -4743,6 +4841,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountFaqItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: FaqItemWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventWhereInput
   }
 
   /**
@@ -10963,6 +11068,7 @@ export namespace Prisma {
     domainStatus: $Enums.BusinessDomainStatus | null
     afProvisionCode: string | null
     templateId: string | null
+    timeZone: string | null
     ownerEmail: string | null
     supportEmail: string | null
     phoneNumber: string | null
@@ -11004,6 +11110,7 @@ export namespace Prisma {
     domainStatus: $Enums.BusinessDomainStatus | null
     afProvisionCode: string | null
     templateId: string | null
+    timeZone: string | null
     ownerEmail: string | null
     supportEmail: string | null
     phoneNumber: string | null
@@ -11045,6 +11152,7 @@ export namespace Prisma {
     domainStatus: number
     afProvisionCode: number
     templateId: number
+    timeZone: number
     ownerEmail: number
     supportEmail: number
     phoneNumber: number
@@ -11106,6 +11214,7 @@ export namespace Prisma {
     domainStatus?: true
     afProvisionCode?: true
     templateId?: true
+    timeZone?: true
     ownerEmail?: true
     supportEmail?: true
     phoneNumber?: true
@@ -11147,6 +11256,7 @@ export namespace Prisma {
     domainStatus?: true
     afProvisionCode?: true
     templateId?: true
+    timeZone?: true
     ownerEmail?: true
     supportEmail?: true
     phoneNumber?: true
@@ -11188,6 +11298,7 @@ export namespace Prisma {
     domainStatus?: true
     afProvisionCode?: true
     templateId?: true
+    timeZone?: true
     ownerEmail?: true
     supportEmail?: true
     phoneNumber?: true
@@ -11320,6 +11431,7 @@ export namespace Prisma {
     domainStatus: $Enums.BusinessDomainStatus
     afProvisionCode: string | null
     templateId: string
+    timeZone: string
     ownerEmail: string
     supportEmail: string | null
     phoneNumber: string | null
@@ -11384,6 +11496,7 @@ export namespace Prisma {
     domainStatus?: boolean
     afProvisionCode?: boolean
     templateId?: boolean
+    timeZone?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
     phoneNumber?: boolean
@@ -11438,6 +11551,7 @@ export namespace Prisma {
     memberships?: boolean | Business$membershipsArgs<ExtArgs>
     zones?: boolean | Business$zonesArgs<ExtArgs>
     faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
+    events?: boolean | Business$eventsArgs<ExtArgs>
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
@@ -11453,6 +11567,7 @@ export namespace Prisma {
     domainStatus?: boolean
     afProvisionCode?: boolean
     templateId?: boolean
+    timeZone?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
     phoneNumber?: boolean
@@ -11498,6 +11613,7 @@ export namespace Prisma {
     domainStatus?: boolean
     afProvisionCode?: boolean
     templateId?: boolean
+    timeZone?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
     phoneNumber?: boolean
@@ -11543,6 +11659,7 @@ export namespace Prisma {
     domainStatus?: boolean
     afProvisionCode?: boolean
     templateId?: boolean
+    timeZone?: boolean
     ownerEmail?: boolean
     supportEmail?: boolean
     phoneNumber?: boolean
@@ -11577,7 +11694,7 @@ export namespace Prisma {
     salesCountries?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "slug" | "subdomain" | "customDomain" | "domainStatus" | "afProvisionCode" | "templateId" | "timeZone" | "ownerEmail" | "supportEmail" | "phoneNumber" | "businessAddress" | "stripeAccountId" | "stripeAutoTaxEnabled" | "stripeChargesEnabled" | "stripePayoutsEnabled" | "testimonialsAutoApprove" | "maintenanceMode" | "maintenanceVariant" | "maintenanceMessage" | "umamiWebsiteId" | "umamiEnabled" | "status" | "onboardingComplete" | "localBusinessEnabled" | "allowAiCrawlers" | "sendAbandonedCheckoutEmails" | "featureFlags" | "shippingType" | "shippingFlatRate" | "freeShippingThreshold" | "offersInStorePickup" | "pickupLocation" | "pickupInstructions" | "originState" | "shippingWeightTiers" | "businessHours" | "shippingFallbackRate" | "shippingDefaultItemWeightLb" | "salesCountries", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products?: boolean | Business$productsArgs<ExtArgs>
     collections?: boolean | Business$collectionsArgs<ExtArgs>
@@ -11601,6 +11718,7 @@ export namespace Prisma {
     memberships?: boolean | Business$membershipsArgs<ExtArgs>
     zones?: boolean | Business$zonesArgs<ExtArgs>
     faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
+    events?: boolean | Business$eventsArgs<ExtArgs>
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -11632,6 +11750,7 @@ export namespace Prisma {
       memberships: Prisma.$BusinessMembershipPayload<ExtArgs>[]
       zones: Prisma.$ShippingZonePayload<ExtArgs>[]
       faqItems: Prisma.$FaqItemPayload<ExtArgs>[]
+      events: Prisma.$EventPayload<ExtArgs>[]
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -11645,6 +11764,7 @@ export namespace Prisma {
       domainStatus: $Enums.BusinessDomainStatus
       afProvisionCode: string | null
       templateId: string
+      timeZone: string
       ownerEmail: string
       supportEmail: string | null
       phoneNumber: string | null
@@ -12093,6 +12213,7 @@ export namespace Prisma {
     memberships<T extends Business$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, Business$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     zones<T extends Business$zonesArgs<ExtArgs> = {}>(args?: Subset<T, Business$zonesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShippingZonePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     faqItems<T extends Business$faqItemsArgs<ExtArgs> = {}>(args?: Subset<T, Business$faqItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    events<T extends Business$eventsArgs<ExtArgs> = {}>(args?: Subset<T, Business$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     backInStockRequests<T extends Business$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Business$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -12133,6 +12254,7 @@ export namespace Prisma {
     readonly domainStatus: FieldRef<"Business", 'BusinessDomainStatus'>
     readonly afProvisionCode: FieldRef<"Business", 'String'>
     readonly templateId: FieldRef<"Business", 'String'>
+    readonly timeZone: FieldRef<"Business", 'String'>
     readonly ownerEmail: FieldRef<"Business", 'String'>
     readonly supportEmail: FieldRef<"Business", 'String'>
     readonly phoneNumber: FieldRef<"Business", 'String'>
@@ -13073,6 +13195,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: FaqItemScalarFieldEnum | FaqItemScalarFieldEnum[]
+  }
+
+  /**
+   * Business.events
+   */
+  export type Business$eventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    where?: EventWhereInput
+    orderBy?: EventOrderByWithRelationInput | EventOrderByWithRelationInput[]
+    cursor?: EventWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: EventScalarFieldEnum | EventScalarFieldEnum[]
   }
 
   /**
@@ -23472,6 +23618,1254 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ServiceItemInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Event
+   */
+
+  export type AggregateEvent = {
+    _count: EventCountAggregateOutputType | null
+    _avg: EventAvgAggregateOutputType | null
+    _sum: EventSumAggregateOutputType | null
+    _min: EventMinAggregateOutputType | null
+    _max: EventMaxAggregateOutputType | null
+  }
+
+  export type EventAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type EventSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type EventMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    blurb: string | null
+    coverImage: string | null
+    startAt: Date | null
+    endAt: Date | null
+    allDay: boolean | null
+    location: string | null
+    externalUrl: string | null
+    externalUrlLabel: string | null
+    priceLabel: string | null
+    published: boolean | null
+    sortOrder: number | null
+    isArchived: boolean | null
+    businessId: string | null
+  }
+
+  export type EventMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    blurb: string | null
+    coverImage: string | null
+    startAt: Date | null
+    endAt: Date | null
+    allDay: boolean | null
+    location: string | null
+    externalUrl: string | null
+    externalUrlLabel: string | null
+    priceLabel: string | null
+    published: boolean | null
+    sortOrder: number | null
+    isArchived: boolean | null
+    businessId: string | null
+  }
+
+  export type EventCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    name: number
+    blurb: number
+    coverImage: number
+    startAt: number
+    endAt: number
+    allDay: number
+    location: number
+    externalUrl: number
+    externalUrlLabel: number
+    priceLabel: number
+    published: number
+    sortOrder: number
+    isArchived: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type EventAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type EventSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type EventMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    blurb?: true
+    coverImage?: true
+    startAt?: true
+    endAt?: true
+    allDay?: true
+    location?: true
+    externalUrl?: true
+    externalUrlLabel?: true
+    priceLabel?: true
+    published?: true
+    sortOrder?: true
+    isArchived?: true
+    businessId?: true
+  }
+
+  export type EventMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    blurb?: true
+    coverImage?: true
+    startAt?: true
+    endAt?: true
+    allDay?: true
+    location?: true
+    externalUrl?: true
+    externalUrlLabel?: true
+    priceLabel?: true
+    published?: true
+    sortOrder?: true
+    isArchived?: true
+    businessId?: true
+  }
+
+  export type EventCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    blurb?: true
+    coverImage?: true
+    startAt?: true
+    endAt?: true
+    allDay?: true
+    location?: true
+    externalUrl?: true
+    externalUrlLabel?: true
+    priceLabel?: true
+    published?: true
+    sortOrder?: true
+    isArchived?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type EventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Event to aggregate.
+     */
+    where?: EventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Events to fetch.
+     */
+    orderBy?: EventOrderByWithRelationInput | EventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Events.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Events
+    **/
+    _count?: true | EventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: EventAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: EventSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EventMaxAggregateInputType
+  }
+
+  export type GetEventAggregateType<T extends EventAggregateArgs> = {
+        [P in keyof T & keyof AggregateEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEvent[P]>
+      : GetScalarType<T[P], AggregateEvent[P]>
+  }
+
+
+
+
+  export type EventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventWhereInput
+    orderBy?: EventOrderByWithAggregationInput | EventOrderByWithAggregationInput[]
+    by: EventScalarFieldEnum[] | EventScalarFieldEnum
+    having?: EventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EventCountAggregateInputType | true
+    _avg?: EventAvgAggregateInputType
+    _sum?: EventSumAggregateInputType
+    _min?: EventMinAggregateInputType
+    _max?: EventMaxAggregateInputType
+  }
+
+  export type EventGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    name: string
+    blurb: string | null
+    coverImage: string | null
+    startAt: Date
+    endAt: Date | null
+    allDay: boolean
+    location: string | null
+    externalUrl: string | null
+    externalUrlLabel: string | null
+    priceLabel: string | null
+    published: boolean
+    sortOrder: number
+    isArchived: boolean
+    businessId: string
+    _count: EventCountAggregateOutputType | null
+    _avg: EventAvgAggregateOutputType | null
+    _sum: EventSumAggregateOutputType | null
+    _min: EventMinAggregateOutputType | null
+    _max: EventMaxAggregateOutputType | null
+  }
+
+  type GetEventGroupByPayload<T extends EventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EventGroupByOutputType[P]>
+            : GetScalarType<T[P], EventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    blurb?: boolean
+    coverImage?: boolean
+    startAt?: boolean
+    endAt?: boolean
+    allDay?: boolean
+    location?: boolean
+    externalUrl?: boolean
+    externalUrlLabel?: boolean
+    priceLabel?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    isArchived?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["event"]>
+
+  export type EventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    blurb?: boolean
+    coverImage?: boolean
+    startAt?: boolean
+    endAt?: boolean
+    allDay?: boolean
+    location?: boolean
+    externalUrl?: boolean
+    externalUrlLabel?: boolean
+    priceLabel?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    isArchived?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["event"]>
+
+  export type EventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    blurb?: boolean
+    coverImage?: boolean
+    startAt?: boolean
+    endAt?: boolean
+    allDay?: boolean
+    location?: boolean
+    externalUrl?: boolean
+    externalUrlLabel?: boolean
+    priceLabel?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    isArchived?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["event"]>
+
+  export type EventSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    blurb?: boolean
+    coverImage?: boolean
+    startAt?: boolean
+    endAt?: boolean
+    allDay?: boolean
+    location?: boolean
+    externalUrl?: boolean
+    externalUrlLabel?: boolean
+    priceLabel?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    isArchived?: boolean
+    businessId?: boolean
+  }
+
+  export type EventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "blurb" | "coverImage" | "startAt" | "endAt" | "allDay" | "location" | "externalUrl" | "externalUrlLabel" | "priceLabel" | "published" | "sortOrder" | "isArchived" | "businessId", ExtArgs["result"]["event"]>
+  export type EventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type EventIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type EventIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $EventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Event"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      name: string
+      blurb: string | null
+      coverImage: string | null
+      startAt: Date
+      endAt: Date | null
+      allDay: boolean
+      location: string | null
+      externalUrl: string | null
+      externalUrlLabel: string | null
+      priceLabel: string | null
+      published: boolean
+      sortOrder: number
+      isArchived: boolean
+      businessId: string
+    }, ExtArgs["result"]["event"]>
+    composites: {}
+  }
+
+  type EventGetPayload<S extends boolean | null | undefined | EventDefaultArgs> = $Result.GetResult<Prisma.$EventPayload, S>
+
+  type EventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EventCountAggregateInputType | true
+    }
+
+  export interface EventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Event'], meta: { name: 'Event' } }
+    /**
+     * Find zero or one Event that matches the filter.
+     * @param {EventFindUniqueArgs} args - Arguments to find a Event
+     * @example
+     * // Get one Event
+     * const event = await prisma.event.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EventFindUniqueArgs>(args: SelectSubset<T, EventFindUniqueArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Event that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EventFindUniqueOrThrowArgs} args - Arguments to find a Event
+     * @example
+     * // Get one Event
+     * const event = await prisma.event.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EventFindUniqueOrThrowArgs>(args: SelectSubset<T, EventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Event that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventFindFirstArgs} args - Arguments to find a Event
+     * @example
+     * // Get one Event
+     * const event = await prisma.event.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EventFindFirstArgs>(args?: SelectSubset<T, EventFindFirstArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Event that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventFindFirstOrThrowArgs} args - Arguments to find a Event
+     * @example
+     * // Get one Event
+     * const event = await prisma.event.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EventFindFirstOrThrowArgs>(args?: SelectSubset<T, EventFindFirstOrThrowArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Events that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Events
+     * const events = await prisma.event.findMany()
+     * 
+     * // Get first 10 Events
+     * const events = await prisma.event.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const eventWithIdOnly = await prisma.event.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EventFindManyArgs>(args?: SelectSubset<T, EventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Event.
+     * @param {EventCreateArgs} args - Arguments to create a Event.
+     * @example
+     * // Create one Event
+     * const Event = await prisma.event.create({
+     *   data: {
+     *     // ... data to create a Event
+     *   }
+     * })
+     * 
+     */
+    create<T extends EventCreateArgs>(args: SelectSubset<T, EventCreateArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Events.
+     * @param {EventCreateManyArgs} args - Arguments to create many Events.
+     * @example
+     * // Create many Events
+     * const event = await prisma.event.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EventCreateManyArgs>(args?: SelectSubset<T, EventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Events and returns the data saved in the database.
+     * @param {EventCreateManyAndReturnArgs} args - Arguments to create many Events.
+     * @example
+     * // Create many Events
+     * const event = await prisma.event.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Events and only return the `id`
+     * const eventWithIdOnly = await prisma.event.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EventCreateManyAndReturnArgs>(args?: SelectSubset<T, EventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Event.
+     * @param {EventDeleteArgs} args - Arguments to delete one Event.
+     * @example
+     * // Delete one Event
+     * const Event = await prisma.event.delete({
+     *   where: {
+     *     // ... filter to delete one Event
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EventDeleteArgs>(args: SelectSubset<T, EventDeleteArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Event.
+     * @param {EventUpdateArgs} args - Arguments to update one Event.
+     * @example
+     * // Update one Event
+     * const event = await prisma.event.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EventUpdateArgs>(args: SelectSubset<T, EventUpdateArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Events.
+     * @param {EventDeleteManyArgs} args - Arguments to filter Events to delete.
+     * @example
+     * // Delete a few Events
+     * const { count } = await prisma.event.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EventDeleteManyArgs>(args?: SelectSubset<T, EventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Events.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Events
+     * const event = await prisma.event.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EventUpdateManyArgs>(args: SelectSubset<T, EventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Events and returns the data updated in the database.
+     * @param {EventUpdateManyAndReturnArgs} args - Arguments to update many Events.
+     * @example
+     * // Update many Events
+     * const event = await prisma.event.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Events and only return the `id`
+     * const eventWithIdOnly = await prisma.event.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EventUpdateManyAndReturnArgs>(args: SelectSubset<T, EventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Event.
+     * @param {EventUpsertArgs} args - Arguments to update or create a Event.
+     * @example
+     * // Update or create a Event
+     * const event = await prisma.event.upsert({
+     *   create: {
+     *     // ... data to create a Event
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Event we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EventUpsertArgs>(args: SelectSubset<T, EventUpsertArgs<ExtArgs>>): Prisma__EventClient<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Events.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventCountArgs} args - Arguments to filter Events to count.
+     * @example
+     * // Count the number of Events
+     * const count = await prisma.event.count({
+     *   where: {
+     *     // ... the filter for the Events we want to count
+     *   }
+     * })
+    **/
+    count<T extends EventCountArgs>(
+      args?: Subset<T, EventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Event.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EventAggregateArgs>(args: Subset<T, EventAggregateArgs>): Prisma.PrismaPromise<GetEventAggregateType<T>>
+
+    /**
+     * Group by Event.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EventGroupByArgs['orderBy'] }
+        : { orderBy?: EventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Event model
+   */
+  readonly fields: EventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Event.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Event model
+   */
+  interface EventFieldRefs {
+    readonly id: FieldRef<"Event", 'String'>
+    readonly createdAt: FieldRef<"Event", 'DateTime'>
+    readonly updatedAt: FieldRef<"Event", 'DateTime'>
+    readonly name: FieldRef<"Event", 'String'>
+    readonly blurb: FieldRef<"Event", 'String'>
+    readonly coverImage: FieldRef<"Event", 'String'>
+    readonly startAt: FieldRef<"Event", 'DateTime'>
+    readonly endAt: FieldRef<"Event", 'DateTime'>
+    readonly allDay: FieldRef<"Event", 'Boolean'>
+    readonly location: FieldRef<"Event", 'String'>
+    readonly externalUrl: FieldRef<"Event", 'String'>
+    readonly externalUrlLabel: FieldRef<"Event", 'String'>
+    readonly priceLabel: FieldRef<"Event", 'String'>
+    readonly published: FieldRef<"Event", 'Boolean'>
+    readonly sortOrder: FieldRef<"Event", 'Int'>
+    readonly isArchived: FieldRef<"Event", 'Boolean'>
+    readonly businessId: FieldRef<"Event", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Event findUnique
+   */
+  export type EventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * Filter, which Event to fetch.
+     */
+    where: EventWhereUniqueInput
+  }
+
+  /**
+   * Event findUniqueOrThrow
+   */
+  export type EventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * Filter, which Event to fetch.
+     */
+    where: EventWhereUniqueInput
+  }
+
+  /**
+   * Event findFirst
+   */
+  export type EventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * Filter, which Event to fetch.
+     */
+    where?: EventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Events to fetch.
+     */
+    orderBy?: EventOrderByWithRelationInput | EventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Events.
+     */
+    cursor?: EventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Events.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Events.
+     */
+    distinct?: EventScalarFieldEnum | EventScalarFieldEnum[]
+  }
+
+  /**
+   * Event findFirstOrThrow
+   */
+  export type EventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * Filter, which Event to fetch.
+     */
+    where?: EventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Events to fetch.
+     */
+    orderBy?: EventOrderByWithRelationInput | EventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Events.
+     */
+    cursor?: EventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Events.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Events.
+     */
+    distinct?: EventScalarFieldEnum | EventScalarFieldEnum[]
+  }
+
+  /**
+   * Event findMany
+   */
+  export type EventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * Filter, which Events to fetch.
+     */
+    where?: EventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Events to fetch.
+     */
+    orderBy?: EventOrderByWithRelationInput | EventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Events.
+     */
+    cursor?: EventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Events.
+     */
+    skip?: number
+    distinct?: EventScalarFieldEnum | EventScalarFieldEnum[]
+  }
+
+  /**
+   * Event create
+   */
+  export type EventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Event.
+     */
+    data: XOR<EventCreateInput, EventUncheckedCreateInput>
+  }
+
+  /**
+   * Event createMany
+   */
+  export type EventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Events.
+     */
+    data: EventCreateManyInput | EventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Event createManyAndReturn
+   */
+  export type EventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * The data used to create many Events.
+     */
+    data: EventCreateManyInput | EventCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Event update
+   */
+  export type EventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Event.
+     */
+    data: XOR<EventUpdateInput, EventUncheckedUpdateInput>
+    /**
+     * Choose, which Event to update.
+     */
+    where: EventWhereUniqueInput
+  }
+
+  /**
+   * Event updateMany
+   */
+  export type EventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Events.
+     */
+    data: XOR<EventUpdateManyMutationInput, EventUncheckedUpdateManyInput>
+    /**
+     * Filter which Events to update
+     */
+    where?: EventWhereInput
+    /**
+     * Limit how many Events to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Event updateManyAndReturn
+   */
+  export type EventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * The data used to update Events.
+     */
+    data: XOR<EventUpdateManyMutationInput, EventUncheckedUpdateManyInput>
+    /**
+     * Filter which Events to update
+     */
+    where?: EventWhereInput
+    /**
+     * Limit how many Events to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Event upsert
+   */
+  export type EventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Event to update in case it exists.
+     */
+    where: EventWhereUniqueInput
+    /**
+     * In case the Event found by the `where` argument doesn't exist, create a new Event with this data.
+     */
+    create: XOR<EventCreateInput, EventUncheckedCreateInput>
+    /**
+     * In case the Event was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EventUpdateInput, EventUncheckedUpdateInput>
+  }
+
+  /**
+   * Event delete
+   */
+  export type EventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
+    /**
+     * Filter which Event to delete.
+     */
+    where: EventWhereUniqueInput
+  }
+
+  /**
+   * Event deleteMany
+   */
+  export type EventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Events to delete
+     */
+    where?: EventWhereInput
+    /**
+     * Limit how many Events to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Event without action
+   */
+  export type EventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Event
+     */
+    select?: EventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Event
+     */
+    omit?: EventOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EventInclude<ExtArgs> | null
   }
 
 
@@ -54878,6 +56272,7 @@ export namespace Prisma {
     domainStatus: 'domainStatus',
     afProvisionCode: 'afProvisionCode',
     templateId: 'templateId',
+    timeZone: 'timeZone',
     ownerEmail: 'ownerEmail',
     supportEmail: 'supportEmail',
     phoneNumber: 'phoneNumber',
@@ -55101,6 +56496,29 @@ export namespace Prisma {
   };
 
   export type ServiceItemScalarFieldEnum = (typeof ServiceItemScalarFieldEnum)[keyof typeof ServiceItemScalarFieldEnum]
+
+
+  export const EventScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    name: 'name',
+    blurb: 'blurb',
+    coverImage: 'coverImage',
+    startAt: 'startAt',
+    endAt: 'endAt',
+    allDay: 'allDay',
+    location: 'location',
+    externalUrl: 'externalUrl',
+    externalUrlLabel: 'externalUrlLabel',
+    priceLabel: 'priceLabel',
+    published: 'published',
+    sortOrder: 'sortOrder',
+    isArchived: 'isArchived',
+    businessId: 'businessId'
+  };
+
+  export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
   export const ImageScalarFieldEnum: {
@@ -56142,6 +57560,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFilter<"Business"> | $Enums.BusinessDomainStatus
     afProvisionCode?: StringNullableFilter<"Business"> | string | null
     templateId?: StringFilter<"Business"> | string
+    timeZone?: StringFilter<"Business"> | string
     ownerEmail?: StringFilter<"Business"> | string
     supportEmail?: StringNullableFilter<"Business"> | string | null
     phoneNumber?: StringNullableFilter<"Business"> | string | null
@@ -56196,6 +57615,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipListRelationFilter
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
+    events?: EventListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
   }
 
@@ -56210,6 +57630,7 @@ export namespace Prisma {
     domainStatus?: SortOrder
     afProvisionCode?: SortOrderInput | SortOrder
     templateId?: SortOrder
+    timeZone?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
@@ -56264,6 +57685,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipOrderByRelationAggregateInput
     zones?: ShippingZoneOrderByRelationAggregateInput
     faqItems?: FaqItemOrderByRelationAggregateInput
+    events?: EventOrderByRelationAggregateInput
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
   }
 
@@ -56282,6 +57704,7 @@ export namespace Prisma {
     name?: StringFilter<"Business"> | string
     domainStatus?: EnumBusinessDomainStatusFilter<"Business"> | $Enums.BusinessDomainStatus
     templateId?: StringFilter<"Business"> | string
+    timeZone?: StringFilter<"Business"> | string
     ownerEmail?: StringFilter<"Business"> | string
     supportEmail?: StringNullableFilter<"Business"> | string | null
     phoneNumber?: StringNullableFilter<"Business"> | string | null
@@ -56335,6 +57758,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipListRelationFilter
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
+    events?: EventListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
@@ -56349,6 +57773,7 @@ export namespace Prisma {
     domainStatus?: SortOrder
     afProvisionCode?: SortOrderInput | SortOrder
     templateId?: SortOrder
+    timeZone?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
@@ -56402,6 +57827,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusWithAggregatesFilter<"Business"> | $Enums.BusinessDomainStatus
     afProvisionCode?: StringNullableWithAggregatesFilter<"Business"> | string | null
     templateId?: StringWithAggregatesFilter<"Business"> | string
+    timeZone?: StringWithAggregatesFilter<"Business"> | string
     ownerEmail?: StringWithAggregatesFilter<"Business"> | string
     supportEmail?: StringNullableWithAggregatesFilter<"Business"> | string | null
     phoneNumber?: StringNullableWithAggregatesFilter<"Business"> | string | null
@@ -57431,6 +58857,123 @@ export namespace Prisma {
     sortOrder?: IntWithAggregatesFilter<"ServiceItem"> | number
     serviceId?: StringWithAggregatesFilter<"ServiceItem"> | string
     businessId?: StringWithAggregatesFilter<"ServiceItem"> | string
+  }
+
+  export type EventWhereInput = {
+    AND?: EventWhereInput | EventWhereInput[]
+    OR?: EventWhereInput[]
+    NOT?: EventWhereInput | EventWhereInput[]
+    id?: StringFilter<"Event"> | string
+    createdAt?: DateTimeFilter<"Event"> | Date | string
+    updatedAt?: DateTimeFilter<"Event"> | Date | string
+    name?: StringFilter<"Event"> | string
+    blurb?: StringNullableFilter<"Event"> | string | null
+    coverImage?: StringNullableFilter<"Event"> | string | null
+    startAt?: DateTimeFilter<"Event"> | Date | string
+    endAt?: DateTimeNullableFilter<"Event"> | Date | string | null
+    allDay?: BoolFilter<"Event"> | boolean
+    location?: StringNullableFilter<"Event"> | string | null
+    externalUrl?: StringNullableFilter<"Event"> | string | null
+    externalUrlLabel?: StringNullableFilter<"Event"> | string | null
+    priceLabel?: StringNullableFilter<"Event"> | string | null
+    published?: BoolFilter<"Event"> | boolean
+    sortOrder?: IntFilter<"Event"> | number
+    isArchived?: BoolFilter<"Event"> | boolean
+    businessId?: StringFilter<"Event"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type EventOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    blurb?: SortOrderInput | SortOrder
+    coverImage?: SortOrderInput | SortOrder
+    startAt?: SortOrder
+    endAt?: SortOrderInput | SortOrder
+    allDay?: SortOrder
+    location?: SortOrderInput | SortOrder
+    externalUrl?: SortOrderInput | SortOrder
+    externalUrlLabel?: SortOrderInput | SortOrder
+    priceLabel?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    isArchived?: SortOrder
+    businessId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type EventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: EventWhereInput | EventWhereInput[]
+    OR?: EventWhereInput[]
+    NOT?: EventWhereInput | EventWhereInput[]
+    createdAt?: DateTimeFilter<"Event"> | Date | string
+    updatedAt?: DateTimeFilter<"Event"> | Date | string
+    name?: StringFilter<"Event"> | string
+    blurb?: StringNullableFilter<"Event"> | string | null
+    coverImage?: StringNullableFilter<"Event"> | string | null
+    startAt?: DateTimeFilter<"Event"> | Date | string
+    endAt?: DateTimeNullableFilter<"Event"> | Date | string | null
+    allDay?: BoolFilter<"Event"> | boolean
+    location?: StringNullableFilter<"Event"> | string | null
+    externalUrl?: StringNullableFilter<"Event"> | string | null
+    externalUrlLabel?: StringNullableFilter<"Event"> | string | null
+    priceLabel?: StringNullableFilter<"Event"> | string | null
+    published?: BoolFilter<"Event"> | boolean
+    sortOrder?: IntFilter<"Event"> | number
+    isArchived?: BoolFilter<"Event"> | boolean
+    businessId?: StringFilter<"Event"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id">
+
+  export type EventOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    blurb?: SortOrderInput | SortOrder
+    coverImage?: SortOrderInput | SortOrder
+    startAt?: SortOrder
+    endAt?: SortOrderInput | SortOrder
+    allDay?: SortOrder
+    location?: SortOrderInput | SortOrder
+    externalUrl?: SortOrderInput | SortOrder
+    externalUrlLabel?: SortOrderInput | SortOrder
+    priceLabel?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    isArchived?: SortOrder
+    businessId?: SortOrder
+    _count?: EventCountOrderByAggregateInput
+    _avg?: EventAvgOrderByAggregateInput
+    _max?: EventMaxOrderByAggregateInput
+    _min?: EventMinOrderByAggregateInput
+    _sum?: EventSumOrderByAggregateInput
+  }
+
+  export type EventScalarWhereWithAggregatesInput = {
+    AND?: EventScalarWhereWithAggregatesInput | EventScalarWhereWithAggregatesInput[]
+    OR?: EventScalarWhereWithAggregatesInput[]
+    NOT?: EventScalarWhereWithAggregatesInput | EventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Event"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
+    name?: StringWithAggregatesFilter<"Event"> | string
+    blurb?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    coverImage?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    startAt?: DateTimeWithAggregatesFilter<"Event"> | Date | string
+    endAt?: DateTimeNullableWithAggregatesFilter<"Event"> | Date | string | null
+    allDay?: BoolWithAggregatesFilter<"Event"> | boolean
+    location?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    externalUrl?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    externalUrlLabel?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    priceLabel?: StringNullableWithAggregatesFilter<"Event"> | string | null
+    published?: BoolWithAggregatesFilter<"Event"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"Event"> | number
+    isArchived?: BoolWithAggregatesFilter<"Event"> | boolean
+    businessId?: StringWithAggregatesFilter<"Event"> | string
   }
 
   export type ImageWhereInput = {
@@ -60324,6 +61867,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -60378,6 +61922,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -60392,6 +61937,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -60446,6 +61992,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -60460,6 +62007,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60514,6 +62062,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -60528,6 +62077,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60582,6 +62132,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -60596,6 +62147,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -60641,6 +62193,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60686,6 +62239,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61899,6 +63453,145 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     serviceId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type EventCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    blurb?: string | null
+    coverImage?: string | null
+    startAt: Date | string
+    endAt?: Date | string | null
+    allDay?: boolean
+    location?: string | null
+    externalUrl?: string | null
+    externalUrlLabel?: string | null
+    priceLabel?: string | null
+    published?: boolean
+    sortOrder?: number
+    isArchived?: boolean
+    business: BusinessCreateNestedOneWithoutEventsInput
+  }
+
+  export type EventUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    blurb?: string | null
+    coverImage?: string | null
+    startAt: Date | string
+    endAt?: Date | string | null
+    allDay?: boolean
+    location?: string | null
+    externalUrl?: string | null
+    externalUrlLabel?: string | null
+    priceLabel?: string | null
+    published?: boolean
+    sortOrder?: number
+    isArchived?: boolean
+    businessId: string
+  }
+
+  export type EventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutEventsNestedInput
+  }
+
+  export type EventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type EventCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    blurb?: string | null
+    coverImage?: string | null
+    startAt: Date | string
+    endAt?: Date | string | null
+    allDay?: boolean
+    location?: string | null
+    externalUrl?: string | null
+    externalUrlLabel?: string | null
+    priceLabel?: string | null
+    published?: boolean
+    sortOrder?: number
+    isArchived?: boolean
+    businessId: string
+  }
+
+  export type EventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type EventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -65218,6 +66911,12 @@ export namespace Prisma {
     none?: FaqItemWhereInput
   }
 
+  export type EventListRelationFilter = {
+    every?: EventWhereInput
+    some?: EventWhereInput
+    none?: EventWhereInput
+  }
+
   export type BackInStockRequestListRelationFilter = {
     every?: BackInStockRequestWhereInput
     some?: BackInStockRequestWhereInput
@@ -65288,6 +66987,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type EventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BackInStockRequestOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -65303,6 +67006,7 @@ export namespace Prisma {
     domainStatus?: SortOrder
     afProvisionCode?: SortOrder
     templateId?: SortOrder
+    timeZone?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
     phoneNumber?: SortOrder
@@ -65355,6 +67059,7 @@ export namespace Prisma {
     domainStatus?: SortOrder
     afProvisionCode?: SortOrder
     templateId?: SortOrder
+    timeZone?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
     phoneNumber?: SortOrder
@@ -65396,6 +67101,7 @@ export namespace Prisma {
     domainStatus?: SortOrder
     afProvisionCode?: SortOrder
     templateId?: SortOrder
+    timeZone?: SortOrder
     ownerEmail?: SortOrder
     supportEmail?: SortOrder
     phoneNumber?: SortOrder
@@ -66218,6 +67924,74 @@ export namespace Prisma {
 
   export type ServiceItemSumOrderByAggregateInput = {
     bookingEmbedHeight?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type EventCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    blurb?: SortOrder
+    coverImage?: SortOrder
+    startAt?: SortOrder
+    endAt?: SortOrder
+    allDay?: SortOrder
+    location?: SortOrder
+    externalUrl?: SortOrder
+    externalUrlLabel?: SortOrder
+    priceLabel?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    isArchived?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type EventAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type EventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    blurb?: SortOrder
+    coverImage?: SortOrder
+    startAt?: SortOrder
+    endAt?: SortOrder
+    allDay?: SortOrder
+    location?: SortOrder
+    externalUrl?: SortOrder
+    externalUrlLabel?: SortOrder
+    priceLabel?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    isArchived?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type EventMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    blurb?: SortOrder
+    coverImage?: SortOrder
+    startAt?: SortOrder
+    endAt?: SortOrder
+    allDay?: SortOrder
+    location?: SortOrder
+    externalUrl?: SortOrder
+    externalUrlLabel?: SortOrder
+    priceLabel?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    isArchived?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type EventSumOrderByAggregateInput = {
     sortOrder?: SortOrder
   }
 
@@ -68223,6 +69997,13 @@ export namespace Prisma {
     connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
   }
 
+  export type EventCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<EventCreateWithoutBusinessInput, EventUncheckedCreateWithoutBusinessInput> | EventCreateWithoutBusinessInput[] | EventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EventCreateOrConnectWithoutBusinessInput | EventCreateOrConnectWithoutBusinessInput[]
+    createMany?: EventCreateManyBusinessInputEnvelope
+    connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+  }
+
   export type BackInStockRequestCreateNestedManyWithoutBusinessInput = {
     create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
@@ -68381,6 +70162,13 @@ export namespace Prisma {
     connectOrCreate?: FaqItemCreateOrConnectWithoutBusinessInput | FaqItemCreateOrConnectWithoutBusinessInput[]
     createMany?: FaqItemCreateManyBusinessInputEnvelope
     connect?: FaqItemWhereUniqueInput | FaqItemWhereUniqueInput[]
+  }
+
+  export type EventUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<EventCreateWithoutBusinessInput, EventUncheckedCreateWithoutBusinessInput> | EventCreateWithoutBusinessInput[] | EventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EventCreateOrConnectWithoutBusinessInput | EventCreateOrConnectWithoutBusinessInput[]
+    createMany?: EventCreateManyBusinessInputEnvelope
+    connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
   }
 
   export type BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -68719,6 +70507,20 @@ export namespace Prisma {
     deleteMany?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
   }
 
+  export type EventUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<EventCreateWithoutBusinessInput, EventUncheckedCreateWithoutBusinessInput> | EventCreateWithoutBusinessInput[] | EventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EventCreateOrConnectWithoutBusinessInput | EventCreateOrConnectWithoutBusinessInput[]
+    upsert?: EventUpsertWithWhereUniqueWithoutBusinessInput | EventUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: EventCreateManyBusinessInputEnvelope
+    set?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    disconnect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    delete?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    update?: EventUpdateWithWhereUniqueWithoutBusinessInput | EventUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: EventUpdateManyWithWhereWithoutBusinessInput | EventUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
+  }
+
   export type BackInStockRequestUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
@@ -69035,6 +70837,20 @@ export namespace Prisma {
     update?: FaqItemUpdateWithWhereUniqueWithoutBusinessInput | FaqItemUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: FaqItemUpdateManyWithWhereWithoutBusinessInput | FaqItemUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: FaqItemScalarWhereInput | FaqItemScalarWhereInput[]
+  }
+
+  export type EventUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<EventCreateWithoutBusinessInput, EventUncheckedCreateWithoutBusinessInput> | EventCreateWithoutBusinessInput[] | EventUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: EventCreateOrConnectWithoutBusinessInput | EventCreateOrConnectWithoutBusinessInput[]
+    upsert?: EventUpsertWithWhereUniqueWithoutBusinessInput | EventUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: EventCreateManyBusinessInputEnvelope
+    set?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    disconnect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    delete?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+    update?: EventUpdateWithWhereUniqueWithoutBusinessInput | EventUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: EventUpdateManyWithWhereWithoutBusinessInput | EventUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
   }
 
   export type BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -69669,6 +71485,20 @@ export namespace Prisma {
     upsert?: ServiceUpsertWithoutItemsInput
     connect?: ServiceWhereUniqueInput
     update?: XOR<XOR<ServiceUpdateToOneWithWhereWithoutItemsInput, ServiceUpdateWithoutItemsInput>, ServiceUncheckedUpdateWithoutItemsInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutEventsInput = {
+    create?: XOR<BusinessCreateWithoutEventsInput, BusinessUncheckedCreateWithoutEventsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutEventsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type BusinessUpdateOneRequiredWithoutEventsNestedInput = {
+    create?: XOR<BusinessCreateWithoutEventsInput, BusinessUncheckedCreateWithoutEventsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutEventsInput
+    upsert?: BusinessUpsertWithoutEventsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutEventsInput, BusinessUpdateWithoutEventsInput>, BusinessUncheckedUpdateWithoutEventsInput>
   }
 
   export type ProductCreateNestedOneWithoutImagesInput = {
@@ -71894,6 +73724,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -71947,6 +73778,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -71961,6 +73793,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -72014,6 +73847,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -72089,6 +73923,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72142,6 +73977,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -72156,6 +73992,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -72209,6 +74046,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -73373,6 +75211,54 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type EventCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    blurb?: string | null
+    coverImage?: string | null
+    startAt: Date | string
+    endAt?: Date | string | null
+    allDay?: boolean
+    location?: string | null
+    externalUrl?: string | null
+    externalUrlLabel?: string | null
+    priceLabel?: string | null
+    published?: boolean
+    sortOrder?: number
+    isArchived?: boolean
+  }
+
+  export type EventUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    blurb?: string | null
+    coverImage?: string | null
+    startAt: Date | string
+    endAt?: Date | string | null
+    allDay?: boolean
+    location?: string | null
+    externalUrl?: string | null
+    externalUrlLabel?: string | null
+    priceLabel?: string | null
+    published?: boolean
+    sortOrder?: number
+    isArchived?: boolean
+  }
+
+  export type EventCreateOrConnectWithoutBusinessInput = {
+    where: EventWhereUniqueInput
+    create: XOR<EventCreateWithoutBusinessInput, EventUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type EventCreateManyBusinessInputEnvelope = {
+    data: EventCreateManyBusinessInput | EventCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BackInStockRequestCreateWithoutBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -74146,6 +76032,45 @@ export namespace Prisma {
     businessId?: StringFilter<"FaqItem"> | string
   }
 
+  export type EventUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: EventWhereUniqueInput
+    update: XOR<EventUpdateWithoutBusinessInput, EventUncheckedUpdateWithoutBusinessInput>
+    create: XOR<EventCreateWithoutBusinessInput, EventUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type EventUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: EventWhereUniqueInput
+    data: XOR<EventUpdateWithoutBusinessInput, EventUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type EventUpdateManyWithWhereWithoutBusinessInput = {
+    where: EventScalarWhereInput
+    data: XOR<EventUpdateManyMutationInput, EventUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type EventScalarWhereInput = {
+    AND?: EventScalarWhereInput | EventScalarWhereInput[]
+    OR?: EventScalarWhereInput[]
+    NOT?: EventScalarWhereInput | EventScalarWhereInput[]
+    id?: StringFilter<"Event"> | string
+    createdAt?: DateTimeFilter<"Event"> | Date | string
+    updatedAt?: DateTimeFilter<"Event"> | Date | string
+    name?: StringFilter<"Event"> | string
+    blurb?: StringNullableFilter<"Event"> | string | null
+    coverImage?: StringNullableFilter<"Event"> | string | null
+    startAt?: DateTimeFilter<"Event"> | Date | string
+    endAt?: DateTimeNullableFilter<"Event"> | Date | string | null
+    allDay?: BoolFilter<"Event"> | boolean
+    location?: StringNullableFilter<"Event"> | string | null
+    externalUrl?: StringNullableFilter<"Event"> | string | null
+    externalUrlLabel?: StringNullableFilter<"Event"> | string | null
+    priceLabel?: StringNullableFilter<"Event"> | string | null
+    published?: BoolFilter<"Event"> | boolean
+    sortOrder?: IntFilter<"Event"> | number
+    isArchived?: BoolFilter<"Event"> | boolean
+    businessId?: StringFilter<"Event"> | string
+  }
+
   export type BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput = {
     where: BackInStockRequestWhereUniqueInput
     update: XOR<BackInStockRequestUpdateWithoutBusinessInput, BackInStockRequestUncheckedUpdateWithoutBusinessInput>
@@ -74186,6 +76111,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -74239,6 +76165,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -74253,6 +76180,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -74306,6 +76234,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -74336,6 +76265,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74389,6 +76319,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -74403,6 +76334,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74456,6 +76388,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -74470,6 +76403,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -74523,6 +76457,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -74537,6 +76472,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -74590,6 +76526,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -74620,6 +76557,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74673,6 +76611,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -74687,6 +76626,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74740,6 +76680,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -74791,6 +76732,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -74844,6 +76786,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -74858,6 +76801,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -74911,6 +76855,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -75244,6 +77189,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75297,6 +77243,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -75311,6 +77258,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75364,6 +77312,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -75863,6 +77812,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -75916,6 +77866,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -75930,6 +77881,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -75983,6 +77935,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -76035,6 +77988,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76088,6 +78042,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76102,6 +78057,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76155,6 +78111,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76461,6 +78418,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -76514,6 +78472,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -76528,6 +78487,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -76581,6 +78541,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -76663,6 +78624,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76716,6 +78678,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76730,6 +78693,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -76783,6 +78747,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76919,6 +78884,298 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type BusinessCreateWithoutEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutEventsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutEventsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutEventsInput, BusinessUncheckedCreateWithoutEventsInput>
+  }
+
+  export type BusinessUpsertWithoutEventsInput = {
+    update: XOR<BusinessUpdateWithoutEventsInput, BusinessUncheckedUpdateWithoutEventsInput>
+    create: XOR<BusinessCreateWithoutEventsInput, BusinessUncheckedCreateWithoutEventsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutEventsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutEventsInput, BusinessUncheckedUpdateWithoutEventsInput>
+  }
+
+  export type BusinessUpdateWithoutEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutEventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
   export type ProductCreateWithoutImagesInput = {
     id?: string
     createdAt?: Date | string
@@ -77023,6 +79280,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -77076,6 +79334,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -77090,6 +79349,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -77143,6 +79403,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -77272,6 +79533,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77325,6 +79587,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -77339,6 +79602,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77392,6 +79656,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -77445,6 +79710,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -77498,6 +79764,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -77512,6 +79779,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -77565,6 +79833,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -77904,6 +80173,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -77957,6 +80227,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -77971,6 +80242,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78024,6 +80296,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -78339,6 +80612,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -78392,6 +80666,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -78406,6 +80681,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -78459,6 +80735,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -78784,6 +81061,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78837,6 +81115,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -78851,6 +81130,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -78904,6 +81184,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -79733,6 +82014,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -79786,6 +82068,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -79800,6 +82083,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -79853,6 +82137,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -79963,6 +82248,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80016,6 +82302,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -80030,6 +82317,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80083,6 +82371,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -80282,6 +82571,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -80335,6 +82625,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -80349,6 +82640,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -80402,6 +82694,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -80733,6 +83026,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80786,6 +83080,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -80800,6 +83095,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80853,6 +83149,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -80993,6 +83290,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -81046,6 +83344,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -81060,6 +83359,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -81113,6 +83413,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -81281,6 +83582,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81334,6 +83636,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -81348,6 +83651,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81401,6 +83705,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -81447,6 +83752,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -81500,6 +83806,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -81514,6 +83821,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -81567,6 +83875,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -81597,6 +83906,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81650,6 +83960,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -81664,6 +83975,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81717,6 +84029,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -81731,6 +84044,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -81784,6 +84098,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -81798,6 +84113,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -81851,6 +84167,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -81881,6 +84198,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81934,6 +84252,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -81948,6 +84267,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82001,6 +84321,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82015,6 +84336,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -82068,6 +84390,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -82082,6 +84405,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -82135,6 +84459,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -82204,6 +84529,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82257,6 +84583,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82271,6 +84598,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82324,6 +84652,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82383,6 +84712,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -82436,6 +84766,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -82450,6 +84781,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -82503,6 +84835,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -82533,6 +84866,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82586,6 +84920,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82600,6 +84935,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82653,6 +84989,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82667,6 +85004,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -82720,6 +85058,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -82734,6 +85073,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -82787,6 +85127,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -82849,6 +85190,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82902,6 +85244,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82916,6 +85259,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -82969,6 +85313,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83098,6 +85443,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -83151,6 +85497,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -83165,6 +85512,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -83218,6 +85566,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -83297,6 +85646,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83350,6 +85700,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83364,6 +85715,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83417,6 +85769,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83486,6 +85839,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -83539,6 +85893,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -83553,6 +85908,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -83606,6 +85962,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -83685,6 +86042,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83738,6 +86096,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83752,6 +86111,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83805,6 +86165,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84492,6 +86853,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -84545,6 +86907,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -84559,6 +86922,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -84612,6 +86976,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -84681,6 +87046,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84734,6 +87100,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84748,6 +87115,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84801,6 +87169,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84860,6 +87229,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -84913,6 +87283,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -84927,6 +87298,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -84980,6 +87352,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -85010,6 +87383,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85063,6 +87437,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85077,6 +87452,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85130,6 +87506,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85144,6 +87521,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -85197,6 +87575,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -85211,6 +87590,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -85264,6 +87644,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -85316,6 +87697,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85369,6 +87751,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85383,6 +87766,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85436,6 +87820,7 @@ export namespace Prisma {
     teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85617,6 +88002,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -85671,6 +88057,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -85684,6 +88071,7 @@ export namespace Prisma {
     domainStatus?: $Enums.BusinessDomainStatus
     afProvisionCode?: string | null
     templateId?: string
+    timeZone?: string
     ownerEmail: string
     supportEmail?: string | null
     phoneNumber?: string | null
@@ -85738,6 +88126,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -85866,6 +88255,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85920,6 +88310,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -85933,6 +88324,7 @@ export namespace Prisma {
     domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
     afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
     templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
     ownerEmail?: StringFieldUpdateOperationsInput | string
     supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
@@ -85987,6 +88379,7 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -86706,6 +89099,25 @@ export namespace Prisma {
     answer: string
     sortOrder?: number
     published?: boolean
+  }
+
+  export type EventCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    blurb?: string | null
+    coverImage?: string | null
+    startAt: Date | string
+    endAt?: Date | string | null
+    allDay?: boolean
+    location?: string | null
+    externalUrl?: string | null
+    externalUrlLabel?: string | null
+    priceLabel?: string | null
+    published?: boolean
+    sortOrder?: number
+    isArchived?: boolean
   }
 
   export type BackInStockRequestCreateManyBusinessInput = {
@@ -87760,6 +90172,63 @@ export namespace Prisma {
     answer?: StringFieldUpdateOperationsInput | string
     sortOrder?: IntFieldUpdateOperationsInput | number
     published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type EventUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type EventUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type EventUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    blurb?: NullableStringFieldUpdateOperationsInput | string | null
+    coverImage?: NullableStringFieldUpdateOperationsInput | string | null
+    startAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    endAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    allDay?: BoolFieldUpdateOperationsInput | boolean
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    externalUrlLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    priceLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    isArchived?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type BackInStockRequestUpdateWithoutBusinessInput = {

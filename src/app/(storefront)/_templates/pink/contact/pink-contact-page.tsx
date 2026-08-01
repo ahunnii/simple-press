@@ -7,19 +7,21 @@ import {
   parseBusinessHours,
 } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
 import type { PinkFactRow } from "../shared/pink-fact-rows";
 import { PinkFactRows } from "../shared/pink-fact-rows";
+import { hasCustomImage, PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
+import { PinkSocialLinks } from "../shared/pink-social-links";
 import type { PinkContactTopic } from "./pink-contact-form";
 import { PinkContactForm } from "./pink-contact-form";
 
 const FIELD_KEYS = [
-  "pink.contact.header-eyebrow",
   "pink.contact.header-heading",
   "pink.contact.header-intro",
   "pink.contact.topics-heading",
@@ -39,7 +41,6 @@ const FIELD_KEYS = [
 
 type FactRow = { label?: string; value?: string; _id?: string };
 type ShortcutItem = { label?: string; href?: string; _id?: string };
-type SocialLink = { label?: string; url?: string; _id?: string };
 
 const DEFAULT_HEADER_FACTS: PinkFactRow[] = [
   { label: "Response time", value: "1–2 business days" },
@@ -47,8 +48,8 @@ const DEFAULT_HEADER_FACTS: PinkFactRow[] = [
 ];
 
 const DEFAULT_SHORTCUTS: ShortcutItem[] = [
-  { label: "Commission a custom piece", href: "/about#commissions" },
-  { label: "Book a make & take", href: "/services" },
+  { label: "Ask about a custom order", href: "/about#commissions" },
+  { label: "Ask about a make & take", href: "/services" },
   { label: "Browse what's ready now", href: "/shop" },
 ];
 
@@ -74,9 +75,7 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   ) as ShortcutItem[];
   const shortcuts = shortcutsRaw.length > 0 ? shortcutsRaw : DEFAULT_SHORTCUTS;
 
-  const socialLinks = parseTemplateListRows(
-    rawCustomFields?.["pink.global.social-links"],
-  ) as SocialLink[];
+  const socialLinks = resolveSocialLinks(business.siteContent?.socialLinks);
 
   const topicsVisible = isSectionVisible(customFields, "pink", "contact.topics");
   const studioVisible = isSectionVisible(customFields, "pink", "contact.studio");
@@ -92,13 +91,11 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
       {/* ── contact.header ─────────────────────────────────────────────── */}
       <PinkPageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Contact" }]}
-        eyebrow={f["pink.contact.header-eyebrow"] ?? ""}
-        eyebrowFieldKey="pink.contact.header-eyebrow"
         heading={f["pink.contact.header-heading"] ?? ""}
         headingFieldKey="pink.contact.header-heading"
         intro={f["pink.contact.header-intro"] ?? ""}
         introFieldKey="pink.contact.header-intro"
-        rightSlot={<PinkFactRows rows={headerFacts} />}
+        rightSlot={<PinkFactRows rows={headerFacts} surface="paper" />}
         sectionAttrs={sectionGroupAttr("contact", "header")}
       />
 
@@ -131,13 +128,17 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                     className="relative w-full overflow-hidden"
                     style={{ aspectRatio: "16 / 10", background: "var(--pink-panel)" }}
                   >
-                    <Image
-                      src={f["pink.contact.studio-image"] ?? "/placeholder.svg"}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
+                    {hasCustomImage(f["pink.contact.studio-image"]) ? (
+                      <Image
+                        src={f["pink.contact.studio-image"]!}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    ) : (
+                      <PinkImageFallback surface="paper" className="absolute inset-0" />
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-4 p-6" style={{ background: "var(--pink-ink)" }}>
@@ -204,25 +205,11 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                             {business.phoneNumber}
                           </a>
                         )}
-                        {socialLinks.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-3">
-                            {socialLinks.map((s) =>
-                              s.url ? (
-                                <a
-                                  key={s._id ?? s.label}
-                                  href={s.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[13px]"
-                                  style={{ color: "var(--pink-ink-muted)" }}
-                                >
-                                  {s.label ?? "Link"}
-                                  <span className="sr-only"> (opens in new tab)</span>
-                                </a>
-                              ) : null,
-                            )}
-                          </div>
-                        )}
+                        <PinkSocialLinks
+                          socialLinks={business.siteContent?.socialLinks}
+                          tone="dark"
+                          className="mt-1"
+                        />
                       </div>
                     )}
                   </div>

@@ -83,7 +83,7 @@ export function PinkServicesGrid({
         <h2
           className="pink-display"
           style={{
-            fontSize: "clamp(26px, 2.8vw, 38px)",
+            fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
             fontWeight: 600,
             letterSpacing: "-0.025em",
             lineHeight: 1.1,

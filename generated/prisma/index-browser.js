@@ -191,6 +191,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   domainStatus: 'domainStatus',
   afProvisionCode: 'afProvisionCode',
   templateId: 'templateId',
+  timeZone: 'timeZone',
   ownerEmail: 'ownerEmail',
   supportEmail: 'supportEmail',
   phoneNumber: 'phoneNumber',
@@ -386,6 +387,26 @@ exports.Prisma.ServiceItemScalarFieldEnum = {
   published: 'published',
   sortOrder: 'sortOrder',
   serviceId: 'serviceId',
+  businessId: 'businessId'
+};
+
+exports.Prisma.EventScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  name: 'name',
+  blurb: 'blurb',
+  coverImage: 'coverImage',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  allDay: 'allDay',
+  location: 'location',
+  externalUrl: 'externalUrl',
+  externalUrlLabel: 'externalUrlLabel',
+  priceLabel: 'priceLabel',
+  published: 'published',
+  sortOrder: 'sortOrder',
+  isArchived: 'isArchived',
   businessId: 'businessId'
 };
 
@@ -833,6 +854,7 @@ exports.Prisma.ModelName = {
   CollectionProduct: 'CollectionProduct',
   Service: 'Service',
   ServiceItem: 'ServiceItem',
+  Event: 'Event',
   Image: 'Image',
   Customer: 'Customer',
   ShippingAddress: 'ShippingAddress',

@@ -9,7 +9,7 @@ type PinkEmptyStateProps = {
 };
 
 /**
- * `--pink-panel` + `1px` border, centered Syne heading + muted body + rose
+ * `--pink-panel` + `1px` border, centered display heading + muted body + rose
  * button. Used for empty carts, empty shop grids, no-results states, etc.
  * (design.md → Shared component inventory). Server-safe.
  */

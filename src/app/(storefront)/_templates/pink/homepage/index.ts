@@ -5,9 +5,14 @@ import type { TemplateSection } from "~/lib/template-sections";
  * Homepage fields for the `pink` template.
  *
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
- * Homepage". Five sections: hero (signature moment, not hideable), promises,
- * collection, events (the make & takes — driven by list fields, not the
- * Services DB, per intake), and story.
+ * Homepage". Six sections: hero (signature moment, not hideable), promises,
+ * collection, upcoming (real dated `Event` records from the DB), events (the
+ * make & takes — an evergreen explainer driven by list fields, deliberately
+ * date-free), and story.
+ *
+ * `homepage.upcoming` and `homepage.events` are separate sections on purpose
+ * and must stay separately hideable: one says WHEN you can come, the other
+ * says WHAT a make & take is.
  */
 
 // ── homepage.hero ───────────────────────────────────────────────────────────
@@ -64,7 +69,7 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Spirit dolls, magnets, and one-of-one pieces — cloth, thread, and a little wire, worked by hand in a Detroit studio.",
+      "Handmade dolls, magnets, jewelry and small pieces — wool, cotton and polymer clay, worked by hand in a Detroit studio. Every one is one of a kind.",
   },
   {
     key: "pink.homepage.hero-cta-primary-label",
@@ -135,7 +140,7 @@ const homepageHeroData: TemplateField[] = [
         key: "caption",
         label: "Caption",
         type: "text",
-        placeholder: "Spirit dolls, one at a time",
+        placeholder: "Dolls, one at a time",
       },
       { key: "depth", label: "Parallax Depth", type: "text", placeholder: "1.4" },
     ],
@@ -157,12 +162,12 @@ const homepagePromisesData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 6,
     itemSchema: [
-      { key: "title", label: "Title", type: "text", placeholder: "Made by hand" },
+      { key: "title", label: "Title", type: "text", placeholder: "One of a kind" },
       {
         key: "body",
         label: "Body",
         type: "textarea",
-        placeholder: "Every piece is sewn one at a time.",
+        placeholder: "Every piece is made on its own, never in runs.",
       },
     ],
     defaultValue: "",
@@ -172,16 +177,6 @@ const homepagePromisesData: TemplateField[] = [
 // ── homepage.collection ─────────────────────────────────────────────────────
 
 const homepageCollectionData: TemplateField[] = [
-  {
-    key: "pink.homepage.collection-eyebrow",
-    label: "Collection Eyebrow",
-    type: "text",
-    page: "homepage",
-    group: "homepage.collection",
-    gridColumn: "col-span-1",
-    defaultValue: "The shop",
-    description: "Small label above the section heading.",
-  },
   {
     key: "pink.homepage.collection-heading",
     label: "Collection Heading",
@@ -200,7 +195,7 @@ const homepageCollectionData: TemplateField[] = [
     page: "homepage",
     group: "homepage.collection",
     gridColumn: "col-span-full",
-    defaultValue: "Small batches. Once they're gone, they're gone.",
+    defaultValue: "One of a kind. Once a piece is gone, it's gone.",
   },
   {
     key: "pink.homepage.collection-cta-label",
@@ -224,19 +219,99 @@ const homepageCollectionData: TemplateField[] = [
   },
 ];
 
+// ── homepage.upcoming ───────────────────────────────────────────────────────
+
+const homepageUpcomingData: TemplateField[] = [
+  {
+    key: "pink.homepage.upcoming-eyebrow",
+    label: "Eyebrow",
+    description: "Small uppercase line above the heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "On the calendar",
+  },
+  {
+    key: "pink.homepage.upcoming-heading",
+    label: "Heading",
+    description: "Heading for the row of real, dated events.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "What's coming up",
+  },
+  {
+    key: "pink.homepage.upcoming-note",
+    label: "Lead-In",
+    description:
+      "One short line under the heading. Hidden automatically while nothing is scheduled.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-full",
+    defaultValue: "The next few dates. Tap a flier to see it full size.",
+  },
+  {
+    key: "pink.homepage.upcoming-limit",
+    label: "How Many To Show",
+    description:
+      "How many upcoming dates to put on the homepage. Three fills the row; anything over six is capped.",
+    type: "number",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "3",
+    placeholder: "3",
+  },
+  {
+    key: "pink.homepage.upcoming-cta-label",
+    label: "“See All” Label",
+    description:
+      "Link beside the heading, through to the full events page. Leave blank to hide it.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "See all events",
+  },
+  {
+    key: "pink.homepage.upcoming-cta-link",
+    label: "“See All” Link",
+    description: "Where that link goes.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "/events",
+  },
+  {
+    key: "pink.homepage.upcoming-empty-heading",
+    label: "Empty Heading",
+    description:
+      "Shown in place of the cards when nothing is scheduled. Clear this and the body to drop the whole band until you add a date.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "Nothing on the calendar yet",
+  },
+  {
+    key: "pink.homepage.upcoming-empty-body",
+    label: "Empty Body",
+    description: "One line under the empty-state heading.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-full",
+    defaultValue: "New dates go up here as soon as they're set.",
+  },
+];
+
 // ── homepage.events ─────────────────────────────────────────────────────────
 
 const homepageEventsData: TemplateField[] = [
-  {
-    key: "pink.homepage.events-eyebrow",
-    label: "Events Eyebrow",
-    type: "text",
-    page: "homepage",
-    group: "homepage.events",
-    gridColumn: "col-span-1",
-    defaultValue: "Make & takes",
-    description: "Small label above the events heading.",
-  },
   {
     key: "pink.homepage.events-heading",
     label: "Events Heading",
@@ -249,19 +324,31 @@ const homepageEventsData: TemplateField[] = [
   },
   {
     key: "pink.homepage.events-note",
-    label: "Events Note",
-    description: "Muted line under the heading.",
+    label: "Events Lead-In",
+    description: "One short line under the heading.",
     type: "textarea",
     page: "homepage",
     group: "homepage.events",
     gridColumn: "col-span-full",
-    defaultValue: "Small groups, all materials included. Nobody is turned away for money.",
+    defaultValue: "Small groups, all materials included. No experience needed.",
+  },
+  {
+    key: "pink.homepage.events-body",
+    label: "What a Make & Take Is",
+    description:
+      "A short paragraph explaining what actually happens at one. This is the only place on the homepage that says what you are offering, so keep it plain.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.events",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A make & take is a hands-on session brought to your room — a church, a school, a library, a workplace, a back yard. Everyone at the table sews, stuffs and finishes a small piece by hand, and leaves holding it. Nobody needs to have sewn a stitch before.",
   },
   {
     key: "pink.homepage.events-mosaic",
-    label: "Studio Photo Mosaic",
+    label: "Make & Take Photos and Fliers",
     description:
-      "Photos of the studio/workshops shown as a mosaic above the sessions. Column and row span are plain numbers (1 or 2). Up to 6 photos.",
+      "Your own photos and event fliers, shown as a mosaic. This is where a flier for an upcoming make & take goes. Column and row span are plain numbers (1 or 2). Up to 6 images.",
     type: "list",
     page: "homepage",
     group: "homepage.events",
@@ -269,36 +356,71 @@ const homepageEventsData: TemplateField[] = [
     maxItems: 6,
     itemSchema: [
       { key: "image", label: "Image", type: "image" },
+      {
+        key: "alt",
+        label: "Alt Text",
+        type: "text",
+        // Fliers carry words, so this is not decoration — if it says the date
+        // and the room, the alt text has to say them too.
+        placeholder: "Describe the photo, or read out what the flier says",
+      },
       { key: "colSpan", label: "Column Span", type: "text", placeholder: "1" },
       { key: "rowSpan", label: "Row Span", type: "text", placeholder: "1" },
     ],
     defaultValue: "",
   },
   {
-    key: "pink.homepage.events-cards",
-    label: "Upcoming Sessions",
+    key: "pink.homepage.events-facts",
+    label: "How They're Hosted",
     description:
-      "The make & take sessions themselves — date, seats left, what it is, and the price. Up to 6.",
+      "Label/value rows describing how a make & take typically runs — where, group size, what's included. Up to 4.",
     type: "list",
     page: "homepage",
     group: "homepage.events",
     gridColumn: "col-span-full",
-    maxItems: 6,
+    maxItems: 4,
     itemSchema: [
-      { key: "date", label: "Date", type: "text", placeholder: "Sat, Aug 8" },
+      { key: "label", label: "Label", type: "text", placeholder: "Where" },
       {
-        key: "availability",
-        label: "Availability",
+        key: "value",
+        label: "Value",
         type: "text",
-        placeholder: "Four seats left",
+        placeholder: "Your space — school, church, library, workplace or back yard",
       },
-      { key: "title", label: "Title", type: "text", placeholder: "Make a spirit doll" },
-      { key: "body", label: "Body", type: "textarea" },
-      { key: "price", label: "Price", type: "text", placeholder: "$65, materials in." },
-      { key: "ctaLabel", label: "CTA Label", type: "text", placeholder: "Save a seat" },
-      { key: "ctaHref", label: "CTA Link", type: "url", placeholder: "/contact" },
     ],
     defaultValue: "",
+  },
+  {
+    key: "pink.homepage.events-cta-note",
+    label: "Enquiry Note",
+    description:
+      "The line beside the button. Say that cost is quoted per group once you know what someone needs.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.events",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Cost is quoted per group. Tell us the room and roughly how many people, and we'll send details.",
+  },
+  {
+    key: "pink.homepage.events-cta-label",
+    label: "Enquiry Button Text",
+    description: "Leave blank to hide the button.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.events",
+    gridColumn: "col-span-1",
+    defaultValue: "Ask about hosting one",
+  },
+  {
+    key: "pink.homepage.events-cta-link",
+    label: "Enquiry Button Link",
+    description: "Where the button goes.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.events",
+    gridColumn: "col-span-1",
+    defaultValue: "/contact",
   },
 ];
 
@@ -324,16 +446,6 @@ const homepageStoryData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "Evelyn Pinkard working at her studio table in Detroit.",
     description: "Describes the story image for screen readers.",
-  },
-  {
-    key: "pink.homepage.story-eyebrow",
-    label: "Story Eyebrow",
-    type: "text",
-    page: "homepage",
-    group: "homepage.story",
-    gridColumn: "col-span-1",
-    defaultValue: "The artist",
-    description: "Small label above the pull-quote.",
   },
   {
     key: "pink.homepage.story-quote-before",
@@ -376,21 +488,6 @@ const homepageStoryData: TemplateField[] = [
       "Evelyn Pinkard started PinkArt LLC out of a spare room in Detroit. Every doll and every magnet still gets made the same way — one at a time, at the same table.",
     description: "Paragraph under the pull-quote.",
   },
-  {
-    key: "pink.homepage.story-stats",
-    label: "Story Stats",
-    description: "Three or four small numbers under the story text.",
-    type: "list",
-    page: "homepage",
-    group: "homepage.story",
-    gridColumn: "col-span-full",
-    maxItems: 4,
-    itemSchema: [
-      { key: "value", label: "Value", type: "text", placeholder: "12" },
-      { key: "label", label: "Label", type: "text", placeholder: "years at the table" },
-    ],
-    defaultValue: "",
-  },
 ];
 
 // ── Aggregated export ───────────────────────────────────────────────────────
@@ -399,6 +496,7 @@ export const pinkHomepageData: TemplateField[] = [
   ...homepageHeroData,
   ...homepagePromisesData,
   ...homepageCollectionData,
+  ...homepageUpcomingData,
   ...homepageEventsData,
   ...homepageStoryData,
 ];
@@ -427,9 +525,18 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
+    id: "homepage.upcoming",
+    title: "Upcoming Events",
+    description:
+      "The next few real dates from your Events list — heading, how many to show, and the empty-state copy",
+    icon: "🗓️",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
+  {
     id: "homepage.events",
     title: "Make & Takes",
-    description: "The workshop band — studio photos and upcoming sessions",
+    description:
+      "The workshop band — your photos and fliers, what a make & take is, how they're hosted, and one enquiry CTA",
     icon: "🪡",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -470,13 +577,25 @@ export const pinkHomepageSections: TemplateSection[] = [
     order: 2,
     hideable: true,
   },
+  // Array position, not just `order`, is what the editor rail renders — this
+  // entry sits third so the rail matches the page: the dated preview comes
+  // immediately before the evergreen Make & Takes band it feeds into.
+  {
+    id: "homepage.upcoming",
+    page: "homepage",
+    title: "Upcoming Events",
+    description: "The next few dated events from your Events list",
+    groupIds: ["homepage.upcoming"],
+    order: 3,
+    hideable: true,
+  },
   {
     id: "homepage.events",
     page: "homepage",
     title: "Make & Takes",
-    description: "Studio photo mosaic and upcoming sessions",
+    description: "Photo/flier mosaic, how they're hosted, and the enquiry CTA",
     groupIds: ["homepage.events"],
-    order: 3,
+    order: 4,
     hideable: true,
   },
   {
@@ -485,7 +604,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     title: "The Artist",
     description: "Portrait, pull-quote and stat row",
     groupIds: ["homepage.story"],
-    order: 4,
+    order: 5,
     hideable: true,
   },
 ];

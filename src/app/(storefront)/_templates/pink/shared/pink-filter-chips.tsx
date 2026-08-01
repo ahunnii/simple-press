@@ -20,6 +20,23 @@ type PinkFilterChipsProps = {
 };
 
 /**
+ * `px-4 py-2` renders a 37px chip, which is the height design.md calibrated
+ * for a hairline strip — it is a filter row, not a button bar, and inflating
+ * it everywhere would coarsen the shop and blog headers on desktop.
+ *
+ * 37px already clears WCAG 2.5.8's 24x24 AA floor, so this is not a
+ * compliance fix; it is the template's *own* bar, set at 44px when the
+ * 2026-07-29 review raised the mobile nav links to 47-48px. So the floor is
+ * applied only where a finger is the input device — `(pointer: coarse)` —
+ * and the desktop box is left exactly as designed (audit 2026-07-31, P3-1).
+ *
+ * `inline-flex` + centring is what lets `min-h` grow the box without the
+ * label drifting off-centre; on a bare `<a>` a min-height would leave the
+ * text top-aligned.
+ */
+const CHIP_CLASS =
+  "inline-flex items-center justify-center px-4 py-2 text-[14px] font-medium whitespace-nowrap transition-colors [@media(pointer:coarse)]:min-h-11";
+/**
  * The hairline chip row: active = ink fill + paper text, resting = paper
  * fill + muted text. Used for shop sort, collection/testimonial filters,
  * blog categories (design.md → Shared component inventory).
@@ -53,7 +70,7 @@ export function PinkFilterChips({
               key={item.id}
               href={item.href}
               aria-current={active ? "true" : undefined}
-              className="px-4 py-2 text-[14px] font-medium whitespace-nowrap transition-colors"
+              className={CHIP_CLASS}
               style={style}
             >
               {label}
@@ -67,7 +84,7 @@ export function PinkFilterChips({
             type="button"
             aria-pressed={active}
             onClick={() => onSelect?.(item.id)}
-            className="px-4 py-2 text-[14px] font-medium whitespace-nowrap transition-colors"
+            className={CHIP_CLASS}
             style={style}
           >
             {label}

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { TemplateSection } from "./template-sections";
+
 import {
   getSpMeta,
   isSectionVisible,
@@ -16,7 +18,6 @@ import {
   getSectionsForTemplate,
   isBlogPostContextSection,
   TEMPLATE_SECTIONS,
-  type TemplateSection,
 } from "./template-sections";
 
 function makeSection(overrides: Partial<TemplateSection>): TemplateSection {
@@ -109,6 +110,40 @@ describe("getSectionsForTemplate (derived fallback)", () => {
   });
 });
 
+describe("pink homepage.upcoming vs homepage.events (real dates vs evergreen explainer)", () => {
+  it("registers both as distinct, hideable sections", () => {
+    const sections = getSectionsForTemplate("pink");
+    const upcoming = sections.find((s) => s.id === "homepage.upcoming");
+    const events = sections.find((s) => s.id === "homepage.events");
+
+    expect(upcoming).toBeDefined();
+    expect(events).toBeDefined();
+    expect(upcoming?.id).not.toBe(events?.id);
+    expect(upcoming?.hideable).toBe(true);
+    expect(events?.hideable).toBe(true);
+  });
+});
+
+describe("events-page sections (pink and default)", () => {
+  it.each(["pink", "default"])(
+    "'%s' registers events-page sections, each id exactly \"${page}.${group}\"",
+    (templateId) => {
+      const eventsPageSections = getSectionsForTemplate(templateId).filter(
+        (s) => s.page === "events",
+      );
+
+      expect(eventsPageSections.length).toBeGreaterThan(0);
+      for (const section of eventsPageSections) {
+        expect(section.id.startsWith("events.")).toBe(true);
+        // The triple-match invariant (section id === field-group id ===
+        // data-sp-group value) means a curated section's own id is always
+        // one of its groupIds.
+        expect(section.groupIds).toContain(section.id);
+      }
+    },
+  );
+});
+
 describe("sp-meta", () => {
   it("getSpMeta never throws on garbage input", () => {
     for (const garbage of [
@@ -182,7 +217,13 @@ describe("isBlogPostContextSection", () => {
 });
 
 describe("getSectionsForTemplate blog-post section coverage", () => {
-  const curatedTemplateIds = ["happy-bamboo", "bamboo", "noise", "sledge", "pink"];
+  const curatedTemplateIds = [
+    "happy-bamboo",
+    "bamboo",
+    "noise",
+    "sledge",
+    "pink",
+  ];
 
   for (const templateId of curatedTemplateIds) {
     it(`has exactly one blog-post-context section for '${templateId}', with id 'blog.post'`, () => {

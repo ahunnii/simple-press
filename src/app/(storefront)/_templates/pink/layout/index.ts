@@ -47,24 +47,12 @@ export const pinkGlobalData: TemplateField[] = [
     group: "global.branding",
     gridColumn: "col-span-full",
     defaultValue:
-      "Spirit dolls, magnets and handmade pieces made one at a time in Detroit. Studio visits by appointment.",
+      "Handmade dolls, magnets, jewelry and small pieces — each one made on its own in Detroit. Studio visits by appointment.",
   },
-  {
-    key: "pink.global.social-links",
-    label: "Social Links",
-    description:
-      "Shown as bordered boxes in the footer. Leave empty to hide the row.",
-    type: "list",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-full",
-    maxItems: 5,
-    itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Instagram" },
-      { key: "url", label: "URL", type: "url", placeholder: "https://…" },
-    ],
-    defaultValue: "",
-  },
+  // NOTE: social links are no longer a template field. They read straight
+  // from `SiteContent.socialLinks` (Admin → Branding) via the shared
+  // `~/lib/social-links` registry, like `elegant`/`pollen`/`builders`/
+  // `happy-bamboo` — see `PinkSocialLinks` in `../shared/pink-social-links`.
 
   // ── global.header ────────────────────────────────────────────────────────
   {
@@ -110,6 +98,17 @@ export const pinkGlobalData: TemplateField[] = [
     defaultValue: "Journal",
   },
   {
+    key: "pink.global.nav-events",
+    label: "Nav Label — Events",
+    description:
+      "Header link to /events. Only shown when the Events feature is on.",
+    type: "text",
+    page: "global",
+    group: "global.header",
+    gridColumn: "col-span-1",
+    defaultValue: "Events",
+  },
+  {
     key: "pink.global.nav-about",
     label: "Nav Label — About",
     description: "Header link to /about.",
@@ -123,22 +122,23 @@ export const pinkGlobalData: TemplateField[] = [
     key: "pink.global.header-cta-text",
     label: "Header Secondary CTA Text",
     description:
-      "The bordered button beside the basket. Leave blank to hide it.",
+      "Optional bordered button beside the basket — e.g. a link to a sale, a class signup, or your Instagram. Empty by default, which hides the button entirely; set both this and the link below to show it.",
     type: "text",
     page: "global",
     group: "global.header",
     gridColumn: "col-span-1",
-    defaultValue: "Keepers",
+    defaultValue: "",
   },
   {
     key: "pink.global.header-cta-link",
     label: "Header Secondary CTA Link",
-    description: "Where the bordered header button goes.",
+    description:
+      "Where the bordered header button goes. Only used once you set the text above — defaults to your Contact page so the button never points somewhere that doesn't exist.",
     type: "url",
     page: "global",
     group: "global.header",
     gridColumn: "col-span-1",
-    defaultValue: "/testimonials",
+    defaultValue: "/contact",
   },
   {
     key: "pink.global.basket-label",
@@ -203,48 +203,26 @@ export const pinkGlobalData: TemplateField[] = [
     defaultValue: "",
   },
 
-  // ── global.footer-cta ────────────────────────────────────────────────────
+  // ── global.footer-social ─────────────────────────────────────────────────
   {
-    key: "pink.global.footer-cta-heading",
-    label: "Footer CTA Heading",
-    description:
-      "The headline in the last footer column — where the mailing-list invitation goes.",
+    key: "pink.global.footer-social-heading",
+    label: "Footer Social Heading",
+    description: "The headline above your social links in the last footer column.",
     type: "text",
     page: "global",
-    group: "global.footer-cta",
+    group: "global.footer-social",
     gridColumn: "col-span-full",
-    defaultValue: "New pieces go to the list first.",
+    defaultValue: "Follow along",
   },
   {
-    key: "pink.global.footer-cta-body",
-    label: "Footer CTA Supporting Line",
+    key: "pink.global.footer-social-body",
+    label: "Footer Social Supporting Line",
     description: "One short line under the heading. Leave blank to hide.",
     type: "text",
     page: "global",
-    group: "global.footer-cta",
+    group: "global.footer-social",
     gridColumn: "col-span-full",
-    defaultValue: "One letter a month. No noise.",
-  },
-  {
-    key: "pink.global.footer-cta-button",
-    label: "Footer CTA Button Text",
-    description: "Leave blank to hide the button.",
-    type: "text",
-    page: "global",
-    group: "global.footer-cta",
-    gridColumn: "col-span-1",
-    defaultValue: "Join the list",
-  },
-  {
-    key: "pink.global.footer-cta-link",
-    label: "Footer CTA Button Link",
-    description:
-      "Where the button goes — your mailing-list signup page, a social profile, or /contact.",
-    type: "url",
-    page: "global",
-    group: "global.footer-cta",
-    gridColumn: "col-span-1",
-    defaultValue: "/contact",
+    defaultValue: "New pieces and studio days, mostly in pictures.",
   },
 
   // ── global.footer-legal ──────────────────────────────────────────────────
@@ -324,7 +302,8 @@ export const pinkGlobalData: TemplateField[] = [
     page: "global",
     group: "global.page-sidebar",
     gridColumn: "col-span-full",
-    defaultValue: "Make & takes run twice a month. Materials are included.",
+    defaultValue:
+      "We bring make & takes to your room — school, church, library, workplace or back yard. Materials are included.",
   },
   {
     key: "pink.global.page-cta-button",
@@ -334,7 +313,7 @@ export const pinkGlobalData: TemplateField[] = [
     page: "global",
     group: "global.page-sidebar",
     gridColumn: "col-span-1",
-    defaultValue: "Save a seat",
+    defaultValue: "Ask about a make & take",
   },
   {
     key: "pink.global.page-cta-link",
@@ -376,7 +355,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.branding",
     title: "Site Branding",
     description:
-      "Wordmark accent, locality tag, footer blurb and social links — shown on every page",
+      "Wordmark accent, locality tag, and footer blurb — shown on every page",
     icon: "🏷️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -396,10 +375,10 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
-    id: "global.footer-cta",
-    title: "Footer Call to Action",
+    id: "global.footer-social",
+    title: "Footer Social",
     description:
-      "The last footer column — a heading and a button pointing at your mailing list, a social profile, or a contact page",
+      "The last footer column — a short heading and your social links",
     icon: "📣",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -441,7 +420,7 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Site Branding",
     description:
-      "Wordmark accent, locality tag, footer blurb and social links — shown on every page",
+      "Wordmark accent, locality tag, and footer blurb — shown on every page",
     groupIds: ["global.branding"],
     order: 0,
     hideable: false,
@@ -465,11 +444,11 @@ export const pinkGlobalSections: TemplateSection[] = [
     hideable: false,
   },
   {
-    id: "global.footer-cta",
+    id: "global.footer-social",
     page: "global",
-    title: "Footer Call to Action",
-    description: "The last footer column — heading and button",
-    groupIds: ["global.footer-cta"],
+    title: "Footer Social",
+    description: "The last footer column — a short heading and your social links",
+    groupIds: ["global.footer-social"],
     order: 3,
     hideable: true,
   },

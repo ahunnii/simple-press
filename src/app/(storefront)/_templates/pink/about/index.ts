@@ -8,9 +8,13 @@ import type { TemplateSection } from "~/lib/template-sections";
  * Field / group / section module for the `pink` template's About page.
  *
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
- * About". Uses `PinkPhotoHeader` (min-height 66vh) for the hero and the
- * light footer tone (handled automatically by `PinkFooter`'s route-based
- * `isLightFooterRoute` check — no action needed here).
+ * About". Uses `PinkPortraitHeader` (pale wash + a 4:5 portrait) for the hero
+ * and the light footer tone (handled automatically by `PinkFooter`'s
+ * route-based `isLightFooterRoute` check — no action needed here).
+ *
+ * Tone (2026-07-31, client direction): the hero and the values band are on
+ * the pale pink wash; the commissions band stays dark on purpose as the
+ * page's closing note, echoing the footer beneath it.
  */
 
 // ── about.hero ──────────────────────────────────────────────────────────────
@@ -18,25 +22,19 @@ import type { TemplateSection } from "~/lib/template-sections";
 const aboutHeroData: TemplateField[] = [
   {
     key: "pink.about.hero-image",
-    label: "Hero Background Image",
-    description: "Full-bleed photo behind the About page header.",
+    label: "Hero Portrait",
+    description:
+      "Tall photo (4:5) beside the heading — a portrait of the maker works best. Leave blank to show the heading on a plain pink band.",
     type: "image",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-full",
-    // Empty on purpose — see the homepage hero-image field. `PinkPhotoHeader`
-    // keeps the bare dark band + scrims when this is unset.
-    defaultValue: "",
-  },
-  {
-    key: "pink.about.hero-eyebrow",
-    label: "Hero Eyebrow",
-    description: "Small label above the heading.",
-    type: "text",
-    page: "about",
-    group: "about.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "The artist",
+    // Light-surface convention: `/placeholder.svg` rather than `""` (the empty
+    // default belongs to the dark bands, where a light placeholder would read
+    // as a grey slab). `hasCustomImage` treats `/placeholder.svg` as "not set",
+    // so `PinkPortraitHeader` drops the image column and renders the wash-only
+    // band until the owner uploads a real photo.
+    defaultValue: "/placeholder.svg",
   },
   {
     key: "pink.about.hero-heading",
@@ -57,7 +55,7 @@ const aboutHeroData: TemplateField[] = [
     group: "about.hero",
     gridColumn: "col-span-full",
     defaultValue:
-      "Evelyn Pinkard has been sewing in Detroit for more than twenty years. PinkArt is her studio — spirit dolls, magnets, and pieces made to be kept, not just bought.",
+      "Evelyn Pinkard sews in Detroit. PinkArt is her studio — dolls, magnets, jewelry and small pieces, made to be kept, not just bought.",
   },
 ];
 
@@ -94,7 +92,7 @@ const aboutStoryData: TemplateField[] = [
     group: "about.story",
     gridColumn: "col-span-full",
     defaultValue:
-      "Every doll starts with fabric on the table and no fixed plan. Evelyn works the shape out by hand, one piece at a time, the same way she's worked since she started sewing.",
+      "Every doll starts with cotton fabric on the table and no fixed plan. Evelyn works the shape out by hand, one piece at a time, the same way she's worked since she started sewing.",
   },
   {
     key: "pink.about.story-paragraph-2",
@@ -105,7 +103,7 @@ const aboutStoryData: TemplateField[] = [
     group: "about.story",
     gridColumn: "col-span-full",
     defaultValue:
-      "Materials come from estate sales, remnant bins, and a handful of suppliers she trusts. Nothing is printed or molded. If a seam shows, it's because a person made it.",
+      "Everything that goes into a piece is natural: 100% wool filling, cotton fabrics, and faces shaped from polymer clay. Nothing is printed. If a seam shows, it's because a person made it.",
   },
   {
     key: "pink.about.story-paragraph-3",
@@ -116,7 +114,7 @@ const aboutStoryData: TemplateField[] = [
     group: "about.story",
     gridColumn: "col-span-full",
     defaultValue:
-      "The studio runs on the same rhythm it always has: make, mend, teach, repeat. Commissions and make & takes fill the gaps between collections.",
+      "The studio runs on the same rhythm it always has: make, mend, teach, repeat. Make & takes carry the same weight as the dolls — a table of people, everyone leaving with something they made themselves.",
   },
   {
     key: "pink.about.story-signature-image",
@@ -213,7 +211,7 @@ const aboutValuesData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 4,
     itemSchema: [
-      { key: "title", label: "Title", type: "text", placeholder: "Made by hand" },
+      { key: "title", label: "Title", type: "text", placeholder: "One of a kind" },
       {
         key: "body",
         label: "Body",
@@ -229,16 +227,6 @@ const aboutValuesData: TemplateField[] = [
 
 const aboutTimelineData: TemplateField[] = [
   {
-    key: "pink.about.timeline-eyebrow",
-    label: "Timeline Eyebrow",
-    type: "text",
-    page: "about",
-    group: "about.timeline",
-    gridColumn: "col-span-1",
-    description: "Small label above the timeline heading.",
-    defaultValue: "Some history",
-  },
-  {
     key: "pink.about.timeline-heading",
     label: "Timeline Heading",
     type: "text",
@@ -246,7 +234,7 @@ const aboutTimelineData: TemplateField[] = [
     group: "about.timeline",
     gridColumn: "col-span-1",
     description: "Heading over the timeline.",
-    defaultValue: "Twenty years, roughly",
+    defaultValue: "How PinkArt got here",
   },
   {
     key: "pink.about.timeline-note",
@@ -256,12 +244,13 @@ const aboutTimelineData: TemplateField[] = [
     page: "about",
     group: "about.timeline",
     gridColumn: "col-span-full",
-    defaultValue: "The short version of how PinkArt got here.",
+    defaultValue: "The short version.",
   },
   {
     key: "pink.about.timeline-items",
     label: "Timeline Rows",
-    description: "Year / title / body rows. Leave empty to use the defaults.",
+    description:
+      "Year / title / body rows. Ships empty — the whole section stays hidden until you add at least one row.",
     type: "list",
     page: "about",
     group: "about.timeline",
@@ -299,38 +288,31 @@ const aboutGalleryData: TemplateField[] = [
 ];
 
 // ── about.commissions ────────────────────────────────────────────────────────
+// Field keys keep the `commissions-` prefix (changing them would orphan every
+// owner-saved value), but the copy is about custom orders — the client takes
+// those, not commissions (2026-07-31 client direction).
 
 const aboutCommissionsData: TemplateField[] = [
   {
-    key: "pink.about.commissions-eyebrow",
-    label: "Commissions Eyebrow",
-    type: "text",
-    page: "about",
-    group: "about.commissions",
-    gridColumn: "col-span-1",
-    description: "Small label above the commissions heading.",
-    defaultValue: "By request",
-  },
-  {
     key: "pink.about.commissions-heading",
-    label: "Commissions Heading",
+    label: "Custom Orders Heading",
     type: "text",
     page: "about",
     group: "about.commissions",
     gridColumn: "col-span-full",
-    description: "Heading for the commissions band.",
-    defaultValue: "Commission a piece of your own",
+    description: "Heading for the custom orders band.",
+    defaultValue: "Order something made for you",
   },
   {
     key: "pink.about.commissions-body",
-    label: "Commissions Body",
+    label: "Custom Orders Body",
     type: "textarea",
     page: "about",
     group: "about.commissions",
     gridColumn: "col-span-full",
-    description: "Explains how commissions work.",
+    description: "Explains how custom orders work.",
     defaultValue:
-      "Tell me who it's for and what it's for. Most commissions take three to six weeks, depending on the season.",
+      "Tell me who it's for and what you have in mind. We'll work out the details together before anything gets made.",
   },
   {
     key: "pink.about.commissions-cta-label",
@@ -340,7 +322,7 @@ const aboutCommissionsData: TemplateField[] = [
     group: "about.commissions",
     gridColumn: "col-span-1",
     description: "Leave blank to hide the button.",
-    defaultValue: "Start a commission",
+    defaultValue: "Start a custom order",
   },
   {
     key: "pink.about.commissions-cta-link",
@@ -360,7 +342,7 @@ const aboutCommissionsData: TemplateField[] = [
     group: "about.commissions",
     gridColumn: "col-span-1",
     description: "Leave blank to hide the button.",
-    defaultValue: "See past commissions",
+    defaultValue: "See finished pieces",
   },
   {
     key: "pink.about.commissions-secondary-link",
@@ -374,9 +356,9 @@ const aboutCommissionsData: TemplateField[] = [
   },
   {
     key: "pink.about.commissions-facts",
-    label: "Commission Facts",
+    label: "Custom Order Facts",
     description:
-      "Label/value rows on the right — turnaround time, starting price, and so on. Leave empty to use the defaults.",
+      "Label/value rows on the right — anything a customer should know before asking. Ships empty; the rows only appear once you add them.",
     type: "list",
     page: "about",
     group: "about.commissions",
@@ -384,7 +366,7 @@ const aboutCommissionsData: TemplateField[] = [
     maxItems: 4,
     itemSchema: [
       { key: "label", label: "Label", type: "text", placeholder: "Turnaround" },
-      { key: "value", label: "Value", type: "text", placeholder: "3–6 weeks" },
+      { key: "value", label: "Value", type: "text", placeholder: "Ask for a quote" },
     ],
     defaultValue: "",
   },
@@ -405,7 +387,7 @@ export const pinkAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.hero",
     title: "About — Hero",
-    description: "Background photo, eyebrow, heading and intro.",
+    description: "Portrait photo, heading and intro on the pink band.",
     icon: "🎨",
     columns: 2,
   },
@@ -419,7 +401,7 @@ export const pinkAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.values",
     title: "About — Values",
-    description: "Up to 4 short principles on a dark band.",
+    description: "Up to 4 short principles on the pink band.",
     icon: "✦",
     columns: 2,
   },
@@ -439,8 +421,8 @@ export const pinkAboutFieldGroups: TemplateFieldGroup[] = [
   },
   {
     id: "about.commissions",
-    title: "About — Commissions",
-    description: "Closing band explaining custom commission work.",
+    title: "About — Custom Orders",
+    description: "Closing band explaining custom order work.",
     icon: "✉️",
     columns: 2,
   },
@@ -451,7 +433,7 @@ export const pinkAboutSections: TemplateSection[] = [
     id: "about.hero",
     page: "about",
     title: "Hero",
-    description: "Photo header with the artist's introduction.",
+    description: "Portrait header with the artist's introduction.",
     groupIds: ["about.hero"],
     order: 0,
     hideable: false,
@@ -469,7 +451,7 @@ export const pinkAboutSections: TemplateSection[] = [
     id: "about.values",
     page: "about",
     title: "Values",
-    description: "Dark band of short principles.",
+    description: "Pink band of short principles.",
     groupIds: ["about.values"],
     order: 2,
     hideable: true,
@@ -495,8 +477,8 @@ export const pinkAboutSections: TemplateSection[] = [
   {
     id: "about.commissions",
     page: "about",
-    title: "Commissions",
-    description: "Closing band about custom commission work.",
+    title: "Custom Orders",
+    description: "Closing band about custom order work.",
     groupIds: ["about.commissions"],
     order: 5,
     hideable: true,

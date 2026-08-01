@@ -33,16 +33,6 @@ import type { TemplateSection } from "~/lib/template-sections";
 export const pinkBlogData: TemplateField[] = [
   // ── blog.header (not hideable) ───────────────────────────────────────────
   {
-    key: "pink.blog.header-eyebrow",
-    label: "Blog Header Eyebrow",
-    description: "Small label above the blog index heading.",
-    type: "text",
-    page: "blog",
-    group: "blog.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Notes from the studio",
-  },
-  {
     key: "pink.blog.header-heading",
     label: "Blog Header Heading",
     description: "Main heading on the blog index page.",
@@ -176,16 +166,6 @@ export const pinkBlogData: TemplateField[] = [
 
   // ── blog.ask (hideable) ──────────────────────────────────────────────────
   {
-    key: "pink.blog.ask-eyebrow",
-    label: "Ask Band Eyebrow",
-    description: "Small label above the closing 'ask a question' band.",
-    type: "text",
-    page: "blog",
-    group: "blog.ask",
-    gridColumn: "col-span-1",
-    defaultValue: "Questions",
-  },
-  {
     key: "pink.blog.ask-heading",
     label: "Ask Band Heading",
     description: "Heading in the closing band. Leave blank to hide the band.",
@@ -267,7 +247,7 @@ export const pinkBlogData: TemplateField[] = [
     group: "blog.post-author",
     gridColumn: "col-span-full",
     defaultValue:
-      "Evelyn has been making spirit dolls and magnets by hand in Detroit for over a decade, one piece at a time.",
+      "Evelyn makes dolls, magnets and jewelry by hand in Detroit, one piece at a time.",
   },
   {
     key: "pink.blog.post-author-cta-label",

@@ -11,6 +11,7 @@ import { customerRouter } from "./routers/customer";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
 import { editorNoteRouter } from "./routers/editor-note";
+import { eventsRouter } from "./routers/events";
 import { exportRouter } from "./routers/export";
 import { externalRouter } from "./routers/external";
 import { faqRouter } from "./routers/faq";
@@ -45,6 +46,7 @@ export const appRouter = createTRPCRouter({
   domain: domainRouter,
   discount: discountRouter,
   editorNote: editorNoteRouter,
+  events: eventsRouter,
   export: exportRouter,
   finance: financeRouter,
 

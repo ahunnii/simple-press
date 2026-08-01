@@ -9,16 +9,12 @@ import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import { PinkEyebrow } from "../shared/pink-eyebrow";
 import { PinkPageHeader } from "../shared/pink-page-header";
-import type { PinkStat } from "../shared/pink-stat-tiles";
-import { PinkStatTiles } from "../shared/pink-stat-tiles";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
 import { PinkTestimonialsGrid } from "./pink-testimonials-grid";
 
 const FIELD_KEYS = [
-  "pink.testimonials.header-eyebrow",
   "pink.testimonials.header-heading",
   "pink.testimonials.header-intro",
   "pink.testimonials.featured-link-label",
@@ -30,7 +26,6 @@ const FIELD_KEYS = [
   "pink.testimonials.grid-empty-body",
   "pink.testimonials.press-heading",
   "pink.testimonials.press-note",
-  "pink.testimonials.cta-eyebrow",
   "pink.testimonials.cta-heading",
   "pink.testimonials.cta-body",
   "pink.testimonials.cta-button-label",
@@ -39,27 +34,11 @@ const FIELD_KEYS = [
 
 type PressItem = { outlet?: string; date?: string; quote?: string; href?: string; _id?: string };
 
-const DEFAULT_STATS: PinkStat[] = [
-  { value: "400+", label: "Keepers so far" },
-  { value: "20+", label: "Years sewing" },
-  { value: "48", label: "Pieces this year" },
-  { value: "100%", label: "Handmade" },
-];
-
-const DEFAULT_PRESS: PressItem[] = [
-  {
-    outlet: "Local Makers Weekly",
-    date: "2024",
-    quote: "Spirit dolls that look like they've always been in the room — that's the PinkArt signature.",
-    href: "/about",
-  },
-  {
-    outlet: "Detroit Craft & Culture Journal",
-    date: "2023",
-    quote: "Every piece carries the marks of a hand that's been doing this for twenty years.",
-    href: "/about",
-  },
-];
+// Deliberately empty (2026-07-31, client direction): the shipped defaults
+// invented two outlets and put words in their mouths. The whole band is
+// skipped on an empty list (see the `press.length > 0` guard below), so a
+// fresh store shows nothing here until the owner adds a real clipping.
+const DEFAULT_PRESS: PressItem[] = [];
 
 export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPageTemplateProps) {
   const testimonials = await api.testimonial.list({ publicOnly: true });
@@ -67,11 +46,6 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
   const customFields = business.siteContent?.customFields;
   const rawCustomFields = customFields as Record<string, unknown> | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
-
-  const statsRaw = parseTemplateListRows(
-    rawCustomFields?.["pink.testimonials.header-stats"],
-  ) as PinkStat[];
-  const stats = statsRaw.length > 0 ? statsRaw : DEFAULT_STATS;
 
   const pressRaw = parseTemplateListRows(
     rawCustomFields?.["pink.testimonials.press-items"],
@@ -90,13 +64,10 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
       {/* ── testimonials.header ────────────────────────────────────────── */}
       <PinkPageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Testimonials" }]}
-        eyebrow={f["pink.testimonials.header-eyebrow"] ?? ""}
-        eyebrowFieldKey="pink.testimonials.header-eyebrow"
         heading={f["pink.testimonials.header-heading"] ?? ""}
         headingFieldKey="pink.testimonials.header-heading"
         intro={f["pink.testimonials.header-intro"] ?? ""}
         introFieldKey="pink.testimonials.header-intro"
-        rightSlot={<PinkStatTiles stats={stats} columns={4} />}
         sectionAttrs={sectionGroupAttr("testimonials", "header")}
       />
 
@@ -134,7 +105,7 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
               <p
                 className="pink-display"
                 style={{
-                  fontSize: "clamp(22px, 2.2vw, 30px)",
+                  fontSize: "clamp(1.375rem, 2.2vw, 1.875rem)",
                   fontWeight: 600,
                   letterSpacing: "-0.015em",
                   lineHeight: 1.25,
@@ -177,13 +148,15 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
       </div>
 
       {/* ── testimonials.press ─────────────────────────────────────────── */}
-      {pressVisible && (
+      {/* `press.length > 0`: with no clippings the band would render a heading
+          and note over an empty grid. */}
+      {pressVisible && press.length > 0 && (
         <PinkDarkBand ariaLabel="As seen" sectionAttrs={sectionGroupAttr("testimonials", "press")}>
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <h2
               className="pink-display"
               style={{
-                fontSize: "clamp(26px, 2.8vw, 38px)",
+                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                 fontWeight: 600,
                 letterSpacing: "-0.025em",
                 color: "var(--pink-paper)",
@@ -241,13 +214,10 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
             className="mx-auto flex max-w-[1400px] flex-col items-start gap-4 p-8 md:p-12"
             style={{ background: "var(--pink-panel)" }}
           >
-            <PinkEyebrow tone="paper" fieldKey="pink.testimonials.cta-eyebrow">
-              {f["pink.testimonials.cta-eyebrow"] ?? ""}
-            </PinkEyebrow>
             <h2
               className="pink-display max-w-[24ch]"
               style={{
-                fontSize: "clamp(26px, 2.8vw, 38px)",
+                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
                 fontWeight: 600,
                 letterSpacing: "-0.025em",
               }}

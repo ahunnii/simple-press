@@ -6,6 +6,7 @@ import Link from "next/link";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { PinkBadge } from "./pink-badge";
+import { hasCustomImage, PinkImageFallback } from "./pink-image-fallback";
 
 type PinkAddToBasketSlot = {
   label: string;
@@ -42,6 +43,13 @@ type PinkProductCardProps = {
         snapshot. */
     rawPrice: number;
   };
+  /**
+   * Set on the first card or two of a grid. Product images are the LCP element
+   * on `/shop` and on the homepage collection band, and without this Next.js
+   * lazy-loads them behind their own siblings — it warns about exactly this in
+   * the console (audit 2026-07-31, P2-8).
+   */
+  priority?: boolean;
   className?: string;
 };
 
@@ -63,9 +71,13 @@ export function PinkProductCard({
   badge,
   addToBasket,
   wishlist,
+  priority = false,
   className,
 }: PinkProductCardProps) {
-  const image = imageUrl ?? "/placeholder.svg";
+  // The template has its own empty-image treatment; falling through to the
+  // platform's generic `/placeholder.svg` put two different "no image yet"
+  // graphics on one screen (audit 2026-07-31, P2-7).
+  const hasImage = hasCustomImage(imageUrl);
 
   return (
     <div className={`group flex flex-col${className ? ` ${className}` : ""}`}>
@@ -73,24 +85,41 @@ export function PinkProductCard({
           link (no <button> inside <a>) while overlaying the image's
           top-right corner — mirrors default-product-card.tsx. */}
       <div className="relative">
+        {/* The title link below points at the same URL and carries the
+            accessible name. When a product has no image the fallback renders no
+            text, which left this anchor unnamed in the tab order — the same
+            defect as the blog cards (audit 2026-07-31, P1-1), reintroduced here
+            by the P2-7 fallback work and caught by the post-remediation re-audit.
+            Hiding it also removes a duplicate tab stop per card.
+            The badge is deliberately a SIBLING rather than a child: it carries
+            real status ("Sold", "Featured"), so it must stay in the
+            accessibility tree even though the image link does not. Same reason
+            the wishlist button is a sibling. */}
         <Link
           href={href}
+          aria-hidden="true"
+          tabIndex={-1}
           className="pink-lift relative block overflow-hidden"
           style={{ aspectRatio: "4 / 5", background: "var(--pink-panel)" }}
         >
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-          {badge && (
-            <span className="absolute top-2.5 left-2.5">
-              <PinkBadge tone={badge.tone}>{badge.label}</PinkBadge>
-            </span>
+          {hasImage ? (
+            <Image
+              src={imageUrl!}
+              alt={imageAlt}
+              fill
+              priority={priority}
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <PinkImageFallback surface="paper" className="absolute inset-0" />
           )}
         </Link>
+        {badge && (
+          <span className="absolute top-2.5 left-2.5 z-10">
+            <PinkBadge tone={badge.tone}>{badge.label}</PinkBadge>
+          </span>
+        )}
         {wishlist && (
           <WishlistButton
             item={{

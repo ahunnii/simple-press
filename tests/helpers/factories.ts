@@ -17,6 +17,8 @@ export function createBusiness(
     status?: string;
     /** Overrides on top of the feature registry defaults (e.g. `{ blog: true }`). */
     featureFlags?: Record<string, boolean>;
+    /** Defaults to the schema column default ("America/Detroit") when omitted. */
+    timeZone?: string;
   } = {},
 ) {
   const sub = opts.subdomain ?? uniq("biz");
@@ -32,6 +34,7 @@ export function createBusiness(
       ...(opts.featureFlags !== undefined
         ? { featureFlags: opts.featureFlags as Prisma.InputJsonValue }
         : {}),
+      ...(opts.timeZone !== undefined ? { timeZone: opts.timeZone } : {}),
     },
   });
 }
@@ -259,7 +262,8 @@ export function createOrder(
                 sku: item.sku ?? null,
                 price: item.price ?? 1000,
                 quantity: item.quantity ?? 1,
-                total: item.total ?? (item.price ?? 1000) * (item.quantity ?? 1),
+                total:
+                  item.total ?? (item.price ?? 1000) * (item.quantity ?? 1),
                 fulfilledQuantity: item.fulfilledQuantity ?? 0,
               })),
             },
@@ -271,7 +275,10 @@ export function createOrder(
 }
 
 /** Adds a line item to an existing order (for cases where items are added after order creation). */
-export function createOrderItem(orderId: string, opts: CreateOrderItemInput = {}) {
+export function createOrderItem(
+  orderId: string,
+  opts: CreateOrderItemInput = {},
+) {
   return db.orderItem.create({
     data: {
       orderId,
@@ -361,6 +368,32 @@ export function createPage(
       ...(opts.publishedAt !== undefined
         ? { publishedAt: opts.publishedAt }
         : {}),
+    },
+  });
+}
+
+export function createEvent(
+  businessId: string,
+  opts: {
+    name?: string;
+    startAt?: Date;
+    endAt?: Date | null;
+    allDay?: boolean;
+    published?: boolean;
+    isArchived?: boolean;
+    sortOrder?: number;
+  } = {},
+) {
+  return db.event.create({
+    data: {
+      businessId,
+      name: opts.name ?? "Test Event",
+      startAt: opts.startAt ?? new Date(),
+      endAt: opts.endAt === undefined ? null : opts.endAt,
+      allDay: opts.allDay ?? false,
+      published: opts.published ?? true,
+      isArchived: opts.isArchived ?? false,
+      sortOrder: opts.sortOrder ?? 0,
     },
   });
 }

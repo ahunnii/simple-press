@@ -37,12 +37,20 @@ function gridColumnsFor(activeIndex: number, count: number): string {
  *   2. Parallax — a rAF-throttled mousemove listener translates each panel's
  *      inner image at a per-panel depth; a scroll listener translates the
  *      whole panel. Never attached on `(pointer: coarse)`.
- *   3. Ken-burns — the innermost layer runs the shared `.pink-anim-ken` CSS
- *      animation (already neutralized under reduced motion by the global
- *      `.pink` reduced-motion block, same as every other `.pink-anim-*`).
+ *   3. (The 22s ken-burns layer was removed on 2026-07-31 — it read as grungy
+ *      and was part of the homepage's idle layout churn.)
  * The spotlight interval and the parallax listeners are explicitly gated on
  * `prefers-reduced-motion` in JS (a CSS-only gate can't stop a `setInterval`
  * or an event listener from doing work).
+ *
+ * They are additionally gated on the strip being **on screen** and the tab being
+ * **visible**. Removing the ken-burns layer cut the homepage's idle churn but did
+ * not end it: the spotlight's `grid-template-columns` transition kept re-laying-out
+ * all four panels every 3.4s forever, including while scrolled far past the hero
+ * (measured 2026-07-31 — 237 layouts/5s off-screen, 136 with the tab hidden).
+ * Animating `grid-template-columns` is inherently layout-bound; the cost while the
+ * strip is actually visible is the price of the effect, but paying it off-screen
+ * was pure waste.
  */
 export function PinkHeroStrip({ panels }: Props) {
   const shown = panels.slice(0, 4);
@@ -50,7 +58,10 @@ export function PinkHeroStrip({ panels }: Props) {
 
   const [spotlight, setSpotlight] = useState(0);
   const [motionEnabled, setMotionEnabled] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
 
+  const stripRef = useRef<HTMLDivElement | null>(null);
   const scrollLayerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mouseLayerRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
@@ -64,19 +75,52 @@ export function PinkHeroStrip({ panels }: Props) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  // Is the strip actually on screen? `grid-template-columns` is the most
+  // expensive property here to animate — every transition frame re-lays-out all
+  // four panels — so the spotlight must not run when nobody can see it.
+  // Measured 2026-07-31: without this gate the homepage did 237 layouts per 5s
+  // while the strip was scrolled 3251px off-screen, versus 262 in view.
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries.some((e) => e.isIntersecting)),
+      // Resume just before it scrolls back in, so the first visible frame is
+      // already mid-rotation rather than starting cold.
+      { rootMargin: "100px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // A background tab still ran the interval and its transition (136 layouts
+  // per 5s when hidden), because rAF throttling does not stop `setInterval`.
+  useEffect(() => {
+    const onVis = () => setPageVisible(document.visibilityState === "visible");
+    onVis();
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
   // 1. Spotlight rotation.
   useEffect(() => {
-    if (!motionEnabled || count === 0) return;
+    if (!motionEnabled || count === 0 || !inView || !pageVisible) return;
     const id = setInterval(() => {
       setSpotlight((i) => (i + 1) % count);
     }, SPOTLIGHT_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [motionEnabled, count]);
+  }, [motionEnabled, count, inView, pageVisible]);
 
   // 2. Parallax — mousemove (rAF-throttled) + scroll. Skipped under reduced
   // motion, and the mousemove listener is never attached on coarse pointers.
+  // Also gated on `inView`: both handlers wrote transforms to off-screen panels
+  // on every scroll/mousemove anywhere on the page.
   useEffect(() => {
-    if (!motionEnabled) return;
+    if (!motionEnabled || !inView) return;
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
 
     const flush = () => {
@@ -118,6 +162,11 @@ export function PinkHeroStrip({ panels }: Props) {
       window.addEventListener("mousemove", onMouseMove, { passive: true });
     }
     window.addEventListener("scroll", onScroll, { passive: true });
+    // The listener is detached while the strip is off-screen, so `scrollY` will
+    // have moved without the panels tracking it. Sync once on re-attach or the
+    // strip scrolls back into view carrying a stale offset until the next
+    // scroll event — which, if the user stops right at the boundary, never comes.
+    onScroll();
 
     return () => {
       if (!isCoarsePointer) {
@@ -126,7 +175,7 @@ export function PinkHeroStrip({ panels }: Props) {
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, [motionEnabled, shown]);
+  }, [motionEnabled, inView, shown]);
 
   const setScrollLayerRef = useCallback(
     (i: number) => (el: HTMLDivElement | null) => {
@@ -143,9 +192,26 @@ export function PinkHeroStrip({ panels }: Props) {
 
   if (count === 0) return null;
 
+  // The strip used to carry a blanket `aria-hidden="true"`, which also hid the
+  // owner-authored panel captions from assistive tech (audit 2026-07-31, P3-6).
+  // Judgment: the *images* are decorative (they stay `alt=""`), but a caption is
+  // an editable content field — an owner who types copy into it has published
+  // copy, so silently dropping it from the accessibility tree is a content
+  // decision the template shouldn't make on their behalf. Exposed as a labelled
+  // list of the captions only, so nothing is announced twice: the images
+  // contribute no text, and `PinkImageFallback` is rendered without a `label`.
+  // When no panel has a caption there is nothing but decoration left, so the
+  // whole strip stays hidden rather than exposing an empty list.
+  const hasCaptions = shown.some((panel) => Boolean(panel.caption));
+
   return (
     <div
-      aria-hidden="true"
+      ref={stripRef}
+      // A caption-less tile is hidden individually so every child this list
+      // owns is a `listitem`, as ARIA requires.
+      aria-hidden={hasCaptions ? undefined : "true"}
+      role={hasCaptions ? "list" : undefined}
+      aria-label={hasCaptions ? "Highlights" : undefined}
       // Below 640px the strip drops to two columns: four tiles at 390px are
       // ~95px wide and truncate every caption. The spotlight widening only
       // applies from `sm` up, where there is room for it to read as motion
@@ -162,13 +228,18 @@ export function PinkHeroStrip({ panels }: Props) {
       {shown.map((panel, i) => (
         <div
           key={panel._id ?? i}
+          role={hasCaptions && panel.caption ? "listitem" : undefined}
+          aria-hidden={hasCaptions && !panel.caption ? "true" : undefined}
           className="pink-anim-panel relative overflow-hidden"
           style={{
             animationDelay: `${PANEL_ENTER_DELAYS_S[i] ?? 0.55}s`,
-            // design.md: panels sit at --pink-ink-panel. Without this the strip
+            // Panels sit on the pink wash so an image-less tile reads as a
+            // designed empty slot on the white hero rather than a dark void.
+            // (Was --pink-ink-panel while the hero was a dark band.)
+            // Original note: without a background the strip
             // renders as light blocks against the dark hero whenever a panel has
             // no image yet (a fresh store), which breaks the hero band.
-            background: "var(--pink-ink-panel)",
+            background: "var(--pink-panel)",
           }}
         >
           {/* Scroll-parallax layer */}
@@ -176,15 +247,11 @@ export function PinkHeroStrip({ panels }: Props) {
             {/* Mousemove-parallax layer */}
             <div ref={setMouseLayerRef(i)} className="absolute inset-0">
               {/* Ken-burns layer */}
-              {/* No image yet → a designed dark-surface fallback fills the tile
-                  instead of stretching a light placeholder across the hero's
-                  dark band, and instead of leaving it visually bare (review
-                  2026-07-29, P1: this rendered as an unexplained black
-                  rectangle under the caption chip). The caption itself is
-                  already rendered as the overlay chip below, so it isn't
-                  duplicated here. */}
+              {/* No image yet → the template's own paper-surface fallback fills
+                  the tile. The caption is already rendered as the overlay chip
+                  below, so it is not duplicated here. */}
               {panel.image ? (
-                <div className="pink-anim-ken absolute inset-0">
+                <div className="absolute inset-0">
                   <Image
                     src={panel.image}
                     alt=""
@@ -194,7 +261,7 @@ export function PinkHeroStrip({ panels }: Props) {
                   />
                 </div>
               ) : (
-                <PinkImageFallback surface="dark" className="absolute inset-0" />
+                <PinkImageFallback surface="paper" className="absolute inset-0" />
               )}
             </div>
           </div>

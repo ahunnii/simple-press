@@ -22,6 +22,7 @@ import {
   parseBusinessHours,
 } from "~/lib/business-hours";
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
+import { eventDateTimeAttr } from "~/lib/events/format";
 import { getEffectivePrice } from "~/lib/prices";
 
 // ---------------------------------------------------------------------------
@@ -690,6 +691,97 @@ export function buildBlogPostingSchema(
   const image = toAbsoluteUrl(page.ogImage);
   if (image) {
     schema.image = image;
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
+// Builder: Event
+// ---------------------------------------------------------------------------
+
+interface EventForSchema {
+  name: string;
+  blurb?: string | null;
+  coverImage?: string | null;
+  startAt: Date | string;
+  endAt?: Date | string | null;
+  allDay: boolean;
+  location?: string | null;
+  priceLabel?: string | null;
+}
+
+/**
+ * Build a schema.org Event object for the storefront /events index.
+ *
+ * There is deliberately no per-event detail page — `url` always points at
+ * the canonical `/events` index, for every event.
+ *
+ * `startDate`/`endDate` are date-only ("YYYY-MM-DD") for all-day events,
+ * computed in the business's own `timeZone` (never the server's ambient
+ * zone — see src/lib/events/format.ts for why). Timed events emit the full
+ * ISO instant, which already carries its own offset.
+ *
+ * IMPORTANT: `priceLabel` is a free-text display string ("$45 per person",
+ * "Free", "sliding scale") entered by the owner, not a structured price. It
+ * must NEVER be turned into an `offers` object — doing so would fabricate a
+ * machine-readable price/currency/availability that we have no actual data
+ * for (no checkout, no inventory, no currency selection exists for events).
+ * If a future contributor is tempted to "complete" this schema with offers
+ * because priceLabel looks parseable (e.g. "$45"), don't — that's exactly
+ * the failure mode this comment exists to head off.
+ */
+export function buildEventSchema(
+  event: EventForSchema,
+  business: CanonicalBusiness & { name: string },
+  timeZone: string,
+): Record<string, unknown> {
+  const canonicalUrl = getCanonicalUrl(business, "/events");
+
+  // Reuse eventDateTimeAttr (the same helper the <time dateTime> attribute
+  // uses) rather than re-deriving the all-day-vs-timed / zone logic here —
+  // it already emits a bare local date for all-day events and a full ISO
+  // instant otherwise. It only reads `startAt` off its input, so a fake
+  // single-field input reuses it for `endAt` too.
+  const startDate = eventDateTimeAttr(
+    { startAt: event.startAt, endAt: null, allDay: event.allDay },
+    timeZone,
+  );
+
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.name,
+    startDate,
+    url: canonicalUrl,
+    eventStatus: "https://schema.org/EventScheduled",
+    organizer: {
+      "@type": "Organization",
+      name: business.name,
+    },
+  };
+
+  if (event.endAt) {
+    schema.endDate = eventDateTimeAttr(
+      { startAt: event.endAt, endAt: null, allDay: event.allDay },
+      timeZone,
+    );
+  }
+
+  if (event.blurb) {
+    schema.description = event.blurb;
+  }
+
+  const image = toAbsoluteUrl(event.coverImage);
+  if (image) {
+    schema.image = image;
+  }
+
+  if (event.location) {
+    schema.location = {
+      "@type": "Place",
+      name: event.location,
+    };
   }
 
   return schema;

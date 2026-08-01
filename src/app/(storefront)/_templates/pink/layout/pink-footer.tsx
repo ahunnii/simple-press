@@ -5,11 +5,13 @@ import { usePathname } from "next/navigation";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "..";
+import { PinkSocialLinks } from "../shared/pink-social-links";
 
 type PinkFooterProps = DefaultFooterTemplateProps & {
   /**
@@ -35,10 +37,8 @@ const FIELD_KEYS = [
   "pink.global.footer-blurb",
   "pink.global.footer-col1-title",
   "pink.global.footer-col2-title",
-  "pink.global.footer-cta-heading",
-  "pink.global.footer-cta-body",
-  "pink.global.footer-cta-button",
-  "pink.global.footer-cta-link",
+  "pink.global.footer-social-heading",
+  "pink.global.footer-social-body",
   "pink.global.footer-copyright",
 ];
 
@@ -77,11 +77,7 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
   const wordmark = splitAccentWordmark(businessName, accentWord);
   const footerBlurb = f["pink.global.footer-blurb"] ?? "";
 
-  const socialLinks = parseTemplateListRows(customFields?.["pink.global.social-links"]) as {
-    _id?: string;
-    label?: string;
-    url?: string;
-  }[];
+  const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
   const col1Title = f["pink.global.footer-col1-title"] ?? "Shop";
   const col2Title = f["pink.global.footer-col2-title"] ?? "Studio";
@@ -106,16 +102,19 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
       : [
           { label: "The artist", url: "/about" },
           ...(isEnabled("blog") ? [{ label: "Journal", url: "/blog" }] : []),
-          ...(isEnabled("testimonials") ? [{ label: "Keepers", url: "/testimonials" }] : []),
+          ...(isEnabled("events") ? [{ label: "Events", url: "/events" }] : []),
+          ...(isEnabled("testimonials") ? [{ label: "Testimonials", url: "/testimonials" }] : []),
           { label: "Contact", url: "/contact" },
         ];
 
-  const ctaHeading = (f["pink.global.footer-cta-heading"] ?? "").trim();
-  const ctaBody = (f["pink.global.footer-cta-body"] ?? "").trim();
-  const ctaButtonText = (f["pink.global.footer-cta-button"] ?? "").trim();
-  const ctaLink = f["pink.global.footer-cta-link"] ?? "/contact";
-  const showCta =
-    isSectionVisible(rawCustomFields, "pink", "global.footer-cta") && ctaHeading.length > 0;
+  const socialHeading = (f["pink.global.footer-social-heading"] ?? "").trim();
+  const socialBody = (f["pink.global.footer-social-body"] ?? "").trim();
+  // Gated on `socialLinks.length` (not just the heading text, which always
+  // carries a default) — an owner with no socials set at all must never see
+  // a dangling heading over an empty row.
+  const showSocialColumn =
+    isSectionVisible(rawCustomFields, "pink", "global.footer-social") &&
+    socialLinks.length > 0;
 
   // No hardcoded location in the fallback — the field's own defaultValue carries
   // PinkArt's, and a different owner on this template must not inherit it.
@@ -138,7 +137,6 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
   const subtleFg = isLight ? "var(--pink-subtle)" : "var(--pink-ink-subtle)";
   const ruleColor = isLight ? "var(--pink-line)" : "var(--pink-ink-line)";
   const accent = isLight ? "var(--pink-rose)" : "var(--pink-blush)";
-  const boxBorder = isLight ? "var(--pink-line-button)" : "var(--pink-ink-line-strong)";
   const labelClass = isLight ? "pink-label" : "pink-label-dark";
 
   return (
@@ -146,12 +144,12 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
       <div
         className="mx-auto grid max-w-[1400px] gap-8 px-5 py-16 md:px-10"
         style={{
-          gridTemplateColumns: showCta
+          gridTemplateColumns: showSocialColumn
             ? "minmax(0,1.3fr) auto auto minmax(0,1fr)"
             : "minmax(0,1.3fr) auto auto",
         }}
       >
-        {/* ── Col 1: wordmark + blurb + socials (global.branding) ── */}
+        {/* ── Col 1: wordmark + blurb (global.branding) ── */}
         <div
           className="col-span-full flex flex-col gap-4 md:col-span-1"
           {...sectionGroupAttr("global", "branding")}
@@ -190,26 +188,6 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
               {footerBlurb}
             </p>
           )}
-
-          {socialLinks.length > 0 && (
-            <div className="flex flex-wrap gap-2.5">
-              {socialLinks.map((s) =>
-                s.url ? (
-                  <a
-                    key={s._id ?? s.label}
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[14px] transition-colors"
-                    style={{ border: `1px solid ${boxBorder}`, padding: "10px 16px", color: fg }}
-                  >
-                    {s.label ?? "Link"}
-                    <span className="sr-only"> (opens in new tab)</span>
-                  </a>
-                ) : null,
-              )}
-            </div>
-          )}
         </div>
 
         {/* ── Col 2 + 3: link columns (global.footer-links) ── */}
@@ -221,37 +199,37 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           <FooterCol title={col2Title} links={col2Links} labelClass={labelClass} fg={fg} />
         </div>
 
-        {/* ── Col 4: CTA block (global.footer-cta) ── */}
-        {showCta && (
+        {/* ── Col 4: social block (global.footer-social) ── */}
+        {showSocialColumn && (
           <div
             className="col-span-full flex flex-col gap-4 md:col-span-1"
-            {...sectionGroupAttr("global", "footer-cta")}
+            {...sectionGroupAttr("global", "footer-social")}
           >
             <h2
               className="pink-display"
               style={{ fontSize: "20px", fontWeight: 600, letterSpacing: "-0.015em", color: fg }}
-              {...fieldAttr("pink.global.footer-cta-heading")}
+              {...fieldAttr("pink.global.footer-social-heading")}
             >
-              {ctaHeading}
+              {socialHeading}
             </h2>
-            {ctaBody && (
+            {socialBody && (
               <p
                 className="text-[14px] leading-[1.6]"
                 style={{ color: mutedFg }}
-                {...fieldAttr("pink.global.footer-cta-body")}
+                {...fieldAttr("pink.global.footer-social-body")}
               >
-                {ctaBody}
+                {socialBody}
               </p>
             )}
-            {ctaButtonText && (
-              <Link
-                href={ctaLink}
-                className="pink-btn pink-btn-solid w-fit"
-                {...fieldAttr("pink.global.footer-cta-button")}
-              >
-                {ctaButtonText}
-              </Link>
-            )}
+            {/* Tone must follow the footer's own resolved tone, not a literal:
+                `/about` and `/blog/[slug]` render the LIGHT footer, where the
+                dark ramp's resting icon colour (`--pink-ink-body`, #e8e8e8)
+                lands at ~1.2:1 on white — invisible. Same class of defect as
+                the /collections regression in the 2026-07-31 remediation. */}
+            <PinkSocialLinks
+              socialLinks={business?.siteContent?.socialLinks}
+              tone={resolvedTone}
+            />
           </div>
         )}
       </div>

@@ -143,6 +143,12 @@ model Business {
   // Template & Branding
   templateId String @default("modern") // modern | vintage | minimal
 
+  // IANA time zone used to format owner-facing and storefront dates/times (events
+  // today). Stored instants are always UTC; this is display only. Defaults to the
+  // platform's home zone rather than a UTC-ish placeholder so a store that never
+  // touches the setting still reads correctly for its owner.
+  timeZone String @default("America/Detroit")
+
   // Contact & Legal
   ownerEmail      String
   supportEmail    String?
@@ -220,6 +226,7 @@ model Business {
   memberships           BusinessMembership[]
   zones                 ShippingZone[]
   faqItems              FaqItem[]
+  events                Event[]
   backInStockRequests   BackInStockRequest[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
@@ -538,6 +545,54 @@ model ServiceItem {
 
   @@index([serviceId])
   @@index([businessId])
+}
+
+/// An upcoming event the owner wants shoppers to know about — a market, a class,
+/// a make & take. Owners typically upload a flier as `coverImage`.
+///
+/// Deliberately NOT a commerce object: `priceLabel` is a display string, there is
+/// no RSVP/ticketing, and there is no detail page (hence no `slug`). The flier is
+/// opened full-size in a lightbox from the list.
+model Event {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name       String
+  blurb      String? @db.Text
+  coverImage String? // flier/cover URL — plain string, same convention as Service.image
+
+  // Always stored as UTC instants; displayed through Business.timeZone via
+  // src/lib/events/format.ts. `allDay` events are normalized on write to
+  // [00:00:00.000, 23:59:59.999] of the local date IN THE BUSINESS ZONE, so
+  // `endAt ?? startAt` is always the correct "is it over yet" cutoff.
+  startAt DateTime
+  endAt   DateTime?
+  allDay  Boolean   @default(false)
+
+  location         String? // free-text venue or address line
+  externalUrl      String? // optional outbound link (Eventbrite, FB event, signup form)
+  externalUrlLabel String?
+  priceLabel       String? // display-only ("$45 per person", "Free"). Never charges anyone,
+  // and never emitted as schema.org `offers`.
+
+  published  Boolean @default(true)
+  sortOrder  Int     @default(0)
+  // Flipped by the cron archive job once the event is over; the owner can undo it.
+  // Public queries filter by date independently, so this is never load-bearing for
+  // hiding a past event — it drives the admin Upcoming/Past split.
+  isArchived Boolean @default(false)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Public storefront list.
+  @@index([businessId, published, isArchived, startAt])
+  // Admin list (both tabs) and the sitemap count.
+  @@index([businessId, startAt])
+  // The cron sweep, which is platform-wide and scans by cutoff, not by business.
+  @@index([isArchived, endAt])
+  @@index([isArchived, startAt])
 }
 
 model Image {
