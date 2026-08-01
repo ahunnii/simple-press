@@ -82,7 +82,12 @@ export function PinkCtaPanel({
       </div>
 
       {hasImages && (
-        <div className="grid grid-cols-2 gap-3">
+        // One image gets the whole column rather than half of a 2-up grid with
+        // a hole beside it — the events CTA only passes images the owner has
+        // actually set, so a lone image is a real state here.
+        <div
+          className={`grid gap-3 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
+        >
           {images.slice(0, 2).map((img, i) => (
             <div key={img.src + i} className="relative aspect-square overflow-hidden">
               <Image

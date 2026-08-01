@@ -119,6 +119,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About" },
     ...(isEnabled("services") ? [{ href: "/services", label: "Services" }] : []),
+    ...(isEnabled("events") ? [{ href: "/events", label: "Events" }] : []),
     ...(isEnabled("testimonials")
       ? [{ href: "/testimonials", label: "Reviews" }]
       : []),

@@ -29,6 +29,7 @@ const FIELD_KEYS = [
   "pink.global.nav-collections",
   "pink.global.nav-services",
   "pink.global.nav-blog",
+  "pink.global.nav-events",
   "pink.global.nav-about",
   "pink.global.header-cta-text",
   "pink.global.header-cta-link",
@@ -125,6 +126,15 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
             href: "/blog",
             label: f["pink.global.nav-blog"] ?? "Journal",
             fieldKey: "pink.global.nav-blog",
+          },
+        ]
+      : []),
+    ...(isEnabled("events")
+      ? [
+          {
+            href: "/events",
+            label: f["pink.global.nav-events"] ?? "Events",
+            fieldKey: "pink.global.nav-events",
           },
         ]
       : []),

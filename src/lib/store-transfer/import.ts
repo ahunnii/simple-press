@@ -200,6 +200,10 @@ export async function importStoreBundle(args: {
         shippingDefaultItemWeightLb: biz.shippingDefaultItemWeightLb ?? null,
         salesCountries: biz.salesCountries,
         featureFlags: biz.featureFlags ?? undefined,
+        // `timeZone` is optional in the schema (backward-compat with ZIPs
+        // exported before the field existed) — fall back to the Business
+        // model's own Prisma default rather than leaving it unset.
+        timeZone: biz.timeZone ?? "America/Detroit",
       },
     });
   } catch (err) {
@@ -1069,6 +1073,46 @@ export async function importStoreBundle(args: {
       }
     } catch (err) {
       result.warnings.push(`FaqItem failed: ${String(err)}`);
+    }
+  }
+
+  // ── 3l2. Events — no natural key on Event (no slug, no unique constraint),
+  // so match on (businessId, name, startAt) for idempotency.
+  for (const event of content.events) {
+    try {
+      const startAt = new Date(event.startAt);
+      const existing = await db.event.findFirst({
+        where: { businessId: targetBusinessId, name: event.name, startAt },
+        select: { id: true },
+      });
+      const data = {
+        name: event.name,
+        blurb: event.blurb ?? null,
+        coverImage: event.coverImage
+          ? rewriteUrl(event.coverImage, urlMap)
+          : null,
+        startAt,
+        endAt: event.endAt ? new Date(event.endAt) : null,
+        allDay: event.allDay,
+        location: event.location ?? null,
+        externalUrl: event.externalUrl ?? null,
+        externalUrlLabel: event.externalUrlLabel ?? null,
+        priceLabel: event.priceLabel ?? null,
+        published: event.published,
+        sortOrder: event.sortOrder,
+        isArchived: event.isArchived,
+      };
+      if (existing) {
+        await db.event.update({ where: { id: existing.id }, data });
+        track("Event", false);
+      } else {
+        await db.event.create({
+          data: { businessId: targetBusinessId, ...data },
+        });
+        track("Event", true);
+      }
+    } catch (err) {
+      result.warnings.push(`Event "${event.name}" failed: ${String(err)}`);
     }
   }
 

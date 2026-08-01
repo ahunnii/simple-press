@@ -5,6 +5,7 @@
 //   2. scheduledProducts   — publish products whose scheduledPublishAt has arrived
 //   3. scheduledPages      — publish pages/blog posts whose scheduledPublishAt has arrived
 //   4. backInStock         — email shoppers whose requested product/variant is purchasable again
+//   5. archivePastEvents   — flip isArchived on events whose end (or start) has passed
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -24,6 +25,7 @@ import * as Sentry from "@sentry/nextjs";
 import { env } from "~/env";
 import { getBusinessUrl } from "~/lib/business-url";
 import { sendBackInStockEmail } from "~/lib/email/templates";
+import { archivePastEvents } from "~/lib/events/archive";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { parseCardAdditionalFields } from "~/lib/products";
@@ -43,7 +45,8 @@ function warnMissingCronSecret(): void {
   const message =
     "CRON_SECRET is not set — /api/cron is rejecting all requests, so " +
     "scheduled jobs (stale-reservation sweep, scheduled publish, back-in-stock " +
-    "emails) are silently never running. Set CRON_SECRET to enable the cron endpoint.";
+    "emails, past-event archiving) are silently never running. Set CRON_SECRET " +
+    "to enable the cron endpoint.";
   console.warn(message);
   Sentry.captureMessage(message, {
     level: "warning",
@@ -265,6 +268,13 @@ async function handle(request: Request) {
     }
     return sent;
   });
+
+  // 5. Archive past events (admin Upcoming/Past split only — never load-bearing
+  //    for hiding a past event from the storefront). Platform-wide, not
+  //    feature-flag-gated; see archivePastEvents' docblock for why.
+  results.archivePastEvents = await runJob("archive-past-events", () =>
+    archivePastEvents(db),
+  );
 
   return NextResponse.json(results);
 }

@@ -5,9 +5,14 @@ import type { TemplateSection } from "~/lib/template-sections";
  * Homepage fields for the `pink` template.
  *
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
- * Homepage". Five sections: hero (signature moment, not hideable), promises,
- * collection, events (the make & takes — driven by list fields, not the
- * Services DB, per intake), and story.
+ * Homepage". Six sections: hero (signature moment, not hideable), promises,
+ * collection, upcoming (real dated `Event` records from the DB), events (the
+ * make & takes — an evergreen explainer driven by list fields, deliberately
+ * date-free), and story.
+ *
+ * `homepage.upcoming` and `homepage.events` are separate sections on purpose
+ * and must stay separately hideable: one says WHEN you can come, the other
+ * says WHAT a make & take is.
  */
 
 // ── homepage.hero ───────────────────────────────────────────────────────────
@@ -214,6 +219,96 @@ const homepageCollectionData: TemplateField[] = [
   },
 ];
 
+// ── homepage.upcoming ───────────────────────────────────────────────────────
+
+const homepageUpcomingData: TemplateField[] = [
+  {
+    key: "pink.homepage.upcoming-eyebrow",
+    label: "Eyebrow",
+    description: "Small uppercase line above the heading.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "On the calendar",
+  },
+  {
+    key: "pink.homepage.upcoming-heading",
+    label: "Heading",
+    description: "Heading for the row of real, dated events.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "What's coming up",
+  },
+  {
+    key: "pink.homepage.upcoming-note",
+    label: "Lead-In",
+    description:
+      "One short line under the heading. Hidden automatically while nothing is scheduled.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-full",
+    defaultValue: "The next few dates. Tap a flier to see it full size.",
+  },
+  {
+    key: "pink.homepage.upcoming-limit",
+    label: "How Many To Show",
+    description:
+      "How many upcoming dates to put on the homepage. Three fills the row; anything over six is capped.",
+    type: "number",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "3",
+    placeholder: "3",
+  },
+  {
+    key: "pink.homepage.upcoming-cta-label",
+    label: "“See All” Label",
+    description:
+      "Link beside the heading, through to the full events page. Leave blank to hide it.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "See all events",
+  },
+  {
+    key: "pink.homepage.upcoming-cta-link",
+    label: "“See All” Link",
+    description: "Where that link goes.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "/events",
+  },
+  {
+    key: "pink.homepage.upcoming-empty-heading",
+    label: "Empty Heading",
+    description:
+      "Shown in place of the cards when nothing is scheduled. Clear this and the body to drop the whole band until you add a date.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-1",
+    defaultValue: "Nothing on the calendar yet",
+  },
+  {
+    key: "pink.homepage.upcoming-empty-body",
+    label: "Empty Body",
+    description: "One line under the empty-state heading.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.upcoming",
+    gridColumn: "col-span-full",
+    defaultValue: "New dates go up here as soon as they're set.",
+  },
+];
+
 // ── homepage.events ─────────────────────────────────────────────────────────
 
 const homepageEventsData: TemplateField[] = [
@@ -401,6 +496,7 @@ export const pinkHomepageData: TemplateField[] = [
   ...homepageHeroData,
   ...homepagePromisesData,
   ...homepageCollectionData,
+  ...homepageUpcomingData,
   ...homepageEventsData,
   ...homepageStoryData,
 ];
@@ -426,6 +522,14 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     title: "Featured Collection",
     description: "Heading and CTAs framing your featured products",
     icon: "🧵",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "homepage.upcoming",
+    title: "Upcoming Events",
+    description:
+      "The next few real dates from your Events list — heading, how many to show, and the empty-state copy",
+    icon: "🗓️",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
@@ -473,13 +577,25 @@ export const pinkHomepageSections: TemplateSection[] = [
     order: 2,
     hideable: true,
   },
+  // Array position, not just `order`, is what the editor rail renders — this
+  // entry sits third so the rail matches the page: the dated preview comes
+  // immediately before the evergreen Make & Takes band it feeds into.
+  {
+    id: "homepage.upcoming",
+    page: "homepage",
+    title: "Upcoming Events",
+    description: "The next few dated events from your Events list",
+    groupIds: ["homepage.upcoming"],
+    order: 3,
+    hideable: true,
+  },
   {
     id: "homepage.events",
     page: "homepage",
     title: "Make & Takes",
     description: "Photo/flier mosaic, how they're hosted, and the enquiry CTA",
     groupIds: ["homepage.events"],
-    order: 3,
+    order: 4,
     hideable: true,
   },
   {
@@ -488,7 +604,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     title: "The Artist",
     description: "Portrait, pull-quote and stat row",
     groupIds: ["homepage.story"],
-    order: 4,
+    order: 5,
     hideable: true,
   },
 ];

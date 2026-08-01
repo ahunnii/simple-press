@@ -98,6 +98,17 @@ export const pinkGlobalData: TemplateField[] = [
     defaultValue: "Journal",
   },
   {
+    key: "pink.global.nav-events",
+    label: "Nav Label — Events",
+    description:
+      "Header link to /events. Only shown when the Events feature is on.",
+    type: "text",
+    page: "global",
+    group: "global.header",
+    gridColumn: "col-span-1",
+    defaultValue: "Events",
+  },
+  {
     key: "pink.global.nav-about",
     label: "Nav Label — About",
     description: "Header link to /about.",

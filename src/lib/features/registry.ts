@@ -169,6 +169,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["services"],
   },
+  events: {
+    key: "events",
+    label: "Events",
+    description: "Publish upcoming events with fliers, dates, and locations",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["events"],
+  },
   media: {
     key: "media",
     label: "Media Library",

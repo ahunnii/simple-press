@@ -2,6 +2,7 @@ import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
   IconBrandWordpress,
+  IconCalendarEvent,
   IconChartBar,
   IconCreditCard,
   IconDashboard,
@@ -309,6 +310,15 @@ export const NAV_ITEMS: NavItem[] = [
     section: "content",
     keywords: ["notification", "transactional", "order emails"],
   },
+  {
+    key: "events",
+    title: "Events",
+    href: "/admin/events",
+    icon: IconCalendarEvent,
+    section: "content",
+    featureKey: "events",
+    keywords: ["calendar", "dates", "workshop", "class", "market"],
+  },
 
   // Insights
   {
@@ -509,6 +519,18 @@ export const HUB_CARDS: HubCard[] = [
     icon: FileText,
   },
   {
+    key: "content-events",
+    title: "Events",
+    description: "Upcoming workshops, classes, and markets",
+    body: "Post upcoming markets, classes, and workshops with a flier, date, and location",
+    href: "/admin/events",
+    hub: "content",
+    color: "cyan",
+    icon: IconCalendarEvent,
+    featureKey: "events",
+    keywords: ["calendar", "dates", "workshop", "class", "market"],
+  },
+  {
     key: "content-policies",
     title: "Policies",
     description: "Privacy, Terms, Refunds, Shipping",
@@ -643,6 +665,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     icon: Plus,
     featureKey: "orders",
     keywords: ["order", "manual"],
+  },
+  {
+    key: "add-event",
+    title: "Add event",
+    href: "/admin/events/new",
+    icon: Plus,
+    featureKey: "events",
+    keywords: ["create", "new", "event"],
   },
   {
     key: "invite-team",

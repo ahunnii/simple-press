@@ -15,6 +15,7 @@ import type {
   ExportedCollection,
   ExportedCollectionProduct,
   ExportedDiscountCode,
+  ExportedEvent,
   ExportedFaqItem,
   ExportedGallery,
   ExportedGalleryImage,
@@ -66,6 +67,7 @@ function mapBusiness(
     shippingDefaultItemWeightLb: b.shippingDefaultItemWeightLb,
     salesCountries: b.salesCountries,
     featureFlags: b.featureFlags,
+    timeZone: b.timeZone,
   };
 }
 
@@ -368,6 +370,27 @@ function mapFaqItem(
   };
 }
 
+function mapEvent(
+  e: Awaited<ReturnType<typeof fetchEvents>>[number],
+): ExportedEvent {
+  return {
+    exportId: e.id,
+    name: e.name,
+    blurb: e.blurb,
+    coverImage: e.coverImage,
+    startAt: e.startAt.toISOString(),
+    endAt: e.endAt?.toISOString() ?? null,
+    allDay: e.allDay,
+    location: e.location,
+    externalUrl: e.externalUrl,
+    externalUrlLabel: e.externalUrlLabel,
+    priceLabel: e.priceLabel,
+    published: e.published,
+    sortOrder: e.sortOrder,
+    isArchived: e.isArchived,
+  };
+}
+
 function mapShippingRate(
   r: Awaited<ReturnType<typeof fetchShippingZones>>[number]["rates"][number],
 ): ExportedShippingRate {
@@ -423,6 +446,7 @@ async function fetchBusiness(businessId: string) {
       shippingDefaultItemWeightLb: true,
       salesCountries: true,
       featureFlags: true,
+      timeZone: true,
     },
   });
   return b;
@@ -733,6 +757,29 @@ async function fetchFaqItems(businessId: string) {
   });
 }
 
+async function fetchEvents(businessId: string) {
+  return db.event.findMany({
+    where: { businessId },
+    select: {
+      id: true,
+      name: true,
+      blurb: true,
+      coverImage: true,
+      startAt: true,
+      endAt: true,
+      allDay: true,
+      location: true,
+      externalUrl: true,
+      externalUrlLabel: true,
+      priceLabel: true,
+      published: true,
+      sortOrder: true,
+      isArchived: true,
+    },
+    orderBy: { sortOrder: "asc" },
+  });
+}
+
 async function fetchShippingZones(businessId: string) {
   return db.shippingZone.findMany({
     where: { businessId },
@@ -782,6 +829,7 @@ export async function collectStoreContent(businessId: string): Promise<{
     discountCodesRaw,
     testimonialsRaw,
     faqItemsRaw,
+    eventsRaw,
     shippingZonesRaw,
   ] = await Promise.all([
     fetchBusiness(businessId),
@@ -796,6 +844,7 @@ export async function collectStoreContent(businessId: string): Promise<{
     fetchDiscountCodes(businessId),
     fetchTestimonials(businessId),
     fetchFaqItems(businessId),
+    fetchEvents(businessId),
     fetchShippingZones(businessId),
   ]);
 
@@ -812,6 +861,7 @@ export async function collectStoreContent(businessId: string): Promise<{
     discountCodes: discountCodesRaw.map(mapDiscountCode),
     testimonials: testimonialsRaw.map(mapTestimonial),
     faqItems: faqItemsRaw.map(mapFaqItem),
+    events: eventsRaw.map(mapEvent),
     shippingZones: shippingZonesRaw.map(mapShippingZone),
   };
 

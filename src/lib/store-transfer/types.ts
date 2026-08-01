@@ -101,6 +101,10 @@ export interface ExportedBusiness {
   salesCountries: string[];
   // Feature flags
   featureFlags: unknown; // Record<string, boolean>
+  // IANA time zone used to display Event start/end times. Added after the
+  // original export format shipped — see the optional-field note on
+  // storeTransferContentSchema in src/lib/validators/store-transfer.ts.
+  timeZone: string;
 }
 
 export interface ExportedSiteContent {
@@ -346,6 +350,23 @@ export interface ExportedFaqItem {
   published: boolean;
 }
 
+export interface ExportedEvent {
+  exportId: string;
+  name: string;
+  blurb: string | null;
+  coverImage: string | null;
+  startAt: string; // ISO string
+  endAt: string | null; // ISO string
+  allDay: boolean;
+  location: string | null;
+  externalUrl: string | null;
+  externalUrlLabel: string | null;
+  priceLabel: string | null;
+  published: boolean;
+  sortOrder: number;
+  isArchived: boolean;
+}
+
 export interface ExportedShippingRate {
   exportId: string;
   tierIndex: number;
@@ -375,6 +396,7 @@ export interface StoreTransferContent {
   discountCodes: ExportedDiscountCode[];
   testimonials: ExportedTestimonial[];
   faqItems: ExportedFaqItem[];
+  events: ExportedEvent[];
   shippingZones: ExportedShippingZone[];
 }
 

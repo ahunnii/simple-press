@@ -26,7 +26,6 @@ import {
   buildersFieldGroups,
 } from "~/app/(storefront)/_templates/builders";
 import { coopData, coopFieldGroups } from "~/app/(storefront)/_templates/coop";
-import { pinkData, pinkFieldGroups } from "~/app/(storefront)/_templates/pink";
 import {
   darkTrendData,
   darkTrendFieldGroups,
@@ -51,6 +50,7 @@ import {
   noiseData,
   noiseFieldGroups,
 } from "~/app/(storefront)/_templates/noise";
+import { pinkData, pinkFieldGroups } from "~/app/(storefront)/_templates/pink";
 import {
   pollenData,
   pollenFieldGroups,
@@ -71,6 +71,7 @@ export type TemplatePage =
   | "collections"
   | "shop"
   | "services"
+  | "events"
   | "cart"
   | "checkout"
   | "global"
@@ -589,6 +590,11 @@ export const PAGE_METADATA = {
     title: "Services",
     description: "Services index page content",
     icon: "🗂️",
+  },
+  events: {
+    title: "Events",
+    description: "Upcoming events listing page content",
+    icon: "🎫",
   },
 } as const;
 

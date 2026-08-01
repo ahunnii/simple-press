@@ -10,6 +10,7 @@ import {
 } from "./cart-checkout";
 import { pinkCollectionsData, pinkCollectionsFieldGroups } from "./collections";
 import { pinkContactData, pinkContactFieldGroups } from "./contact";
+import { pinkEventsData, pinkEventsFieldGroups } from "./events";
 import { pinkGenericData, pinkGenericFieldGroups } from "./generic";
 import { pinkHomepageData, pinkHomepageFieldGroups } from "./homepage";
 import { pinkGlobalData, pinkGlobalFieldGroups } from "./layout";
@@ -47,6 +48,7 @@ export const pinkData: Record<string, TemplateField[]> = {
     ...pinkProductData,
     ...pinkCollectionsData,
     ...pinkServicesData,
+    ...pinkEventsData,
     ...pinkBlogData,
     ...pinkTestimonialsData,
     ...pinkContactData,
@@ -65,6 +67,7 @@ export const pinkFieldGroups: Record<string, TemplateFieldGroup[]> = {
     ...pinkProductFieldGroups,
     ...pinkCollectionsFieldGroups,
     ...pinkServicesFieldGroups,
+    ...pinkEventsFieldGroups,
     ...pinkBlogFieldGroups,
     ...pinkTestimonialsFieldGroups,
     ...pinkContactFieldGroups,

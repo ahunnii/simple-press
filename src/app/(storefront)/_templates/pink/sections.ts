@@ -6,6 +6,7 @@ import { pinkBlogSections } from "./blog";
 import { pinkCartCheckoutSections } from "./cart-checkout";
 import { pinkCollectionsSections } from "./collections";
 import { pinkContactSections } from "./contact";
+import { pinkEventsSections } from "./events";
 import { pinkGenericSections } from "./generic";
 import { pinkHomepageSections } from "./homepage";
 import { pinkGlobalSections } from "./layout";
@@ -17,7 +18,12 @@ import { pinkTestimonialsSections } from "./testimonials";
 /**
  * Curated section registry for the `pink` template, merged in page order:
  * homepage → about → shop → product (page "global") → collections → services →
- * blog → testimonials → contact → cart/checkout → global chrome.
+ * events → blog → testimonials → contact → cart/checkout → global chrome.
+ *
+ * `events.*` covers the `/events` page (real, dated `Event` records). The
+ * homepage's two calendar-adjacent bands are distinct sections and must stay
+ * that way: `homepage.upcoming` renders the same DB records as a teaser,
+ * `homepage.events` is the evergreen, date-free "Make & Takes" explainer.
  *
  * Every field group defined under `index.ts` must be covered by exactly one
  * section here (the triple-match invariant: section `id` === field-group `id`
@@ -36,6 +42,7 @@ export const pinkSections: Record<string, TemplateSection[]> = {
     ...pinkProductSections,
     ...pinkCollectionsSections,
     ...pinkServicesSections,
+    ...pinkEventsSections,
     ...pinkBlogSections,
     ...pinkTestimonialsSections,
     ...pinkContactSections,

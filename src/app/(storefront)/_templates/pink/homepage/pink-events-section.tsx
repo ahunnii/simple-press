@@ -20,8 +20,9 @@ type Props = {
 };
 
 /**
- * `homepage.events` — the make & takes band. Ink section (one of only two dark
- * surfaces in the template, with the footer) doing four jobs, in order:
+ * `homepage.events` — the make & takes band: an EVERGREEN explainer, not a
+ * schedule. Ink section (one of only two dark surfaces in the template, with
+ * the footer) doing four jobs, in order:
  *
  *   1. the owner's own photos and event fliers (`events-mosaic`),
  *   2. what a make & take actually is (`events-note` + `events-body`),
@@ -30,8 +31,17 @@ type Props = {
  *
  * There is deliberately NO schedule and NO price here: the owner does not sell
  * seats, so a dated/priced card row would advertise a model she does not run.
- * Everything is driven by template `list`/text fields rather than the Services
- * DB (there is no Event model — see design.md → Homepage; per intake).
+ * Everything is driven by template `list`/text fields.
+ *
+ * NOT to be confused with `homepage.upcoming` (`pink-upcoming-section.tsx`),
+ * the paper band directly ABOVE this one. That band is the opposite in every
+ * respect: real dated `Event` rows from the DB (`events.getUpcomingPublic`),
+ * on paper rather than ink, gated on the `events` feature flag, and linking
+ * through to `/events`. Two sections, two ids, independently hideable — do not
+ * rebuild either one as the other. (An earlier version of this comment claimed
+ * there is no Event model; there is one now — see `prisma/schema.prisma` and
+ * `src/server/api/routers/events.ts`.)
+ *
  * Hideable.
  */
 export function PinkEventsSection({
