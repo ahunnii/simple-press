@@ -2,6 +2,7 @@ import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
   IconBrandWordpress,
+  IconBrandYoutube,
   IconCalendarEvent,
   IconChartBar,
   IconCreditCard,
@@ -319,6 +320,15 @@ export const NAV_ITEMS: NavItem[] = [
     featureKey: "events",
     keywords: ["calendar", "dates", "workshop", "class", "market"],
   },
+  {
+    key: "videos",
+    title: "Videos",
+    href: "/admin/videos",
+    icon: IconBrandYoutube,
+    section: "content",
+    featureKey: "videos",
+    keywords: ["youtube", "video", "gallery", "channel", "playlist"],
+  },
 
   // Insights
   {
@@ -531,6 +541,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["calendar", "dates", "workshop", "class", "market"],
   },
   {
+    key: "content-videos",
+    title: "Videos",
+    description: "YouTube videos, synced automatically",
+    body: "Follow your YouTube channels and playlists — new uploads appear on your site on their own, and you choose which ones show.",
+    href: "/admin/videos",
+    hub: "content",
+    color: "rose",
+    icon: IconBrandYoutube,
+    featureKey: "videos",
+    keywords: ["youtube", "video", "gallery", "channel", "playlist"],
+  },
+  {
     key: "content-policies",
     title: "Policies",
     description: "Privacy, Terms, Refunds, Shipping",
@@ -673,6 +695,17 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     icon: Plus,
     featureKey: "events",
     keywords: ["create", "new", "event"],
+  },
+  {
+    key: "add-video",
+    title: "Add video",
+    // Videos are added through a dialog on the library page, not a dedicated
+    // /new route (unlike events) — a video only needs a pasted URL, which
+    // oEmbed then expands. Do not "fix" this to /admin/videos/new; that 404s.
+    href: "/admin/videos",
+    icon: Plus,
+    featureKey: "videos",
+    keywords: ["create", "new", "video"],
   },
   {
     key: "invite-team",

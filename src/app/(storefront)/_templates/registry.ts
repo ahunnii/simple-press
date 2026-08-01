@@ -100,6 +100,7 @@ import { DefaultProductPage } from "./default/products/default-product-page";
 import { DefaultServicesIndexPage } from "./default/services/default-services-index-page";
 import { DefaultProductsPage } from "./default/shop/default-shop-page";
 import { DefaultTestimonialsPage } from "./default/testimonials/default-testimonials-page";
+import { DefaultVideosPage } from "./default/videos/default-videos-page";
 // ---------------------------------------------------------------------------
 // Elegant
 // ---------------------------------------------------------------------------
@@ -218,6 +219,9 @@ import { PinkProductPage } from "./pink/products/pink-product-page";
 import { PinkServicesIndexPage } from "./pink/services/pink-services-index-page";
 import { PinkShopPage } from "./pink/shop/pink-shop-page";
 import { PinkTestimonialsPage } from "./pink/testimonials/pink-testimonials-page";
+// Wired ahead of the file landing — another agent is creating this path in
+// parallel (see registry.ts comment at the pink TEMPLATES entry).
+import { PinkVideosPage } from "./pink/videos/pink-videos-page";
 // ---------------------------------------------------------------------------
 // Pollen
 // ---------------------------------------------------------------------------
@@ -338,6 +342,7 @@ export type TemplateComponentSet = {
   ServicesPage?: AnyComponent;
   ServicesIndexPage?: AnyComponent;
   EventsPage?: AnyComponent;
+  VideosPage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -368,6 +373,7 @@ const defaultEntry: TemplateComponentSet = {
   PreferencesPage: DefaultPreferencesFallback,
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
+  VideosPage: DefaultVideosPage,
 };
 
 const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
@@ -524,6 +530,7 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     CollectionsPage: PinkCollectionsPage,
     ContactPage: PinkContactPage,
     EventsPage: PinkEventsIndexPage,
+    VideosPage: PinkVideosPage,
     GenericPage: PinkGenericPage,
     ProductPage: PinkProductPage,
     ShopPage: PinkShopPage,

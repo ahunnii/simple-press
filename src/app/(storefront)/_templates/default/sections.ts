@@ -177,6 +177,25 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       hideable: true,
     },
 
+    // ── Videos ────────────────────────────────────────────────────────────
+    {
+      id: "videos.hero",
+      page: "videos",
+      title: "Hero",
+      groupIds: ["videos.hero"],
+      order: 0,
+      hideable: false,
+    },
+    {
+      id: "videos.list",
+      page: "videos",
+      title: "List",
+      description: "Video grid and empty-state copy",
+      groupIds: ["videos.list"],
+      order: 1,
+      hideable: false,
+    },
+
     // ── Blog ──────────────────────────────────────────────────────────────
     {
       id: "blog.header",

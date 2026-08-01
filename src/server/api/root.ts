@@ -33,6 +33,7 @@ import { shippingRouter } from "./routers/shipping";
 import { teamRouter } from "./routers/team";
 import { testimonialRouter } from "./routers/testimonials";
 import { uploadRouter } from "./routers/upload";
+import { videosRouter } from "./routers/videos";
 
 /**
  * This is the primary router for your server.
@@ -49,6 +50,7 @@ export const appRouter = createTRPCRouter({
   events: eventsRouter,
   export: exportRouter,
   finance: financeRouter,
+  videos: videosRouter,
 
   business: businessRouter,
   product: productRouter,

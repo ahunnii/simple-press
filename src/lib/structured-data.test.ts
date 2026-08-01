@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildEventSchema } from "./structured-data";
+import { buildEventSchema, buildVideoObjectSchema } from "./structured-data";
 
 const business = {
   subdomain: "testshop",
@@ -158,5 +158,81 @@ describe("buildEventSchema", () => {
     );
 
     expect(schema.url).toBe("https://testshop.simplepress.test/events");
+  });
+});
+
+describe("buildVideoObjectSchema", () => {
+  it("emits every field when overrides, description, and thumbnail are all present", () => {
+    const schema = buildVideoObjectSchema({
+      youtubeId: "dQw4w9WgXcQ",
+      publishedAt: new Date("2026-06-01T12:00:00.000Z"),
+      title: "Synced title",
+      description: "Synced description",
+      thumbnailUrl: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      titleOverride: "Owner title",
+      descriptionOverride: "Owner description",
+      thumbnailOverride:
+        "https://storage.simplepress.test/business-sites/biz1/video-thumb.jpg",
+    });
+
+    expect(schema).toEqual({
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      name: "Owner title",
+      description: "Owner description",
+      thumbnailUrl:
+        "https://storage.simplepress.test/business-sites/biz1/video-thumb.jpg",
+      uploadDate: "2026-06-01T12:00:00.000Z",
+      embedUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+      contentUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    });
+  });
+
+  it("falls back to synced title/description/thumbnail when no override is set", () => {
+    const schema = buildVideoObjectSchema({
+      youtubeId: "dQw4w9WgXcQ",
+      publishedAt: new Date("2026-06-01T12:00:00.000Z"),
+      title: "Synced title",
+      description: "Synced description",
+      thumbnailUrl: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      titleOverride: null,
+      descriptionOverride: null,
+      thumbnailOverride: null,
+    });
+
+    expect(schema.name).toBe("Synced title");
+    expect(schema.description).toBe("Synced description");
+    expect(schema.thumbnailUrl).toBe(
+      "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+    );
+  });
+
+  it("emits only the required fields when description and thumbnail are absent", () => {
+    const schema = buildVideoObjectSchema({
+      youtubeId: "dQw4w9WgXcQ",
+      publishedAt: new Date("2026-06-01T12:00:00.000Z"),
+      title: "Minimal video",
+    });
+
+    expect(schema).toEqual({
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      name: "Minimal video",
+      uploadDate: "2026-06-01T12:00:00.000Z",
+      embedUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+      contentUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    });
+    expect(schema).not.toHaveProperty("description");
+    expect(schema).not.toHaveProperty("thumbnailUrl");
+  });
+
+  it("accepts a string publishedAt (as returned after JSON round-tripping) and still emits an ISO uploadDate", () => {
+    const schema = buildVideoObjectSchema({
+      youtubeId: "dQw4w9WgXcQ",
+      publishedAt: "2026-06-01T12:00:00.000Z",
+      title: "String date video",
+    });
+
+    expect(schema.uploadDate).toBe("2026-06-01T12:00:00.000Z");
   });
 });

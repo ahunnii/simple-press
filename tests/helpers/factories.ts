@@ -398,6 +398,78 @@ export function createEvent(
   });
 }
 
+/**
+ * An 11-char string matching the shape of a real YouTube video id
+ * (`[A-Za-z0-9_-]{11}`, see VIDEO_ID_RE in src/lib/youtube/parse.ts).
+ * Monotonic (`seq`-based) rather than sliced from `uniq()` so two videos
+ * created in the same test never collide even when Date.now() ties.
+ */
+function uniqYoutubeId(): string {
+  return `v${(seq++).toString(36).padStart(9, "0")}Z`.slice(0, 11);
+}
+
+export function createVideoSource(
+  businessId: string,
+  opts: {
+    kind?: string;
+    externalId?: string;
+    label?: string | null;
+    enabled?: boolean;
+    autoPublish?: boolean;
+    lastSyncedAt?: Date | null;
+    lastSyncError?: string | null;
+  } = {},
+) {
+  return db.videoSource.create({
+    data: {
+      businessId,
+      kind: opts.kind ?? "channel",
+      externalId: opts.externalId ?? uniq("UCtest"),
+      label: opts.label ?? null,
+      enabled: opts.enabled ?? true,
+      autoPublish: opts.autoPublish ?? true,
+      lastSyncedAt: opts.lastSyncedAt ?? null,
+      lastSyncError: opts.lastSyncError ?? null,
+    },
+  });
+}
+
+export function createVideo(
+  businessId: string,
+  opts: {
+    youtubeId?: string;
+    title?: string;
+    description?: string | null;
+    thumbnailUrl?: string | null;
+    channelTitle?: string | null;
+    publishedAt?: Date;
+    titleOverride?: string | null;
+    descriptionOverride?: string | null;
+    thumbnailOverride?: string | null;
+    published?: boolean;
+    sortOrder?: number;
+    sourceId?: string | null;
+  } = {},
+) {
+  return db.video.create({
+    data: {
+      businessId,
+      youtubeId: opts.youtubeId ?? uniqYoutubeId(),
+      title: opts.title ?? "Test Video",
+      description: opts.description ?? null,
+      thumbnailUrl: opts.thumbnailUrl ?? null,
+      channelTitle: opts.channelTitle ?? null,
+      publishedAt: opts.publishedAt ?? new Date(),
+      titleOverride: opts.titleOverride ?? null,
+      descriptionOverride: opts.descriptionOverride ?? null,
+      thumbnailOverride: opts.thumbnailOverride ?? null,
+      published: opts.published ?? true,
+      sortOrder: opts.sortOrder ?? 0,
+      sourceId: opts.sourceId ?? null,
+    },
+  });
+}
+
 export function createBaseInventoryUnit(
   businessId: string,
   opts: {

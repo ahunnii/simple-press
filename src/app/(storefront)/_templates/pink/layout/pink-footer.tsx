@@ -103,6 +103,7 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           { label: "The artist", url: "/about" },
           ...(isEnabled("blog") ? [{ label: "Journal", url: "/blog" }] : []),
           ...(isEnabled("events") ? [{ label: "Events", url: "/events" }] : []),
+          ...(isEnabled("videos") ? [{ label: "Videos", url: "/videos" }] : []),
           ...(isEnabled("testimonials") ? [{ label: "Testimonials", url: "/testimonials" }] : []),
           { label: "Contact", url: "/contact" },
         ];

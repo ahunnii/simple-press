@@ -21,6 +21,7 @@ import {
   pinkTestimonialsData,
   pinkTestimonialsFieldGroups,
 } from "./testimonials";
+import { pinkVideosData, pinkVideosFieldGroups } from "./videos";
 
 /**
  * Root field registry for the `pink` template (PinkArt LLC).
@@ -49,6 +50,7 @@ export const pinkData: Record<string, TemplateField[]> = {
     ...pinkCollectionsData,
     ...pinkServicesData,
     ...pinkEventsData,
+    ...pinkVideosData,
     ...pinkBlogData,
     ...pinkTestimonialsData,
     ...pinkContactData,
@@ -68,6 +70,7 @@ export const pinkFieldGroups: Record<string, TemplateFieldGroup[]> = {
     ...pinkCollectionsFieldGroups,
     ...pinkServicesFieldGroups,
     ...pinkEventsFieldGroups,
+    ...pinkVideosFieldGroups,
     ...pinkBlogFieldGroups,
     ...pinkTestimonialsFieldGroups,
     ...pinkContactFieldGroups,

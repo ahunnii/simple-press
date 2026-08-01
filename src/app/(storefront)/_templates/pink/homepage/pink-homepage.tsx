@@ -19,6 +19,7 @@ import { PinkPopup } from "./pink-popup";
 import { PinkPromisesSection } from "./pink-promises-section";
 import { PinkStorySection } from "./pink-story-section";
 import { PinkUpcomingSection } from "./pink-upcoming-section";
+import { PinkVideosSection } from "./pink-videos-section";
 
 const FIELD_KEYS = [
   // hero
@@ -53,6 +54,14 @@ const FIELD_KEYS = [
   "pink.homepage.events-cta-label",
   "pink.homepage.events-cta-link",
   "pink.homepage.events-cta-note",
+  // videos (real Video records from the DB, synced from YouTube)
+  "pink.homepage.videos-heading",
+  "pink.homepage.videos-note",
+  "pink.homepage.videos-limit",
+  "pink.homepage.videos-cta-label",
+  "pink.homepage.videos-cta-link",
+  "pink.homepage.videos-empty-heading",
+  "pink.homepage.videos-empty-body",
   // story
   "pink.homepage.story-image",
   "pink.homepage.story-image-alt",
@@ -192,6 +201,25 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   const upcomingEvents = await api.events
     .getUpcomingPublic({ limit: upcomingLimit })
     .catch(() => []);
+
+  // Same clamp and the same reasoning as `upcoming-limit` above — a `number`
+  // field arrives as a string an owner can type anything into, and the strip
+  // is a teaser for /videos, not the whole gallery.
+  const parsedVideosLimit = Number.parseInt(
+    f["pink.homepage.videos-limit"] ?? "",
+    10,
+  );
+  const videosLimit = Number.isFinite(parsedVideosLimit)
+    ? Math.min(Math.max(parsedVideosLimit, 1), 6)
+    : 3;
+
+  // MANDATORY `.catch`, exactly as above: the `videos` flag ships OFF, so
+  // `getPublic`'s own featureGate throws FORBIDDEN on every store that hasn't
+  // opted in, and an uncaught throw here 500s the whole homepage.
+  const homepageVideos = await api.videos
+    .getPublic({ limit: videosLimit })
+    .catch(() => []);
+
   const collectionChips: PinkFilterChipItem[] = [
     { id: "all", label: "All pieces", href: "/shop" },
     ...collections.slice(0, 4).map((c) => ({ id: c.id, label: c.name, href: `/collections/${c.slug}` })),
@@ -260,6 +288,23 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
             ctaNote={f["pink.homepage.events-cta-note"] ?? ""}
           />
         )}
+
+        {/* Flag-gated as well as section-gated, same as the upcoming band:
+            with `videos` off there is no gallery to be empty, so the strip's
+            "nothing up yet" state would promise clips the store can never
+            publish. */}
+        {isEnabled("videos") &&
+          isSectionVisible(customFields, "pink", "homepage.videos") && (
+            <PinkVideosSection
+              heading={f["pink.homepage.videos-heading"] ?? ""}
+              note={f["pink.homepage.videos-note"] ?? ""}
+              ctaLabel={f["pink.homepage.videos-cta-label"] ?? ""}
+              ctaLink={f["pink.homepage.videos-cta-link"] ?? "/videos"}
+              emptyHeading={f["pink.homepage.videos-empty-heading"] ?? ""}
+              emptyBody={f["pink.homepage.videos-empty-body"] ?? ""}
+              videos={homepageVideos}
+            />
+          )}
 
         {isSectionVisible(customFields, "pink", "homepage.story") && (
           <PinkStorySection

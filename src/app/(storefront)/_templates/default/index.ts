@@ -16,6 +16,7 @@ import {
   defaultTestimonialsData,
   defaultTestimonialsFieldGroups,
 } from "./testimonials";
+import { defaultVideosData, defaultVideosFieldGroups } from "./videos";
 
 export { defaultTemplateSections } from "./sections";
 
@@ -127,6 +128,7 @@ const fieldGroups: TemplateFieldGroup[] = [
   ...defaultServicesFieldGroups,
   ...defaultShopFieldGroups,
   ...defaultTestimonialsFieldGroups,
+  ...defaultVideosFieldGroups,
   {
     id: "global.authentication",
     title: "Authentication",
@@ -154,6 +156,7 @@ export const defaultTemplateData = {
     ...defaultServicesData,
     ...defaultShopData,
     ...defaultTestimonialsData,
+    ...defaultVideosData,
     ...globalAuthenticationData,
     ...globalProductData,
   ],

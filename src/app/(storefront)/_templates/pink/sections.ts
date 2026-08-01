@@ -14,11 +14,16 @@ import { pinkProductSections } from "./products";
 import { pinkServicesSections } from "./services";
 import { pinkShopSections } from "./shop";
 import { pinkTestimonialsSections } from "./testimonials";
+import { pinkVideosSections } from "./videos";
 
 /**
  * Curated section registry for the `pink` template, merged in page order:
  * homepage → about → shop → product (page "global") → collections → services →
- * events → blog → testimonials → contact → cart/checkout → global chrome.
+ * events → videos → blog → testimonials → contact → cart/checkout → global
+ * chrome.
+ *
+ * `videos.*` covers the `/videos` page (published `Video` records synced from
+ * YouTube); its homepage teaser is the separate `homepage.videos` section.
  *
  * `events.*` covers the `/events` page (real, dated `Event` records). The
  * homepage's two calendar-adjacent bands are distinct sections and must stay
@@ -43,6 +48,7 @@ export const pinkSections: Record<string, TemplateSection[]> = {
     ...pinkCollectionsSections,
     ...pinkServicesSections,
     ...pinkEventsSections,
+    ...pinkVideosSections,
     ...pinkBlogSections,
     ...pinkTestimonialsSections,
     ...pinkContactSections,

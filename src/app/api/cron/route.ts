@@ -6,6 +6,7 @@
 //   3. scheduledPages      — publish pages/blog posts whose scheduledPublishAt has arrived
 //   4. backInStock         — email shoppers whose requested product/variant is purchasable again
 //   5. archivePastEvents   — flip isArchived on events whose end (or start) has passed
+//   6. videoSync           — pull YouTube channel/playlist feeds into the Video cache
 //
 // Auth: requires `Authorization: Bearer $CRON_SECRET` (env.CRON_SECRET). If the
 // secret is unset, the endpoint always returns 401 — and logs a one-time
@@ -29,6 +30,7 @@ import { archivePastEvents } from "~/lib/events/archive";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { sweepStaleReservations } from "~/lib/inventory/reservation";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { syncVideoSources } from "~/lib/youtube/sync";
 import { db } from "~/server/db";
 
 // Fires at most once per server process — CRON_SECRET being unset means every
@@ -45,8 +47,8 @@ function warnMissingCronSecret(): void {
   const message =
     "CRON_SECRET is not set — /api/cron is rejecting all requests, so " +
     "scheduled jobs (stale-reservation sweep, scheduled publish, back-in-stock " +
-    "emails, past-event archiving) are silently never running. Set CRON_SECRET " +
-    "to enable the cron endpoint.";
+    "emails, past-event archiving, YouTube video sync) are silently never " +
+    "running. Set CRON_SECRET to enable the cron endpoint.";
   console.warn(message);
   Sentry.captureMessage(message, {
     level: "warning",
@@ -275,6 +277,19 @@ async function handle(request: Request) {
   results.archivePastEvents = await runJob("archive-past-events", () =>
     archivePastEvents(db),
   );
+
+  // 6. YouTube video sync: refresh the `Video` metadata cache from each
+  //    registered channel/playlist Atom feed. Per-business `videos` flag gating
+  //    and per-source error isolation live inside `syncVideoSources`.
+  //
+  //    This endpoint ticks every ~15 minutes, but a source is only eligible
+  //    once its lastSyncedAt is older than MIN_SYNC_INTERVAL_MS (30 min). That
+  //    guard is what stops us re-fetching every registered feed on every tick
+  //    and hammering YouTube — so most ticks are a single cheap SELECT.
+  //
+  //    Sync is insert/update only: videos aging out of the ~15-entry feed
+  //    window are never deleted locally.
+  results.videoSync = await runJob("video-sync", () => syncVideoSources(db));
 
   return NextResponse.json(results);
 }

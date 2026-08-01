@@ -109,6 +109,7 @@
     "country-flag-icons": "^1.6.15",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "fast-xml-parser": "^5.10.1",
     "input-otp": "^1.4.2",
     "ioredis": "^5.10.1",
     "jszip": "^3.10.1",

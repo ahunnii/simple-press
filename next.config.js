@@ -41,6 +41,10 @@ const config = {
         protocol: "https",
         hostname: "trendanomaly.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.ytimg.com",
+      },
     ],
   },
 

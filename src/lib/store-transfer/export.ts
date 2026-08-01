@@ -30,6 +30,8 @@ import type {
   ExportedShippingZone,
   ExportedSiteContent,
   ExportedTestimonial,
+  ExportedVideo,
+  ExportedVideoSource,
   StoreTransferContent,
 } from "~/lib/store-transfer/types";
 import { db } from "~/server/db";
@@ -388,6 +390,39 @@ function mapEvent(
     published: e.published,
     sortOrder: e.sortOrder,
     isArchived: e.isArchived,
+  };
+}
+
+function mapVideoSource(
+  s: Awaited<ReturnType<typeof fetchVideoSources>>[number],
+): ExportedVideoSource {
+  return {
+    exportId: s.id,
+    kind: s.kind,
+    externalId: s.externalId,
+    label: s.label,
+    enabled: s.enabled,
+    autoPublish: s.autoPublish,
+  };
+}
+
+function mapVideo(
+  v: Awaited<ReturnType<typeof fetchVideos>>[number],
+): ExportedVideo {
+  return {
+    exportId: v.id,
+    youtubeId: v.youtubeId,
+    title: v.title,
+    description: v.description,
+    thumbnailUrl: v.thumbnailUrl,
+    channelTitle: v.channelTitle,
+    publishedAt: v.publishedAt.toISOString(),
+    titleOverride: v.titleOverride,
+    descriptionOverride: v.descriptionOverride,
+    thumbnailOverride: v.thumbnailOverride,
+    published: v.published,
+    sortOrder: v.sortOrder,
+    exportSourceId: v.sourceId,
   };
 }
 
@@ -780,6 +815,43 @@ async function fetchEvents(businessId: string) {
   });
 }
 
+async function fetchVideoSources(businessId: string) {
+  return db.videoSource.findMany({
+    where: { businessId },
+    select: {
+      id: true,
+      kind: true,
+      externalId: true,
+      label: true,
+      enabled: true,
+      autoPublish: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+async function fetchVideos(businessId: string) {
+  return db.video.findMany({
+    where: { businessId },
+    select: {
+      id: true,
+      youtubeId: true,
+      title: true,
+      description: true,
+      thumbnailUrl: true,
+      channelTitle: true,
+      publishedAt: true,
+      titleOverride: true,
+      descriptionOverride: true,
+      thumbnailOverride: true,
+      published: true,
+      sortOrder: true,
+      sourceId: true,
+    },
+    orderBy: { sortOrder: "asc" },
+  });
+}
+
 async function fetchShippingZones(businessId: string) {
   return db.shippingZone.findMany({
     where: { businessId },
@@ -830,6 +902,8 @@ export async function collectStoreContent(businessId: string): Promise<{
     testimonialsRaw,
     faqItemsRaw,
     eventsRaw,
+    videoSourcesRaw,
+    videosRaw,
     shippingZonesRaw,
   ] = await Promise.all([
     fetchBusiness(businessId),
@@ -845,6 +919,8 @@ export async function collectStoreContent(businessId: string): Promise<{
     fetchTestimonials(businessId),
     fetchFaqItems(businessId),
     fetchEvents(businessId),
+    fetchVideoSources(businessId),
+    fetchVideos(businessId),
     fetchShippingZones(businessId),
   ]);
 
@@ -862,6 +938,8 @@ export async function collectStoreContent(businessId: string): Promise<{
     testimonials: testimonialsRaw.map(mapTestimonial),
     faqItems: faqItemsRaw.map(mapFaqItem),
     events: eventsRaw.map(mapEvent),
+    videoSources: videoSourcesRaw.map(mapVideoSource),
+    videos: videosRaw.map(mapVideo),
     shippingZones: shippingZonesRaw.map(mapShippingZone),
   };
 

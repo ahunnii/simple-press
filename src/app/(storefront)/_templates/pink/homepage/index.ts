@@ -5,10 +5,10 @@ import type { TemplateSection } from "~/lib/template-sections";
  * Homepage fields for the `pink` template.
  *
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
- * Homepage". Six sections: hero (signature moment, not hideable), promises,
+ * Homepage". Seven sections: hero (signature moment, not hideable), promises,
  * collection, upcoming (real dated `Event` records from the DB), events (the
  * make & takes — an evergreen explainer driven by list fields, deliberately
- * date-free), and story.
+ * date-free), videos (real `Video` records from the DB), and story.
  *
  * `homepage.upcoming` and `homepage.events` are separate sections on purpose
  * and must stay separately hideable: one says WHEN you can come, the other
@@ -424,6 +424,87 @@ const homepageEventsData: TemplateField[] = [
   },
 ];
 
+// ── homepage.videos ─────────────────────────────────────────────────────────
+
+const homepageVideosData: TemplateField[] = [
+  {
+    key: "pink.homepage.videos-heading",
+    label: "Heading",
+    description: "Heading for the row of videos.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-1",
+    defaultValue: "See it happening",
+  },
+  {
+    key: "pink.homepage.videos-note",
+    label: "Lead-In",
+    description:
+      "One short line under the heading. Hidden automatically while there are no videos to describe.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "Clips from make & takes and the studio table — some ours, some posted by the people who hosted us.",
+  },
+  {
+    key: "pink.homepage.videos-limit",
+    label: "How Many To Show",
+    description:
+      "How many videos to put on the homepage. Three fills the row; anything over six is capped.",
+    type: "number",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-1",
+    defaultValue: "3",
+    placeholder: "3",
+  },
+  {
+    key: "pink.homepage.videos-cta-label",
+    label: "“See All” Label",
+    description:
+      "Link beside the heading, through to the full videos page. Leave blank to hide it.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-1",
+    defaultValue: "See all videos",
+  },
+  {
+    key: "pink.homepage.videos-cta-link",
+    label: "“See All” Link",
+    description: "Where that link goes.",
+    type: "url",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-1",
+    defaultValue: "/videos",
+  },
+  {
+    key: "pink.homepage.videos-empty-heading",
+    label: "Empty Heading",
+    description:
+      "Shown in place of the videos when nothing has been published yet. Clear this and the body to drop the whole band until you add one.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-1",
+    defaultValue: "Nothing up yet",
+  },
+  {
+    key: "pink.homepage.videos-empty-body",
+    label: "Empty Body",
+    description: "One line under the empty-state heading.",
+    type: "textarea",
+    page: "homepage",
+    group: "homepage.videos",
+    gridColumn: "col-span-full",
+    defaultValue: "New clips go up here as they're posted.",
+  },
+];
+
 // ── homepage.story ──────────────────────────────────────────────────────────
 
 const homepageStoryData: TemplateField[] = [
@@ -498,6 +579,7 @@ export const pinkHomepageData: TemplateField[] = [
   ...homepageCollectionData,
   ...homepageUpcomingData,
   ...homepageEventsData,
+  ...homepageVideosData,
   ...homepageStoryData,
 ];
 
@@ -538,6 +620,14 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     description:
       "The workshop band — your photos and fliers, what a make & take is, how they're hosted, and one enquiry CTA",
     icon: "🪡",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
+  {
+    id: "homepage.videos",
+    title: "Videos",
+    description:
+      "The first few videos from your Videos list — heading, how many to show, and the empty-state copy",
+    icon: "📺",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
@@ -598,13 +688,24 @@ export const pinkHomepageSections: TemplateSection[] = [
     order: 4,
     hideable: true,
   },
+  // Below the Make & Takes band, not above it: the clips are the evidence for
+  // the claim that band makes, so the page argues and then shows.
+  {
+    id: "homepage.videos",
+    page: "homepage",
+    title: "Videos",
+    description: "The first few videos from your Videos list",
+    groupIds: ["homepage.videos"],
+    order: 5,
+    hideable: true,
+  },
   {
     id: "homepage.story",
     page: "homepage",
     title: "The Artist",
     description: "Portrait, pull-quote and stat row",
     groupIds: ["homepage.story"],
-    order: 5,
+    order: 6,
     hideable: true,
   },
 ];

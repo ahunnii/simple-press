@@ -94,6 +94,57 @@ export type ServiceItem = $Result.DefaultSelection<Prisma.$ServiceItemPayload>
  */
 export type Event = $Result.DefaultSelection<Prisma.$EventPayload>
 /**
+ * Model VideoSource
+ * A YouTube channel or playlist the owner registered as a feed to sync from.
+ * 
+ * Sync reads the public YouTube Atom feed for `externalId`; no API key, no OAuth,
+ * so there is nothing here but an id and bookkeeping. `kind` is a plain string
+ * ("channel" | "playlist") rather than an enum to keep this additive and to avoid
+ * a migration if a third feed shape ever shows up.
+ * 
+ * `autoPublish` decides only what `Video.published` is set to at INSERT time for
+ * videos discovered through this source. Flipping it later does not retroactively
+ * publish or unpublish anything — see the ownership note on `Video`.
+ */
+export type VideoSource = $Result.DefaultSelection<Prisma.$VideoSourcePayload>
+/**
+ * Model Video
+ * One YouTube video surfaced on the storefront.
+ * 
+ * ────────────────────────────────────────────────────────────────────────────
+ * THE CORE INVARIANT: sync-owned columns vs owner-owned columns.
+ * ────────────────────────────────────────────────────────────────────────────
+ * This table has two writers with strictly separate column sets:
+ * 
+ * SYNC-OWNED  (cron, rewritten on EVERY run):
+ * title, description, thumbnailUrl, channelTitle, publishedAt
+ * OWNER-OWNED (admin UI only, written by the cron ONLY at first insert):
+ * titleOverride, descriptionOverride, thumbnailOverride, published, sortOrder
+ * 
+ * The sync upsert MUST list only the sync-owned columns in its `update` clause.
+ * Renders resolve through the overrides — `titleOverride ?? title`,
+ * `descriptionOverride ?? description`, `thumbnailOverride ?? thumbnailUrl` — so
+ * the owner's edits survive YouTube renaming a video, and YouTube's metadata
+ * still refreshes underneath them.
+ * 
+ * ⚠️ If a future reader "simplifies" that upsert into writing the whole object
+ * (e.g. spreading the same payload into both `create` and `update`), every owner
+ * edit, every unpublish, and every manual ordering choice is silently overwritten
+ * on the next cron tick. There is no error, no constraint violation, and no test
+ * that fails by construction — the data is just quietly gone. Keep the split.
+ * 
+ * ────────────────────────────────────────────────────────────────────────────
+ * ROWS ARE NEVER DELETED BECAUSE A VIDEO LEFT THE FEED.
+ * ────────────────────────────────────────────────────────────────────────────
+ * The YouTube Atom feed carries only the ~15 most recent entries. Older videos
+ * falling out of the feed is normal, expected behavior — not a signal that they
+ * were removed from YouTube. Reconciling by deleting local rows absent from the
+ * feed would wipe the owner's entire back catalogue on the very first sync of an
+ * established channel. Sync is insert/update only; rows leave this table solely
+ * by explicit owner action in the admin UI.
+ */
+export type Video = $Result.DefaultSelection<Prisma.$VideoPayload>
+/**
  * Model Image
  * 
  */
@@ -534,6 +585,26 @@ export class PrismaClient<
     * ```
     */
   get event(): Prisma.EventDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.videoSource`: Exposes CRUD operations for the **VideoSource** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VideoSources
+    * const videoSources = await prisma.videoSource.findMany()
+    * ```
+    */
+  get videoSource(): Prisma.VideoSourceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.video`: Exposes CRUD operations for the **Video** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Videos
+    * const videos = await prisma.video.findMany()
+    * ```
+    */
+  get video(): Prisma.VideoDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.image`: Exposes CRUD operations for the **Image** model.
@@ -1250,6 +1321,8 @@ export namespace Prisma {
     Service: 'Service',
     ServiceItem: 'ServiceItem',
     Event: 'Event',
+    VideoSource: 'VideoSource',
+    Video: 'Video',
     Image: 'Image',
     Customer: 'Customer',
     ShippingAddress: 'ShippingAddress',
@@ -1294,7 +1367,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2405,6 +2478,154 @@ export namespace Prisma {
           count: {
             args: Prisma.EventCountArgs<ExtArgs>
             result: $Utils.Optional<EventCountAggregateOutputType> | number
+          }
+        }
+      }
+      VideoSource: {
+        payload: Prisma.$VideoSourcePayload<ExtArgs>
+        fields: Prisma.VideoSourceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VideoSourceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VideoSourceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>
+          }
+          findFirst: {
+            args: Prisma.VideoSourceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VideoSourceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>
+          }
+          findMany: {
+            args: Prisma.VideoSourceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>[]
+          }
+          create: {
+            args: Prisma.VideoSourceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>
+          }
+          createMany: {
+            args: Prisma.VideoSourceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VideoSourceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>[]
+          }
+          delete: {
+            args: Prisma.VideoSourceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>
+          }
+          update: {
+            args: Prisma.VideoSourceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>
+          }
+          deleteMany: {
+            args: Prisma.VideoSourceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VideoSourceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VideoSourceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>[]
+          }
+          upsert: {
+            args: Prisma.VideoSourceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoSourcePayload>
+          }
+          aggregate: {
+            args: Prisma.VideoSourceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVideoSource>
+          }
+          groupBy: {
+            args: Prisma.VideoSourceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VideoSourceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VideoSourceCountArgs<ExtArgs>
+            result: $Utils.Optional<VideoSourceCountAggregateOutputType> | number
+          }
+        }
+      }
+      Video: {
+        payload: Prisma.$VideoPayload<ExtArgs>
+        fields: Prisma.VideoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VideoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VideoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>
+          }
+          findFirst: {
+            args: Prisma.VideoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VideoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>
+          }
+          findMany: {
+            args: Prisma.VideoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>[]
+          }
+          create: {
+            args: Prisma.VideoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>
+          }
+          createMany: {
+            args: Prisma.VideoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VideoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>[]
+          }
+          delete: {
+            args: Prisma.VideoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>
+          }
+          update: {
+            args: Prisma.VideoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>
+          }
+          deleteMany: {
+            args: Prisma.VideoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VideoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VideoUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>[]
+          }
+          upsert: {
+            args: Prisma.VideoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VideoPayload>
+          }
+          aggregate: {
+            args: Prisma.VideoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVideo>
+          }
+          groupBy: {
+            args: Prisma.VideoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VideoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VideoCountArgs<ExtArgs>
+            result: $Utils.Optional<VideoCountAggregateOutputType> | number
           }
         }
       }
@@ -4443,6 +4664,8 @@ export namespace Prisma {
     service?: ServiceOmit
     serviceItem?: ServiceItemOmit
     event?: EventOmit
+    videoSource?: VideoSourceOmit
+    video?: VideoOmit
     image?: ImageOmit
     customer?: CustomerOmit
     shippingAddress?: ShippingAddressOmit
@@ -4656,6 +4879,8 @@ export namespace Prisma {
     zones: number
     faqItems: number
     events: number
+    videos: number
+    videoSources: number
     backInStockRequests: number
   }
 
@@ -4682,6 +4907,8 @@ export namespace Prisma {
     zones?: boolean | BusinessCountOutputTypeCountZonesArgs
     faqItems?: boolean | BusinessCountOutputTypeCountFaqItemsArgs
     events?: boolean | BusinessCountOutputTypeCountEventsArgs
+    videos?: boolean | BusinessCountOutputTypeCountVideosArgs
+    videoSources?: boolean | BusinessCountOutputTypeCountVideoSourcesArgs
     backInStockRequests?: boolean | BusinessCountOutputTypeCountBackInStockRequestsArgs
   }
 
@@ -4848,6 +5075,20 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountEventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EventWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountVideosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VideoWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountVideoSourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VideoSourceWhereInput
   }
 
   /**
@@ -5042,6 +5283,37 @@ export namespace Prisma {
    */
   export type ServiceCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ServiceItemWhereInput
+  }
+
+
+  /**
+   * Count Type VideoSourceCountOutputType
+   */
+
+  export type VideoSourceCountOutputType = {
+    videos: number
+  }
+
+  export type VideoSourceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    videos?: boolean | VideoSourceCountOutputTypeCountVideosArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * VideoSourceCountOutputType without action
+   */
+  export type VideoSourceCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSourceCountOutputType
+     */
+    select?: VideoSourceCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * VideoSourceCountOutputType without action
+   */
+  export type VideoSourceCountOutputTypeCountVideosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VideoWhereInput
   }
 
 
@@ -11552,6 +11824,8 @@ export namespace Prisma {
     zones?: boolean | Business$zonesArgs<ExtArgs>
     faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
     events?: boolean | Business$eventsArgs<ExtArgs>
+    videos?: boolean | Business$videosArgs<ExtArgs>
+    videoSources?: boolean | Business$videoSourcesArgs<ExtArgs>
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
@@ -11719,6 +11993,8 @@ export namespace Prisma {
     zones?: boolean | Business$zonesArgs<ExtArgs>
     faqItems?: boolean | Business$faqItemsArgs<ExtArgs>
     events?: boolean | Business$eventsArgs<ExtArgs>
+    videos?: boolean | Business$videosArgs<ExtArgs>
+    videoSources?: boolean | Business$videoSourcesArgs<ExtArgs>
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -11751,6 +12027,8 @@ export namespace Prisma {
       zones: Prisma.$ShippingZonePayload<ExtArgs>[]
       faqItems: Prisma.$FaqItemPayload<ExtArgs>[]
       events: Prisma.$EventPayload<ExtArgs>[]
+      videos: Prisma.$VideoPayload<ExtArgs>[]
+      videoSources: Prisma.$VideoSourcePayload<ExtArgs>[]
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -12214,6 +12492,8 @@ export namespace Prisma {
     zones<T extends Business$zonesArgs<ExtArgs> = {}>(args?: Subset<T, Business$zonesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShippingZonePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     faqItems<T extends Business$faqItemsArgs<ExtArgs> = {}>(args?: Subset<T, Business$faqItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FaqItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     events<T extends Business$eventsArgs<ExtArgs> = {}>(args?: Subset<T, Business$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    videos<T extends Business$videosArgs<ExtArgs> = {}>(args?: Subset<T, Business$videosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    videoSources<T extends Business$videoSourcesArgs<ExtArgs> = {}>(args?: Subset<T, Business$videoSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     backInStockRequests<T extends Business$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Business$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -13219,6 +13499,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: EventScalarFieldEnum | EventScalarFieldEnum[]
+  }
+
+  /**
+   * Business.videos
+   */
+  export type Business$videosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    where?: VideoWhereInput
+    orderBy?: VideoOrderByWithRelationInput | VideoOrderByWithRelationInput[]
+    cursor?: VideoWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VideoScalarFieldEnum | VideoScalarFieldEnum[]
+  }
+
+  /**
+   * Business.videoSources
+   */
+  export type Business$videoSourcesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    where?: VideoSourceWhereInput
+    orderBy?: VideoSourceOrderByWithRelationInput | VideoSourceOrderByWithRelationInput[]
+    cursor?: VideoSourceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VideoSourceScalarFieldEnum | VideoSourceScalarFieldEnum[]
   }
 
   /**
@@ -24866,6 +25194,2434 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: EventInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VideoSource
+   */
+
+  export type AggregateVideoSource = {
+    _count: VideoSourceCountAggregateOutputType | null
+    _min: VideoSourceMinAggregateOutputType | null
+    _max: VideoSourceMaxAggregateOutputType | null
+  }
+
+  export type VideoSourceMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    kind: string | null
+    externalId: string | null
+    label: string | null
+    enabled: boolean | null
+    autoPublish: boolean | null
+    lastSyncedAt: Date | null
+    lastSyncError: string | null
+    businessId: string | null
+  }
+
+  export type VideoSourceMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    kind: string | null
+    externalId: string | null
+    label: string | null
+    enabled: boolean | null
+    autoPublish: boolean | null
+    lastSyncedAt: Date | null
+    lastSyncError: string | null
+    businessId: string | null
+  }
+
+  export type VideoSourceCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    kind: number
+    externalId: number
+    label: number
+    enabled: number
+    autoPublish: number
+    lastSyncedAt: number
+    lastSyncError: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type VideoSourceMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    kind?: true
+    externalId?: true
+    label?: true
+    enabled?: true
+    autoPublish?: true
+    lastSyncedAt?: true
+    lastSyncError?: true
+    businessId?: true
+  }
+
+  export type VideoSourceMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    kind?: true
+    externalId?: true
+    label?: true
+    enabled?: true
+    autoPublish?: true
+    lastSyncedAt?: true
+    lastSyncError?: true
+    businessId?: true
+  }
+
+  export type VideoSourceCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    kind?: true
+    externalId?: true
+    label?: true
+    enabled?: true
+    autoPublish?: true
+    lastSyncedAt?: true
+    lastSyncError?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type VideoSourceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VideoSource to aggregate.
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VideoSources to fetch.
+     */
+    orderBy?: VideoSourceOrderByWithRelationInput | VideoSourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VideoSourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VideoSources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VideoSources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VideoSources
+    **/
+    _count?: true | VideoSourceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VideoSourceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VideoSourceMaxAggregateInputType
+  }
+
+  export type GetVideoSourceAggregateType<T extends VideoSourceAggregateArgs> = {
+        [P in keyof T & keyof AggregateVideoSource]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVideoSource[P]>
+      : GetScalarType<T[P], AggregateVideoSource[P]>
+  }
+
+
+
+
+  export type VideoSourceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VideoSourceWhereInput
+    orderBy?: VideoSourceOrderByWithAggregationInput | VideoSourceOrderByWithAggregationInput[]
+    by: VideoSourceScalarFieldEnum[] | VideoSourceScalarFieldEnum
+    having?: VideoSourceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VideoSourceCountAggregateInputType | true
+    _min?: VideoSourceMinAggregateInputType
+    _max?: VideoSourceMaxAggregateInputType
+  }
+
+  export type VideoSourceGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    kind: string
+    externalId: string
+    label: string | null
+    enabled: boolean
+    autoPublish: boolean
+    lastSyncedAt: Date | null
+    lastSyncError: string | null
+    businessId: string
+    _count: VideoSourceCountAggregateOutputType | null
+    _min: VideoSourceMinAggregateOutputType | null
+    _max: VideoSourceMaxAggregateOutputType | null
+  }
+
+  type GetVideoSourceGroupByPayload<T extends VideoSourceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VideoSourceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VideoSourceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VideoSourceGroupByOutputType[P]>
+            : GetScalarType<T[P], VideoSourceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VideoSourceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    kind?: boolean
+    externalId?: boolean
+    label?: boolean
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: boolean
+    lastSyncError?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    videos?: boolean | VideoSource$videosArgs<ExtArgs>
+    _count?: boolean | VideoSourceCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["videoSource"]>
+
+  export type VideoSourceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    kind?: boolean
+    externalId?: boolean
+    label?: boolean
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: boolean
+    lastSyncError?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["videoSource"]>
+
+  export type VideoSourceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    kind?: boolean
+    externalId?: boolean
+    label?: boolean
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: boolean
+    lastSyncError?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["videoSource"]>
+
+  export type VideoSourceSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    kind?: boolean
+    externalId?: boolean
+    label?: boolean
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: boolean
+    lastSyncError?: boolean
+    businessId?: boolean
+  }
+
+  export type VideoSourceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "kind" | "externalId" | "label" | "enabled" | "autoPublish" | "lastSyncedAt" | "lastSyncError" | "businessId", ExtArgs["result"]["videoSource"]>
+  export type VideoSourceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    videos?: boolean | VideoSource$videosArgs<ExtArgs>
+    _count?: boolean | VideoSourceCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type VideoSourceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type VideoSourceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $VideoSourcePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VideoSource"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      videos: Prisma.$VideoPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      kind: string
+      externalId: string
+      label: string | null
+      enabled: boolean
+      autoPublish: boolean
+      lastSyncedAt: Date | null
+      lastSyncError: string | null
+      businessId: string
+    }, ExtArgs["result"]["videoSource"]>
+    composites: {}
+  }
+
+  type VideoSourceGetPayload<S extends boolean | null | undefined | VideoSourceDefaultArgs> = $Result.GetResult<Prisma.$VideoSourcePayload, S>
+
+  type VideoSourceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VideoSourceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VideoSourceCountAggregateInputType | true
+    }
+
+  export interface VideoSourceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VideoSource'], meta: { name: 'VideoSource' } }
+    /**
+     * Find zero or one VideoSource that matches the filter.
+     * @param {VideoSourceFindUniqueArgs} args - Arguments to find a VideoSource
+     * @example
+     * // Get one VideoSource
+     * const videoSource = await prisma.videoSource.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VideoSourceFindUniqueArgs>(args: SelectSubset<T, VideoSourceFindUniqueArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VideoSource that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VideoSourceFindUniqueOrThrowArgs} args - Arguments to find a VideoSource
+     * @example
+     * // Get one VideoSource
+     * const videoSource = await prisma.videoSource.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VideoSourceFindUniqueOrThrowArgs>(args: SelectSubset<T, VideoSourceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VideoSource that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceFindFirstArgs} args - Arguments to find a VideoSource
+     * @example
+     * // Get one VideoSource
+     * const videoSource = await prisma.videoSource.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VideoSourceFindFirstArgs>(args?: SelectSubset<T, VideoSourceFindFirstArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VideoSource that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceFindFirstOrThrowArgs} args - Arguments to find a VideoSource
+     * @example
+     * // Get one VideoSource
+     * const videoSource = await prisma.videoSource.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VideoSourceFindFirstOrThrowArgs>(args?: SelectSubset<T, VideoSourceFindFirstOrThrowArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VideoSources that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VideoSources
+     * const videoSources = await prisma.videoSource.findMany()
+     * 
+     * // Get first 10 VideoSources
+     * const videoSources = await prisma.videoSource.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const videoSourceWithIdOnly = await prisma.videoSource.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VideoSourceFindManyArgs>(args?: SelectSubset<T, VideoSourceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VideoSource.
+     * @param {VideoSourceCreateArgs} args - Arguments to create a VideoSource.
+     * @example
+     * // Create one VideoSource
+     * const VideoSource = await prisma.videoSource.create({
+     *   data: {
+     *     // ... data to create a VideoSource
+     *   }
+     * })
+     * 
+     */
+    create<T extends VideoSourceCreateArgs>(args: SelectSubset<T, VideoSourceCreateArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VideoSources.
+     * @param {VideoSourceCreateManyArgs} args - Arguments to create many VideoSources.
+     * @example
+     * // Create many VideoSources
+     * const videoSource = await prisma.videoSource.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VideoSourceCreateManyArgs>(args?: SelectSubset<T, VideoSourceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VideoSources and returns the data saved in the database.
+     * @param {VideoSourceCreateManyAndReturnArgs} args - Arguments to create many VideoSources.
+     * @example
+     * // Create many VideoSources
+     * const videoSource = await prisma.videoSource.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VideoSources and only return the `id`
+     * const videoSourceWithIdOnly = await prisma.videoSource.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VideoSourceCreateManyAndReturnArgs>(args?: SelectSubset<T, VideoSourceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VideoSource.
+     * @param {VideoSourceDeleteArgs} args - Arguments to delete one VideoSource.
+     * @example
+     * // Delete one VideoSource
+     * const VideoSource = await prisma.videoSource.delete({
+     *   where: {
+     *     // ... filter to delete one VideoSource
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VideoSourceDeleteArgs>(args: SelectSubset<T, VideoSourceDeleteArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VideoSource.
+     * @param {VideoSourceUpdateArgs} args - Arguments to update one VideoSource.
+     * @example
+     * // Update one VideoSource
+     * const videoSource = await prisma.videoSource.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VideoSourceUpdateArgs>(args: SelectSubset<T, VideoSourceUpdateArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VideoSources.
+     * @param {VideoSourceDeleteManyArgs} args - Arguments to filter VideoSources to delete.
+     * @example
+     * // Delete a few VideoSources
+     * const { count } = await prisma.videoSource.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VideoSourceDeleteManyArgs>(args?: SelectSubset<T, VideoSourceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VideoSources.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VideoSources
+     * const videoSource = await prisma.videoSource.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VideoSourceUpdateManyArgs>(args: SelectSubset<T, VideoSourceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VideoSources and returns the data updated in the database.
+     * @param {VideoSourceUpdateManyAndReturnArgs} args - Arguments to update many VideoSources.
+     * @example
+     * // Update many VideoSources
+     * const videoSource = await prisma.videoSource.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VideoSources and only return the `id`
+     * const videoSourceWithIdOnly = await prisma.videoSource.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VideoSourceUpdateManyAndReturnArgs>(args: SelectSubset<T, VideoSourceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VideoSource.
+     * @param {VideoSourceUpsertArgs} args - Arguments to update or create a VideoSource.
+     * @example
+     * // Update or create a VideoSource
+     * const videoSource = await prisma.videoSource.upsert({
+     *   create: {
+     *     // ... data to create a VideoSource
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VideoSource we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VideoSourceUpsertArgs>(args: SelectSubset<T, VideoSourceUpsertArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VideoSources.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceCountArgs} args - Arguments to filter VideoSources to count.
+     * @example
+     * // Count the number of VideoSources
+     * const count = await prisma.videoSource.count({
+     *   where: {
+     *     // ... the filter for the VideoSources we want to count
+     *   }
+     * })
+    **/
+    count<T extends VideoSourceCountArgs>(
+      args?: Subset<T, VideoSourceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VideoSourceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VideoSource.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VideoSourceAggregateArgs>(args: Subset<T, VideoSourceAggregateArgs>): Prisma.PrismaPromise<GetVideoSourceAggregateType<T>>
+
+    /**
+     * Group by VideoSource.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoSourceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VideoSourceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VideoSourceGroupByArgs['orderBy'] }
+        : { orderBy?: VideoSourceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VideoSourceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVideoSourceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VideoSource model
+   */
+  readonly fields: VideoSourceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VideoSource.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VideoSourceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    videos<T extends VideoSource$videosArgs<ExtArgs> = {}>(args?: Subset<T, VideoSource$videosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VideoSource model
+   */
+  interface VideoSourceFieldRefs {
+    readonly id: FieldRef<"VideoSource", 'String'>
+    readonly createdAt: FieldRef<"VideoSource", 'DateTime'>
+    readonly updatedAt: FieldRef<"VideoSource", 'DateTime'>
+    readonly kind: FieldRef<"VideoSource", 'String'>
+    readonly externalId: FieldRef<"VideoSource", 'String'>
+    readonly label: FieldRef<"VideoSource", 'String'>
+    readonly enabled: FieldRef<"VideoSource", 'Boolean'>
+    readonly autoPublish: FieldRef<"VideoSource", 'Boolean'>
+    readonly lastSyncedAt: FieldRef<"VideoSource", 'DateTime'>
+    readonly lastSyncError: FieldRef<"VideoSource", 'String'>
+    readonly businessId: FieldRef<"VideoSource", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VideoSource findUnique
+   */
+  export type VideoSourceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * Filter, which VideoSource to fetch.
+     */
+    where: VideoSourceWhereUniqueInput
+  }
+
+  /**
+   * VideoSource findUniqueOrThrow
+   */
+  export type VideoSourceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * Filter, which VideoSource to fetch.
+     */
+    where: VideoSourceWhereUniqueInput
+  }
+
+  /**
+   * VideoSource findFirst
+   */
+  export type VideoSourceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * Filter, which VideoSource to fetch.
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VideoSources to fetch.
+     */
+    orderBy?: VideoSourceOrderByWithRelationInput | VideoSourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VideoSources.
+     */
+    cursor?: VideoSourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VideoSources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VideoSources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VideoSources.
+     */
+    distinct?: VideoSourceScalarFieldEnum | VideoSourceScalarFieldEnum[]
+  }
+
+  /**
+   * VideoSource findFirstOrThrow
+   */
+  export type VideoSourceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * Filter, which VideoSource to fetch.
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VideoSources to fetch.
+     */
+    orderBy?: VideoSourceOrderByWithRelationInput | VideoSourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VideoSources.
+     */
+    cursor?: VideoSourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VideoSources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VideoSources.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VideoSources.
+     */
+    distinct?: VideoSourceScalarFieldEnum | VideoSourceScalarFieldEnum[]
+  }
+
+  /**
+   * VideoSource findMany
+   */
+  export type VideoSourceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * Filter, which VideoSources to fetch.
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VideoSources to fetch.
+     */
+    orderBy?: VideoSourceOrderByWithRelationInput | VideoSourceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VideoSources.
+     */
+    cursor?: VideoSourceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VideoSources from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VideoSources.
+     */
+    skip?: number
+    distinct?: VideoSourceScalarFieldEnum | VideoSourceScalarFieldEnum[]
+  }
+
+  /**
+   * VideoSource create
+   */
+  export type VideoSourceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a VideoSource.
+     */
+    data: XOR<VideoSourceCreateInput, VideoSourceUncheckedCreateInput>
+  }
+
+  /**
+   * VideoSource createMany
+   */
+  export type VideoSourceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VideoSources.
+     */
+    data: VideoSourceCreateManyInput | VideoSourceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VideoSource createManyAndReturn
+   */
+  export type VideoSourceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * The data used to create many VideoSources.
+     */
+    data: VideoSourceCreateManyInput | VideoSourceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VideoSource update
+   */
+  export type VideoSourceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a VideoSource.
+     */
+    data: XOR<VideoSourceUpdateInput, VideoSourceUncheckedUpdateInput>
+    /**
+     * Choose, which VideoSource to update.
+     */
+    where: VideoSourceWhereUniqueInput
+  }
+
+  /**
+   * VideoSource updateMany
+   */
+  export type VideoSourceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VideoSources.
+     */
+    data: XOR<VideoSourceUpdateManyMutationInput, VideoSourceUncheckedUpdateManyInput>
+    /**
+     * Filter which VideoSources to update
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * Limit how many VideoSources to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VideoSource updateManyAndReturn
+   */
+  export type VideoSourceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * The data used to update VideoSources.
+     */
+    data: XOR<VideoSourceUpdateManyMutationInput, VideoSourceUncheckedUpdateManyInput>
+    /**
+     * Filter which VideoSources to update
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * Limit how many VideoSources to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * VideoSource upsert
+   */
+  export type VideoSourceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the VideoSource to update in case it exists.
+     */
+    where: VideoSourceWhereUniqueInput
+    /**
+     * In case the VideoSource found by the `where` argument doesn't exist, create a new VideoSource with this data.
+     */
+    create: XOR<VideoSourceCreateInput, VideoSourceUncheckedCreateInput>
+    /**
+     * In case the VideoSource was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VideoSourceUpdateInput, VideoSourceUncheckedUpdateInput>
+  }
+
+  /**
+   * VideoSource delete
+   */
+  export type VideoSourceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    /**
+     * Filter which VideoSource to delete.
+     */
+    where: VideoSourceWhereUniqueInput
+  }
+
+  /**
+   * VideoSource deleteMany
+   */
+  export type VideoSourceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VideoSources to delete
+     */
+    where?: VideoSourceWhereInput
+    /**
+     * Limit how many VideoSources to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VideoSource.videos
+   */
+  export type VideoSource$videosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    where?: VideoWhereInput
+    orderBy?: VideoOrderByWithRelationInput | VideoOrderByWithRelationInput[]
+    cursor?: VideoWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VideoScalarFieldEnum | VideoScalarFieldEnum[]
+  }
+
+  /**
+   * VideoSource without action
+   */
+  export type VideoSourceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Video
+   */
+
+  export type AggregateVideo = {
+    _count: VideoCountAggregateOutputType | null
+    _avg: VideoAvgAggregateOutputType | null
+    _sum: VideoSumAggregateOutputType | null
+    _min: VideoMinAggregateOutputType | null
+    _max: VideoMaxAggregateOutputType | null
+  }
+
+  export type VideoAvgAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type VideoSumAggregateOutputType = {
+    sortOrder: number | null
+  }
+
+  export type VideoMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    youtubeId: string | null
+    title: string | null
+    description: string | null
+    thumbnailUrl: string | null
+    channelTitle: string | null
+    publishedAt: Date | null
+    titleOverride: string | null
+    descriptionOverride: string | null
+    thumbnailOverride: string | null
+    published: boolean | null
+    sortOrder: number | null
+    sourceId: string | null
+    businessId: string | null
+  }
+
+  export type VideoMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    youtubeId: string | null
+    title: string | null
+    description: string | null
+    thumbnailUrl: string | null
+    channelTitle: string | null
+    publishedAt: Date | null
+    titleOverride: string | null
+    descriptionOverride: string | null
+    thumbnailOverride: string | null
+    published: boolean | null
+    sortOrder: number | null
+    sourceId: string | null
+    businessId: string | null
+  }
+
+  export type VideoCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    youtubeId: number
+    title: number
+    description: number
+    thumbnailUrl: number
+    channelTitle: number
+    publishedAt: number
+    titleOverride: number
+    descriptionOverride: number
+    thumbnailOverride: number
+    published: number
+    sortOrder: number
+    sourceId: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type VideoAvgAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type VideoSumAggregateInputType = {
+    sortOrder?: true
+  }
+
+  export type VideoMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    youtubeId?: true
+    title?: true
+    description?: true
+    thumbnailUrl?: true
+    channelTitle?: true
+    publishedAt?: true
+    titleOverride?: true
+    descriptionOverride?: true
+    thumbnailOverride?: true
+    published?: true
+    sortOrder?: true
+    sourceId?: true
+    businessId?: true
+  }
+
+  export type VideoMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    youtubeId?: true
+    title?: true
+    description?: true
+    thumbnailUrl?: true
+    channelTitle?: true
+    publishedAt?: true
+    titleOverride?: true
+    descriptionOverride?: true
+    thumbnailOverride?: true
+    published?: true
+    sortOrder?: true
+    sourceId?: true
+    businessId?: true
+  }
+
+  export type VideoCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    youtubeId?: true
+    title?: true
+    description?: true
+    thumbnailUrl?: true
+    channelTitle?: true
+    publishedAt?: true
+    titleOverride?: true
+    descriptionOverride?: true
+    thumbnailOverride?: true
+    published?: true
+    sortOrder?: true
+    sourceId?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type VideoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Video to aggregate.
+     */
+    where?: VideoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Videos to fetch.
+     */
+    orderBy?: VideoOrderByWithRelationInput | VideoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VideoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Videos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Videos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Videos
+    **/
+    _count?: true | VideoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: VideoAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: VideoSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VideoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VideoMaxAggregateInputType
+  }
+
+  export type GetVideoAggregateType<T extends VideoAggregateArgs> = {
+        [P in keyof T & keyof AggregateVideo]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVideo[P]>
+      : GetScalarType<T[P], AggregateVideo[P]>
+  }
+
+
+
+
+  export type VideoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VideoWhereInput
+    orderBy?: VideoOrderByWithAggregationInput | VideoOrderByWithAggregationInput[]
+    by: VideoScalarFieldEnum[] | VideoScalarFieldEnum
+    having?: VideoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VideoCountAggregateInputType | true
+    _avg?: VideoAvgAggregateInputType
+    _sum?: VideoSumAggregateInputType
+    _min?: VideoMinAggregateInputType
+    _max?: VideoMaxAggregateInputType
+  }
+
+  export type VideoGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    youtubeId: string
+    title: string
+    description: string | null
+    thumbnailUrl: string | null
+    channelTitle: string | null
+    publishedAt: Date
+    titleOverride: string | null
+    descriptionOverride: string | null
+    thumbnailOverride: string | null
+    published: boolean
+    sortOrder: number
+    sourceId: string | null
+    businessId: string
+    _count: VideoCountAggregateOutputType | null
+    _avg: VideoAvgAggregateOutputType | null
+    _sum: VideoSumAggregateOutputType | null
+    _min: VideoMinAggregateOutputType | null
+    _max: VideoMaxAggregateOutputType | null
+  }
+
+  type GetVideoGroupByPayload<T extends VideoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VideoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VideoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VideoGroupByOutputType[P]>
+            : GetScalarType<T[P], VideoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VideoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    youtubeId?: boolean
+    title?: boolean
+    description?: boolean
+    thumbnailUrl?: boolean
+    channelTitle?: boolean
+    publishedAt?: boolean
+    titleOverride?: boolean
+    descriptionOverride?: boolean
+    thumbnailOverride?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    sourceId?: boolean
+    businessId?: boolean
+    source?: boolean | Video$sourceArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["video"]>
+
+  export type VideoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    youtubeId?: boolean
+    title?: boolean
+    description?: boolean
+    thumbnailUrl?: boolean
+    channelTitle?: boolean
+    publishedAt?: boolean
+    titleOverride?: boolean
+    descriptionOverride?: boolean
+    thumbnailOverride?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    sourceId?: boolean
+    businessId?: boolean
+    source?: boolean | Video$sourceArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["video"]>
+
+  export type VideoSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    youtubeId?: boolean
+    title?: boolean
+    description?: boolean
+    thumbnailUrl?: boolean
+    channelTitle?: boolean
+    publishedAt?: boolean
+    titleOverride?: boolean
+    descriptionOverride?: boolean
+    thumbnailOverride?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    sourceId?: boolean
+    businessId?: boolean
+    source?: boolean | Video$sourceArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["video"]>
+
+  export type VideoSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    youtubeId?: boolean
+    title?: boolean
+    description?: boolean
+    thumbnailUrl?: boolean
+    channelTitle?: boolean
+    publishedAt?: boolean
+    titleOverride?: boolean
+    descriptionOverride?: boolean
+    thumbnailOverride?: boolean
+    published?: boolean
+    sortOrder?: boolean
+    sourceId?: boolean
+    businessId?: boolean
+  }
+
+  export type VideoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "youtubeId" | "title" | "description" | "thumbnailUrl" | "channelTitle" | "publishedAt" | "titleOverride" | "descriptionOverride" | "thumbnailOverride" | "published" | "sortOrder" | "sourceId" | "businessId", ExtArgs["result"]["video"]>
+  export type VideoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    source?: boolean | Video$sourceArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type VideoIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    source?: boolean | Video$sourceArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type VideoIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    source?: boolean | Video$sourceArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $VideoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Video"
+    objects: {
+      source: Prisma.$VideoSourcePayload<ExtArgs> | null
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      youtubeId: string
+      title: string
+      description: string | null
+      thumbnailUrl: string | null
+      channelTitle: string | null
+      publishedAt: Date
+      titleOverride: string | null
+      descriptionOverride: string | null
+      thumbnailOverride: string | null
+      published: boolean
+      sortOrder: number
+      sourceId: string | null
+      businessId: string
+    }, ExtArgs["result"]["video"]>
+    composites: {}
+  }
+
+  type VideoGetPayload<S extends boolean | null | undefined | VideoDefaultArgs> = $Result.GetResult<Prisma.$VideoPayload, S>
+
+  type VideoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VideoFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VideoCountAggregateInputType | true
+    }
+
+  export interface VideoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Video'], meta: { name: 'Video' } }
+    /**
+     * Find zero or one Video that matches the filter.
+     * @param {VideoFindUniqueArgs} args - Arguments to find a Video
+     * @example
+     * // Get one Video
+     * const video = await prisma.video.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VideoFindUniqueArgs>(args: SelectSubset<T, VideoFindUniqueArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Video that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VideoFindUniqueOrThrowArgs} args - Arguments to find a Video
+     * @example
+     * // Get one Video
+     * const video = await prisma.video.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VideoFindUniqueOrThrowArgs>(args: SelectSubset<T, VideoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Video that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoFindFirstArgs} args - Arguments to find a Video
+     * @example
+     * // Get one Video
+     * const video = await prisma.video.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VideoFindFirstArgs>(args?: SelectSubset<T, VideoFindFirstArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Video that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoFindFirstOrThrowArgs} args - Arguments to find a Video
+     * @example
+     * // Get one Video
+     * const video = await prisma.video.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VideoFindFirstOrThrowArgs>(args?: SelectSubset<T, VideoFindFirstOrThrowArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Videos that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Videos
+     * const videos = await prisma.video.findMany()
+     * 
+     * // Get first 10 Videos
+     * const videos = await prisma.video.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const videoWithIdOnly = await prisma.video.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VideoFindManyArgs>(args?: SelectSubset<T, VideoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Video.
+     * @param {VideoCreateArgs} args - Arguments to create a Video.
+     * @example
+     * // Create one Video
+     * const Video = await prisma.video.create({
+     *   data: {
+     *     // ... data to create a Video
+     *   }
+     * })
+     * 
+     */
+    create<T extends VideoCreateArgs>(args: SelectSubset<T, VideoCreateArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Videos.
+     * @param {VideoCreateManyArgs} args - Arguments to create many Videos.
+     * @example
+     * // Create many Videos
+     * const video = await prisma.video.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VideoCreateManyArgs>(args?: SelectSubset<T, VideoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Videos and returns the data saved in the database.
+     * @param {VideoCreateManyAndReturnArgs} args - Arguments to create many Videos.
+     * @example
+     * // Create many Videos
+     * const video = await prisma.video.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Videos and only return the `id`
+     * const videoWithIdOnly = await prisma.video.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VideoCreateManyAndReturnArgs>(args?: SelectSubset<T, VideoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Video.
+     * @param {VideoDeleteArgs} args - Arguments to delete one Video.
+     * @example
+     * // Delete one Video
+     * const Video = await prisma.video.delete({
+     *   where: {
+     *     // ... filter to delete one Video
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VideoDeleteArgs>(args: SelectSubset<T, VideoDeleteArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Video.
+     * @param {VideoUpdateArgs} args - Arguments to update one Video.
+     * @example
+     * // Update one Video
+     * const video = await prisma.video.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VideoUpdateArgs>(args: SelectSubset<T, VideoUpdateArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Videos.
+     * @param {VideoDeleteManyArgs} args - Arguments to filter Videos to delete.
+     * @example
+     * // Delete a few Videos
+     * const { count } = await prisma.video.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VideoDeleteManyArgs>(args?: SelectSubset<T, VideoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Videos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Videos
+     * const video = await prisma.video.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VideoUpdateManyArgs>(args: SelectSubset<T, VideoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Videos and returns the data updated in the database.
+     * @param {VideoUpdateManyAndReturnArgs} args - Arguments to update many Videos.
+     * @example
+     * // Update many Videos
+     * const video = await prisma.video.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Videos and only return the `id`
+     * const videoWithIdOnly = await prisma.video.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VideoUpdateManyAndReturnArgs>(args: SelectSubset<T, VideoUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Video.
+     * @param {VideoUpsertArgs} args - Arguments to update or create a Video.
+     * @example
+     * // Update or create a Video
+     * const video = await prisma.video.upsert({
+     *   create: {
+     *     // ... data to create a Video
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Video we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VideoUpsertArgs>(args: SelectSubset<T, VideoUpsertArgs<ExtArgs>>): Prisma__VideoClient<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Videos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoCountArgs} args - Arguments to filter Videos to count.
+     * @example
+     * // Count the number of Videos
+     * const count = await prisma.video.count({
+     *   where: {
+     *     // ... the filter for the Videos we want to count
+     *   }
+     * })
+    **/
+    count<T extends VideoCountArgs>(
+      args?: Subset<T, VideoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VideoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Video.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VideoAggregateArgs>(args: Subset<T, VideoAggregateArgs>): Prisma.PrismaPromise<GetVideoAggregateType<T>>
+
+    /**
+     * Group by Video.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VideoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VideoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VideoGroupByArgs['orderBy'] }
+        : { orderBy?: VideoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VideoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVideoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Video model
+   */
+  readonly fields: VideoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Video.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VideoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    source<T extends Video$sourceArgs<ExtArgs> = {}>(args?: Subset<T, Video$sourceArgs<ExtArgs>>): Prisma__VideoSourceClient<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Video model
+   */
+  interface VideoFieldRefs {
+    readonly id: FieldRef<"Video", 'String'>
+    readonly createdAt: FieldRef<"Video", 'DateTime'>
+    readonly updatedAt: FieldRef<"Video", 'DateTime'>
+    readonly youtubeId: FieldRef<"Video", 'String'>
+    readonly title: FieldRef<"Video", 'String'>
+    readonly description: FieldRef<"Video", 'String'>
+    readonly thumbnailUrl: FieldRef<"Video", 'String'>
+    readonly channelTitle: FieldRef<"Video", 'String'>
+    readonly publishedAt: FieldRef<"Video", 'DateTime'>
+    readonly titleOverride: FieldRef<"Video", 'String'>
+    readonly descriptionOverride: FieldRef<"Video", 'String'>
+    readonly thumbnailOverride: FieldRef<"Video", 'String'>
+    readonly published: FieldRef<"Video", 'Boolean'>
+    readonly sortOrder: FieldRef<"Video", 'Int'>
+    readonly sourceId: FieldRef<"Video", 'String'>
+    readonly businessId: FieldRef<"Video", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Video findUnique
+   */
+  export type VideoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * Filter, which Video to fetch.
+     */
+    where: VideoWhereUniqueInput
+  }
+
+  /**
+   * Video findUniqueOrThrow
+   */
+  export type VideoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * Filter, which Video to fetch.
+     */
+    where: VideoWhereUniqueInput
+  }
+
+  /**
+   * Video findFirst
+   */
+  export type VideoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * Filter, which Video to fetch.
+     */
+    where?: VideoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Videos to fetch.
+     */
+    orderBy?: VideoOrderByWithRelationInput | VideoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Videos.
+     */
+    cursor?: VideoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Videos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Videos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Videos.
+     */
+    distinct?: VideoScalarFieldEnum | VideoScalarFieldEnum[]
+  }
+
+  /**
+   * Video findFirstOrThrow
+   */
+  export type VideoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * Filter, which Video to fetch.
+     */
+    where?: VideoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Videos to fetch.
+     */
+    orderBy?: VideoOrderByWithRelationInput | VideoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Videos.
+     */
+    cursor?: VideoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Videos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Videos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Videos.
+     */
+    distinct?: VideoScalarFieldEnum | VideoScalarFieldEnum[]
+  }
+
+  /**
+   * Video findMany
+   */
+  export type VideoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * Filter, which Videos to fetch.
+     */
+    where?: VideoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Videos to fetch.
+     */
+    orderBy?: VideoOrderByWithRelationInput | VideoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Videos.
+     */
+    cursor?: VideoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Videos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Videos.
+     */
+    skip?: number
+    distinct?: VideoScalarFieldEnum | VideoScalarFieldEnum[]
+  }
+
+  /**
+   * Video create
+   */
+  export type VideoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Video.
+     */
+    data: XOR<VideoCreateInput, VideoUncheckedCreateInput>
+  }
+
+  /**
+   * Video createMany
+   */
+  export type VideoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Videos.
+     */
+    data: VideoCreateManyInput | VideoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Video createManyAndReturn
+   */
+  export type VideoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * The data used to create many Videos.
+     */
+    data: VideoCreateManyInput | VideoCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Video update
+   */
+  export type VideoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Video.
+     */
+    data: XOR<VideoUpdateInput, VideoUncheckedUpdateInput>
+    /**
+     * Choose, which Video to update.
+     */
+    where: VideoWhereUniqueInput
+  }
+
+  /**
+   * Video updateMany
+   */
+  export type VideoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Videos.
+     */
+    data: XOR<VideoUpdateManyMutationInput, VideoUncheckedUpdateManyInput>
+    /**
+     * Filter which Videos to update
+     */
+    where?: VideoWhereInput
+    /**
+     * Limit how many Videos to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Video updateManyAndReturn
+   */
+  export type VideoUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * The data used to update Videos.
+     */
+    data: XOR<VideoUpdateManyMutationInput, VideoUncheckedUpdateManyInput>
+    /**
+     * Filter which Videos to update
+     */
+    where?: VideoWhereInput
+    /**
+     * Limit how many Videos to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Video upsert
+   */
+  export type VideoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Video to update in case it exists.
+     */
+    where: VideoWhereUniqueInput
+    /**
+     * In case the Video found by the `where` argument doesn't exist, create a new Video with this data.
+     */
+    create: XOR<VideoCreateInput, VideoUncheckedCreateInput>
+    /**
+     * In case the Video was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VideoUpdateInput, VideoUncheckedUpdateInput>
+  }
+
+  /**
+   * Video delete
+   */
+  export type VideoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
+    /**
+     * Filter which Video to delete.
+     */
+    where: VideoWhereUniqueInput
+  }
+
+  /**
+   * Video deleteMany
+   */
+  export type VideoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Videos to delete
+     */
+    where?: VideoWhereInput
+    /**
+     * Limit how many Videos to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Video.source
+   */
+  export type Video$sourceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VideoSource
+     */
+    select?: VideoSourceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VideoSource
+     */
+    omit?: VideoSourceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoSourceInclude<ExtArgs> | null
+    where?: VideoSourceWhereInput
+  }
+
+  /**
+   * Video without action
+   */
+  export type VideoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Video
+     */
+    select?: VideoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Video
+     */
+    omit?: VideoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: VideoInclude<ExtArgs> | null
   }
 
 
@@ -56521,6 +59277,45 @@ export namespace Prisma {
   export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
+  export const VideoSourceScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    kind: 'kind',
+    externalId: 'externalId',
+    label: 'label',
+    enabled: 'enabled',
+    autoPublish: 'autoPublish',
+    lastSyncedAt: 'lastSyncedAt',
+    lastSyncError: 'lastSyncError',
+    businessId: 'businessId'
+  };
+
+  export type VideoSourceScalarFieldEnum = (typeof VideoSourceScalarFieldEnum)[keyof typeof VideoSourceScalarFieldEnum]
+
+
+  export const VideoScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    youtubeId: 'youtubeId',
+    title: 'title',
+    description: 'description',
+    thumbnailUrl: 'thumbnailUrl',
+    channelTitle: 'channelTitle',
+    publishedAt: 'publishedAt',
+    titleOverride: 'titleOverride',
+    descriptionOverride: 'descriptionOverride',
+    thumbnailOverride: 'thumbnailOverride',
+    published: 'published',
+    sortOrder: 'sortOrder',
+    sourceId: 'sourceId',
+    businessId: 'businessId'
+  };
+
+  export type VideoScalarFieldEnum = (typeof VideoScalarFieldEnum)[keyof typeof VideoScalarFieldEnum]
+
+
   export const ImageScalarFieldEnum: {
     id: 'id',
     createdAt: 'createdAt',
@@ -57616,6 +60411,8 @@ export namespace Prisma {
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
     events?: EventListRelationFilter
+    videos?: VideoListRelationFilter
+    videoSources?: VideoSourceListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
   }
 
@@ -57686,6 +60483,8 @@ export namespace Prisma {
     zones?: ShippingZoneOrderByRelationAggregateInput
     faqItems?: FaqItemOrderByRelationAggregateInput
     events?: EventOrderByRelationAggregateInput
+    videos?: VideoOrderByRelationAggregateInput
+    videoSources?: VideoSourceOrderByRelationAggregateInput
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
   }
 
@@ -57759,6 +60558,8 @@ export namespace Prisma {
     zones?: ShippingZoneListRelationFilter
     faqItems?: FaqItemListRelationFilter
     events?: EventListRelationFilter
+    videos?: VideoListRelationFilter
+    videoSources?: VideoSourceListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
@@ -58974,6 +61775,211 @@ export namespace Prisma {
     sortOrder?: IntWithAggregatesFilter<"Event"> | number
     isArchived?: BoolWithAggregatesFilter<"Event"> | boolean
     businessId?: StringWithAggregatesFilter<"Event"> | string
+  }
+
+  export type VideoSourceWhereInput = {
+    AND?: VideoSourceWhereInput | VideoSourceWhereInput[]
+    OR?: VideoSourceWhereInput[]
+    NOT?: VideoSourceWhereInput | VideoSourceWhereInput[]
+    id?: StringFilter<"VideoSource"> | string
+    createdAt?: DateTimeFilter<"VideoSource"> | Date | string
+    updatedAt?: DateTimeFilter<"VideoSource"> | Date | string
+    kind?: StringFilter<"VideoSource"> | string
+    externalId?: StringFilter<"VideoSource"> | string
+    label?: StringNullableFilter<"VideoSource"> | string | null
+    enabled?: BoolFilter<"VideoSource"> | boolean
+    autoPublish?: BoolFilter<"VideoSource"> | boolean
+    lastSyncedAt?: DateTimeNullableFilter<"VideoSource"> | Date | string | null
+    lastSyncError?: StringNullableFilter<"VideoSource"> | string | null
+    businessId?: StringFilter<"VideoSource"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    videos?: VideoListRelationFilter
+  }
+
+  export type VideoSourceOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    kind?: SortOrder
+    externalId?: SortOrder
+    label?: SortOrderInput | SortOrder
+    enabled?: SortOrder
+    autoPublish?: SortOrder
+    lastSyncedAt?: SortOrderInput | SortOrder
+    lastSyncError?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    videos?: VideoOrderByRelationAggregateInput
+  }
+
+  export type VideoSourceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId_kind_externalId?: VideoSourceBusinessIdKindExternalIdCompoundUniqueInput
+    AND?: VideoSourceWhereInput | VideoSourceWhereInput[]
+    OR?: VideoSourceWhereInput[]
+    NOT?: VideoSourceWhereInput | VideoSourceWhereInput[]
+    createdAt?: DateTimeFilter<"VideoSource"> | Date | string
+    updatedAt?: DateTimeFilter<"VideoSource"> | Date | string
+    kind?: StringFilter<"VideoSource"> | string
+    externalId?: StringFilter<"VideoSource"> | string
+    label?: StringNullableFilter<"VideoSource"> | string | null
+    enabled?: BoolFilter<"VideoSource"> | boolean
+    autoPublish?: BoolFilter<"VideoSource"> | boolean
+    lastSyncedAt?: DateTimeNullableFilter<"VideoSource"> | Date | string | null
+    lastSyncError?: StringNullableFilter<"VideoSource"> | string | null
+    businessId?: StringFilter<"VideoSource"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    videos?: VideoListRelationFilter
+  }, "id" | "businessId_kind_externalId">
+
+  export type VideoSourceOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    kind?: SortOrder
+    externalId?: SortOrder
+    label?: SortOrderInput | SortOrder
+    enabled?: SortOrder
+    autoPublish?: SortOrder
+    lastSyncedAt?: SortOrderInput | SortOrder
+    lastSyncError?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    _count?: VideoSourceCountOrderByAggregateInput
+    _max?: VideoSourceMaxOrderByAggregateInput
+    _min?: VideoSourceMinOrderByAggregateInput
+  }
+
+  export type VideoSourceScalarWhereWithAggregatesInput = {
+    AND?: VideoSourceScalarWhereWithAggregatesInput | VideoSourceScalarWhereWithAggregatesInput[]
+    OR?: VideoSourceScalarWhereWithAggregatesInput[]
+    NOT?: VideoSourceScalarWhereWithAggregatesInput | VideoSourceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"VideoSource"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"VideoSource"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"VideoSource"> | Date | string
+    kind?: StringWithAggregatesFilter<"VideoSource"> | string
+    externalId?: StringWithAggregatesFilter<"VideoSource"> | string
+    label?: StringNullableWithAggregatesFilter<"VideoSource"> | string | null
+    enabled?: BoolWithAggregatesFilter<"VideoSource"> | boolean
+    autoPublish?: BoolWithAggregatesFilter<"VideoSource"> | boolean
+    lastSyncedAt?: DateTimeNullableWithAggregatesFilter<"VideoSource"> | Date | string | null
+    lastSyncError?: StringNullableWithAggregatesFilter<"VideoSource"> | string | null
+    businessId?: StringWithAggregatesFilter<"VideoSource"> | string
+  }
+
+  export type VideoWhereInput = {
+    AND?: VideoWhereInput | VideoWhereInput[]
+    OR?: VideoWhereInput[]
+    NOT?: VideoWhereInput | VideoWhereInput[]
+    id?: StringFilter<"Video"> | string
+    createdAt?: DateTimeFilter<"Video"> | Date | string
+    updatedAt?: DateTimeFilter<"Video"> | Date | string
+    youtubeId?: StringFilter<"Video"> | string
+    title?: StringFilter<"Video"> | string
+    description?: StringNullableFilter<"Video"> | string | null
+    thumbnailUrl?: StringNullableFilter<"Video"> | string | null
+    channelTitle?: StringNullableFilter<"Video"> | string | null
+    publishedAt?: DateTimeFilter<"Video"> | Date | string
+    titleOverride?: StringNullableFilter<"Video"> | string | null
+    descriptionOverride?: StringNullableFilter<"Video"> | string | null
+    thumbnailOverride?: StringNullableFilter<"Video"> | string | null
+    published?: BoolFilter<"Video"> | boolean
+    sortOrder?: IntFilter<"Video"> | number
+    sourceId?: StringNullableFilter<"Video"> | string | null
+    businessId?: StringFilter<"Video"> | string
+    source?: XOR<VideoSourceNullableScalarRelationFilter, VideoSourceWhereInput> | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type VideoOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    youtubeId?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    thumbnailUrl?: SortOrderInput | SortOrder
+    channelTitle?: SortOrderInput | SortOrder
+    publishedAt?: SortOrder
+    titleOverride?: SortOrderInput | SortOrder
+    descriptionOverride?: SortOrderInput | SortOrder
+    thumbnailOverride?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    sourceId?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    source?: VideoSourceOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type VideoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    businessId_youtubeId?: VideoBusinessIdYoutubeIdCompoundUniqueInput
+    AND?: VideoWhereInput | VideoWhereInput[]
+    OR?: VideoWhereInput[]
+    NOT?: VideoWhereInput | VideoWhereInput[]
+    createdAt?: DateTimeFilter<"Video"> | Date | string
+    updatedAt?: DateTimeFilter<"Video"> | Date | string
+    youtubeId?: StringFilter<"Video"> | string
+    title?: StringFilter<"Video"> | string
+    description?: StringNullableFilter<"Video"> | string | null
+    thumbnailUrl?: StringNullableFilter<"Video"> | string | null
+    channelTitle?: StringNullableFilter<"Video"> | string | null
+    publishedAt?: DateTimeFilter<"Video"> | Date | string
+    titleOverride?: StringNullableFilter<"Video"> | string | null
+    descriptionOverride?: StringNullableFilter<"Video"> | string | null
+    thumbnailOverride?: StringNullableFilter<"Video"> | string | null
+    published?: BoolFilter<"Video"> | boolean
+    sortOrder?: IntFilter<"Video"> | number
+    sourceId?: StringNullableFilter<"Video"> | string | null
+    businessId?: StringFilter<"Video"> | string
+    source?: XOR<VideoSourceNullableScalarRelationFilter, VideoSourceWhereInput> | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "businessId_youtubeId">
+
+  export type VideoOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    youtubeId?: SortOrder
+    title?: SortOrder
+    description?: SortOrderInput | SortOrder
+    thumbnailUrl?: SortOrderInput | SortOrder
+    channelTitle?: SortOrderInput | SortOrder
+    publishedAt?: SortOrder
+    titleOverride?: SortOrderInput | SortOrder
+    descriptionOverride?: SortOrderInput | SortOrder
+    thumbnailOverride?: SortOrderInput | SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    sourceId?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    _count?: VideoCountOrderByAggregateInput
+    _avg?: VideoAvgOrderByAggregateInput
+    _max?: VideoMaxOrderByAggregateInput
+    _min?: VideoMinOrderByAggregateInput
+    _sum?: VideoSumOrderByAggregateInput
+  }
+
+  export type VideoScalarWhereWithAggregatesInput = {
+    AND?: VideoScalarWhereWithAggregatesInput | VideoScalarWhereWithAggregatesInput[]
+    OR?: VideoScalarWhereWithAggregatesInput[]
+    NOT?: VideoScalarWhereWithAggregatesInput | VideoScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Video"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Video"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Video"> | Date | string
+    youtubeId?: StringWithAggregatesFilter<"Video"> | string
+    title?: StringWithAggregatesFilter<"Video"> | string
+    description?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    thumbnailUrl?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    channelTitle?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    publishedAt?: DateTimeWithAggregatesFilter<"Video"> | Date | string
+    titleOverride?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    descriptionOverride?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    thumbnailOverride?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    published?: BoolWithAggregatesFilter<"Video"> | boolean
+    sortOrder?: IntWithAggregatesFilter<"Video"> | number
+    sourceId?: StringNullableWithAggregatesFilter<"Video"> | string | null
+    businessId?: StringWithAggregatesFilter<"Video"> | string
   }
 
   export type ImageWhereInput = {
@@ -61923,6 +64929,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -61993,6 +65001,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -62063,6 +65073,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -62133,6 +65145,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -63592,6 +66606,238 @@ export namespace Prisma {
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     isArchived?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type VideoSourceCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    business: BusinessCreateNestedOneWithoutVideoSourcesInput
+    videos?: VideoCreateNestedManyWithoutSourceInput
+  }
+
+  export type VideoSourceUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    businessId: string
+    videos?: VideoUncheckedCreateNestedManyWithoutSourceInput
+  }
+
+  export type VideoSourceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutVideoSourcesNestedInput
+    videos?: VideoUpdateManyWithoutSourceNestedInput
+  }
+
+  export type VideoSourceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    videos?: VideoUncheckedUpdateManyWithoutSourceNestedInput
+  }
+
+  export type VideoSourceCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    businessId: string
+  }
+
+  export type VideoSourceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type VideoSourceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type VideoCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    source?: VideoSourceCreateNestedOneWithoutVideosInput
+    business: BusinessCreateNestedOneWithoutVideosInput
+  }
+
+  export type VideoUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    sourceId?: string | null
+    businessId: string
+  }
+
+  export type VideoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    source?: VideoSourceUpdateOneWithoutVideosNestedInput
+    business?: BusinessUpdateOneRequiredWithoutVideosNestedInput
+  }
+
+  export type VideoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type VideoCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    sourceId?: string | null
+    businessId: string
+  }
+
+  export type VideoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type VideoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -66917,6 +70163,18 @@ export namespace Prisma {
     none?: EventWhereInput
   }
 
+  export type VideoListRelationFilter = {
+    every?: VideoWhereInput
+    some?: VideoWhereInput
+    none?: VideoWhereInput
+  }
+
+  export type VideoSourceListRelationFilter = {
+    every?: VideoSourceWhereInput
+    some?: VideoSourceWhereInput
+    none?: VideoSourceWhereInput
+  }
+
   export type BackInStockRequestListRelationFilter = {
     every?: BackInStockRequestWhereInput
     some?: BackInStockRequestWhereInput
@@ -66988,6 +70246,14 @@ export namespace Prisma {
   }
 
   export type EventOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type VideoOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type VideoSourceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -67992,6 +71258,129 @@ export namespace Prisma {
   }
 
   export type EventSumOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type VideoSourceBusinessIdKindExternalIdCompoundUniqueInput = {
+    businessId: string
+    kind: string
+    externalId: string
+  }
+
+  export type VideoSourceCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    kind?: SortOrder
+    externalId?: SortOrder
+    label?: SortOrder
+    enabled?: SortOrder
+    autoPublish?: SortOrder
+    lastSyncedAt?: SortOrder
+    lastSyncError?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type VideoSourceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    kind?: SortOrder
+    externalId?: SortOrder
+    label?: SortOrder
+    enabled?: SortOrder
+    autoPublish?: SortOrder
+    lastSyncedAt?: SortOrder
+    lastSyncError?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type VideoSourceMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    kind?: SortOrder
+    externalId?: SortOrder
+    label?: SortOrder
+    enabled?: SortOrder
+    autoPublish?: SortOrder
+    lastSyncedAt?: SortOrder
+    lastSyncError?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type VideoSourceNullableScalarRelationFilter = {
+    is?: VideoSourceWhereInput | null
+    isNot?: VideoSourceWhereInput | null
+  }
+
+  export type VideoBusinessIdYoutubeIdCompoundUniqueInput = {
+    businessId: string
+    youtubeId: string
+  }
+
+  export type VideoCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    youtubeId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    thumbnailUrl?: SortOrder
+    channelTitle?: SortOrder
+    publishedAt?: SortOrder
+    titleOverride?: SortOrder
+    descriptionOverride?: SortOrder
+    thumbnailOverride?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    sourceId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type VideoAvgOrderByAggregateInput = {
+    sortOrder?: SortOrder
+  }
+
+  export type VideoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    youtubeId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    thumbnailUrl?: SortOrder
+    channelTitle?: SortOrder
+    publishedAt?: SortOrder
+    titleOverride?: SortOrder
+    descriptionOverride?: SortOrder
+    thumbnailOverride?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    sourceId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type VideoMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    youtubeId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    thumbnailUrl?: SortOrder
+    channelTitle?: SortOrder
+    publishedAt?: SortOrder
+    titleOverride?: SortOrder
+    descriptionOverride?: SortOrder
+    thumbnailOverride?: SortOrder
+    published?: SortOrder
+    sortOrder?: SortOrder
+    sourceId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type VideoSumOrderByAggregateInput = {
     sortOrder?: SortOrder
   }
 
@@ -70004,6 +73393,20 @@ export namespace Prisma {
     connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
   }
 
+  export type VideoCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<VideoCreateWithoutBusinessInput, VideoUncheckedCreateWithoutBusinessInput> | VideoCreateWithoutBusinessInput[] | VideoUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutBusinessInput | VideoCreateOrConnectWithoutBusinessInput[]
+    createMany?: VideoCreateManyBusinessInputEnvelope
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+  }
+
+  export type VideoSourceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<VideoSourceCreateWithoutBusinessInput, VideoSourceUncheckedCreateWithoutBusinessInput> | VideoSourceCreateWithoutBusinessInput[] | VideoSourceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoSourceCreateOrConnectWithoutBusinessInput | VideoSourceCreateOrConnectWithoutBusinessInput[]
+    createMany?: VideoSourceCreateManyBusinessInputEnvelope
+    connect?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+  }
+
   export type BackInStockRequestCreateNestedManyWithoutBusinessInput = {
     create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
@@ -70169,6 +73572,20 @@ export namespace Prisma {
     connectOrCreate?: EventCreateOrConnectWithoutBusinessInput | EventCreateOrConnectWithoutBusinessInput[]
     createMany?: EventCreateManyBusinessInputEnvelope
     connect?: EventWhereUniqueInput | EventWhereUniqueInput[]
+  }
+
+  export type VideoUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<VideoCreateWithoutBusinessInput, VideoUncheckedCreateWithoutBusinessInput> | VideoCreateWithoutBusinessInput[] | VideoUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutBusinessInput | VideoCreateOrConnectWithoutBusinessInput[]
+    createMany?: VideoCreateManyBusinessInputEnvelope
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+  }
+
+  export type VideoSourceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<VideoSourceCreateWithoutBusinessInput, VideoSourceUncheckedCreateWithoutBusinessInput> | VideoSourceCreateWithoutBusinessInput[] | VideoSourceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoSourceCreateOrConnectWithoutBusinessInput | VideoSourceCreateOrConnectWithoutBusinessInput[]
+    createMany?: VideoSourceCreateManyBusinessInputEnvelope
+    connect?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
   }
 
   export type BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -70521,6 +73938,34 @@ export namespace Prisma {
     deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
   }
 
+  export type VideoUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<VideoCreateWithoutBusinessInput, VideoUncheckedCreateWithoutBusinessInput> | VideoCreateWithoutBusinessInput[] | VideoUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutBusinessInput | VideoCreateOrConnectWithoutBusinessInput[]
+    upsert?: VideoUpsertWithWhereUniqueWithoutBusinessInput | VideoUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: VideoCreateManyBusinessInputEnvelope
+    set?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    disconnect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    delete?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    update?: VideoUpdateWithWhereUniqueWithoutBusinessInput | VideoUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: VideoUpdateManyWithWhereWithoutBusinessInput | VideoUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: VideoScalarWhereInput | VideoScalarWhereInput[]
+  }
+
+  export type VideoSourceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<VideoSourceCreateWithoutBusinessInput, VideoSourceUncheckedCreateWithoutBusinessInput> | VideoSourceCreateWithoutBusinessInput[] | VideoSourceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoSourceCreateOrConnectWithoutBusinessInput | VideoSourceCreateOrConnectWithoutBusinessInput[]
+    upsert?: VideoSourceUpsertWithWhereUniqueWithoutBusinessInput | VideoSourceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: VideoSourceCreateManyBusinessInputEnvelope
+    set?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    disconnect?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    delete?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    connect?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    update?: VideoSourceUpdateWithWhereUniqueWithoutBusinessInput | VideoSourceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: VideoSourceUpdateManyWithWhereWithoutBusinessInput | VideoSourceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: VideoSourceScalarWhereInput | VideoSourceScalarWhereInput[]
+  }
+
   export type BackInStockRequestUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<BackInStockRequestCreateWithoutBusinessInput, BackInStockRequestUncheckedCreateWithoutBusinessInput> | BackInStockRequestCreateWithoutBusinessInput[] | BackInStockRequestUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
@@ -70851,6 +74296,34 @@ export namespace Prisma {
     update?: EventUpdateWithWhereUniqueWithoutBusinessInput | EventUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: EventUpdateManyWithWhereWithoutBusinessInput | EventUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: EventScalarWhereInput | EventScalarWhereInput[]
+  }
+
+  export type VideoUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<VideoCreateWithoutBusinessInput, VideoUncheckedCreateWithoutBusinessInput> | VideoCreateWithoutBusinessInput[] | VideoUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutBusinessInput | VideoCreateOrConnectWithoutBusinessInput[]
+    upsert?: VideoUpsertWithWhereUniqueWithoutBusinessInput | VideoUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: VideoCreateManyBusinessInputEnvelope
+    set?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    disconnect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    delete?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    update?: VideoUpdateWithWhereUniqueWithoutBusinessInput | VideoUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: VideoUpdateManyWithWhereWithoutBusinessInput | VideoUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: VideoScalarWhereInput | VideoScalarWhereInput[]
+  }
+
+  export type VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<VideoSourceCreateWithoutBusinessInput, VideoSourceUncheckedCreateWithoutBusinessInput> | VideoSourceCreateWithoutBusinessInput[] | VideoSourceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: VideoSourceCreateOrConnectWithoutBusinessInput | VideoSourceCreateOrConnectWithoutBusinessInput[]
+    upsert?: VideoSourceUpsertWithWhereUniqueWithoutBusinessInput | VideoSourceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: VideoSourceCreateManyBusinessInputEnvelope
+    set?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    disconnect?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    delete?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    connect?: VideoSourceWhereUniqueInput | VideoSourceWhereUniqueInput[]
+    update?: VideoSourceUpdateWithWhereUniqueWithoutBusinessInput | VideoSourceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: VideoSourceUpdateManyWithWhereWithoutBusinessInput | VideoSourceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: VideoSourceScalarWhereInput | VideoSourceScalarWhereInput[]
   }
 
   export type BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -71499,6 +74972,92 @@ export namespace Prisma {
     upsert?: BusinessUpsertWithoutEventsInput
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutEventsInput, BusinessUpdateWithoutEventsInput>, BusinessUncheckedUpdateWithoutEventsInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutVideoSourcesInput = {
+    create?: XOR<BusinessCreateWithoutVideoSourcesInput, BusinessUncheckedCreateWithoutVideoSourcesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutVideoSourcesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type VideoCreateNestedManyWithoutSourceInput = {
+    create?: XOR<VideoCreateWithoutSourceInput, VideoUncheckedCreateWithoutSourceInput> | VideoCreateWithoutSourceInput[] | VideoUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutSourceInput | VideoCreateOrConnectWithoutSourceInput[]
+    createMany?: VideoCreateManySourceInputEnvelope
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+  }
+
+  export type VideoUncheckedCreateNestedManyWithoutSourceInput = {
+    create?: XOR<VideoCreateWithoutSourceInput, VideoUncheckedCreateWithoutSourceInput> | VideoCreateWithoutSourceInput[] | VideoUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutSourceInput | VideoCreateOrConnectWithoutSourceInput[]
+    createMany?: VideoCreateManySourceInputEnvelope
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutVideoSourcesNestedInput = {
+    create?: XOR<BusinessCreateWithoutVideoSourcesInput, BusinessUncheckedCreateWithoutVideoSourcesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutVideoSourcesInput
+    upsert?: BusinessUpsertWithoutVideoSourcesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutVideoSourcesInput, BusinessUpdateWithoutVideoSourcesInput>, BusinessUncheckedUpdateWithoutVideoSourcesInput>
+  }
+
+  export type VideoUpdateManyWithoutSourceNestedInput = {
+    create?: XOR<VideoCreateWithoutSourceInput, VideoUncheckedCreateWithoutSourceInput> | VideoCreateWithoutSourceInput[] | VideoUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutSourceInput | VideoCreateOrConnectWithoutSourceInput[]
+    upsert?: VideoUpsertWithWhereUniqueWithoutSourceInput | VideoUpsertWithWhereUniqueWithoutSourceInput[]
+    createMany?: VideoCreateManySourceInputEnvelope
+    set?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    disconnect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    delete?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    update?: VideoUpdateWithWhereUniqueWithoutSourceInput | VideoUpdateWithWhereUniqueWithoutSourceInput[]
+    updateMany?: VideoUpdateManyWithWhereWithoutSourceInput | VideoUpdateManyWithWhereWithoutSourceInput[]
+    deleteMany?: VideoScalarWhereInput | VideoScalarWhereInput[]
+  }
+
+  export type VideoUncheckedUpdateManyWithoutSourceNestedInput = {
+    create?: XOR<VideoCreateWithoutSourceInput, VideoUncheckedCreateWithoutSourceInput> | VideoCreateWithoutSourceInput[] | VideoUncheckedCreateWithoutSourceInput[]
+    connectOrCreate?: VideoCreateOrConnectWithoutSourceInput | VideoCreateOrConnectWithoutSourceInput[]
+    upsert?: VideoUpsertWithWhereUniqueWithoutSourceInput | VideoUpsertWithWhereUniqueWithoutSourceInput[]
+    createMany?: VideoCreateManySourceInputEnvelope
+    set?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    disconnect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    delete?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    connect?: VideoWhereUniqueInput | VideoWhereUniqueInput[]
+    update?: VideoUpdateWithWhereUniqueWithoutSourceInput | VideoUpdateWithWhereUniqueWithoutSourceInput[]
+    updateMany?: VideoUpdateManyWithWhereWithoutSourceInput | VideoUpdateManyWithWhereWithoutSourceInput[]
+    deleteMany?: VideoScalarWhereInput | VideoScalarWhereInput[]
+  }
+
+  export type VideoSourceCreateNestedOneWithoutVideosInput = {
+    create?: XOR<VideoSourceCreateWithoutVideosInput, VideoSourceUncheckedCreateWithoutVideosInput>
+    connectOrCreate?: VideoSourceCreateOrConnectWithoutVideosInput
+    connect?: VideoSourceWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutVideosInput = {
+    create?: XOR<BusinessCreateWithoutVideosInput, BusinessUncheckedCreateWithoutVideosInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutVideosInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type VideoSourceUpdateOneWithoutVideosNestedInput = {
+    create?: XOR<VideoSourceCreateWithoutVideosInput, VideoSourceUncheckedCreateWithoutVideosInput>
+    connectOrCreate?: VideoSourceCreateOrConnectWithoutVideosInput
+    upsert?: VideoSourceUpsertWithoutVideosInput
+    disconnect?: VideoSourceWhereInput | boolean
+    delete?: VideoSourceWhereInput | boolean
+    connect?: VideoSourceWhereUniqueInput
+    update?: XOR<XOR<VideoSourceUpdateToOneWithWhereWithoutVideosInput, VideoSourceUpdateWithoutVideosInput>, VideoSourceUncheckedUpdateWithoutVideosInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutVideosNestedInput = {
+    create?: XOR<BusinessCreateWithoutVideosInput, BusinessUncheckedCreateWithoutVideosInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutVideosInput
+    upsert?: BusinessUpsertWithoutVideosInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutVideosInput, BusinessUpdateWithoutVideosInput>, BusinessUncheckedUpdateWithoutVideosInput>
   }
 
   export type ProductCreateNestedOneWithoutImagesInput = {
@@ -73779,6 +77338,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -73848,6 +77409,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -73978,6 +77541,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -74047,6 +77612,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -75259,6 +78826,90 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type VideoCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    source?: VideoSourceCreateNestedOneWithoutVideosInput
+  }
+
+  export type VideoUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    sourceId?: string | null
+  }
+
+  export type VideoCreateOrConnectWithoutBusinessInput = {
+    where: VideoWhereUniqueInput
+    create: XOR<VideoCreateWithoutBusinessInput, VideoUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type VideoCreateManyBusinessInputEnvelope = {
+    data: VideoCreateManyBusinessInput | VideoCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type VideoSourceCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    videos?: VideoCreateNestedManyWithoutSourceInput
+  }
+
+  export type VideoSourceUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    videos?: VideoUncheckedCreateNestedManyWithoutSourceInput
+  }
+
+  export type VideoSourceCreateOrConnectWithoutBusinessInput = {
+    where: VideoSourceWhereUniqueInput
+    create: XOR<VideoSourceCreateWithoutBusinessInput, VideoSourceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type VideoSourceCreateManyBusinessInputEnvelope = {
+    data: VideoSourceCreateManyBusinessInput | VideoSourceCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BackInStockRequestCreateWithoutBusinessInput = {
     id?: string
     createdAt?: Date | string
@@ -76071,6 +79722,77 @@ export namespace Prisma {
     businessId?: StringFilter<"Event"> | string
   }
 
+  export type VideoUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: VideoWhereUniqueInput
+    update: XOR<VideoUpdateWithoutBusinessInput, VideoUncheckedUpdateWithoutBusinessInput>
+    create: XOR<VideoCreateWithoutBusinessInput, VideoUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type VideoUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: VideoWhereUniqueInput
+    data: XOR<VideoUpdateWithoutBusinessInput, VideoUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type VideoUpdateManyWithWhereWithoutBusinessInput = {
+    where: VideoScalarWhereInput
+    data: XOR<VideoUpdateManyMutationInput, VideoUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type VideoScalarWhereInput = {
+    AND?: VideoScalarWhereInput | VideoScalarWhereInput[]
+    OR?: VideoScalarWhereInput[]
+    NOT?: VideoScalarWhereInput | VideoScalarWhereInput[]
+    id?: StringFilter<"Video"> | string
+    createdAt?: DateTimeFilter<"Video"> | Date | string
+    updatedAt?: DateTimeFilter<"Video"> | Date | string
+    youtubeId?: StringFilter<"Video"> | string
+    title?: StringFilter<"Video"> | string
+    description?: StringNullableFilter<"Video"> | string | null
+    thumbnailUrl?: StringNullableFilter<"Video"> | string | null
+    channelTitle?: StringNullableFilter<"Video"> | string | null
+    publishedAt?: DateTimeFilter<"Video"> | Date | string
+    titleOverride?: StringNullableFilter<"Video"> | string | null
+    descriptionOverride?: StringNullableFilter<"Video"> | string | null
+    thumbnailOverride?: StringNullableFilter<"Video"> | string | null
+    published?: BoolFilter<"Video"> | boolean
+    sortOrder?: IntFilter<"Video"> | number
+    sourceId?: StringNullableFilter<"Video"> | string | null
+    businessId?: StringFilter<"Video"> | string
+  }
+
+  export type VideoSourceUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: VideoSourceWhereUniqueInput
+    update: XOR<VideoSourceUpdateWithoutBusinessInput, VideoSourceUncheckedUpdateWithoutBusinessInput>
+    create: XOR<VideoSourceCreateWithoutBusinessInput, VideoSourceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type VideoSourceUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: VideoSourceWhereUniqueInput
+    data: XOR<VideoSourceUpdateWithoutBusinessInput, VideoSourceUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type VideoSourceUpdateManyWithWhereWithoutBusinessInput = {
+    where: VideoSourceScalarWhereInput
+    data: XOR<VideoSourceUpdateManyMutationInput, VideoSourceUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type VideoSourceScalarWhereInput = {
+    AND?: VideoSourceScalarWhereInput | VideoSourceScalarWhereInput[]
+    OR?: VideoSourceScalarWhereInput[]
+    NOT?: VideoSourceScalarWhereInput | VideoSourceScalarWhereInput[]
+    id?: StringFilter<"VideoSource"> | string
+    createdAt?: DateTimeFilter<"VideoSource"> | Date | string
+    updatedAt?: DateTimeFilter<"VideoSource"> | Date | string
+    kind?: StringFilter<"VideoSource"> | string
+    externalId?: StringFilter<"VideoSource"> | string
+    label?: StringNullableFilter<"VideoSource"> | string | null
+    enabled?: BoolFilter<"VideoSource"> | boolean
+    autoPublish?: BoolFilter<"VideoSource"> | boolean
+    lastSyncedAt?: DateTimeNullableFilter<"VideoSource"> | Date | string | null
+    lastSyncError?: StringNullableFilter<"VideoSource"> | string | null
+    businessId?: StringFilter<"VideoSource"> | string
+  }
+
   export type BackInStockRequestUpsertWithWhereUniqueWithoutBusinessInput = {
     where: BackInStockRequestWhereUniqueInput
     update: XOR<BackInStockRequestUpdateWithoutBusinessInput, BackInStockRequestUncheckedUpdateWithoutBusinessInput>
@@ -76166,6 +79888,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -76235,6 +79959,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -76320,6 +80046,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76389,6 +80117,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76458,6 +80188,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -76527,6 +80259,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -76612,6 +80346,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76681,6 +80417,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -76787,6 +80525,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -76856,6 +80596,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -77244,6 +80986,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -77313,6 +81057,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -77867,6 +81613,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -77936,6 +81684,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -78043,6 +81793,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -78112,6 +81864,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -78473,6 +82227,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -78542,6 +82298,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -78679,6 +82437,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -78748,6 +82508,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -78950,6 +82712,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -79019,6 +82783,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -79104,6 +82870,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -79173,6 +82941,742 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutVideoSourcesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutVideoSourcesInput, BusinessUncheckedCreateWithoutVideoSourcesInput>
+  }
+
+  export type VideoCreateWithoutSourceInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    business: BusinessCreateNestedOneWithoutVideosInput
+  }
+
+  export type VideoUncheckedCreateWithoutSourceInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    businessId: string
+  }
+
+  export type VideoCreateOrConnectWithoutSourceInput = {
+    where: VideoWhereUniqueInput
+    create: XOR<VideoCreateWithoutSourceInput, VideoUncheckedCreateWithoutSourceInput>
+  }
+
+  export type VideoCreateManySourceInputEnvelope = {
+    data: VideoCreateManySourceInput | VideoCreateManySourceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutVideoSourcesInput = {
+    update: XOR<BusinessUpdateWithoutVideoSourcesInput, BusinessUncheckedUpdateWithoutVideoSourcesInput>
+    create: XOR<BusinessCreateWithoutVideoSourcesInput, BusinessUncheckedCreateWithoutVideoSourcesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutVideoSourcesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutVideoSourcesInput, BusinessUncheckedUpdateWithoutVideoSourcesInput>
+  }
+
+  export type BusinessUpdateWithoutVideoSourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
+    where: VideoWhereUniqueInput
+    update: XOR<VideoUpdateWithoutSourceInput, VideoUncheckedUpdateWithoutSourceInput>
+    create: XOR<VideoCreateWithoutSourceInput, VideoUncheckedCreateWithoutSourceInput>
+  }
+
+  export type VideoUpdateWithWhereUniqueWithoutSourceInput = {
+    where: VideoWhereUniqueInput
+    data: XOR<VideoUpdateWithoutSourceInput, VideoUncheckedUpdateWithoutSourceInput>
+  }
+
+  export type VideoUpdateManyWithWhereWithoutSourceInput = {
+    where: VideoScalarWhereInput
+    data: XOR<VideoUpdateManyMutationInput, VideoUncheckedUpdateManyWithoutSourceInput>
+  }
+
+  export type VideoSourceCreateWithoutVideosInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    business: BusinessCreateNestedOneWithoutVideoSourcesInput
+  }
+
+  export type VideoSourceUncheckedCreateWithoutVideosInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
+    businessId: string
+  }
+
+  export type VideoSourceCreateOrConnectWithoutVideosInput = {
+    where: VideoSourceWhereUniqueInput
+    create: XOR<VideoSourceCreateWithoutVideosInput, VideoSourceUncheckedCreateWithoutVideosInput>
+  }
+
+  export type BusinessCreateWithoutVideosInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutVideosInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutVideosInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutVideosInput, BusinessUncheckedCreateWithoutVideosInput>
+  }
+
+  export type VideoSourceUpsertWithoutVideosInput = {
+    update: XOR<VideoSourceUpdateWithoutVideosInput, VideoSourceUncheckedUpdateWithoutVideosInput>
+    create: XOR<VideoSourceCreateWithoutVideosInput, VideoSourceUncheckedCreateWithoutVideosInput>
+    where?: VideoSourceWhereInput
+  }
+
+  export type VideoSourceUpdateToOneWithWhereWithoutVideosInput = {
+    where?: VideoSourceWhereInput
+    data: XOR<VideoSourceUpdateWithoutVideosInput, VideoSourceUncheckedUpdateWithoutVideosInput>
+  }
+
+  export type VideoSourceUpdateWithoutVideosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    business?: BusinessUpdateOneRequiredWithoutVideoSourcesNestedInput
+  }
+
+  export type VideoSourceUncheckedUpdateWithoutVideosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BusinessUpsertWithoutVideosInput = {
+    update: XOR<BusinessUpdateWithoutVideosInput, BusinessUncheckedUpdateWithoutVideosInput>
+    create: XOR<BusinessCreateWithoutVideosInput, BusinessUncheckedCreateWithoutVideosInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutVideosInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutVideosInput, BusinessUncheckedUpdateWithoutVideosInput>
+  }
+
+  export type BusinessUpdateWithoutVideosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutVideosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -79335,6 +83839,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -79404,6 +83910,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -79588,6 +84096,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -79657,6 +84167,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -79765,6 +84277,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -79834,6 +84348,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -80228,6 +84744,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -80297,6 +84815,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -80667,6 +85187,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -80736,6 +85258,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -81116,6 +85640,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -81185,6 +85711,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82069,6 +86597,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -82138,6 +86668,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -82303,6 +86835,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82372,6 +86906,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -82626,6 +87162,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -82695,6 +87233,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -83081,6 +87621,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83150,6 +87692,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83345,6 +87889,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -83414,6 +87960,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -83637,6 +88185,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83706,6 +88256,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -83807,6 +88359,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -83876,6 +88430,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -83961,6 +88517,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84030,6 +88588,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84099,6 +88659,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -84168,6 +88730,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -84253,6 +88817,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84322,6 +88888,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84391,6 +88959,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -84460,6 +89030,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -84584,6 +89156,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84653,6 +89227,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84767,6 +89343,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -84836,6 +89414,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -84921,6 +89501,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -84990,6 +89572,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85059,6 +89643,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -85128,6 +89714,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -85245,6 +89833,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85314,6 +89904,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85498,6 +90090,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -85567,6 +90161,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -85701,6 +90297,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85770,6 +90368,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -85894,6 +90494,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -85963,6 +90565,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -86097,6 +90701,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -86166,6 +90772,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -86908,6 +91516,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -86977,6 +91587,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -87101,6 +91713,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -87170,6 +91784,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -87284,6 +91900,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -87353,6 +91971,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -87438,6 +92058,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -87507,6 +92129,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -87576,6 +92200,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
   }
 
@@ -87645,6 +92271,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
   }
 
@@ -87752,6 +92380,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
   }
 
@@ -87821,6 +92451,8 @@ export namespace Prisma {
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
@@ -88058,6 +92690,8 @@ export namespace Prisma {
     zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
     events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -88127,6 +92761,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
     faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -88311,6 +92947,8 @@ export namespace Prisma {
     zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
     events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -88380,6 +93018,8 @@ export namespace Prisma {
     zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
     faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -89118,6 +93758,37 @@ export namespace Prisma {
     published?: boolean
     sortOrder?: number
     isArchived?: boolean
+  }
+
+  export type VideoCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    sourceId?: string | null
+  }
+
+  export type VideoSourceCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    kind: string
+    externalId: string
+    label?: string | null
+    enabled?: boolean
+    autoPublish?: boolean
+    lastSyncedAt?: Date | string | null
+    lastSyncError?: string | null
   }
 
   export type BackInStockRequestCreateManyBusinessInput = {
@@ -90231,6 +94902,101 @@ export namespace Prisma {
     isArchived?: BoolFieldUpdateOperationsInput | boolean
   }
 
+  export type VideoUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    source?: VideoSourceUpdateOneWithoutVideosNestedInput
+  }
+
+  export type VideoUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type VideoUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    sourceId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type VideoSourceUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    videos?: VideoUpdateManyWithoutSourceNestedInput
+  }
+
+  export type VideoSourceUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+    videos?: VideoUncheckedUpdateManyWithoutSourceNestedInput
+  }
+
+  export type VideoSourceUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    kind?: StringFieldUpdateOperationsInput | string
+    externalId?: StringFieldUpdateOperationsInput | string
+    label?: NullableStringFieldUpdateOperationsInput | string | null
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    autoPublish?: BoolFieldUpdateOperationsInput | boolean
+    lastSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastSyncError?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type BackInStockRequestUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -90847,6 +95613,78 @@ export namespace Prisma {
     bookingEmbedHeight?: NullableIntFieldUpdateOperationsInput | number | null
     category?: NullableStringFieldUpdateOperationsInput | string | null
     isSignature?: BoolFieldUpdateOperationsInput | boolean
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type VideoCreateManySourceInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    youtubeId: string
+    title: string
+    description?: string | null
+    thumbnailUrl?: string | null
+    channelTitle?: string | null
+    publishedAt: Date | string
+    titleOverride?: string | null
+    descriptionOverride?: string | null
+    thumbnailOverride?: string | null
+    published?: boolean
+    sortOrder?: number
+    businessId: string
+  }
+
+  export type VideoUpdateWithoutSourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    business?: BusinessUpdateOneRequiredWithoutVideosNestedInput
+  }
+
+  export type VideoUncheckedUpdateWithoutSourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    published?: BoolFieldUpdateOperationsInput | boolean
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type VideoUncheckedUpdateManyWithoutSourceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    youtubeId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    channelTitle?: NullableStringFieldUpdateOperationsInput | string | null
+    publishedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    titleOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    descriptionOverride?: NullableStringFieldUpdateOperationsInput | string | null
+    thumbnailOverride?: NullableStringFieldUpdateOperationsInput | string | null
     published?: BoolFieldUpdateOperationsInput | boolean
     sortOrder?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string

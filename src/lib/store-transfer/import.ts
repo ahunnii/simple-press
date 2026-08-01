@@ -1116,6 +1116,118 @@ export async function importStoreBundle(args: {
     }
   }
 
+  // ── 3l3. VideoSources — upsert (businessId, kind, externalId), the same
+  // tuple the DB's own unique constraint dedupes on → videoSourceMap
+  const videoSourceMap = new Map<string, string>(); // exportId → newId
+
+  for (const source of content.videoSources) {
+    try {
+      const existing = await db.videoSource.findUnique({
+        where: {
+          businessId_kind_externalId: {
+            businessId: targetBusinessId,
+            kind: source.kind,
+            externalId: source.externalId,
+          },
+        },
+        select: { id: true },
+      });
+      let newId: string;
+      if (existing) {
+        await db.videoSource.update({
+          where: { id: existing.id },
+          data: {
+            label: source.label ?? null,
+            enabled: source.enabled,
+            autoPublish: source.autoPublish,
+          },
+        });
+        newId = existing.id;
+        track("VideoSource", false);
+      } else {
+        const created = await db.videoSource.create({
+          data: {
+            businessId: targetBusinessId,
+            kind: source.kind,
+            externalId: source.externalId,
+            label: source.label ?? null,
+            enabled: source.enabled,
+            autoPublish: source.autoPublish,
+          },
+        });
+        newId = created.id;
+        track("VideoSource", true);
+      }
+      videoSourceMap.set(source.exportId, newId);
+    } catch (err) {
+      result.warnings.push(
+        `VideoSource "${source.kind}:${source.externalId}" failed: ${String(err)}`,
+      );
+    }
+  }
+
+  // ── 3l4. Videos — upsert (businessId, youtubeId), matching the DB's own
+  // unique constraint. The video→source relationship is preserved via
+  // videoSourceMap (built just above, same pattern as
+  // exportBaseInventoryUnitId → baseUnitMap for Products): a video whose
+  // exportSourceId resolves to a source that was itself imported gets
+  // re-linked to the NEW source row. `thumbnailUrl` is a remote YouTube CDN
+  // URL and is carried across verbatim (never rewritten) — only
+  // `thumbnailOverride` is S3-hosted and goes through rewriteUrl. See the
+  // matching comment on ExportedVideo in types.ts.
+  for (const video of content.videos) {
+    try {
+      const resolvedSourceId =
+        video.exportSourceId != null
+          ? (videoSourceMap.get(video.exportSourceId) ?? null)
+          : null;
+
+      const existing = await db.video.findUnique({
+        where: {
+          businessId_youtubeId: {
+            businessId: targetBusinessId,
+            youtubeId: video.youtubeId,
+          },
+        },
+        select: { id: true },
+      });
+
+      const data = {
+        title: video.title,
+        description: video.description ?? null,
+        thumbnailUrl: video.thumbnailUrl ?? null,
+        channelTitle: video.channelTitle ?? null,
+        publishedAt: new Date(video.publishedAt),
+        titleOverride: video.titleOverride ?? null,
+        descriptionOverride: video.descriptionOverride ?? null,
+        thumbnailOverride: video.thumbnailOverride
+          ? rewriteUrl(video.thumbnailOverride, urlMap)
+          : null,
+        published: video.published,
+        sortOrder: video.sortOrder,
+        sourceId: resolvedSourceId,
+      };
+
+      if (existing) {
+        await db.video.update({ where: { id: existing.id }, data });
+        track("Video", false);
+      } else {
+        await db.video.create({
+          data: {
+            businessId: targetBusinessId,
+            youtubeId: video.youtubeId,
+            ...data,
+          },
+        });
+        track("Video", true);
+      }
+    } catch (err) {
+      result.warnings.push(
+        `Video "${video.youtubeId}" failed: ${String(err)}`,
+      );
+    }
+  }
+
   // ── 3m. ShippingZones + ShippingRates
   const zoneMap = new Map<string, string>(); // exportId → newId
 
