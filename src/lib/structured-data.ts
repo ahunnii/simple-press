@@ -24,6 +24,7 @@ import {
 import { getCanonicalBaseUrl, getCanonicalUrl } from "~/lib/canonical";
 import { eventDateTimeAttr } from "~/lib/events/format";
 import { getEffectivePrice } from "~/lib/prices";
+import { youtubeEmbedUrl, youtubeWatchUrl } from "~/lib/youtube/parse";
 
 // ---------------------------------------------------------------------------
 // Local type aliases mirroring the shape returned by tRPC / Prisma selects.
@@ -782,6 +783,73 @@ export function buildEventSchema(
       "@type": "Place",
       name: event.location,
     };
+  }
+
+  return schema;
+}
+
+// ---------------------------------------------------------------------------
+// Builder: VideoObject
+// ---------------------------------------------------------------------------
+
+interface VideoForSchema {
+  youtubeId: string;
+  publishedAt: Date | string;
+  // Sync-owned
+  title: string;
+  description?: string | null;
+  thumbnailUrl?: string | null;
+  // Owner-owned overrides — resolution is ALWAYS `override ?? synced`, same
+  // as every other surface that renders a video (see the Video model
+  // comment in schema.prisma). Never pass the raw sync columns through.
+  titleOverride?: string | null;
+  descriptionOverride?: string | null;
+  thumbnailOverride?: string | null;
+}
+
+/**
+ * Build a schema.org VideoObject for a video on the storefront /videos index.
+ *
+ * `embedUrl`/`contentUrl` are derived from `youtubeId` via the shared
+ * `youtubeEmbedUrl`/`youtubeWatchUrl` helpers (src/lib/youtube/parse.ts),
+ * matching every other place in the app that links to a YouTube video.
+ * `uploadDate` is `publishedAt` as an ISO string.
+ *
+ * `thumbnailUrl` here resolves `thumbnailOverride ?? thumbnailUrl` — the
+ * override may be an S3-hosted image or, if never customized, YouTube's own
+ * CDN thumbnail. Either way it's already an absolute URL; `toAbsoluteUrl` is
+ * reused only as the same "omit if unusable" safety net every other builder
+ * uses, not because this field is S3-specific.
+ */
+export function buildVideoObjectSchema(
+  video: VideoForSchema,
+): Record<string, unknown> {
+  const name = video.titleOverride ?? video.title;
+  const description = video.descriptionOverride ?? video.description;
+  const thumbnailUrl = toAbsoluteUrl(
+    video.thumbnailOverride ?? video.thumbnailUrl,
+  );
+  const uploadDate = (
+    video.publishedAt instanceof Date
+      ? video.publishedAt
+      : new Date(video.publishedAt)
+  ).toISOString();
+
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name,
+    uploadDate,
+    embedUrl: youtubeEmbedUrl(video.youtubeId),
+    contentUrl: youtubeWatchUrl(video.youtubeId),
+  };
+
+  if (description) {
+    schema.description = description;
+  }
+
+  if (thumbnailUrl) {
+    schema.thumbnailUrl = thumbnailUrl;
   }
 
   return schema;

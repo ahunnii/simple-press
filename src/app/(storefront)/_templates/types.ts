@@ -57,6 +57,11 @@ export type DefaultEventsPageTemplateProps = {
   timeZone: string;
 };
 
+export type DefaultVideosPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  videos: RouterOutputs["videos"]["getPublic"];
+};
+
 export type DefaultCartPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
 };

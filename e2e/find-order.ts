@@ -1,4 +1,4 @@
-// Side-effect import FIRST: points Prisma at the 5433 test DB.
+// Side-effect import FIRST: points Prisma at the local test DB.
 import "../tests/helpers/test-env";
 
 import { db } from "../tests/helpers/db";

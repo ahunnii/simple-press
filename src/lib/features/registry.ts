@@ -178,6 +178,16 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     ownerCanToggle: true,
     hidesNav: ["events"],
   },
+  videos: {
+    key: "videos",
+    label: "Videos",
+    description:
+      "Show YouTube videos on your site, synced automatically from your channels and playlists",
+    category: "content",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+    hidesNav: ["videos"],
+  },
   media: {
     key: "media",
     label: "Media Library",

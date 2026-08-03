@@ -26,8 +26,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const baseUrl = getCanonicalBaseUrl(business);
 
-  const [products, collections, pages, services, faqCount, eventCount] =
-    await Promise.all([
+  const [
+    products,
+    collections,
+    pages,
+    services,
+    faqCount,
+    eventCount,
+    videoCount,
+  ] = await Promise.all([
       db.product.findMany({
         where: { businessId: business.id, published: true },
         select: { slug: true, updatedAt: true },
@@ -49,6 +56,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
       db.event.count({
         where: { businessId: business.id, published: true, isArchived: false },
+      }),
+      db.video.count({
+        where: { businessId: business.id, published: true },
       }),
     ]);
 
@@ -110,6 +120,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/events`,
       changeFrequency: "weekly",
       priority: 0.7,
+    });
+  }
+
+  // Videos static index page — only when there are published videos. Mirrors
+  // the events entry above, including NOT gating on the "videos" feature
+  // flag — like every other section in this file, only the published-row
+  // count is checked.
+  if (videoCount > 0) {
+    staticRoutes.push({
+      url: `${baseUrl}/videos`,
+      changeFrequency: "weekly",
+      priority: 0.6,
     });
   }
 

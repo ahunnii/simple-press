@@ -26,7 +26,12 @@ export default defineConfig({
         test: {
           name: "unit",
           environment: "node",
-          include: ["src/**/*.test.ts"],
+          // `tests/helpers` is included for test-harness units that must run
+          // WITHOUT Docker — notably assert-test-database, which guards the
+          // destructive `db push` in the integration project's globalSetup. It
+          // deliberately cannot live in that project: its whole job is to run
+          // before that setup, so a failure there must not depend on it.
+          include: ["src/**/*.test.ts", "tests/helpers/**/*.test.ts"],
           setupFiles: ["tests/helpers/setup-node.ts"],
         },
       },

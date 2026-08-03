@@ -410,6 +410,39 @@ exports.Prisma.EventScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.VideoSourceScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  kind: 'kind',
+  externalId: 'externalId',
+  label: 'label',
+  enabled: 'enabled',
+  autoPublish: 'autoPublish',
+  lastSyncedAt: 'lastSyncedAt',
+  lastSyncError: 'lastSyncError',
+  businessId: 'businessId'
+};
+
+exports.Prisma.VideoScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  youtubeId: 'youtubeId',
+  title: 'title',
+  description: 'description',
+  thumbnailUrl: 'thumbnailUrl',
+  channelTitle: 'channelTitle',
+  publishedAt: 'publishedAt',
+  titleOverride: 'titleOverride',
+  descriptionOverride: 'descriptionOverride',
+  thumbnailOverride: 'thumbnailOverride',
+  published: 'published',
+  sortOrder: 'sortOrder',
+  sourceId: 'sourceId',
+  businessId: 'businessId'
+};
+
 exports.Prisma.ImageScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
@@ -855,6 +888,8 @@ exports.Prisma.ModelName = {
   Service: 'Service',
   ServiceItem: 'ServiceItem',
   Event: 'Event',
+  VideoSource: 'VideoSource',
+  Video: 'Video',
   Image: 'Image',
   Customer: 'Customer',
   ShippingAddress: 'ShippingAddress',

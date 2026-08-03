@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw"/>
+ <id>yt:channel:_x5XG1OV2P6uZZ5FSM9Ttw</id>
+ <yt:channelId>_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+ <title>Google for Developers</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw"/>
+ <author>
+  <name>Google for Developers</name>
+  <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+ </author>
+ <published>2007-08-23T00:34:43+00:00</published>
+ <entry>
+  <id>yt:video:-rYFDefcq3k</id>
+  <yt:videoId>-rYFDefcq3k</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Introducing Gemini Robotics 2</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=-rYFDefcq3k"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-31T19:00:37+00:00</published>
+  <updated>2026-07-31T22:18:44+00:00</updated>
+  <media:group>
+   <media:title>Introducing Gemini Robotics 2</media:title>
+   <media:content url="https://www.youtube.com/v/-rYFDefcq3k?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/-rYFDefcq3k/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Carolina Parada, Stuart Bowers, Kanishka Rao, and Jie Tan from Google DeepMind join host Logan Kilpatrick inside the Gemini Robotics Lab to introduce Gemini Robotics 2, Google DeepMind's new suite of models bringing whole body intelligence, dexterity, and multi-robot collaboration to general purpose robotics. Their conversation covers the arc from reinforcement learning to vision language action models and the open challenge of physical AGI.
+
+Subscribe to Google for Developers → https://goo.gle/developers  
+
+Speaker: Carolina Parada, Stuart Bowers, Kanishka Rao, Jie Tan 
+Products Mentioned:  Google AI, Gemini</media:description>
+   <media:community>
+    <media:starRating count="116" average="5.00" min="1" max="5"/>
+    <media:statistics views="1716"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:z6l5nyE_6-I</id>
+  <yt:videoId>z6l5nyE_6-I</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Voice Agent observability with LangSmith</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=z6l5nyE_6-I"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-31T16:22:34+00:00</published>
+  <updated>2026-07-31T16:31:23+00:00</updated>
+  <media:group>
+   <media:title>Voice Agent observability with LangSmith</media:title>
+   <media:content url="https://www.youtube.com/v/z6l5nyE_6-I?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/z6l5nyE_6-I/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Caroline di Vittorio, Engineer at LangChain, builds a voice agent with the Google ADK and the Gemini Live model, then sets up tracing in LangSmith to see exactly what the agent is doing under the hood. Gemini Live is Google's native audio model. It's speech-to-speech, taking audio directly as input and producing audio as output without transcribing to text, which keeps latency low and makes the agent's voice sound natural and emotive.
+
+What's covered: building a terminal-based weather assistant with two tools, defining the LangSmith Google ADK plugin, registering it on the runner, recording user and agent audio so the trace captures only what the user actually heard, and reading the full trace in LangSmith, including audio playback, transcripts, tool calls, interruption events, and token-level cost breakdowns.
+
+Get started with the Gemini Live API. Grab an API key in Google AI Studio and start building.
+
+Resources:
+Gemini Live API docs → https://goo.gle/4hDlQYv
+Google ADK docs → https://goo.gle/3U4sjlq 
+LangSmith docs → https://goo.gle/3Tt9CI4  
+
+What are you building with Gemini Live? Drop it in the comments.
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speaker: 
+Products Mentioned:  Google AI, ADK,</media:description>
+   <media:community>
+    <media:starRating count="71" average="5.00" min="1" max="5"/>
+    <media:statistics views="1070"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:8uncdjpygSU</id>
+  <yt:videoId>8uncdjpygSU</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>The documentary all devs would watch tbh…</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/8uncdjpygSU"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-31T04:00:35+00:00</published>
+  <updated>2026-07-31T18:11:53+00:00</updated>
+  <media:group>
+   <media:title>The documentary all devs would watch tbh…</media:title>
+   <media:content url="https://www.youtube.com/v/8uncdjpygSU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/8uncdjpygSU/hqdefault.jpg" width="480" height="360"/>
+   <media:description>We know it’s going to be a good story, especially when you force-pushed to prod… on a FRIDAY. 
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speakers: Micah-Christian Foster</media:description>
+   <media:community>
+    <media:starRating count="37" average="5.00" min="1" max="5"/>
+    <media:statistics views="2811"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:BXzFk5kK5_Q</id>
+  <yt:videoId>BXzFk5kK5_Q</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Android Studio Quail 2, the Build with Gemini XPRIZE, and more! - Google Developer News July 2026</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=BXzFk5kK5_Q"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-30T16:00:39+00:00</published>
+  <updated>2026-07-31T15:26:34+00:00</updated>
+  <media:group>
+   <media:title>Android Studio Quail 2, the Build with Gemini XPRIZE, and more! - Google Developer News July 2026</media:title>
+   <media:content url="https://www.youtube.com/v/BXzFk5kK5_Q?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/BXzFk5kK5_Q/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Welcome to Google Developer News! Join Christy Yao as we dive into the latest tools, updates, and opportunities for developers. In this episode, we cover the stable release of Android Studio Quail 2, new model evaluations in Android Bench, an exclusive look at YouTube’s AI prototyping stack, and how you can compete for a share of $2,000,000 in the Build with Gemini XPRIZE! 
+
+Chapters: 
+
+0:00 - Intro 
+0:13 - Android Studio Quail 2 is Now Stable (Parallel chats, LeakCanary, App Quality Insights)
+1:10 - Android Bench Updates &amp; Harbor Framework
+2:00 - Inside Look: YouTube's AI Prototyping Stack (Emergent Premiere)
+2:48 - Build with Gemini XPRIZE ($2M Competition)
+3:38 - Outro &amp; Keep Building
+
+
+Resources: 
+Android Studio Quail 2  → https://goo.gle/4bloC0A  
+Android Bench → https://goo.gle/4fMcNCb 
+Emergent 1st episode  → https://goo.gle/4fLHDe5 
+Build with Gemini XPRIZE → https://goo.gle/3TIfnBG 
+
+Watch more Google Developer News → https://goo.gle/4e8Rysd  
+Subscribe to Google for Developers → https://goo.gle/developers  
+
+#GoogleDeveloperNews 
+
+Speaker: Christy Yao
+Products Mentioned:  Google AI, Gemini, Android</media:description>
+   <media:community>
+    <media:starRating count="85" average="5.00" min="1" max="5"/>
+    <media:statistics views="1818"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:cBBWorSU0P4</id>
+  <yt:videoId>cBBWorSU0P4</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Building the ultimate morning dashboard with Gemini 3.6 Flash and Nano Banana</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/cBBWorSU0P4"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-29T23:00:37+00:00</published>
+  <updated>2026-07-30T07:48:19+00:00</updated>
+  <media:group>
+   <media:title>Building the ultimate morning dashboard with Gemini 3.6 Flash and Nano Banana</media:title>
+   <media:content url="https://www.youtube.com/v/cBBWorSU0P4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/cBBWorSU0P4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Raph vibe coded an e-ink picture frame with Gemini 3.6 Flash and Nano Banana that helps his family start their day. 
+
+Learn how he did it using Antigravity and follow the open source guide to build your own too.
+
+Resources: 
+
+Learn more → https://goo.gle/4wpzbs0 
+
+Subscribe to Google for Developers → https://goo.gle/developers  
+
+Speaker: Raphael D. 
+Products Mentioned:  Google AI, Gemini</media:description>
+   <media:community>
+    <media:starRating count="166" average="5.00" min="1" max="5"/>
+    <media:statistics views="5876"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:UUozyqDNRGg</id>
+  <yt:videoId>UUozyqDNRGg</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Does this install succeed? If it does, which three versions end up in your lockfile?</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/UUozyqDNRGg"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-27T13:00:08+00:00</published>
+  <updated>2026-07-29T15:03:16+00:00</updated>
+  <media:group>
+   <media:title>Does this install succeed? If it does, which three versions end up in your lockfile?</media:title>
+   <media:content url="https://www.youtube.com/v/UUozyqDNRGg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/UUozyqDNRGg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>A dependency resolution dev challenge from a situation every dev has faced at least once. Your app needs three packages. The registry has six versions, each with its own constraints. The resolver can pick only one version of each package, and it prefers the newest it can get. Which versions get installed if any?
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speakers: Anaya Mehta</media:description>
+   <media:community>
+    <media:starRating count="178" average="5.00" min="1" max="5"/>
+    <media:statistics views="5771"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:NIDrPjeZ-jQ</id>
+  <yt:videoId>NIDrPjeZ-jQ</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>PM vs. Eng</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/NIDrPjeZ-jQ"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-23T23:00:32+00:00</published>
+  <updated>2026-07-24T08:02:35+00:00</updated>
+  <media:group>
+   <media:title>PM vs. Eng</media:title>
+   <media:content url="https://www.youtube.com/v/NIDrPjeZ-jQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/NIDrPjeZ-jQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description>When your PM comes up with the *best* ideas...
+
+Subscribe to Google for Developers → https://goo.gle/developers
+
+Speakers: Rohan Shah, Denis Nekliudov</media:description>
+   <media:community>
+    <media:starRating count="1109" average="5.00" min="1" max="5"/>
+    <media:statistics views="33088"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:eiRlCVtzlm4</id>
+  <yt:videoId>eiRlCVtzlm4</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Expose your site's actions to AI agents using WebMCP</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/eiRlCVtzlm4"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-22T23:00:37+00:00</published>
+  <updated>2026-07-27T14:36:58+00:00</updated>
+  <media:group>
+   <media:title>Expose your site's actions to AI agents using WebMCP</media:title>
+   <media:content url="https://www.youtube.com/v/eiRlCVtzlm4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/eiRlCVtzlm4/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Instead of forcing agents to interpret your UI, use WebMCP to expose what it can actually do! 
+
+Resources: 
+Learn more about WebMCP → https://goo.gle/4wdG9Af 
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speaker: Sayali Godbole</media:description>
+   <media:community>
+    <media:starRating count="261" average="5.00" min="1" max="5"/>
+    <media:statistics views="7330"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:JRArFxEfyQU</id>
+  <yt:videoId>JRArFxEfyQU</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>How are large language models trained?</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=JRArFxEfyQU"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-22T15:57:42+00:00</published>
+  <updated>2026-07-22T16:11:44+00:00</updated>
+  <media:group>
+   <media:title>How are large language models trained?</media:title>
+   <media:content url="https://www.youtube.com/v/JRArFxEfyQU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/JRArFxEfyQU/hqdefault.jpg" width="480" height="360"/>
+   <media:description>DeepMind’s Nikita Namjoshi breaks ​​down the two core phases of how large language models are trained: pre-training and post-training. Learn how next token prediction builds a model's foundation, and how supervised fine-tuning, reinforcement learning, and Autoraters refine it into a safe, helpful assistant.
+
+Subscribe to Google for Developers → https://goo.gle/developers  
+
+Speaker: Nikita Namjoshi 
+Products Mentioned:  Google AI, Gemini</media:description>
+   <media:community>
+    <media:starRating count="939" average="5.00" min="1" max="5"/>
+    <media:statistics views="17266"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:T_YzKVRlRsQ</id>
+  <yt:videoId>T_YzKVRlRsQ</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Emojis in the username really do cause havoc, huh?</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/T_YzKVRlRsQ"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-22T04:00:29+00:00</published>
+  <updated>2026-07-25T20:55:20+00:00</updated>
+  <media:group>
+   <media:title>Emojis in the username really do cause havoc, huh?</media:title>
+   <media:content url="https://www.youtube.com/v/T_YzKVRlRsQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/T_YzKVRlRsQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description>So, your app works perfectly? Not for long when we introduce emojis in a username. 
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speakers: Justine Lai, Bri Davis</media:description>
+   <media:community>
+    <media:starRating count="212" average="5.00" min="1" max="5"/>
+    <media:statistics views="19038"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:iK-JE0ZbCfg</id>
+  <yt:videoId>iK-JE0ZbCfg</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Access all Gemini models with the Interactions API</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/iK-JE0ZbCfg"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-20T23:00:10+00:00</published>
+  <updated>2026-07-21T08:18:27+00:00</updated>
+  <media:group>
+   <media:title>Access all Gemini models with the Interactions API</media:title>
+   <media:content url="https://www.youtube.com/v/iK-JE0ZbCfg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/iK-JE0ZbCfg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Say goodbye to complex AI workflows. The new Gemini Interactions API is a single-interface gateway that gives your AI agents stateful memory and multimodal powers.
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speakers: Thor Schaeff 
+Products Mentioned: Gemini, Google AI</media:description>
+   <media:community>
+    <media:starRating count="315" average="5.00" min="1" max="5"/>
+    <media:statistics views="8345"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:AaWdVp_py4Y</id>
+  <yt:videoId>AaWdVp_py4Y</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>What’s going wrong with this Kotlin code?</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/AaWdVp_py4Y"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-20T13:00:13+00:00</published>
+  <updated>2026-07-21T14:59:25+00:00</updated>
+  <media:group>
+   <media:title>What’s going wrong with this Kotlin code?</media:title>
+   <media:content url="https://www.youtube.com/v/AaWdVp_py4Y?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/AaWdVp_py4Y/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Devs, this Kotlin challenge arises from a refactoring bug you might have seen. Here’s the setup: a teammate tidies up some code that builds job configurations. The build succeeds and everything looks fine. Then we check the list, and instead of the config object we expect, it holds something else. Watch the video and share what you think caused the bug!
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speakers: Anaya Mehta</media:description>
+   <media:community>
+    <media:starRating count="162" average="5.00" min="1" max="5"/>
+    <media:statistics views="10363"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:iOK1-b_9Dlg</id>
+  <yt:videoId>iOK1-b_9Dlg</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Get started with the Interactions API</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=iOK1-b_9Dlg"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-17T23:00:34+00:00</published>
+  <updated>2026-07-20T22:25:44+00:00</updated>
+  <media:group>
+   <media:title>Get started with the Interactions API</media:title>
+   <media:content url="https://www.youtube.com/v/iOK1-b_9Dlg?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/iOK1-b_9Dlg/hqdefault.jpg" width="480" height="360"/>
+   <media:description>The Interactions API has reached general availability and is now our primary API for interacting with Gemini models and agents.  Whether you're calling a model or running an agent, the Interactions API gets you there in a few lines of code.  
+
+Start building with the new API now → https://goo.gle/4fjN2Jg 
+
+Subscribe to Google for Developers → https://goo.gle/developers   
+
+Speaker: Thor Schaeff 
+Products Mentioned:  Google AI, Gemini</media:description>
+   <media:community>
+    <media:starRating count="192" average="5.00" min="1" max="5"/>
+    <media:statistics views="4518"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:8I7wr2hYFec</id>
+  <yt:videoId>8I7wr2hYFec</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Antigravity Arcade: From prompt to game in minutes</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=8I7wr2hYFec"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-17T16:00:10+00:00</published>
+  <updated>2026-07-17T16:11:19+00:00</updated>
+  <media:group>
+   <media:title>Antigravity Arcade: From prompt to game in minutes</media:title>
+   <media:content url="https://www.youtube.com/v/8I7wr2hYFec?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/8I7wr2hYFec/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Explore how Antigravity and AI skills can generate web games in minutes with best practices skills and deployment workflows to an online games portal powered by Firebase and Google Cloud.
+
+Subscribe to Google for Developers → https://goo.gle/developers  
+
+Speaker: Tom Greenaway 
+Products Mentioned:  Google AI</media:description>
+   <media:community>
+    <media:starRating count="173" average="5.00" min="1" max="5"/>
+    <media:statistics views="6450"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:mgoNUC-tCAo</id>
+  <yt:videoId>mgoNUC-tCAo</yt:videoId>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Wait, what are we launching?</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/mgoNUC-tCAo"/>
+  <author>
+   <name>Google for Developers</name>
+   <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2026-07-17T04:00:14+00:00</published>
+  <updated>2026-07-17T21:45:53+00:00</updated>
+  <media:group>
+   <media:title>Wait, what are we launching?</media:title>
+   <media:content url="https://www.youtube.com/v/mgoNUC-tCAo?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/mgoNUC-tCAo/hqdefault.jpg" width="480" height="360"/>
+   <media:description>For a launch, it’s all about rolling with the quick turn around times. 
+
+Subscribe to Google for Developers → https://goo.gle/developers 
+
+Speakers: Chase Akumiah, Serena Cheng, Kadija Nabe</media:description>
+   <media:community>
+    <media:starRating count="456" average="5.00" min="1" max="5"/>
+    <media:statistics views="39695"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

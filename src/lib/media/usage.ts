@@ -455,6 +455,40 @@ export async function buildUsedMediaIndex(
       }
     });
 
+  // ── 5c. Videos (owner-uploaded thumbnail override) ─────────────────────────
+  //
+  // IMPORTANT: only `thumbnailOverride` belongs here. The sync-owned
+  // `thumbnailUrl` column points at YouTube's CDN (`*.ytimg.com`), never at
+  // an object in our bucket — `addUsage`'s `isStorageUrl` guard would reject
+  // it anyway, but do NOT be tempted to add it "for completeness" if this
+  // section is ever extended. Registering a remote YouTube thumbnail as
+  // media usage would make the library think it's a managed file we can
+  // re-host or that deleting frees storage — neither is true.
+  const videosPromise = db.video
+    .findMany({
+      where: { businessId },
+      select: {
+        id: true,
+        title: true,
+        titleOverride: true,
+        thumbnailOverride: true,
+      },
+    })
+    .then((videos) => {
+      for (const v of videos) {
+        if (v.thumbnailOverride) {
+          addUsage(map, v.thumbnailOverride, {
+            url: v.thumbnailOverride,
+            location: "Video thumbnail override",
+            entityType: "video",
+            entityId: v.id,
+            entityLabel: v.titleOverride ?? v.title,
+            adminHref: `/admin/videos/${v.id}`,
+          });
+        }
+      }
+    });
+
   // ── 6. Images (product image gallery rows) ─────────────────────────────────
   const imagesPromise = db.image
     .findMany({
@@ -635,6 +669,7 @@ export async function buildUsedMediaIndex(
     collectionsPromise,
     servicesPromise,
     eventsPromise,
+    videosPromise,
     imagesPromise,
     pagesPromise,
     galleryImagesPromise,

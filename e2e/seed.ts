@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 
-// Side-effect import FIRST: points the Prisma client at the 5433 test DB and sets
+// Side-effect import FIRST: points the Prisma client at the local test DB and sets
 // SKIP_ENV_VALIDATION before `~/server/db` (via the factories) constructs.
 import "../tests/helpers/test-env";
 

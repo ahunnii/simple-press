@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Side-effect import: sets the test DSN (5433) + dummy env defaults via `??=`
+// Side-effect import: sets the test DSN (port from TEST_PG_PORT) + dummy env defaults via `??=`
 // BEFORE the dev server inherits process.env. Mirrors the Vitest test harness so
 // the running app's env-validated singletons construct without real credentials.
 import "./tests/helpers/test-env";

@@ -72,6 +72,7 @@ export type TemplatePage =
   | "shop"
   | "services"
   | "events"
+  | "videos"
   | "cart"
   | "checkout"
   | "global"
@@ -595,6 +596,11 @@ export const PAGE_METADATA = {
     title: "Events",
     description: "Upcoming events listing page content",
     icon: "🎫",
+  },
+  videos: {
+    title: "Videos",
+    description: "Video gallery page content",
+    icon: "📺",
   },
 } as const;
 

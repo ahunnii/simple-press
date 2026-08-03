@@ -367,6 +367,38 @@ export interface ExportedEvent {
   isArchived: boolean;
 }
 
+export interface ExportedVideoSource {
+  exportId: string;
+  kind: string; // "channel" | "playlist"
+  externalId: string;
+  label: string | null;
+  enabled: boolean;
+  autoPublish: boolean;
+  // lastSyncedAt / lastSyncError excluded — sync bookkeeping, not content.
+}
+
+export interface ExportedVideo {
+  exportId: string;
+  youtubeId: string;
+  // Sync-owned — carried across so an imported video renders correctly
+  // before the next sync run overwrites these.
+  title: string;
+  description: string | null;
+  /** Remote YouTube CDN URL (*.ytimg.com) — never rewritten on import. */
+  thumbnailUrl: string | null;
+  channelTitle: string | null;
+  publishedAt: string; // ISO string
+  // Owner-owned overrides
+  titleOverride: string | null;
+  descriptionOverride: string | null;
+  /** S3-hosted — rewritten on import, unlike thumbnailUrl above. */
+  thumbnailOverride: string | null;
+  published: boolean;
+  sortOrder: number;
+  /** exportId of the source ExportedVideoSource, or null for a manual add. */
+  exportSourceId: string | null;
+}
+
 export interface ExportedShippingRate {
   exportId: string;
   tierIndex: number;
@@ -397,6 +429,8 @@ export interface StoreTransferContent {
   testimonials: ExportedTestimonial[];
   faqItems: ExportedFaqItem[];
   events: ExportedEvent[];
+  videoSources: ExportedVideoSource[];
+  videos: ExportedVideo[];
   shippingZones: ExportedShippingZone[];
 }
 

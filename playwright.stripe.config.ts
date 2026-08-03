@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Side-effect import: sets DATABASE_URL (5433), SKIP_ENV_VALIDATION, the Prisma
+// Side-effect import: sets DATABASE_URL (port from TEST_PG_PORT), SKIP_ENV_VALIDATION, the Prisma
 // field-encryption key, and the non-Stripe NEXT_PUBLIC_* dummies via `??=`. The
 // orchestrator (scripts/e2e-stripe.sh) exports the REAL test Stripe keys
 // (STRIPE_SECRET_KEY / NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY / STRIPE_WEBHOOK_SECRET

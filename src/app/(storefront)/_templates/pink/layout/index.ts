@@ -109,6 +109,17 @@ export const pinkGlobalData: TemplateField[] = [
     defaultValue: "Events",
   },
   {
+    key: "pink.global.nav-videos",
+    label: "Nav Label — Videos",
+    description:
+      "Header link to /videos. Only shown when the Videos feature is on.",
+    type: "text",
+    page: "global",
+    group: "global.header",
+    gridColumn: "col-span-1",
+    defaultValue: "Videos",
+  },
+  {
     key: "pink.global.nav-about",
     label: "Nav Label — About",
     description: "Header link to /about.",

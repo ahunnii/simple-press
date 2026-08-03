@@ -353,6 +353,31 @@ const exportedEventSchema = z.object({
   isArchived: z.boolean(),
 });
 
+const exportedVideoSourceSchema = z.object({
+  exportId: z.string(),
+  kind: z.string(),
+  externalId: z.string(),
+  label: nullableString.optional(),
+  enabled: z.boolean(),
+  autoPublish: z.boolean(),
+});
+
+const exportedVideoSchema = z.object({
+  exportId: z.string(),
+  youtubeId: z.string(),
+  title: z.string(),
+  description: nullableString.optional(),
+  thumbnailUrl: nullableString.optional(),
+  channelTitle: nullableString.optional(),
+  publishedAt: z.string(),
+  titleOverride: nullableString.optional(),
+  descriptionOverride: nullableString.optional(),
+  thumbnailOverride: nullableString.optional(),
+  published: z.boolean(),
+  sortOrder: z.number(),
+  exportSourceId: nullableString.optional(),
+});
+
 // ─── Content block ────────────────────────────────────────────────────────────
 
 const storeTransferContentSchema = z.object({
@@ -373,6 +398,12 @@ const storeTransferContentSchema = z.object({
   // STORE_TRANSFER_FORMAT_VERSION — that would hard-reject every ZIP exported
   // before this field existed). Do not "tidy" this into a required array.
   events: z.array(exportedEventSchema).optional().default([]),
+  // `videoSources`/`videos` were added after the original export format
+  // shipped, same as `events` above — MUST stay optional with a default so
+  // ZIPs exported before this field existed still parse instead of
+  // hard-failing. Do not make these required.
+  videoSources: z.array(exportedVideoSourceSchema).optional().default([]),
+  videos: z.array(exportedVideoSchema).optional().default([]),
   shippingZones: z.array(exportedShippingZoneSchema),
 });
 

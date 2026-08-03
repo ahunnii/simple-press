@@ -227,6 +227,8 @@ model Business {
   zones                 ShippingZone[]
   faqItems              FaqItem[]
   events                Event[]
+  videos                Video[]
+  videoSources          VideoSource[]
   backInStockRequests   BackInStockRequest[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
@@ -593,6 +595,132 @@ model Event {
   // The cron sweep, which is platform-wide and scans by cutoff, not by business.
   @@index([isArchived, endAt])
   @@index([isArchived, startAt])
+}
+
+/// A YouTube channel or playlist the owner registered as a feed to sync from.
+///
+/// Sync reads the public YouTube Atom feed for `externalId`; no API key, no OAuth,
+/// so there is nothing here but an id and bookkeeping. `kind` is a plain string
+/// ("channel" | "playlist") rather than an enum to keep this additive and to avoid
+/// a migration if a third feed shape ever shows up.
+///
+/// `autoPublish` decides only what `Video.published` is set to at INSERT time for
+/// videos discovered through this source. Flipping it later does not retroactively
+/// publish or unpublish anything — see the ownership note on `Video`.
+model VideoSource {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  kind        String // "channel" | "playlist"
+  externalId  String // UC… (channel) or PL…/UU… (playlist)
+  label       String? // owner-facing name
+  enabled     Boolean @default(true)
+  autoPublish Boolean @default(true)
+
+  // Bookkeeping written by the cron sync. `lastSyncError` holds the last failure
+  // message (feed 404, network error, malformed XML) so the owner can see why a
+  // source went quiet; it is cleared on the next successful run.
+  lastSyncedAt  DateTime?
+  lastSyncError String?   @db.Text
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  videos     Video[]
+
+  // One row per feed per business. Registering the same channel twice is a no-op
+  // upsert rather than a duplicate source producing duplicate work.
+  @@unique([businessId, kind, externalId])
+  // The cron sweep is platform-wide: it selects enabled sources ordered by the
+  // stalest `lastSyncedAt` first (nulls = never synced) and takes a batch. This
+  // index is what makes that selection cheap; it is not a per-business query.
+  @@index([enabled, lastSyncedAt])
+}
+
+/// One YouTube video surfaced on the storefront.
+///
+/// ────────────────────────────────────────────────────────────────────────────
+/// THE CORE INVARIANT: sync-owned columns vs owner-owned columns.
+/// ────────────────────────────────────────────────────────────────────────────
+/// This table has two writers with strictly separate column sets:
+///
+///   SYNC-OWNED  (cron, rewritten on EVERY run):
+///     title, description, thumbnailUrl, channelTitle, publishedAt
+///   OWNER-OWNED (admin UI only, written by the cron ONLY at first insert):
+///     titleOverride, descriptionOverride, thumbnailOverride, published, sortOrder
+///
+/// The sync upsert MUST list only the sync-owned columns in its `update` clause.
+/// Renders resolve through the overrides — `titleOverride ?? title`,
+/// `descriptionOverride ?? description`, `thumbnailOverride ?? thumbnailUrl` — so
+/// the owner's edits survive YouTube renaming a video, and YouTube's metadata
+/// still refreshes underneath them.
+///
+/// ⚠️ If a future reader "simplifies" that upsert into writing the whole object
+/// (e.g. spreading the same payload into both `create` and `update`), every owner
+/// edit, every unpublish, and every manual ordering choice is silently overwritten
+/// on the next cron tick. There is no error, no constraint violation, and no test
+/// that fails by construction — the data is just quietly gone. Keep the split.
+///
+/// ────────────────────────────────────────────────────────────────────────────
+/// ROWS ARE NEVER DELETED BECAUSE A VIDEO LEFT THE FEED.
+/// ────────────────────────────────────────────────────────────────────────────
+/// The YouTube Atom feed carries only the ~15 most recent entries. Older videos
+/// falling out of the feed is normal, expected behavior — not a signal that they
+/// were removed from YouTube. Reconciling by deleting local rows absent from the
+/// feed would wipe the owner's entire back catalogue on the very first sync of an
+/// established channel. Sync is insert/update only; rows leave this table solely
+/// by explicit owner action in the admin UI.
+model Video {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // The 11-character YouTube video id (the `v=` parameter). Everything public —
+  // watch URL, embed URL, thumbnail fallbacks — is derived from this.
+  youtubeId String
+
+  // ── Sync-owned. Overwritten on every sync run. Never hand-edit these. ────────
+  title        String
+  description  String?  @db.Text
+  thumbnailUrl String?
+  channelTitle String?
+  publishedAt  DateTime
+
+  // ── Owner-owned. Written at first insert, then only by the admin UI. ─────────
+  // Nullable overrides mean "not customized" — resolution is `override ?? synced`,
+  // so clearing an override falls back to live YouTube metadata rather than to an
+  // empty string.
+  titleOverride       String?
+  descriptionOverride String? @db.Text
+  thumbnailOverride   String?
+  // Seeded from the source's `autoPublish` at insert; owner-controlled thereafter.
+  published           Boolean @default(true)
+  // Manual ordering; storefront lists fall back to `publishedAt` desc within a tie.
+  sortOrder           Int     @default(0)
+
+  // Null = the owner added this video by hand (pasted a URL), not via a feed.
+  //
+  // SetNull, deliberately NOT Cascade: removing a channel/playlist means "stop
+  // pulling new videos from this feed", not "destroy the videos I already curated,
+  // reordered, and wrote custom copy for". Deleting a source demotes its videos to
+  // manual entries, which the owner can then keep or delete individually.
+  sourceId String?
+  source   VideoSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // The upsert target for sync, and the deduper. Note the scope: (business, video),
+  // NOT (source, video). An owner may register their own channel AND someone else's
+  // playlist that features the same video, so the identical `youtubeId` legitimately
+  // arrives from two different feeds in one run. Keying on the business collapses
+  // those into a single row (first source to insert it wins `sourceId`) instead of
+  // showing the shopper the same video twice.
+  @@unique([businessId, youtubeId])
+  // Public storefront list: published videos, newest first.
+  @@index([businessId, published, publishedAt])
+  // Admin list and any owner-ordered render.
+  @@index([businessId, sortOrder])
 }
 
 model Image {
