@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 
 import { SidebarMenu, SidebarMenuItem } from "~/components/ui/sidebar";
 

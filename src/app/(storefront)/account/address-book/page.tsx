@@ -13,7 +13,7 @@ export const metadata = {
 export default async function AddressBookPage() {
   const session = await getSession();
   if (!session?.user) {
-    redirect("/auth/sign-in?redirect=/account/address-book");
+    redirect("/auth/sign-in?redirectTo=/account/address-book");
   }
 
   const [business, customer] = await Promise.all([

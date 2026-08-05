@@ -33,6 +33,17 @@ export const SEED_FILE = join(
   ".seed-data.json",
 );
 
+// A pre-verified, credentialed better-auth user, seeded directly (see seed.ts)
+// rather than through the real /sign-up flow — `requireEmailVerification: true`
+// means a freshly signed-up user can't sign in until they click an emailed
+// link, which no e2e spec can do. Better-auth users aren't tenant-scoped (one
+// account works across every business subdomain), so this single seeded user
+// is reused by every auth spec regardless of which tenant it signs in on.
+export const SEED_USER = {
+  email: "e2e-signed-in@test.dev",
+  password: "E2eTest123!",
+};
+
 // Seeding touches the app's Prisma singleton (generated/prisma directory import +
 // the `~` alias), which Playwright's ESM runner can't resolve — so run it through
 // `tsx`, exactly like the `db:seed` script. The child writes SEED_FILE itself.

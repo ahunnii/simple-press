@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import {
   ChevronDown,
@@ -776,15 +776,9 @@ export function ViiHeader({
                   {session?.user ? (
                     <UserButton
                       size="icon"
-                      classNames={{
-                        trigger: {
-                          base: "rounded-full w-auto h-auto p-0",
-                          avatar: {
-                            base: "size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent",
-                          },
-                        },
-                      }}
-                      additionalLinks={[
+                      className="rounded-full w-auto h-auto p-0"
+                      avatarClassName="size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent"
+                      links={[
                         {
                           icon: <IconPackage className="h-4 w-4" />,
                           label: "Orders",

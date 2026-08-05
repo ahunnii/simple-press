@@ -1,6 +1,6 @@
 "use client";
 
-import { AccountSettingsCards } from "@daveyplate/better-auth-ui";
+import { AccountSettingsCards } from "~/components/account/account-settings-cards";
 
 import { NoiseAccountLayout } from "./noise-account-layout";
 

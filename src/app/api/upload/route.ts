@@ -7,6 +7,7 @@ import { toRouteHandler } from "@better-upload/server/adapters/next";
 import { env } from "~/env";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
+import { keyToPublicUrl } from "~/lib/s3/url";
 import { ROUTE_MAX_FILES } from "~/lib/uploads";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -203,6 +204,40 @@ const router: Router = {
         return {
           metadata: {
             ...metadata,
+          },
+        };
+      },
+    }),
+    // User avatars. Unlike every other route here, this is NOT business-scoped:
+    //
+    //  - Guard is session-only. Avatars belong to any signed-in shopper, so
+    //    `requireBusinessManager` (OWNER/MANAGER) would be wrong — it would
+    //    lock ordinary customers out of their own profile picture.
+    //  - The key lives under a global `avatars/` prefix rather than
+    //    `{businessId}/`. better-auth users are not tenant-scoped (one account
+    //    works across every storefront), and a business-scoped key would also
+    //    surface shopper avatars in that tenant's Media Library as
+    //    owner-deletable objects (`listBusinessObjects` lists by `{businessId}/`).
+    //  - The key is fixed per user, so re-uploading overwrites in place and
+    //    never orphans the previous object — the same deliberate choice the
+    //    `logo` and `favicon` routes make. Callers add a cache-busting query
+    //    param to the returned URL (see `~/lib/avatar-upload`).
+    avatar: route({
+      fileTypes: ["image/*"],
+      multipleFiles: false,
+      // Avatars are resized client-side to 256px before upload; this cap only
+      // needs to stop someone POSTing a raw original.
+      maxFileSize: 1024 * 1024 * 2, // 2MB
+      onBeforeUpload: async ({ req, file }) => {
+        const session = await auth.api.getSession({ headers: req.headers });
+        if (!session) throw new RejectUpload("Not logged in!");
+
+        const ext = safeRasterImageExt(file.name);
+        const key = `avatars/${session.user.id}${ext}`;
+        return {
+          objectInfo: {
+            key,
+            metadata: { pathname: keyToPublicUrl(key) },
           },
         };
       },

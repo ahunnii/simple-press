@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Leaf, Menu, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
@@ -86,15 +86,9 @@ export function HappyBambooHeader({
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "border-primary border",
-          avatar: {
-            base: "size-10",
-          },
-        },
-      }}
-      additionalLinks={[
+      className="border-primary border"
+      avatarClassName="size-10"
+      links={[
         {
           icon: <IconPackage className="h-4 w-4" />,
           label: "Orders",

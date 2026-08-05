@@ -1,19 +1,27 @@
+import { redirect } from "next/navigation";
+
 import { api } from "~/trpc/server";
+import { canonicalRedirectUrl } from "~/lib/auth-paths";
 import { DefaultResetPasswordPage } from "~/app/(storefront)/_templates/default/auth/default-reset-password-page";
 
 type Props = {
-  searchParams: Promise<{ redirectTo: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function ResetPasswordPage({ searchParams }: Props) {
-  const { redirectTo } = await searchParams;
+  const sp = await searchParams;
+
+  // See the note in ../sign-in/page.tsx. Note the reset token itself rides in
+  // `?token=`, which is untouched — only the destination params are rewritten.
+  const canonical = canonicalRedirectUrl("/auth/reset-password", sp);
+  if (canonical) redirect(canonical);
 
   const business = await api.business.simplifiedGet();
 
   const TemplateComponent =
     {}[business?.templateId ?? "default"] ?? DefaultResetPasswordPage;
 
-  return <TemplateComponent business={business} redirectTo={redirectTo} />;
+  return <TemplateComponent business={business} />;
 }
 
 export const metadata = {

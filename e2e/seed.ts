@@ -6,9 +6,14 @@ import "../tests/helpers/test-env";
 
 import type { SeedTenant } from "./global-setup";
 
+// better-auth's own password hasher (scrypt) — used to seed a credential
+// `Account` row directly, bypassing the real /sign-up/email flow (which would
+// leave the user unverified and unable to sign in; see SEED_USER's doc comment).
+import { hashPassword } from "better-auth/crypto";
+
 import { db } from "../tests/helpers/db";
 import { createBusiness, createProduct } from "../tests/helpers/factories";
-import { SEED_FILE, TEMPLATES } from "./global-setup";
+import { SEED_FILE, SEED_USER, TEMPLATES } from "./global-setup";
 
 // Run via `tsx` from e2e/global-setup.ts. Seeds one tenant (with a published
 // product) per template and writes the lookup table the specs read.
@@ -70,6 +75,28 @@ async function main() {
       price: product.price,
     });
   }
+
+  // Idempotent: drop + recreate the shared auth user (same pattern as the
+  // stale-tenant cleanup above). Cascades to its Session/Account rows.
+  await db.user.deleteMany({ where: { email: SEED_USER.email } });
+  const authUser = await db.user.create({
+    data: {
+      name: "E2E Signed-In User",
+      email: SEED_USER.email,
+      emailVerified: true,
+    },
+  });
+  await db.account.create({
+    data: {
+      userId: authUser.id,
+      providerId: "credential",
+      // Matches better-auth's own sign-up handler, which links the credential
+      // account under the user's own id (see
+      // node_modules/better-auth/dist/api/routes/sign-up.mjs).
+      accountId: authUser.id,
+      password: await hashPassword(SEED_USER.password),
+    },
+  });
 
   writeFileSync(SEED_FILE, JSON.stringify(tenants, null, 2));
   await db.$disconnect();

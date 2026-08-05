@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import {
   Heart,
   LayoutDashboardIcon,
   Menu,
+  Package,
   Search,
   ShoppingBag,
   User,
@@ -339,19 +340,28 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 ) : user ? (
                   <UserButton
                     size="icon"
-                    classNames={{
-                      trigger: {
-                        base: "w-[34px] h-[34px] rounded-full",
-                        avatar: { base: "w-[34px] h-[34px]" },
-                      },
-                    }}
-                    additionalLinks={[
-                      ...(user.platformRole === "PLATFORM_ADMIN"
+                    className="w-[34px] h-[34px] rounded-full"
+                    avatarClassName="w-[34px] h-[34px]"
+                    links={[
+                      // Business members reach /admin too, not just platform
+                      // admins — matches the gate the other templates use.
+                      ...(user.platformRole === "PLATFORM_ADMIN" ||
+                      session?.session?.membershipId
                         ? [
                             {
                               icon: <LayoutDashboardIcon className="h-4 w-4" />,
                               label: "Admin",
                               href: "/admin",
+                            },
+                          ]
+                        : []),
+                      // /account/orders 404s when the owner disables `orders`.
+                      ...(isStorefrontEnabled("orders")
+                        ? [
+                            {
+                              icon: <Package className="h-4 w-4" />,
+                              label: "Orders",
+                              href: "/account/orders",
                             },
                           ]
                         : []),

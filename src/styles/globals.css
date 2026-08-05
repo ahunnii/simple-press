@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
-@import "@daveyplate/better-auth-ui/css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -2941,39 +2940,9 @@
     opacity: 1;
   }
 
-  /* ─── Sledge: account pages (auth cards, address book, preferences) ─── */
-  .sledge .sl-account-content .rounded-lg.border,
-  .sledge .sl-account-content [class*="rounded-lg"][class*="border"] {
-    border-color: #e8e8e8 !important;
-    border-radius: var(--radius, 0.5rem);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  }
-
-  .sledge .sl-account-content .bg-primary {
-    background-color: var(--sl-coral-aa) !important;
-  }
-
-  .sledge .sl-account-content .text-primary {
-    color: var(--sl-coral-aa) !important;
-  }
-
-  .sledge .sl-account-content button.bg-primary,
-  .sledge .sl-account-content [data-slot="button"].bg-primary {
-    background-color: var(--sl-coral-aa) !important;
-    border-radius: var(--radius, 0.5rem);
-  }
-
-  .sledge .sl-account-content button.bg-primary:hover {
-    background-color: var(--sl-coral-aa-hover) !important;
-  }
-
-  .sledge .sl-account-content h2,
-  .sledge .sl-account-content h3 {
-    font-family: var(--font-heading, sans-serif);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--sl-coral-aa);
-  }
+  /* Sledge's account-page styling moved out of @layer base — see the
+     ".sledge .sl-account-content" block further down, near the vii and pink
+     account blocks. */
   .maplibregl-popup-content {
     @apply rounded-none! bg-transparent! p-0! shadow-none!;
   }
@@ -3219,17 +3188,36 @@
   box-shadow: none;
 }
 
-.vii-account [data-slot="card-title"] {
+/* Section headings. The auth UI renders these as a plain <h2> that sits
+   *outside* the card (it no longer uses CardTitle at all), so this targets the
+   heading directly. `.vii-account`'s own page title is an <h1>, so it is
+   untouched by this. */
+.vii-account h2 {
   font-family: var(--font-serif);
   font-weight: 500;
   letter-spacing: 0;
   color: var(--vii-navy);
 }
 
-/* Remove the two-tone footer band; keep one hairline divider on a paper card. */
+/* Session / linked-account rows are Item, not Card. */
+.vii-account [data-slot="item"] {
+  border-color: var(--vii-hairline);
+}
+
+.vii-account [data-slot="item-separator"] {
+  background: var(--vii-hairline);
+}
+
+/* Field labels sit above each input in the new settings forms. */
+.vii-account [data-slot="field-label"] {
+  color: var(--vii-ink-soft);
+}
+
+/* SIMPLEPRESS LOCAL ADDITION — the settings-card footers carry a `border-t pt-6`
+   utility (see src/components/auth/settings/**); this just swaps the divider to
+   the template's own hairline colour instead of shadcn's default border token. */
 .vii-account [data-slot="card-footer"] {
-  background: transparent;
-  border-top: 1px solid var(--vii-hairline);
+  border-top-color: var(--vii-hairline);
 }
 
 /* Form fields: calm boxed inputs on a cream fill, hairline border, copper focus. */
@@ -4844,6 +4832,59 @@
   }
 }
 
+/* ── Sledge account bridge ────────────────────────────────────────────────
+   Set on the content column of SledgeAccountLayout (`.sl-account-content`).
+
+   This used to live in @layer base and target Tailwind *class names* baked
+   into the card markup — `.rounded-lg.border`,
+   `[class*="rounded-lg"][class*="border"]`, `button.bg-primary` — every rule
+   forced with `!important`. That was doubly fragile: the class names are an
+   implementation detail of whichever card the auth library happens to render
+   (shadcn's Card is `rounded-xl`, not `rounded-lg`, so the selector had
+   already stopped matching), and `!important` was only needed because a base
+   layer loses to Tailwind's utility layer.
+
+   Now it is unlayered — like the vii and pink blocks below — so ordinary
+   specificity wins and no `!important` is required. */
+
+.sl-account-content {
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --primary: var(--sl-coral-aa);
+  --primary-foreground: #ffffff;
+  --border: #e8e8e8;
+  --input: #e8e8e8;
+  --ring: var(--sl-coral-aa);
+}
+
+.sl-account-content [data-slot="card"] {
+  border: 1px solid #e8e8e8;
+  border-radius: var(--radius, 0.5rem);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Section headings: the auth UI emits a plain <h2> outside the card. The
+   layout's own page title is an <h1> and lives outside `.sl-account-content`,
+   so it keeps its own styling. */
+.sl-account-content h2,
+.sl-account-content h3 {
+  font-family: var(--font-heading, sans-serif);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sl-coral-aa);
+}
+
+/* Tailwind's hover is `--primary/90`, which reads as a washed coral here, so
+   the intended darker hover is restated. */
+.sl-account-content [data-slot="button"].bg-primary:hover {
+  background-color: var(--sl-coral-aa-hover);
+}
+
+/* Session / linked-account rows are Item, not Card. */
+.sl-account-content [data-slot="item-separator"] {
+  background: #e8e8e8;
+}
+
 /* ── Account bridge: maps pink tokens onto the shadcn variables the shared
    better-auth-ui cards read. Set on the outermost wrapper of PinkAccountLayout. */
 
@@ -4876,15 +4917,31 @@
   border-radius: 0;
   box-shadow: none;
 }
-.pink-account [data-slot="card-title"] {
+/* Section headings. The auth UI renders these as a plain <h2> that sits
+   *outside* the card (it no longer uses CardTitle at all), so this targets the
+   heading directly. `.pink-display` is excluded because PinkAccountLayout uses
+   an <h2> of its own for the page title, which is already styled inline. */
+.pink-account h2:not(.pink-display) {
   font-family: var(--font-pink-display), Georgia, "Times New Roman", serif;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--pink-ink);
 }
+/* Session / linked-account rows are Item, not Card. */
+.pink-account [data-slot="item"] {
+  border-color: var(--pink-line);
+}
+.pink-account [data-slot="item-separator"] {
+  background: var(--pink-line);
+}
+.pink-account [data-slot="field-label"] {
+  color: var(--pink-muted);
+}
+/* SIMPLEPRESS LOCAL ADDITION — the settings-card footers carry a `border-t pt-6`
+   utility (see src/components/auth/settings/**); this just swaps the divider to
+   the template's own hairline colour instead of shadcn's default border token. */
 .pink-account [data-slot="card-footer"] {
-  background: transparent;
-  border-top: 1px solid var(--pink-line);
+  border-top-color: var(--pink-line);
 }
 .pink-account
   input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
@@ -5008,8 +5065,12 @@
   .pink-account [data-slot="card"] {
     border: 1px solid CanvasText;
   }
+
+  /* SIMPLEPRESS LOCAL ADDITION — forced-colors counterpart of the hairline-colour
+     override above; the footer's border-top-width/style already come from the
+     `border-t` utility on the CardFooter, this only restates the colour. */
   .pink-account [data-slot="card-footer"] {
-    border-top: 1px solid CanvasText;
+    border-top-color: CanvasText;
   }
 
   .pink ::selection {

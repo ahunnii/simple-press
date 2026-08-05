@@ -34,7 +34,7 @@ export default async function SubmitTestimonialPage({
   const session = await getSession();
 
   if (!session?.user) {
-    redirect(`/auth/sign-in?redirect=/testimonials/submit`);
+    redirect(`/auth/sign-in?redirectTo=/testimonials/submit`);
   }
 
   return <TestimonialForm business={business} />;

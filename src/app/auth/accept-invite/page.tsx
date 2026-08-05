@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { api } from "~/trpc/server";
+import { DefaultAuthShell } from "~/app/(storefront)/_templates/default/auth/default-auth-shell";
 
 import { AcceptInviteClient } from "./_components/accept-invite-client";
 
@@ -30,8 +31,30 @@ export default async function AcceptInvitePage({ searchParams }: Props) {
     errorMessage = message;
   }
 
+  const business = await api.business.simplifiedGet();
+
+  // The subhead always names the *invited* business (from the invite lookup),
+  // never the shell's own `business` — accept-invite is typically reached on
+  // the platform root domain, where `business` is null. Fall back to generic
+  // wording when the invite failed to load (no businessName available).
+  const subhead = invite
+    ? `Join ${invite.businessName} on SimplePress.`
+    : "This invitation link may be invalid or expired.";
+
   return (
-    <AcceptInviteClient code={code} invite={invite} errorMessage={errorMessage} />
+    <DefaultAuthShell
+      business={business}
+      headline="You've been invited"
+      subhead={subhead}
+      badgeView={null}
+      legalFooter="generic"
+    >
+      <AcceptInviteClient
+        code={code}
+        invite={invite}
+        errorMessage={errorMessage}
+      />
+    </DefaultAuthShell>
   );
 }
 

@@ -46,7 +46,20 @@ const DUMMIES: Record<string, string> = {
   MINIO_ACCESS_KEY: "dummy",
   MINIO_SECRET_KEY: "dummy",
   INVITATION_CODE: "dummy",
-  HCAPTCHA_SECRET_KEY: "dummy",
+  // better-auth's captcha() plugin (src/server/better-auth/config.tsx) enforces
+  // verification unconditionally on /sign-in/email, /sign-up/email, and
+  // /request-password-reset — there is no NODE_ENV or missing-key bypass on the
+  // server side (unlike the separate HCaptchaField/verifyHCaptcha dev-bypass used
+  // by onboarding/claim forms). A literal "dummy" secret makes those endpoints
+  // permanently 400/403 for any Vitest test or e2e spec that exercises them
+  // through the real UI. hCaptcha publishes a dedicated site key/secret pair for
+  // exactly this: the widget always renders a checkbox that instantly verifies,
+  // and the real siteverify call (yes, a real network round-trip to hCaptcha)
+  // always returns success for this pair. See
+  // https://docs.hcaptcha.com/configuration#integration-testing-test-keys and
+  // e2e/auth.default.spec.ts, which is the first spec to actually drive a
+  // credentialed sign-in through this gate.
+  HCAPTCHA_SECRET_KEY: "0x0000000000000000000000000000000000000000",
   VPS_IP: "127.0.0.1",
   SIMPLEPRESS_HASH_SECRET: "test-hash-secret",
   ARTISANAL_FUTURES_API_URL: "http://localhost:4000",
@@ -61,7 +74,9 @@ const DUMMIES: Record<string, string> = {
   NEXT_PUBLIC_EMAIL_FROM_NOREPLY: "noreply@test.dev",
   NEXT_PUBLIC_EMAIL_FROM_ORDERS: "orders@test.dev",
   NEXT_PUBLIC_EMAIL_FROM_SUPPORT: "support@test.dev",
-  NEXT_PUBLIC_HCAPTCHA_SITE_KEY: "dummy",
+  // Paired with HCAPTCHA_SECRET_KEY above — hCaptcha's published "always
+  // passes" integration-testing site key.
+  NEXT_PUBLIC_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001",
 };
 
 for (const [key, value] of Object.entries(DUMMIES)) {

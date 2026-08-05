@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
@@ -252,15 +252,9 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
                 {session?.user ? (
                   <UserButton
                     size="icon"
-                    classNames={{
-                      trigger: {
-                        base: "rounded-full w-auto h-auto p-0",
-                        avatar: {
-                          base: "size-8 ring-1 ring-[var(--pink-rose)] ring-offset-1 ring-offset-[var(--pink-paper)]",
-                        },
-                      },
-                    }}
-                    additionalLinks={[
+                    className="rounded-full w-auto h-auto p-0"
+                    avatarClassName="size-8 ring-1 ring-[var(--pink-rose)] ring-offset-1 ring-offset-[var(--pink-paper)]"
+                    links={[
                       {
                         icon: <IconPackage className="h-4 w-4" />,
                         label: "Orders",

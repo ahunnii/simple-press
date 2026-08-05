@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ArrowRight, Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 
@@ -184,13 +184,9 @@ export function BuildersHeader({
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "rounded-none w-auto h-auto p-0 border border-gray-200",
-          avatar: { base: "size-7" },
-        },
-      }}
-      additionalLinks={[
+      className="rounded-none w-auto h-auto p-0 border border-gray-200"
+      avatarClassName="size-7"
+      links={[
         {
           icon: <IconPackage className="h-4 w-4" />,
           label: "Orders",
