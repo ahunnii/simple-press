@@ -4141,6 +4141,407 @@
   background: var(--pink-ink-panel-hover);
 }
 
+/* ─── Pink: hero stage ─────────────────────────────────────────────────────
+   The homepage hero composition (v2, 2026-08-04 — replaces the same day's
+   washed-grey build, which replaced the bento collage; a same-day v3 pass
+   widened the trio to five makers on desktop): white ground → the family
+   home held in the upper region → the client's traced wordmark → five
+   makers holding their own work, overlapping that wordmark → solid bottom
+   band, with two doll cutouts pinned in the top corners. Layer order is
+   z-index only; everything stays in flow except the photo layers, the makers
+   rail and the corner dolls. */
+
+/* The photo treatment lives here rather than in the asset so a theme preset
+   retints around it, and so an owner-uploaded replacement lands in the same
+   composition automatically.
+
+   v1 ran `grayscale(1) contrast(1.05)` at 0.22 over a pink panel and the whole
+   hero went grey-mauve. The correction is baked into the new export now, so
+   there is no filter at all — the house's natural warmth against white paper
+   is the entire point of the v2 ground.
+
+   Opacity is tunable in 0.35–0.5; 0.5 is the ceiling. Not because the copy
+   fails above it — `.pink-hero-copy-scrim` is what guarantees the text — but
+   because a louder photo makes the whole page feel busy under a template whose
+   brief is "calm".
+
+   The mask is what lets opacity go this high: the house belongs to the upper
+   region, and the band seam wants clean white beneath it, not a photo edge. */
+.pink .pink-hero-photo {
+  position: absolute;
+  inset: 0;
+  opacity: 0.42;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 55%,
+    transparent 85%
+  );
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 85%);
+}
+/* A breath of rose at the top of the frame, nothing more — v2's ground is
+   white, so the old two-stop wash over the full height just dirtied it. */
+.pink .pink-hero-tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pink-rose) 5%, transparent),
+    transparent 70%
+  );
+}
+/* The legibility floor for the kicker and H1, held separately from the tint so
+   the two can be tuned against each other: the tint is mood, this is contrast.
+   Solid paper through the copy rows, gone by the time it reaches the makers.
+   The vertical radius is deliberately short (55% of the hero's height): the
+   first pass used 130% and the ray never left the element, so the "scrim"
+   was really a half-opaque white sheet over the whole photo — the house the
+   v2 ground exists to show was suppressed everywhere, not just under the
+   copy (review 2026-08-04). */
+.pink .pink-hero-copy-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 62% 55% at 50% 0%,
+    var(--pink-paper) 42%,
+    color-mix(in srgb, var(--pink-paper) 55%, transparent) 74%,
+    transparent 100%
+  );
+}
+
+/* The shop name as a graphic, sized off the viewport so it always spans most
+   of the stage. `SOFT 100` rounds the terminals and `WONK 1` swaps in
+   Fraunces' quirky alternates — both only ever set here, so the rest of the
+   template keeps the axes at their defaults. */
+.pink .pink-hero-wordmark {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(3.25rem, 19vw, 17rem);
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  font-variation-settings:
+    "SOFT" 100,
+    "WONK" 1;
+}
+
+/* The traced-logo build of the same mark (`PinkWordmarkSvg`), which is what
+   renders whenever the wordmark fields still hold their defaults. Sized by
+   width rather than font-size because it is geometry, not type — the ~5.6:1
+   viewBox turns 82vw into roughly the same stage presence the live-text
+   version gets from its clamp. */
+.pink .pink-hero-wordmark-svg {
+  display: block;
+  width: clamp(14rem, 82vw, 73rem);
+  height: auto;
+  margin-inline: auto;
+}
+
+/* ── The makers ──
+   Five figures (three on phones — the far-left and far-right pair is hidden
+   below 640px) in a bottom-anchored flex rail, sized by HEIGHT (`svh`), which
+   is the whole v2 sizing change: v1's dolls were width-sized in `vw` and so
+   towered out of the stage on a short-but-wide window, which is why that build
+   needed a `min(vw, vh)` cap bolted on at the end. Height-first sizing makes
+   the figures respond to the dimension that actually constrains them, and the
+   `min-h-0` stage row absorbs the difference. Negative margins overlap the
+   neighbours; the section's `overflow: hidden` crops whatever runs off canvas.
+
+   Each figure is then sunk by a percentage of ITS OWN height, so the fraction
+   hidden behind the band holds for any aspect ratio an owner uploads (a
+   `bottom` offset would resolve against the stage instead and drift with
+   viewport height). The rotation is static and lives on the inner element: the
+   outer one is what the entrance animates, and animating a transform that also
+   carries the resting tilt would either drop the tilt or spin the figure into
+   place. */
+.pink .pink-hero-makers {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.pink .pink-hero-maker {
+  height: var(--pink-maker-h);
+  position: relative;
+}
+/* The anchor of the composition overlaps both neighbours, not the reverse. */
+.pink .pink-hero-maker-center {
+  z-index: 2;
+}
+.pink .pink-hero-maker-figure {
+  height: 100%;
+  transform: translateY(var(--pink-maker-sink, 45%))
+    rotate(var(--pink-maker-tilt, 0deg));
+  transform-origin: 50% 100%;
+  /* Ink-tinted, not black — same lighting family as the corner dolls, and it
+     seats the cutouts against the photo instead of floating them on it. */
+  filter: drop-shadow(
+    0 12px 28px color-mix(in srgb, var(--pink-ink) 14%, transparent)
+  );
+}
+
+/* SINK GEOMETRY (QA 2026-08-04): the sink only has to keep the cutout's raw
+   bottom edge under the band — anything sunk past the band's own height is
+   cropped by the section and invisible either way. So the real constraint is
+   `sink × figure-height ≲ band height` (else nothing, it just wastes figure),
+   and the DESIGN constraint runs the other way: the first tuning pass sank the
+   figures 42–50% and buried the held artwork — three heads and no work, which
+   defeats the whole makers concept. These values keep head AND held piece
+   above the band, hiding only the hand/crop zone at each cutout's bottom. */
+
+/* Mobile first: the side figures are pushed partly off-canvas so all three stay
+   in the composition on a narrow screen instead of shrinking to thumbnails.
+   The far pair is display:none below (phones keep the original trio only). */
+.pink .pink-hero-maker-center {
+  --pink-maker-h: 36svh;
+  --pink-maker-sink: 16%;
+}
+/* Layer the row center-outward: the trio sits above the far pair so the
+   composition reads anchor-first even though the far figures are markup
+   siblings, not descendants. */
+.pink .pink-hero-maker-left {
+  --pink-maker-h: 30svh;
+  --pink-maker-sink: 20%;
+  --pink-maker-tilt: -2deg;
+  margin-right: -10vw;
+  z-index: 1;
+}
+/* The right figure's panel ends in a straight feathered cut — it is meant to
+   run off the right edge of the canvas rather than float with a visible seam,
+   hence the extra right-side bleed on top of the overlap. */
+.pink .pink-hero-maker-right {
+  --pink-maker-h: 30svh;
+  --pink-maker-sink: 22%;
+  --pink-maker-tilt: 1.5deg;
+  margin-left: -10vw;
+  margin-right: -6vw;
+  z-index: 1;
+}
+/* Five figures cannot fit a phone's width — the far pair is cut entirely
+   below 640px and the phone keeps the original trio. */
+.pink .pink-hero-maker-farleft,
+.pink .pink-hero-maker-farright {
+  display: none;
+}
+
+/* At phone width the wordmark is barely 60px tall — any figure overlap
+   swallows whole letters (the first pass read "PIN ART"). Lift it out of the
+   figures' reach; the poster overlap is a wide-screen move. The shift lives on
+   the outer reveal wrapper: it is `overflow: hidden` (the rise animation's
+   mask), so shifting the SVG inside it would just clip the mark out of view.
+   (Effective displacement is ~half the stated value — the wrapper is a
+   centered flex item, so flex centering gives half the shrunken margin box
+   back. -16svh here ≈ an 8svh visual lift; tuned by eye at 390×844.) */
+@media (max-width: 639px) {
+  .pink .pink-hero-wordmark-wrap {
+    margin-top: -16svh;
+  }
+}
+
+@media (min-width: 640px) {
+  .pink .pink-hero-maker-center {
+    --pink-maker-h: 44svh;
+    --pink-maker-sink: 16%;
+  }
+  .pink .pink-hero-maker-left {
+    --pink-maker-h: 38svh;
+    --pink-maker-sink: 20%;
+    margin-right: -2vw;
+  }
+  .pink .pink-hero-maker-right {
+    --pink-maker-h: 38svh;
+    --pink-maker-sink: 22%;
+    margin-left: -2vw;
+    margin-right: -3vw;
+  }
+  /* The far pair only ever appears here and up — five figures is a
+     desktop/tablet composition, not a phone one. */
+  .pink .pink-hero-maker-farleft,
+  .pink .pink-hero-maker-farright {
+    display: block;
+    --pink-maker-h: 32svh;
+    --pink-maker-sink: 24%;
+  }
+  .pink .pink-hero-maker-farleft {
+    --pink-maker-tilt: -3deg;
+    margin-right: -3vw;
+  }
+  .pink .pink-hero-maker-farright {
+    --pink-maker-tilt: 2.5deg;
+    margin-left: -3vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pink .pink-hero-maker-center {
+    --pink-maker-h: clamp(320px, 48svh, 560px);
+    --pink-maker-sink: 14%;
+  }
+  .pink .pink-hero-maker-left {
+    --pink-maker-h: clamp(260px, 40svh, 480px);
+    --pink-maker-sink: 18%;
+  }
+  .pink .pink-hero-maker-right {
+    --pink-maker-h: clamp(260px, 40svh, 480px);
+    --pink-maker-sink: 20%;
+    margin-right: -3vw;
+  }
+  .pink .pink-hero-maker-farleft,
+  .pink .pink-hero-maker-farright {
+    --pink-maker-h: clamp(220px, 34svh, 420px);
+  }
+  .pink .pink-hero-maker-farleft {
+    --pink-maker-sink: 22%;
+  }
+  .pink .pink-hero-maker-farright {
+    --pink-maker-sink: 24%;
+  }
+}
+
+/* The one short-viewport safety left over from v1's much larger set: on a
+   wide-but-short window (landscape phone, split-screen desktop) figure height
+   still crowds the copy row, so everything steps down TOGETHER — scaling only
+   the center let the sides' 260px clamp floor overtake it and inverted the
+   composition's hierarchy (review 2026-08-04). Last in the block so it wins
+   the breakpoints above at equal specificity. `min-width: 640px` keeps short
+   PORTRAIT phones (e.g. 375×667) on their tuned mobile values — this is a
+   wide-and-short fix. */
+@media (max-height: 700px) and (min-width: 640px) {
+  .pink .pink-hero-maker-center {
+    --pink-maker-h: clamp(250px, 40svh, 460px);
+  }
+  .pink .pink-hero-maker-left,
+  .pink .pink-hero-maker-right {
+    --pink-maker-h: clamp(200px, 33svh, 380px);
+  }
+  .pink .pink-hero-maker-farleft,
+  .pink .pink-hero-maker-farright {
+    --pink-maker-h: clamp(170px, 28svh, 330px);
+  }
+}
+
+/* ── Corner mementos ──
+   The two dolls that survived the v2 recut, at thumbnail size in the top
+   corners. Hidden below 640px: at phone width they land on top of the kicker
+   and there is no corner to spare. The desaturation keeps them reading as
+   pinned keepsakes rather than as a fourth and fifth subject. */
+.pink .pink-hero-corner-doll {
+  position: absolute;
+  display: none;
+}
+.pink .pink-hero-corner-doll-figure {
+  transform: rotate(var(--pink-corner-tilt, 0deg));
+  filter: saturate(0.88)
+    drop-shadow(
+      0 10px 24px color-mix(in srgb, var(--pink-ink) 18%, transparent)
+    );
+}
+
+@media (min-width: 640px) {
+  .pink .pink-hero-corner-doll {
+    display: block;
+    /* Keepsake scale — at 150px they started reading as a fourth and fifth
+       subject hanging into the stage (QA 2026-08-04). Bumped a quarter up
+       from that first cut per owner request (2026-08-04). */
+    width: clamp(80px, 10vw, 160px);
+  }
+  .pink .pink-hero-corner-doll-left {
+    left: -14px;
+    top: 4px;
+    --pink-corner-tilt: -9deg;
+  }
+  .pink .pink-hero-corner-doll-right {
+    right: -16px;
+    top: 10px;
+    --pink-corner-tilt: 10deg;
+  }
+}
+
+/* The band is the only thing that paints over the makers. Its min-height is
+   what guarantees the crop: below roughly 96px the sunk lower half of each
+   figure — and with it the hand-held crop line — starts reappearing under it. */
+.pink .pink-hero-band {
+  display: flex;
+  align-items: center;
+  /* `svh` to match the section's own height unit — with mobile browser chrome
+     shown, `vh` would size the band against a taller viewport than the hero. */
+  min-height: clamp(96px, 12svh, 150px);
+  background: var(--pink-panel-strong);
+}
+/* The band's top edge is cut with pinking shears — the zigzag border every
+   affirmation patch on the client's dolls and boards carries (and the pun the
+   shop is named for). Replaces the straight 1px seam; pure background
+   geometry, tinted by the same token as the band so theme presets keep it. */
+.pink .pink-hero-band::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: 9px;
+  /* One 90° wedge hanging from each 18px tile's top-center: at 9px depth the
+     wedge spans the full tile, so the teeth connect at their bases and the top
+     edge reads as pinked. (`at 50% 100%` was the first try — the wedge opened
+     below the strip and painted nothing.) */
+  background: conic-gradient(
+    from 135deg at 50% 0%,
+    var(--pink-panel-strong) 0 90deg,
+    transparent 0
+  );
+  background-size: 18px 9px;
+  background-repeat: repeat-x;
+}
+
+/* ─── Pink: Make & Takes mosaic ────────────────────────────────────────────
+   Fixed five-slot layout (1 dominant + 4 supporting) inside the dark ink
+   band, replacing the old owner-spanned grid that was hard-coded to
+   repeat(4,1fr) / 168px rows at every viewport with no mobile collapse.
+   Mobile: dominant tile full-width, then a 2x2 of supporting tiles. */
+.pink .pink-events-mosaic {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(2, 1fr);
+}
+.pink .pink-events-mosaic .pink-em-0 {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 10;
+}
+.pink .pink-events-mosaic .pink-em-1,
+.pink .pink-events-mosaic .pink-em-2,
+.pink .pink-events-mosaic .pink-em-3,
+.pink .pink-events-mosaic .pink-em-4 {
+  aspect-ratio: 1 / 1;
+}
+
+@media (min-width: 768px) {
+  .pink .pink-events-mosaic {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, clamp(150px, 16vw, 250px));
+  }
+  .pink .pink-events-mosaic .pink-em-0 {
+    grid-area: 1 / 1 / 3 / 3;
+    aspect-ratio: auto;
+  }
+  .pink .pink-events-mosaic .pink-em-1 {
+    grid-area: 1 / 3 / 2 / 4;
+    aspect-ratio: auto;
+  }
+  .pink .pink-events-mosaic .pink-em-2 {
+    grid-area: 1 / 4 / 2 / 5;
+    aspect-ratio: auto;
+  }
+  .pink .pink-events-mosaic .pink-em-3 {
+    grid-area: 2 / 3 / 3 / 4;
+    aspect-ratio: auto;
+  }
+  .pink .pink-events-mosaic .pink-em-4 {
+    grid-area: 2 / 4 / 3 / 5;
+    aspect-ratio: auto;
+  }
+}
+
 /* ── Buttons ── */
 
 .pink .pink-btn {
@@ -4347,13 +4748,30 @@
     opacity: 1;
   }
 }
-@keyframes pink-panel {
+/* The hero figures rise into frame from behind the band. Only the outer wrapper
+   is animated — the resting tilt sits on the inner element (see
+   `.pink-hero-maker-figure`), so nothing here has to re-state it. Kept under
+   its original name through the v2 recut: the dolls became makers, the motion
+   did not change. */
+@keyframes pink-doll-rise {
   from {
-    clip-path: inset(100% 0 0 0);
-    transform: translateY(40px);
+    opacity: 0;
+    transform: translateY(64px);
   }
   to {
-    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* The corner mementos come from the opposite direction — they hang off the top
+   edge, so they drop in rather than rise. Same inner/outer split. */
+@keyframes pink-doll-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -4369,7 +4787,9 @@
    removed on 2026-07-31. They were the main source of the "grungy" read the
    client flagged, and they were also the measured cause of the homepage running
    655 layout/style passes while completely idle vs 6 on a control page
-   (audit 2026-07-31, P3-2). The clean palette carries the hero on its own. */
+   (audit 2026-07-31, P3-2). The clean palette carries the hero on its own.
+   `pink-panel` (the bento tiles' clip-path entrance) went with the bento
+   collage on 2026-08-04 — the hero was its only consumer. */
 
 /* Entrance animations only run once JS has armed the gate, so content is
    fully visible with JS disabled (progressive enhancement). */
@@ -4379,8 +4799,11 @@
 .pink-js .pink-anim-fade {
   animation: pink-fade 1s ease both;
 }
-.pink-js .pink-anim-panel {
-  animation: pink-panel 1.2s var(--pink-ease) both;
+.pink-js .pink-anim-doll {
+  animation: pink-doll-rise 0.9s var(--pink-ease) both;
+}
+.pink-js .pink-anim-drop {
+  animation: pink-doll-drop 0.7s var(--pink-ease) both;
 }
 .pink-js .pink-anim-rule {
   transform-origin: left;
@@ -4444,7 +4867,8 @@
   --input: var(--pink-line-strong);
   --ring: var(--pink-rose);
   --radius: 0;
-  font-family: var(--font-pink-body), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    var(--font-pink-body), "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 .pink-account [data-slot="card"] {
   background: var(--pink-white);

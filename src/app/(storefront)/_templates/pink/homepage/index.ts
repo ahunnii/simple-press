@@ -6,9 +6,9 @@ import type { TemplateSection } from "~/lib/template-sections";
  *
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
  * Homepage". Seven sections: hero (signature moment, not hideable), promises,
- * collection, upcoming (real dated `Event` records from the DB), events (the
- * make & takes — an evergreen explainer driven by list fields, deliberately
- * date-free), videos (real `Video` records from the DB), and story.
+ * collection, events (the make & takes — an evergreen explainer driven by list
+ * fields, deliberately date-free), upcoming (real dated `Event` records from
+ * the DB), videos (real `Video` records from the DB), and story.
  *
  * `homepage.upcoming` and `homepage.events` are separate sections on purpose
  * and must stay separately hideable: one says WHEN you can come, the other
@@ -113,38 +113,173 @@ const homepageHeroData: TemplateField[] = [
   },
   {
     key: "pink.homepage.hero-image",
-    label: "Hero Background Image",
-    description: "Full-viewport background image behind the headline.",
+    label: "Family Home Photo",
+    description:
+      "The family home where it all began — washed into the hero background behind the wordmark, not shown as a standalone tile.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
-    // Empty on purpose. This image sits on the hero's DARK band, where the
-    // light `/placeholder.svg` reads as a grey slab across the headline.
-    // `PinkHeroSection` renders the scrims + glows bare when this is unset.
-    defaultValue: "",
+    defaultValue: "/templates/pink/images/hero-family-home.webp",
   },
   {
-    key: "pink.homepage.hero-panels",
-    label: "Hero Panel Strip",
+    key: "pink.homepage.hero-wordmark-accent",
+    label: "Wordmark — First Half",
     description:
-      "The four-panel strip beneath the hero headline. Each panel needs an image, a short caption, and a parallax depth (a plain number like 1.4 — higher drifts further on mouse move). Up to 4 panels.",
-    type: "list",
+      "The first half of the giant two-part wordmark that anchors the hero. While both halves are left at their defaults (\"PINK\" / \"ART\") the hero shows the PinkArt logo's actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the accent color.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "PINK",
+  },
+  {
+    key: "pink.homepage.hero-wordmark-ink",
+    label: "Wordmark — Second Half",
+    description:
+      "The second half of the wordmark. While both halves are left at their defaults (\"PINK\" / \"ART\") the hero shows the PinkArt logo's actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the ink color.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "ART",
+  },
+  {
+    key: "pink.homepage.hero-maker-1",
+    label: "Maker — Left",
+    description:
+      "A person holding what they made at a make & take, standing at the hero's left. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band.",
+    type: "image",
     page: "homepage",
     group: "homepage.hero",
     gridColumn: "col-span-full",
-    maxItems: 4,
-    itemSchema: [
-      { key: "image", label: "Image", type: "image" },
-      {
-        key: "caption",
-        label: "Caption",
-        type: "text",
-        placeholder: "Dolls, one at a time",
-      },
-      { key: "depth", label: "Parallax Depth", type: "text", placeholder: "1.4" },
-    ],
-    defaultValue: "",
+    defaultValue: "/templates/pink/images/hero-maker-1.webp",
+  },
+  {
+    key: "pink.homepage.hero-maker-1-alt",
+    label: "Maker — Left (photo description)",
+    description:
+      "Read aloud by screen readers; describe the person and what they're holding.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A workshop guest smiling and holding up the collaged art journal she made at a make & take.",
+  },
+  {
+    key: "pink.homepage.hero-maker-2",
+    label: "Maker — Center",
+    description:
+      "A person holding what they made at a make & take, standing at the hero's center. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/pink/images/hero-maker-2.webp",
+  },
+  {
+    key: "pink.homepage.hero-maker-2-alt",
+    label: "Maker — Center (photo description)",
+    description:
+      "Read aloud by screen readers; describe the person and what they're holding.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A maker in sunglasses holding up her finished fabric-collage affirmation board outside a make & take.",
+  },
+  {
+    key: "pink.homepage.hero-maker-3",
+    label: "Maker — Right",
+    description:
+      "A person holding what they made at a make & take, standing at the hero's right. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/pink/images/hero-maker-3.webp",
+  },
+  {
+    key: "pink.homepage.hero-maker-3-alt",
+    label: "Maker — Right (photo description)",
+    description:
+      "Read aloud by screen readers; describe the person and what they're holding.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A guest at an Idlewild make & take holding the wide collage panel she finished, honoring Black women in history.",
+  },
+  {
+    key: "pink.homepage.hero-maker-4",
+    label: "Maker — Far Left",
+    description:
+      "A person holding what they made at a make & take, standing at the hero's far left, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Hidden on phones — five figures cannot fit that narrow a stage.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/pink/images/hero-maker-4.webp",
+  },
+  {
+    key: "pink.homepage.hero-maker-4-alt",
+    label: "Maker — Far Left (photo description)",
+    description:
+      "Read aloud by screen readers; describe the person and what they're holding.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A guest in her 'Dream Often' shirt holding the collage board she made at a make & take.",
+  },
+  {
+    key: "pink.homepage.hero-maker-5",
+    label: "Maker — Far Right",
+    description:
+      "A person holding what they made at a make & take, standing at the hero's far right, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Hidden on phones — five figures cannot fit that narrow a stage.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/pink/images/hero-maker-5.webp",
+  },
+  {
+    key: "pink.homepage.hero-maker-5-alt",
+    label: "Maker — Far Right (photo description)",
+    description:
+      "Read aloud by screen readers; describe the person and what they're holding.",
+    type: "text",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue:
+      "A maker holding up the orange collage banner she finished at an Idlewild make & take.",
+  },
+  {
+    key: "pink.homepage.hero-doll-1",
+    label: "Corner Doll — Top Left",
+    description:
+      "Small tilted doll cutout pinned in the hero's top-left corner like taped-up artwork. Hidden on phones; a photo with its background removed (transparent PNG/WebP) works best.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/pink/images/hero-doll-mudcloth.webp",
+  },
+  {
+    key: "pink.homepage.hero-doll-2",
+    label: "Corner Doll — Top Right",
+    description:
+      "Small tilted doll cutout pinned in the hero's top-right corner like taped-up artwork. Hidden on phones; a photo with its background removed (transparent PNG/WebP) works best.",
+    type: "image",
+    page: "homepage",
+    group: "homepage.hero",
+    gridColumn: "col-span-full",
+    defaultValue: "/templates/pink/images/hero-doll-red.webp",
   },
 ];
 
@@ -348,12 +483,12 @@ const homepageEventsData: TemplateField[] = [
     key: "pink.homepage.events-mosaic",
     label: "Make & Take Photos and Fliers",
     description:
-      "Your own photos and event fliers, shown as a mosaic. This is where a flier for an upcoming make & take goes. Column and row span are plain numbers (1 or 2). Up to 6 images.",
+      "Five photos — the first shows large; the other four fill the grid around it. The layout is arranged for you.",
     type: "list",
     page: "homepage",
     group: "homepage.events",
     gridColumn: "col-span-full",
-    maxItems: 6,
+    maxItems: 5,
     itemSchema: [
       { key: "image", label: "Image", type: "image" },
       {
@@ -364,8 +499,6 @@ const homepageEventsData: TemplateField[] = [
         // and the room, the alt text has to say them too.
         placeholder: "Describe the photo, or read out what the flier says",
       },
-      { key: "colSpan", label: "Column Span", type: "text", placeholder: "1" },
-      { key: "rowSpan", label: "Row Span", type: "text", placeholder: "1" },
     ],
     defaultValue: "",
   },
@@ -577,8 +710,8 @@ export const pinkHomepageData: TemplateField[] = [
   ...homepageHeroData,
   ...homepagePromisesData,
   ...homepageCollectionData,
-  ...homepageUpcomingData,
   ...homepageEventsData,
+  ...homepageUpcomingData,
   ...homepageVideosData,
   ...homepageStoryData,
 ];
@@ -588,7 +721,7 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Full-viewport ink hero — kicker, two-line headline, body, CTAs, background image, and the four-panel parallax strip",
+      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair hidden on phones), and two small doll cutouts pinned in the top corners",
     icon: "🏰",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -607,19 +740,19 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
+    id: "homepage.events",
+    title: "Make & Takes",
+    description:
+      "The workshop band — your photos and fliers as a five-photo mosaic, what a make & take is, how they're hosted, and one enquiry CTA",
+    icon: "🪡",
+    columns: 2,
+  } satisfies TemplateFieldGroup,
+  {
     id: "homepage.upcoming",
     title: "Upcoming Events",
     description:
       "The next few real dates from your Events list — heading, how many to show, and the empty-state copy",
     icon: "🗓️",
-    columns: 2,
-  } satisfies TemplateFieldGroup,
-  {
-    id: "homepage.events",
-    title: "Make & Takes",
-    description:
-      "The workshop band — your photos and fliers, what a make & take is, how they're hosted, and one enquiry CTA",
-    icon: "🪡",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
@@ -644,7 +777,8 @@ export const pinkHomepageSections: TemplateSection[] = [
     id: "homepage.hero",
     page: "homepage",
     title: "Hero",
-    description: "Full-viewport hero with the four-panel parallax strip",
+    description:
+      "Washed family home photo background, giant wordmark, five makers holding their finished pieces over the bottom band (the outer pair hidden on phones), and two doll cutouts pinned in the top corners",
     groupIds: ["homepage.hero"],
     order: 0,
     hideable: false,
@@ -668,28 +802,30 @@ export const pinkHomepageSections: TemplateSection[] = [
     hideable: true,
   },
   // Array position, not just `order`, is what the editor rail renders — this
-  // entry sits third so the rail matches the page: the dated preview comes
-  // immediately before the evergreen Make & Takes band it feeds into.
-  {
-    id: "homepage.upcoming",
-    page: "homepage",
-    title: "Upcoming Events",
-    description: "The next few dated events from your Events list",
-    groupIds: ["homepage.upcoming"],
-    order: 3,
-    hideable: true,
-  },
+  // entry sits third so the rail matches the page: the Make & Takes explainer
+  // band makes the case first (what a make & take is + hire-me CTA); the dated
+  // Upcoming band follows as proof — the actual calendar of sessions.
   {
     id: "homepage.events",
     page: "homepage",
     title: "Make & Takes",
     description: "Photo/flier mosaic, how they're hosted, and the enquiry CTA",
     groupIds: ["homepage.events"],
+    order: 3,
+    hideable: true,
+  },
+  {
+    id: "homepage.upcoming",
+    page: "homepage",
+    title: "Upcoming Events",
+    description: "The next few dated events from your Events list",
+    groupIds: ["homepage.upcoming"],
     order: 4,
     hideable: true,
   },
-  // Below the Make & Takes band, not above it: the clips are the evidence for
-  // the claim that band makes, so the page argues and then shows.
+  // Below the Make & Takes and Upcoming bands, not above them: the clips are
+  // the evidence for the claims those bands make, so the page argues and then
+  // shows.
   {
     id: "homepage.videos",
     page: "homepage",

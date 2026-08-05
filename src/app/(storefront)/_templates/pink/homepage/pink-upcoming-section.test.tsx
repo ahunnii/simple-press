@@ -21,9 +21,22 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/image", () => ({
   default: (props: Record<string, unknown>) => {
-    const { src, alt } = props as { src?: string; alt?: string };
+    // `sizes` is passed through (not just `src`/`alt`) so tests can assert on
+    // it directly — it's the regression guard for the full-width flier vs.
+    // the old 88px thumbnail (see the "full-width sizes" test below).
+    const { src, alt, sizes } = props as {
+      src?: string;
+      alt?: string;
+      sizes?: string;
+    };
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={typeof src === "string" ? src : ""} alt={alt ?? ""} />;
+    return (
+      <img
+        src={typeof src === "string" ? src : ""}
+        alt={alt ?? ""}
+        sizes={typeof sizes === "string" ? sizes : undefined}
+      />
+    );
   },
 }));
 
@@ -168,6 +181,48 @@ describe("PinkUpcomingSection", () => {
     expect(
       screen.getByRole("button", { name: "View flier for Flier Market" }),
     ).toBeInTheDocument();
+  });
+
+  it("renders the flier before the meta block in DOM order (image-top card, not the old 88px thumbnail row)", () => {
+    const events = [
+      makeEvent({
+        name: "Flier Market",
+        coverImage: "https://storage.example.com/fliers/flier-market.png",
+      }),
+    ];
+    render(<PinkUpcomingSection {...baseProps} events={events} />);
+
+    const flierTrigger = screen.getByRole("button", {
+      name: "View flier for Flier Market",
+    });
+    const heading = screen.getByText("Flier Market");
+
+    // `compareDocumentPosition` from the flier trigger's perspective: the
+    // heading must be FOLLOWING it in the DOM, i.e. the flier renders first
+    // and the meta block (heading included) comes after it.
+    expect(
+      flierTrigger.compareDocumentPosition(heading) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("renders the flier's <img> with full-card sizes, not the old 88px thumbnail sizes", () => {
+    const events = [
+      makeEvent({
+        name: "Wide Flier Market",
+        coverImage: "https://storage.example.com/fliers/wide-flier.png",
+      }),
+    ];
+    const { container } = render(
+      <PinkUpcomingSection {...baseProps} events={events} />,
+    );
+
+    const img = container.querySelector("img");
+    expect(img).not.toBeNull();
+    expect(img).toHaveAttribute(
+      "sizes",
+      "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
+    );
   });
 
   it("renders the event's date as a <time> element with a dateTime attribute", () => {

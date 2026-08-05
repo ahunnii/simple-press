@@ -3,8 +3,11 @@ import Link from "next/link";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
-import { PinkRule } from "../shared/pink-rule";
-import { PinkHeroStrip, type PinkHeroPanel } from "./pink-hero-strip";
+import { hasCustomImage } from "../shared/pink-image-fallback";
+import {
+  PINK_WORDMARK_DEFAULTS,
+  PinkWordmarkSvg,
+} from "../shared/pink-wordmark-svg";
 
 type Props = {
   kicker: string;
@@ -16,18 +19,104 @@ type Props = {
   ctaPrimaryLink: string;
   ctaSecondaryLabel: string;
   ctaSecondaryLink: string;
+  /** The family-home photo, held in the upper region of the composition. */
   image: string;
-  panels: PinkHeroPanel[];
+  /** Wordmark, first half — set in `--pink-rose`. */
+  wordmarkAccent: string;
+  /** Wordmark, second half — set in `--pink-ink`. */
+  wordmarkInk: string;
+  /** Small tilted doll cutout, top-left corner. Decorative. */
+  cornerDollLeft: string;
+  /** Small tilted doll cutout, top-right corner. Decorative. */
+  cornerDollRight: string;
+  /** Left figure — a maker holding what she made. */
+  maker1: string;
+  maker1Alt: string;
+  /** Center figure — the composition's anchor and the likely LCP element. */
+  maker2: string;
+  maker2Alt: string;
+  /** Right figure — her panel's cut edge bleeds off the right of the canvas. */
+  maker3: string;
+  maker3Alt: string;
+  /** Far-left figure — outside the trio, same as the corner dolls, hidden on phones. */
+  maker4: string;
+  maker4Alt: string;
+  /** Far-right figure — outside the trio, same as the corner dolls, hidden on phones. */
+  maker5: string;
+  maker5Alt: string;
 };
+
+/**
+ * Entrance order: h1 (.1s) → wordmark (.3s) → makers (centre first, so the
+ * composition builds outward from its anchor, trio then the far pair) → band
+ * (.6s) → corner dolls last, as the final flourish rather than something the
+ * eye has to track.
+ */
+const MAKER_ENTER_DELAYS_S = {
+  center: 0.45,
+  left: 0.58,
+  right: 0.71,
+  farLeft: 0.84,
+  farRight: 0.97,
+};
+const CORNER_ENTER_DELAYS_S = { left: 1.1, right: 1.2 };
 
 /**
  * The homepage hero — the template's signature moment (design.md → Per-page
  * section concepts → Homepage → `homepage.hero`). Not hideable.
  *
- * Server-rendered except for the 4-panel strip (`PinkHeroStrip`, client) —
- * the masked heading reveal, glow drift and ken-burns are all pure CSS
- * (`.pink-anim-*`), gated behind `.pink-js` + `prefers-reduced-motion` at
- * the stylesheet level, same as the rest of the template.
+ * **The people are the subject now.** v1 of this composition (shipped and
+ * replaced the same day) put three doll cutouts across the front, on the
+ * reasoning that the dolls are what the business sells. Wrong read: what the
+ * business actually sells is a room where you make something, and what a
+ * first-time visitor needs to see is somebody standing there holding the thing
+ * they made. So the foreground figures are makers with their own work in
+ * their hands — bigger than the dolls ever were, and deliberately overlapping
+ * the wordmark up to about half its height, because a poster where the
+ * subjects crowd the type reads as a scene and a poster where they politely
+ * clear it reads as a stock layout. The dolls did not lose the argument
+ * entirely: two of them survive as small tilted mementos in the top corners.
+ * A second pair of makers was added outside the original trio (2026-08-04) to
+ * widen the crowd on desktop; they are hidden below 640px, where the phone
+ * keeps the original trio.
+ *
+ * Which is why the figures are **content, not decoration** — each one carries
+ * real alt text from an owner-editable field. The v1 doll layer was
+ * `aria-hidden` and that was correct for cutouts of merchandise; it would be
+ * plainly wrong for photographs of people.
+ *
+ * **The wordmark is the client's own letterforms** (`PinkWordmarkSvg`), traced
+ * as geometry because the logo font has no license we can ship. It renders only
+ * while both wordmark fields still hold their defaults — rename the shop and
+ * the hero falls back to the live Fraunces text build below, which is kept
+ * intact for exactly that reason.
+ *
+ * **White ground, warm photo.** v1 washed the house to 22% greyscale over a
+ * pink panel and the whole hero went grey-mauve. v2 sits on plain
+ * `--pink-paper` with the house at a much higher opacity in its natural colour,
+ * masked so it fades out before the band — the house belongs to the upper
+ * region, and the band seam wants clean white under it. Contrast for the copy
+ * is not bought by dimming the photo (that flattens the whole page); it is
+ * bought by `.pink-hero-copy-scrim`, a paper-coloured radial that sits under
+ * the kicker and H1 only.
+ *
+ * **The band still clips the figures on purpose.** Every cutout in this set —
+ * dolls and makers alike — ends in a crop line somewhere below the waist,
+ * because they were photographed hand-held. Sinking the lower ~15–22% behind
+ * the band hides that edge while keeping the held work in view — the first
+ * tuning pass sank them ~45% and buried the artwork, which defeated the whole
+ * makers concept (QA 2026-08-04). The sink is a percentage translate on each
+ * figure's own box, so the fraction hidden holds at any aspect ratio an owner
+ * uploads.
+ *
+ * Entrance-only animation, no continuous motion: the 2026-07-31 audit measured
+ * the old hero running 655 layout/style passes while completely idle (P3-2)
+ * and deleted every looping keyframe in the template. `.pink-anim-rise`,
+ * `.pink-anim-doll`, `.pink-anim-drop` and `.pink-anim-fade` are pure CSS,
+ * gated behind `.pink-js` (so a JS-less page renders fully composed) and
+ * `prefers-reduced-motion` at the stylesheet level.
+ *
+ * Pure server component — zero client JS in the template's signature moment.
  */
 export function PinkHeroSection({
   kicker,
@@ -40,135 +129,356 @@ export function PinkHeroSection({
   ctaSecondaryLabel,
   ctaSecondaryLink,
   image,
-  panels,
+  wordmarkAccent,
+  wordmarkInk,
+  cornerDollLeft,
+  cornerDollRight,
+  maker1,
+  maker1Alt,
+  maker2,
+  maker2Alt,
+  maker3,
+  maker3Alt,
+  maker4,
+  maker4Alt,
+  maker5,
+  maker5Alt,
 }: Props) {
+  // The traced mark spells one specific word. It is only honest while the
+  // owner has not renamed the shop; the moment either half is edited we owe
+  // them live text, not their predecessor's logo.
+  const useSvg =
+    wordmarkAccent === PINK_WORDMARK_DEFAULTS.accent &&
+    wordmarkInk === PINK_WORDMARK_DEFAULTS.ink;
+
   return (
     <section
       aria-label="Hero"
-      // `min-height: 100svh` honours design.md's "full-viewport ink hero" spec,
-      // which the previous content-height build did not — the band measured
-      // anywhere from 72% to 104% of the viewport depending on window size and
-      // copy length, and at 1440x900 the panel strip was clipped 121px below the
-      // fold (audit 2026-07-31, P2-1). `svh` rather than `vh` so mobile browser
-      // chrome cannot overflow it. The content block flexes and the strip
-      // anchors to the bottom, so slack absorbs into the band instead of into a
-      // fixed 40px gap.
-      className="relative flex min-h-[100svh] flex-col overflow-hidden"
+      // Full-viewport hero, minus the sticky header that sits in flow above it:
+      // at a plain `100svh` the band — the row that exists to carry the CTAs —
+      // ended exactly one header-height below the fold at every desktop
+      // viewport (QA 2026-08-04). `svh` rather than `vh` so mobile browser
+      // chrome cannot overflow it. The three rows are `auto / 1fr / auto`: a
+      // short viewport compresses the stage in the middle rather than pushing
+      // the CTAs off-screen. Everything that overhangs — the sunk lower half of
+      // each maker, the right figure's panel bleeding past the right edge, the
+      // corner dolls hanging off the top — is cropped here.
+      className="relative flex min-h-[calc(100svh-var(--pink-header-h))] flex-col overflow-hidden"
       style={{ background: "var(--pink-paper)" }}
       {...sectionGroupAttr("homepage", "hero")}
     >
-      {/* Optional background image, washed back so ink type stays legible.
-          The band is a light surface as of 2026-07-31 — the previous smoky
-          ink scrims plus two drifting radial glows were the main source of the
-          "grungy" read, and the glows were also the measured cause of the
-          homepage's idle layout churn. */}
-      {image ? (
-        <div aria-hidden="true" className="absolute inset-0">
-          <Image src={image} alt="" fill priority className="object-cover" sizes="100vw" />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(90deg, color-mix(in srgb, var(--pink-paper) 96%, transparent) 0%, color-mix(in srgb, var(--pink-paper) 72%, transparent) 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, color-mix(in srgb, var(--pink-paper) 88%, transparent) 0%, color-mix(in srgb, var(--pink-paper) 62%, transparent) 45%, color-mix(in srgb, var(--pink-paper) 90%, transparent) 100%)",
-            }}
+      {/* ── Layer 1: the house ──
+          Decorative in every state: the heading below already says where the
+          work gets made, and naming the house again in alt text would only add
+          noise to the announcement. An owner who has not uploaded a photo gets
+          no layer at all — the hero is composed on plain paper and reads as
+          designed, not as a hole. */}
+      {hasCustomImage(image) && (
+        <div className="pink-hero-photo" aria-hidden="true">
+          <Image
+            src={image}
+            alt=""
+            fill
+            // `eager`, not `priority`: it should arrive with the page, but the
+            // preload budget belongs to the center maker — the actual LCP
+            // candidate — not to a 0.42-opacity backdrop (review 2026-08-04).
+            loading="eager"
+            sizes="100vw"
+            className="object-cover"
           />
         </div>
-      ) : null}
+      )}
+      <div className="pink-hero-tint" aria-hidden="true" />
+      {/* The contrast guarantee for the kicker and H1, independent of whatever
+          photo is behind them. Kept as its own element rather than folded into
+          the tint so the two can be tuned separately: the tint is a mood, this
+          is a legibility floor. */}
+      <div className="pink-hero-copy-scrim" aria-hidden="true" />
 
-      {/* Content — flexes to fill the band, vertically centred */}
-      <div className="relative z-10 flex flex-1 flex-col justify-center px-5 py-16 md:px-10 md:py-20">
-        <div className="flex items-center gap-4">
-          <PinkRule tone="paper" width={44} />
-          <p className="text-[13px] font-medium tracking-[.14em] uppercase">
-            <span style={{ color: "var(--pink-ink)" }} {...fieldAttr("pink.homepage.hero-kicker")}>
-              {kicker}
-            </span>
-            {kickerTrailing && (
-              <>
-                {" "}
-                <span
-                  style={{ color: "var(--pink-muted)" }}
-                  {...fieldAttr("pink.homepage.hero-kicker-trailing")}
-                >
-                  {kickerTrailing}
-                </span>
-              </>
-            )}
-          </p>
-        </div>
+      {/* ── Row 1: the pitch ──
+          `z-30` — above every figure layer: on a short viewport (landscape
+          phone, split-screen desktop) the svh-sized makers can ride up into
+          this row, and the copy must paint over them, not under. */}
+      <div className="relative z-30 mx-auto w-full max-w-[1400px] px-5 pt-12 pb-4 text-center md:px-10 md:pt-16 md:pb-6">
+        <p className="text-[13px] font-medium tracking-[.14em] uppercase">
+          <span
+            style={{ color: "var(--pink-ink)" }}
+            {...fieldAttr("pink.homepage.hero-kicker")}
+          >
+            {kicker}
+          </span>
+          {kickerTrailing && (
+            <>
+              {" "}
+              <span
+                style={{ color: "var(--pink-muted)" }}
+                {...fieldAttr("pink.homepage.hero-kicker-trailing")}
+              >
+                {kickerTrailing}
+              </span>
+            </>
+          )}
+        </p>
 
-        {/* Ceiling lowered from 132px to 96px (audit 2026-07-31, P2-6). 132px only
-            materialised above ~1700px viewport width — the width least likely to
-            have been reviewed — and at that size the headline shouts rather than
-            speaks, which is at odds with the "clean, upbeat, all ages" direction.
-            The `vw` term is nudged 7.8 → 7.4 so the curve stays smooth into the
-            new cap instead of clamping early on common laptop widths, and
-            leading goes 0.96 → 0.98 because the tighter value was tuned for the
-            132px setting and reads cramped at 96px. */}
+        {/* The wordmark below is the big type now, so the H1 steps down to a
+            standee-sized single line — it is still the real heading (the
+            wordmark is `aria-hidden` decoration), it just no longer has to
+            carry the visual weight. `leading-1.25` clears descenders inside
+            the masked reveal; the old 0.98 was tuned for an all-caps slab. */}
         <h1
-          className="pink-display mt-6 max-w-[16ch] text-[clamp(3.125rem,7.4vw,6rem)] leading-[0.98] font-semibold tracking-[-0.035em]"
+          className="pink-display mx-auto mt-5 max-w-[24ch] text-[clamp(1.625rem,2.6vw,2.375rem)] leading-[1.25] font-semibold tracking-[-0.02em] text-balance"
           style={{ color: "var(--pink-ink)" }}
         >
           <span className="block overflow-hidden">
             <span
               className="pink-anim-rise block"
               style={{ animationDelay: ".1s" }}
-              {...fieldAttr("pink.homepage.hero-heading-line-1")}
             >
-              {headingLine1}
-            </span>
-          </span>
-          <span className="block overflow-hidden">
-            <span
-              className="pink-anim-rise block"
-              style={{ animationDelay: ".26s", color: "var(--pink-rose)" }}
-              {...fieldAttr("pink.homepage.hero-heading-line-2")}
-            >
-              {headingLine2}
+              <span {...fieldAttr("pink.homepage.hero-heading-line-1")}>
+                {headingLine1}
+              </span>{" "}
+              <span
+                style={{ color: "var(--pink-rose)" }}
+                {...fieldAttr("pink.homepage.hero-heading-line-2")}
+              >
+                {headingLine2}
+              </span>
             </span>
           </span>
         </h1>
+      </div>
 
-        {body && (
-          <p
-            className="pink-anim-fade mt-6 max-w-[44ch] text-[19px] leading-[1.7]"
-            style={{ color: "var(--pink-body)", animationDelay: ".4s" }}
-            {...fieldAttr("pink.homepage.hero-body")}
+      {/* ── Row 2: the stage — wordmark behind, makers in front ──
+          `min-h-0` lets this row absorb the slack (and give it back on a short
+          viewport) instead of the copy or the band doing it. */}
+      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center">
+        {/* Decorative in both branches: it is the shop name set as a graphic,
+            and the header wordmark plus the H1 already say it in the
+            accessibility tree. The overflow mask is what the `.pink-anim-rise`
+            translate reveals against, so it wraps either build. */}
+        <div aria-hidden="true" className="pink-hero-wordmark-wrap w-full overflow-hidden">
+          <span
+            className="pink-anim-rise block"
+            style={{ animationDelay: ".3s" }}
           >
-            {body}
-          </p>
-        )}
+            {useSvg ? (
+              <PinkWordmarkSvg />
+            ) : (
+              // The two halves stay separately editable so an owner whose name
+              // splits differently can re-split it.
+              <span className="pink-display pink-hero-wordmark">
+                <span
+                  style={{ color: "var(--pink-rose)" }}
+                  {...fieldAttr("pink.homepage.hero-wordmark-accent")}
+                >
+                  {wordmarkAccent}
+                </span>
+                <span
+                  style={{ color: "var(--pink-ink)" }}
+                  {...fieldAttr("pink.homepage.hero-wordmark-ink")}
+                >
+                  {wordmarkInk}
+                </span>
+              </span>
+            )}
+          </span>
+        </div>
 
-        <div className="pink-anim-fade mt-8 flex flex-wrap gap-3" style={{ animationDelay: ".5s" }}>
-          {ctaPrimaryLabel && (
-            <Link
-              href={ctaPrimaryLink}
-              className="pink-btn pink-btn-lg pink-btn-solid"
-              {...fieldAttr("pink.homepage.hero-cta-primary-label")}
-            >
-              {ctaPrimaryLabel}
-            </Link>
-          )}
-          {ctaSecondaryLabel && (
-            <Link
-              href={ctaSecondaryLink}
-              className="pink-btn pink-btn-lg pink-btn-ghost"
-              {...fieldAttr("pink.homepage.hero-cta-secondary-label")}
-            >
-              {ctaSecondaryLabel}
-            </Link>
-          )}
+        {/* The makers overhang this row's bottom edge — which is exactly the
+            band's top edge — and the band paints over them from a higher
+            stacking context. NOT `aria-hidden`: these are photographs of people
+            with their work, so each one announces itself. `pointer-events-none`
+            keeps the rail from swallowing clicks meant for the copy above it.
+            An empty slot renders nothing: five figures (three on phones, where
+            the outer pair is hidden) is the designed state, fewer is a
+            quieter one, and a placeholder rectangle standing in for a person
+            would be worse than either. */}
+        <div className="pointer-events-none absolute inset-0 z-10">
+          <div className="pink-hero-makers">
+            {hasCustomImage(maker4) && (
+              <div
+                className="pink-hero-maker pink-hero-maker-farleft pink-anim-doll"
+                style={{ animationDelay: `${MAKER_ENTER_DELAYS_S.farLeft}s` }}
+              >
+                <div className="pink-hero-maker-figure">
+                  <Image
+                    src={maker4}
+                    alt={maker4Alt}
+                    width={1229}
+                    height={1400}
+                    loading="eager"
+                    className="h-full w-auto"
+                  />
+                </div>
+              </div>
+            )}
+            {hasCustomImage(maker1) && (
+              <div
+                className="pink-hero-maker pink-hero-maker-left pink-anim-doll"
+                style={{ animationDelay: `${MAKER_ENTER_DELAYS_S.left}s` }}
+              >
+                <div className="pink-hero-maker-figure">
+                  <Image
+                    src={maker1}
+                    alt={maker1Alt}
+                    width={927}
+                    height={1400}
+                    loading="eager"
+                    className="h-full w-auto"
+                  />
+                </div>
+              </div>
+            )}
+            {hasCustomImage(maker2) && (
+              <div
+                className="pink-hero-maker pink-hero-maker-center pink-anim-doll"
+                style={{ animationDelay: `${MAKER_ENTER_DELAYS_S.center}s` }}
+              >
+                <div className="pink-hero-maker-figure">
+                  <Image
+                    src={maker2}
+                    alt={maker2Alt}
+                    width={762}
+                    height={1400}
+                    // The makers are the subject — the center one is the likely
+                    // LCP element, so it preloads; the house behind it is
+                    // decorative and must not be the only prioritized image.
+                    // No `sizes`: this is a height-driven layout (the rail
+                    // sizes off `svh`), so a width-based hint would be a lie.
+                    // The intrinsic width/height still prevent CLS.
+                    priority
+                    className="h-full w-auto"
+                  />
+                </div>
+              </div>
+            )}
+            {hasCustomImage(maker3) && (
+              <div
+                className="pink-hero-maker pink-hero-maker-right pink-anim-doll"
+                style={{ animationDelay: `${MAKER_ENTER_DELAYS_S.right}s` }}
+              >
+                <div className="pink-hero-maker-figure">
+                  <Image
+                    src={maker3}
+                    alt={maker3Alt}
+                    width={995}
+                    height={1400}
+                    loading="eager"
+                    className="h-full w-auto"
+                  />
+                </div>
+              </div>
+            )}
+            {hasCustomImage(maker5) && (
+              <div
+                className="pink-hero-maker pink-hero-maker-farright pink-anim-doll"
+                style={{ animationDelay: `${MAKER_ENTER_DELAYS_S.farRight}s` }}
+              >
+                <div className="pink-hero-maker-figure">
+                  <Image
+                    src={maker5}
+                    alt={maker5Alt}
+                    width={1139}
+                    height={1400}
+                    loading="eager"
+                    className="h-full w-auto"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <PinkHeroStrip panels={panels} />
+      {/* ── Corner mementos ──
+          Above the stage, below the band and the copy (`z-[15]` vs `z-20` /
+          `z-30`) — they hang off the top edge and get cropped by the section,
+          so they must never paint over the kicker. Decorative: two dolls at
+          thumbnail size are a garnish on a composition whose subject is already
+          announced three times below. Hidden entirely under 640px in CSS. */}
+      {(hasCustomImage(cornerDollLeft) || hasCustomImage(cornerDollRight)) && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-[15]"
+        >
+          {hasCustomImage(cornerDollLeft) && (
+            <div
+              className="pink-hero-corner-doll pink-hero-corner-doll-left pink-anim-drop"
+              style={{ animationDelay: `${CORNER_ENTER_DELAYS_S.left}s` }}
+            >
+              <div className="pink-hero-corner-doll-figure">
+                <Image
+                  src={cornerDollLeft}
+                  alt=""
+                  width={638}
+                  height={1200}
+                  loading="lazy"
+                  sizes="160px"
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+          )}
+          {hasCustomImage(cornerDollRight) && (
+            <div
+              className="pink-hero-corner-doll pink-hero-corner-doll-right pink-anim-drop"
+              style={{ animationDelay: `${CORNER_ENTER_DELAYS_S.right}s` }}
+            >
+              <div className="pink-hero-corner-doll-figure">
+                <Image
+                  src={cornerDollRight}
+                  alt=""
+                  width={605}
+                  height={1200}
+                  loading="lazy"
+                  sizes="160px"
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Row 3: the band — the only thing above the makers ── */}
+      <div
+        className="pink-hero-band pink-anim-fade relative z-20"
+        style={{ animationDelay: ".6s" }}
+      >
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-5 px-5 py-6 md:flex-row md:items-center md:justify-between md:gap-10 md:px-10">
+          {body && (
+            <p
+              className="max-w-[44ch] text-[16px] leading-[1.7] text-pretty"
+              style={{ color: "var(--pink-body)" }}
+              {...fieldAttr("pink.homepage.hero-body")}
+            >
+              {body}
+            </p>
+          )}
+          {(ctaPrimaryLabel || ctaSecondaryLabel) && (
+            <div className="flex shrink-0 flex-wrap gap-3">
+              {ctaPrimaryLabel && (
+                <Link
+                  href={ctaPrimaryLink}
+                  className="pink-btn pink-btn-lg pink-btn-solid"
+                  {...fieldAttr("pink.homepage.hero-cta-primary-label")}
+                >
+                  {ctaPrimaryLabel}
+                </Link>
+              )}
+              {ctaSecondaryLabel && (
+                <Link
+                  href={ctaSecondaryLink}
+                  className="pink-btn pink-btn-lg pink-btn-ghost"
+                  {...fieldAttr("pink.homepage.hero-cta-secondary-label")}
+                >
+                  {ctaSecondaryLabel}
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

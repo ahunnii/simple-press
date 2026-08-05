@@ -3,10 +3,22 @@ import { Fraunces, Nunito_Sans } from "next/font/google";
 const fontFraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-pink-fraunces",
-  // 600 is the default `.pink-display` weight (headings, section titles,
-  // most display text). 700 is used for the wordmark fallback (header/footer
-  // logo text) — every other display weight in the template is 600.
-  weight: ["600", "700"],
+  // Loaded as the VARIABLE font (2026-08-04, hero redesign) rather than as
+  // static 600/700 cuts. The variable file covers both of those usages — 600
+  // is the default `.pink-display` weight (headings, section titles, most
+  // display text), 700 is the header/footer wordmark fallback — and it also
+  // exposes Fraunces' two expressive axes, which the hero's live-text
+  // wordmark fallback needs (the default hero render is a traced SVG,
+  // `PinkWordmarkSvg`; the axes only come into play once an owner edits
+  // the wordmark fields away from their defaults and the hero falls back
+  // to real text): `SOFT` (rounded terminals) and `WONK` (quirky
+  // alternates), set via `font-variation-settings` on
+  // `.pink-hero-wordmark` and nowhere else.
+  // Both axes default to 0, and `font-variation-settings` only overrides the
+  // axes it names, so every other display element renders exactly as before.
+  // `weight` must be omitted when `axes` is set — the array selects static
+  // cuts, and the two are mutually exclusive in next/font.
+  axes: ["SOFT", "WONK"],
 });
 
 const fontNunitoSans = Nunito_Sans({
