@@ -1,27 +1,24 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 "use client";
 
 import type { AdditionalFields } from "@better-auth-ui/core";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import Link from "next/link";
-import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import { captchaPlugin } from "@better-auth-ui/react/plugins";
 import { QueryClient } from "@tanstack/react-query";
 import { useRouter } from "nextjs-toploader/app";
 
-import { env } from "~/env";
-import { authClient } from "~/server/better-auth/client";
-import { deleteAvatar, uploadAvatar } from "~/lib/avatar-upload";
-import { AuthProvider } from "~/components/auth/auth-provider";
-import { HCaptchaWidget } from "~/components/auth/captcha/hcaptcha-widget";
-import { Toaster } from "~/components/ui/sonner";
-import { TooltipProvider } from "~/components/ui/tooltip";
 import {
   AUTH_BASE_PATHS,
   AUTH_VIEW_PATHS,
   SETTINGS_VIEW_PATHS,
 } from "~/lib/auth-paths";
+import { deleteAvatar, uploadAvatar } from "~/lib/avatar-upload";
+import { authClient } from "~/server/better-auth/client";
+import { Toaster } from "~/components/ui/sonner";
+import { TooltipProvider } from "~/components/ui/tooltip";
+import { AuthProvider } from "~/components/auth/auth-provider";
+import { HCaptchaWidget } from "~/components/auth/captcha/hcaptcha-widget";
 import { CartProvider } from "~/providers/cart-context";
 import { WishlistProvider } from "~/providers/wishlist-context";
 
@@ -33,16 +30,15 @@ import { WishlistProvider } from "~/providers/wishlist-context";
  *
  * There is deliberately no `terms` column on `User` and no matching
  * `user.additionalFields.terms` in `src/server/better-auth/config.tsx`; this is
- * a client-side gate only, and better-auth drops the value. That mirrors the
- * behaviour of the legacy `AuthUIProvider` config this replaces.
+ * a client-side gate only. better-auth's `parseInputData` iterates the declared
+ * schema, so the undeclared `terms` key is silently dropped rather than 400ing.
  */
 const ADDITIONAL_FIELDS: AdditionalFields = [
   {
     name: "terms",
     type: "boolean",
     // A `boolean` field renders as a toggle SWITCH by default. That's wrong for
-    // a consent gate — agreeing to terms is a checkbox, which is also what the
-    // legacy `@daveyplate/better-auth-ui` rendered here. Caught by
+    // a consent gate — agreeing to terms is a checkbox. Caught by
     // e2e/auth.default.spec.ts's sign-up test.
     inputType: "checkbox",
     required: true,
@@ -103,95 +99,62 @@ export function Providers({ children }: { children: ReactNode }) {
       <Toaster closeButton />
       <CartProvider>
         <WishlistProvider>
-          <AuthUIProvider
+          {/*
+           * Session refresh lives in `<SessionSync />` (`src/trpc/react.tsx`),
+           * which is the single owner of that behaviour. Do NOT add an
+           * equivalent here: running two `router.refresh()` calls on the same
+           * session transition races the sign-in navigation and bounces the
+           * user straight back to /auth/sign-in — caught by
+           * e2e/auth.default.spec.ts.
+           */}
+          <AuthProvider
             authClient={authClient}
-            navigate={router.push}
-            replace={router.replace}
-            // NOTE: `onSessionChange` (which called `router.refresh()`) has
-            // moved to `<SessionSync />` in `src/trpc/react.tsx`, which is the
-            // single owner of that behaviour now that the legacy provider is on
-            // its way out.
-            //
-            // It must NOT be re-added here. Running both meant two concurrent
-            // `router.refresh()` calls on the same session transition, which
-            // raced the sign-in navigation and bounced the user straight back
-            // to /auth/sign-in — caught by e2e/auth.default.spec.ts.
-            signUp={{
-              fields: ["name", "terms"],
-            }}
-            additionalFields={{
-              terms: {
-                label: `I agree to SimplePress's Terms of Service and Privacy Policy`,
-                type: "boolean",
-                required: true,
-              },
-            }}
+            queryClient={authQueryClient}
+            navigate={({ to, replace }) =>
+              replace ? router.replace(to) : router.push(to)
+            }
             Link={Link}
-            captcha={{
-              provider: "hcaptcha",
-              siteKey: env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+            basePaths={{ ...AUTH_BASE_PATHS }}
+            viewPaths={{
+              auth: { ...AUTH_VIEW_PATHS },
+              settings: { ...SETTINGS_VIEW_PATHS },
             }}
-            credentials={{
+            redirectTo="/"
+            emailAndPassword={{
+              enabled: true,
               forgotPassword: true,
+              name: true,
+              requireEmailVerification: true,
+            }}
+            additionalFields={ADDITIONAL_FIELDS}
+            // Renders the hCaptcha widget on sign-in, sign-up, and
+            // forgot-password, and attaches `x-captcha-response` — matching
+            // the endpoints better-auth's server-side `captcha()` plugin
+            // protects. Without this, every credentialed auth request 400s.
+            plugins={[captchaPlugin({ render: HCaptchaWidget })]}
+            // `upload` is not optional in practice: without it the library
+            // encodes the image as a base64 data URL and writes that into
+            // `user.image`, which then rides in the 7-day
+            // `session.cookieCache` configured in
+            // `src/server/better-auth/config.tsx` and blows past the ~4KB
+            // browser cookie limit. `uploadAvatar` stores it in MinIO/S3 and
+            // returns a URL instead.
+            //
+            // NOTE: `enabled` is not honoured by this version of the library
+            // — neither the vendored components nor `@better-auth-ui/react`
+            // ever read it, so the "Change avatar" control renders either
+            // way. Providing `upload` is the only thing that actually keeps
+            // an image out of `user.image` as base64.
+            avatar={{
+              enabled: true,
+              size: 256,
+              extension: "webp",
+              upload: uploadAvatar,
+              delete: deleteAvatar,
             }}
           >
-            {/*
-             * Migration in progress: the new Better Auth UI provider is mounted
-             * inside the legacy one so both contexts are live. Nothing consumes
-             * this one yet — the auth views, account settings, and UserButton
-             * are cut over in later slices, after which `AuthUIProvider` above
-             * (and the `@daveyplate/better-auth-ui` dependency) is removed.
-             * See docs/design/ and the migration plan for the slice order.
-             */}
-            <AuthProvider
-              authClient={authClient}
-              queryClient={authQueryClient}
-              navigate={({ to, replace }) =>
-                replace ? router.replace(to) : router.push(to)
-              }
-              Link={Link}
-              basePaths={{ ...AUTH_BASE_PATHS }}
-              viewPaths={{
-                auth: { ...AUTH_VIEW_PATHS },
-                settings: { ...SETTINGS_VIEW_PATHS },
-              }}
-              redirectTo="/"
-              emailAndPassword={{
-                enabled: true,
-                forgotPassword: true,
-                name: true,
-                requireEmailVerification: true,
-              }}
-              additionalFields={ADDITIONAL_FIELDS}
-              // Renders the hCaptcha widget on sign-in, sign-up, and
-              // forgot-password, and attaches `x-captcha-response` — matching
-              // the endpoints better-auth's server-side `captcha()` plugin
-              // protects. Without this, every credentialed auth request 400s.
-              plugins={[captchaPlugin({ render: HCaptchaWidget })]}
-              // `upload` is not optional in practice: without it the library
-              // encodes the image as a base64 data URL and writes that into
-              // `user.image`, which then rides in the 7-day
-              // `session.cookieCache` configured in
-              // `src/server/better-auth/config.tsx` and blows past the ~4KB
-              // browser cookie limit. `uploadAvatar` stores it in MinIO/S3 and
-              // returns a URL instead.
-              //
-              // NOTE: `enabled` is not honoured by this version of the library
-              // — neither the vendored components nor `@better-auth-ui/react`
-              // ever read it, so the "Change avatar" control renders either
-              // way. Providing `upload` is the only thing that actually keeps
-              // an image out of `user.image` as base64.
-              avatar={{
-                enabled: true,
-                size: 256,
-                extension: "webp",
-                upload: uploadAvatar,
-                delete: deleteAvatar,
-              }}
-            >
-              <TooltipProvider>{children}</TooltipProvider>
-            </AuthProvider>
-          </AuthUIProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </AuthProvider>
         </WishlistProvider>
       </CartProvider>
     </>
