@@ -25,18 +25,25 @@ type Props = {
  * `homepage.upcoming` — the next few REAL, dated `Event` records, pulled from
  * the DB via `events.getUpcomingPublic`.
  *
- * Sits directly above `homepage.events` (the ink "Make & Takes" band), so it
+ * Sits directly BELOW `homepage.events` (the ink "Make & Takes" band), so it
  * is deliberately NOT ink: black is reserved for exactly two surfaces in this
  * template — that band and the footer — and stacking two dark slabs would
  * flatten the page's light → dark rhythm. It runs on the pale `--pink-panel`
- * wash instead, which steps the page white → blush → black into the band
- * below and keeps it distinct from the plain-white product grid above it too.
+ * wash instead, which steps the page back out of black after the ink band —
+ * white → blush → black → blush again → on toward the videos band below.
  *
  * The two bands answer different questions and must not be merged: this one is
  * "when can I come", `homepage.events` is "what even is a make & take".
  *
+ * Cards mirror the `/events` index card (`PinkEventCard`): a full-width flier
+ * first, then a meta block hung under the same `1px solid var(--pink-ink)`
+ * rule, rather than the old 88–104px thumbnail-and-text row. A flier that's
+ * too small to read defeats the point of having one, and repeating the same
+ * card idiom here keeps the homepage teaser and the full listing legible as
+ * one visual language.
+ *
  * Hideable, and collapses to nothing when there is neither an event nor
- * empty-state copy — a fresh store must not open a void immediately above the
+ * empty-state copy — a fresh store must not leave a void directly under the
  * dark band.
  */
 export function PinkUpcomingSection({
@@ -125,7 +132,7 @@ export function PinkUpcomingSection({
               return (
                 <PinkReveal key={event.id} index={i}>
                   <article
-                    className="grid h-full grid-cols-[88px_1fr] gap-4 p-4 sm:grid-cols-[104px_1fr] sm:gap-5 sm:p-5"
+                    className="flex h-full flex-col p-4 sm:p-5"
                     style={{
                       background: "var(--pink-white)",
                       border: "1px solid var(--pink-line)",
@@ -134,11 +141,14 @@ export function PinkUpcomingSection({
                     <PinkEventFlier
                       src={event.coverImage}
                       name={event.name}
-                      sizes="(max-width: 640px) 88px, 104px"
-                      className="self-start"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="pink-lift"
                     />
 
-                    <div className="flex min-w-0 flex-col gap-1.5">
+                    <div
+                      className="mt-4 flex flex-1 flex-col gap-1.5 pt-4"
+                      style={{ borderTop: "1px solid var(--pink-ink)" }}
+                    >
                       <time
                         dateTime={eventDateTimeAttr(event, timeZone)}
                         className="flex flex-col gap-0.5"
@@ -167,7 +177,7 @@ export function PinkUpcomingSection({
 
                       {event.blurb && (
                         <p
-                          className="line-clamp-2 text-[0.875rem] leading-[1.6]"
+                          className="line-clamp-3 text-[0.875rem] leading-[1.6]"
                           style={{ color: "var(--pink-body)" }}
                         >
                           {event.blurb}

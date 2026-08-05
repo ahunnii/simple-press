@@ -12,7 +12,6 @@ import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { PinkCollectionSection, type PinkFeaturedProduct } from "./pink-collection-section";
 import { PinkEventsSection } from "./pink-events-section";
-import type { PinkHeroPanel } from "./pink-hero-strip";
 import { PinkHeroSection } from "./pink-hero-section";
 import { rowStr } from "./pink-homepage-list-utils";
 import { PinkPopup } from "./pink-popup";
@@ -33,6 +32,20 @@ const FIELD_KEYS = [
   "pink.homepage.hero-cta-secondary-label",
   "pink.homepage.hero-cta-secondary-link",
   "pink.homepage.hero-image",
+  "pink.homepage.hero-wordmark-accent",
+  "pink.homepage.hero-wordmark-ink",
+  "pink.homepage.hero-maker-1",
+  "pink.homepage.hero-maker-1-alt",
+  "pink.homepage.hero-maker-2",
+  "pink.homepage.hero-maker-2-alt",
+  "pink.homepage.hero-maker-3",
+  "pink.homepage.hero-maker-3-alt",
+  "pink.homepage.hero-maker-4",
+  "pink.homepage.hero-maker-4-alt",
+  "pink.homepage.hero-maker-5",
+  "pink.homepage.hero-maker-5-alt",
+  "pink.homepage.hero-doll-1",
+  "pink.homepage.hero-doll-2",
   // collection
   "pink.homepage.collection-heading",
   "pink.homepage.collection-note",
@@ -75,16 +88,6 @@ const FIELD_KEYS = [
 // ships blank (field-conventions.md → "Default-value rules"). Only used when
 // the owner hasn't saved rows of their own yet.
 
-// Empty `image` on purpose: these panels sit inside the hero's dark band, so an
-// unset panel should render as a bare dark tile (see PinkHeroStrip), not as a
-// light `/placeholder.svg` stretched across the hero.
-const DEFAULT_HERO_PANELS: PinkHeroPanel[] = [
-  { image: "", caption: "Dolls, one at a time", depth: "1.4" },
-  { image: "", caption: "Wool, cotton, polymer clay", depth: "0.8" },
-  { image: "", caption: "Magnets and jewelry, small enough to carry", depth: "1.7" },
-  { image: "", caption: "The studio table", depth: "1.0" },
-];
-
 const DEFAULT_PROMISES: TemplateListRow[] = [
   {
     _id: "promise-1",
@@ -104,11 +107,15 @@ const DEFAULT_PROMISES: TemplateListRow[] = [
 ];
 
 // Same reasoning as the hero panels — the events mosaic renders on the dark band.
+// Exactly five rows, because the mosaic is a fixed five-slot layout now: spans
+// are placed in CSS rather than typed per row, so an owner can no longer produce
+// a grid that overflows its band or leaves a hole in it.
 const DEFAULT_EVENTS_MOSAIC: TemplateListRow[] = [
-  { _id: "mosaic-1", image: "", colSpan: "2", rowSpan: "2" },
-  { _id: "mosaic-2", image: "", colSpan: "1", rowSpan: "1" },
-  { _id: "mosaic-3", image: "", colSpan: "1", rowSpan: "1" },
-  { _id: "mosaic-4", image: "", colSpan: "2", rowSpan: "1" },
+  { _id: "mosaic-1", image: "" },
+  { _id: "mosaic-2", image: "" },
+  { _id: "mosaic-3", image: "" },
+  { _id: "mosaic-4", image: "" },
+  { _id: "mosaic-5", image: "" },
 ];
 
 // Mirrors the `pink-table` service page's hero fact rows — a make & take is
@@ -135,16 +142,11 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   const { isEnabled } = await getBusinessFlags();
   const popup = resolvePopup(business.siteContent, isEnabled("popups"));
 
-  const heroPanelsRaw = parseTemplateListRows(customFields?.["pink.homepage.hero-panels"]);
-  const heroPanels: PinkHeroPanel[] =
-    heroPanelsRaw.length > 0
-      ? heroPanelsRaw.map((row) => ({
-          image: typeof row.image === "string" ? row.image : "",
-          caption: typeof row.caption === "string" ? row.caption : "",
-          depth: typeof row.depth === "string" ? row.depth : "1",
-          _id: row._id,
-        }))
-      : DEFAULT_HERO_PANELS;
+  // The old hero collage's rows (`pink.homepage.hero-panels`) are gone along
+  // with the collage layout that read them, and the v1 doll-trio's
+  // `pink.homepage.hero-doll-3` key went with it in the v2 makers revision;
+  // any values an owner saved for either before their respective redesign
+  // landed are silently ignored, same precedent as other removed keys.
 
   const promiseItemsRaw = parseTemplateListRows(customFields?.["pink.homepage.promises-items"]);
   const promiseItems = promiseItemsRaw.length > 0 ? promiseItemsRaw : DEFAULT_PROMISES;
@@ -240,7 +242,20 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
           ctaSecondaryLabel={f["pink.homepage.hero-cta-secondary-label"] ?? ""}
           ctaSecondaryLink={f["pink.homepage.hero-cta-secondary-link"] ?? "#make-and-takes"}
           image={f["pink.homepage.hero-image"] ?? ""}
-          panels={heroPanels}
+          wordmarkAccent={f["pink.homepage.hero-wordmark-accent"] ?? ""}
+          wordmarkInk={f["pink.homepage.hero-wordmark-ink"] ?? ""}
+          cornerDollLeft={f["pink.homepage.hero-doll-1"] ?? ""}
+          cornerDollRight={f["pink.homepage.hero-doll-2"] ?? ""}
+          maker1={f["pink.homepage.hero-maker-1"] ?? ""}
+          maker1Alt={f["pink.homepage.hero-maker-1-alt"] ?? ""}
+          maker2={f["pink.homepage.hero-maker-2"] ?? ""}
+          maker2Alt={f["pink.homepage.hero-maker-2-alt"] ?? ""}
+          maker3={f["pink.homepage.hero-maker-3"] ?? ""}
+          maker3Alt={f["pink.homepage.hero-maker-3-alt"] ?? ""}
+          maker4={f["pink.homepage.hero-maker-4"] ?? ""}
+          maker4Alt={f["pink.homepage.hero-maker-4-alt"] ?? ""}
+          maker5={f["pink.homepage.hero-maker-5"] ?? ""}
+          maker5Alt={f["pink.homepage.hero-maker-5-alt"] ?? ""}
         />
 
         {isSectionVisible(customFields, "pink", "homepage.promises") && (
@@ -255,6 +270,22 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
             ctaLink={f["pink.homepage.collection-cta-link"] ?? "/shop"}
             products={products}
             collectionChips={collectionChips}
+          />
+        )}
+
+        {/* Make & Takes leads the calendar: it explains what a make & take
+            actually is, which the dated cards below assume the reader already
+            knows. */}
+        {isSectionVisible(customFields, "pink", "homepage.events") && (
+          <PinkEventsSection
+            heading={f["pink.homepage.events-heading"] ?? ""}
+            note={f["pink.homepage.events-note"] ?? ""}
+            body={f["pink.homepage.events-body"] ?? ""}
+            mosaic={eventsMosaic}
+            facts={eventsFacts}
+            ctaLabel={f["pink.homepage.events-cta-label"] ?? ""}
+            ctaLink={f["pink.homepage.events-cta-link"] ?? "/contact"}
+            ctaNote={f["pink.homepage.events-cta-note"] ?? ""}
           />
         )}
 
@@ -275,19 +306,6 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
               timeZone={business.timeZone}
             />
           )}
-
-        {isSectionVisible(customFields, "pink", "homepage.events") && (
-          <PinkEventsSection
-            heading={f["pink.homepage.events-heading"] ?? ""}
-            note={f["pink.homepage.events-note"] ?? ""}
-            body={f["pink.homepage.events-body"] ?? ""}
-            mosaic={eventsMosaic}
-            facts={eventsFacts}
-            ctaLabel={f["pink.homepage.events-cta-label"] ?? ""}
-            ctaLink={f["pink.homepage.events-cta-link"] ?? "/contact"}
-            ctaNote={f["pink.homepage.events-cta-note"] ?? ""}
-          />
-        )}
 
         {/* Flag-gated as well as section-gated, same as the upcoming band:
             with `videos` off there is no gallery to be empty, so the strip's
