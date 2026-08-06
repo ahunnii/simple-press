@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
-import { IconLayoutDashboard } from "@tabler/icons-react";
+import { UserButton } from "~/components/auth/user/user-button";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
@@ -97,21 +97,28 @@ export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "border-primary border",
-          avatar: {
-            base: "size-10",
-          },
-        },
-      }}
-      additionalLinks={[
-        ...(session?.user?.platformRole === "PLATFORM_ADMIN"
+      className="border-primary border"
+      avatarClassName="size-10"
+      links={[
+        // Business members reach /admin too, not just platform admins — this
+        // matches the gate the other templates already use.
+        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
+        session?.session?.membershipId
           ? [
               {
                 icon: <IconLayoutDashboard className="h-4 w-4" />,
                 label: "Admin",
                 href: "/admin",
+              },
+            ]
+          : []),
+        // /account/orders 404s when the owner disables the `orders` feature.
+        ...(isEnabled("orders")
+          ? [
+              {
+                icon: <IconPackage className="h-4 w-4" />,
+                label: "Orders",
+                href: "/account/orders",
               },
             ]
           : []),

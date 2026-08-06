@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import { IconPackage } from "@tabler/icons-react";
 import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
@@ -153,13 +153,9 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const userMenu = user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "border border-[#e8e8e8]",
-          avatar: { base: "size-8" },
-        },
-      }}
-      additionalLinks={[
+      className="border border-[#e8e8e8]"
+      avatarClassName="size-8"
+      links={[
         {
           icon: <IconPackage className="h-4 w-4" />,
           label: "Orders",

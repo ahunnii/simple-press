@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconTerminal } from "@tabler/icons-react";
 
 import { authClient } from "~/server/better-auth/client";
@@ -19,15 +19,9 @@ export function PlatformHeader() {
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "border-primary border",
-          avatar: {
-            base: "size-10",
-          },
-        },
-      }}
-      additionalLinks={[
+      className="border-primary border"
+      avatarClassName="size-10"
+      links={[
         ...(session?.user?.platformRole === "PLATFORM_ADMIN"
           ? [
               {

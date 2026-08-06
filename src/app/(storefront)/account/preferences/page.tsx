@@ -13,7 +13,7 @@ export const metadata = {
 export default async function PreferencesPage() {
   const session = await getSession();
   if (!session?.user) {
-    redirect("/auth/sign-in?redirect=/account/preferences");
+    redirect("/auth/sign-in?redirectTo=/account/preferences");
   }
 
   const [business, customer] = await Promise.all([

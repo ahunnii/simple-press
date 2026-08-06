@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserButton } from "~/components/auth/user/user-button";
 import {
   IconLayoutDashboard,
   IconLogout,
@@ -275,13 +275,9 @@ export function SledgeHeader({
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "rounded-full w-auto h-auto p-0 border border-white/30",
-          avatar: { base: "size-9" },
-        },
-      }}
-      additionalLinks={[
+      className="rounded-full w-auto h-auto p-0 border border-white/30"
+      avatarClassName="size-9"
+      links={[
         {
           icon: <IconPackage className="h-4 w-4" />,
           label: "Orders",

@@ -38,10 +38,10 @@ type Props = {
   /** Right figure — her panel's cut edge bleeds off the right of the canvas. */
   maker3: string;
   maker3Alt: string;
-  /** Far-left figure — outside the trio, same as the corner dolls, hidden on phones. */
+  /** Far-left figure — outside the trio, and desktop-only (rendered from 1024px up). */
   maker4: string;
   maker4Alt: string;
-  /** Far-right figure — outside the trio, same as the corner dolls, hidden on phones. */
+  /** Far-right figure — outside the trio, and desktop-only (rendered from 1024px up). */
   maker5: string;
   maker5Alt: string;
 };
@@ -77,8 +77,11 @@ const CORNER_ENTER_DELAYS_S = { left: 1.1, right: 1.2 };
  * clear it reads as a stock layout. The dolls did not lose the argument
  * entirely: two of them survive as small tilted mementos in the top corners.
  * A second pair of makers was added outside the original trio (2026-08-04) to
- * widen the crowd on desktop; they are hidden below 640px, where the phone
- * keeps the original trio.
+ * widen the crowd on desktop; they render from 1024px up only. That pair first
+ * shipped at 640px and up, which meant a 768–1023px tablet had to fit five
+ * figures into a phone-and-a-half of width and squished every one of them
+ * (owner report 2026-08-05) — so tablets now keep the original trio too, and
+ * the crowd is a desktop move.
  *
  * Which is why the figures are **content, not decoration** — each one carries
  * real alt text from an owner-editable field. The v1 doll layer was
@@ -289,10 +292,13 @@ export function PinkHeroSection({
             stacking context. NOT `aria-hidden`: these are photographs of people
             with their work, so each one announces itself. `pointer-events-none`
             keeps the rail from swallowing clicks meant for the copy above it.
-            An empty slot renders nothing: five figures (three on phones, where
-            the outer pair is hidden) is the designed state, fewer is a
-            quieter one, and a placeholder rectangle standing in for a person
-            would be worse than either. */}
+            Every filled slot is rendered here at every width; CSS is what drops
+            the outer pair below 1024px, so the trio a phone or tablet sees is
+            the same three elements a desktop sees in the middle, and no
+            breakpoint changes the reading order. An empty slot renders
+            nothing: the full crowd is the designed state, fewer is a quieter
+            one, and a placeholder rectangle standing in for a person would be
+            worse than either. */}
         <div className="pointer-events-none absolute inset-0 z-10">
           <div className="pink-hero-makers">
             {hasCustomImage(maker4) && (
@@ -392,10 +398,13 @@ export function PinkHeroSection({
 
       {/* ── Corner mementos ──
           Above the stage, below the band and the copy (`z-[15]` vs `z-20` /
-          `z-30`) — they hang off the top edge and get cropped by the section,
-          so they must never paint over the kicker. Decorative: two dolls at
+          `z-30`) — they hang off the section's edges and get cropped by it, so
+          they must never paint over the kicker. Decorative: two dolls at
           thumbnail size are a garnish on a composition whose subject is already
-          announced three times below. Hidden entirely under 640px in CSS. */}
+          announced by every maker below. They render at every width now
+          (2026-08-05) — a phone gets them hung mostly off the left and right
+          edges, where the section's crop leaves only a sliver showing, and only
+          a viewport both narrow AND short drops them in CSS. */}
       {(hasCustomImage(cornerDollLeft) || hasCustomImage(cornerDollRight)) && (
         <div
           aria-hidden="true"
@@ -413,7 +422,7 @@ export function PinkHeroSection({
                   width={638}
                   height={1200}
                   loading="lazy"
-                  sizes="160px"
+                  sizes="(min-width: 640px) 160px, 90px"
                   className="h-auto w-full"
                 />
               </div>
@@ -431,7 +440,7 @@ export function PinkHeroSection({
                   width={605}
                   height={1200}
                   loading="lazy"
-                  sizes="160px"
+                  sizes="(min-width: 640px) 160px, 90px"
                   className="h-auto w-full"
                 />
               </div>

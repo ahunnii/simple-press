@@ -114,7 +114,7 @@ export function WriteReviewDialog({
               Cancel
             </Button>
             <Button asChild>
-              <Link href={`/auth/sign-in?redirect=${redirect}`}>Sign in</Link>
+              <Link href={`/auth/sign-in?redirectTo=${redirect}`}>Sign in</Link>
             </Button>
           </DialogFooter>
         </DialogContent>

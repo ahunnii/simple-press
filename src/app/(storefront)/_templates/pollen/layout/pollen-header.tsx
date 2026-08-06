@@ -4,8 +4,8 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@daveyplate/better-auth-ui";
-import { IconLayoutDashboard } from "@tabler/icons-react";
+import { UserButton } from "~/components/auth/user/user-button";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import {
   Heart,
   MessageSquare,
@@ -170,15 +170,9 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const userMenu = user && (
     <UserButton
       size="icon"
-      classNames={{
-        trigger: {
-          base: "border-primary border",
-          avatar: {
-            base: "size-10",
-          },
-        },
-      }}
-      additionalLinks={[
+      className="border-primary border"
+      avatarClassName="size-10"
+      links={[
         ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
         !!session?.session?.membershipId
           ? [
@@ -186,6 +180,16 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                 icon: <IconLayoutDashboard className="h-4 w-4" />,
                 label: "Admin",
                 href: "/admin",
+              },
+            ]
+          : []),
+        // /account/orders 404s when the owner disables the `orders` feature.
+        ...(isStorefrontEnabled("orders")
+          ? [
+              {
+                icon: <IconPackage className="h-4 w-4" />,
+                label: "Orders",
+                href: "/account/orders",
               },
             ]
           : []),

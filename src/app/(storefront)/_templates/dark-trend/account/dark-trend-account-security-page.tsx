@@ -1,6 +1,6 @@
 "use client";
 
-import { SecuritySettingsCards } from "@daveyplate/better-auth-ui";
+import { SecuritySettingsCards } from "~/components/account/security-settings-cards";
 
 import { DarkTrendAccountLayout } from "./dark-trend-account-layout";
 

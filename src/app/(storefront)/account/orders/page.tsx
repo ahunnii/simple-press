@@ -13,7 +13,7 @@ export const metadata = {
 export default async function OrdersPage() {
   const session = await getSession();
   if (!session?.user) {
-    redirect("/auth/sign-in?redirect=/account/orders");
+    redirect("/auth/sign-in?redirectTo=/account/orders");
   }
 
   const [business, orders] = await Promise.all([

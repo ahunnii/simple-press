@@ -29,7 +29,7 @@ type Options = {
  * layouts. Redirect targets and PLATFORM_ADMIN bypass semantics match the
  * historical `/admin/layout.tsx` behavior exactly:
  *
- * 1. No session → redirect to `/auth/sign-in?callbackUrl=/admin`.
+ * 1. No session → redirect to `/auth/sign-in?redirectTo=/admin`.
  * 2. No resolved business for the current host → `notFound()`.
  * 3. PLATFORM_ADMIN → bypasses membership checks entirely (`membershipRole: null`).
  * 4. Everyone else must have a BusinessMembership with an allowed role, else
@@ -45,7 +45,7 @@ export async function requireAdminAccess(
   const session = await getSession();
 
   if (!session) {
-    redirect("/auth/sign-in?callbackUrl=/admin");
+    redirect("/auth/sign-in?redirectTo=/admin");
   }
 
   const business = await checkBusiness();
