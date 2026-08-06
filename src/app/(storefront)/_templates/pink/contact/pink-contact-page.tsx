@@ -48,7 +48,6 @@ const DEFAULT_HEADER_FACTS: PinkFactRow[] = [
 ];
 
 const DEFAULT_SHORTCUTS: ShortcutItem[] = [
-  { label: "Ask about a custom order", href: "/about#commissions" },
   { label: "Ask about a make & take", href: "/services" },
   { label: "Browse what's ready now", href: "/shop" },
 ];

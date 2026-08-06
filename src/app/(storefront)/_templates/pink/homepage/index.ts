@@ -217,7 +217,7 @@ const homepageHeroData: TemplateField[] = [
     key: "pink.homepage.hero-maker-4",
     label: "Maker — Far Left",
     description:
-      "A person holding what they made at a make & take, standing at the hero's far left, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Hidden on phones — five figures cannot fit that narrow a stage.",
+      "A person holding what they made at a make & take, standing at the hero's far left, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Shown on desktop only — five figures cannot fit a phone or tablet stage, which keep the middle three.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -240,7 +240,7 @@ const homepageHeroData: TemplateField[] = [
     key: "pink.homepage.hero-maker-5",
     label: "Maker — Far Right",
     description:
-      "A person holding what they made at a make & take, standing at the hero's far right, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Hidden on phones — five figures cannot fit that narrow a stage.",
+      "A person holding what they made at a make & take, standing at the hero's far right, outside the trio. A photo with its background removed (transparent PNG/WebP) works best — the lower part sinks behind the bottom band. Shown on desktop only — five figures cannot fit a phone or tablet stage, which keep the middle three.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -263,7 +263,7 @@ const homepageHeroData: TemplateField[] = [
     key: "pink.homepage.hero-doll-1",
     label: "Corner Doll — Top Left",
     description:
-      "Small tilted doll cutout pinned in the hero's top-left corner like taped-up artwork. Hidden on phones; a photo with its background removed (transparent PNG/WebP) works best.",
+      "Small tilted doll cutout pinned in the hero's top-left corner like taped-up artwork — smaller and cropped by the edge on phones. A photo with its background removed (transparent PNG/WebP) works best.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -274,7 +274,7 @@ const homepageHeroData: TemplateField[] = [
     key: "pink.homepage.hero-doll-2",
     label: "Corner Doll — Top Right",
     description:
-      "Small tilted doll cutout pinned in the hero's top-right corner like taped-up artwork. Hidden on phones; a photo with its background removed (transparent PNG/WebP) works best.",
+      "Small tilted doll cutout pinned in the hero's top-right corner like taped-up artwork — smaller and cropped by the edge on phones. A photo with its background removed (transparent PNG/WebP) works best.",
     type: "image",
     page: "homepage",
     group: "homepage.hero",
@@ -721,7 +721,7 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair hidden on phones), and two small doll cutouts pinned in the top corners",
+      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners",
     icon: "🏰",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -778,7 +778,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     page: "homepage",
     title: "Hero",
     description:
-      "Washed family home photo background, giant wordmark, five makers holding their finished pieces over the bottom band (the outer pair hidden on phones), and two doll cutouts pinned in the top corners",
+      "Washed family home photo background, giant wordmark, five makers holding their finished pieces over the bottom band (the outer pair on desktop only), and two doll cutouts pinned in the top corners",
     groupIds: ["homepage.hero"],
     order: 0,
     hideable: false,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,6 +13,7 @@ import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "..";
 import { PinkSocialLinks } from "../shared/pink-social-links";
+import { PinkWordmarkSvg } from "../shared/pink-wordmark-svg";
 
 type PinkFooterProps = DefaultFooterTemplateProps & {
   /**
@@ -33,12 +35,11 @@ type PinkFooterProps = DefaultFooterTemplateProps & {
 
 const FIELD_KEYS = [
   "pink.global.accent-word",
-  "pink.global.locality-tag",
+  "pink.global.footer-brand-mark",
+  "pink.global.footer-logo",
   "pink.global.footer-blurb",
   "pink.global.footer-col1-title",
   "pink.global.footer-col2-title",
-  "pink.global.footer-social-heading",
-  "pink.global.footer-social-body",
   "pink.global.footer-copyright",
 ];
 
@@ -73,9 +74,30 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
   const f = resolveFields(rawCustomFields, FIELD_KEYS);
 
   const accentWord = f["pink.global.accent-word"] ?? "";
-  const localityTag = f["pink.global.locality-tag"] ?? "";
   const wordmark = splitAccentWordmark(businessName, accentWord);
   const footerBlurb = f["pink.global.footer-blurb"] ?? "";
+
+  // ── What the footer shows as the brand ──
+  // Three-way owner choice, expressed with the two field types the platform
+  // already has (there is no select/enum type): a switch picks the traced
+  // mark, and everything below it is a fallback chain. Precedence:
+  //
+  //   1. the traced PINKART mark          — switch on (the default)
+  //   2. `pink.global.footer-logo`        — a footer-specific upload
+  //   3. `siteContent.logoUrl`            — whatever the header already uses
+  //   4. the live-text wordmark           — always available, never blank
+  //
+  // Steps 2 and 3 are separate on purpose: the footer is dark on most routes,
+  // so a header logo drawn in dark ink disappears there. The dedicated field
+  // is where an owner puts the light version, and it wins when set.
+  const useWordmarkSvg =
+    (f["pink.global.footer-brand-mark"] ?? "true") === "true";
+  const footerLogo = (f["pink.global.footer-logo"] ?? "").trim();
+  // Not `??` — an EMPTY footer-logo field must fall through to the branding
+  // logo, and an empty one of those through to the text build. Only a real
+  // value stops the chain.
+  const brandLogoUrl =
+    footerLogo !== "" ? footerLogo : (business?.siteContent?.logoUrl ?? "");
 
   const socialLinks = resolveSocialLinks(business?.siteContent?.socialLinks);
 
@@ -108,12 +130,9 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           { label: "Contact", url: "/contact" },
         ];
 
-  const socialHeading = (f["pink.global.footer-social-heading"] ?? "").trim();
-  const socialBody = (f["pink.global.footer-social-body"] ?? "").trim();
-  // Gated on `socialLinks.length` (not just the heading text, which always
-  // carries a default) — an owner with no socials set at all must never see
-  // a dangling heading over an empty row.
-  const showSocialColumn =
+  // Gated on `socialLinks.length` — an owner with no socials set at all must
+  // never see an empty icon row reserving space under the blurb.
+  const showSocial =
     isSectionVisible(rawCustomFields, "pink", "global.footer-social") &&
     socialLinks.length > 0;
 
@@ -144,18 +163,41 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
     <footer style={{ background: bg, color: fg }}>
       <div
         className="mx-auto grid max-w-[1400px] gap-8 px-5 py-16 md:px-10"
+        // Three columns since the social block moved under the blurb
+        // (2026-08-05). The link columns are `1fr` rather than the `auto` they
+        // were as a four-column footer: with `auto` they shrink to their text
+        // and the whole pair clings to the right edge, leaving ~800px of dead
+        // centre at 1440px — the fourth column used to fill that. Fractional
+        // widths spread them back across the right half.
         style={{
-          gridTemplateColumns: showSocialColumn
-            ? "minmax(0,1.3fr) auto auto minmax(0,1fr)"
-            : "minmax(0,1.3fr) auto auto",
+          gridTemplateColumns: "minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)",
         }}
       >
-        {/* ── Col 1: wordmark + blurb (global.branding) ── */}
+        {/* ── Col 1: wordmark + blurb + socials (global.branding) ── */}
         <div
           className="col-span-full flex flex-col gap-4 md:col-span-1"
           {...sectionGroupAttr("global", "branding")}
         >
-          <div className="flex items-baseline gap-2.5">
+          {useWordmarkSvg ? (
+            <PinkWordmarkSvg
+              className="pink-footer-wordmark-svg"
+              accentColor={accent}
+              inkColor={fg}
+              label={businessName}
+            />
+          ) : brandLogoUrl ? (
+            <Image
+              src={brandLogoUrl}
+              alt={businessName}
+              width={220}
+              height={56}
+              // Height-capped rather than width-capped: an owner's logo can be
+              // any ratio, and the column has to stay a fixed rhythm above the
+              // blurb. `object-contain` so a wide mark letterboxes instead of
+              // cropping.
+              className="h-10 w-auto max-w-[220px] object-contain"
+            />
+          ) : (
             <span
               className="pink-display"
               style={{ fontSize: "26px", fontWeight: 700, color: fg }}
@@ -169,16 +211,7 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
                 businessName
               )}
             </span>
-            {localityTag && (
-              <span
-                className="text-[11px] font-medium tracking-[0.2em] uppercase"
-                style={{ color: subtleFg }}
-                {...fieldAttr("pink.global.locality-tag")}
-              >
-                {localityTag}
-              </span>
-            )}
-          </div>
+          )}
 
           {footerBlurb && (
             <p
@@ -188,6 +221,22 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
             >
               {footerBlurb}
             </p>
+          )}
+
+          {/* Socials, formerly their own "Follow along" column — folded under
+              the blurb 2026-08-05 per the redesign. Tone must follow the
+              footer's own resolved tone, not a literal: `/about` and
+              `/blog/[slug]` render the LIGHT footer, where the dark ramp's
+              resting icon colour (`--pink-ink-body`, #e8e8e8) lands at
+              ~1.2:1 on white — invisible. Same class of defect as the
+              /collections regression in the 2026-07-31 remediation. */}
+          {showSocial && (
+            <div {...sectionGroupAttr("global", "footer-social")}>
+              <PinkSocialLinks
+                socialLinks={business?.siteContent?.socialLinks}
+                tone={resolvedTone}
+              />
+            </div>
           )}
         </div>
 
@@ -199,40 +248,6 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           <FooterCol title={col1Title} links={col1Links} labelClass={labelClass} fg={fg} />
           <FooterCol title={col2Title} links={col2Links} labelClass={labelClass} fg={fg} />
         </div>
-
-        {/* ── Col 4: social block (global.footer-social) ── */}
-        {showSocialColumn && (
-          <div
-            className="col-span-full flex flex-col gap-4 md:col-span-1"
-            {...sectionGroupAttr("global", "footer-social")}
-          >
-            <h2
-              className="pink-display"
-              style={{ fontSize: "20px", fontWeight: 600, letterSpacing: "-0.015em", color: fg }}
-              {...fieldAttr("pink.global.footer-social-heading")}
-            >
-              {socialHeading}
-            </h2>
-            {socialBody && (
-              <p
-                className="text-[14px] leading-[1.6]"
-                style={{ color: mutedFg }}
-                {...fieldAttr("pink.global.footer-social-body")}
-              >
-                {socialBody}
-              </p>
-            )}
-            {/* Tone must follow the footer's own resolved tone, not a literal:
-                `/about` and `/blog/[slug]` render the LIGHT footer, where the
-                dark ramp's resting icon colour (`--pink-ink-body`, #e8e8e8)
-                lands at ~1.2:1 on white — invisible. Same class of defect as
-                the /collections regression in the 2026-07-31 remediation. */}
-            <PinkSocialLinks
-              socialLinks={business?.siteContent?.socialLinks}
-              tone={resolvedTone}
-            />
-          </div>
-        )}
       </div>
 
       {/* ── Legal strip (global.footer-legal) ── */}

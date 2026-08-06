@@ -24,7 +24,6 @@ export type PinkNavLink = { href: string; label: string; fieldKey?: string };
 
 const FIELD_KEYS = [
   "pink.global.accent-word",
-  "pink.global.locality-tag",
   "pink.global.nav-shop",
   "pink.global.nav-collections",
   "pink.global.nav-services",
@@ -90,7 +89,6 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
     | null;
 
   const accentWord = f["pink.global.accent-word"] ?? "";
-  const localityTag = f["pink.global.locality-tag"] ?? "";
   const wordmark = splitAccentWordmark(businessName, accentWord);
 
   const ctaText = (f["pink.global.header-cta-text"] ?? "").trim();
@@ -177,7 +175,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
           borderBottom: "1px solid var(--pink-line)",
         }}
       >
-        {/* ── Wordmark + locality ── */}
+        {/* ── Wordmark ── */}
         <Link
           href="/"
           className="flex min-w-0 items-baseline gap-2.5"
@@ -211,15 +209,6 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
               ) : (
                 businessName
               )}
-            </span>
-          )}
-          {localityTag && (
-            <span
-              className="shrink-0 text-[11px] font-medium tracking-[0.2em] uppercase"
-              style={{ color: "var(--pink-subtle)" }}
-              {...fieldAttr("pink.global.locality-tag")}
-            >
-              {localityTag}
             </span>
           )}
         </Link>

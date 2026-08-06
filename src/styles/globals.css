@@ -4133,9 +4133,10 @@
    The homepage hero composition (v2, 2026-08-04 — replaces the same day's
    washed-grey build, which replaced the bento collage; a same-day v3 pass
    widened the trio to five makers on desktop): white ground → the family
-   home held in the upper region → the client's traced wordmark → five
-   makers holding their own work, overlapping that wordmark → solid bottom
-   band, with two doll cutouts pinned in the top corners. Layer order is
+   home held in the upper region → the client's traced wordmark → the makers
+   holding their own work, overlapping that wordmark (five of them on desktop,
+   the original three from tablet down) → solid bottom band, with two doll
+   cutouts pinned in the top corners. Layer order is
    z-index only; everything stays in flow except the photo layers, the makers
    rail and the corner dolls. */
 
@@ -4225,9 +4226,24 @@
   margin-inline: auto;
 }
 
+/* The same traced mark, reused as the footer's signature. Sized off width for
+   the same reason as the hero build — it is geometry, not type — but an order
+   of magnitude smaller: at ~5.6:1 this clamp resolves to roughly 27–40px of
+   height, which is the line the 26px text wordmark it replaces used to hold.
+   26vw is what keeps it proportionate on a phone, where the footer column is
+   the full canvas rather than a lane inside it. */
+.pink .pink-footer-wordmark-svg {
+  display: block;
+  width: clamp(150px, 26vw, 224px);
+  height: auto;
+}
+
 /* ── The makers ──
-   Five figures (three on phones — the far-left and far-right pair is hidden
-   below 640px) in a bottom-anchored flex rail, sized by HEIGHT (`svh`), which
+   Five figures on desktop, three below it: the far-left and far-right pair
+   only exists from 1024px up. It used to turn on at 640px, which crammed five
+   figures into a 768–1023px tablet and left every one of them squished (owner
+   report 2026-08-05) — so phones and tablets alike keep the original trio.
+   They sit in a bottom-anchored flex rail, sized by HEIGHT (`svh`), which
    is the whole v2 sizing change: v1's dolls were width-sized in `vw` and so
    towered out of the stage on a short-but-wide window, which is why that build
    needed a `min(vw, vh)` cap bolted on at the end. Height-first sizing makes
@@ -4281,7 +4297,8 @@
 
 /* Mobile first: the side figures are pushed partly off-canvas so all three stay
    in the composition on a narrow screen instead of shrinking to thumbnails.
-   The far pair is display:none below (phones keep the original trio only). */
+   The far pair is display:none below, and stays that way clear through the
+   tablet band — only the trio's heights and overlaps get re-tuned at 640px. */
 .pink .pink-hero-maker-center {
   --pink-maker-h: 36svh;
   --pink-maker-sink: 16%;
@@ -4307,8 +4324,9 @@
   margin-right: -6vw;
   z-index: 1;
 }
-/* Five figures cannot fit a phone's width — the far pair is cut entirely
-   below 640px and the phone keeps the original trio. */
+/* Five figures are a desktop composition. Nothing under 1024px has the width
+   for them — a tablet fit all five only by squishing each one — so the far pair
+   is cut entirely here and switched back on in the 1024px block. */
 .pink .pink-hero-maker-farleft,
 .pink .pink-hero-maker-farright {
   display: none;
@@ -4344,47 +4362,75 @@
     margin-left: -2vw;
     margin-right: -3vw;
   }
-  /* The far pair only ever appears here and up — five figures is a
-     desktop/tablet composition, not a phone one. */
+}
+
+/* TABLET WIDTH CEILING (owner report 2026-08-05, "squished on tablet").
+   Dropping the far pair to desktop-only fixed the count; this fixes the fit.
+   The rail is height-driven, so a TALL portrait tablet asks for figures whose
+   widths then have to survive a much narrower canvas: at 820×1180 the 44/38/38
+   svh heights resolve to ~840px of rail against 820px of viewport and the left
+   figure gets sliced at the edge. The fix caps the height with the width that
+   produces it — `min()` takes whichever constraint is tighter, so a short wide
+   tablet, where svh was already the binding one, is untouched.
+
+   All three scale by the same factor (≈1.32× their svh numbers), which keeps
+   the center exactly 16% taller than its neighbours and preserves the designed
+   left/right parity. Equalising the three WIDTHS instead would have made the
+   right figure — the widest per unit of height — visibly the shortest.
+
+   Sized so the rail lands near 93% of the viewport. The ~3% gutter each side is
+   what the tilts need: a 420px figure rotated 2° reaches ~15px further out than
+   its layout box, and the tilt is a transform, so the flex rail never sees it.
+   The right figure's -3vw margin still runs its cut panel off the right edge,
+   which is the one overhang this composition wants. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .pink .pink-hero-maker-center {
+    --pink-maker-h: min(44svh, 58vw);
+  }
+  .pink .pink-hero-maker-left,
+  .pink .pink-hero-maker-right {
+    --pink-maker-h: min(38svh, 50vw);
+  }
+}
+
+/* The full five-figure crowd, and the only place it exists.
+   The `min(<vw>, …)` ceilings are the same guard the tablet band uses, kept on
+   for the one desktop-width viewport that is also very tall: iPad Pro portrait
+   is 1024×1366, where the uncapped heights put ~1675px of figure across 1024px
+   of canvas and the far pair survives as two slivers. Each cap only engages
+   below about a 1.26:1 aspect ratio, so every landscape window — 1280×800,
+   1440×900, 1024×768 — resolves to exactly the values it did before. */
+@media (min-width: 1024px) {
+  .pink .pink-hero-maker-center {
+    --pink-maker-h: min(38vw, clamp(320px, 48svh, 560px));
+    --pink-maker-sink: 14%;
+  }
+  .pink .pink-hero-maker-left {
+    --pink-maker-h: min(32vw, clamp(260px, 40svh, 480px));
+    --pink-maker-sink: 18%;
+  }
+  .pink .pink-hero-maker-right {
+    --pink-maker-h: min(32vw, clamp(260px, 40svh, 480px));
+    --pink-maker-sink: 20%;
+    margin-right: -3vw;
+  }
+  /* The far pair turns on here and nowhere else, so its display, tilts and
+     overlaps live in this block alongside its sizing rather than being
+     inherited from a wider breakpoint. */
   .pink .pink-hero-maker-farleft,
   .pink .pink-hero-maker-farright {
     display: block;
-    --pink-maker-h: 32svh;
-    --pink-maker-sink: 24%;
+    --pink-maker-h: min(27vw, clamp(220px, 34svh, 420px));
   }
   .pink .pink-hero-maker-farleft {
+    --pink-maker-sink: 22%;
     --pink-maker-tilt: -3deg;
     margin-right: -3vw;
   }
   .pink .pink-hero-maker-farright {
+    --pink-maker-sink: 24%;
     --pink-maker-tilt: 2.5deg;
     margin-left: -3vw;
-  }
-}
-
-@media (min-width: 1024px) {
-  .pink .pink-hero-maker-center {
-    --pink-maker-h: clamp(320px, 48svh, 560px);
-    --pink-maker-sink: 14%;
-  }
-  .pink .pink-hero-maker-left {
-    --pink-maker-h: clamp(260px, 40svh, 480px);
-    --pink-maker-sink: 18%;
-  }
-  .pink .pink-hero-maker-right {
-    --pink-maker-h: clamp(260px, 40svh, 480px);
-    --pink-maker-sink: 20%;
-    margin-right: -3vw;
-  }
-  .pink .pink-hero-maker-farleft,
-  .pink .pink-hero-maker-farright {
-    --pink-maker-h: clamp(220px, 34svh, 420px);
-  }
-  .pink .pink-hero-maker-farleft {
-    --pink-maker-sink: 22%;
-  }
-  .pink .pink-hero-maker-farright {
-    --pink-maker-sink: 24%;
   }
 }
 
@@ -4395,7 +4441,14 @@
    composition's hierarchy (review 2026-08-04). Last in the block so it wins
    the breakpoints above at equal specificity. `min-width: 640px` keeps short
    PORTRAIT phones (e.g. 375×667) on their tuned mobile values — this is a
-   wide-and-short fix. */
+   wide-and-short fix.
+
+   It overrides the width ceilings above with plain clamps on purpose: under a
+   700px ceiling the `svh` term is always the smaller of the two anyway (44svh
+   tops out at 308px, well under 58vw at the narrowest width this block can
+   see), so the caps were never the binding constraint here. The far-pair rule
+   below only reaches anything from 1024px up now — between 640 and 1023 those
+   two are display:none and it is inert. */
 @media (max-height: 700px) and (min-width: 640px) {
   .pink .pink-hero-maker-center {
     --pink-maker-h: clamp(250px, 40svh, 460px);
@@ -4411,13 +4464,33 @@
 }
 
 /* ── Corner mementos ──
-   The two dolls that survived the v2 recut, at thumbnail size in the top
-   corners. Hidden below 640px: at phone width they land on top of the kicker
-   and there is no corner to spare. The desaturation keeps them reading as
-   pinned keepsakes rather than as a fourth and fifth subject. */
+   The two dolls that survived the v2 recut, pinned in the top corners. The
+   desaturation keeps them reading as keepsakes rather than as a fourth and
+   fifth subject.
+
+   PHONES (2026-08-05): they used to be cut entirely below 640px, on the
+   reasoning that a phone has no corner to spare. The owner wanted them back, so
+   the phone build earns its corner by hanging most of each doll past the edge —
+   the section's `overflow: hidden` is what crops it — leaving a ~30px sliver of
+   the inner side. The pitch row is `z-30` against the dolls' `z-[15]`, so the
+   kicker and H1 always paint over them; the sliver is what keeps them from
+   having to. Width is clamped while the offsets are `vw`, which is what holds
+   that sliver at roughly one width across the whole phone band instead of
+   letting it grow with the screen. */
 .pink .pink-hero-corner-doll {
   position: absolute;
-  display: none;
+  display: block;
+  width: clamp(56px, 16vw, 84px);
+}
+.pink .pink-hero-corner-doll-left {
+  left: -8vw;
+  top: 0;
+  --pink-corner-tilt: -9deg;
+}
+.pink .pink-hero-corner-doll-right {
+  right: -9vw;
+  top: 8px;
+  --pink-corner-tilt: 10deg;
 }
 .pink .pink-hero-corner-doll-figure {
   transform: rotate(var(--pink-corner-tilt, 0deg));
@@ -4427,6 +4500,19 @@
     );
 }
 
+/* Short AND narrow — a resized desktop window, a foldable's cover screen, a
+   phone landing in a landscape web view. The pitch row fills the entire top of
+   the composition at that shape, so there is no corner left to hang them in and
+   the crop trick has nothing to crop against. */
+@media (max-width: 639px) and (max-height: 560px) {
+  .pink .pink-hero-corner-doll {
+    display: none;
+  }
+}
+
+/* From 640px up there is a real corner again, so they come inboard: only a few
+   pixels off the edge, and at full keepsake scale rather than the phone
+   sliver. Every property the phone build sets is reset here. */
 @media (min-width: 640px) {
   .pink .pink-hero-corner-doll {
     display: block;

@@ -26,16 +26,26 @@ export const pinkGlobalData: TemplateField[] = [
     placeholder: "Art",
   },
   {
-    key: "pink.global.locality-tag",
-    label: "Locality Tag",
+    key: "pink.global.footer-brand-mark",
+    label: "Use the PinkArt Logo Mark in the Footer",
     description:
-      "Small uppercase word beside the wordmark — usually your city. Leave blank to hide.",
-    type: "text",
+      "On: the footer shows the PinkArt logo's own letterforms, recolored to stay readable on the dark footer (and on the light one used by The Artist and blog posts). Off: it falls back to your footer logo image below, then to the logo in Admin → Branding, then to your business name as text.",
+    type: "boolean",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "Detroit",
-    placeholder: "Detroit",
+    defaultValue: "true",
+  },
+  {
+    key: "pink.global.footer-logo",
+    label: "Footer Logo Image",
+    description:
+      "Used only when the logo mark above is off. Upload a version that reads on a DARK background — the footer is dark on every page except The Artist and blog posts. Leave blank to reuse the logo from Admin → Branding.",
+    type: "image",
+    page: "global",
+    group: "global.branding",
+    gridColumn: "col-span-1",
+    defaultValue: "",
   },
   {
     key: "pink.global.footer-blurb",
@@ -214,28 +224,6 @@ export const pinkGlobalData: TemplateField[] = [
     defaultValue: "",
   },
 
-  // ── global.footer-social ─────────────────────────────────────────────────
-  {
-    key: "pink.global.footer-social-heading",
-    label: "Footer Social Heading",
-    description: "The headline above your social links in the last footer column.",
-    type: "text",
-    page: "global",
-    group: "global.footer-social",
-    gridColumn: "col-span-full",
-    defaultValue: "Follow along",
-  },
-  {
-    key: "pink.global.footer-social-body",
-    label: "Footer Social Supporting Line",
-    description: "One short line under the heading. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.footer-social",
-    gridColumn: "col-span-full",
-    defaultValue: "New pieces and studio days, mostly in pictures.",
-  },
-
   // ── global.footer-legal ──────────────────────────────────────────────────
   {
     key: "pink.global.footer-copyright",
@@ -366,7 +354,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.branding",
     title: "Site Branding",
     description:
-      "Wordmark accent, locality tag, and footer blurb — shown on every page",
+      "Wordmark accent, the footer logo, and the footer blurb — shown on every page",
     icon: "🏷️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -383,14 +371,6 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     title: "Footer Links",
     description: "The two link columns in the middle of the footer",
     icon: "🔗",
-    columns: 2,
-  } satisfies TemplateFieldGroup,
-  {
-    id: "global.footer-social",
-    title: "Footer Social",
-    description:
-      "The last footer column — a short heading and your social links",
-    icon: "📣",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
@@ -431,7 +411,7 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Site Branding",
     description:
-      "Wordmark accent, locality tag, and footer blurb — shown on every page",
+      "Wordmark accent, the footer logo, and the footer blurb — shown on every page",
     groupIds: ["global.branding"],
     order: 0,
     hideable: false,
@@ -458,7 +438,7 @@ export const pinkGlobalSections: TemplateSection[] = [
     id: "global.footer-social",
     page: "global",
     title: "Footer Social",
-    description: "The last footer column — a short heading and your social links",
+    description: "Social icons shown in the footer (configured in Admin → Branding)",
     groupIds: ["global.footer-social"],
     order: 3,
     hideable: true,
