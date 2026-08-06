@@ -2,7 +2,6 @@ import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { env } from "~/env";
 import { getBusinessUrl } from "~/lib/business-url";
 import { sendTeamInviteEmail } from "~/lib/email/templates";
 
@@ -14,11 +13,29 @@ import {
   publicProcedure,
 } from "../trpc";
 
-function buildTeamInviteUrl(code: string): string {
-  if (process.env.NODE_ENV === "development") {
-    return `http://localhost:3000/auth/accept-invite?code=${code}`;
-  }
-  return `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/auth/accept-invite?code=${code}`;
+type InviteBusiness = {
+  subdomain: string | null;
+  customDomain: string | null;
+  domainStatus: string | null;
+};
+
+/**
+ * Invite links point at the *business's own* domain (custom domain when
+ * ACTIVE, else its subdomain) — never the bare platform domain.
+ *
+ * Sessions are per-host (no cross-subdomain cookie is configured), so signing
+ * in on the platform domain would not authenticate the member on the store
+ * they were invited to. Landing them on the store's own host means they sign
+ * in exactly once, on the host where the session is actually needed — and
+ * they never see an unfamiliar platform domain in the process.
+ */
+function buildTeamInviteUrl(code: string, business: InviteBusiness): string {
+  const base = getBusinessUrl({
+    subdomain: business.subdomain ?? "",
+    customDomain: business.customDomain,
+    domainStatus: business.domainStatus,
+  });
+  return `${base}/auth/accept-invite?code=${code}`;
 }
 
 export const teamRouter = createTRPCRouter({
@@ -116,20 +133,23 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      // The invite/accept flow runs on the platform domain, but the member must
-      // land on the *business's* admin (its own subdomain/custom domain) —
-      // /admin on the platform domain has no tenant context. Build that URL so
-      // the client can send them there (they re-sign-in so the new role loads).
+      // The member must land on the *business's* admin (its own subdomain or
+      // custom domain) — /admin on the platform domain has no tenant context.
+      // Invite links now point at that host already, so an accepting member is
+      // signed in there and can go straight to the dashboard: admin role checks
+      // resolve the membership live (see `requireAdminAccess`), so no re-sign-in
+      // is needed for the new role to take effect. A member arriving from a
+      // legacy platform-domain link simply gets bounced to that host's sign-in.
       const business = await ctx.db.business.findUnique({
         where: { id: invite.businessId },
         select: { subdomain: true, customDomain: true, domainStatus: true },
       });
-      const adminSignInUrl = business
+      const adminUrl = business
         ? `${getBusinessUrl({
             subdomain: business.subdomain ?? "",
             customDomain: business.customDomain,
             domainStatus: business.domainStatus,
-          })}/auth/sign-in?redirectTo=${encodeURIComponent("/admin/dashboard")}`
+          })}/admin/dashboard`
         : "/admin/dashboard";
 
       // Guard against duplicate membership
@@ -148,7 +168,7 @@ export const teamRouter = createTRPCRouter({
           where: { id: invite.id },
           data: { used: true, usedAt: new Date() },
         });
-        return { success: true, businessId: invite.businessId, adminSignInUrl };
+        return { success: true, businessId: invite.businessId, adminUrl };
       }
 
       // Create membership + mark invite used in a transaction
@@ -166,7 +186,7 @@ export const teamRouter = createTRPCRouter({
         }),
       ]);
 
-      return { success: true, businessId: invite.businessId, adminSignInUrl };
+      return { success: true, businessId: invite.businessId, adminUrl };
     }),
 
   // ─── OWNER-ONLY MUTATIONS ─────────────────────────────────────────────────
@@ -242,7 +262,7 @@ export const teamRouter = createTRPCRouter({
         },
       });
 
-      const inviteUrl = buildTeamInviteUrl(code);
+      const inviteUrl = buildTeamInviteUrl(code, business);
 
       await sendTeamInviteEmail({
         to: input.email,

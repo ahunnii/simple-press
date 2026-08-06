@@ -31,13 +31,13 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
   const { data: session } = authClient.useSession();
 
   const acceptMutation = api.team.acceptInvite.useMutation({
-    onSuccess: ({ adminSignInUrl }) => {
+    onSuccess: ({ adminUrl }) => {
       toast.success("Invitation accepted! Redirecting to your dashboard...");
       setTimeout(() => {
-        // adminSignInUrl points at the business's own domain (absolute in
-        // prod), so use a full navigation rather than a same-origin push —
-        // /admin on the platform domain has no tenant context.
-        window.location.href = adminSignInUrl;
+        // adminUrl points at the business's own domain (absolute in prod), so
+        // use a full navigation rather than a same-origin push — /admin on the
+        // platform domain has no tenant context.
+        window.location.href = adminUrl;
       }, 1500);
     },
     onError: (err) => {
@@ -170,8 +170,8 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground text-sm">
-          Click Accept to join the team. You&apos;ll need to sign in again
-          after accepting so your new role is loaded.
+          Click Accept to join the team. You&apos;ll be taken straight to the{" "}
+          <strong>{invite.businessName}</strong> dashboard.
         </p>
       </CardContent>
       <CardFooter className="flex gap-3">
