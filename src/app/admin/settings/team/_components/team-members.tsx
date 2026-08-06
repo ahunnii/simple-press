@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  Info,
   Loader2,
   Mail,
   MoreHorizontal,
   Shield,
+  ShieldAlert,
   Trash2,
   UserPlus,
 } from "lucide-react";
@@ -18,6 +20,7 @@ import { ROLE_DESCRIPTIONS } from "~/app/admin/_lib/admin-nav";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { inviteMemberFormSchema } from "~/lib/validators/team";
 import { type RouterOutputs, api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -72,6 +75,8 @@ interface Props {
   pendingInvites: PendingInvite[];
   currentUserId: string | null;
   currentUserRole: TeamRole | null;
+  canManage: boolean;
+  isPlatformAdmin: boolean;
 }
 
 export function TeamMembers({
@@ -79,9 +84,9 @@ export function TeamMembers({
   pendingInvites: initialPendingInvites,
   currentUserId,
   currentUserRole,
+  canManage,
+  isPlatformAdmin,
 }: Props) {
-  const isOwner = currentUserRole === "OWNER";
-
   const utils = api.useUtils();
 
   const { data } = api.team.list.useQuery(undefined, {
@@ -168,7 +173,7 @@ export function TeamMembers({
             Manage who has access to your store&apos;s admin dashboard.
           </p>
         </div>
-        {isOwner && (
+        {canManage && (
           <Dialog open={inviteOpen} onOpenChange={handleInviteOpenChange}>
             <DialogTrigger asChild>
               <Button>
@@ -244,6 +249,31 @@ export function TeamMembers({
         )}
       </div>
 
+      {isPlatformAdmin && (
+        <Alert>
+          <ShieldAlert />
+          <AlertTitle>Viewing as platform admin</AlertTitle>
+          <AlertDescription>
+            Platform admin access lets you manage this business&apos;s team
+            without being one of its Owners. Changes made here affect the
+            business owner&apos;s team, not your own.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!canManage && !isPlatformAdmin && (
+        <Alert>
+          <Info />
+          <AlertTitle>Team management is Owner-only</AlertTitle>
+          <AlertDescription>
+            {currentUserRole && ROLE_DESCRIPTIONS[currentUserRole].summary} You
+            can view the team below, but only an{" "}
+            {ROLE_DESCRIPTIONS.OWNER.label} can invite members, change roles,
+            or remove people.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Members table */}
       <Card>
         <CardHeader>
@@ -261,7 +291,7 @@ export function TeamMembers({
                 <TableHead className="px-6 py-3">Name</TableHead>
                 <TableHead className="px-6 py-3">Email</TableHead>
                 <TableHead className="px-6 py-3">Role</TableHead>
-                {isOwner && (
+                {canManage && (
                   <TableHead className="px-6 py-3 text-right">
                     Actions
                   </TableHead>
@@ -285,7 +315,7 @@ export function TeamMembers({
                       {m.user.email}
                     </TableCell>
                     <TableCell className="px-6 py-3">
-                      {isOwner && !isCurrentUser ? (
+                      {canManage && !isCurrentUser ? (
                         <Select
                           value={m.role}
                           onValueChange={(v) =>
@@ -324,7 +354,7 @@ export function TeamMembers({
                         </Badge>
                       )}
                     </TableCell>
-                    {isOwner && (
+                    {canManage && (
                       <TableCell className="px-6 py-3 text-right">
                         {!isCurrentUser && (
                           <DropdownMenu>
@@ -383,7 +413,7 @@ export function TeamMembers({
                   <TableHead className="px-6 py-3">Email</TableHead>
                   <TableHead className="px-6 py-3">Role</TableHead>
                   <TableHead className="px-6 py-3">Expires</TableHead>
-                  {isOwner && (
+                  {canManage && (
                     <TableHead className="px-6 py-3 text-right">
                       Actions
                     </TableHead>
@@ -402,7 +432,7 @@ export function TeamMembers({
                     <TableCell className="text-muted-foreground px-6 py-3">
                       {new Date(inv.expiresAt).toLocaleDateString()}
                     </TableCell>
-                    {isOwner && (
+                    {canManage && (
                       <TableCell className="px-6 py-3 text-right">
                         <Button
                           variant="ghost"
