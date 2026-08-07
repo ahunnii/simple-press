@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  ADMIN_BULK_DELETE_LIMIT,
+  ADMIN_BULK_SELECTION_LIMIT,
+} from "~/lib/validators/admin-table";
+
 // ─── Service (broad service group) ───────────────────────────────────────────
 
 export const serviceFormSchema = z.object({
@@ -123,13 +128,6 @@ export type ServiceItemDeleteData = z.infer<typeof serviceItemDeleteSchema>;
 
 // ─── Reorder ─────────────────────────────────────────────────────────────────
 
-export const serviceReorderSchema = z.object({
-  ids: z
-    .array(z.string())
-    .min(1, "At least one service id is required")
-    .max(500, "Too many services selected"),
-});
-
 export const serviceItemReorderSchema = z.object({
   serviceId: z.string(),
   ids: z
@@ -138,16 +136,20 @@ export const serviceItemReorderSchema = z.object({
     .max(500, "Too many items selected"),
 });
 
-export type ServiceReorderData = z.infer<typeof serviceReorderSchema>;
 export type ServiceItemReorderData = z.infer<typeof serviceItemReorderSchema>;
 
 // ─── Bulk operations ──────────────────────────────────────────────────────────
 
+// Caps come from ~/lib/validators/admin-table, shared with Products and
+// Collections — delete is far lower than publish on purpose.
 export const serviceBulkPublishSchema = z.object({
   ids: z
     .array(z.string())
     .min(1, "At least one service id is required")
-    .max(1000, "Too many services selected"),
+    .max(
+      ADMIN_BULK_SELECTION_LIMIT,
+      `Too many services selected — publish or unpublish at most ${ADMIN_BULK_SELECTION_LIMIT} at a time`,
+    ),
   published: z.boolean(),
 });
 
@@ -155,7 +157,10 @@ export const serviceBulkDeleteSchema = z.object({
   ids: z
     .array(z.string())
     .min(1, "At least one service id is required")
-    .max(1000, "Too many services selected"),
+    .max(
+      ADMIN_BULK_DELETE_LIMIT,
+      `Too many services selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
+    ),
 });
 
 export type ServiceBulkPublishData = z.infer<typeof serviceBulkPublishSchema>;

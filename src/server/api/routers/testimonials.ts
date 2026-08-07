@@ -6,6 +6,7 @@ import { z } from "zod";
 import { env } from "~/env";
 import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
 import { checkBusiness } from "~/lib/check-business";
+import { splitCustomerName } from "~/lib/customer-name";
 import { sendTestimonialInviteEmail } from "~/lib/email/templates";
 import {
   getClientIpFromHeaders,
@@ -245,8 +246,8 @@ export const testimonialRouter = createTRPCRouter({
         create: {
           businessId: business.id,
           email: normalizedUserEmail,
-          firstName: user.name?.split(" ")[0],
-          lastName: user.name?.split(" ").slice(1).join(" "),
+          // Stores NULL, not "", for a missing half — see splitCustomerName.
+          ...splitCustomerName(user.name),
         },
         update: {},
       });
@@ -357,8 +358,8 @@ export const testimonialRouter = createTRPCRouter({
         create: {
           businessId: invite.businessId,
           email: normalizedInviteEmail,
-          firstName: input.name.split(" ")[0],
-          lastName: input.name.split(" ").slice(1).join(" "),
+          // Stores NULL, not "", for a missing half — see splitCustomerName.
+          ...splitCustomerName(input.name),
         },
         update: {},
       });

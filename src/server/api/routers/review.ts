@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
+import { splitCustomerName } from "~/lib/customer-name";
 import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
 
@@ -34,9 +35,7 @@ async function assertBusinessOwner(
   // Review moderation/authoring touches store content, so it must be limited to
   // OWNER/MANAGER — STAFF (fulfillment-only) must not approve/hide/delete or
   // author reviews. A bare membership check would let any role through.
-  const membership = user?.memberships.find(
-    (m) => m.businessId === businessId,
-  );
+  const membership = user?.memberships.find((m) => m.businessId === businessId);
   if (!membership || !["OWNER", "MANAGER"].includes(membership.role)) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
   }
@@ -372,8 +371,8 @@ export const reviewRouter = createTRPCRouter({
         create: {
           businessId: product.businessId,
           email: normalizedUserEmail,
-          firstName: user.name?.split(" ")[0],
-          lastName: user.name?.split(" ").slice(1).join(" "),
+          // Stores NULL, not "", for a missing half — see splitCustomerName.
+          ...splitCustomerName(user.name),
         },
         update: {},
       });

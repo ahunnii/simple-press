@@ -58,9 +58,7 @@ import {
   DANGER_TEXT,
   TABLE_CARD,
   TABLE_CELL,
-  TABLE_CELL_TIGHT,
   TABLE_HEAD,
-  TABLE_HEAD_TIGHT,
   WARNING_TEXT,
 } from "../../_components/admin-table-style";
 import {
@@ -90,9 +88,10 @@ const ITEM_NOUN = { one: "base unit", many: "base units" } as const;
 // Aliased to the short names this file reads with.
 const TH = TABLE_HEAD;
 const TD = TABLE_CELL;
-/** The actions column is a lone icon button — Products' tighter control gutter. */
-const TH_ACTIONS = TABLE_HEAD_TIGHT;
-const TD_ACTIONS = TABLE_CELL_TIGHT;
+/** Full-width padding, matching Services/Collections — see the TABLE_HEAD_TIGHT
+ *  docblock for why the tight variant is reserved for checkbox columns now. */
+const TH_ACTIONS = TABLE_HEAD;
+const TD_ACTIONS = TABLE_CELL;
 
 /**
  * Deliberately NO AdminBulkBar: there is no bulk endpoint for pools, and

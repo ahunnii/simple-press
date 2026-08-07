@@ -2,7 +2,7 @@ import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
-import { buildTablePage, pickParam } from "../_lib/table-query";
+import { buildTablePage, matchesAllTokens, pickParam } from "../_lib/table-query";
 import { PoolCreateButton } from "./_components/pool-create-button";
 import { PoolsTable } from "./_components/pools-table";
 import { isLowStock, isOutOfStock, isUnavailable } from "./_lib/stock-state";
@@ -71,14 +71,15 @@ export default async function InventoryPage({ searchParams }: Props) {
   // It also has to happen here: the stock filter and the units-sold sort read
   // `sales`, which only exists once the router has merged its `inventoryHistory`
   // groupBy onto each pool. Neither is expressible as a Prisma `where`/`orderBy`.
-  const needle = search.toLowerCase();
   const matching = pools.filter((pool) => {
     // Description is meaningful on a pool ("6 rolls per case"), so search covers
-    // it as well as the name.
-    const matchesSearch =
-      needle === "" ||
-      pool.name.toLowerCase().includes(needle) ||
-      (pool.description?.toLowerCase().includes(needle) ?? false);
+    // it as well as the name. Tokenized via `matchesAllTokens` so a multi-word
+    // query can match across the two fields rather than needing to appear
+    // whole in a single one.
+    const matchesSearch = matchesAllTokens(search, [
+      pool.name,
+      pool.description,
+    ]);
     const matchesStock =
       stock === "all" ||
       (stock === "low" && isLowStock(pool)) ||

@@ -2,20 +2,28 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { ProductSortValue } from "~/lib/validators/product";
 import type { DbClient } from "~/server/db";
 import { deleteStoredObjects } from "~/lib/s3/delete";
-import { resolveVariantPrice } from "~/lib/variant-price";
 import {
+  ADMIN_BULK_SELECTION_LIMIT,
+  MAX_REQUESTED_PAGE,
+} from "~/lib/validators/admin-table";
+import {
+  productBulkDeleteSchema,
+  productBulkPublishSchema,
   productCreateSchema,
   productImageSchema,
   productListFiltersSchema,
   productUpdateSchema,
 } from "~/lib/validators/product";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import {
   createTRPCRouter,
   featureGate,
   getBusinessProcedure,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
@@ -180,6 +188,20 @@ export const productRouter = createTRPCRouter({
       return product;
     }),
 
+  // Cheap existence check for the admin empty state — distinguishes "no
+  // products at all" (offer Add Your First Product) from "no matches for the
+  // current filters" (offer Clear filters). A single COUNT(*), unlike
+  // `secureList({})`, which was being called a second time just to read
+  // `totalCount` and paid for a findMany with `include: {images, variants,
+  // _count}` plus the matching-ids query for one boolean.
+  hasAny: ownerAdminProcedure
+    .use(featureGate("products"))
+    .query(async ({ ctx }) => {
+      const { businessId } = ctx;
+      const count = await ctx.db.product.count({ where: { businessId } });
+      return { hasAny: count > 0 };
+    }),
+
   secureListAll: ownerAdminProcedure
     .use(featureGate("products"))
     .query(async ({ ctx }) => {
@@ -212,38 +234,70 @@ export const productRouter = createTRPCRouter({
         where.published = false;
       }
 
-      // Search filter — match name, slug, product sku, or any variant sku
+      // Search filter — match name, slug, product sku, or any variant sku.
+      // Tokenized: each whitespace-separated word of the query has to match
+      // SOME field (AND of ORs), not the query as a whole in one field — see
+      // customer.list's identical tokenization for the failure mode this
+      // avoids.
       const searchQuery = input?.search?.trim();
-      if (searchQuery) {
-        where.OR = [
-          { name: { contains: searchQuery, mode: "insensitive" } },
-          { slug: { contains: searchQuery, mode: "insensitive" } },
-          { sku: { contains: searchQuery, mode: "insensitive" } },
-          {
-            variants: {
-              some: { sku: { contains: searchQuery, mode: "insensitive" } },
+      const searchTokens = searchQuery
+        ? searchQuery.split(/\s+/).filter(Boolean)
+        : [];
+      if (searchTokens.length > 0) {
+        where.AND = searchTokens.map((token) => ({
+          OR: [
+            { name: { contains: token, mode: "insensitive" } },
+            { slug: { contains: token, mode: "insensitive" } },
+            { sku: { contains: token, mode: "insensitive" } },
+            {
+              variants: {
+                some: { sku: { contains: token, mode: "insensitive" } },
+              },
             },
-          },
-        ];
+          ],
+        }));
       }
 
-      // Sort
+      // Sort. Each entry is the PRIMARY ordering only — `id` is appended below
+      // as a mandatory tie-break, mirroring what `buildTablePage` guarantees for
+      // the in-memory admin tables (~/app/admin/_lib/table-query). Without it,
+      // two products sharing a `price` or a `createdAt` have no defined relative
+      // order, Postgres is free to return them differently between executions,
+      // and with pagination that renders one product on two pages and another on
+      // none. `price-asc` on a catalog with repeated prices is the live case.
+      //
+      // `satisfies Record<ProductSortValue, …>` rather than
+      // `Record<string, …>`: the keys ARE the sort vocabulary (one `as const`
+      // tuple in ~/lib/validators/product, shared with the page's filter
+      // options and the router's own `z.enum`), so a value added there without
+      // a branch here is a compile error instead of a silent fall-through to
+      // `newest` — which would leave the admin's sort control appearing to do
+      // nothing.
       type ProductOrderBy = Prisma.ProductOrderByWithRelationInput;
-      const orderByMap: Record<string, ProductOrderBy> = {
+      const orderByMap = {
         newest: { createdAt: "desc" },
         oldest: { createdAt: "asc" },
         "name-asc": { name: "asc" },
         "name-desc": { name: "desc" },
         "price-asc": { price: "asc" },
         "price-desc": { price: "desc" },
-      };
-      const orderBy: ProductOrderBy =
-        (input?.sort ? orderByMap[input.sort] : undefined) ??
-        orderByMap.newest!;
+      } satisfies Record<ProductSortValue, ProductOrderBy>;
+      const orderBy: ProductOrderBy[] = [
+        input?.sort ? orderByMap[input.sort] : orderByMap.newest,
+        { id: "asc" },
+      ];
 
-      // Pagination — page size tuned for large catalogs (≈300 products → 6 pages)
-      const pageSize = 50;
-      const page = input?.page ?? 1;
+      // Pagination — 25, the density every admin table uses (see PAGE_SIZE in
+      // the Collections/Services/Inventory pages). The stores on this platform
+      // run to a few hundred products, not tens of thousands, so a page that
+      // fits on one screen beats a long scroll.
+      const pageSize = 25;
+      // Bounded BEFORE it becomes an offset. The clamp further down handles
+      // "past the end", but it needs `totalCount` first, so the opening query
+      // still runs with whatever `skip` this produces — and an unbounded page
+      // number overflows Postgres' OFFSET rather than paging past the end. See
+      // MAX_REQUESTED_PAGE.
+      const page = Math.min(input?.page ?? 1, MAX_REQUESTED_PAGE);
       const skip = (page - 1) * pageSize;
 
       const include = {
@@ -252,20 +306,87 @@ export const productRouter = createTRPCRouter({
         _count: { select: { variants: true } },
       };
 
-      const [products, totalCount] = await ctx.db.$transaction([
-        ctx.db.product.findMany({
-          where,
-          include,
-          orderBy,
-          skip,
-          take: pageSize,
-        }),
-        ctx.db.product.count({ where }),
-      ]);
+      const [firstPassProducts, totalCount, matchingIdRows] =
+        await ctx.db.$transaction([
+          ctx.db.product.findMany({
+            where,
+            include,
+            orderBy,
+            skip,
+            take: pageSize,
+          }),
+          ctx.db.product.count({ where }),
+          // Every id matching the current filters, in the current sort order,
+          // ignoring pagination — powers the admin table's "select all N
+          // matching" bulk-bar escalation. Included in the same $transaction
+          // as the count so the two stay consistent with each other.
+          //
+          // `take` is LIMIT + 1, not unbounded. Without it, a 100k-product
+          // catalog reads 100k rows out of Postgres and into Node on EVERY
+          // list load, inside a transaction holding a connection — only to
+          // discard them below because the set is too large to escalate. The
+          // largest catalogs, the ones the null-return exists to protect,
+          // would pay the full cost anyway. One extra row is all it takes to
+          // distinguish "at the cap" from "over it".
+          ctx.db.product.findMany({
+            where,
+            orderBy,
+            select: { id: true },
+            take: ADMIN_BULK_SELECTION_LIMIT + 1,
+          }),
+        ]);
 
-      const totalPages = Math.ceil(totalCount / pageSize);
+      // `Math.max(1, …)` so an empty result set reports one page rather than
+      // zero, matching `buildTablePage` in ~/app/admin/_lib/table-query.
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
-      return { products, totalCount, page, pageSize, totalPages };
+      // Clamp an out-of-range page HERE rather than leaving it to callers. An
+      // unclamped `?page=900` against a 3-page catalog echoes `page: 900` back
+      // with an empty slice, and a paginator faithfully renders "Showing
+      // 44,951–150 of 150" above a no-matches empty state. The re-query only
+      // fires on that path — in-app navigation never produces it — so the
+      // common case stays a single round trip, and every consumer gets the
+      // guarantee that the returned `page` is always within range.
+      const clampedPage = Math.min(page, totalPages);
+      const products =
+        clampedPage === page
+          ? firstPassProducts
+          : await ctx.db.product.findMany({
+              where,
+              include,
+              orderBy,
+              skip: (clampedPage - 1) * pageSize,
+              take: pageSize,
+            });
+
+      // Size decision: a 5,000-product catalog is ~5,000 cuids (~125KB) that
+      // would otherwise ride along in the RSC payload on every load of the
+      // products list, whether or not anyone triggers the escalation. Rather
+      // than pay that cost unconditionally, only materialize `matchingIds`
+      // when the result set is small enough that "select all" could actually
+      // run — the bulk validators cap `ids` at ADMIN_BULK_SELECTION_LIMIT, so a
+      // larger selection would be rejected
+      // anyway. Above the limit, `matchingIds` is `null` — distinct from `[]`
+      // (no matches) — so the UI can tell "not offered" apart from "nothing
+      // matched" and hide the escalation, which is the honest outcome.
+      //
+      // Decided from the row count, not `totalCount`: the query above is
+      // capped at LIMIT + 1, so overflow is exactly "we read one more than we
+      // can use". Reading it off the same result that produced the ids means
+      // the two can't disagree.
+      const matchingIds: string[] | null =
+        matchingIdRows.length > ADMIN_BULK_SELECTION_LIMIT
+          ? null
+          : matchingIdRows.map((p) => p.id);
+
+      return {
+        products,
+        totalCount,
+        page: clampedPage,
+        pageSize,
+        totalPages,
+        matchingIds,
+      };
     }),
 
   secureGetAll: ownerAdminProcedure
@@ -659,26 +780,55 @@ export const productRouter = createTRPCRouter({
 
   bulkSetPublished: ownerAdminProcedure
     .use(featureGate("products"))
-    .input(
-      z.object({ ids: z.array(z.string()).min(1), published: z.boolean() }),
-    )
+    .input(productBulkPublishSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const result = await ctx.db.product.updateMany({
-        where: { id: { in: input.ids }, businessId },
-        data: { published: input.published },
+      // The rows this call will actually FLIP, captured before the write.
+      //
+      // The admin table's Undo used to re-send the whole selection with the
+      // opposite `published`, which is not an inverse: a selection of 50 that
+      // contained 20 already-published products publishes all 50, then "Undo"
+      // unpublishes all 50 — including the 20 the user never touched. The
+      // client can't compute the difference either (a selection spans pages,
+      // and off-page rows' `published` state was never sent to the browser), so
+      // the correct undo set is returned from here.
+      //
+      // Same transaction as the update so nothing can change between the two.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.product.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            published: { not: input.published },
+          },
+          select: { id: true },
+        });
+
+        const result = await tx.product.updateMany({
+          where: { id: { in: input.ids }, businessId },
+          data: { published: input.published },
+        });
+
+        return { changedIds: changed.map((p) => p.id), count: result.count };
       });
 
       return {
-        count: result.count,
-        message: `${result.count} product(s) updated`,
+        count,
+        /** Only the rows whose state actually changed — the exact undo set. */
+        changedIds,
+        message: `${count} product(s) updated`,
       };
     }),
 
-  bulkDelete: ownerAdminProcedure
+  // OWNER only, unlike bulkSetPublished next door — see the note on
+  // collections.bulkDelete. This one is the strongest case of the three: it
+  // cascades to variants, images and collection joins, then calls
+  // `deleteUnreferencedImageObjects`, destroying S3 objects that live OUTSIDE
+  // the database. A database restore does not bring those back.
+  bulkDelete: ownerOnlyProcedure
     .use(featureGate("products"))
-    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .input(productBulkDeleteSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 

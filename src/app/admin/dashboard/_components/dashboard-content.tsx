@@ -32,6 +32,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import { WARNING_TEXT, DANGER_TEXT } from "~/app/admin/_components/admin-table-style";
 
 type DashboardContentProps = {
   business: {
@@ -568,10 +569,10 @@ export function DashboardContent({
                   {lowStockProducts.map((variant) => (
                     <div
                       key={variant.id}
-                      className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3"
+                      className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/40"
                     >
                       <div className="flex items-center gap-3">
-                        <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+                        <AlertTriangle className={`h-5 w-5 shrink-0 ${WARNING_TEXT}`} />
                         <div>
                           <p className="text-foreground text-sm font-medium">
                             {variant.product.name}
@@ -582,7 +583,7 @@ export function DashboardContent({
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-amber-700">
+                        <p className="text-sm font-semibold text-amber-700 dark:text-amber-500">
                           {variant.inventoryQty} left
                         </p>
                       </div>
@@ -595,14 +596,14 @@ export function DashboardContent({
                     // fold. Now a store with 26+ pools lands on page 1, which may
                     // not contain the pool that was clicked.
                     <Link key={pool.id} href={`/admin/inventory/${pool.id}`}>
-                      <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100">
+                      <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/40 dark:hover:bg-amber-950/60">
                         <div className="flex items-center gap-3">
                           <AlertTriangle
                             // `<= 0`, matching isOutOfStock in the inventory
                             // page: the feeding query is `lte: 10` with no lower
                             // bound, so a negative pool is in this list and must
                             // read as broken, not merely low.
-                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty <= 0 ? "text-red-600" : "text-amber-600"}`}
+                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty <= 0 ? DANGER_TEXT : WARNING_TEXT}`}
                           />
                           <div>
                             <p className="text-foreground text-sm font-medium">
@@ -615,7 +616,7 @@ export function DashboardContent({
                         </div>
                         <div className="text-right">
                           <p
-                            className={`text-sm font-semibold ${pool.inventoryQty <= 0 ? "text-red-700" : "text-amber-700"}`}
+                            className={`text-sm font-semibold ${pool.inventoryQty <= 0 ? "text-red-700 dark:text-red-500" : "text-amber-700 dark:text-amber-500"}`}
                           >
                             {pool.inventoryQty} left
                           </p>

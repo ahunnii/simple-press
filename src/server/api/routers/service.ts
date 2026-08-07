@@ -1,4 +1,4 @@
-import { Prisma } from "generated/prisma";
+import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -13,7 +13,6 @@ import {
   serviceItemDeleteSchema,
   serviceItemReorderSchema,
   serviceItemUpdateSchema,
-  serviceReorderSchema,
   serviceUpdateSchema,
 } from "~/lib/validators/services";
 import {
@@ -21,6 +20,7 @@ import {
   featureGate,
   getBusinessProcedure,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
@@ -36,32 +36,41 @@ export const serviceRouter = createTRPCRouter({
     .use(featureGate("services"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
-      // `items` stays UNFILTERED — admin edits drafts, so it has to see them, and
-      // /admin/content/navigation reads this same output. But `getAllPublic` and
-      // `getBySlug` both scope items to `published: true`, so `items.length` is
-      // NOT what a shopper sees: a published service whose items are all drafts
-      // renders an empty page. Ship the storefront-visible count alongside the
-      // total so admin can say both, the way `collections.getAll` does with
-      // `liveProductCount`.
+      // `_count.items` is UNFILTERED — admin edits drafts, so it has to see
+      // them. But `getAllPublic` and `getBySlug` both scope items to
+      // `published: true`, so that total is NOT what a shopper sees: a published
+      // service whose items are all drafts renders an empty page. Ship the
+      // storefront-visible count alongside the total so admin can say both, the
+      // way `collections.getAll` does with `liveProductCount`.
       //
-      // Derived in JS rather than with a groupBy: the join rows are already here
-      // with their `published` flag, so a second query would buy nothing.
-      const services = await ctx.db.service.findMany({
-        where: { businessId },
-        include: {
-          items: {
-            orderBy: { sortOrder: "asc" },
-          },
-        },
-        orderBy: { sortOrder: "asc" },
-      });
+      // Counts, not rows. The two consumers of this procedure — the services
+      // table and /admin/content/navigation — need "how many" and "how many
+      // live"; every other ServiceItem field (description, price, image, embed
+      // config) was riding into the browser in the RSC payload for nothing.
+      // groupBy rather than a second `_count` with a `where`, so the live count
+      // aggregates in the DB without pulling item rows back — the same shape
+      // `collections.getAll` uses.
+      const [services, liveCounts] = await Promise.all([
+        ctx.db.service.findMany({
+          where: { businessId },
+          include: { _count: { select: { items: true } } },
+          orderBy: { sortOrder: "asc" },
+        }),
+        ctx.db.serviceItem.groupBy({
+          by: ["serviceId"],
+          where: { published: true, service: { businessId } },
+          _count: true,
+        }),
+      ]);
 
-      // Additive only — nothing above is removed or renamed, so every existing
-      // consumer (the services list, /admin/content/navigation) is unaffected.
+      const liveCountByServiceId = new Map(
+        liveCounts.map((row) => [row.serviceId, row._count]),
+      );
+
       return services.map((service) => ({
         ...service,
         /** Items in this service that are actually visible on the storefront. */
-        liveItemCount: service.items.filter((item) => item.published).length,
+        liveItemCount: liveCountByServiceId.get(service.id) ?? 0,
       }));
     }),
 
@@ -222,14 +231,41 @@ export const serviceRouter = createTRPCRouter({
     .input(serviceBulkPublishSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const result = await ctx.db.service.updateMany({
-        where: { id: { in: input.ids }, businessId },
-        data: { published: input.published },
+
+      // `changedIds` is the rows this call will actually FLIP, captured before
+      // the write, and it is what the table's Undo re-sends. Re-sending the
+      // whole selection with the opposite `published` is not an inverse: a
+      // selection containing already-published services publishes all of them,
+      // then "Undo" unpublishes all of them — including the ones the user never
+      // touched. The client can't narrow it either (a selection spans pages,
+      // and off-page rows' `published` state never reaches the browser).
+      //
+      // One transaction so nothing can change between the read and the update.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.service.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            published: { not: input.published },
+          },
+          select: { id: true },
+        });
+
+        const result = await tx.service.updateMany({
+          where: { id: { in: input.ids }, businessId },
+          data: { published: input.published },
+        });
+
+        return { changedIds: changed.map((s) => s.id), count: result.count };
       });
-      return { count: result.count };
+
+      return { count, changedIds };
     }),
 
-  bulkDelete: ownerAdminProcedure
+  // OWNER only, unlike bulkSetPublished next door — see the note on
+  // collections.bulkDelete. Deleting a service cascades to every ServiceItem
+  // it owns, so the loss is larger than the row count suggests.
+  bulkDelete: ownerOnlyProcedure
     .use(featureGate("services"))
     .input(serviceBulkDeleteSchema)
     .mutation(async ({ ctx, input }) => {
@@ -238,64 +274,6 @@ export const serviceRouter = createTRPCRouter({
         where: { id: { in: input.ids }, businessId },
       });
       return { count: result.count };
-    }),
-
-  reorder: ownerAdminProcedure
-    .use(featureGate("services"))
-    .input(serviceReorderSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-
-      // The UI contract is "the complete ordered list of every service for
-      // this business" — a subset would leave the rows NOT in the list with
-      // stale sortOrder values, silently interleaving them with the
-      // reordered ones. Compare against the actual owned id set (not just a
-      // count) so duplicate ids or a foreign id substituted in for a real
-      // one are also caught, not just a short/long list.
-      const existing = await ctx.db.service.findMany({
-        where: { businessId },
-        select: { id: true },
-      });
-      const existingIds = new Set(existing.map((s) => s.id));
-
-      // The duplicate check is load-bearing, not belt-and-braces: without it
-      // `[A, A]` against owned `{A, B}` passes both other conditions (length 2
-      // === size 2, and every entry IS owned), then the UPDATE matches A twice
-      // with conflicting positions while B silently keeps its stale sortOrder.
-      if (
-        input.ids.length !== existingIds.size ||
-        new Set(input.ids).size !== input.ids.length ||
-        input.ids.some((id) => !existingIds.has(id))
-      ) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message:
-            "That list of services doesn't match what's on file. Refresh and try again.",
-        });
-      }
-
-      // A single set-based UPDATE ... FROM (VALUES ...) rather than N
-      // individual UPDATEs (previously issued as one $transaction([...])
-      // batch — the array form of $transaction has no `timeout` option, it's
-      // just N statements sent back to back, so this was N round trips no
-      // matter what). The reorder UI is unpaginated and always submits the
-      // full list, up to serviceReorderSchema's cap of 500, so this is the
-      // normal case rather than an edge case. Every value is bound as a
-      // parameter (never interpolated into the SQL string) and the WHERE
-      // clause scopes to businessId, so this can only touch rows this
-      // business owns even if an id snuck past the completeness check above.
-      const rows = input.ids.map(
-        (id, index) => Prisma.sql`(${id}::text, ${index}::int)`,
-      );
-
-      await ctx.db.$executeRaw`
-        UPDATE "Service" AS s
-        SET "sortOrder" = v.pos
-        FROM (VALUES ${Prisma.join(rows)}) AS v(id, pos)
-        WHERE s.id = v.id AND s."businessId" = ${businessId}
-      `;
-
-      return { success: true };
     }),
 
   updateCustomFields: ownerAdminProcedure

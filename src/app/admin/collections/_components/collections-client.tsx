@@ -22,7 +22,10 @@ import { toast } from "sonner";
 import type { BulkAction } from "../../_components/admin-bulk-bar";
 import type { AdminFilterDef } from "../../_components/admin-filters";
 import type { RouterOutputs } from "~/trpc/react";
-import { COLLECTION_BULK_DUPLICATE_MAX } from "~/lib/validators/collections";
+import {
+  ADMIN_BULK_DELETE_LIMIT,
+  ADMIN_BULK_SELECTION_LIMIT,
+} from "~/lib/validators/admin-table";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -67,6 +70,7 @@ import {
   WARNING_TEXT,
 } from "../../_components/admin-table-style";
 import {
+  createCapDisabledReason,
   createOverCapGuard,
   createShortfallMessage,
   describeSelection,
@@ -82,14 +86,19 @@ type Collection = RouterOutputs["collections"]["getAll"][number];
 type Props = {
   /** The current page slice only — filtering/sorting/paging happen server-side. */
   collections: Collection[];
-  /** Ids of every row matching the current filters, across all pages. */
-  matchingIds: string[];
+  /** Ids of every row matching the current filters, across all pages — or `null`
+   *  when more than ADMIN_BULK_SELECTION_LIMIT match and `buildTablePage`
+   *  declined to enumerate them. See `useAdminTableSelection`, which takes both. */
+  matchingIds: string[] | null;
   /** Unfiltered total — distinguishes "no collections yet" from "no matches". */
   totalCollections: number;
   totalCount: number;
   totalPages: number;
   page: number;
   pageSize: number;
+  /** Mirrors `collections.bulkDelete`'s `ownerOnlyProcedure`, resolved
+   *  server-side. False OMITS the bulk Delete action rather than disabling it. */
+  canBulkDelete: boolean;
 };
 
 const BASE_PATH = "/admin/collections";
@@ -115,21 +124,18 @@ const shortfallMessage = createShortfallMessage(ITEM_NOUN);
  */
 const EMPTY_ON_STOREFRONT_MESSAGE = "Published, but shoppers see an empty page";
 
-/** The publish and delete validators in ~/lib/validators/collections.ts cap `ids`
- *  at 1000. Duplicate is lower — see COLLECTION_BULK_DUPLICATE_MAX. */
-const MAX_BULK_IDS = 1000;
-
 const SORT_FILTER: AdminFilterDef = {
   key: "sort",
   label: "Sort",
-  defaultValue: "storefront",
+  defaultValue: "newest",
   options: [
-    // `sortOrder` is the order the storefront renders collections in. It used
-    // to be the silent, unexplained default here; naming it makes it legible.
-    { value: "storefront", label: "Storefront order" },
+    // No "Storefront order" option here: owners cannot reorder collections
+    // (only products WITHIN a collection), so that sort implied a control
+    // that doesn't exist. `Collection.sortOrder` still drives the storefront's
+    // own rendering — see the page's comment on `comparePrimary`.
+    { value: "newest", label: "Newest" },
     { value: "name-asc", label: "Name A–Z" },
     { value: "name-desc", label: "Name Z–A" },
-    { value: "newest", label: "Newest" },
     { value: "oldest", label: "Oldest" },
     { value: "products-desc", label: "Most products" },
     { value: "products-asc", label: "Fewest products" },
@@ -155,6 +161,7 @@ export function CollectionsClient({
   totalPages,
   page,
   pageSize,
+  canBulkDelete,
 }: Props) {
   const utils = api.useUtils();
   const router = useRouter();
@@ -174,6 +181,7 @@ export function CollectionsClient({
     allPageSelected,
     somePageSelected,
     canEscalate,
+    escalationDisabledReason,
     clearSelection,
     pruneSelection,
     handleRowToggle,
@@ -184,6 +192,7 @@ export function CollectionsClient({
   } = useAdminTableSelection({
     rowIds: collections.map((collection) => collection.id),
     matchingIds,
+    totalCount,
     page,
     searchParams,
   });
@@ -260,18 +269,28 @@ export function CollectionsClient({
       } else {
         // Publish/unpublish are exactly invertible, so the recovery path is a
         // single click rather than re-finding and re-selecting every row.
+        //
+        // Undo targets `data.changedIds` — the rows this call actually flipped,
+        // computed server-side — NOT `variables.ids`. Re-sending the whole
+        // selection inverted would unpublish collections that were already
+        // published before the bulk op, which is a second unwanted edit dressed
+        // up as a recovery. Nothing flipped means nothing to undo, so the toast
+        // drops the action rather than offering a no-op.
+        const undoable = data.changedIds;
         toast.success(
           `${data.count} ${data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many} ${verb}`,
-          {
-            action: {
-              label: "Undo",
-              onClick: () =>
-                undoPublishMutation.mutate({
-                  ids: variables.ids,
-                  published: !variables.published,
-                }),
-            },
-          },
+          undoable.length > 0
+            ? {
+                action: {
+                  label: "Undo",
+                  onClick: () =>
+                    undoPublishMutation.mutate({
+                      ids: undoable,
+                      published: !variables.published,
+                    }),
+                },
+              }
+            : undefined,
         );
       }
 
@@ -281,31 +300,6 @@ export function CollectionsClient({
     onError: (error, _variables, context) => {
       dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to update collections");
-    },
-  });
-
-  const bulkDuplicateMutation = api.collections.bulkDuplicate.useMutation({
-    onMutate: loadingToast("Duplicating collections…"),
-    onSuccess: (data, variables, context) => {
-      dismissLoadingToast(context);
-      const requested = variables.ids.length;
-
-      if (data.count < requested) {
-        toast.warning(shortfallMessage(data.count, requested, "duplicated"));
-      } else {
-        toast.success(
-          `${data.count} ${
-            data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
-          } duplicated — saved as drafts`,
-        );
-      }
-
-      pruneSelection(variables.ids);
-      afterWrite();
-    },
-    onError: (error, _variables, context) => {
-      dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to duplicate collections");
     },
   });
 
@@ -353,33 +347,32 @@ export function CollectionsClient({
     selectionReachesPastPage ||
     selectedOnPageRows.some((collection) => collection.published);
 
-  /** Duplicate passes a lower cap than publish/delete — it's N sequential writes
-   *  inside one transaction, where the others are a single statement. */
   const overCap = createOverCapGuard(selectedCount, ITEM_NOUN);
+  /** Delete's cap is well below the selection cap, so it can be unavailable
+   *  while Publish and Duplicate are fine — the bar disables that one action
+   *  and says why, rather than letting the click fail. */
+  const capReason = createCapDisabledReason(selectedCount, ITEM_NOUN);
+  const deleteCapReason = capReason(ADMIN_BULK_DELETE_LIMIT, "delete");
 
   const handleBulkPublish = (published: boolean) => {
-    if (selectedCount === 0 || overCap(MAX_BULK_IDS, "update")) return;
+    if (selectedCount === 0 || overCap(ADMIN_BULK_SELECTION_LIMIT, "update")) {
+      return;
+    }
     bulkPublishMutation.mutate({ ids: [...selectedIds], published });
   };
 
-  const handleBulkDuplicate = () => {
-    if (
-      selectedCount === 0 ||
-      overCap(COLLECTION_BULK_DUPLICATE_MAX, "duplicate")
-    ) {
+  const handleBulkDelete = () => {
+    if (selectedCount === 0 || overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) {
       return;
     }
-    bulkDuplicateMutation.mutate({ ids: [...selectedIds] });
-  };
-
-  const handleBulkDelete = () => {
-    if (selectedCount === 0 || overCap(MAX_BULK_IDS, "delete")) return;
     bulkDeleteMutation.mutate({ ids: [...selectedIds] });
   };
 
+  // `undoPublishMutation` counts: it writes to the same rows the bulk bar acts
+  // on, so leaving the bar live during an undo lets a second bulk action race it.
   const isBulkPending =
     bulkPublishMutation.isPending ||
-    bulkDuplicateMutation.isPending ||
+    undoPublishMutation.isPending ||
     bulkDeleteMutation.isPending;
 
   const bulkActions: BulkAction[] = [
@@ -399,25 +392,29 @@ export function CollectionsClient({
         bulkPublishMutation.isPending &&
         bulkPublishMutation.variables?.published === false,
     },
-    {
-      label: "Duplicate",
-      icon: Copy,
-      onClick: handleBulkDuplicate,
-      pending: bulkDuplicateMutation.isPending,
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-      variant: "destructive",
-      // Check the cap BEFORE opening the dialog. Otherwise the user reads
-      // "Delete 1,043 Collections?", confirms, and gets an error toast while the
-      // dialog sits there with no way forward.
-      onClick: () => {
-        if (overCap(MAX_BULK_IDS, "delete")) return;
-        setBulkDeleteOpen(true);
-      },
-      pending: bulkDeleteMutation.isPending,
-    },
+    // Omitted, not disabled, for a MANAGER: `bulkDelete` is `ownerOnlyProcedure`,
+    // and a button that only ever produces a FORBIDDEN toast is worse than no
+    // button. The procedure remains the enforcement.
+    ...(canBulkDelete
+      ? [
+          {
+            label: "Delete",
+            icon: Trash2,
+            variant: "destructive" as const,
+            // `disabledReason` stops the click; this still checks the cap BEFORE
+            // opening the dialog, for a selection grown past the cap between
+            // render and click. Otherwise the user reads "Delete 43
+            // Collections?", confirms, and gets an error toast while the dialog
+            // sits there with no way forward.
+            onClick: () => {
+              if (overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) return;
+              setBulkDeleteOpen(true);
+            },
+            pending: bulkDeleteMutation.isPending,
+            disabledReason: deleteCapReason,
+          },
+        ]
+      : []),
   ];
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -478,16 +475,13 @@ export function CollectionsClient({
             selectAllMatching={
               canEscalate || isEscalated
                 ? {
-                    total: matchingIds.length,
+                    total: totalCount,
                     onSelect: handleSelectAllMatching,
                     isEscalated,
                     // Describes what's blocked — selecting *all* matches — not
                     // the action itself. The current page's selection is
                     // perfectly actionable and the copy must not imply otherwise.
-                    disabledReason:
-                      matchingIds.length > MAX_BULK_IDS
-                        ? `Too many matches to select at once (${matchingIds.length.toLocaleString()}). Work through them ${MAX_BULK_IDS.toLocaleString()} or fewer at a time.`
-                        : undefined,
+                    disabledReason: escalationDisabledReason,
                   }
                 : undefined
             }
@@ -508,9 +502,6 @@ export function CollectionsClient({
             />
           ) : (
             <>
-              {/* Margin lives here rather than on a wrapper around AdminBulkBar:
-                  the bar is `sticky top-0`, and a wrapper sized to its own height
-                  would cap the sticky range at zero. */}
               <Card className={TABLE_CARD}>
                 <Table>
                   <TableCaption className="sr-only">Collections</TableCaption>

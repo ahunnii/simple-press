@@ -36,6 +36,32 @@ export type AdminFilterDef = {
   options: AdminFilterOption[];
 };
 
+/**
+ * An `AdminFilterDef` whose values are pinned to the same `as const` tuple that
+ * `pickParam` whitelists with — the tuple is the single source of truth for
+ * "what this param may be".
+ *
+ * `options` is a mapped TUPLE, not an array, so the correspondence is checked in
+ * both directions: an option offered in the UI that isn't whitelisted is a type
+ * error (the server would silently fall back to the default, so the control
+ * would appear to do nothing), and a whitelisted value with no option is one too
+ * (a filter reachable only by hand-editing the URL). Order is part of the check,
+ * which is fine — the tuples are written in the order the menu should read.
+ *
+ * Lives here rather than beside one page's filters: Customers proved it and
+ * Products adopted it, and a copy per page is the drift this type exists to
+ * prevent.
+ */
+export type FilterDefFor<Values extends readonly string[]> = Omit<
+  AdminFilterDef,
+  "defaultValue" | "options"
+> & {
+  defaultValue: Values[number];
+  options: {
+    -readonly [K in keyof Values]: { value: Values[K]; label: string };
+  };
+};
+
 export type AdminFiltersProps = {
   /** Route the filter bar navigates within, e.g. "/admin/collections" */
   basePath: string;

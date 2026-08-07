@@ -12,6 +12,12 @@ const alertVariants = cva(
         default: "bg-card text-card-foreground",
         destructive:
           "text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
+        // "Needs attention, but not broken" — same amber the admin's WARNING_TEXT
+        // and Badge's `warning` variant use elsewhere, given the destructive
+        // variant's dark-mode pair (amber isn't a theme token, so it needs one
+        // explicitly where `text-destructive` doesn't).
+        warning:
+          "text-amber-600 dark:text-amber-400 bg-card *:data-[slot=alert-description]:text-amber-600/90 dark:*:data-[slot=alert-description]:text-amber-400/90 *:[svg]:text-current",
       },
     },
     defaultVariants: {

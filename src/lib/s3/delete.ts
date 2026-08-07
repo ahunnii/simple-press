@@ -49,16 +49,29 @@ async function deleteOneObject(url: string): Promise<void> {
 }
 
 /**
+ * Cap on concurrent S3 DELETEs from a single call.
+ *
+ * `product.bulkDelete` accepts up to 1,000 products, and a product can carry
+ * several images — so an unbounded fan-out here means ~5,000 simultaneous
+ * signed requests from one handler, which is how a bulk delete takes the
+ * process down rather than the storage bucket. Sequential would be far too
+ * slow at that size; a bounded window keeps the wall-clock reasonable without
+ * opening a socket per image.
+ */
+const DELETE_CONCURRENCY = 20;
+
+/**
  * Delete one or more S3 objects by their stored public URLs.
  *
  * Best-effort: all errors are caught per-object, reported to Sentry, and
  * never re-thrown.  Empty / null URLs are silently skipped.
  */
 export async function deleteStoredObjects(urls: string[]): Promise<void> {
-  await Promise.all(
-    urls
-      .filter((u) => !!u)
-      .map((url) =>
+  const targets = urls.filter((u) => !!u);
+
+  for (let i = 0; i < targets.length; i += DELETE_CONCURRENCY) {
+    await Promise.all(
+      targets.slice(i, i + DELETE_CONCURRENCY).map((url) =>
         deleteOneObject(url).catch((err: unknown) => {
           Sentry.captureException(err, {
             tags: { service: "s3", operation: "delete" },
@@ -66,5 +79,6 @@ export async function deleteStoredObjects(urls: string[]): Promise<void> {
           });
         }),
       ),
-  );
+    );
+  }
 }

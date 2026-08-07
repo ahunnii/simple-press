@@ -12,6 +12,11 @@
  * live here.
  */
 
+import {
+  ADMIN_BULK_SELECTION_LIMIT,
+  MAX_REQUESTED_PAGE,
+} from "~/lib/validators/admin-table";
+
 /**
  * Narrow a raw search param to one of a fixed set of accepted values, falling
  * back rather than throwing — a stale bookmark or a hand-typed URL should show
@@ -37,6 +42,106 @@ export function pickParam<T extends readonly string[]>(
 }
 
 /**
+ * Coerce a raw `?page=` param to a positive integer, or undefined.
+ * Server-paginated counterpart to the page arithmetic `buildTablePage` does
+ * internally when narrowing in-memory results.
+ *
+ * The old `params.page ? Math.max(1, parseInt(params.page, 10)) : undefined`
+ * turned `?page=abc` into `Math.max(1, NaN)` — which is NaN, not 1 — and handed
+ * that straight to a validator like `.int().positive()`, so a typo'd or
+ * truncated URL rendered a 500 instead of page one.
+ *
+ * Capped at MAX_REQUESTED_PAGE for the same reason: `?page=1e20` IS a positive
+ * integer, and passing it through turns it into a Postgres OFFSET no i64 can
+ * hold. Clamped rather than dropped, so an absurd page behaves like any other
+ * over-range one and lands on the last page.
+ */
+export function parsePageParam(raw: string | undefined): number | undefined {
+  const parsed = Number.parseInt(raw ?? "", 10);
+  return Number.isInteger(parsed) && parsed > 0
+    ? Math.min(parsed, MAX_REQUESTED_PAGE)
+    : undefined;
+}
+
+/**
+ * Tokenized, order-insensitive search: split `query` on whitespace, and a row
+ * matches only if EVERY token is a substring of AT LEAST ONE of `fields`
+ * (AND of ORs). A single-token query behaves exactly like a plain substring
+ * test, so this is a drop-in replacement for `needle.includes(...)` checks.
+ *
+ * Without this, searching "John Smith" against a customer whose name and
+ * email each contain only "John" or only "Smith" — never both — matches
+ * nothing, because a naive search treats the whole query as one substring
+ * that has to live in a single field.
+ *
+ * `query` empty/whitespace-only matches everything (mirrors the existing
+ * `needle === ""` short-circuit at every call site). `fields` entries that
+ * are `null`/`undefined` are skipped rather than thrown on, since several
+ * callers search nullable columns (a collection's `description`, etc.).
+ */
+export function matchesAllTokens(
+  query: string,
+  fields: Array<string | null | undefined>,
+): boolean {
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  const haystacks = fields
+    .filter((field): field is string => field != null)
+    .map((field) => field.toLowerCase());
+
+  return tokens.every((token) =>
+    haystacks.some((haystack) => haystack.includes(token)),
+  );
+}
+
+/**
+ * The URL this page SHOULD be at given the page the server actually rendered,
+ * or null when the current URL already says that.
+ *
+ * The server-paginated routers clamp an out-of-range `?page=` down to the last
+ * real one and return the clamped value, which leaves the URL disagreeing with
+ * the content: `?page=900` against a 3-page list renders page 3, the paginator
+ * highlights 3, and clicking 3 is a no-op because the router's
+ * `nextPage === page` guard compares against the RENDERED page while the href
+ * still carries 900. Deleting the last row on the last page does the same thing
+ * via `router.refresh()`. Redirecting to the canonical URL is what keeps the
+ * two in sync.
+ *
+ * Compared as STRINGS against the raw param, not as numbers against the parsed
+ * one, so every non-canonical spelling that renders page N resolves to the same
+ * URL — `?page=abc`, `?page=01`, `?page=1` — and so the comparison is guaranteed
+ * to be false after the redirect. A number comparison would treat the absent
+ * param as "not 1" and redirect an ordinary first-page load to itself, forever.
+ *
+ * `page=1` is DELETED rather than written, matching `AdminPagination`'s
+ * `hrefFor(1)`: the two must agree or the same view has two URLs, and the admin
+ * tables' selection state keys off the param signature.
+ */
+export function canonicalPageHref(
+  basePath: string,
+  params: Record<string, string | undefined>,
+  renderedPage: number,
+): string | null {
+  const canonical = renderedPage === 1 ? undefined : String(renderedPage);
+  if (params.page === canonical) return null;
+
+  const next = new URLSearchParams(
+    Object.entries(params).filter(
+      (entry): entry is [string, string] => entry[1] !== undefined,
+    ),
+  );
+  if (canonical === undefined) {
+    next.delete("page");
+  } else {
+    next.set("page", canonical);
+  }
+
+  const qs = next.toString();
+  return qs ? `${basePath}?${qs}` : basePath;
+}
+
+/**
  * The PRIMARY ordering for a table — everything except the final tie-break.
  *
  * `id` is omitted from the row on purpose: `buildTablePage` always appends
@@ -59,8 +164,17 @@ export type TablePage<Row> = {
   /**
    * Ids of every row matching the current filters, across all pages, in the
    * same sorted order — feeds a bulk bar's "select all N matching" escalation.
+   *
+   * `null` when more than ADMIN_BULK_SELECTION_LIMIT rows match: the escalation
+   * would hand the mutation more ids than its validator accepts, so it isn't
+   * offered, and shipping the ids anyway would only bloat the RSC payload with
+   * a list nothing can use. `null` is NOT `[]` — an empty array is a genuine
+   * "nothing matched", and conflating the two produces a "Select all 0" link.
+   *
+   * Same contract `product.secureList` returns, so the selection hook and the
+   * three admin tables handle one shape rather than two.
    */
-  matchingIds: string[];
+  matchingIds: string[] | null;
   /** Rows matching the current filters, across all pages. */
   totalCount: number;
   /** Never below 1, so an empty table still reads as "page 1 of 1". */
@@ -118,7 +232,13 @@ export function buildTablePage<Row extends { id: string }>(
 
   return {
     pageItems: sorted.slice((page - 1) * pageSize, page * pageSize),
-    matchingIds: sorted.map((row) => row.id),
+    // A plain length comparison, where `product.secureList` needs a `take:
+    // LIMIT + 1` query to answer the same question: these pages already hold
+    // every matching row in memory, so there is nothing to save by not looking.
+    matchingIds:
+      totalCount > ADMIN_BULK_SELECTION_LIMIT
+        ? null
+        : sorted.map((row) => row.id),
     totalCount,
     totalPages,
     page,

@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  ADMIN_BULK_DELETE_LIMIT,
+  ADMIN_BULK_SELECTION_LIMIT,
+} from "~/lib/validators/admin-table";
+
 const productFeatureSchema = z.object({
   icon: z.string(),
   text: z.string(),
@@ -136,20 +141,49 @@ export const productUpdateSchema = productFormSchema
     scheduledPublishAt: z.date().nullable().optional(),
   });
 
+/**
+ * The accepted values for the admin Products list's filter and sort params —
+ * the same single-source-of-truth contract `~/lib/validators/customer` sets out
+ * at length, for the same two failure modes:
+ *
+ * - a UI option the `z.enum` below doesn't accept is a CRASH (`pickParam`
+ *   whitelists it against the page's tuple, tRPC rejects it as BAD_REQUEST, and
+ *   `rethrowTrpcForErrorBoundary` blanks the page);
+ * - a default that disagrees between page and router is SILENT (`AdminFilters`
+ *   deletes a param set to its `defaultValue`, so the router applies its own).
+ *
+ * One `as const` tuple per param, consumed by `z.enum` here, by `pickParam` and
+ * the `FilterDefFor` option lists on the page, and by `secureList`'s
+ * `orderByMap` (via `satisfies`), removes both. This file used to hold a
+ * fourth, hand-maintained copy in each of those places.
+ */
+export const PRODUCT_STATUS_VALUES = ["all", "published", "draft"] as const;
+export const PRODUCT_STATUS_DEFAULT = "all";
+
+export const PRODUCT_SORT_VALUES = [
+  "newest",
+  "oldest",
+  "name-asc",
+  "name-desc",
+  "price-asc",
+  "price-desc",
+] as const;
+export const PRODUCT_SORT_DEFAULT = "newest";
+
+export type ProductSortValue = (typeof PRODUCT_SORT_VALUES)[number];
+
 export const productListFiltersSchema = z
   .object({
-    search: z.string().optional(),
-    status: z.enum(["all", "published", "draft"]).optional(),
-    sort: z
-      .enum([
-        "newest",
-        "oldest",
-        "name-asc",
-        "name-desc",
-        "price-asc",
-        "price-desc",
-      ])
+    // Truncated, not rejected: the value comes from `?search=` in the URL, so a
+    // `.max()` would throw BAD_REQUEST and error-boundary the page instead of
+    // showing results. 200 chars is far past any real query, and this feeds four
+    // ILIKE `contains` clauses (one of them across the variants relation).
+    search: z
+      .string()
+      .transform((s) => s.slice(0, 200))
       .optional(),
+    status: z.enum(PRODUCT_STATUS_VALUES).optional(),
+    sort: z.enum(PRODUCT_SORT_VALUES).optional(),
     page: z
       .number()
       .int("Page must be a whole number")
@@ -160,3 +194,34 @@ export const productListFiltersSchema = z
 
 export type ProductFormSchema = z.infer<typeof productFormSchema>;
 export type ProductListFiltersSchema = z.infer<typeof productListFiltersSchema>;
+
+// ─── Bulk operations ──────────────────────────────────────────────────────────
+
+/**
+ * Products carries no bulk caps of its own: publish/unpublish take
+ * ADMIN_BULK_SELECTION_LIMIT and delete takes the much lower
+ * ADMIN_BULK_DELETE_LIMIT, exactly as Collections and Services do. The old
+ * products-only `PRODUCT_BULK_SELECTION_LIMIT` was one of four hand-kept copies
+ * of the same number; see ~/lib/validators/admin-table for where each is
+ * enforced.
+ */
+export const productBulkPublishSchema = z.object({
+  ids: z
+    .array(z.string())
+    .min(1, "At least one product id is required")
+    .max(
+      ADMIN_BULK_SELECTION_LIMIT,
+      `Too many products selected — publish or unpublish at most ${ADMIN_BULK_SELECTION_LIMIT} at a time`,
+    ),
+  published: z.boolean(),
+});
+
+export const productBulkDeleteSchema = z.object({
+  ids: z
+    .array(z.string())
+    .min(1, "At least one product id is required")
+    .max(
+      ADMIN_BULK_DELETE_LIMIT,
+      `Too many products selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
+    ),
+});

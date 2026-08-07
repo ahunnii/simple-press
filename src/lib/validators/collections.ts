@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  ADMIN_BULK_DELETE_LIMIT,
+  ADMIN_BULK_SELECTION_LIMIT,
+} from "~/lib/validators/admin-table";
+
 export const collectionFormSchema = z.object({
   name: z
     .string()
@@ -57,11 +62,16 @@ export const collectionSetProductsSchema = z.object({
     .max(500, "Too many products in one collection"),
 });
 
+// Caps come from ~/lib/validators/admin-table, shared with Products and
+// Services — delete is far lower than publish on purpose.
 export const collectionBulkPublishSchema = z.object({
   ids: z
     .array(z.string())
     .min(1, "At least one collection id is required")
-    .max(1000, "Too many collections selected"),
+    .max(
+      ADMIN_BULK_SELECTION_LIMIT,
+      `Too many collections selected — publish or unpublish at most ${ADMIN_BULK_SELECTION_LIMIT} at a time`,
+    ),
   published: z.boolean(),
 });
 
@@ -69,23 +79,9 @@ export const collectionBulkDeleteSchema = z.object({
   ids: z
     .array(z.string())
     .min(1, "At least one collection id is required")
-    .max(1000, "Too many collections selected"),
-});
-
-/**
- * Duplicate is capped far below publish/delete on purpose. Those two are single
- * `updateMany`/`deleteMany` statements and genuinely scale to 1000; duplicate is
- * N sequential round trips inside one interactive transaction, so a large batch
- * would exhaust the transaction timeout and roll the whole thing back.
- */
-export const COLLECTION_BULK_DUPLICATE_MAX = 100;
-
-export const collectionBulkDuplicateSchema = z.object({
-  ids: z
-    .array(z.string())
-    .min(1, "At least one collection id is required")
     .max(
-      COLLECTION_BULK_DUPLICATE_MAX,
-      `You can duplicate at most ${COLLECTION_BULK_DUPLICATE_MAX} collections at a time`,
+      ADMIN_BULK_DELETE_LIMIT,
+      `Too many collections selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
     ),
 });
+

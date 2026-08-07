@@ -1,9 +1,10 @@
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { SERVICE_TEMPLATE_META } from "~/lib/service-templates";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
-import { buildTablePage, pickParam } from "../_lib/table-query";
+import { buildTablePage, matchesAllTokens, pickParam } from "../_lib/table-query";
 import { ServicesClient } from "./_components/services-client";
 
 type Props = {
@@ -22,7 +23,6 @@ const PAGE_SIZE = 25;
 
 const VALID_STATUS = ["all", "published", "draft"] as const;
 const VALID_SORT = [
-  "storefront",
   "name-asc",
   "name-desc",
   "newest",
@@ -35,12 +35,26 @@ type ValidStatus = (typeof VALID_STATUS)[number];
 type ValidSort = (typeof VALID_SORT)[number];
 
 const DEFAULT_STATUS: ValidStatus = "all";
-const DEFAULT_SORT: ValidSort = "storefront";
+// Owners cannot reorder services (only service ITEMS within one), so there is
+// no "Storefront order" sort here to default to — Newest is what every other
+// admin table without a controllable order defaults to.
+const DEFAULT_SORT: ValidSort = "newest";
 
 export default async function AdminServicesPage({ searchParams }: Props) {
   // No feature gate here — `layout.tsx` already gates this whole subtree with
   // the identical `flags.isEnabled("services")` check.
   const params = await searchParams;
+  // Same guard `/admin/layout.tsx` already ran, called again for its resolved
+  // `membershipRole` — which is what decides whether the bulk bar may offer
+  // Delete at all.
+  const { session, membershipRole } = await requireAdminAccess();
+  // Mirrors `ownerOnlyProcedure`, which `services.bulkDelete` uses:
+  // PLATFORM_ADMIN bypasses the membership check, everyone else needs OWNER.
+  // The procedure is still the enforcement — this only stops the UI offering
+  // what it will refuse.
+  const canBulkDelete =
+    session.user.platformRole === "PLATFORM_ADMIN" ||
+    membershipRole === "OWNER";
 
   const search = params.search?.trim() ?? "";
   const status = pickParam(params.status, VALID_STATUS, DEFAULT_STATUS);
@@ -62,14 +76,14 @@ export default async function AdminServicesPage({ searchParams }: Props) {
   //
   // The description is searched too, because the table RENDERS it under the
   // name — text a person can read in a row but not search for is a dead end.
-  // `description` is nullable; `?? false` keeps a null out of the predicate.
-  const needle = search.toLowerCase();
+  // Tokenized via `matchesAllTokens` so a multi-word query can match across
+  // fields rather than needing to appear whole in a single one.
   const matching = all.filter((service) => {
-    const matchesSearch =
-      needle === "" ||
-      service.name.toLowerCase().includes(needle) ||
-      service.slug.toLowerCase().includes(needle) ||
-      (service.description?.toLowerCase().includes(needle) ?? false);
+    const matchesSearch = matchesAllTokens(search, [
+      service.name,
+      service.slug,
+      service.description,
+    ]);
     const matchesStatus =
       status === "all" ||
       (status === "published" && service.published) ||
@@ -79,9 +93,11 @@ export default async function AdminServicesPage({ searchParams }: Props) {
 
   // Primary ordering only — `buildTablePage` appends the `id` tie-break that
   // keeps pagination stable, and its doc explains why every branch needs one.
-  // `storefront` is the case that most needs it: it is the DEFAULT sort, and
-  // `sortOrder` duplicates are routine (every service created before `reorder`
-  // was ever run shares whatever the create path assigned).
+  // No `storefront`/`sortOrder` branch here on purpose: owners cannot reorder
+  // services (only service ITEMS within one), so surfacing that column as a
+  // sort option implied a control that doesn't exist. `Service.sortOrder`
+  // still drives the storefront's own rendering — this only removes it from
+  // the admin table's sort control.
   const { pageItems, matchingIds, totalCount, totalPages, page } =
     buildTablePage(matching, {
       pageParam: params.page,
@@ -92,8 +108,6 @@ export default async function AdminServicesPage({ searchParams }: Props) {
             return a.name.localeCompare(b.name);
           case "name-desc":
             return b.name.localeCompare(a.name);
-          case "newest":
-            return b.createdAt.getTime() - a.createdAt.getTime();
           case "oldest":
             return a.createdAt.getTime() - b.createdAt.getTime();
           // Sorts on the TOTAL, not `liveItemCount`. "Most items" has to order
@@ -106,17 +120,15 @@ export default async function AdminServicesPage({ searchParams }: Props) {
           // the in-row warning answers it today.
           case "items-desc":
             return (
-              b.items.length - a.items.length || a.name.localeCompare(b.name)
+              b._count.items - a._count.items || a.name.localeCompare(b.name)
             );
           case "items-asc":
             return (
-              a.items.length - b.items.length || a.name.localeCompare(b.name)
+              a._count.items - b._count.items || a.name.localeCompare(b.name)
             );
-          case "storefront":
+          case "newest":
           default:
-            // The storefront's own display order (Service.sortOrder), which is
-            // otherwise invisible and unexplained in admin.
-            return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
+            return b.createdAt.getTime() - a.createdAt.getTime();
         }
       },
     });
@@ -142,6 +154,7 @@ export default async function AdminServicesPage({ searchParams }: Props) {
         totalPages={totalPages}
         page={page}
         pageSize={PAGE_SIZE}
+        canBulkDelete={canBulkDelete}
       />
     </>
   );

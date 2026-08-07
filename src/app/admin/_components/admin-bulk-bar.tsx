@@ -9,6 +9,20 @@ export interface BulkAction {
   onClick: () => void;
   pending?: boolean;
   /**
+   * Why this one action can't be taken on the current selection, or undefined
+   * when it can. Set it and the button is disabled and the sentence is shown in
+   * the bar.
+   *
+   * Exists because the caps are not uniform: a table lets you select
+   * ADMIN_BULK_SELECTION_LIMIT rows, but Delete only accepts
+   * ADMIN_BULK_DELETE_LIMIT of them. Between the two, Publish is genuinely
+   * available and Delete is not — so the block belongs to the action, not to
+   * the bar. Shown rather than merely disabled: a disabled button isn't
+   * focusable, so a tooltip would be unreachable by keyboard and the button
+   * would simply look broken.
+   */
+  disabledReason?: string;
+  /**
    * `destructive` renders as an outline button with destructive text and border,
    * NOT a solid red fill. This bar is on screen the entire time anything is
    * selected, so a saturated block would shout through all ordinary selection
@@ -24,7 +38,8 @@ export interface AdminBulkBarSelectAllMatching {
   onSelect: () => void;
   /** true once the user has escalated — bar then reads "All N selected" */
   isEscalated: boolean;
-  /** e.g. exceeds the 1000-id server cap — shown instead of the escalation link */
+  /** e.g. more matches than ADMIN_BULK_SELECTION_LIMIT — shown instead of the
+   *  escalation link. Comes from `useAdminTableSelection`. */
   disabledReason?: string;
 }
 
@@ -57,6 +72,17 @@ export function AdminBulkBar({
   const countLabel = selectAllMatching?.isEscalated
     ? `All ${count} ${noun} selected`
     : `${count} ${noun} selected`;
+
+  // Deduped: two actions sharing a cap would otherwise print the same sentence
+  // twice. Rendered next to the count rather than beside each button, where a
+  // full sentence per action would wrap the bar into a paragraph.
+  const actionDisabledReasons = [
+    ...new Set(
+      actions
+        .map((action) => action.disabledReason)
+        .filter((reason): reason is string => !!reason),
+    ),
+  ];
 
   return (
     <>
@@ -100,6 +126,12 @@ export function AdminBulkBar({
             </>
           )}
 
+          {actionDisabledReasons.map((reason) => (
+            <span key={reason} className="text-muted-foreground text-sm">
+              {reason}
+            </span>
+          ))}
+
           <div className="ml-auto flex flex-wrap items-center gap-2">
             {actions.map((action) => {
               const Icon = action.icon;
@@ -115,10 +147,15 @@ export function AdminBulkBar({
                       ? "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       : undefined
                   }
-                  // Either flag disables. Deliberately not `disabled ?? action.pending`:
-                  // `??` only falls through on null/undefined, so a bar-level
-                  // `disabled={false}` would suppress this action's own pending state.
-                  disabled={disabled === true || action.pending === true}
+                  // Any of the three disables. Deliberately not
+                  // `disabled ?? action.pending`: `??` only falls through on
+                  // null/undefined, so a bar-level `disabled={false}` would
+                  // suppress this action's own pending state.
+                  disabled={
+                    disabled === true ||
+                    action.pending === true ||
+                    action.disabledReason !== undefined
+                  }
                   onClick={action.onClick}
                 >
                   {action.pending ? (

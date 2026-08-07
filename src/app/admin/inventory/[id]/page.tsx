@@ -8,10 +8,25 @@ import { api } from "~/trpc/server";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 import { isUnavailable, unavailableMessage } from "../_lib/stock-state";
 import { AdminEmpty } from "../../_components/admin-empty";
-import { TABLE_HEAD } from "../../_components/admin-table-style";
+import {
+  DANGER_TEXT,
+  SUCCESS_TEXT,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_HEAD,
+} from "../../_components/admin-table-style";
 import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {
@@ -85,12 +100,10 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
           // "needs attention, not broken" banner (see the INFORM Act
           // threshold alert on /admin/payments) — `destructive` would claim
           // the shelf is empty, which `isOutOfStock` already covers below.
-          <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/40 dark:text-amber-100">
-            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <Alert variant="warning" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Nothing available to sell</AlertTitle>
-            <AlertDescription className="text-amber-900/90 dark:text-amber-100/90">
-              {unavailableMessage(pool)}
-            </AlertDescription>
+            <AlertDescription>{unavailableMessage(pool)}</AlertDescription>
           </Alert>
         )}
 
@@ -120,53 +133,51 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
                 description="Assign a product to this base unit to start drawing from shared inventory."
               />
             ) : (
-              <Card>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <caption className="sr-only">
-                      Products drawing from the {pool.name} pool
-                    </caption>
-                    <thead className="border-b">
-                      <tr>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Product
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Units per purchase
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {pool.products.map((product) => (
-                        <tr key={product.id} className="hover:bg-muted/50">
-                          <td className="px-6 py-4">
-                            <Link
-                              href={`/admin/products/${product.id}`}
-                              className="text-foreground font-medium hover:underline"
-                            >
-                              {product.name}
-                            </Link>
-                          </td>
-                          <td className="text-foreground px-6 py-4">
-                            {product.baseUnitsConsumed ?? 1}
-                          </td>
-                          <td className="px-6 py-4">
-                            <Badge
-                              variant={
-                                product.published ? "default" : "secondary"
-                              }
-                            >
-                              {product.published ? "Published" : "Draft"}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <Card className={TABLE_CARD}>
+                <Table>
+                  <TableCaption className="sr-only">
+                    Products drawing from the {pool.name} pool
+                  </TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Product
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Units per purchase
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Status
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pool.products.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell className={`${TABLE_CELL} whitespace-normal`}>
+                          <Link
+                            href={`/admin/products/${product.id}`}
+                            className="text-foreground font-medium hover:underline"
+                          >
+                            {product.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell className={`text-foreground ${TABLE_CELL}`}>
+                          {product.baseUnitsConsumed ?? 1}
+                        </TableCell>
+                        <TableCell className={TABLE_CELL}>
+                          <Badge
+                            variant={
+                              product.published ? "default" : "secondary"
+                            }
+                          >
+                            {product.published ? "Published" : "Draft"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </Card>
             )}
           </div>
@@ -183,89 +194,89 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
                 description="Sales, returns, and manual adjustments to this pool will show up here."
               />
             ) : (
-              <Card>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <caption className="sr-only">
-                      Movement history for the {pool.name} pool
-                    </caption>
-                    <thead className="border-b">
-                      <tr>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Date
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Reason
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Change
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Resulting qty
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          Order
-                        </th>
-                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
-                          By
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {pool.inventoryHistory.map((entry) => (
-                        <tr key={entry.id} className="hover:bg-muted/50">
-                          <td className="text-foreground px-6 py-4 whitespace-nowrap">
-                            {formatDate(entry.createdAt)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <Badge variant="outline" className="capitalize">
-                              {entry.reason}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={
-                                entry.changeQty > 0
-                                  ? "font-medium text-emerald-600"
-                                  : entry.changeQty < 0
-                                    ? "font-medium text-red-600"
-                                    : "text-foreground"
-                              }
-                            >
-                              {entry.changeQty > 0
-                                ? `+${entry.changeQty}`
+              <Card className={TABLE_CARD}>
+                <Table>
+                  <TableCaption className="sr-only">
+                    Movement history for the {pool.name} pool
+                  </TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Date
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Reason
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Change
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Resulting qty
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        Order
+                      </TableHead>
+                      <TableHead scope="col" className={TABLE_HEAD}>
+                        By
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pool.inventoryHistory.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell className={`text-foreground ${TABLE_CELL}`}>
+                          {formatDate(entry.createdAt)}
+                        </TableCell>
+                        <TableCell className={TABLE_CELL}>
+                          <Badge variant="outline" className="capitalize">
+                            {entry.reason}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className={TABLE_CELL}>
+                          <span
+                            className={
+                              entry.changeQty > 0
+                                ? `font-medium ${SUCCESS_TEXT}`
                                 : entry.changeQty < 0
-                                  ? `−${Math.abs(entry.changeQty)}`
-                                  : entry.changeQty}
-                            </span>
-                          </td>
-                          <td className="text-foreground px-6 py-4">
-                            {entry.newQty}
-                          </td>
-                          <td className="px-6 py-4">
-                            {entry.order ? (
-                              <Link
-                                href={`/admin/orders/${entry.order.id}`}
-                                className="text-foreground hover:underline"
-                              >
-                                #{entry.order.orderNumber}
-                              </Link>
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </td>
-                          <td className="text-foreground px-6 py-4">
-                            {entry.user
-                              ? (entry.user.name ?? entry.user.email)
-                              : entry.order
-                                ? `Order #${entry.order.orderNumber}`
-                                : "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                                  ? `font-medium ${DANGER_TEXT}`
+                                  : "text-foreground"
+                            }
+                          >
+                            {entry.changeQty > 0
+                              ? `+${entry.changeQty}`
+                              : entry.changeQty < 0
+                                ? `−${Math.abs(entry.changeQty)}`
+                                : entry.changeQty}
+                          </span>
+                        </TableCell>
+                        <TableCell className={`text-foreground ${TABLE_CELL}`}>
+                          {entry.newQty}
+                        </TableCell>
+                        <TableCell className={TABLE_CELL}>
+                          {entry.order ? (
+                            <Link
+                              href={`/admin/orders/${entry.order.id}`}
+                              className="text-foreground hover:underline"
+                            >
+                              #{entry.order.orderNumber}
+                            </Link>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell
+                          className={`text-foreground whitespace-normal ${TABLE_CELL}`}
+                        >
+                          {entry.user
+                            ? (entry.user.name ?? entry.user.email)
+                            : entry.order
+                              ? `Order #${entry.order.orderNumber}`
+                              : "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </Card>
             )}
           </div>

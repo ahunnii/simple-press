@@ -3,6 +3,8 @@
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { ADMIN_BULK_SELECTION_LIMIT } from "~/lib/validators/admin-table";
+
 /**
  * The multi-select engine behind the admin list tables (Collections, Services).
  *
@@ -21,8 +23,25 @@ export type UseAdminTableSelectionArgs = {
    * select indexes into this array, so the order must match the rendered rows.
    */
   rowIds: string[];
-  /** Ids of every row matching the current filters, across all pages. */
-  matchingIds: string[];
+  /**
+   * Ids of every row matching the current filters, across all pages — or `null`
+   * when the server declined to enumerate them because more than
+   * ADMIN_BULK_SELECTION_LIMIT match. Both `buildTablePage` and
+   * `product.secureList` return exactly this shape.
+   *
+   * `null` is not `[]`: an empty array is a genuine "nothing matched". The
+   * escalation is offered in neither case, but only `null` gets an explanation
+   * (`escalationDisabledReason`) — "nothing matched" needs none, because with no
+   * rows there is no full page to escalate FROM.
+   */
+  matchingIds: string[] | null;
+  /**
+   * Rows matching the current filters, across all pages. Equal to
+   * `matchingIds.length` whenever those were sent — but it is also the only
+   * count available when they weren't, which is exactly when the escalation has
+   * to explain itself with a real number.
+   */
+  totalCount: number;
   /** The current page number, as resolved server-side and passed in as a prop. */
   page: number;
   /** `useSearchParams()` from the calling component. */
@@ -42,6 +61,13 @@ export type AdminTableSelection = {
   somePageSelected: boolean;
   /** The page is exhausted and more matches exist, so escalation is offerable. */
   canEscalate: boolean;
+  /**
+   * Why "select all N matching" can't be taken up, or undefined when it can.
+   * Set only when `matchingIds` was withheld — the bulk bar shows this sentence
+   * in place of the escalation link rather than dropping it silently, so the
+   * reader learns the set is too large instead of wondering where the link went.
+   */
+  escalationDisabledReason: string | undefined;
   clearSelection: () => void;
   /** Drop ids a mutation just consumed, so the counter can't outrun reality. */
   pruneSelection: (ids: string[]) => void;
@@ -60,6 +86,7 @@ export type AdminTableSelection = {
 export function useAdminTableSelection({
   rowIds,
   matchingIds,
+  totalCount,
   page,
   searchParams,
 }: UseAdminTableSelectionArgs): AdminTableSelection {
@@ -205,8 +232,14 @@ export function useAdminTableSelection({
   };
 
   /** REPLACES the selection rather than unioning: the promise the bulk bar makes
-   *  is "all N matching", and a union with off-filter leftovers would not be that. */
+   *  is "all N matching", and a union with off-filter leftovers would not be that.
+   *
+   *  A no-op when the ids were withheld. The bulk bar renders the reason instead
+   *  of the link on that path, so this is unreachable through the UI — but
+   *  clearing the selection to `new Set(null ?? [])` would be a silent, actively
+   *  wrong outcome if it ever were reached. */
   const handleSelectAllMatching = () => {
+    if (matchingIds === null) return;
     setSelectedIds(new Set(matchingIds));
     setIsEscalated(true);
     setLastToggledIndex(null);
@@ -226,8 +259,16 @@ export function useAdminTableSelection({
     isEscalated,
     allPageSelected,
     somePageSelected,
-    // Offer the escalation only when the page is exhausted and more matches exist.
-    canEscalate: allPageSelected && matchingIds.length > rowIds.length,
+    // Offer the escalation only when the page is exhausted and more matches
+    // exist. Counted from `totalCount`, not `matchingIds.length`: the two are
+    // equal whenever the ids were sent, and `totalCount` is the only one that
+    // still means something when they weren't — which is precisely the case
+    // that needs to show the disabled explanation rather than nothing at all.
+    canEscalate: allPageSelected && totalCount > rowIds.length,
+    escalationDisabledReason:
+      matchingIds === null
+        ? `Too many matches to select at once (${totalCount.toLocaleString()}). Work through them ${ADMIN_BULK_SELECTION_LIMIT.toLocaleString()} or fewer at a time.`
+        : undefined,
     clearSelection,
     pruneSelection,
     handleRowToggle,

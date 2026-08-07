@@ -61,6 +61,15 @@ export function createShortfallMessage(itemNoun: AdminItemNoun) {
 }
 
 /**
+ * The one sentence that names a cap. Both the toast below and the disabled
+ * Delete button's reason are built from it, so a user who hits the limit two
+ * different ways is told the same thing twice, not two things once.
+ */
+function capSentence(itemNoun: AdminItemNoun, max: number, verb: string) {
+  return `You can ${verb} at most ${max.toLocaleString()} ${itemNoun.many} at a time.`;
+}
+
+/**
  * Belt-and-braces cap check: escalation is already blocked past the cap, but a
  * user can also accumulate a selection page by page. Fail here, with a sentence
  * naming the limit, rather than at the API with a validator error.
@@ -77,8 +86,32 @@ export function createOverCapGuard(
   return (max: number, verb: string) => {
     if (selectedCount <= max) return false;
     toast.error(
-      `You can ${verb} at most ${max.toLocaleString()} ${itemNoun.many} at a time. ${selectedCount.toLocaleString()} are selected.`,
+      `${capSentence(itemNoun, max, verb)} ${selectedCount.toLocaleString()} are selected.`,
     );
     return true;
   };
+}
+
+/**
+ * The `BulkAction.disabledReason` for an action whose own cap sits BELOW the
+ * selection cap — bulk delete, today, at ADMIN_BULK_DELETE_LIMIT against a
+ * selection limit of ADMIN_BULK_SELECTION_LIMIT.
+ *
+ * The pair matters: `createOverCapGuard` catches the click, this stops the click
+ * from being worth making. Without it the user selects 60 rows, presses Delete,
+ * reads a confirm dialog offering to delete all 60, confirms, and only then
+ * learns the cap — the guard fires before the dialog opens, but a button that
+ * looks live and does nothing is its own bug. The count is deliberately left out
+ * of this sentence (unlike the toast's): it sits inches from "60 products
+ * selected" in the same bar.
+ *
+ * Returns undefined when the action IS available, which is exactly what
+ * `disabledReason` wants — so it can be handed straight to the action.
+ */
+export function createCapDisabledReason(
+  selectedCount: number,
+  itemNoun: AdminItemNoun,
+) {
+  return (max: number, verb: string): string | undefined =>
+    selectedCount > max ? capSentence(itemNoun, max, verb) : undefined;
 }
