@@ -31,7 +31,10 @@ type Props = {
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
   const hasActiveFilters = Boolean(
-    params.status ?? params.search ?? params.fulfillment ?? params.paymentStatus,
+    params.status ??
+    params.search ??
+    params.fulfillment ??
+    params.paymentStatus,
   );
   const page = params.page ? Math.max(1, parseInt(params.page, 10)) : undefined;
 
@@ -105,19 +108,27 @@ export default async function OrdersPage({ searchParams }: Props) {
           <AdminEmpty
             icon={ShoppingCart}
             title={hasActiveFilters ? "No matching orders" : "No orders yet"}
+            // When filtered, AdminEmpty renders its own "try adjusting" line —
+            // don't restate the title.
             description={
               hasActiveFilters
-                ? "No orders match your current filters."
+                ? undefined
                 : "Orders appear here when customers check out on your storefront. You can also create one manually for phone or in-person sales."
             }
             filtered={hasActiveFilters}
             action={
-              <Button asChild>
-                <Link href="/admin/orders/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Manual Order
-                </Link>
-              </Button>
+              hasActiveFilters ? (
+                <Button variant="outline" asChild>
+                  <Link href="/admin/orders">Clear filters</Link>
+                </Button>
+              ) : (
+                <Button asChild>
+                  <Link href="/admin/orders/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Manual Order
+                  </Link>
+                </Button>
+              )
             }
           />
         ) : (

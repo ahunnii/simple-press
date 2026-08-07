@@ -335,10 +335,7 @@ export function FaqManager({ initialItems }: FaqManagerProps) {
 
                         <div className="mt-2 flex items-center gap-2">
                           {item.published ? (
-                            <Badge
-                              variant="default"
-                              className="bg-green-600 text-xs"
-                            >
+                            <Badge variant="success" className="text-xs">
                               Published
                             </Badge>
                           ) : (

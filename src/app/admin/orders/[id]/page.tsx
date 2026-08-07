@@ -121,25 +121,15 @@ export default async function OrderDetailPage({ params }: Props) {
                 order.fulfillmentStatus === "fulfilled"
                   ? "default"
                   : isPartiallyFulfilled
-                    ? "outline"
+                    ? "warning"
                     : "secondary"
-              }
-              className={
-                isPartiallyFulfilled
-                  ? "border-amber-300 bg-amber-50 text-amber-700"
-                  : undefined
               }
             >
               Fulfillment: {fulfillmentLabel(order.fulfillmentStatus)}
             </Badge>
 
             {order.deliveryMethod === "pickup" && (
-              <Badge
-                variant="outline"
-                className="border-amber-300 bg-amber-50 text-amber-700"
-              >
-                Pickup
-              </Badge>
+              <Badge variant="warning">Pickup</Badge>
             )}
 
             {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
@@ -199,17 +189,11 @@ export default async function OrderDetailPage({ params }: Props) {
                           </p>
                           {isPartiallyFulfilled &&
                             (item.fulfilledQuantity >= item.quantity ? (
-                              <Badge
-                                variant="outline"
-                                className="mt-2 border-green-300 bg-green-50 text-green-700"
-                              >
+                              <Badge variant="success" className="mt-2">
                                 Shipped
                               </Badge>
                             ) : item.fulfilledQuantity > 0 ? (
-                              <Badge
-                                variant="outline"
-                                className="mt-2 border-amber-300 bg-amber-50 text-amber-700"
-                              >
+                              <Badge variant="warning" className="mt-2">
                                 {item.fulfilledQuantity} of {item.quantity}{" "}
                                 shipped
                               </Badge>

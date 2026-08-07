@@ -187,7 +187,7 @@ export function PaymentsOverview({ data }: { data: Data }) {
             </div>
             {informActThresholdReached ? (
               stripeDetailsSubmitted ? (
-                <Badge className="gap-1 bg-green-100 text-green-800 hover:bg-green-100">
+                <Badge variant="success" className="gap-1">
                   <CheckCircle className="h-3 w-3" />
                   Verified
                 </Badge>

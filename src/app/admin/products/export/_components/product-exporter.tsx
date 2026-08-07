@@ -307,7 +307,7 @@ export function ProductExporter() {
                         </TableCell>
                         <TableCell>
                           {product.published ? (
-                            <Badge className="bg-green-600">Published</Badge>
+                            <Badge variant="success">Published</Badge>
                           ) : (
                             <Badge variant="secondary">Draft</Badge>
                           )}

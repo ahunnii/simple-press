@@ -109,21 +109,31 @@ export default async function ProductsPage({ searchParams }: Props) {
           <AdminEmpty
             icon={Package}
             title={
-              hasActiveFilters ? "No products match your filters" : "No products yet"
+              hasActiveFilters
+                ? "No products match your filters"
+                : "No products yet"
             }
+            // When filtered, AdminEmpty renders its own "try adjusting" line —
+            // don't say it twice.
             description={
               hasActiveFilters
-                ? "Try adjusting your search or filters to find what you are looking for."
+                ? undefined
                 : "Get started by adding your first product"
             }
             filtered={hasActiveFilters}
             action={
-              <Button asChild>
-                <Link href="/admin/products/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Product
-                </Link>
-              </Button>
+              hasActiveFilters ? (
+                <Button variant="outline" asChild>
+                  <Link href="/admin/products">Clear filters</Link>
+                </Button>
+              ) : (
+                <Button asChild>
+                  <Link href="/admin/products/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Your First Product
+                  </Link>
+                </Button>
+              )
             }
           />
         ) : (

@@ -34,14 +34,13 @@ export function AdminEmpty({
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
         {description && <EmptyDescription>{description}</EmptyDescription>}
+        {filtered && (
+          <div className="text-muted-foreground text-xs">
+            Try adjusting your search or filters.
+          </div>
+        )}
       </EmptyHeader>
-      {filtered ? (
-        <div className="text-muted-foreground text-xs">
-          Try adjusting your search or filters.
-        </div>
-      ) : (
-        action && <EmptyContent>{action}</EmptyContent>
-      )}
+      {action && <EmptyContent>{action}</EmptyContent>}
     </Empty>
   );
 }

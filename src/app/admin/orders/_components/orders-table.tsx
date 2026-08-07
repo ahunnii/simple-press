@@ -130,20 +130,10 @@ export function OrdersTable({ orders }: Props) {
                       {order.status}
                     </Badge>
                     {order.fulfillmentStatus === "partially_fulfilled" && (
-                      <Badge
-                        variant="outline"
-                        className="border-amber-300 bg-amber-50 text-amber-700"
-                      >
-                        Partially fulfilled
-                      </Badge>
+                      <Badge variant="warning">Partially fulfilled</Badge>
                     )}
                     {order.deliveryMethod === "pickup" && (
-                      <Badge
-                        variant="outline"
-                        className="border-amber-300 bg-amber-50 text-amber-700"
-                      >
-                        Pickup
-                      </Badge>
+                      <Badge variant="warning">Pickup</Badge>
                     )}
                     {order.hasOversell && (
                       <Badge variant="destructive">Oversold</Badge>

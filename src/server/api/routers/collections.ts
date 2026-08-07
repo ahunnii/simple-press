@@ -1,9 +1,11 @@
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { generateCollectionSlug } from "~/lib/slug";
 import {
   collectionBulkDeleteSchema,
+  collectionBulkDuplicateSchema,
   collectionBulkPublishSchema,
   collectionCreateSchema,
   collectionModifyProductSchema,
@@ -23,12 +25,40 @@ export const collectionsRouter = createTRPCRouter({
     .use(featureGate("collections"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
-      const collections = await ctx.db.collection.findMany({
-        where: { businessId },
-        include: { _count: { select: { collectionProducts: true } } },
-        orderBy: { sortOrder: "asc" },
-      });
-      return collections;
+
+      // `_count.collectionProducts` counts every join row, drafts included.
+      // `getAllPublic` (below) deliberately counts only published products,
+      // because that number is what a shopper can actually see. Admin needs
+      // both: the total it already shows, plus the storefront-visible count,
+      // so an owner can tell when a published collection would render empty.
+      //
+      // groupBy rather than a second `_count` with a `where`, so we aggregate
+      // in the DB without pulling join rows back.
+      const [collections, liveCounts] = await Promise.all([
+        ctx.db.collection.findMany({
+          where: { businessId },
+          include: { _count: { select: { collectionProducts: true } } },
+          orderBy: { sortOrder: "asc" },
+        }),
+        ctx.db.collectionProduct.groupBy({
+          by: ["collectionId"],
+          where: { product: { published: true }, collection: { businessId } },
+          _count: true,
+        }),
+      ]);
+
+      const liveCountByCollectionId = new Map(
+        liveCounts.map((row) => [row.collectionId, row._count]),
+      );
+
+      // Additive only — three other call sites read this procedure's output
+      // (products/new, products/[id], the template field widgets), so nothing
+      // above may be removed or renamed.
+      return collections.map((collection) => ({
+        ...collection,
+        /** Products in this collection that are actually visible on the storefront. */
+        liveProductCount: liveCountByCollectionId.get(collection.id) ?? 0,
+      }));
     }),
 
   getById: ownerAdminProcedure
@@ -633,6 +663,146 @@ export const collectionsRouter = createTRPCRouter({
         where: { id: { in: input.ids }, businessId },
       });
       return { count: result.count };
+    }),
+
+  bulkDuplicate: ownerAdminProcedure
+    .use(featureGate("collections"))
+    .input(collectionBulkDuplicateSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Load every requested source collection that actually belongs to
+      // this business, silently ignoring ids that don't exist or aren't
+      // owned — same "filter, don't throw" behavior as bulkDelete /
+      // bulkSetPublished above.
+      const sources = await ctx.db.collection.findMany({
+        where: { id: { in: input.ids }, businessId },
+        include: {
+          collectionProducts: {
+            select: { productId: true, sortOrder: true },
+          },
+        },
+      });
+
+      if (sources.length === 0) {
+        return { count: 0 };
+      }
+
+      // Load every slug already in use for this business once, then grow
+      // this set in memory as we mint a slug for each copy. `duplicate`
+      // (single-item, above) re-queries the DB per candidate slug because
+      // it only ever needs to check one collision at a time. A batch also
+      // has to catch collisions *within itself* — duplicating the same
+      // collection twice, or two sources whose "copy" slugs happen to
+      // coincide — so this in-memory set does double duty as both the
+      // DB-collision check and the intra-batch check.
+      const existingSlugs = await ctx.db.collection.findMany({
+        where: { businessId },
+        select: { slug: true },
+      });
+      const claimedSlugs = new Set(existingSlugs.map((c) => c.slug));
+
+      // Sort order: max existing + 1, +2, ... so N copies land on N
+      // distinct, sequential sort orders instead of all piling onto
+      // maxSort + 1.
+      const maxSort = await ctx.db.collection.findFirst({
+        where: { businessId },
+        orderBy: { sortOrder: "desc" },
+        select: { sortOrder: true },
+      });
+      let nextSortOrder = (maxSort?.sortOrder ?? 0) + 1;
+
+      const plannedCopies = sources.map((source) => {
+        const baseSlug =
+          generateCollectionSlug(`${source.name} copy`) || "collection";
+        let slug = baseSlug;
+        let counter = 1;
+        while (claimedSlugs.has(slug)) {
+          if (counter > 1000) {
+            throw new TRPCError({
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Could not generate a unique URL slug.",
+            });
+          }
+          slug = `${baseSlug}-${counter}`;
+          counter++;
+        }
+        claimedSlugs.add(slug);
+
+        return { source, slug, sortOrder: nextSortOrder++ };
+      });
+
+      // One transaction for the whole batch rather than one per source (as
+      // `duplicate` uses for its single item): the claimedSlugs set above
+      // is only valid as a uniqueness guarantee if nothing else can create
+      // a colliding slug between planning and writing, and an all-or-
+      // nothing bulk duplicate (matching bulkDelete/bulkSetPublished's
+      // single-statement atomicity) is easier to reason about than partial
+      // success with per-item rollback/retry bookkeeping.
+      // Prisma's interactive-transaction defaults (maxWait 2s, timeout 5s) are
+      // sized for a couple of statements, not for N sequential creates against a
+      // remote DB. At ~2 round trips per source that budget is gone well before
+      // the schema's 100-source cap, and P2028 would roll back the whole batch.
+      // `claimedSlugs` is planned outside the transaction, so a concurrent create
+      // in the same business can steal one of these slugs in between and trip
+      // @@unique([businessId, slug]). Narrow that to a retryable CONFLICT rather
+      // than letting a P2002 surface as an opaque 500.
+      const runBatch = () =>
+        ctx.db.$transaction(
+          async (tx) => {
+            const results = [];
+            for (const { source, slug, sortOrder } of plannedCopies) {
+              const newCollection = await tx.collection.create({
+                data: {
+                  businessId,
+                  name: `Copy of ${source.name}`,
+                  slug,
+                  description: source.description,
+                  imageUrl: source.imageUrl,
+                  metaTitle: source.metaTitle,
+                  metaDescription: source.metaDescription,
+                  metaKeywords: source.metaKeywords,
+                  ogImage: source.ogImage,
+                  published: false,
+                  sortOrder,
+                },
+              });
+
+              if (source.collectionProducts.length > 0) {
+                await tx.collectionProduct.createMany({
+                  data: source.collectionProducts.map((cp) => ({
+                    collectionId: newCollection.id,
+                    productId: cp.productId,
+                    sortOrder: cp.sortOrder,
+                  })),
+                });
+              }
+
+              results.push(newCollection);
+            }
+            return results;
+          },
+          { timeout: 60_000, maxWait: 15_000 },
+        );
+
+      let created;
+      try {
+        created = await runBatch();
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2002"
+        ) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message:
+              "Another change claimed one of these URL slugs. Please try duplicating again.",
+          });
+        }
+        throw err;
+      }
+
+      return { count: created.length };
     }),
 
   getProductsByCollectionId: publicProcedure

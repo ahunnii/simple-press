@@ -178,9 +178,7 @@ export function BlogPagesList({ business }: Props) {
                       </TableCell>
                       <TableCell>
                         {page.published ? (
-                          <Badge variant="default" className="bg-green-600">
-                            Published
-                          </Badge>
+                          <Badge variant="success">Published</Badge>
                         ) : (
                           <Badge variant="secondary">Draft</Badge>
                         )}

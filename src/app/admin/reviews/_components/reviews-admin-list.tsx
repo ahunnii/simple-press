@@ -170,7 +170,9 @@ export function ReviewsAdminList() {
               )}
 
               {review.isApproved && !review.isHidden && (
-                <Badge className="bg-green-600 text-xs">Published</Badge>
+                <Badge variant="success" className="text-xs">
+                  Published
+                </Badge>
               )}
               {!review.isApproved && !review.isHidden && (
                 <Badge variant="secondary" className="text-xs">

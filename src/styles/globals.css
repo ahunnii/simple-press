@@ -2962,10 +2962,10 @@
     @apply mb-8 flex items-center justify-between;
   }
   .admin-header h1 {
-    @apply text-3xl font-bold text-gray-900;
+    @apply text-3xl font-bold text-foreground;
   }
   .admin-header p {
-    @apply mt-1 text-gray-600;
+    @apply mt-1 text-muted-foreground;
   }
   .admin-container {
     @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;

@@ -572,7 +572,9 @@ export function TestimonialsList({
                 )}
 
                 {testimonial.isApproved && !testimonial.isHidden && (
-                  <Badge className="bg-green-600 text-xs">Published</Badge>
+                  <Badge variant="success" className="text-xs">
+                    Published
+                  </Badge>
                 )}
                 {!testimonial.isApproved && !testimonial.isHidden && (
                   <Badge variant="secondary" className="text-xs">
@@ -766,7 +768,9 @@ export function TestimonialsList({
             <div className="min-w-0 flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 {status === "completed" && (
-                  <Badge className="bg-green-600 text-xs">Completed</Badge>
+                  <Badge variant="success" className="text-xs">
+                    Completed
+                  </Badge>
                 )}
                 {status === "pending" && (
                   <Badge variant="secondary" className="text-xs">
