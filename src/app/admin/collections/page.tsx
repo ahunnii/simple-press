@@ -2,6 +2,7 @@ import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
+import { buildTablePage, pickParam } from "../_lib/table-query";
 import { CollectionsClient } from "./_components/collections-client";
 
 type Props = {
@@ -40,17 +41,8 @@ export default async function AdminCollectionsPage({ searchParams }: Props) {
   const params = await searchParams;
 
   const search = params.search?.trim() ?? "";
-  const status: ValidStatus = VALID_STATUS.includes(
-    params.status as ValidStatus,
-  )
-    ? (params.status as ValidStatus)
-    : DEFAULT_STATUS;
-  const sort: ValidSort = VALID_SORT.includes(params.sort as ValidSort)
-    ? (params.sort as ValidSort)
-    : DEFAULT_SORT;
-  const requestedPage = Number.parseInt(params.page ?? "", 10);
-  const rawPage =
-    Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const status = pickParam(params.status, VALID_STATUS, DEFAULT_STATUS);
+  const sort = pickParam(params.sort, VALID_SORT, DEFAULT_SORT);
 
   const collections = await api.collections
     .getAll()
@@ -60,10 +52,19 @@ export default async function AdminCollectionsPage({ searchParams }: Props) {
 
   // `getAll` intentionally stays unpaginated — three other call sites depend on
   // its current signature — so the narrowing happens here instead.
+  // Search covers name, slug and description — the same three Services searches.
+  // The slug because a collection is URL-addressable (/collections/<slug>) and
+  // generated rather than typed, so the URL is a real way an owner arrives here;
+  // the description because the table RENDERS it under the name, and text a
+  // person can read in a row but not search for is a dead end. `description` is
+  // nullable; `?? false` keeps a null out of the predicate.
   const needle = search.toLowerCase();
   const matching = all.filter((collection) => {
     const matchesSearch =
-      needle === "" || collection.name.toLowerCase().includes(needle);
+      needle === "" ||
+      collection.name.toLowerCase().includes(needle) ||
+      collection.slug.toLowerCase().includes(needle) ||
+      (collection.description?.toLowerCase().includes(needle) ?? false);
     const matchesStatus =
       status === "all" ||
       (status === "published" && collection.published) ||
@@ -71,49 +72,49 @@ export default async function AdminCollectionsPage({ searchParams }: Props) {
     return matchesSearch && matchesStatus;
   });
 
-  const sorted = [...matching].sort((a, b) => {
-    switch (sort) {
-      case "name-asc":
-        return a.name.localeCompare(b.name);
-      case "name-desc":
-        return b.name.localeCompare(a.name);
-      case "newest":
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      case "oldest":
-        return a.createdAt.getTime() - b.createdAt.getTime();
-      case "products-desc":
-        return (
-          b._count.collectionProducts - a._count.collectionProducts ||
-          a.name.localeCompare(b.name)
-        );
-      case "products-asc":
-        return (
-          a._count.collectionProducts - b._count.collectionProducts ||
-          a.name.localeCompare(b.name)
-        );
-      case "storefront":
-      default:
-        // The storefront's own display order (Collection.sortOrder), which is
-        // otherwise invisible and unexplained in admin.
-        return a.sortOrder - b.sortOrder;
-    }
-  });
-
-  const totalCount = sorted.length;
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  // Clamp: a stale/hand-typed `?page=` past the end must show the last page
-  // rather than an empty table.
-  const page = Math.min(rawPage, totalPages);
-  const pageItems = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Primary ordering only — `buildTablePage` appends the `id` tie-break that
+  // keeps pagination stable, and its doc explains why every branch needs one.
+  // `storefront` is the case that most needs it: `sortOrder` duplicates are
+  // routine, and it is the DEFAULT sort.
+  const { pageItems, matchingIds, totalCount, totalPages, page } =
+    buildTablePage(matching, {
+      pageParam: params.page,
+      pageSize: PAGE_SIZE,
+      comparePrimary: (a, b) => {
+        switch (sort) {
+          case "name-asc":
+            return a.name.localeCompare(b.name);
+          case "name-desc":
+            return b.name.localeCompare(a.name);
+          case "newest":
+            return b.createdAt.getTime() - a.createdAt.getTime();
+          case "oldest":
+            return a.createdAt.getTime() - b.createdAt.getTime();
+          case "products-desc":
+            return (
+              b._count.collectionProducts - a._count.collectionProducts ||
+              a.name.localeCompare(b.name)
+            );
+          case "products-asc":
+            return (
+              a._count.collectionProducts - b._count.collectionProducts ||
+              a.name.localeCompare(b.name)
+            );
+          case "storefront":
+          default:
+            // The storefront's own display order (Collection.sortOrder), which
+            // is otherwise invisible and unexplained in admin.
+            return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
+        }
+      },
+    });
 
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Collections" }]} />
       <CollectionsClient
         collections={pageItems}
-        // Ids of every row matching the current filters, across all pages —
-        // feeds the bulk bar's "select all N matching" escalation.
-        matchingIds={sorted.map((collection) => collection.id)}
+        matchingIds={matchingIds}
         totalCollections={all.length}
         totalCount={totalCount}
         totalPages={totalPages}

@@ -15,7 +15,6 @@ export interface AdminEmptyProps {
   description?: string;
   action?: React.ReactNode;
   filtered?: boolean;
-  className?: string;
 }
 
 export function AdminEmpty({
@@ -24,10 +23,9 @@ export function AdminEmpty({
   description,
   action,
   filtered,
-  className,
 }: AdminEmptyProps) {
   return (
-    <Empty className={className}>
+    <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon />

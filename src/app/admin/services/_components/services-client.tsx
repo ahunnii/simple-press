@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
   ExternalLink,
+  Eye,
+  EyeOff,
   LayoutList,
   MoreVertical,
   Pencil,
@@ -14,6 +17,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { BulkAction } from "../../_components/admin-bulk-bar";
+import type { AdminFilterDef } from "../../_components/admin-filters";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 import {
@@ -28,13 +33,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -42,21 +41,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "~/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import {
   Table,
   TableBody,
@@ -67,173 +51,322 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
+import { AdminBulkBar } from "../../_components/admin-bulk-bar";
+import { AdminEmpty } from "../../_components/admin-empty";
+import { AdminFilters } from "../../_components/admin-filters";
+import { AdminPagination } from "../../_components/admin-pagination";
+import {
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_CELL_TIGHT,
+  TABLE_HEAD,
+  TABLE_HEAD_TIGHT,
+  WARNING_TEXT,
+} from "../../_components/admin-table-style";
+import {
+  createOverCapGuard,
+  createShortfallMessage,
+  describeSelection,
+} from "../../_lib/admin-bulk-actions";
+import {
+  dismissLoadingToast,
+  loadingToast,
+} from "../../_lib/admin-mutation-toast";
+import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
+
 type Service = RouterOutputs["services"]["getAll"][number];
 
 type Props = {
-  services: RouterOutputs["services"]["getAll"];
+  /** The current page slice only — filtering/sorting/paging happen server-side. */
+  services: Service[];
+  /** Ids of every row matching the current filters, across all pages. */
+  matchingIds: string[];
+  /**
+   * serviceTemplateId → human label, resolved server-side from
+   * SERVICE_TEMPLATE_META. Ids with no registry entry are absent; the badge
+   * falls back to the raw id for those.
+   */
+  templateLabels: Record<string, string>;
+  /** Unfiltered total — distinguishes "no services yet" from "no matches". */
+  totalServices: number;
+  totalCount: number;
+  totalPages: number;
+  page: number;
+  pageSize: number;
 };
 
-const PAGE_SIZE = 12;
+const BASE_PATH = "/admin/services";
+const ITEM_NOUN = { one: "service", many: "services" } as const;
 
-type FilterValue = "all" | "published" | "draft";
+// Table type/density lives in ../../_components/admin-table-style so a second
+// table can adopt it without copy-paste. Aliased to short names for the JSX.
+const TH = TABLE_HEAD;
+const TD = TABLE_CELL;
+const TH_CHECKBOX = TABLE_HEAD_TIGHT;
+const TD_CHECKBOX = TABLE_CELL_TIGHT;
 
-export function ServicesClient({ services }: Props) {
+/** "3 of 5" — a bulk op silently touching fewer rows than asked must say so. */
+const shortfallMessage = createShortfallMessage(ITEM_NOUN);
+
+/**
+ * The one place this sentence is written. The desktop Items cell and the
+ * `md:hidden` reflow line both render it, so the two cannot drift. Mobile keeps
+ * the compact badge PRESENTATION; only the string is shared. Deliberately word
+ * for word what Collections shows for a collection with no live products — it is
+ * the same failure, and calling it two different things would imply otherwise.
+ */
+const EMPTY_ON_STOREFRONT_MESSAGE = "Published, but shoppers see an empty page";
+
+/** Both bulk validators in ~/lib/validators/services.ts cap `ids` at 1000. */
+const MAX_BULK_IDS = 1000;
+
+const SORT_FILTER: AdminFilterDef = {
+  key: "sort",
+  label: "Sort",
+  defaultValue: "storefront",
+  options: [
+    // `sortOrder` is the order the storefront renders services in. It used to be
+    // the silent, unexplained default here; naming it makes it legible.
+    { value: "storefront", label: "Storefront order" },
+    { value: "name-asc", label: "Name A–Z" },
+    { value: "name-desc", label: "Name Z–A" },
+    { value: "newest", label: "Newest" },
+    { value: "oldest", label: "Oldest" },
+    { value: "items-desc", label: "Most items" },
+    { value: "items-asc", label: "Fewest items" },
+  ],
+};
+
+const STATUS_FILTER: AdminFilterDef = {
+  key: "status",
+  label: "Status",
+  defaultValue: "all",
+  options: [
+    { value: "all", label: "All services" },
+    { value: "published", label: "Published" },
+    { value: "draft", label: "Drafts" },
+  ],
+};
+
+export function ServicesClient({
+  services,
+  matchingIds,
+  templateLabels,
+  totalServices,
+  totalCount,
+  totalPages,
+  page,
+  pageSize,
+}: Props) {
   const utils = api.useUtils();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<FilterValue>("all");
-  const [page, setPage] = useState(1);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // ── Selection ──────────────────────────────────────────────────────────────
+  // Shared with Collections. The hook owns which URL changes invalidate a
+  // selection (any filter, but never a page or sort change), the shift-click
+  // anchor, and the "select all N matching" escalation.
+  const {
+    selectedIds,
+    selectedCount,
+    isEscalated,
+    allPageSelected,
+    somePageSelected,
+    canEscalate,
+    clearSelection,
+    pruneSelection,
+    handleRowToggle,
+    handleSelectAllOnPage,
+    handleSelectAllMatching,
+    onRowClickCapture,
+    onFiltersChange,
+  } = useAdminTableSelection({
+    rowIds: services.map((service) => service.id),
+    matchingIds,
+    page,
+    searchParams,
+  });
 
   // ── Mutations ──────────────────────────────────────────────────────────────
+  // Every handler dismisses the specific loading toast it opened — see
+  // dismissLoadingToast. A bare toast.dismiss() clears every toast on screen.
+
+  const afterWrite = () => {
+    void utils.services.invalidate();
+    router.refresh();
+  };
 
   const deleteMutation = api.services.delete.useMutation({
-    onMutate: () => toast.loading("Deleting service..."),
-    onSuccess: () => {
-      toast.dismiss();
-      toast.success("Service deleted successfully");
-      void utils.services.invalidate();
-      router.refresh();
+    onMutate: loadingToast("Deleting service…"),
+    onSuccess: (_data, id, context) => {
+      dismissLoadingToast(context);
+      toast.success("Service deleted");
+      pruneSelection([id]);
       setDeleteId(null);
+      afterWrite();
     },
-    onError: (error) => {
-      toast.dismiss();
+    onError: (error, _id, context) => {
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to delete service");
     },
   });
 
-  // Bulk delete — sequential so we can track per-item results
-  const bulkDeleteMutation = api.services.delete.useMutation();
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-
-  const handleBulkDelete = async () => {
-    const ids = [...selectedIds];
-    setIsBulkDeleting(true);
-    toast.loading("Deleting services...");
-
-    let succeeded = 0;
-    const failures: string[] = [];
-
-    for (const id of ids) {
-      try {
-        await bulkDeleteMutation.mutateAsync(id);
-        succeeded++;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Unknown error";
-        failures.push(msg);
-      }
-    }
-
-    toast.dismiss();
-    setIsBulkDeleting(false);
-
-    if (failures.length === 0) {
+  // Separate from bulkPublishMutation so the undo's own success toast doesn't
+  // offer another Undo, which would let the two ping-pong indefinitely.
+  const undoPublishMutation = api.services.bulkSetPublished.useMutation({
+    onMutate: loadingToast("Undoing…"),
+    onSuccess: (data, variables, context) => {
+      dismissLoadingToast(context);
       toast.success(
-        `${succeeded} ${succeeded === 1 ? "service" : "services"} deleted`,
+        `Undone — ${data.count} ${
+          data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
+        } ${variables.published ? "published" : "unpublished"}`,
       );
-      void utils.services.invalidate();
-      router.refresh();
-      setSelectedIds(new Set());
-      setBulkDeleteOpen(false);
-    } else if (succeeded === 0) {
-      // All failed — surface the first distinct error message
-      toast.error(failures[0] ?? "Failed to delete services");
-    } else {
-      // Partial success — tell the user exactly what happened
-      const firstError = failures[0] ?? "Unknown error";
-      toast.error(
-        `${succeeded} deleted, ${failures.length} failed: ${firstError}`,
-      );
-      void utils.services.invalidate();
-      router.refresh();
-      setSelectedIds(new Set());
-      setBulkDeleteOpen(false);
-    }
-  };
-
-  // ── Filtering + pagination ─────────────────────────────────────────────────
-
-  const filtered = services.filter((s: Service) => {
-    const matchesSearch =
-      search.trim() === "" ||
-      s.name.toLowerCase().includes(search.trim().toLowerCase());
-
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "published" && s.published) ||
-      (filter === "draft" && !s.published);
-
-    return matchesSearch && matchesFilter;
+      afterWrite();
+    },
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message ?? "Failed to undo");
+    },
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
-  );
+  const bulkPublishMutation = api.services.bulkSetPublished.useMutation({
+    onMutate: loadingToast("Updating services…"),
+    onSuccess: (data, variables, context) => {
+      dismissLoadingToast(context);
+      const verb = variables.published ? "published" : "unpublished";
+      const requested = variables.ids.length;
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
-
-  const handleFilterChange = (value: FilterValue) => {
-    setFilter(value);
-    setPage(1);
-  };
-
-  // ── Selection helpers ──────────────────────────────────────────────────────
-
-  const filteredIds = filtered.map((s) => s.id);
-  const selectedInFiltered = filteredIds.filter((id) => selectedIds.has(id));
-  const allFilteredSelected =
-    filteredIds.length > 0 && selectedInFiltered.length === filteredIds.length;
-  const someFilteredSelected =
-    selectedInFiltered.length > 0 && !allFilteredSelected;
-
-  const toggleCard = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
+      if (data.count < requested) {
+        toast.warning(shortfallMessage(data.count, requested, verb));
       } else {
-        next.add(id);
+        // Publish/unpublish are exactly invertible, so the recovery path is a
+        // single click rather than re-finding and re-selecting every row.
+        toast.success(
+          `${data.count} ${data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many} ${verb}`,
+          {
+            action: {
+              label: "Undo",
+              onClick: () =>
+                undoPublishMutation.mutate({
+                  ids: variables.ids,
+                  published: !variables.published,
+                }),
+            },
+          },
+        );
       }
-      return next;
-    });
+
+      pruneSelection(variables.ids);
+      afterWrite();
+    },
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message ?? "Failed to update services");
+    },
+  });
+
+  // One statement, not N sequential `delete` calls. The old loop reported
+  // "3 deleted, 2 failed" from client-side accounting; `deleteMany` returns the
+  // authoritative count, and a shortfall is reported from that.
+  const bulkDeleteMutation = api.services.bulkDelete.useMutation({
+    onMutate: loadingToast("Deleting services…"),
+    onSuccess: (data, variables, context) => {
+      dismissLoadingToast(context);
+      const requested = variables.ids.length;
+
+      if (data.count < requested) {
+        toast.warning(shortfallMessage(data.count, requested, "deleted"));
+      } else {
+        toast.success(
+          `${data.count} ${data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many} deleted`,
+        );
+      }
+
+      pruneSelection(variables.ids);
+      setBulkDeleteOpen(false);
+      afterWrite();
+    },
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message ?? "Failed to delete services");
+    },
+  });
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+
+  // Confirm-dialog context. Only rows on the current page are available here;
+  // `describeSelection` handles the shortfall in the copy.
+  const selectedOnPageRows = services.filter((service) =>
+    selectedIds.has(service.id),
+  );
+  const selectedNames = selectedOnPageRows.map((service) => service.name);
+  const deleteTarget = services.find((service) => service.id === deleteId);
+
+  // Warn about storefront pages disappearing only when that's actually true.
+  // A selection can reach past this page, and unseen rows might be published —
+  // so an incomplete view has to assume the warning applies rather than omit it.
+  const selectionReachesPastPage = selectedCount > selectedOnPageRows.length;
+  const anySelectedPublished =
+    selectionReachesPastPage ||
+    selectedOnPageRows.some((service) => service.published);
+
+  const overCap = createOverCapGuard(selectedCount, ITEM_NOUN);
+
+  const handleBulkPublish = (published: boolean) => {
+    if (selectedCount === 0 || overCap(MAX_BULK_IDS, "update")) return;
+    bulkPublishMutation.mutate({ ids: [...selectedIds], published });
   };
 
-  const handleSelectAll = () => {
-    if (allFilteredSelected) {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        for (const id of filteredIds) next.delete(id);
-        return next;
-      });
-    } else {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        for (const id of filteredIds) next.add(id);
-        return next;
-      });
-    }
+  const handleBulkDelete = () => {
+    if (selectedCount === 0 || overCap(MAX_BULK_IDS, "delete")) return;
+    bulkDeleteMutation.mutate({ ids: [...selectedIds] });
   };
 
-  const handleDelete = () => {
-    if (!deleteId) return;
-    deleteMutation.mutate(deleteId);
-  };
+  const isBulkPending =
+    bulkPublishMutation.isPending || bulkDeleteMutation.isPending;
+
+  // Publish / Unpublish / Delete only — there is no `services.duplicate`
+  // procedure, so Collections' Duplicate action has no counterpart here.
+  const bulkActions: BulkAction[] = [
+    {
+      label: "Publish",
+      icon: Eye,
+      onClick: () => handleBulkPublish(true),
+      pending:
+        bulkPublishMutation.isPending &&
+        bulkPublishMutation.variables?.published === true,
+    },
+    {
+      label: "Unpublish",
+      icon: EyeOff,
+      onClick: () => handleBulkPublish(false),
+      pending:
+        bulkPublishMutation.isPending &&
+        bulkPublishMutation.variables?.published === false,
+    },
+    {
+      label: "Delete",
+      icon: Trash2,
+      variant: "destructive",
+      // Check the cap BEFORE opening the dialog. Otherwise the user reads
+      // "Delete 1,043 Services?", confirms, and gets an error toast while the
+      // dialog sits there with no way forward.
+      onClick: () => {
+        if (overCap(MAX_BULK_IDS, "delete")) return;
+        setBulkDeleteOpen(true);
+      },
+      pending: bulkDeleteMutation.isPending,
+    },
+  ];
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const hasServices = services.length > 0;
-  const hasResults = filtered.length > 0;
-  const isFiltering = search.trim() !== "" || filter !== "all";
-  const hasSelection = selectedIds.size > 0;
+  const hasServices = totalServices > 0;
+  const hasResults = services.length > 0;
 
   return (
     <div className="admin-container">
@@ -243,7 +376,7 @@ export function ServicesClient({ services }: Props) {
           <p>Manage your bookable services and service pages</p>
         </div>
         <Button asChild>
-          <Link href="/admin/services/new">
+          <Link href={`${BASE_PATH}/new`}>
             <Plus className="mr-2 h-4 w-4" />
             Create Service
           </Link>
@@ -251,182 +384,161 @@ export function ServicesClient({ services }: Props) {
       </div>
 
       {!hasServices ? (
-        <Card>
-          <CardHeader className="items-center text-center">
-            <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
-              <LayoutList className="text-muted-foreground h-6 w-6" />
-            </div>
-            <CardTitle>No services yet</CardTitle>
-            <CardDescription>
-              Create a service page to showcase and offer bookable appointments,
-              classes, or custom work.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center pb-8">
+        <AdminEmpty
+          icon={LayoutList}
+          title="No services yet"
+          description="Create a service page to showcase and offer bookable appointments, classes, or custom work."
+          action={
             <Button asChild>
-              <Link href="/admin/services/new">
+              <Link href={`${BASE_PATH}/new`}>
                 <Plus className="mr-2 h-4 w-4" />
                 Create Your First Service
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <>
-          {/* Search + Filter bar */}
-          <div className="bg-card sticky top-0 z-20 mb-6 rounded-lg border p-4 shadow-sm">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-              <div className="relative flex-1">
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <Input
-                  type="text"
-                  placeholder="Search services..."
-                  aria-label="Search services"
-                  value={search}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="w-full md:w-44">
-                <Select
-                  value={filter}
-                  onValueChange={(v) => handleFilterChange(v as FilterValue)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="All services" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Services</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="draft">Drafts</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {isFiltering && (
-                <span className="text-muted-foreground text-sm">
-                  {filtered.length}{" "}
-                  {filtered.length === 1 ? "result" : "results"}
-                </span>
-              )}
-            </div>
-          </div>
+          <AdminFilters
+            basePath={BASE_PATH}
+            searchPlaceholder="Search services…"
+            // Names the fields actually matched — the placeholder can't, at that
+            // width, and a bare "Search services" leaves a screen-reader user
+            // guessing whether typing a URL or a description word will hit.
+            searchAriaLabel="Search services by name, URL or description"
+            filters={[STATUS_FILTER, SORT_FILTER]}
+            resultCount={totalCount}
+            itemNoun={ITEM_NOUN}
+            onFiltersChange={onFiltersChange}
+          />
 
-          {/* Bulk action bar */}
-          {hasSelection && (
-            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-              <span className="text-sm font-medium text-blue-800">
-                {selectedIds.size}{" "}
-                {selectedIds.size === 1 ? "service" : "services"} selected
-              </span>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setBulkDeleteOpen(true)}
-                  className="border-destructive/30 bg-card text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
-              </div>
-              <button
-                className="text-primary ml-auto text-sm underline-offset-2 hover:underline"
-                onClick={() => setSelectedIds(new Set())}
-              >
-                Clear
-              </button>
-            </div>
-          )}
+          <AdminBulkBar
+            count={selectedCount}
+            itemNoun={ITEM_NOUN}
+            actions={bulkActions}
+            onClear={clearSelection}
+            disabled={isBulkPending}
+            selectAllMatching={
+              canEscalate || isEscalated
+                ? {
+                    total: matchingIds.length,
+                    onSelect: handleSelectAllMatching,
+                    isEscalated,
+                    // Describes what's blocked — selecting *all* matches — not
+                    // the action itself. The current page's selection is
+                    // perfectly actionable and the copy must not imply otherwise.
+                    disabledReason:
+                      matchingIds.length > MAX_BULK_IDS
+                        ? `Too many matches to select at once (${matchingIds.length.toLocaleString()}). Work through them ${MAX_BULK_IDS.toLocaleString()} or fewer at a time.`
+                        : undefined,
+                  }
+                : undefined
+            }
+          />
 
           {!hasResults ? (
-            <Card>
-              <CardHeader className="items-center text-center">
-                <div className="bg-muted mb-2 flex h-12 w-12 items-center justify-center rounded-full">
-                  <Search className="text-muted-foreground h-6 w-6" />
-                </div>
-                <CardTitle>No services match your filters</CardTitle>
-                <CardDescription>
-                  Try adjusting your search or status filter to find what
-                  you&apos;re looking for.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center pb-8">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearch("");
-                    setFilter("all");
-                    setPage(1);
-                  }}
-                >
-                  Clear filters
+            <AdminEmpty
+              icon={Search}
+              title="No services match your filters"
+              // AdminEmpty renders its own "Try adjusting your search or
+              // filters." line when `filtered` — don't say it twice.
+              filtered
+              action={
+                <Button variant="outline" asChild>
+                  <Link href={BASE_PATH}>Clear filters</Link>
                 </Button>
-              </CardContent>
-            </Card>
+              }
+            />
           ) : (
             <>
-              <Card>
+              {/* Margin lives here rather than on a wrapper around AdminBulkBar:
+                  the bar is `sticky top-0`, and a wrapper sized to its own height
+                  would cap the sticky range at zero. */}
+              <Card className={TABLE_CARD}>
                 <Table>
                   <TableCaption className="sr-only">Services</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead scope="col" className="w-10">
+                      <TableHead scope="col" className={`w-10 ${TH_CHECKBOX}`}>
                         <Checkbox
                           id="select-all-services"
                           checked={
-                            allFilteredSelected
+                            allPageSelected
                               ? true
-                              : someFilteredSelected
+                              : somePageSelected
                                 ? "indeterminate"
                                 : false
                           }
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Select all services"
-                          disabled={!hasResults}
+                          onCheckedChange={handleSelectAllOnPage}
+                          aria-label="Select all services on this page"
                         />
                       </TableHead>
-                      <TableHead scope="col">Service</TableHead>
-                      <TableHead scope="col" className="hidden md:table-cell">
+                      <TableHead scope="col" className={TH}>
+                        Service
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
                         Items
                       </TableHead>
-                      <TableHead scope="col" className="hidden md:table-cell">
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
                         Template
                       </TableHead>
-                      <TableHead scope="col" className="hidden md:table-cell">
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
                         Status
                       </TableHead>
-                      <TableHead scope="col" className="hidden md:table-cell">
-                        Storefront
-                      </TableHead>
-                      <TableHead scope="col">
+                      <TableHead scope="col" className={`${TH} text-right`}>
                         <span className="sr-only">Actions</span>
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginated.map((service) => {
+                    {services.map((service, index) => {
                       const isSelected = selectedIds.has(service.id);
+                      const itemCount = service.items.length;
+                      // Items are published independently of their parent, and
+                      // the storefront only ever renders the published ones. A
+                      // service page whose items are all drafts is live and blank.
+                      const liveItems = service.liveItemCount;
+                      const isEmptyOnStorefront =
+                        service.published && liveItems === 0;
+                      // The registry label the owner picked the template BY
+                      // ("Minimal", "Editorial", "The Table (PinkArt)"). An id
+                      // with no registry entry — a legacy or removed template —
+                      // shows the raw id rather than a fabricated name.
+                      const templateLabel =
+                        templateLabels[service.serviceTemplateId] ??
+                        service.serviceTemplateId;
+
                       return (
                         <TableRow
                           key={service.id}
                           data-state={isSelected ? "selected" : undefined}
-                          onClick={() =>
-                            router.push(`/admin/services/${service.id}`)
-                          }
-                          className="cursor-pointer"
                         >
-                          <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableCell className={TD_CHECKBOX}>
                             <Checkbox
                               checked={isSelected}
-                              onCheckedChange={() => toggleCard(service.id)}
+                              onClickCapture={onRowClickCapture}
+                              onCheckedChange={() => handleRowToggle(index)}
                               aria-label={`Select ${service.name}`}
                             />
                           </TableCell>
 
-                          <TableCell className="whitespace-normal">
+                          <TableCell className={`${TD} whitespace-normal`}>
                             <div className="flex items-center gap-3">
                               {service.image ? (
                                 <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
+                                  {/* Plain <img>, not next/image: `Service.image`
+                                      is any https URL (owner paste, store-transfer
+                                      import), and next/image hard-fails on hosts
+                                      absent from next.config's remotePatterns. */}
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={service.image}
@@ -436,77 +548,129 @@ export function ServicesClient({ services }: Props) {
                                   />
                                 </div>
                               ) : (
-                                <div className="bg-muted h-10 w-10 shrink-0 rounded" />
+                                <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded">
+                                  <LayoutList
+                                    aria-hidden="true"
+                                    className="text-muted-foreground h-4 w-4"
+                                  />
+                                </div>
                               )}
                               <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <Link
-                                    href={`/admin/services/${service.id}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="font-medium hover:underline"
-                                  >
-                                    {service.name}
-                                  </Link>
-                                  {!service.published && (
-                                    <Badge
-                                      variant="secondary"
-                                      className="md:hidden"
-                                    >
-                                      Draft
-                                    </Badge>
-                                  )}
-                                </div>
+                                <Link
+                                  href={`${BASE_PATH}/${service.id}`}
+                                  className="font-medium hover:underline"
+                                >
+                                  {service.name}
+                                </Link>
                                 {service.description && (
                                   <p className="text-muted-foreground line-clamp-1 text-sm">
                                     {service.description}
                                   </p>
                                 )}
+                                {/* Below md the Items, Template and Status
+                                    columns are hidden — reflow all three here
+                                    rather than lose them. The old layout
+                                    re-surfaced only a Draft badge, so on a phone
+                                    "Published" and the item count and the
+                                    template simply vanished. */}
+                                <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm md:hidden">
+                                  <span>
+                                    {itemCount}{" "}
+                                    {itemCount === 1 ? "item" : "items"}
+                                  </span>
+                                  {liveItems !== itemCount && (
+                                    <>
+                                      <span aria-hidden="true">·</span>
+                                      <span>{liveItems} live</span>
+                                    </>
+                                  )}
+                                  <span aria-hidden="true">·</span>
+                                  <span>{templateLabel}</span>
+                                  <span aria-hidden="true">·</span>
+                                  <span>
+                                    {service.published ? "Published" : "Draft"}
+                                  </span>
+                                  {isEmptyOnStorefront && (
+                                    // Same sentence as the desktop cell, from the
+                                    // constant above. `whitespace-normal shrink`
+                                    // overrides Badge's nowrap/shrink-0 so a full
+                                    // sentence wraps inside the row instead of
+                                    // pushing the table off a phone screen.
+                                    <Badge
+                                      variant="warning"
+                                      className="shrink whitespace-normal"
+                                    >
+                                      <span className="sr-only">Warning: </span>
+                                      {EMPTY_ON_STOREFRONT_MESSAGE}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
 
-                          <TableCell className="hidden md:table-cell">
-                            {service.items.length}
+                          {/* Primary number, then muted qualifier lines beneath —
+                              the idiom Inventory established and Collections
+                              reuses for "one value plus caveats". A badge could
+                              only say THAT something is wrong; the warning line
+                              says what.
+                              whitespace-normal so that sentence wraps — TableCell
+                              is nowrap by default, which would push the table far
+                              past the viewport. */}
+                          <TableCell
+                            className={`hidden md:table-cell ${TD} whitespace-normal`}
+                          >
+                            <div
+                              className={`tabular-nums ${
+                                isEmptyOnStorefront && itemCount === 0
+                                  ? `font-semibold ${WARNING_TEXT}`
+                                  : "text-foreground"
+                              }`}
+                            >
+                              {itemCount}
+                            </div>
+                            {liveItems !== itemCount && (
+                              <div
+                                className={`text-sm tabular-nums ${
+                                  isEmptyOnStorefront
+                                    ? WARNING_TEXT
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                {liveItems} live
+                              </div>
+                            )}
+                            {isEmptyOnStorefront && (
+                              <div
+                                className={`mt-1 flex max-w-56 items-start gap-1 ${WARNING_TEXT}`}
+                              >
+                                <AlertTriangle
+                                  className="mt-px h-3 w-3 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span className="text-xs">
+                                  {/* Restores for screen readers the meaning the
+                                      icon carries visually. */}
+                                  <span className="sr-only">Warning: </span>
+                                  {EMPTY_ON_STOREFRONT_MESSAGE}
+                                </span>
+                              </div>
+                            )}
                           </TableCell>
 
-                          <TableCell className="hidden md:table-cell">
-                            <Badge variant="outline" className="capitalize">
-                              {service.serviceTemplateId.replace(
-                                "service-",
-                                "Template ",
-                              )}
-                            </Badge>
+                          <TableCell className={`hidden md:table-cell ${TD}`}>
+                            <Badge variant="outline">{templateLabel}</Badge>
                           </TableCell>
 
-                          <TableCell className="hidden md:table-cell">
+                          <TableCell className={`hidden md:table-cell ${TD}`}>
                             {service.published ? (
-                              <Badge variant="default">Published</Badge>
+                              <Badge variant="success">Published</Badge>
                             ) : (
                               <Badge variant="secondary">Draft</Badge>
                             )}
                           </TableCell>
 
-                          <TableCell
-                            className="hidden md:table-cell"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {service.published && service.slug ? (
-                              <a
-                                href={`/services/${service.slug}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-                                aria-label={`View ${service.name} on storefront (opens in new tab)`}
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                                <span>View</span>
-                              </a>
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
-
-                          <TableCell onClick={(e) => e.stopPropagation()}>
+                          <TableCell className={`${TD} text-right`}>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
@@ -518,11 +682,24 @@ export function ServicesClient({ services }: Props) {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/admin/services/${service.id}`}>
+                                  <Link href={`${BASE_PATH}/${service.id}`}>
                                     <Pencil className="mr-2 h-4 w-4" />
                                     Edit
                                   </Link>
                                 </DropdownMenuItem>
+                                {service.published && service.slug && (
+                                  <DropdownMenuItem asChild>
+                                    <a
+                                      href={`/services/${service.slug}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-label={`View ${service.name} on storefront (opens in new tab)`}
+                                    >
+                                      <ExternalLink className="mr-2 h-4 w-4" />
+                                      View on storefront
+                                    </a>
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
                                   onClick={() => setDeleteId(service.id)}
@@ -540,66 +717,63 @@ export function ServicesClient({ services }: Props) {
                 </Table>
               </Card>
 
-              {totalPages > 1 && (
-                <div className="mt-8 flex flex-col items-center gap-2">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() => setPage((p) => Math.max(1, p - 1))}
-                          aria-disabled={safePage <= 1}
-                          className={
-                            safePage <= 1
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer"
-                          }
-                        />
-                      </PaginationItem>
-                      <PaginationItem>
-                        <span className="text-muted-foreground px-4 text-sm">
-                          Page {safePage} of {totalPages}
-                        </span>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() =>
-                            setPage((p) => Math.min(totalPages, p + 1))
-                          }
-                          aria-disabled={safePage >= totalPages}
-                          className={
-                            safePage >= totalPages
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer"
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
+              <AdminPagination
+                page={page}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={pageSize}
+                basePath={BASE_PATH}
+                itemNoun={ITEM_NOUN}
+              />
             </>
           )}
         </>
       )}
 
-      {/* Single Delete Dialog */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      {/* Single Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Service?</AlertDialogTitle>
+            {/* Name in the TITLE, consequence in the description — the shape
+                Inventory's pool-delete dialog uses. The title is the line people
+                actually read before clicking through. */}
+            <AlertDialogTitle>
+              {deleteTarget
+                ? `Delete “${deleteTarget.name}”?`
+                : "Delete Service?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this service? All associated
-              service items will also be deleted. This action cannot be undone.
+              {deleteTarget && deleteTarget.items.length > 0
+                ? `Its ${deleteTarget.items.length} service ${
+                    deleteTarget.items.length === 1 ? "item" : "items"
+                  } will be deleted too.`
+                : "Its service items will be deleted too."}
+              {deleteTarget?.published && deleteTarget.slug
+                ? ` Its storefront page at /services/${deleteTarget.slug} will stop working.`
+                : ""}{" "}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>
               Cancel
             </AlertDialogCancel>
+            {/* `variant`, NOT className. AlertDialogAction wraps a `Button ...
+                asChild`, so a className lands on the inner Radix element while
+                Button still supplies `bg-primary` — and Slot concatenates the two
+                without tailwind-merge, so CSS order decides and primary wins. A
+                `className="bg-destructive"` here renders BLACK. */}
             <AlertDialogAction
-              onClick={handleDelete}
+              variant="destructive"
+              onClick={() => {
+                if (deleteId) deleteMutation.mutate(deleteId);
+              }}
               disabled={deleteMutation.isPending}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               {deleteMutation.isPending ? "Deleting…" : "Delete"}
             </AlertDialogAction>
@@ -607,32 +781,37 @@ export function ServicesClient({ services }: Props) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk Delete Dialog */}
+      {/* Bulk Delete Confirmation Dialog */}
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedIds.size}{" "}
-              {selectedIds.size === 1 ? "Service" : "Services"}?
+              Delete {selectedCount}{" "}
+              {selectedCount === 1 ? "Service" : "Services"}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedIds.size}{" "}
-              {selectedIds.size === 1 ? "service" : "services"} and all their
-              associated items. This action cannot be undone.
+              This will delete{" "}
+              {describeSelection(selectedNames, selectedCount, ITEM_NOUN)} and
+              every service item {selectedCount === 1 ? "it" : "they"} contains.
+              {anySelectedPublished
+                ? " Published services will stop working on your storefront."
+                : ""}{" "}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isBulkDeleting}>
+            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>
               Cancel
             </AlertDialogCancel>
+            {/* See the note on the single-delete action: `variant`, not className. */}
             <AlertDialogAction
-              onClick={() => void handleBulkDelete()}
-              disabled={isBulkDeleting}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              variant="destructive"
+              onClick={handleBulkDelete}
+              disabled={bulkDeleteMutation.isPending}
             >
-              {isBulkDeleting
+              {bulkDeleteMutation.isPending
                 ? "Deleting…"
-                : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "Service" : "Services"}`}
+                : `Delete ${selectedCount} ${selectedCount === 1 ? "Service" : "Services"}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

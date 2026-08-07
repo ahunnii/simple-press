@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
   Copy,
   ExternalLink,
   Eye,
@@ -57,6 +58,24 @@ import { AdminBulkBar } from "../../_components/admin-bulk-bar";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
 import { AdminPagination } from "../../_components/admin-pagination";
+import {
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_CELL_TIGHT,
+  TABLE_HEAD,
+  TABLE_HEAD_TIGHT,
+  WARNING_TEXT,
+} from "../../_components/admin-table-style";
+import {
+  createOverCapGuard,
+  createShortfallMessage,
+  describeSelection,
+} from "../../_lib/admin-bulk-actions";
+import {
+  dismissLoadingToast,
+  loadingToast,
+} from "../../_lib/admin-mutation-toast";
+import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 
 type Collection = RouterOutputs["collections"]["getAll"][number];
 
@@ -76,24 +95,25 @@ type Props = {
 const BASE_PATH = "/admin/collections";
 const ITEM_NOUN = { one: "collection", many: "collections" } as const;
 
-/**
- * Turn a selection into something a person can actually check before confirming
- * a delete — "“Summer Collection” and “Night Out”" beats "2 collections", which
- * tells you the count you already knew and nothing about what you're destroying.
- *
- * `names` only covers the rows on the current page, since that's all this
- * component holds. A selection accumulated across pages degrades gracefully to
- * naming what it can plus a remainder.
- */
-function describeSelection(names: string[], total: number, maxNamed = 3) {
-  const shown = names.slice(0, maxNamed).map((name) => `“${name}”`);
-  const remaining = total - shown.length;
+// Table type/density and the warning colour live in ../../_components/admin-table-style
+// so a second table can adopt them without copy-paste. Aliased to the short names
+// this file already reads with.
+const TH = TABLE_HEAD;
+const TD = TABLE_CELL;
+const TH_CHECKBOX = TABLE_HEAD_TIGHT;
+const TD_CHECKBOX = TABLE_CELL_TIGHT;
 
-  if (shown.length === 0) return `${total} collections`;
-  if (remaining > 0) return `${shown.join(", ")} and ${remaining} more`;
-  if (shown.length === 1) return shown[0]!;
-  return `${shown.slice(0, -1).join(", ")} and ${shown[shown.length - 1]!}`;
-}
+/** "3 of 5" — a bulk op silently touching fewer rows than asked must say so. */
+const shortfallMessage = createShortfallMessage(ITEM_NOUN);
+
+/**
+ * The one place this sentence is written. The desktop Products cell and the
+ * `md:hidden` reflow line both render it, so the two cannot drift — mobile used
+ * to say "No live products" while desktop said this, which reads as two
+ * different problems. Mobile keeps the compact badge PRESENTATION; only the
+ * string is shared. Services carries the identical sentence for its own items.
+ */
+const EMPTY_ON_STOREFRONT_MESSAGE = "Published, but shoppers see an empty page";
 
 /** The publish and delete validators in ~/lib/validators/collections.ts cap `ids`
  *  at 1000. Duplicate is lower — see COLLECTION_BULK_DUPLICATE_MAX. */
@@ -143,181 +163,68 @@ export function CollectionsClient({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  // Id-based so a selection survives paging — the ids of rows that scrolled off
-  // are still meaningful, unlike row indices.
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  /** True once the user escalated past the current page via "Select all N". */
-  const [isEscalated, setIsEscalated] = useState(false);
-  /** Anchor for shift-click range select — an index into the CURRENT page. */
-  const [lastToggledIndex, setLastToggledIndex] = useState<number | null>(null);
-
-  // ── Page change vs. filter change ──────────────────────────────────────────
-  // Both are `router.push` to this same route, so the two are told apart by what
-  // actually changed in the URL rather than by which control was clicked:
-  // everything except `page` is a *filter* signature. A filter change invalidates
-  // the selection (the rows it refers to may no longer be reachable, and a bulk
-  // action promising "5 collections" while zero are on screen is a trap), while a
-  // page change deliberately preserves it. Deriving this from the URL — rather
-  // than only from AdminFilters' onFiltersChange — also covers back/forward
-  // navigation and the "Clear filters" link in the empty state, neither of which
-  // routes through that callback.
-
-  // `sort` is excluded alongside `page`: reordering cannot change WHICH rows
-  // match, so `matchingIds` and every selected id stay valid across a re-sort.
-  // Sorting to find something and then selecting it is a normal workflow, and
-  // wiping the selection for a pure reorder would be gratuitous.
-  const filterSignature = (() => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("page");
-    params.delete("sort");
-    params.sort();
-    return params.toString();
-  })();
-
-  const [lastFilterSignature, setLastFilterSignature] =
-    useState(filterSignature);
-  if (filterSignature !== lastFilterSignature) {
-    setLastFilterSignature(filterSignature);
-    setSelectedIds(new Set());
-    setIsEscalated(false);
-    setLastToggledIndex(null);
-  }
-
-  // A page or sort change keeps the selection, but the shift-click anchor is a
-  // *positional* index and means nothing against a different set or order of rows.
-  const sortKey = searchParams.get("sort") ?? "";
-  const [lastPageAndSort, setLastPageAndSort] = useState(`${page}|${sortKey}`);
-  if (`${page}|${sortKey}` !== lastPageAndSort) {
-    setLastPageAndSort(`${page}|${sortKey}`);
-    setLastToggledIndex(null);
-  }
-
-  // ── Selection helpers ──────────────────────────────────────────────────────
-
-  const pageIds = collections.map((collection) => collection.id);
-  const selectedOnPage = pageIds.filter((id) => selectedIds.has(id));
-  const allPageSelected =
-    pageIds.length > 0 && selectedOnPage.length === pageIds.length;
-  const somePageSelected = selectedOnPage.length > 0 && !allPageSelected;
-
-  const clearSelection = () => {
-    setSelectedIds(new Set());
-    setIsEscalated(false);
-    setLastToggledIndex(null);
-  };
-
-  /** Drop ids a mutation just consumed, so the counter can't outrun reality. */
-  const pruneSelection = (ids: string[]) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      for (const id of ids) next.delete(id);
-      return next;
-    });
-    setIsEscalated(false);
-    setLastToggledIndex(null);
-  };
-
-  // Radix's Checkbox reports the new checked state, not the originating event.
-  // A capture-phase click listener runs before Radix's own handler fires
-  // onCheckedChange, so the modifier key is recorded by the time we need it.
-  // Keyboard activation produces a click with shiftKey === false, as intended.
-  const shiftKeyRef = useRef(false);
-
-  const handleRowToggle = (index: number) => {
-    const withShift = shiftKeyRef.current;
-    shiftKeyRef.current = false;
-
-    const id = collections[index]?.id;
-    if (!id) return;
-
-    setIsEscalated(false);
-
-    if (withShift && lastToggledIndex !== null && lastToggledIndex !== index) {
-      const start = Math.min(lastToggledIndex, index);
-      const end = Math.max(lastToggledIndex, index);
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        for (let i = start; i <= end; i++) {
-          const rangeId = collections[i]?.id;
-          if (rangeId) next.add(rangeId);
-        }
-        return next;
-      });
-    } else {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
-        return next;
-      });
-    }
-
-    setLastToggledIndex(index);
-  };
-
-  /** Select-all is scoped to the visible page, matching Products and Testimonials. */
-  const handleSelectAllOnPage = () => {
-    setIsEscalated(false);
-    setLastToggledIndex(null);
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (allPageSelected) {
-        for (const id of pageIds) next.delete(id);
-      } else {
-        for (const id of pageIds) next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const handleSelectAllMatching = () => {
-    setSelectedIds(new Set(matchingIds));
-    setIsEscalated(true);
-    setLastToggledIndex(null);
-  };
+  // ── Selection ──────────────────────────────────────────────────────────────
+  // Shared with Services. The hook owns which URL changes invalidate a selection
+  // (any filter, but never a page or sort change), the shift-click anchor, and
+  // the "select all N matching" escalation.
+  const {
+    selectedIds,
+    selectedCount,
+    isEscalated,
+    allPageSelected,
+    somePageSelected,
+    canEscalate,
+    clearSelection,
+    pruneSelection,
+    handleRowToggle,
+    handleSelectAllOnPage,
+    handleSelectAllMatching,
+    onRowClickCapture,
+    onFiltersChange,
+  } = useAdminTableSelection({
+    rowIds: collections.map((collection) => collection.id),
+    matchingIds,
+    page,
+    searchParams,
+  });
 
   // ── Mutations ──────────────────────────────────────────────────────────────
-  // Every handler dismisses the specific loading toast it opened. A bare
-  // toast.dismiss() clears every toast on screen, including unrelated ones.
+  // Every handler dismisses the specific loading toast it opened — see
+  // dismissLoadingToast. A bare toast.dismiss() clears every toast on screen.
 
   const afterWrite = () => {
     void utils.collections.invalidate();
     router.refresh();
   };
 
-  /** "3 of 5" — a bulk op silently touching fewer rows than asked must say so. */
-  const shortfallMessage = (done: number, requested: number, verb: string) =>
-    `${done} of ${requested} ${requested === 1 ? ITEM_NOUN.one : ITEM_NOUN.many} ${verb} — ${
-      requested - done
-    } could not be found. They may have been deleted already.`;
-
   const deleteMutation = api.collections.delete.useMutation({
-    onMutate: () => ({ toastId: toast.loading("Deleting collection…") }),
+    onMutate: loadingToast("Deleting collection…"),
     onSuccess: (_data, id, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.success("Collection deleted");
       pruneSelection([id]);
       setDeleteId(null);
       afterWrite();
     },
     onError: (error, _id, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to delete collection");
     },
   });
 
   const duplicateMutation = api.collections.duplicate.useMutation({
-    onMutate: () => ({ toastId: toast.loading("Duplicating collection…") }),
+    onMutate: loadingToast("Duplicating collection…"),
     onSuccess: (_data, _id, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.success("Collection duplicated — draft saved");
+      // Prune like every other mutation. Skipping it here left `isEscalated`
+      // true while the new draft grew the matching set, so the bulk bar would
+      // claim more rows were selected than actually were.
+      pruneSelection([]);
       afterWrite();
     },
     onError: (error, _id, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to duplicate collection");
     },
   });
@@ -325,9 +232,9 @@ export function CollectionsClient({
   // Separate from bulkPublishMutation so the undo's own success toast doesn't
   // offer another Undo, which would let the two ping-pong indefinitely.
   const undoPublishMutation = api.collections.bulkSetPublished.useMutation({
-    onMutate: () => ({ toastId: toast.loading("Undoing…") }),
+    onMutate: loadingToast("Undoing…"),
     onSuccess: (data, variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.success(
         `Undone — ${data.count} ${
           data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
@@ -336,15 +243,15 @@ export function CollectionsClient({
       afterWrite();
     },
     onError: (error, _variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to undo");
     },
   });
 
   const bulkPublishMutation = api.collections.bulkSetPublished.useMutation({
-    onMutate: () => ({ toastId: toast.loading("Updating collections…") }),
+    onMutate: loadingToast("Updating collections…"),
     onSuccess: (data, variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       const verb = variables.published ? "published" : "unpublished";
       const requested = variables.ids.length;
 
@@ -372,15 +279,15 @@ export function CollectionsClient({
       afterWrite();
     },
     onError: (error, _variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to update collections");
     },
   });
 
   const bulkDuplicateMutation = api.collections.bulkDuplicate.useMutation({
-    onMutate: () => ({ toastId: toast.loading("Duplicating collections…") }),
+    onMutate: loadingToast("Duplicating collections…"),
     onSuccess: (data, variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       const requested = variables.ids.length;
 
       if (data.count < requested) {
@@ -397,15 +304,15 @@ export function CollectionsClient({
       afterWrite();
     },
     onError: (error, _variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to duplicate collections");
     },
   });
 
   const bulkDeleteMutation = api.collections.bulkDelete.useMutation({
-    onMutate: () => ({ toastId: toast.loading("Deleting collections…") }),
+    onMutate: loadingToast("Deleting collections…"),
     onSuccess: (data, variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       const requested = variables.ids.length;
 
       if (data.count < requested) {
@@ -421,35 +328,34 @@ export function CollectionsClient({
       afterWrite();
     },
     onError: (error, _variables, context) => {
-      if (context) toast.dismiss(context.toastId);
+      dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to delete collections");
     },
   });
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
-  const selectedCount = selectedIds.size;
-
-  // Names for the confirm dialogs. Only rows on the current page are available
-  // here; `describeSelection` handles the shortfall.
-  const selectedNames = collections
-    .filter((collection) => selectedIds.has(collection.id))
-    .map((collection) => collection.name);
+  // Confirm-dialog context. Only rows on the current page are available here;
+  // `describeSelection` handles the shortfall in the copy.
+  const selectedOnPageRows = collections.filter((collection) =>
+    selectedIds.has(collection.id),
+  );
+  const selectedNames = selectedOnPageRows.map((collection) => collection.name);
   const deleteTarget = collections.find(
     (collection) => collection.id === deleteId,
   );
 
-  /** Belt-and-braces: escalation is already blocked past the cap, but a user can
-   *  also accumulate a selection page by page. Fail here rather than at the API.
-   *  Duplicate carries a lower cap than publish/delete — it's N sequential writes
+  // Warn about storefront pages disappearing only when that's actually true.
+  // A selection can reach past this page, and unseen rows might be published —
+  // so an incomplete view has to assume the warning applies rather than omit it.
+  const selectionReachesPastPage = selectedCount > selectedOnPageRows.length;
+  const anySelectedPublished =
+    selectionReachesPastPage ||
+    selectedOnPageRows.some((collection) => collection.published);
+
+  /** Duplicate passes a lower cap than publish/delete — it's N sequential writes
    *  inside one transaction, where the others are a single statement. */
-  const overCap = (max: number, verb: string) => {
-    if (selectedCount <= max) return false;
-    toast.error(
-      `You can ${verb} at most ${max.toLocaleString()} collections at a time. ${selectedCount.toLocaleString()} are selected.`,
-    );
-    return true;
-  };
+  const overCap = createOverCapGuard(selectedCount, ITEM_NOUN);
 
   const handleBulkPublish = (published: boolean) => {
     if (selectedCount === 0 || overCap(MAX_BULK_IDS, "update")) return;
@@ -514,9 +420,6 @@ export function CollectionsClient({
     },
   ];
 
-  // Offer the escalation only when the page is exhausted and more matches exist.
-  const canEscalate = allPageSelected && matchingIds.length > pageIds.length;
-
   // ── Render ─────────────────────────────────────────────────────────────────
 
   const hasCollections = totalCollections > 0;
@@ -556,17 +459,14 @@ export function CollectionsClient({
           <AdminFilters
             basePath={BASE_PATH}
             searchPlaceholder="Search collections…"
-            searchAriaLabel="Search collections"
+            // Names the fields actually matched — the placeholder can't, at that
+            // width, and a bare "Search collections" leaves a screen-reader user
+            // guessing whether typing a URL or a description word will hit.
+            searchAriaLabel="Search collections by name, URL or description"
             filters={[STATUS_FILTER, SORT_FILTER]}
             resultCount={totalCount}
             itemNoun={ITEM_NOUN}
-            // Redundant with the URL-signature check above, but it fires at push
-            // time so the stale count disappears immediately rather than after
-            // the server round-trip. Must apply the same `sort` exemption the
-            // signature does, or a re-sort would clear the selection here first.
-            onFiltersChange={(changedKeys) => {
-              if (changedKeys.some((key) => key !== "sort")) clearSelection();
-            }}
+            onFiltersChange={onFiltersChange}
           />
 
           <AdminBulkBar
@@ -611,27 +511,12 @@ export function CollectionsClient({
               {/* Margin lives here rather than on a wrapper around AdminBulkBar:
                   the bar is `sticky top-0`, and a wrapper sized to its own height
                   would cap the sticky range at zero. */}
-              {/* `py-0` kills Card's default 24px vertical padding: the table is
-                  full-bleed horizontally, so that padding rendered as white
-                  gutters above the header and below the last row — visible as
-                  banding the moment a row picks up a selected/hover background.
-                  `overflow-hidden` then clips the first and last row backgrounds
-                  to the card's rounded corners. */}
-              <Card
-                className={`overflow-hidden py-0 ${
-                  selectedCount > 0 ? "mt-4" : ""
-                }`}
-              >
-                {/* Cell padding: the shadcn primitives default to `p-2`, which is
-                    half what every other admin table uses (`px-6 py-4` on their
-                    hand-rolled cells) and left the checkboxes crowding the card
-                    edge. The `:has([role=checkbox])` rule in the primitive is more
-                    specific, so the checkbox cell keeps its `pr-0`. */}
-                <Table className="[&_td]:px-4 [&_td]:py-3 [&_th]:px-4">
+              <Card className={TABLE_CARD}>
+                <Table>
                   <TableCaption className="sr-only">Collections</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead scope="col" className="w-10">
+                      <TableHead scope="col" className={`w-10 ${TH_CHECKBOX}`}>
                         <Checkbox
                           id="select-all-collections"
                           checked={
@@ -645,14 +530,22 @@ export function CollectionsClient({
                           aria-label="Select all collections on this page"
                         />
                       </TableHead>
-                      <TableHead scope="col">Collection</TableHead>
-                      <TableHead scope="col" className="hidden md:table-cell">
+                      <TableHead scope="col" className={TH}>
+                        Collection
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
                         Products
                       </TableHead>
-                      <TableHead scope="col" className="hidden md:table-cell">
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
                         Status
                       </TableHead>
-                      <TableHead scope="col">
+                      <TableHead scope="col" className={`${TH} text-right`}>
                         <span className="sr-only">Actions</span>
                       </TableHead>
                     </TableRow>
@@ -673,18 +566,16 @@ export function CollectionsClient({
                           key={collection.id}
                           data-state={isSelected ? "selected" : undefined}
                         >
-                          <TableCell>
+                          <TableCell className={TD_CHECKBOX}>
                             <Checkbox
                               checked={isSelected}
-                              onClickCapture={(e) => {
-                                shiftKeyRef.current = e.shiftKey;
-                              }}
+                              onClickCapture={onRowClickCapture}
                               onCheckedChange={() => handleRowToggle(index)}
                               aria-label={`Select ${collection.name}`}
                             />
                           </TableCell>
 
-                          <TableCell className="whitespace-normal">
+                          <TableCell className={`${TD} whitespace-normal`}>
                             <div className="flex items-center gap-3">
                               {collection.imageUrl ? (
                                 <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
@@ -738,8 +629,17 @@ export function CollectionsClient({
                                       : "Draft"}
                                   </span>
                                   {isEmptyOnStorefront && (
-                                    <Badge variant="warning">
-                                      No live products
+                                    // Same sentence as the desktop cell, from the
+                                    // constant above. `whitespace-normal shrink`
+                                    // overrides Badge's nowrap/shrink-0 so a full
+                                    // sentence wraps inside the row instead of
+                                    // pushing the table off a phone screen.
+                                    <Badge
+                                      variant="warning"
+                                      className="shrink whitespace-normal"
+                                    >
+                                      <span className="sr-only">Warning: </span>
+                                      {EMPTY_ON_STOREFRONT_MESSAGE}
                                     </Badge>
                                   )}
                                 </div>
@@ -747,28 +647,55 @@ export function CollectionsClient({
                             </div>
                           </TableCell>
 
-                          <TableCell className="hidden md:table-cell">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="tabular-nums">
-                                {totalProducts}
-                              </span>
-                              {liveProducts !== totalProducts && (
-                                <span
-                                  className="text-muted-foreground text-xs"
-                                  title="Products in this collection that shoppers can actually see"
-                                >
-                                  {liveProducts} live
-                                </span>
-                              )}
-                              {isEmptyOnStorefront && (
-                                <Badge variant="warning">
-                                  No live products
-                                </Badge>
-                              )}
+                          {/* Primary number, then muted qualifier lines beneath —
+                              the idiom Inventory established for "one value plus
+                              caveats". A badge could only say THAT something is
+                              wrong; the warning line says what. */}
+                          {/* whitespace-normal so the warning sentence wraps —
+                              TableCell is nowrap by default, which would push the
+                              table far past the viewport. */}
+                          <TableCell
+                            className={`hidden md:table-cell ${TD} whitespace-normal`}
+                          >
+                            <div
+                              className={`tabular-nums ${
+                                isEmptyOnStorefront && totalProducts === 0
+                                  ? `font-semibold ${WARNING_TEXT}`
+                                  : "text-foreground"
+                              }`}
+                            >
+                              {totalProducts}
                             </div>
+                            {liveProducts !== totalProducts && (
+                              <div
+                                className={`text-sm tabular-nums ${
+                                  isEmptyOnStorefront
+                                    ? WARNING_TEXT
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                {liveProducts} live
+                              </div>
+                            )}
+                            {isEmptyOnStorefront && (
+                              <div
+                                className={`mt-1 flex max-w-56 items-start gap-1 ${WARNING_TEXT}`}
+                              >
+                                <AlertTriangle
+                                  className="mt-px h-3 w-3 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span className="text-xs">
+                                  {/* Restores for screen readers the meaning the
+                                      icon carries visually. */}
+                                  <span className="sr-only">Warning: </span>
+                                  {EMPTY_ON_STOREFRONT_MESSAGE}
+                                </span>
+                              </div>
+                            )}
                           </TableCell>
 
-                          <TableCell className="hidden md:table-cell">
+                          <TableCell className={`hidden md:table-cell ${TD}`}>
                             {collection.published ? (
                               <Badge variant="success">Published</Badge>
                             ) : (
@@ -776,7 +703,7 @@ export function CollectionsClient({
                             )}
                           </TableCell>
 
-                          <TableCell>
+                          <TableCell className={`${TD} text-right`}>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
@@ -854,13 +781,20 @@ export function CollectionsClient({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Collection?</AlertDialogTitle>
-            <AlertDialogDescription>
+            {/* Name in the TITLE, consequence in the description — the shape
+                Inventory's pool-delete dialog uses. The title is the line people
+                actually read before clicking through. */}
+            <AlertDialogTitle>
               {deleteTarget
-                ? `This will delete “${deleteTarget.name}”.`
-                : "This will delete the collection."}{" "}
-              The products in it won&apos;t be deleted. This action cannot be
-              undone.
+                ? `Delete “${deleteTarget.name}”?`
+                : "Delete Collection?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              The products in it won&apos;t be deleted.
+              {deleteTarget?.published && deleteTarget.slug
+                ? ` Its storefront page at /collections/${deleteTarget.slug} will stop working.`
+                : ""}{" "}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -894,9 +828,14 @@ export function CollectionsClient({
               {selectedCount === 1 ? "Collection" : "Collections"}?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will delete {describeSelection(selectedNames, selectedCount)}
-              . The products in {selectedCount === 1 ? "it" : "them"} won&apos;t
-              be deleted. This action cannot be undone.
+              This will delete{" "}
+              {describeSelection(selectedNames, selectedCount, ITEM_NOUN)}. The
+              products in {selectedCount === 1 ? "it" : "them"} won&apos;t be
+              deleted.
+              {anySelectedPublished
+                ? " Published collections will stop working on your storefront."
+                : ""}{" "}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

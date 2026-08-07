@@ -141,6 +141,26 @@ export const serviceItemReorderSchema = z.object({
 export type ServiceReorderData = z.infer<typeof serviceReorderSchema>;
 export type ServiceItemReorderData = z.infer<typeof serviceItemReorderSchema>;
 
+// ─── Bulk operations ──────────────────────────────────────────────────────────
+
+export const serviceBulkPublishSchema = z.object({
+  ids: z
+    .array(z.string())
+    .min(1, "At least one service id is required")
+    .max(1000, "Too many services selected"),
+  published: z.boolean(),
+});
+
+export const serviceBulkDeleteSchema = z.object({
+  ids: z
+    .array(z.string())
+    .min(1, "At least one service id is required")
+    .max(1000, "Too many services selected"),
+});
+
+export type ServiceBulkPublishData = z.infer<typeof serviceBulkPublishSchema>;
+export type ServiceBulkDeleteData = z.infer<typeof serviceBulkDeleteSchema>;
+
 // ─── Custom fields ────────────────────────────────────────────────────────────
 
 export const serviceCustomFieldsSchema = z.object({

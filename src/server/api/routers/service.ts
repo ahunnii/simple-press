@@ -1,10 +1,12 @@
-import type { Prisma } from "generated/prisma";
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { DEFAULT_EMBED_HEIGHT, parseEmbedInput } from "~/lib/embed";
 import { generateCollectionSlug } from "~/lib/slug";
 import {
+  serviceBulkDeleteSchema,
+  serviceBulkPublishSchema,
   serviceCreateSchema,
   serviceCustomFieldsSchema,
   serviceItemCreateSchema,
@@ -34,6 +36,16 @@ export const serviceRouter = createTRPCRouter({
     .use(featureGate("services"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
+      // `items` stays UNFILTERED — admin edits drafts, so it has to see them, and
+      // /admin/content/navigation reads this same output. But `getAllPublic` and
+      // `getBySlug` both scope items to `published: true`, so `items.length` is
+      // NOT what a shopper sees: a published service whose items are all drafts
+      // renders an empty page. Ship the storefront-visible count alongside the
+      // total so admin can say both, the way `collections.getAll` does with
+      // `liveProductCount`.
+      //
+      // Derived in JS rather than with a groupBy: the join rows are already here
+      // with their `published` flag, so a second query would buy nothing.
       const services = await ctx.db.service.findMany({
         where: { businessId },
         include: {
@@ -43,7 +55,14 @@ export const serviceRouter = createTRPCRouter({
         },
         orderBy: { sortOrder: "asc" },
       });
-      return services;
+
+      // Additive only — nothing above is removed or renamed, so every existing
+      // consumer (the services list, /admin/content/navigation) is unaffected.
+      return services.map((service) => ({
+        ...service,
+        /** Items in this service that are actually visible on the storefront. */
+        liveItemCount: service.items.filter((item) => item.published).length,
+      }));
     }),
 
   getById: ownerAdminProcedure
@@ -198,20 +217,83 @@ export const serviceRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  bulkSetPublished: ownerAdminProcedure
+    .use(featureGate("services"))
+    .input(serviceBulkPublishSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.service.updateMany({
+        where: { id: { in: input.ids }, businessId },
+        data: { published: input.published },
+      });
+      return { count: result.count };
+    }),
+
+  bulkDelete: ownerAdminProcedure
+    .use(featureGate("services"))
+    .input(serviceBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.service.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+      return { count: result.count };
+    }),
+
   reorder: ownerAdminProcedure
     .use(featureGate("services"))
     .input(serviceReorderSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      await ctx.db.$transaction(
-        input.ids.map((id, index) =>
-          ctx.db.service.update({
-            where: { id, businessId },
-            data: { sortOrder: index },
-          }),
-        ),
+      // The UI contract is "the complete ordered list of every service for
+      // this business" — a subset would leave the rows NOT in the list with
+      // stale sortOrder values, silently interleaving them with the
+      // reordered ones. Compare against the actual owned id set (not just a
+      // count) so duplicate ids or a foreign id substituted in for a real
+      // one are also caught, not just a short/long list.
+      const existing = await ctx.db.service.findMany({
+        where: { businessId },
+        select: { id: true },
+      });
+      const existingIds = new Set(existing.map((s) => s.id));
+
+      // The duplicate check is load-bearing, not belt-and-braces: without it
+      // `[A, A]` against owned `{A, B}` passes both other conditions (length 2
+      // === size 2, and every entry IS owned), then the UPDATE matches A twice
+      // with conflicting positions while B silently keeps its stale sortOrder.
+      if (
+        input.ids.length !== existingIds.size ||
+        new Set(input.ids).size !== input.ids.length ||
+        input.ids.some((id) => !existingIds.has(id))
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "That list of services doesn't match what's on file. Refresh and try again.",
+        });
+      }
+
+      // A single set-based UPDATE ... FROM (VALUES ...) rather than N
+      // individual UPDATEs (previously issued as one $transaction([...])
+      // batch — the array form of $transaction has no `timeout` option, it's
+      // just N statements sent back to back, so this was N round trips no
+      // matter what). The reorder UI is unpaginated and always submits the
+      // full list, up to serviceReorderSchema's cap of 500, so this is the
+      // normal case rather than an edge case. Every value is bound as a
+      // parameter (never interpolated into the SQL string) and the WHERE
+      // clause scopes to businessId, so this can only touch rows this
+      // business owns even if an id snuck past the completeness check above.
+      const rows = input.ids.map(
+        (id, index) => Prisma.sql`(${id}::text, ${index}::int)`,
       );
+
+      await ctx.db.$executeRaw`
+        UPDATE "Service" AS s
+        SET "sortOrder" = v.pos
+        FROM (VALUES ${Prisma.join(rows)}) AS v(id, pos)
+        WHERE s.id = v.id AND s."businessId" = ${businessId}
+      `;
 
       return { success: true };
     }),

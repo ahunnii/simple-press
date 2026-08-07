@@ -9,7 +9,9 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 
+import { isUnavailable, unavailableMessage } from "../_lib/stock-state";
 import { AdminEmpty } from "../../_components/admin-empty";
+import { TABLE_HEAD } from "../../_components/admin-table-style";
 import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {
@@ -28,6 +30,7 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
   }
 
   const { sales } = pool;
+  const unavailable = isUnavailable(pool);
 
   return (
     <>
@@ -50,18 +53,22 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
           <div className="rounded-lg border p-4">
             <p className="text-muted-foreground text-sm">On hand</p>
             <p className="mt-1 text-2xl font-semibold">{pool.inventoryQty}</p>
+            {/* `reservedQty` is otherwise invisible on this page — surfacing it
+                here is what makes the "healthy quantity, nothing sellable"
+                state (flagged below) legible instead of a mystery. */}
+            {pool.reservedQty > 0 && (
+              <p className="text-muted-foreground mt-1 text-sm tabular-nums">
+                {pool.reservedQty} reserved
+              </p>
+            )}
           </div>
           <div className="rounded-lg border p-4">
             <p className="text-muted-foreground text-sm">Units sold (net)</p>
-            <p className="mt-1 text-2xl font-semibold">
-              {sales.netSoldUnits}
-            </p>
+            <p className="mt-1 text-2xl font-semibold">{sales.netSoldUnits}</p>
           </div>
           <div className="rounded-lg border p-4">
             <p className="text-muted-foreground text-sm">Returned</p>
-            <p className="mt-1 text-2xl font-semibold">
-              {sales.returnedUnits}
-            </p>
+            <p className="mt-1 text-2xl font-semibold">{sales.returnedUnits}</p>
           </div>
           <div className="rounded-lg border p-4">
             <p className="text-muted-foreground text-sm">
@@ -73,14 +80,28 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
           </div>
         </div>
 
+        {unavailable && (
+          // Same amber treatment the platform already uses for a
+          // "needs attention, not broken" banner (see the INFORM Act
+          // threshold alert on /admin/payments) — `destructive` would claim
+          // the shelf is empty, which `isOutOfStock` already covers below.
+          <Alert className="mb-6 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-400/30 dark:bg-amber-950/40 dark:text-amber-100">
+            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <AlertTitle>Nothing available to sell</AlertTitle>
+            <AlertDescription className="text-amber-900/90 dark:text-amber-100/90">
+              {unavailableMessage(pool)}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {sales.oversellEvents > 0 && (
           <Alert variant="destructive" className="mb-6">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Some sales could not be deducted</AlertTitle>
             <AlertDescription>
               {sales.oversellEvents} sale
-              {sales.oversellEvents === 1 ? "" : "s"} could not be deducted
-              from this pool because stock was insufficient. Units sold may be
+              {sales.oversellEvents === 1 ? "" : "s"} could not be deducted from
+              this pool because stock was insufficient. Units sold may be
               understated.
             </AlertDescription>
           </Alert>
@@ -107,22 +128,13 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
                     </caption>
                     <thead className="border-b">
                       <tr>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Product
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Units per purchase
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Status
                         </th>
                       </tr>
@@ -179,40 +191,22 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
                     </caption>
                     <thead className="border-b">
                       <tr>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Date
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Reason
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Change
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Resulting qty
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           Order
                         </th>
-                        <th
-                          scope="col"
-                          className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                        >
+                        <th scope="col" className={`${TABLE_HEAD} text-left`}>
                           By
                         </th>
                       </tr>

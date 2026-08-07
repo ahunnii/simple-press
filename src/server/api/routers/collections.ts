@@ -682,6 +682,9 @@ export const collectionsRouter = createTRPCRouter({
             select: { productId: true, sortOrder: true },
           },
         },
+        // Deterministic: without it, which copy receives which sequential
+        // sortOrder is left to whatever order Postgres returns.
+        orderBy: { sortOrder: "asc" },
       });
 
       if (sources.length === 0) {

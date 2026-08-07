@@ -8,12 +8,13 @@ import {
   Edit,
   Eye,
   MoreVertical,
-  Plus,
-  Trash,
   Package,
+  Search,
+  Trash,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { AdminFilterDef } from "../../_components/admin-filters";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 import {
@@ -28,230 +29,524 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
-
-import { AdminEmpty } from "../../_components/admin-empty";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
+import {
+  isLowStock,
+  isOutOfStock,
+  isUnavailable,
+  unavailableMessage,
+} from "../_lib/stock-state";
+import { AdminEmpty } from "../../_components/admin-empty";
+import { AdminFilters } from "../../_components/admin-filters";
+import { AdminPagination } from "../../_components/admin-pagination";
+import {
+  DANGER_TEXT,
+  TABLE_CARD,
+  TABLE_CELL,
+  TABLE_CELL_TIGHT,
+  TABLE_HEAD,
+  TABLE_HEAD_TIGHT,
+  WARNING_TEXT,
+} from "../../_components/admin-table-style";
+import {
+  dismissLoadingToast,
+  loadingToast,
+} from "../../_lib/admin-mutation-toast";
 import { PoolAdjustInventory } from "./pool-adjust-inventory";
+import { PoolCreateButton } from "./pool-create-button";
 import { PoolDialog } from "./pool-dialog";
 
 type Pool = RouterOutputs["baseInventoryUnit"]["list"][number];
 
 type Props = {
+  /** The current page slice only — filtering/sorting/paging happen server-side. */
   pools: Pool[];
+  /** Unfiltered total — distinguishes "no base units yet" from "no matches". */
+  totalPools: number;
+  totalCount: number;
+  totalPages: number;
+  page: number;
+  pageSize: number;
 };
 
-export function PoolsTable({ pools }: Props) {
+const BASE_PATH = "/admin/inventory";
+const ITEM_NOUN = { one: "base unit", many: "base units" } as const;
+
+// Aliased to the short names this file reads with.
+const TH = TABLE_HEAD;
+const TD = TABLE_CELL;
+/** The actions column is a lone icon button — Products' tighter control gutter. */
+const TH_ACTIONS = TABLE_HEAD_TIGHT;
+const TD_ACTIONS = TABLE_CELL_TIGHT;
+
+/**
+ * Deliberately NO AdminBulkBar: there is no bulk endpoint for pools, and
+ * deleting one detaches every linked product and zeroes its stock. That is not
+ * an operation to make available behind a checkbox and a single click. The
+ * primitives are independently adoptable; this is the page that proves it.
+ */
+const STOCK_FILTER: AdminFilterDef = {
+  key: "stock",
+  label: "Stock",
+  defaultValue: "all",
+  options: [
+    { value: "all", label: "All base units" },
+    // "Low stock" includes out of stock — see the isLowStock note in page.tsx.
+    { value: "low", label: "Low or out of stock" },
+    { value: "out", label: "Out of stock" },
+  ],
+};
+
+/**
+ * A separate filter, not a third `STOCK_FILTER` option. "Stock" is documented
+ * above as physical quantity — folding availability in under that label would
+ * make "Stock: Unsellable" read like a quantity claim it isn't. Its own
+ * "Availability" grouping keeps the label unambiguous without touching what
+ * "Stock" already promises.
+ */
+const AVAILABILITY_FILTER: AdminFilterDef = {
+  key: "availability",
+  label: "Availability",
+  defaultValue: "all",
+  options: [
+    { value: "all", label: "All base units" },
+    {
+      value: "unavailable",
+      label: "Unsellable (reserved out)",
+    },
+  ],
+};
+
+const SORT_FILTER: AdminFilterDef = {
+  key: "sort",
+  label: "Sort",
+  defaultValue: "name-asc",
+  options: [
+    { value: "name-asc", label: "Name A–Z" },
+    { value: "name-desc", label: "Name Z–A" },
+    { value: "newest", label: "Newest" },
+    { value: "oldest", label: "Oldest" },
+    { value: "qty-asc", label: "Lowest stock" },
+    { value: "qty-desc", label: "Highest stock" },
+    { value: "sold-desc", label: "Most units sold" },
+    { value: "sold-asc", label: "Fewest units sold" },
+    { value: "products-desc", label: "Most products" },
+    { value: "products-asc", label: "Fewest products" },
+  ],
+};
+
+/**
+ * Red when out, amber when low. Shares the predicates with the server-side stock
+ * filter so the colour a row shows and the filter it answers to can't disagree.
+ *
+ * Deliberately does NOT factor in `isUnavailable`. This tone colours the
+ * `inventoryQty` NUMBER, and that number is exactly what the "Out of stock" /
+ * "Low or out of stock" filters promise to describe — painting a
+ * healthy-quantity, fully-reserved row the same amber as a low-quantity row
+ * would make the colour lie about which filter the row answers to (it stays
+ * absent from "Low or out of stock" either way). Unavailability gets its own
+ * warning treatment below instead, the same way oversell events do — a
+ * distinct signal that never recolours the primary number.
+ */
+function qtyTone(pool: Pool) {
+  if (isOutOfStock(pool)) return `font-semibold ${DANGER_TEXT}`;
+  if (isLowStock(pool)) return `font-semibold ${WARNING_TEXT}`;
+  return "text-foreground";
+}
+
+/** Same sentence on desktop and mobile — written once so they can't drift. */
+function oversellMessage(events: number) {
+  return `${events} sale${events === 1 ? "" : "s"} could not be deducted — units sold may be understated`;
+}
+
+export function PoolsTable({
+  pools,
+  totalPools,
+  totalCount,
+  totalPages,
+  page,
+  pageSize,
+}: Props) {
   const router = useRouter();
   const apiUtils = api.useUtils();
 
-  const [createOpen, setCreateOpen] = useState(false);
+  // `editPool` deliberately survives the close. Radix keeps dialog content mounted
+  // through its ~200ms exit animation, so clearing the pool at the same moment as
+  // the open flag makes the title flip to "New Base Unit" and the fields blank out
+  // while it fades. Holding the last pool until the next open replaces it keeps the
+  // dialog showing what it was showing.
   const [editPool, setEditPool] = useState<Pool | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
   const [adjustPool, setAdjustPool] = useState<Pool | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteName, setDeleteName] = useState<string>("");
+  // Threaded alongside deleteName for the same reason it isn't cleared on
+  // close: `pool._count.products` only exists on the row that was clicked, so
+  // it has to be captured at that moment rather than looked up again later.
+  const [deleteProductCount, setDeleteProductCount] = useState<number>(0);
 
+  // Deleting a pool detaches every linked product, so it can take a moment. The
+  // loading toast is the same one Collections and Services show — this table had
+  // none, which read as nothing happening until the row disappeared.
   const deletePool = api.baseInventoryUnit.delete.useMutation({
-    onSuccess: () => {
+    onMutate: loadingToast("Deleting base unit…"),
+    onSuccess: (_data, _variables, context) => {
+      dismissLoadingToast(context);
       toast.success("Base unit deleted");
+      setDeleteId(null);
       void apiUtils.baseInventoryUnit.invalidate();
       router.refresh();
     },
-    onError: (err) => toast.error(err.message ?? "Failed to delete base unit"),
+    onError: (err, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(err.message ?? "Failed to delete base unit");
+    },
   });
+
+  const hasPools = totalPools > 0;
+  const hasResults = pools.length > 0;
 
   return (
     <>
-      <div className="mb-4 flex justify-end">
-        <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Base Unit
-        </Button>
-      </div>
-
-      {pools.length === 0 ? (
+      {!hasPools ? (
         <AdminEmpty
           icon={Package}
           title="No base units yet"
           description="Create your first base unit to start tracking shared inventory."
-          action={
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Base Unit
-            </Button>
-          }
+          action={<PoolCreateButton label="Create Base Unit" />}
         />
       ) : (
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <caption className="sr-only">Inventory base units</caption>
-              <thead className="border-b">
-                <tr>
-                  <th
-                    scope="col"
-                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    Current Qty
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    Units sold
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    Products
-                  </th>
-                  <th
-                    scope="col"
-                    className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    Threshold
-                  </th>
-                  <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {pools.map((pool) => (
-                  <tr key={pool.id} className="hover:bg-muted/50">
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/admin/inventory/${pool.id}`}
-                        className="text-foreground font-medium hover:underline"
+        <>
+          <AdminFilters
+            basePath={BASE_PATH}
+            searchPlaceholder="Search base units…"
+            searchAriaLabel="Search base units by name or description"
+            filters={[STOCK_FILTER, AVAILABILITY_FILTER, SORT_FILTER]}
+            resultCount={totalCount}
+            itemNoun={ITEM_NOUN}
+          />
+
+          {!hasResults ? (
+            <AdminEmpty
+              icon={Search}
+              title="No base units match your filters"
+              // AdminEmpty renders its own "Try adjusting your search or
+              // filters." line when `filtered` — don't say it twice.
+              filtered
+              action={
+                <Button variant="outline" asChild>
+                  <Link href={BASE_PATH}>Clear filters</Link>
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              <Card className={TABLE_CARD}>
+                <Table>
+                  <TableCaption className="sr-only">
+                    Inventory base units
+                  </TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead scope="col" className={TH}>
+                        Name
+                      </TableHead>
+                      {/* Never hidden at any breakpoint: the Adjust button lives
+                          in this column, and it is the reason this page exists. */}
+                      <TableHead scope="col" className={TH}>
+                        Current Qty
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
                       >
-                        {pool.name}
-                      </Link>
-                      {pool.description && (
-                        <div className="text-muted-foreground text-sm">
-                          {pool.description}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={
-                            pool.inventoryQty === 0
-                              ? "font-semibold text-red-600"
-                              : pool.lowInventoryThreshold !== null &&
-                                  pool.inventoryQty <=
-                                    pool.lowInventoryThreshold
-                                ? "font-semibold text-amber-600"
-                                : "text-foreground"
-                          }
-                        >
-                          {pool.inventoryQty}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-2 text-xs"
-                          onClick={() => setAdjustPool(pool)}
-                        >
-                          Adjust
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-foreground">
-                        {pool.sales.netSoldUnits}
-                      </div>
-                      {pool.sales.returnedUnits > 0 && (
-                        <div className="text-muted-foreground text-sm">
-                          {pool.sales.returnedUnits} returned
-                        </div>
-                      )}
-                      {pool.sales.oversellEvents > 0 && (
-                        <div className="mt-1 flex items-center gap-1 text-amber-600">
-                          <AlertTriangle
-                            className="h-3 w-3 shrink-0"
-                            aria-hidden="true"
-                          />
-                          <span className="text-xs">
-                            <span className="sr-only">Warning: </span>
-                            {pool.sales.oversellEvents} sale
-                            {pool.sales.oversellEvents === 1 ? "" : "s"} could
-                            not be deducted — units sold may be understated
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                    <td className="text-foreground px-6 py-4">
-                      {pool._count.products}
-                    </td>
-                    <td className="text-foreground px-6 py-4">
-                      {pool.lowInventoryThreshold ?? "—"}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-9 w-9 p-0"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">
-                              Actions for {pool.name}
-                            </span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/inventory/${pool.id}`}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View details
+                        Units sold
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
+                        Products
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`hidden md:table-cell ${TH}`}
+                      >
+                        Threshold
+                      </TableHead>
+                      <TableHead
+                        scope="col"
+                        className={`${TH_ACTIONS} text-right`}
+                      >
+                        <span className="sr-only">Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pools.map((pool) => {
+                      const netSold = pool.sales.netSoldUnits;
+                      const returned = pool.sales.returnedUnits;
+                      const oversells = pool.sales.oversellEvents;
+                      const productCount = pool._count.products;
+                      const reserved = pool.reservedQty;
+                      const unavailable = isUnavailable(pool);
+
+                      return (
+                        <TableRow key={pool.id}>
+                          <TableCell className={`${TD} whitespace-normal`}>
+                            <Link
+                              href={`${BASE_PATH}/${pool.id}`}
+                              className="text-foreground font-medium hover:underline"
+                            >
+                              {pool.name}
                             </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setEditPool(pool)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              setDeleteId(pool.id);
-                              setDeleteName(pool.name);
-                            }}
+                            {pool.description && (
+                              <div className="text-muted-foreground text-sm">
+                                {pool.description}
+                              </div>
+                            )}
+
+                            {/* Below md the Units sold, Products and Threshold
+                                columns are hidden — reflow them here rather than
+                                lose them. Current Qty is NOT reflowed: it keeps
+                                its own column so Adjust stays one click away. */}
+                            <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm md:hidden">
+                              <span>{netSold} sold</span>
+                              {returned > 0 && (
+                                <>
+                                  <span aria-hidden="true">·</span>
+                                  <span>{returned} returned</span>
+                                </>
+                              )}
+                              {reserved > 0 && (
+                                <>
+                                  <span aria-hidden="true">·</span>
+                                  <span>{reserved} reserved</span>
+                                </>
+                              )}
+                              <span aria-hidden="true">·</span>
+                              <span>
+                                {productCount}{" "}
+                                {productCount === 1 ? "product" : "products"}
+                              </span>
+                              <span aria-hidden="true">·</span>
+                              <span>
+                                {pool.lowInventoryThreshold !== null
+                                  ? `Low at ${pool.lowInventoryThreshold}`
+                                  : "No threshold"}
+                              </span>
+                            </div>
+                            {oversells > 0 && (
+                              <div
+                                className={`mt-1 flex items-start gap-1 md:hidden ${WARNING_TEXT}`}
+                              >
+                                <AlertTriangle
+                                  className="mt-px h-3 w-3 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span className="text-xs">
+                                  <span className="sr-only">Warning: </span>
+                                  {oversellMessage(oversells)}
+                                </span>
+                              </div>
+                            )}
+                            {/* Mobile counterpart to the desktop-only warning
+                                inside the Current Qty cell below — that cell
+                                stays number+button only on small screens so
+                                Adjust doesn't get crowded, so the "nothing
+                                available" signal reflows here instead. */}
+                            {unavailable && (
+                              <div
+                                className={`mt-1 flex items-start gap-1 md:hidden ${WARNING_TEXT}`}
+                              >
+                                <AlertTriangle
+                                  className="mt-px h-3 w-3 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span className="text-xs">
+                                  <span className="sr-only">Warning: </span>
+                                  {unavailableMessage(pool)}
+                                </span>
+                              </div>
+                            )}
+                          </TableCell>
+
+                          <TableCell className={TD}>
+                            <div className="flex items-center gap-2">
+                              <span className={`tabular-nums ${qtyTone(pool)}`}>
+                                {pool.inventoryQty}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-2 text-xs"
+                                onClick={() => setAdjustPool(pool)}
+                              >
+                                Adjust
+                                <span className="sr-only">
+                                  {" "}
+                                  quantity for {pool.name}
+                                </span>
+                              </Button>
+                            </div>
+                            {/* Same "one value plus caveat" idiom as Units
+                                sold's "N returned" line below netSoldUnits.
+                                Hidden on mobile — see the reflow comment under
+                                the Name cell for why. */}
+                            {reserved > 0 && (
+                              <div className="text-muted-foreground hidden text-sm tabular-nums md:block">
+                                {reserved} reserved
+                              </div>
+                            )}
+                            {unavailable && (
+                              <div
+                                className={`mt-1 hidden max-w-56 items-start gap-1 md:flex ${WARNING_TEXT}`}
+                              >
+                                <AlertTriangle
+                                  className="mt-px h-3 w-3 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span className="text-xs">
+                                  <span className="sr-only">Warning: </span>
+                                  {unavailableMessage(pool)}
+                                </span>
+                              </div>
+                            )}
+                          </TableCell>
+
+                          {/* whitespace-normal so the oversell sentence wraps —
+                              TableCell is nowrap by default, which would push the
+                              table far past the viewport. */}
+                          <TableCell
+                            className={`hidden md:table-cell ${TD} whitespace-normal`}
                           >
-                            <Trash className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                            <div className="text-foreground tabular-nums">
+                              {netSold}
+                            </div>
+                            {returned > 0 && (
+                              <div className="text-muted-foreground text-sm tabular-nums">
+                                {returned} returned
+                              </div>
+                            )}
+                            {oversells > 0 && (
+                              <div
+                                className={`mt-1 flex max-w-56 items-start gap-1 ${WARNING_TEXT}`}
+                              >
+                                <AlertTriangle
+                                  className="mt-px h-3 w-3 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span className="text-xs">
+                                  {/* Restores for screen readers the meaning the
+                                      icon carries visually. */}
+                                  <span className="sr-only">Warning: </span>
+                                  {oversellMessage(oversells)}
+                                </span>
+                              </div>
+                            )}
+                          </TableCell>
+
+                          <TableCell
+                            className={`text-foreground hidden tabular-nums md:table-cell ${TD}`}
+                          >
+                            {productCount}
+                          </TableCell>
+
+                          <TableCell
+                            className={`text-foreground hidden tabular-nums md:table-cell ${TD}`}
+                          >
+                            {pool.lowInventoryThreshold ?? (
+                              <span className="text-muted-foreground">
+                                <span aria-hidden="true">—</span>
+                                <span className="sr-only">
+                                  No threshold set
+                                </span>
+                              </span>
+                            )}
+                          </TableCell>
+
+                          <TableCell className={`${TD_ACTIONS} text-right`}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-9 w-9 p-0"
+                                >
+                                  <MoreVertical className="h-4 w-4" />
+                                  <span className="sr-only">
+                                    Actions for {pool.name}
+                                  </span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
+                                  <Link href={`${BASE_PATH}/${pool.id}`}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View details
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setEditPool(pool);
+                                    setEditOpen(true);
+                                  }}
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => {
+                                    setDeleteId(pool.id);
+                                    setDeleteName(pool.name);
+                                    setDeleteProductCount(pool._count.products);
+                                  }}
+                                >
+                                  <Trash className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Card>
+
+              <AdminPagination
+                page={page}
+                totalPages={totalPages}
+                totalCount={totalCount}
+                pageSize={pageSize}
+                basePath={BASE_PATH}
+                itemNoun={ITEM_NOUN}
+              />
+            </>
+          )}
+        </>
       )}
 
-      <PoolDialog open={createOpen} onOpenChange={setCreateOpen} />
-
       <PoolDialog
-        open={!!editPool}
-        onOpenChange={(open) => {
-          if (!open) setEditPool(null);
-        }}
+        open={editOpen}
+        onOpenChange={setEditOpen}
         pool={editPool ?? undefined}
       />
 
@@ -277,17 +572,33 @@ export function PoolsTable({ pools }: Props) {
               Delete &ldquo;{deleteName}&rdquo;?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the pool. Linked products will be
-              detached and set to out of stock — you&apos;ll need to restock
-              them manually before they become purchasable again.
+              This will permanently delete the pool.{" "}
+              {deleteProductCount > 0 ? (
+                <>
+                  {deleteProductCount} linked product
+                  {deleteProductCount === 1 ? "" : "s"} will be detached and set
+                  to out of stock — you&apos;ll need to restock{" "}
+                  {deleteProductCount === 1 ? "it" : "them"} manually before{" "}
+                  {deleteProductCount === 1 ? "it becomes" : "they become"}{" "}
+                  purchasable again.
+                </>
+              ) : (
+                "No products are currently linked to this pool."
+              )}{" "}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deletePool.isPending}>
               Cancel
             </AlertDialogCancel>
+            {/* `variant`, NOT className. AlertDialogAction wraps a `Button ...
+                asChild`, so a className lands on the inner Radix element while
+                Button still supplies `bg-primary` — and Slot concatenates the
+                two without tailwind-merge, so CSS order decides. The old
+                `className="bg-red-600"` was fighting that and losing. */}
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
+              variant="destructive"
               disabled={deletePool.isPending}
               onClick={(e) => {
                 e.preventDefault();

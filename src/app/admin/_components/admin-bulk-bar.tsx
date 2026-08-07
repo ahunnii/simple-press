@@ -47,74 +47,100 @@ export function AdminBulkBar({
   selectAllMatching,
   disabled,
 }: AdminBulkBarProps) {
-  if (count === 0) return null;
-
   const noun = count === 1 ? itemNoun.one : itemNoun.many;
+  // Both branches count from `count` — the set that actually gets sent to a
+  // mutation. Reading the escalated branch from `selectAllMatching.total` looks
+  // equivalent but isn't: `total` is re-supplied by the server every render, so
+  // any write that changes the matching set (a duplicate landing, another admin
+  // in a second tab) leaves the bar claiming "All N+1 selected" while N are
+  // selected and Delete removes N.
   const countLabel = selectAllMatching?.isEscalated
-    ? `All ${selectAllMatching.total} ${
-        selectAllMatching.total === 1 ? itemNoun.one : itemNoun.many
-      } selected`
+    ? `All ${count} ${noun} selected`
     : `${count} ${noun} selected`;
 
   return (
-    <div className="bg-card sticky top-0 z-30 flex flex-wrap items-center gap-3 rounded-lg border px-4 py-2 shadow-sm">
-      <span
-        role="status"
-        aria-live="polite"
-        className="text-foreground text-sm font-medium"
-      >
-        {countLabel}
+    <>
+      {/* Mounted at ALL times, including at count 0. A live region inserted into
+          the DOM with its text already in it is not announced — assistive tech
+          reports mutations of an already-present region, not its arrival. Early
+          -returning `null` meant checking the FIRST box announced nothing, and
+          only the second onward spoke. `AdminFilters` documents the same trap at
+          its result-count region; the two primitives must not disagree. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {count === 0 ? "" : countLabel}
       </span>
 
-      {selectAllMatching && !selectAllMatching.isEscalated && (
-        <>
-          {selectAllMatching.disabledReason ? (
-            <span className="text-muted-foreground text-sm">
-              {selectAllMatching.disabledReason}
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={selectAllMatching.onSelect}
-              disabled={disabled}
-              className="text-primary text-sm font-medium underline-offset-4 hover:underline disabled:pointer-events-none disabled:opacity-50"
-            >
-              Select all {selectAllMatching.total} {itemNoun.many}
-            </button>
-          )}
-        </>
-      )}
+      {count === 0 ? null : (
+        <div className="bg-card sticky top-0 z-30 mb-4 flex flex-wrap items-center gap-3 rounded-lg border px-4 py-2 shadow-sm">
+          {/* aria-hidden: the sr-only region above already announces this, and the
+          bar is reachable by tabbing to its buttons. */}
+          <span
+            aria-hidden="true"
+            className="text-foreground text-sm font-medium"
+          >
+            {countLabel}
+          </span>
 
-      <div className="ml-auto flex flex-wrap items-center gap-2">
-        {actions.map((action) => {
-          const Icon = action.icon;
-          return (
+          {selectAllMatching && !selectAllMatching.isEscalated && (
+            <>
+              {selectAllMatching.disabledReason ? (
+                <span className="text-muted-foreground text-sm">
+                  {selectAllMatching.disabledReason}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={selectAllMatching.onSelect}
+                  disabled={disabled}
+                  className="text-primary text-sm font-medium underline-offset-4 hover:underline disabled:pointer-events-none disabled:opacity-50"
+                >
+                  Select all {selectAllMatching.total} {itemNoun.many}
+                </button>
+              )}
+            </>
+          )}
+
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {actions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <Button
+                  key={action.label}
+                  size="sm"
+                  // Always an outline button — a destructive action is tinted, not
+                  // filled. See the note on BulkAction.variant.
+                  variant="outline"
+                  className={
+                    action.variant === "destructive"
+                      ? "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      : undefined
+                  }
+                  // Either flag disables. Deliberately not `disabled ?? action.pending`:
+                  // `??` only falls through on null/undefined, so a bar-level
+                  // `disabled={false}` would suppress this action's own pending state.
+                  disabled={disabled === true || action.pending === true}
+                  onClick={action.onClick}
+                >
+                  {action.pending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <Icon />
+                  )}
+                  {action.label}
+                </Button>
+              );
+            })}
             <Button
-              key={action.label}
               size="sm"
-              // Always an outline button — a destructive action is tinted, not
-              // filled. See the note on BulkAction.variant.
-              variant="outline"
-              className={
-                action.variant === "destructive"
-                  ? "border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  : undefined
-              }
-              // Either flag disables. Deliberately not `disabled ?? action.pending`:
-              // `??` only falls through on null/undefined, so a bar-level
-              // `disabled={false}` would suppress this action's own pending state.
-              disabled={disabled === true || action.pending === true}
-              onClick={action.onClick}
+              variant="ghost"
+              onClick={onClear}
+              disabled={disabled}
             >
-              {action.pending ? <Loader2 className="animate-spin" /> : <Icon />}
-              {action.label}
+              Clear
             </Button>
-          );
-        })}
-        <Button size="sm" variant="ghost" onClick={onClear} disabled={disabled}>
-          Clear
-        </Button>
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

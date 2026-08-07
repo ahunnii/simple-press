@@ -238,7 +238,8 @@ export function DashboardContent({
     ? `https://${business.customDomain}`
     : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? ""}`;
 
-  const hasAttentionItems = ordersToFulfillCount > 0 || awaitingPaymentCount > 0;
+  const hasAttentionItems =
+    ordersToFulfillCount > 0 || awaitingPaymentCount > 0;
 
   return (
     <div className="bg-muted min-h-screen">
@@ -389,7 +390,10 @@ export function DashboardContent({
                     {formatCurrency(stats.totalRevenue)}
                   </span>
                 </p>
-                <Link href="/admin/finances" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/admin/finances"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Full breakdown →
                 </Link>
               </div>
@@ -418,7 +422,9 @@ export function DashboardContent({
                 {stats.sevenDayRefunded > 0 && (
                   <>
                     {" "}
-                    &middot; &minus;{formatCurrency(stats.sevenDayRefunded)}{" "}
+                    &middot; &minus;{formatCurrency(
+                      stats.sevenDayRefunded,
+                    )}{" "}
                     refunded
                   </>
                 )}
@@ -583,11 +589,20 @@ export function DashboardContent({
                     </div>
                   ))}
                   {lowStockPools.map((pool) => (
-                    <Link key={pool.id} href="/admin/inventory">
+                    // Deep-link to the pool, not the list. This used to be
+                    // `/admin/inventory`, which worked only because the list was
+                    // unpaginated — the pool was always rendered, just below the
+                    // fold. Now a store with 26+ pools lands on page 1, which may
+                    // not contain the pool that was clicked.
+                    <Link key={pool.id} href={`/admin/inventory/${pool.id}`}>
                       <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100">
                         <div className="flex items-center gap-3">
                           <AlertTriangle
-                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty === 0 ? "text-red-600" : "text-amber-600"}`}
+                            // `<= 0`, matching isOutOfStock in the inventory
+                            // page: the feeding query is `lte: 10` with no lower
+                            // bound, so a negative pool is in this list and must
+                            // read as broken, not merely low.
+                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty <= 0 ? "text-red-600" : "text-amber-600"}`}
                           />
                           <div>
                             <p className="text-foreground text-sm font-medium">
@@ -600,7 +615,7 @@ export function DashboardContent({
                         </div>
                         <div className="text-right">
                           <p
-                            className={`text-sm font-semibold ${pool.inventoryQty === 0 ? "text-red-700" : "text-amber-700"}`}
+                            className={`text-sm font-semibold ${pool.inventoryQty <= 0 ? "text-red-700" : "text-amber-700"}`}
                           >
                             {pool.inventoryQty} left
                           </p>
