@@ -1,6 +1,5 @@
 "use client";
 
-import type { Product, ProductReview } from "generated/prisma";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -9,6 +8,14 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { OwnerReviewFormData } from "~/lib/validators/reviews";
+// Type-only import from the client that renders this dialog — safe despite
+// `reviews-client.tsx` importing this component by value: `import type` is
+// erased before module evaluation, so there is no runtime cycle, only a
+// type-level dependency. Reusing `ReviewRow` (the trimmed `review.listAll`
+// row + derived `status`) keeps this dialog's prop in sync with the one row
+// shape the whole Reviews table already uses, instead of a second
+// hand-copied structural type that could drift from it.
+import type { ReviewRow } from "./reviews-client";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { ownerReviewFormSchema } from "~/lib/validators/reviews";
 import { api } from "~/trpc/react";
@@ -29,7 +36,7 @@ import { SelectFormField } from "~/components/inputs/select-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
-  review?: ProductReview & { product: Product }; // If provided → edit mode
+  review?: ReviewRow; // If provided → edit mode
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -42,9 +49,7 @@ function trimmedOrUndefined(value: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-function buildDefaultValues(
-  review?: ProductReview & { product: Product },
-): OwnerReviewFormData {
+function buildDefaultValues(review?: ReviewRow): OwnerReviewFormData {
   if (review) {
     return {
       productId: review.productId,

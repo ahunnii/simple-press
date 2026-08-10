@@ -2,16 +2,22 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient } from "~/server/db";
+import type { DbClient, TxClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { getClientIpFromHeaders, reviewVoteLimiter } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
+import {
+  reviewBulkApproveSchema,
+  reviewBulkDeleteSchema,
+  reviewBulkHideSchema,
+} from "~/lib/validators/reviews";
 
 import {
   createTRPCRouter,
   featureGate,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
@@ -57,7 +63,11 @@ async function getReviewAndAssertOwner(
   return review;
 }
 
-async function updateProductStats(db: DbClient, productId: string) {
+// Takes `TxClient`, not `DbClient`, so it can run either standalone or inside a
+// `$transaction` callback (the bulk mutations recompute stats in-transaction).
+// `DbClient` is structurally assignable to `TxClient`, so plain `ctx.db` callers
+// still work unchanged.
+async function updateProductStats(db: TxClient, productId: string) {
   const reviews = await db.productReview.findMany({
     where: { productId, isApproved: true, isHidden: false },
     select: { rating: true },
@@ -498,61 +508,78 @@ export const reviewRouter = createTRPCRouter({
 
   // ── Admin (both types) ───────────────────────────────────────────────────
   //
-  // NOTE: the moderation procedures below (listAll, approve, toggleHidden,
-  // delete) are intentionally left ungated by featureGate("reviews"). Owners
-  // must still be able to moderate/hide/delete pre-existing reviews after
-  // disabling the reviews feature — otherwise turning the flag off would trap
-  // stale or reported reviews with no way to clean them up.
+  // NOTE: every moderation procedure below — listAll, approve, toggleHidden,
+  // delete, bulkSetApproved, bulkSetHidden, bulkDelete — is intentionally left
+  // ungated by featureGate("reviews"). Owners must still be able to
+  // moderate/hide/delete pre-existing reviews after disabling the reviews
+  // feature — otherwise turning the flag off would trap stale or reported
+  // reviews with no way to clean them up. This is a deliberate divergence from
+  // the testimonials router, whose bulk procedures ARE gated by
+  // featureGate("testimonials"); do not "fix" the inconsistency by adding a
+  // gate here. Only the customer/storefront-facing procedures above (which
+  // create new reviews or render them publicly) are gated.
+  //
+  // Tenancy note: ProductReview has no businessId column — it is reachable
+  // only through the product relation. EVERY where clause here (including
+  // reads inside transactions, updateMany and deleteMany) must therefore carry
+  // `product: { businessId }`. Omitting it on any single query is a
+  // cross-tenant read or write.
 
-  // List all reviews for a business across all products
-  listAll: ownerAdminProcedure
-    .input(
-      z.object({
-        status: z.enum(["pending", "approved", "hidden", "all"]).default("all"),
-        source: z.enum(["customer", "owner", "all"]).default("all"),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { businessId } = ctx;
+  // List all reviews for a business across all products. Input-free on
+  // purpose: the admin page filters, sorts and paginates in memory, so the
+  // router just ships the full tenant-scoped set.
+  listAll: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
 
-      await assertBusinessOwner(ctx.db, ctx.session.user.id, businessId);
+    return ctx.db.productReview.findMany({
+      where: { product: { businessId } },
+      // Stable transport order (reviewDate ties broken by id); the page
+      // re-sorts in memory according to its own sort param.
+      orderBy: [{ reviewDate: "desc" }, { id: "asc" }],
+      // Explicit select rather than a full row + include: this trims
+      // updatedAt, notHelpfulCount, customerId and orderId, none of which the
+      // table or the owner-review dialog reads. createdAt stays because the
+      // dialog's buildDefaultValues falls back to it when reviewDate is unset.
+      select: {
+        id: true,
+        source: true,
+        rating: true,
+        title: true,
+        comment: true,
+        images: true,
+        videoUrl: true,
+        verifiedPurchase: true,
+        isApproved: true,
+        isHidden: true,
+        customerName: true,
+        customerEmail: true,
+        customerTitle: true,
+        reviewDate: true,
+        createdAt: true,
+        helpfulCount: true,
+        productId: true,
+        product: { select: { id: true, name: true, slug: true } },
+      },
+    });
+  }),
 
-      const where: Prisma.ProductReviewWhereInput = {
-        product: { businessId },
-      };
-
-      if (input.status === "pending") {
-        where.isApproved = false;
-        where.isHidden = false;
-      }
-      if (input.status === "approved") {
-        where.isApproved = true;
-        where.isHidden = false;
-      }
-      if (input.status === "hidden") {
-        where.isHidden = true;
-      }
-      if (input.source !== "all") {
-        where.source = input.source;
-      }
-
-      return ctx.db.productReview.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        include: {
-          product: { select: { id: true, name: true, slug: true } },
-        },
-      });
-    }),
-
-  approve: protectedProcedure
+  approve: ownerAdminProcedure
     .input(z.object({ id: z.string(), isApproved: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const review = await getReviewAndAssertOwner(
-        ctx.db,
-        ctx.session.user.id,
-        input.id,
-      );
+      const { businessId } = ctx;
+
+      // Declarative tenancy: findFirst scoped through the product relation
+      // replaces the old getReviewAndAssertOwner round-trip. Same policy —
+      // assertBusinessOwner admitted exactly OWNER/MANAGER/PLATFORM_ADMIN,
+      // which is ownerAdminProcedure's definition.
+      const review = await ctx.db.productReview.findFirst({
+        where: { id: input.id, product: { businessId } },
+        select: { productId: true },
+      });
+      if (!review) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      }
+
       const updated = await ctx.db.productReview.update({
         where: { id: input.id },
         data: { isApproved: input.isApproved },
@@ -561,14 +588,19 @@ export const reviewRouter = createTRPCRouter({
       return updated;
     }),
 
-  toggleHidden: protectedProcedure
+  toggleHidden: ownerAdminProcedure
     .input(z.object({ id: z.string(), isHidden: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const review = await getReviewAndAssertOwner(
-        ctx.db,
-        ctx.session.user.id,
-        input.id,
-      );
+      const { businessId } = ctx;
+
+      const review = await ctx.db.productReview.findFirst({
+        where: { id: input.id, product: { businessId } },
+        select: { productId: true },
+      });
+      if (!review) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      }
+
       const updated = await ctx.db.productReview.update({
         where: { id: input.id },
         data: { isHidden: input.isHidden },
@@ -577,16 +609,144 @@ export const reviewRouter = createTRPCRouter({
       return updated;
     }),
 
-  delete: protectedProcedure
+  delete: ownerAdminProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const review = await getReviewAndAssertOwner(
-        ctx.db,
-        ctx.session.user.id,
-        input.id,
-      );
+      const { businessId } = ctx;
+
+      // productId must be read BEFORE the delete — the row is gone afterwards.
+      const review = await ctx.db.productReview.findFirst({
+        where: { id: input.id, product: { businessId } },
+        select: { productId: true },
+      });
+      if (!review) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      }
+
       await ctx.db.productReview.delete({ where: { id: input.id } });
       await updateProductStats(ctx.db, review.productId);
       return { success: true };
+    }),
+
+  // ─── BULK MUTATIONS ───────────────────────────────────────────────────────
+
+  bulkSetApproved: ownerAdminProcedure
+    .input(reviewBulkApproveSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // `changedIds` is the rows this call will actually FLIP, captured before
+      // the write, and it is what the table's Undo re-sends. Re-sending the
+      // whole selection with `isApproved` inverted is not an inverse: a
+      // selection containing already-approved rows approves all of them, then
+      // "Undo" unapproves all of them — including the ones the user never
+      // touched. The client can't narrow it either (a selection spans pages,
+      // and off-page rows' `isApproved` state never reaches the browser).
+      //
+      // The same set is also exactly which products need a stats recompute:
+      // a row already in the target state can't change any product's
+      // approved-and-visible aggregate.
+      //
+      // One transaction so nothing can change between the read and the update.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.productReview.findMany({
+          where: {
+            id: { in: input.ids },
+            product: { businessId },
+            isApproved: { not: input.isApproved },
+          },
+          select: { id: true, productId: true },
+        });
+
+        const result = await tx.productReview.updateMany({
+          where: { id: { in: input.ids }, product: { businessId } },
+          data: { isApproved: input.isApproved },
+        });
+
+        // Recompute inside the same tx, after the write (tx reads see tx
+        // writes), via the shared helper so there is exactly one definition of
+        // "counts toward a product's stats".
+        const productIds = [...new Set(changed.map((r) => r.productId))];
+        for (const productId of productIds) {
+          await updateProductStats(tx, productId);
+        }
+
+        return { changedIds: changed.map((r) => r.id), count: result.count };
+      });
+
+      return { count, changedIds };
+    }),
+
+  bulkSetHidden: ownerAdminProcedure
+    .input(reviewBulkHideSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Same undo contract as `bulkSetApproved` above: `changedIds` is read
+      // inside the transaction, before the write, and is the only valid Undo
+      // target — and the same set drives the stats recompute.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.productReview.findMany({
+          where: {
+            id: { in: input.ids },
+            product: { businessId },
+            isHidden: { not: input.isHidden },
+          },
+          select: { id: true, productId: true },
+        });
+
+        const result = await tx.productReview.updateMany({
+          where: { id: { in: input.ids }, product: { businessId } },
+          data: { isHidden: input.isHidden },
+        });
+
+        const productIds = [...new Set(changed.map((r) => r.productId))];
+        for (const productId of productIds) {
+          await updateProductStats(tx, productId);
+        }
+
+        return { changedIds: changed.map((r) => r.id), count: result.count };
+      });
+
+      return { count, changedIds };
+    }),
+
+  // OWNER only, unlike the two bulk toggles above. Not a statement about
+  // trusting managers — it's blast radius. Approve/hide is reversible in one
+  // click (and Undo-able); deleting N reviews is unrecoverable without a
+  // database restore, and it permanently rewrites the affected products' live
+  // star ratings and review counts on the storefront. Same reason the schema's
+  // delete cap (ADMIN_BULK_DELETE_LIMIT) sits far below the selection cap the
+  // toggles use.
+  //
+  // Unlike `testimonial.bulkDelete` this one needs a transaction: product
+  // stats must be recomputed from post-delete state, so the delete and the
+  // recompute have to be atomic.
+  bulkDelete: ownerOnlyProcedure
+    .input(reviewBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const count = await ctx.db.$transaction(async (tx) => {
+        // Read productIds BEFORE the delete — the rows won't exist afterwards.
+        const rows = await tx.productReview.findMany({
+          where: { id: { in: input.ids }, product: { businessId } },
+          select: { productId: true },
+        });
+
+        const result = await tx.productReview.deleteMany({
+          where: { id: { in: input.ids }, product: { businessId } },
+        });
+
+        const productIds = [...new Set(rows.map((r) => r.productId))];
+        for (const productId of productIds) {
+          // Runs after deleteMany, so the helper sees post-delete state.
+          await updateProductStats(tx, productId);
+        }
+
+        return result.count;
+      });
+
+      return { count };
     }),
 });

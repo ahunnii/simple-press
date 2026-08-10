@@ -15,6 +15,7 @@
  *  - Logo / favicon objects are marked "always in use" via `isAlwaysInUseKey`
  */
 
+import type { TemplateField } from "~/lib/template-fields";
 import { isStorageUrl } from "~/lib/s3/url";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
@@ -29,6 +30,34 @@ export interface MediaUsage {
   entityId?: string;
   entityLabel?: string;
   adminHref?: string;
+  /**
+   * true when this reference comes from a template FIELD VALUE belonging to a
+   * template that is not the business's active template — i.e. leftover content
+   * from a template the owner switched away from. Consumers may treat a file
+   * whose every usage is inactiveTemplate as safe to clean up.
+   */
+  inactiveTemplate?: boolean;
+}
+
+/** A template field key resolved back to the template that declares it. */
+type TemplateFieldOwner = { templateId: string; field: TemplateField };
+
+/**
+ * Reverse index of every field key in the registry → the template that owns it.
+ *
+ * Field keys are effectively unique per template across `TEMPLATE_FIELDS`, so
+ * this is very nearly a bijection. Where two templates DO declare the same key,
+ * the first one in registry iteration order wins — arbitrary but deterministic,
+ * which is all the attribution label needs.
+ */
+function buildTemplateFieldOwnerIndex(): Map<string, TemplateFieldOwner> {
+  const owners = new Map<string, TemplateFieldOwner>();
+  for (const [templateId, fields] of Object.entries(TEMPLATE_FIELDS)) {
+    for (const field of fields) {
+      if (!owners.has(field.key)) owners.set(field.key, { templateId, field });
+    }
+  }
+  return owners;
 }
 
 // ─── Always-in-use predicate ──────────────────────────────────────────────────
@@ -165,6 +194,8 @@ export async function buildUsedMediaIndex(
     entityId?: string;
     entityLabel?: string;
     adminHref?: string;
+    /** Set when the reference came from an inactive template's field value. */
+    inactiveTemplate?: boolean;
   };
   const galleryRefs: GalleryRef[] = [];
 
@@ -210,19 +241,40 @@ export async function buildUsedMediaIndex(
         (TEMPLATE_FIELDS[templateId] ?? []).map((f) => [f.key, f]),
       );
 
+      // `customFields` is ONE blob shared by every template the business has
+      // ever used, so a key in it may belong to a template that is no longer
+      // active. Resolve such keys against the full registry (built at most once
+      // per call, on the first miss) so their usages can be labelled — and
+      // flagged — as leftovers from an inactive template.
+      let fieldOwners: Map<string, TemplateFieldOwner> | null = null;
+      const getInactiveOwner = (
+        key: string,
+      ): TemplateFieldOwner | undefined => {
+        fieldOwners ??= buildTemplateFieldOwnerIndex();
+        return fieldOwners.get(key);
+      };
+
       // Attribute each custom-field value to its template + field label, e.g.
-      // "Modern template · Hero image". Unknown keys (template switched, legacy
-      // data) fall back to the raw field key so nothing is lost.
+      // "Modern template · Hero image", or "Default template (not active) ·
+      // Hero image" when another template owns the key. Keys owned by NO
+      // template (legacy / orphaned data) keep the conservative old fallback:
+      // raw key, active template's label, and NO inactiveTemplate flag — an
+      // unattributable reference must keep blocking deletion.
       const scanCustomFields = (fields: unknown, isDraft: boolean) => {
         if (!fields || typeof fields !== "object" || Array.isArray(fields))
           return;
         const obj = fields as Record<string, unknown>;
 
         for (const [fieldKey, value] of Object.entries(obj)) {
-          const field = fieldsByKey.get(fieldKey);
+          const activeField = fieldsByKey.get(fieldKey);
+          const owner = activeField ? undefined : getInactiveOwner(fieldKey);
+          const field = activeField ?? owner?.field;
           const fieldLabel = field?.label ?? fieldKey;
           const draftSuffix = isDraft ? " (draft)" : "";
-          const location = `${templateLabel} template · ${fieldLabel}${draftSuffix}`;
+          const location = owner
+            ? `${getTemplateLabel(owner.templateId)} template (not active) · ${fieldLabel}${draftSuffix}`
+            : `${templateLabel} template · ${fieldLabel}${draftSuffix}`;
+          const inactiveTemplate = owner ? true : undefined;
 
           // gallery-type fields store a gallery ID (a string), not a URL
           if (field?.type === "gallery" && typeof value === "string" && value) {
@@ -232,6 +284,7 @@ export async function buildUsedMediaIndex(
               entityType: "siteContent",
               entityLabel: fieldLabel,
               adminHref: "/admin/content/template",
+              inactiveTemplate,
             });
             continue;
           }
@@ -247,6 +300,7 @@ export async function buildUsedMediaIndex(
                 location,
                 entityType: "siteContent",
                 adminHref: "/admin/content/template",
+                inactiveTemplate,
               });
             },
             (doc) => {
@@ -258,6 +312,7 @@ export async function buildUsedMediaIndex(
                     location: `${location} (rich text)`,
                     entityType: "siteContent",
                     adminHref: "/admin/content/template",
+                    inactiveTemplate,
                   });
                 },
                 (id) => {
@@ -267,6 +322,7 @@ export async function buildUsedMediaIndex(
                     entityType: "siteContent",
                     entityLabel: fieldLabel,
                     adminHref: "/admin/content/template",
+                    inactiveTemplate,
                   });
                 },
               );
@@ -619,7 +675,7 @@ export async function buildUsedMediaIndex(
             entityType: "testimonial",
             entityId: t.id,
             entityLabel: t.customerName,
-            adminHref: `/admin/reviews`,
+            adminHref: `/admin/testimonials`,
           });
         }
       }
@@ -708,17 +764,96 @@ export async function buildUsedMediaIndex(
       const imgs = imagesByGallery.get(ref.id);
       if (!imgs) continue;
       for (const img of imgs) {
-        // location already names the gallery — no separate entityLabel
+        // location already names the gallery — no separate entityLabel.
+        //
+        // The inactive-template flag rides along: a gallery embedded from a
+        // field of a template the owner switched away from produces inactive
+        // usages for every image in it. That never makes those images
+        // deletable on its own — step 8 already gave each of them an
+        // always-active "Gallery — name" usage from its own GalleryImage row,
+        // so a gallery-contained file can never be inactive-only overall.
         addUsage(map, img.url, {
           url: img.url,
           location: `${ref.location} — gallery “${img.name}”`,
           entityType: ref.entityType,
           entityId: ref.entityId,
           adminHref: ref.adminHref,
+          inactiveTemplate: ref.inactiveTemplate,
         });
       }
     }
   }
 
   return map;
+}
+
+// ─── Gallery external-usage helper ────────────────────────────────────────────
+
+export type GalleryExternalUsage = {
+  location: string;
+  entityLabel?: string;
+  adminHref?: string;
+};
+
+/**
+ * For every gallery in `businessId`, find where its images are referenced
+ * OUTSIDE the gallery's own image listing (i.e. embedded via a gallery-type
+ * template field or a TipTap `gallery` node somewhere on the storefront).
+ *
+ * Semantics are intentionally identical to `gallery.delete`'s usage guard —
+ * this is URL-based, not gallery-ID-based, on purpose:
+ *  - A gallery with zero images is never flagged (nothing to look up).
+ *  - `gallery.duplicate` reuses the same S3 URLs as its source, so a
+ *    duplicate of an embedded gallery is ALSO flagged here, because the
+ *    lookup is keyed on the shared image URL, not the gallery ID.
+ *  - `entityType === "galleryImage"` usages are skipped — that's just a
+ *    gallery's own listing of its images (the source gallery's or, via a
+ *    duplicate, another gallery's), not an external embed.
+ *
+ * This is the single source of truth for both `gallery.delete`'s CONFLICT
+ * guard and the admin "Embedded" badge — they must never drift apart.
+ *
+ * `MediaUsage.inactiveTemplate` is deliberately NOT threaded through here: an
+ * embed from an inactive template still counts as embedded and still blocks
+ * gallery deletion, because switching the template back would restore it.
+ */
+export async function buildGalleryExternalUsage(
+  businessId: string,
+): Promise<Map<string, GalleryExternalUsage[]>> {
+  const index = await buildUsedMediaIndex(businessId);
+
+  const galleryImages = await db.galleryImage.findMany({
+    where: { gallery: { businessId } },
+    select: { url: true, galleryId: true },
+  });
+
+  const urlsByGallery = new Map<string, string[]>();
+  for (const img of galleryImages) {
+    const list = urlsByGallery.get(img.galleryId) ?? [];
+    list.push(img.url);
+    urlsByGallery.set(img.galleryId, list);
+  }
+
+  const result = new Map<string, GalleryExternalUsage[]>();
+  for (const [galleryId, urls] of urlsByGallery) {
+    // Dedupe the same way the delete guard does: one entry per
+    // entityType+entityId (falling back to location when entityId is absent).
+    const externalUsages = new Map<string, GalleryExternalUsage>();
+    for (const url of urls) {
+      const usages = index.get(normalizeUrl(url)) ?? [];
+      for (const u of usages) {
+        if (u.entityType === "galleryImage") continue;
+        externalUsages.set(`${u.entityType}:${u.entityId ?? u.location}`, {
+          location: u.location,
+          entityLabel: u.entityLabel,
+          adminHref: u.adminHref,
+        });
+      }
+    }
+    if (externalUsages.size > 0) {
+      result.set(galleryId, Array.from(externalUsages.values()));
+    }
+  }
+
+  return result;
 }

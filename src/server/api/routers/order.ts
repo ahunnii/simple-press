@@ -2,9 +2,10 @@ import type Stripe from "stripe";
 import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
+import { carrierLabel } from "~/data/fulfillment-constants";
 import { z } from "zod";
 
-import { carrierLabel } from "~/data/fulfillment-constants";
+import type { OrderSortValue } from "~/lib/validators/order";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
   sendOrderCancelled,
@@ -17,8 +18,10 @@ import {
 import { deductPoolInventory, restorePoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
+import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
   addShipmentSchema,
+  buildOrderListWhere,
   manualOrderFormSchema,
   markAsFulfilledSchema,
   markAsRefundedSchema,
@@ -36,6 +39,21 @@ import {
   ownerAdminProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
+
+/**
+ * What the admin Orders TABLE needs per row, and nothing else. It renders an
+ * item count and an oversell badge, so both are counts — `include: { items:
+ * true }` was shipping every column of every OrderItem for a whole page of
+ * orders into the RSC payload to be reduced to `items.length`.
+ */
+const LIST_INCLUDE = {
+  _count: {
+    select: {
+      items: true,
+      inventoryHistory: { where: { reason: "oversell" } },
+    },
+  },
+} satisfies Prisma.OrderInclude;
 
 const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   requested_by_customer: "Customer requested refund",
@@ -650,98 +668,141 @@ export const orderRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const statusFilter = input?.status;
-      const searchQuery = input?.search;
-      const fulfillmentFilter = input?.fulfillment;
-      const paymentStatusFilter = input?.paymentStatus;
-
-      const where: Prisma.OrderWhereInput = {
+      // Shared with `export.exportOrders` so "Export CSV" always exports what
+      // the table shows — see ~/lib/validators/order.
+      const where = buildOrderListWhere({
         businessId,
-      };
+        status: input.status,
+        fulfillment: input.fulfillment,
+        paymentStatus: input.paymentStatus,
+        search: input.search,
+      });
 
-      if (statusFilter && statusFilter !== "all") {
-        where.status = statusFilter;
-      }
+      // Sort. Each entry is the PRIMARY ordering only — `id` is appended below
+      // as a mandatory tie-break, mirroring product.secureList / customer.list
+      // and the guarantee `buildTablePage` makes for the in-memory admin tables
+      // (~/app/admin/_lib/table-query). Without it, orders sharing a `createdAt`
+      // (routine — a webhook burst writes several within the same millisecond)
+      // or a `total` have no defined relative order, Postgres is free to return
+      // them differently between executions, and with pagination that renders
+      // one order on two pages and another on none.
+      //
+      // `total` is unindexed, unlike `createdAt`; at small-business scale (tens
+      // to low thousands of orders) that sort is a trivial in-memory sort in
+      // Postgres and does not warrant an index.
+      type OrderOrderBy = Prisma.OrderOrderByWithRelationInput;
+      const orderByMap = {
+        newest: [{ createdAt: "desc" }],
+        oldest: [{ createdAt: "asc" }],
+        total_desc: [{ total: "desc" }],
+        total_asc: [{ total: "asc" }],
+      } satisfies Record<OrderSortValue, OrderOrderBy[]>;
+      const orderBy: OrderOrderBy[] = [
+        ...orderByMap[input.sort],
+        { id: "asc" },
+      ];
 
-      if (fulfillmentFilter && fulfillmentFilter !== "all") {
-        where.fulfillmentStatus = fulfillmentFilter;
-      }
-
-      if (paymentStatusFilter && paymentStatusFilter !== "all") {
-        where.paymentStatus = paymentStatusFilter;
-      }
-
-      if (searchQuery) {
-        const or: Prisma.OrderWhereInput[] = [
-          { customerEmail: { contains: searchQuery, mode: "insensitive" } },
-          { customerName: { contains: searchQuery, mode: "insensitive" } },
-          { id: { contains: searchQuery, mode: "insensitive" } },
-        ];
-        // Customers quote the human order number (e.g. "#1042"), not the UUID.
-        // Match it whenever the query is numeric (tolerating a leading "#").
-        const numericQuery = Number.parseInt(
-          searchQuery.trim().replace(/^#/, ""),
-          10,
-        );
-        if (Number.isInteger(numericQuery)) {
-          or.push({ orderNumber: numericQuery });
-        }
-        where.OR = or;
-      }
-
-      // Pagination — mirrors product.secureList
-      const pageSize = 50;
-      const page = input?.page ?? 1;
+      // Pagination — 25, the one page size every admin list uses, so "page 3"
+      // means the same amount of scrolling everywhere.
+      const pageSize = 25;
+      // Bounded BEFORE it becomes an offset. The clamp further down handles
+      // "past the end", but it needs `totalCount` first, so the opening query
+      // still runs with whatever `skip` this produces — and an unbounded page
+      // number overflows Postgres' OFFSET rather than paging past the end. See
+      // MAX_REQUESTED_PAGE.
+      const page = Math.min(input.page ?? 1, MAX_REQUESTED_PAGE);
       const skip = (page - 1) * pageSize;
 
-      // Stats are computed over the FULL filtered set (not just the page).
-      // Revenue counts paid orders only and subtracts refunds.
-      const [orders, totalCount, paidOrders, revenueAgg] =
-        await ctx.db.$transaction([
-          ctx.db.order.findMany({
-            where,
-            include: {
-              items: true,
-              _count: {
-                select: {
-                  inventoryHistory: { where: { reason: "oversell" } },
-                },
-              },
-            },
-            orderBy: { createdAt: "desc" },
-            skip,
-            take: pageSize,
-          }),
-          ctx.db.order.count({ where }),
-          ctx.db.order.count({
-            where: { AND: [where, { paymentStatus: "paid" }] },
-          }),
-          ctx.db.order.aggregate({
-            where: { AND: [where, { paymentStatus: "paid" }] },
-            _sum: { total: true, refundAmountCents: true },
-          }),
-        ]);
+      // The three queue counts below are DELIBERATELY unconditional on the
+      // current filters — `businessId` only. Each one backs a card that's a
+      // filter shortcut linking to exactly that filter combo (e.g. "Needs
+      // fulfillment" -> ?status=open&fulfillment=unfulfilled), so its number
+      // has to be what the table will show right after the click. Scoping
+      // them to `where` would make the cards lie the moment any filter is
+      // active — the same bug class the old all-time stat cards had, just
+      // inverted. Kept in the same $transaction as the page query and count
+      // for a consistent snapshot, not because they're expensive.
+      const [
+        firstPassOrders,
+        totalCount,
+        openCount,
+        needsFulfillmentCount,
+        awaitingPaymentCount,
+      ] = await ctx.db.$transaction([
+        ctx.db.order.findMany({
+          where,
+          include: LIST_INCLUDE,
+          orderBy,
+          skip,
+          take: pageSize,
+        }),
+        ctx.db.order.count({ where }),
+        ctx.db.order.count({ where: { businessId, status: "open" } }),
+        // Deliberately NOT including partially_fulfilled: this count must
+        // match the ?status=open&fulfillment=unfulfilled filter exactly.
+        // Partial fulfillment gets its own row badge instead.
+        ctx.db.order.count({
+          where: {
+            businessId,
+            status: "open",
+            fulfillmentStatus: "unfulfilled",
+          },
+        }),
+        ctx.db.order.count({
+          where: { businessId, status: "open", paymentStatus: "pending" },
+        }),
+      ]);
 
-      const totalRevenue =
-        (revenueAgg._sum.total ?? 0) - (revenueAgg._sum.refundAmountCents ?? 0);
-      const totalPages = Math.ceil(totalCount / pageSize);
+      // `Math.max(1, …)` so an empty result set reports one page rather than
+      // zero, matching `buildTablePage`.
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+      // Clamp an out-of-range page HERE rather than leaving it to callers. An
+      // unclamped `?page=900` against a 3-page list echoes `page: 900` back with
+      // an empty slice, and a paginator faithfully renders "Showing
+      // 22,476–75 of 75" above a no-matches empty state. The re-query only
+      // fires on that path — in-app navigation never produces it — so the
+      // common case stays a single round trip.
+      const clampedPage = Math.min(page, totalPages);
+      const pageOrders =
+        clampedPage === page
+          ? firstPassOrders
+          : await ctx.db.order.findMany({
+              where,
+              include: LIST_INCLUDE,
+              orderBy,
+              skip: (clampedPage - 1) * pageSize,
+              take: pageSize,
+            });
 
       return {
-        orders: orders.map((order) => ({
+        orders: pageOrders.map(({ _count, ...order }) => ({
           ...order,
-          hasOversell: order._count.inventoryHistory > 0,
+          itemCount: _count.items,
+          hasOversell: _count.inventoryHistory > 0,
         })),
         totalCount,
-        page,
+        page: clampedPage,
         pageSize,
         totalPages,
         stats: {
-          totalRevenue,
-          totalOrders: totalCount,
-          paidOrders,
+          openCount,
+          needsFulfillmentCount,
+          awaitingPaymentCount,
         },
       };
     }),
+
+  // Cheap existence check for the admin empty state — distinguishes "no orders
+  // yet" (explain that orders arrive from the storefront) from "no matches for
+  // the current filters" (offer Clear filters). A single COUNT(*), and only
+  // issued when the filtered query came back empty, so the common page load
+  // never pays for it.
+  hasAny: staffProcedure.use(featureGate("orders")).query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    const count = await ctx.db.order.count({ where: { businessId } });
+    return { hasAny: count > 0 };
+  }),
 
   getById: staffProcedure
     .use(featureGate("orders"))
@@ -1710,10 +1771,7 @@ export const orderRouter = createTRPCRouter({
             }
           });
         } catch (invError) {
-          console.error(
-            "[Manual Order] Failed to deduct inventory:",
-            invError,
-          );
+          console.error("[Manual Order] Failed to deduct inventory:", invError);
         }
       }
 

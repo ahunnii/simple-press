@@ -43,9 +43,34 @@ export const videosRouter = createTRPCRouter({
       // Everything is returned unfiltered — the admin client splits
       // published/draft itself (see publishedVideoWhere for the
       // storefront-facing equivalent of that split).
+      //
+      // `select` here is deliberate: the admin list page is `getAll`'s only
+      // consumer (verified), and this drops both `@db.Text` description
+      // columns (`description`, `descriptionOverride`) from the RSC
+      // payload — the edit form fetches the full row via `getById`. The
+      // trailing `{ id: "asc" }` tie-break matches the platform's
+      // stable-order rule (see `getPublic` below, which uses the same
+      // three-key order).
       return ctx.db.video.findMany({
         where: { businessId },
-        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }],
+        select: {
+          id: true,
+          youtubeId: true,
+          title: true,
+          titleOverride: true,
+          thumbnailUrl: true,
+          thumbnailOverride: true,
+          channelTitle: true,
+          publishedAt: true,
+          published: true,
+          sortOrder: true,
+          sourceId: true,
+        },
+        orderBy: [
+          { sortOrder: "asc" },
+          { publishedAt: "desc" },
+          { id: "asc" },
+        ],
       });
     }),
 

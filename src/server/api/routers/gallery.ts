@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { buildUsedMediaIndex, normalizeUrl } from "~/lib/media/usage";
+import { buildGalleryExternalUsage } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
 import { generateGallerySlug } from "~/lib/slug";
 import {
@@ -33,6 +33,33 @@ export const galleryRouter = createTRPCRouter({
         },
         orderBy: { updatedAt: "desc" },
       });
+    }),
+
+  // Which galleries are embedded outside their own image listing (gallery-type
+  // template fields, TipTap `gallery` nodes) — powers the admin "Embedded"
+  // badge. Shares buildGalleryExternalUsage with the delete guard so the two
+  // can never drift: a gallery present here is exactly a gallery `delete`
+  // would refuse to remove.
+  usage: ownerAdminProcedure
+    .use(featureGate("galleries"))
+    .query(async ({ ctx }) => {
+      const usage = await buildGalleryExternalUsage(ctx.businessId);
+      // Plain record, not a Map — lean JSON; absent key = not embedded.
+      const result: Record<string, { count: number; locations: string[] }> =
+        {};
+      for (const [galleryId, usages] of usage) {
+        result[galleryId] = {
+          count: usages.length,
+          // Same formatting as the delete guard's CONFLICT message; cap at
+          // 5, the client renders "and N more" from count.
+          locations: usages
+            .slice(0, 5)
+            .map(
+              (u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""),
+            ),
+        };
+      }
+      return result;
     }),
 
   getById: ownerAdminProcedure
@@ -159,32 +186,17 @@ export const galleryRouter = createTRPCRouter({
       // Usage-aware guard: block deletion if this gallery's images are
       // referenced anywhere outside the gallery's own listing. TipTap
       // `gallery` blocks and gallery-type template fields resolve to
-      // per-image usage entries here (see src/lib/media/usage.ts), so we
-      // scan each of this gallery's image URLs and ignore only the
-      // "galleryImage" entries (a gallery's own listing of its images, or —
-      // when a duplicated gallery reuses the same S3 URL — another
-      // gallery's own listing). Anything else means a blog post, page, or
-      // product description still embeds this gallery. Mirrors the
-      // usage check in the media router (src/server/api/routers/media.ts).
+      // per-image usage entries here (see src/lib/media/usage.ts). Mirrors
+      // the usage check in the media router (src/server/api/routers/media.ts)
+      // and shares its dedupe/lookup logic with the `usage` query above via
+      // buildGalleryExternalUsage — the two can never drift.
       if (gallery && gallery.images.length > 0) {
-        const usageIndex = await buildUsedMediaIndex(businessId);
-        const externalUsages = new Map<
-          string,
-          { location: string; entityLabel?: string }
-        >();
-        for (const img of gallery.images) {
-          const usages = usageIndex.get(normalizeUrl(img.url)) ?? [];
-          for (const u of usages) {
-            if (u.entityType === "galleryImage") continue;
-            externalUsages.set(`${u.entityType}:${u.entityId ?? u.location}`, {
-              location: u.location,
-              entityLabel: u.entityLabel,
-            });
-          }
-        }
+        const externalUsageByGallery = await buildGalleryExternalUsage(
+          businessId,
+        );
+        const list = externalUsageByGallery.get(id) ?? [];
 
-        if (externalUsages.size > 0) {
-          const list = Array.from(externalUsages.values());
+        if (list.length > 0) {
           const summary = list
             .slice(0, 5)
             .map((u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""))

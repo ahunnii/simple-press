@@ -13,11 +13,17 @@ import {
   testimonialSubmitLimiter,
 } from "~/lib/rate-limit";
 import { normalizeEmail } from "~/lib/utils";
+import {
+  testimonialBulkApproveSchema,
+  testimonialBulkDeleteSchema,
+  testimonialBulkHideSchema,
+} from "~/lib/validators/testimonials";
 
 import {
   createTRPCRouter,
   featureGate,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   protectedProcedure,
   publicProcedure,
 } from "../trpc";
@@ -538,36 +544,87 @@ export const testimonialRouter = createTRPCRouter({
 
   bulkApprove: ownerAdminProcedure
     .use(featureGate("testimonials"))
-    .input(
-      z.object({ ids: z.array(z.string()).min(1), isApproved: z.boolean() }),
-    )
+    .input(testimonialBulkApproveSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      return ctx.db.testimonial.updateMany({
-        where: { id: { in: input.ids }, businessId },
-        data: { isApproved: input.isApproved },
+
+      // `changedIds` is the rows this call will actually FLIP, captured before
+      // the write, and it is what the table's Undo re-sends. Re-sending the
+      // whole selection with `isApproved` inverted is not an inverse: a
+      // selection containing already-approved rows approves all of them, then
+      // "Undo" unapproves all of them — including the ones the user never
+      // touched. The client can't narrow it either (a selection spans pages,
+      // and off-page rows' `isApproved` state never reaches the browser).
+      // Unlike `discount.bulkSetActive` there is no eligibility guard here:
+      // testimonials have no expiry materializer that could flip a row back
+      // behind the owner's back, so every selected row is fair game.
+      //
+      // One transaction so nothing can change between the read and the update.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.testimonial.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            isApproved: { not: input.isApproved },
+          },
+          select: { id: true },
+        });
+
+        const result = await tx.testimonial.updateMany({
+          where: { id: { in: input.ids }, businessId },
+          data: { isApproved: input.isApproved },
+        });
+
+        return { changedIds: changed.map((t) => t.id), count: result.count };
       });
+
+      return { count, changedIds };
     }),
 
   bulkSetHidden: ownerAdminProcedure
     .use(featureGate("testimonials"))
-    .input(z.object({ ids: z.array(z.string()).min(1), isHidden: z.boolean() }))
+    .input(testimonialBulkHideSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      return ctx.db.testimonial.updateMany({
-        where: { id: { in: input.ids }, businessId },
-        data: { isHidden: input.isHidden },
+
+      // Same undo contract as `bulkApprove` above: `changedIds` is read inside
+      // the transaction, before the write, and is the only valid Undo target.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.testimonial.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            isHidden: { not: input.isHidden },
+          },
+          select: { id: true },
+        });
+
+        const result = await tx.testimonial.updateMany({
+          where: { id: { in: input.ids }, businessId },
+          data: { isHidden: input.isHidden },
+        });
+
+        return { changedIds: changed.map((t) => t.id), count: result.count };
       });
+
+      return { count, changedIds };
     }),
 
-  bulkDelete: ownerAdminProcedure
+  // OWNER only, unlike the two bulk toggles above. Not a statement about
+  // trusting managers — it's blast radius. Approve/hide is reversible in one
+  // click (and Undo-able); deleting N testimonials is unrecoverable without a
+  // database restore, and it takes live storefront content down with it. Same
+  // reason the schema's delete cap (ADMIN_BULK_DELETE_LIMIT) sits far below
+  // the selection cap the toggles use.
+  bulkDelete: ownerOnlyProcedure
     .use(featureGate("testimonials"))
-    .input(z.object({ ids: z.array(z.string()).min(1) }))
+    .input(testimonialBulkDeleteSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      return ctx.db.testimonial.deleteMany({
+      const result = await ctx.db.testimonial.deleteMany({
         where: { id: { in: input.ids }, businessId },
       });
+      return { count: result.count };
     }),
 
   sendInvite: ownerAdminProcedure
@@ -729,13 +786,19 @@ export const testimonialRouter = createTRPCRouter({
       });
     }),
 
-  listInvites: ownerAdminProcedure.query(async ({ ctx }) => {
-    return ctx.db.testimonialInvite.findMany({
-      where: { businessId: ctx.businessId },
-      orderBy: { createdAt: "desc" },
-      include: {
-        customer: { select: { firstName: true, lastName: true } },
-      },
-    });
-  }),
+  // Gated like every other admin procedure in this router. Callers were
+  // grepped first (migration doc's grep-before-gating rule): the only consumer
+  // is the admin testimonials page, which is already behind the same flag, so
+  // adding the gate can't 404 a caller that was relying on it being open.
+  listInvites: ownerAdminProcedure
+    .use(featureGate("testimonials"))
+    .query(async ({ ctx }) => {
+      return ctx.db.testimonialInvite.findMany({
+        where: { businessId: ctx.businessId },
+        orderBy: { createdAt: "desc" },
+        include: {
+          customer: { select: { firstName: true, lastName: true } },
+        },
+      });
+    }),
 });

@@ -82,10 +82,23 @@ export default async function CustomerDetailPage({ params }: Props) {
               </Card>
             ) : (
               <OrdersTable
-                orders={customer.orders.map((o) => ({
-                  ...o,
-                  shippingAddress: o.shippingAddress ?? undefined,
-                }))}
+                orders={customer.orders.map(
+                  ({ items, shippingAddress: _shippingAddress, ...o }) => ({
+                    ...o,
+                    // The admin Orders table's row type carries a computed
+                    // itemCount rather than the full items relation — mirror
+                    // that here instead of shipping every OrderItem column
+                    // just to be reduced to `.length`.
+                    itemCount: items.length,
+                    // This view's `customer.getById` query doesn't fetch
+                    // inventoryHistory (only the Orders list router needs it,
+                    // to flag oversells) — false here matches this call
+                    // site's PRE-EXISTING behavior of never setting
+                    // `hasOversell`, so the Oversold badge simply never
+                    // showed on a customer's order history before either.
+                    hasOversell: false,
+                  }),
+                )}
               />
             )}
           </div>
