@@ -44,6 +44,10 @@ export const platformRouter = createTRPCRouter({
             name: true,
             platformRole: true,
             createdAt: true,
+            // Platform ToS + Privacy acceptance (see policy-versions.ts). Null
+            // is expected and common on day one — nothing was backfilled.
+            termsAcceptedAt: true,
+            termsVersion: true,
             _count: {
               select: {
                 memberships: true,
@@ -77,11 +81,17 @@ export const platformRouter = createTRPCRouter({
           emailVerified: true,
           createdAt: true,
           updatedAt: true,
+          termsAcceptedAt: true,
+          termsVersion: true,
           memberships: {
             select: {
               id: true,
               role: true,
               createdAt: true,
+              // Seller & Merchant Agreement + Acceptable Use, per membership —
+              // one person can own two stores and accept separately for each.
+              merchantTermsAcceptedAt: true,
+              merchantTermsVersion: true,
               business: {
                 select: {
                   id: true,
@@ -152,6 +162,18 @@ export const platformRouter = createTRPCRouter({
             _count: {
               select: {
                 memberships: true,
+              },
+            },
+            // Merchant terms status is computed client-side from just the
+            // OWNER memberships (never STAFF/MANAGER — the agreement is the
+            // owner's). This nested select is answered in the same query
+            // Prisma already issues for the page of rows, not one query per
+            // business, so it does not add an N+1.
+            memberships: {
+              where: { role: "OWNER" },
+              select: {
+                merchantTermsAcceptedAt: true,
+                merchantTermsVersion: true,
               },
             },
           },
@@ -629,6 +651,7 @@ export const platformRouter = createTRPCRouter({
       newBusinesses30d,
       activeBusinesses,
       pendingDomains,
+      businessesWithoutAcceptedOwner,
       recentUsers,
       recentBusinesses,
     ] = await Promise.all([
@@ -639,6 +662,22 @@ export const platformRouter = createTRPCRouter({
       ctx.db.business.count({ where: { status: "active" } }),
       ctx.db.domainQueue.count({
         where: { status: { in: ["pending", "processing", "failed"] } },
+      }),
+      // Businesses with no OWNER membership that has ever accepted the Seller
+      // & Merchant Agreement — the only document that grants the platform
+      // grounds to suspend a store. `none: { role: "OWNER", merchantTermsAcceptedAt: { not: null } }`
+      // compiles to a single NOT EXISTS subquery, so this is one count query
+      // regardless of how many businesses or memberships exist — no N+1, and
+      // no need to pull membership rows into app code just to count.
+      ctx.db.business.count({
+        where: {
+          memberships: {
+            none: {
+              role: "OWNER",
+              merchantTermsAcceptedAt: { not: null },
+            },
+          },
+        },
       }),
       ctx.db.user.findMany({
         take: 5,
@@ -672,6 +711,7 @@ export const platformRouter = createTRPCRouter({
       newBusinesses30d,
       activeBusinesses,
       pendingDomains,
+      businessesWithoutAcceptedOwner,
       recentUsers,
       recentBusinesses,
     };

@@ -13,6 +13,18 @@ export type RequireAdminAccessResult = {
   business: NonNullable<Awaited<ReturnType<typeof checkBusiness>>>;
   /** Resolved BusinessMembership role, or null for PLATFORM_ADMIN (implicit access). */
   membershipRole: AdminRole | null;
+  /**
+   * `BusinessMembership.merchantTermsAcceptedAt` for THIS membership, piggybacked
+   * on the membership lookup for the `/admin` retroactive-terms gate.
+   *
+   * Three-state, and only meaningful alongside `membershipRole === "OWNER"`:
+   * `Date` = on file, `null` = nothing on file, `undefined` = not determined
+   * (PLATFORM_ADMIN, who never runs a membership lookup at all, or a database
+   * that does not have the column yet). Read it through
+   * `shouldPromptOwnerTerms` in `~/lib/legal/owner-terms-gate` rather than
+   * testing it directly — `undefined` must never be treated as "not accepted".
+   */
+  merchantTermsAcceptedAt?: Date | null;
 };
 
 type Options = {
@@ -56,6 +68,9 @@ export async function requireAdminAccess(
 
   // Allow PLATFORM_ADMIN unconditionally
   let membershipRole: AdminRole | null = null;
+  // Stays `undefined` for PLATFORM_ADMIN — no membership is looked up, so there
+  // is nothing to report, and "unknown" is the honest value.
+  let merchantTermsAcceptedAt: Date | null | undefined;
   if (session.user.platformRole !== "PLATFORM_ADMIN") {
     // For everyone else, check BusinessMembership
     const membership = await checkBusinessMembership(
@@ -69,6 +84,7 @@ export async function requireAdminAccess(
       redirect("/not-permitted");
     }
     membershipRole = membership.role as AdminRole;
+    merchantTermsAcceptedAt = membership.merchantTermsAcceptedAt;
 
     // STAFF is fulfillment-only: orders + customers. Middleware exposes the
     // requested path via x-pathname; anything outside the allowed pages sends
@@ -85,5 +101,5 @@ export async function requireAdminAccess(
     }
   }
 
-  return { session, business, membershipRole };
+  return { session, business, membershipRole, merchantTermsAcceptedAt };
 }

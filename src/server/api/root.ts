@@ -21,6 +21,7 @@ import { financeRouter } from "./routers/finance";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
+import { legalRouter } from "./routers/legal";
 import { marketingRouter } from "./routers/marketing";
 import { mediaRouter } from "./routers/media";
 import { orderRouter } from "./routers/order";
@@ -83,6 +84,7 @@ export const appRouter = createTRPCRouter({
 
   upload: uploadRouter,
   search: searchRouter,
+  legal: legalRouter,
 });
 
 // export type definition of API
