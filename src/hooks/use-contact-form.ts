@@ -84,11 +84,13 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     // staged on mount/refresh — v3 tokens are single-use and expire after
     // 120s, so a token minted when the form first rendered may be stale by
     // the time a user finishes typing. Minted via `useRecaptchaV3` directly
-    // (not through `captchaRef`) so this hook is self-sufficient: pages that
-    // render no `RecaptchaField` at all (e.g. `CoopContactPage`, which has no
-    // captcha widget by design) still get a correctly-actioned token instead
-    // of silently submitting empty. Falls back to whatever was last staged
-    // in state only if the fresh mint fails (e.g. transient network error).
+    // (not through `captchaRef`) so this hook is self-sufficient: a template
+    // form that forgot to render a `RecaptchaField` would still get a
+    // correctly-actioned token instead of silently submitting empty. (Every
+    // current consumer does render one — it carries the Google attribution
+    // that hiding the badge in globals.css requires.) Falls back to whatever
+    // was last staged in state only if the fresh mint fails (e.g. transient
+    // network error).
     const freshToken = await executeRecaptcha(RECAPTCHA_ACTION);
     const tokenToSend = freshToken ?? captchaToken;
 

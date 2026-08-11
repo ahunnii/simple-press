@@ -109,7 +109,10 @@ export default async function AdminDashboardPage() {
       },
     }),
 
-    // Recent orders (last 10)
+    // Recent orders (last 6). Kept short deliberately: this card is a glance,
+    // not a browsing surface — "View All" goes to /admin/orders. If you change
+    // this, match the skeleton row count in `loading.tsx` so the page doesn't
+    // shift when the data lands.
     db.order.findMany({
       where: {
         businessId: business.id,
@@ -117,7 +120,7 @@ export default async function AdminDashboardPage() {
       orderBy: {
         createdAt: "desc",
       },
-      take: 10,
+      take: 6,
       select: {
         id: true,
         orderNumber: true,

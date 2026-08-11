@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Plus, Search, ShoppingCart } from "lucide-react";
 
 import type { FilterDefFor } from "../_components/admin-filters";
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { cn } from "~/lib/utils";
 import {
@@ -152,6 +153,16 @@ function QueueStatCard({ card }: { card: QueueCard }) {
 export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams;
 
+  // STAFF can reach this list (`staffProcedure`) but neither of the two actions
+  // in the header works for them — `order.createManual`, the catalog query the
+  // manual-order form needs, and `export.exportOrders` are all
+  // `ownerAdminProcedure`. `STAFF_ALLOWED_PATH_PREFIXES` matches on prefix, so
+  // /admin/orders/new is not blocked by the layout guard either: without this,
+  // staff saw a button that error-boundaried the page they landed on, and an
+  // Export button that only ever produced a FORBIDDEN toast.
+  const { membershipRole } = await requireAdminAccess();
+  const canUseOwnerActions = membershipRole !== "STAFF";
+
   // Whitelist everything going in. `pickParam` falls back rather than throwing,
   // so a stale bookmark or a hand-typed `?sort=bogus` renders the default view;
   // `parsePageParam` does the same for `?page=abc`.
@@ -259,13 +270,17 @@ export default async function OrdersPage({ searchParams }: Props) {
             <p>Manage your customer orders</p>
           </div>
           <div className="flex items-center gap-2">
-            <ExportOrdersButton />
-            <Button asChild>
-              <Link href="/admin/orders/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Manual Order
-              </Link>
-            </Button>
+            {canUseOwnerActions && (
+              <>
+                <ExportOrdersButton />
+                <Button asChild>
+                  <Link href="/admin/orders/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Manual Order
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -273,14 +288,20 @@ export default async function OrdersPage({ searchParams }: Props) {
           <AdminEmpty
             icon={ShoppingCart}
             title="No orders yet"
-            description="Orders appear here when customers check out on your storefront. You can also create one manually for phone or in-person sales."
+            description={
+              canUseOwnerActions
+                ? "Orders appear here when customers check out on your storefront. You can also create one manually for phone or in-person sales."
+                : "Orders appear here when customers check out on your storefront."
+            }
             action={
-              <Button asChild>
-                <Link href="/admin/orders/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Manual Order
-                </Link>
-              </Button>
+              canUseOwnerActions ? (
+                <Button asChild>
+                  <Link href="/admin/orders/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Manual Order
+                  </Link>
+                </Button>
+              ) : undefined
             }
           />
         ) : (

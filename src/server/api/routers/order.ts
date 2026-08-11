@@ -22,7 +22,8 @@ import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
   addShipmentSchema,
   buildOrderListWhere,
-  manualOrderFormSchema,
+  computeManualOrderTotals,
+  manualOrderInputSchema,
   markAsFulfilledSchema,
   markAsRefundedSchema,
   orderFiltersSchema,
@@ -1365,9 +1366,15 @@ export const orderRouter = createTRPCRouter({
 
   createManual: ownerAdminProcedure
     .use(featureGate("orders"))
-    .input(manualOrderFormSchema)
+    .input(manualOrderInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      // Authoritative money. The client sends items and charges, never the
+      // resulting subtotal/total — those used to come straight off the request
+      // and be written verbatim, so a crafted payload could record a $500 order
+      // as `total: 0` and silently skew the Finances page.
+      const totals = computeManualOrderTotals(input);
 
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
@@ -1400,16 +1407,25 @@ export const orderRouter = createTRPCRouter({
         ),
       ];
 
-      if (lineItemProductIds.length > 0) {
-        const ownedCount = await ctx.db.product.count({
-          where: { id: { in: lineItemProductIds }, businessId },
+      // Fetched rather than counted so the same round-trip can also answer
+      // "does this product have variants?" below.
+      const ownedProducts =
+        lineItemProductIds.length > 0
+          ? await ctx.db.product.findMany({
+              where: { id: { in: lineItemProductIds }, businessId },
+              select: {
+                id: true,
+                name: true,
+                _count: { select: { variants: true } },
+              },
+            })
+          : [];
+
+      if (ownedProducts.length !== lineItemProductIds.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "One or more products do not belong to this business",
         });
-        if (ownedCount !== lineItemProductIds.length) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "One or more products do not belong to this business",
-          });
-        }
       }
 
       if (lineItemVariantIds.length > 0) {
@@ -1423,6 +1439,28 @@ export const orderRouter = createTRPCRouter({
               "One or more product variants do not belong to this business",
           });
         }
+      }
+
+      // A product that HAS variants must have one chosen. The form checks this
+      // too, but only against the catalog it was rendered with — a product that
+      // gained variants after the page loaded would slip past it and be stored
+      // variant-less at the base price, which then reads as a bare product name
+      // everywhere downstream and cannot be fulfilled against a specific SKU.
+      const variantfulProductIds = new Set(
+        ownedProducts.filter((p) => p._count.variants > 0).map((p) => p.id),
+      );
+      const missingVariant = input.items.find(
+        (item) =>
+          variantfulProductIds.has(item.productId) && !item.productVariantId,
+      );
+      if (missingVariant) {
+        const name =
+          ownedProducts.find((p) => p.id === missingVariant.productId)?.name ??
+          missingVariant.productName;
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Choose a variant for "${name}".`,
+        });
       }
 
       const nameParts = input.customerName.trim().split(" ");
@@ -1454,8 +1492,15 @@ export const orderRouter = createTRPCRouter({
       );
 
       let shippingAddressId: string | undefined;
-      if (input.shippingAddress) {
-        const shippingName = input.shippingName?.trim() ?? input.customerName;
+      // A pickup order has nothing to ship, so no address is recorded even if
+      // one came along in the payload.
+      if (input.shippingAddress && input.deliveryMethod !== "pickup") {
+        // Emptiness-checked, not `??`: an empty-string shippingName is not
+        // nullish, so `??` let it through and produced an address with a blank
+        // first name.
+        const trimmedShippingName = input.shippingName?.trim() ?? "";
+        const shippingName =
+          trimmedShippingName === "" ? input.customerName : trimmedShippingName;
         const shippingNameParts = shippingName.split(" ");
         const shippingFirstName = shippingNameParts[0] ?? firstName;
         const shippingLastName =
@@ -1466,10 +1511,14 @@ export const orderRouter = createTRPCRouter({
           firstName: shippingFirstName,
           lastName: shippingLastName,
           address1: input.shippingAddress.line1,
+          address2: input.shippingAddress.line2 ?? null,
           city: input.shippingAddress.city,
-          province: input.shippingAddress.state,
+          // `ShippingAddress.province` is nullable and plenty of countries have
+          // no subdivision, but the helper takes a plain string.
+          province: input.shippingAddress.state ?? "",
           zip: input.shippingAddress.postal_code,
           country: input.shippingAddress.country,
+          phone: input.shippingAddress.phone ?? null,
         });
       }
 
@@ -1504,15 +1553,21 @@ export const orderRouter = createTRPCRouter({
                 customerEmail: normalizedCustomerEmail,
                 customerName: input.customerName,
 
-                subtotal: input.subtotal,
-                tax: input.tax ?? 0,
-                shipping: input.shipping ?? 0,
-                total: input.total,
+                subtotal: totals.subtotal,
+                tax: totals.tax,
+                shipping: totals.shipping,
+                discount: totals.discount,
+                total: totals.total,
 
                 status: input.status,
                 paymentStatus: input.paymentStatus,
                 paymentMethod,
                 fulfillmentStatus: input.fulfillmentStatus,
+                deliveryMethod: input.deliveryMethod,
+
+                // Backdating for sales recorded after the fact. Omitted =
+                // Prisma's `@default(now())`.
+                ...(input.orderDate ? { createdAt: input.orderDate } : {}),
 
                 shippingAddressId,
                 internalNote,
@@ -1520,11 +1575,17 @@ export const orderRouter = createTRPCRouter({
                 items: {
                   create: input.items.map((item) => ({
                     productId: item.productId,
-                    productName: item.productName ?? "Unknown Product",
+                    productName: item.productName,
                     productVariantId: item.productVariantId,
+                    // Snapshot fields. `variantName` in particular was being
+                    // computed on the client and then dropped, so every manual
+                    // order with a variant rendered as a bare product name on
+                    // the detail page, packing slip and invoice.
+                    variantName: item.variantName ?? null,
+                    sku: item.sku ?? null,
                     quantity: item.quantity,
                     price: item.price,
-                    total: item.total,
+                    total: Math.round(item.price * item.quantity),
                   })),
                 },
               },

@@ -5427,3 +5427,19 @@
     transition: none;
   }
 }
+
+/* ══ reCAPTCHA v3 badge (platform-wide) ═══════════════════════════════════
+   Google's api.js appends a fixed badge to <body> the moment it loads, and
+   never removes it — so after any captcha form mounts, the badge follows the
+   visitor through every client-side navigation. Hidden here instead, which
+   Google's FAQ permits only because every token-minting form renders the
+   inline attribution (`RecaptchaDisclosure` in
+   src/components/inputs/recaptcha-field.tsx) in its place. If a new form
+   ever mints tokens WITHOUT rendering that disclosure, this rule makes it
+   non-compliant — add the disclosure, don't unhide the badge.
+   `visibility: hidden` rather than `display: none`, per Google's own
+   snippet: the element stays in the layout tree, so token minting is
+   provably unaffected. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

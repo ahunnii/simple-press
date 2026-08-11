@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildOrderListWhere } from "./order";
+import {
+  buildOrderListWhere,
+  computeManualOrderTotals,
+  manualOrderFormSchema,
+} from "./order";
 
 /**
  * `buildOrderListWhere` is the single `where` behind BOTH the admin Orders list
@@ -189,5 +193,223 @@ describe("buildOrderListWhere", () => {
       const where = buildOrderListWhere({ ...base, search: undefined });
       expect(where.AND).toBeUndefined();
     });
+  });
+});
+
+/**
+ * `computeManualOrderTotals` is the only thing standing between the manual
+ * order form and the Finances page. It used to not exist: `createManual` wrote
+ * the client's `subtotal`/`total` verbatim, so a crafted request could record a
+ * $500 order as `total: 0`. The server now derives both, and the client renders
+ * its preview through this same function so the two cannot drift.
+ *
+ * Everything here is in cents.
+ */
+describe("computeManualOrderTotals", () => {
+  it("derives the subtotal from line items rather than trusting a caller", () => {
+    const totals = computeManualOrderTotals({
+      items: [
+        { price: 1250, quantity: 2 },
+        { price: 999, quantity: 1 },
+      ],
+    });
+
+    expect(totals.subtotal).toBe(3499);
+    expect(totals.total).toBe(3499);
+  });
+
+  it("adds shipping and tax on top of the item subtotal", () => {
+    const totals = computeManualOrderTotals({
+      items: [{ price: 1000, quantity: 1 }],
+      shipping: 599,
+      tax: 106,
+    });
+
+    expect(totals.total).toBe(1705);
+  });
+
+  it("subtracts the discount", () => {
+    const totals = computeManualOrderTotals({
+      items: [{ price: 5000, quantity: 1 }],
+      shipping: 500,
+      discount: 1000,
+    });
+
+    expect(totals.discount).toBe(1000);
+    expect(totals.total).toBe(4500);
+  });
+
+  it("clamps an over-large discount so the total can never go negative", () => {
+    const totals = computeManualOrderTotals({
+      items: [{ price: 1000, quantity: 1 }],
+      shipping: 200,
+      tax: 50,
+      // More than the order is worth — a fat-fingered entry must not produce a
+      // negative Order.total, which would read as a credit in revenue figures.
+      discount: 999_999,
+    });
+
+    expect(totals.discount).toBe(1250);
+    expect(totals.total).toBe(0);
+  });
+
+  it("falls back to directSubtotal only when there are no line items", () => {
+    const withItems = computeManualOrderTotals({
+      items: [{ price: 1000, quantity: 1 }],
+      directSubtotal: 999_999,
+    });
+    // Line items win: directSubtotal is the no-items escape hatch, not an
+    // override that could mask what was actually ordered.
+    expect(withItems.subtotal).toBe(1000);
+
+    const withoutItems = computeManualOrderTotals({
+      items: [],
+      directSubtotal: 2500,
+    });
+    expect(withoutItems.subtotal).toBe(2500);
+    expect(withoutItems.total).toBe(2500);
+  });
+
+  it("treats an empty order with no direct subtotal as zero, not NaN", () => {
+    expect(computeManualOrderTotals({ items: [] })).toEqual({
+      subtotal: 0,
+      shipping: 0,
+      tax: 0,
+      discount: 0,
+      total: 0,
+    });
+  });
+
+  it("rounds each line before summing, so a fractional-cent price cannot leak a float into the Int columns", () => {
+    // Product.price is a Prisma Float; importers can write fractional cents.
+    const totals = computeManualOrderTotals({
+      items: [
+        { price: 10.5, quantity: 3 },
+        { price: 0.5, quantity: 1 },
+      ],
+    });
+
+    expect(Number.isInteger(totals.subtotal)).toBe(true);
+    expect(totals.subtotal).toBe(33); // round(31.5) + round(0.5)
+  });
+});
+
+/**
+ * `manualOrderFormSchema` is what react-hook-form validates, and it had no
+ * tests — which is precisely how the bug these first cases pin got shipped.
+ *
+ * The form seeds every shippingAddress key with `""`. An earlier version built
+ * this from `shippingAddressSchema.partial()`, but `.partial()` only makes keys
+ * optional: the `.min(1)` refinements still fired on the present-but-empty
+ * values. The result was that the form could not be submitted at all unless a
+ * full address was filled in — and because the address card is hidden when it
+ * isn't being captured, the errors landed on unrendered fields and the Save
+ * button silently did nothing. Every pickup order was unreachable.
+ */
+describe("manualOrderFormSchema", () => {
+  const base = {
+    customerName: "Jane Doe",
+    customerEmail: "jane@example.com",
+    shippingName: "",
+    // As seeded by the form's defaultValues.
+    shippingAddress: {
+      line1: "",
+      line2: "",
+      city: "",
+      state: "",
+      postal_code: "",
+      country: "US",
+      phone: "",
+    },
+    deliveryMethod: "ship" as const,
+    includeAddress: false,
+    items: [
+      {
+        productId: "prod_1",
+        productName: "A Thing",
+        productVariantId: null,
+        variantName: null,
+        sku: null,
+        quantity: 1,
+        price: 1000,
+      },
+    ],
+    useDirectSubtotal: false,
+    directSubtotal: null,
+    shipping: null,
+    tax: null,
+    discount: null,
+    orderDate: "",
+    notes: "",
+    paymentStatus: "pending" as const,
+    paymentMethod: undefined,
+    fulfillmentStatus: "unfulfilled" as const,
+    sendConfirmationEmail: false,
+  };
+
+  const issues = (input: unknown) => {
+    const result = manualOrderFormSchema.safeParse(input);
+    return result.success
+      ? []
+      : result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+  };
+
+  it("accepts a ship order with no address captured, despite empty address fields", () => {
+    expect(issues(base)).toEqual([]);
+  });
+
+  it("accepts a pickup order, which never captures an address", () => {
+    expect(issues({ ...base, deliveryMethod: "pickup" as const })).toEqual([]);
+  });
+
+  it("requires the address members once an address is being captured", () => {
+    expect(issues({ ...base, includeAddress: true })).toEqual([
+      "shippingAddress.line1: Street address is required",
+      "shippingAddress.city: City is required",
+      "shippingAddress.postal_code: Postal code is required",
+    ]);
+  });
+
+  it("does not require an address for pickup even when includeAddress is on", () => {
+    // The address card is hidden for pickup, so a stale `includeAddress: true`
+    // must not be able to block submission with errors nobody can see.
+    expect(
+      issues({
+        ...base,
+        includeAddress: true,
+        deliveryMethod: "pickup" as const,
+      }),
+    ).toEqual([]);
+  });
+
+  it("treats a whitespace-only address field as missing", () => {
+    expect(
+      issues({
+        ...base,
+        includeAddress: true,
+        shippingAddress: { ...base.shippingAddress, line1: "   ", city: "NY", postal_code: "10001" },
+      }),
+    ).toEqual(["shippingAddress.line1: Street address is required"]);
+  });
+
+  it("rejects a line item with no product picked", () => {
+    const blankRow = { ...base.items[0]!, productId: "", productName: "" };
+    expect(issues({ ...base, items: [blankRow] })).toContain(
+      "items.0.productId: Pick a product",
+    );
+  });
+
+  it("requires either line items or a direct subtotal", () => {
+    expect(issues({ ...base, items: [] })).toEqual([
+      "items: Add at least one item, or enter a subtotal directly.",
+    ]);
+
+    expect(
+      issues({ ...base, items: [], useDirectSubtotal: true, directSubtotal: 25 }),
+    ).toEqual([]);
+
+    expect(
+      issues({ ...base, items: [], useDirectSubtotal: true, directSubtotal: null }),
+    ).toEqual(["directSubtotal: Enter a subtotal."]);
   });
 });

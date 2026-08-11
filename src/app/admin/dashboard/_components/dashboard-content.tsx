@@ -33,7 +33,11 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { WARNING_TEXT, DANGER_TEXT } from "~/app/admin/_components/admin-table-style";
+import {
+  DANGER_TEXT,
+  SUCCESS_TEXT,
+  WARNING_TEXT,
+} from "~/app/admin/_components/admin-table-style";
 
 type DashboardContentProps = {
   business: {
@@ -274,7 +278,7 @@ export function DashboardContent({
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/content/template">
+              <Link href="/editor">
                 <Palette className="mr-1.5 h-3.5 w-3.5" />
                 Customize
               </Link>
@@ -502,8 +506,15 @@ export function DashboardContent({
           {conversionCard}
         </div>
 
-        {/* Two Column Layout */}
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Two Column Layout.
+
+            `items-start` matters: grid defaults to `align-items: stretch`, so
+            without it the shorter card is stretched to the taller one's height.
+            Nothing inside a Card consumes that space (CardContent has no
+            `flex-1`), so it became dead whitespace — most obvious when Low
+            Stock is empty and sat as a tall, near-blank card next to a full
+            Recent Orders. Let each card size to its own content instead. */}
+        <div className="mb-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           {/* Recent Orders */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -578,7 +589,7 @@ export function DashboardContent({
             <CardContent>
               {lowStockProducts.length === 0 && lowStockPools.length === 0 ? (
                 <div className="py-8 text-center">
-                  <Package className="mx-auto mb-3 h-12 w-12 text-green-400" />
+                  <Package className={`mx-auto mb-3 h-12 w-12 ${SUCCESS_TEXT}`} />
                   <p className="text-muted-foreground">
                     All stock levels are good!
                   </p>
@@ -594,7 +605,9 @@ export function DashboardContent({
                       className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/40"
                     >
                       <div className="flex items-center gap-3">
-                        <AlertTriangle className={`h-5 w-5 shrink-0 ${WARNING_TEXT}`} />
+                        <AlertTriangle
+                          className={`h-5 w-5 shrink-0 ${WARNING_TEXT}`}
+                        />
                         <div>
                           <p className="text-foreground text-sm font-medium">
                             {variant.product.name}

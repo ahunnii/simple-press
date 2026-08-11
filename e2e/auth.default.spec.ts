@@ -247,8 +247,13 @@ test("sign up with valid details lands on the verify-email view", async ({
   await page.getByLabel(/^email$/i).fill(email);
   await page.getByLabel(/^password$/i).fill(SIGN_UP_PASSWORD);
 
-  // Terms-of-service consent gate (src/providers/providers.tsx) — matched by
-  // its accessible name (the rendered label text), not any library markup.
+  // Terms-of-service consent gate (the `termsAccepted` field in
+  // src/components/auth/sign-up.tsx) — matched by its accessible name (the
+  // rendered label text), not any library markup.
+  //
+  // This locator REQUIRES that only one such checkbox exists. A second consent
+  // checkbox with the same label used to be declared in providers.tsx, which
+  // made this a strict-mode violation on two matches. Don't reintroduce one.
   await page
     .getByRole("checkbox", { name: /I agree to SimplePress/i })
     .check();
@@ -279,7 +284,8 @@ test("the terms checkbox is required to sign up", async ({ page }) => {
   // anyway.
   await page.getByRole("button", { name: /sign\s?up/i }).click();
 
-  // The checkbox is `required` (src/providers/providers.tsx). Radix forwards
+  // The checkbox is `required` (the `termsAccepted` field in
+  // src/components/auth/sign-up.tsx). Radix forwards
   // `required` to a hidden native `<input type="checkbox">` it renders for
   // form participation, so the browser's own constraint validation blocks the
   // form's `submit` event before React's `onSubmit` handler ever runs — no

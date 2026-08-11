@@ -602,24 +602,29 @@ export function SignUp({
 
                   <FieldContent>
                     <FieldLabel htmlFor="termsAccepted" className="font-normal">
-                      I agree to SimplePress&apos;s{" "}
-                      <a
-                        href={platformTermsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-4"
-                      >
-                        Terms of Service
-                      </a>{" "}
-                      and{" "}
-                      <a
-                        href={platformPrivacyUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-4"
-                      >
-                        Privacy Policy
-                      </a>
+                      {/* Single <span> on purpose: `Label` is a flex
+                          container, so bare text + anchors would each become
+                          their own flex item and the sentence breaks apart. */}
+                      <span>
+                        I agree to SimplePress&apos;s{" "}
+                        <a
+                          href={platformTermsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href={platformPrivacyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          Privacy Policy
+                        </a>
+                      </span>
                     </FieldLabel>
 
                     <FieldError>{termsError}</FieldError>

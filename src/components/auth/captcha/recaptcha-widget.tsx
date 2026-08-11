@@ -72,7 +72,8 @@ export function RecaptchaWidget({
     return () => setReset(null);
   }, [setReset, mint]);
 
-  // No widget: v3 is invisible and the badge is hidden, so Google's terms
-  // require the attribution below to appear in the flow instead.
+  // No widget: v3 is invisible and the badge is hidden (`.grecaptcha-badge`
+  // rule in src/styles/globals.css), so Google's terms require the
+  // attribution below to appear in the flow instead.
   return <RecaptchaDisclosure className="text-center" />;
 }

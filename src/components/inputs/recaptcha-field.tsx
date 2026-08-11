@@ -13,10 +13,11 @@ import { useRecaptchaAutoRefresh } from "~/lib/captcha/use-recaptcha-v3";
 /**
  * Google's required attribution.
  *
- * The v3 badge is hidden on every SimplePress form (there is no widget to
- * show), and Google's terms permit that only if this disclosure appears in
- * the user flow instead. Exported so `RecaptchaWidget` renders the identical
- * text rather than keeping a second copy that can drift.
+ * The v3 badge is hidden platform-wide (`.grecaptcha-badge` rule in
+ * src/styles/globals.css), and Google's terms permit that only if this
+ * disclosure appears in the user flow instead. Exported so `RecaptchaWidget`
+ * renders the identical text rather than keeping a second copy that can
+ * drift.
  */
 export function RecaptchaDisclosure({ className }: { className?: string }) {
   return (
