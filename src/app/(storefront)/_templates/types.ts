@@ -62,6 +62,11 @@ export type DefaultVideosPageTemplateProps = {
   videos: RouterOutputs["videos"]["getPublic"];
 };
 
+export type DefaultFaqPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  items: RouterOutputs["faq"]["list"];
+};
+
 export type DefaultCartPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
 };

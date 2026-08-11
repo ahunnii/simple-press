@@ -35,6 +35,8 @@ import { NoiseHomepage } from "./(storefront)/_templates/noise/homepage/noise-ho
 import { NoiseLayout } from "./(storefront)/_templates/noise/layout/noise-layout";
 import { PinkHomepage } from "./(storefront)/_templates/pink/homepage/pink-homepage";
 import { PinkLayout } from "./(storefront)/_templates/pink/layout/pink-layout";
+import { RelocationHomepage } from "./(storefront)/_templates/relocation/homepage/relocation-homepage";
+import { RelocationLayout } from "./(storefront)/_templates/relocation/layout/relocation-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
@@ -95,6 +97,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       builders: BuildersHomepage,
       coop: CoopHomepage,
       pink: PinkHomepage,
+      relocation: RelocationHomepage,
       sledge: SledgeHomepage,
       vii: ViiHomepage,
     }[business.templateId] ?? DefaultHomePage;
@@ -112,6 +115,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       builders: BuildersLayout,
       coop: CoopLayout,
       pink: PinkLayout,
+      relocation: RelocationLayout,
       sledge: SledgeLayout,
       vii: ViiLayout,
     }[business.templateId] ?? DefaultLayout;

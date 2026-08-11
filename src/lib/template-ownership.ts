@@ -64,6 +64,12 @@ const COMMERCIAL_TEMPLATE_OWNERSHIP = {
     label: "Testkit",
     subdomains: ["testkit"],
   },
+  // 1:1 recreation of handyrelocations.com (Detroit moving company). "demo"
+  // is included so runtime QA can switch the demo business to this template.
+  relocation: {
+    label: "Handy Relocations",
+    subdomains: ["handyrelocations", "demo"],
+  },
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {

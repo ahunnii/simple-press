@@ -13,6 +13,7 @@ export const PAGE_PREVIEW_PATHS: Record<string, string> = {
   services: "/services",
   events: "/events",
   videos: "/videos",
+  faq: "/faq",
   // "cart" and "checkout" field pages are intentionally absent: the preview
   // iframe's cart is empty (localStorage), so those pages preview an
   // unrepresentative state. Their fields remain editable in the advanced
