@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { RelocationPillButton } from "../shared/relocation-pill-button";
@@ -325,8 +325,9 @@ export function RelocationQuoteForm({
           )}
         />
 
-        <HCaptchaField
+        <RecaptchaField
           ref={captchaRef}
+          action="contact"
           onVerify={setCaptchaToken}
           onExpire={() => setCaptchaToken("")}
           onError={() => setCaptchaToken("")}

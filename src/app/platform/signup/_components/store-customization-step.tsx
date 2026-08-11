@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
-import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
 import { authClient } from "~/server/better-auth/client";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -17,7 +17,7 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 
 type StoreCustomizationStepProps = {
   formData: Partial<SignupFormData>;
@@ -28,7 +28,7 @@ export function StoreCustomizationStep({
   formData,
   onBack,
 }: StoreCustomizationStepProps) {
-  const captchaRef = useRef<HCaptchaHandle>(null);
+  const captchaRef = useRef<RecaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [heroTitle, setHeroTitle] = useState(
     formData.heroTitle ?? `Welcome to ${formData.businessName ?? "Our Store"}`,
@@ -61,13 +61,20 @@ export function StoreCustomizationStep({
         return;
       }
 
+      // Mint a fresh token right before submitting rather than reusing
+      // whatever was staged — this form is long enough (hero title,
+      // subtitle, about text, colors) that a staged token can easily be
+      // past its 120s TTL by the time the user actually submits.
+      const freshCaptchaToken =
+        (await captchaRef.current?.execute()) ?? captchaToken;
+
       const { error: signUpError } = await authClient.signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
         fetchOptions: {
           headers: {
-            "x-captcha-response": captchaToken,
+            "x-captcha-response": freshCaptchaToken,
           },
         },
       });
@@ -225,8 +232,9 @@ export function StoreCustomizationStep({
             </div>
           </div>
 
-          <HCaptchaField
+          <RecaptchaField
             ref={captchaRef}
+            action="auth"
             onVerify={setCaptchaToken}
             onExpire={() => setCaptchaToken("")}
             onError={() => setCaptchaToken("")}

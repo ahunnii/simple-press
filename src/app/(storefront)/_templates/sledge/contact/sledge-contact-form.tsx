@@ -9,7 +9,7 @@ import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Form } from "~/components/ui/form";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -130,8 +130,9 @@ export function SledgeContactForm({ formTitle }: Props) {
             className="flex flex-col gap-2"
           />
 
-          <HCaptchaField
+          <RecaptchaField
             ref={captchaRef}
+            action="contact"
             onVerify={setCaptchaToken}
             onExpire={() => setCaptchaToken("")}
             onError={() => setCaptchaToken("")}

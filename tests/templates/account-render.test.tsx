@@ -154,7 +154,7 @@ const fakeAuthClient = {
  * Wraps children in the real `<AuthProvider>` (approach (a) from the task
  * brief) with a stub client and an explicit, per-render `QueryClient` — the
  * same shape `src/providers/providers.tsx` uses in production, minus the
- * hCaptcha/terms-field/basePaths wiring that isn't reachable from a
+ * reCAPTCHA/terms-field/basePaths wiring that isn't reachable from a
  * signed-out settings/security mount. This is more faithful than mocking
  * `@better-auth-ui/react` itself: it exercises the real `useAuth`/`useSession`
  * hooks the vendored settings cards depend on.

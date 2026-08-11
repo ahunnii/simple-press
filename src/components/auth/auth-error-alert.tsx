@@ -13,9 +13,11 @@ import { cn } from "~/lib/utils";
  * Sits directly above the submit button inside `CardContent`, so it is styled
  * to read as one more row of the form rather than a banner bolted onto it.
  *
- * Renders nothing for a captcha failure: that message belongs beside the
- * captcha widget (as a `FieldError`), not at the bottom of the form, so the
- * user's eye lands on the control they have to fix.
+ * Captcha failures render here too. They used to be suppressed and shown as a
+ * `FieldError` beside the widget, so the user's eye landed on the control they
+ * had to fix — but reCAPTCHA v3 is invisible, so there is no longer a control
+ * to point at. A form-level alert is now the only place the message can go;
+ * suppressing it here would drop it silently.
  */
 export function AuthErrorAlert({
   error,
@@ -24,7 +26,7 @@ export function AuthErrorAlert({
   error?: AuthErrorInfo | null;
   className?: string;
 }) {
-  if (!error || error.field === "captcha") return null;
+  if (!error) return null;
 
   return (
     <Alert

@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import type { BrowserContext, Locator, Page } from "@playwright/test";
-import { expect } from "@playwright/test";
 
 import type { SeedTenant } from "./global-setup";
 
@@ -340,41 +339,20 @@ export function stubStripe(page: Page, stub: StripeStub) {
 }
 
 /**
- * Solve the hCaptcha widget rendered on the credentials sign-in/sign-up forms.
- * better-auth's `captcha()` plugin (src/server/better-auth/config.tsx) enforces
- * verification unconditionally on `/sign-in/email` — there is no server-side
- * dev bypass — so any spec that submits a real credentialed sign-in must clear
- * this first. The e2e env (tests/helpers/test-env.ts) points
- * NEXT_PUBLIC_HCAPTCHA_SITE_KEY / HCAPTCHA_SECRET_KEY at hCaptcha's own
- * published "always passes" integration-testing keypair, so the checkbox
- * really does render, and the resulting token really is verified over the
- * network against hCaptcha's siteverify endpoint — it just never shows an
- * actual challenge.
- *
- * The click must wait for the checkbox's `aria-checked` state rather than just
- * firing-and-forgetting: hCaptcha's own verification round-trip (browser →
- * hCaptcha → browser, via postMessage) happens asynchronously after the click
- * event, so submitting immediately after the click races it and intermittently
- * submits with no captcha response yet.
- */
-export async function solveHCaptcha(page: Page): Promise<void> {
-  const checkbox = page
-    .frameLocator('iframe[src*="hcaptcha"]')
-    .first()
-    .locator("#checkbox");
-  await checkbox.waitFor({ state: "visible", timeout: 15_000 });
-  await checkbox.click();
-  await expect(checkbox).toHaveAttribute("aria-checked", "true", {
-    timeout: 15_000,
-  });
-}
-
-/**
  * Drive a real credentialed sign-in through the actual UI: fill email/password
- * by their accessible label (stable across any auth-UI-library swap), solve
- * the captcha, and submit. The submit button's accessible name varies by
- * library/localization (currently "Login"), so match loosely rather than on
- * exact copy.
+ * by their accessible label (stable across any auth-UI-library swap) and
+ * submit. No captcha-solving step is needed: better-auth's `captcha()` plugin
+ * (src/server/better-auth/config.tsx) enforces verification unconditionally on
+ * `/sign-in/email`, but the e2e env (tests/helpers/test-env.ts) sets
+ * `NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS=1`, which makes `useRecaptchaV3`
+ * (src/lib/captcha/use-recaptcha-v3.ts) stage the sentinel
+ * `RECAPTCHA_TEST_BYPASS_TOKEN` instead of loading Google's script, and
+ * `verifyRecaptcha` (src/lib/captcha/verify-recaptcha.ts) accept that exact
+ * token without calling Google. The Better Auth UI captcha plugin picks the
+ * staged token up automatically via its `x-captcha-response` header, so there
+ * is nothing for this helper to click or wait on. The submit button's
+ * accessible name varies by library/localization (currently "Login"), so
+ * match loosely rather than on exact copy.
  */
 export async function signIn(
   page: Page,
@@ -388,6 +366,5 @@ export async function signIn(
   await page.goto(url);
   await page.getByLabel(/^email$/i).fill(creds.email);
   await page.getByLabel(/^password$/i).fill(creds.password);
-  await solveHCaptcha(page);
   await page.getByRole("button", { name: /log\s?in|sign\s?in/i }).click();
 }

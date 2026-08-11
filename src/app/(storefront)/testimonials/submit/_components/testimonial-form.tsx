@@ -7,7 +7,7 @@ import { useUploadFiles } from "@better-upload/client";
 import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
-import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
 import { getStoredPath } from "~/lib/uploads";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -20,7 +20,7 @@ import {
 } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 
 type TestimonialFormProps = {
   business: {
@@ -38,7 +38,7 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [approved, setApproved] = useState(false);
 
-  const captchaRef = useRef<HCaptchaHandle>(null);
+  const captchaRef = useRef<RecaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
 
   // Inline error state per field
@@ -72,14 +72,17 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
       setApproved(data.isApproved);
       setSubmitted(true);
     },
-    onError: (error) => {
+    onError: async (error) => {
       toast.error(error.message || "Failed to submit testimonial");
-      captchaRef.current?.reset();
-      setCaptchaToken("");
+      // v3 has no widget to clear — "reset" means mint a replacement, since
+      // the server burns the previous token on verification even when the
+      // request is later rejected for an unrelated reason.
+      const token = await captchaRef.current?.reset();
+      setCaptchaToken(token ?? "");
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Clear previous errors
@@ -117,10 +120,16 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
 
     if (hasError) return;
 
+    // Mint a fresh token right at submit rather than reusing the staged one
+    // — the field auto-mints on mount/interval, but a shopper can spend
+    // longer than the 120s TTL writing a testimonial and picking photos.
+    const freshCaptchaToken =
+      (await captchaRef.current?.execute()) ?? captchaToken;
+
     submitMutation.mutate({
       text: text.trim(),
       photoUrls,
-      captchaToken,
+      captchaToken: freshCaptchaToken,
     });
   };
 
@@ -331,8 +340,9 @@ export function TestimonialForm({ business }: TestimonialFormProps) {
                 </div>
               </div>
 
-              <HCaptchaField
+              <RecaptchaField
                 ref={captchaRef}
+                action="testimonial"
                 onVerify={(token) => {
                   setCaptchaToken(token);
                   if (captchaError) setCaptchaError("");

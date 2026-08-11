@@ -8,7 +8,7 @@ import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Form } from "~/components/ui/form";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
@@ -165,8 +165,9 @@ export function NoiseContactForm() {
           />
 
           {/* Captcha */}
-          <HCaptchaField
+          <RecaptchaField
             ref={captchaRef}
+            action="contact"
             onVerify={setCaptchaToken}
             onExpire={() => setCaptchaToken("")}
             onError={() => setCaptchaToken("")}

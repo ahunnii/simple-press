@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { baseUrlFor, getTenant, signIn, solveHCaptcha } from "./fixtures";
+import { baseUrlFor, getTenant, signIn } from "./fixtures";
 import { SEED_USER } from "./global-setup";
 
 // If this file happens to run first against a stone-cold dev server (e.g. run
@@ -21,20 +21,21 @@ test.use({ navigationTimeout: 60_000 });
 //
 // The credentials sign-in/sign-up forms sit behind better-auth's `captcha()`
 // plugin (src/server/better-auth/config.tsx), which has no server-side dev
-// bypass — see the `signIn`/`solveHCaptcha` helpers in ./fixtures for how the
-// real hCaptcha widget gets cleared using hCaptcha's own published
-// integration-testing keypair (tests/helpers/test-env.ts).
+// bypass. In this suite that gate is a no-op: tests/helpers/test-env.ts sets
+// `NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS=1`, so `useRecaptchaV3`
+// (src/lib/captcha/use-recaptcha-v3.ts) stages the sentinel
+// `RECAPTCHA_TEST_BYPASS_TOKEN` with no Google script load, and
+// `verifyRecaptcha` (src/lib/captcha/verify-recaptcha.ts) accepts that exact
+// token without a network call. See the `signIn` helper in ./fixtures — there
+// is nothing left for a spec to solve or wait on.
 const TEMPLATE = "default";
 
-// Solving the captcha means a real network round-trip to hCaptcha's own
-// siteverify endpoint on every sign-in (see ./fixtures). Running this file's
-// sign-in tests concurrently (Playwright's default) queues several of those
-// live round-trips at once and made the flow intermittently exceed the
-// default 15s assertion timeout under this repo's 3-worker cap — not a captcha
-// *failure* (no error toast; the form just sat in its own pending/disabled
-// state longer than the default timeout allowed). Serial mode removes the
-// concurrency, and the URL assertions below still get an explicit longer
-// timeout as headroom for a slow individual round-trip.
+// This file still runs serial, but not because of the captcha: the sign-up
+// tests below share module-level state (`signedUpAccount`, set by "sign up
+// with valid details..." and read by "a freshly signed-up, unverified account
+// cannot sign in") and rely on Playwright's serial-mode guarantee that a
+// failure in one test skips the rest of the file rather than letting a later
+// test run against unset state. See the comment at `signedUpAccount` below.
 test.describe.configure({ mode: "serial" });
 
 // The post-sign-in navigation is a client-side route change that the dev server
@@ -43,11 +44,12 @@ test.describe.configure({ mode: "serial" });
 // the window for "did we get where we were going", not a fixed wait.
 const SIGN_IN_TIMEOUT = 90_000;
 
-// Every credentialed test here pays for a live hCaptcha round-trip (there is no
-// server-side dev bypass — see the note above) *plus* whatever the dev server
-// still has to compile. The 60s default in playwright.config.ts is enough on a
-// fully warm cache and not enough otherwise, which shows up as a test that dies
-// mid-assertion and reads exactly like a broken sign-in.
+// Every credentialed test here still pays for whatever the dev server has to
+// compile on the way (the captcha itself is a same-process sentinel bypass —
+// see the note above, no network round-trip). The 60s default in
+// playwright.config.ts is enough on a fully warm cache and not enough
+// otherwise, which shows up as a test that dies mid-assertion and reads
+// exactly like a broken sign-in.
 //
 // The `beforeAll` below removes most of that variance; this removes the rest.
 // It buys headroom only — nothing here waits on a fixed delay, so a fast run is
@@ -61,11 +63,11 @@ test.beforeEach(({}, testInfo) => {
 // This isn't an optimisation, it's what makes the suite deterministic. The dev
 // server compiles each route on first hit, and the homepage in particular took
 // ~19s to compile on a cold Turbopack cache. That cost otherwise lands *inside*
-// a test — after `signIn()` has already spent time on a page load plus a live
-// hCaptcha round-trip — and the combination overruns Playwright's 60s per-test
-// timeout. The failure then looks exactly like a broken sign-in (the URL simply
-// never changes), which is badly misleading: the sign-in POST has in fact
-// already returned 200 and set a session.
+// a test — after `signIn()` has already spent time on a page load — and can
+// overrun Playwright's 60s per-test timeout on its own. The failure then looks
+// exactly like a broken sign-in (the URL simply never changes), which is badly
+// misleading: the sign-in POST has in fact already returned 200 and set a
+// session.
 //
 // Paying the compile cost once, up front and outside any assertion budget,
 // removes that whole class of false negative.
@@ -201,7 +203,8 @@ test("sign out returns to a signed-out state", async ({ page }) => {
 // --- Sign-up ---------------------------------------------------------------
 //
 // The sign-up form (src/components/auth/sign-up.tsx) sits behind the same
-// hCaptcha gate as sign-in. Server config has `requireEmailVerification: true`
+// captcha gate as sign-in (also a no-op sentinel bypass here — see the note
+// above). Server config has `requireEmailVerification: true`
 // (src/server/better-auth/config.tsx), so a successful sign-up does NOT
 // establish a session — the component's `onSuccess` handler stashes the email
 // in sessionStorage and navigates to the verify-email view instead of signing
@@ -250,7 +253,6 @@ test("sign up with valid details lands on the verify-email view", async ({
     .getByRole("checkbox", { name: /I agree to SimplePress/i })
     .check();
 
-  await solveHCaptcha(page);
   await page.getByRole("button", { name: /sign\s?up/i }).click();
 
   // The app-owned contract for an unverified sign-up is "you land on the
@@ -275,7 +277,6 @@ test("the terms checkbox is required to sign up", async ({ page }) => {
 
   // Deliberately leave the terms checkbox unchecked, then try to submit
   // anyway.
-  await solveHCaptcha(page);
   await page.getByRole("button", { name: /sign\s?up/i }).click();
 
   // The checkbox is `required` (src/providers/providers.tsx). Radix forwards

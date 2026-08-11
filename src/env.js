@@ -32,7 +32,13 @@ export const env = createEnv({
     DISCORD_WEBHOOK_URL: z.string().url(),
     VPS_IP: z.string(),
 
-    HCAPTCHA_SECRET_KEY: z.string(),
+    RECAPTCHA_SECRET_KEY: z.string().min(1),
+    // reCAPTCHA v3 scores 0.0–1.0 rather than passing/failing, so this is a
+    // policy knob, not a constant. Tune it against real traffic before trusting
+    // the default — too high silently locks out real customers. Set it to 0 in
+    // `.env.local`: scores from localhost are typically 0.1–0.3 because there's
+    // no traffic history for the key.
+    RECAPTCHA_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.5),
 
     SIMPLEPRESS_HASH_SECRET: z.string(),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
@@ -93,7 +99,13 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: z.string(),
-    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: z.string(),
+    // Public by design — a reCAPTCHA site key ships in the page source.
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().min(1),
+    // Test-only escape hatch: when "1", the client stages a sentinel token and
+    // the server accepts it without calling Google. Both the client hook and
+    // `verify-recaptcha.ts` additionally require NODE_ENV !== "production", so
+    // setting this on a deployed build does nothing.
+    NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS: z.string().optional(),
     NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL: z
       .string()
       .email()
@@ -134,10 +146,13 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: process.env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT,
     DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
     VPS_IP: process.env.VPS_IP,
-    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS:
+      process.env.NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS,
     NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL:
       process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL,
-    HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
+    RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
+    RECAPTCHA_MIN_SCORE: process.env.RECAPTCHA_MIN_SCORE,
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
     CRON_SECRET: process.env.CRON_SECRET,

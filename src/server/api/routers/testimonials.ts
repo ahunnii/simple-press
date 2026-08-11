@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
-import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
+import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { sendTestimonialInviteEmail } from "~/lib/email/templates";
@@ -190,9 +190,12 @@ export const testimonialRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const ip = `${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`;
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      const remoteIp = rawIp === "unknown" ? undefined : rawIp;
+
       try {
-        await testimonialSubmitLimiter.consume(ip);
+        await testimonialSubmitLimiter.consume(`${rawIp}:${requestHost}`);
       } catch {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
@@ -207,11 +210,21 @@ export const testimonialRouter = createTRPCRouter({
           message: "Business not found",
         });
 
-      const isValid = await verifyHCaptcha(input.captchaToken);
-      if (!isValid) {
+      // No `NODE_ENV === "development"` short-circuit — see contact.ts for
+      // why: verifyRecaptcha owns the test-bypass decision itself now.
+      const result = await verifyRecaptcha(input.captchaToken, {
+        action: "testimonial",
+        requestHost,
+        remoteIp,
+      });
+      if (!result.ok) {
         throw new TRPCError({
           code: "BAD_REQUEST",
+          // See contact.ts: `reason` rides `cause`, not `message`, so the
+          // generic user-facing text never leaks the rejection reason, but a
+          // server-side test can still assert on it via `error.cause`.
           message: "Captcha verification failed",
+          cause: new Error(`recaptcha verification failed: ${result.reason}`),
         });
       }
 
@@ -293,9 +306,12 @@ export const testimonialRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const ip = `${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`;
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      const remoteIp = rawIp === "unknown" ? undefined : rawIp;
+
       try {
-        await testimonialSubmitLimiter.consume(ip);
+        await testimonialSubmitLimiter.consume(`${rawIp}:${requestHost}`);
       } catch {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
@@ -303,11 +319,21 @@ export const testimonialRouter = createTRPCRouter({
         });
       }
 
-      const isValid = await verifyHCaptcha(input.captchaToken);
-      if (!isValid) {
+      // No `NODE_ENV === "development"` short-circuit — see contact.ts for
+      // why: verifyRecaptcha owns the test-bypass decision itself now.
+      const result = await verifyRecaptcha(input.captchaToken, {
+        action: "testimonial_invite",
+        requestHost,
+        remoteIp,
+      });
+      if (!result.ok) {
         throw new TRPCError({
           code: "BAD_REQUEST",
+          // See contact.ts: `reason` rides `cause`, not `message`, so the
+          // generic user-facing text never leaks the rejection reason, but a
+          // server-side test can still assert on it via `error.cause`.
           message: "Captcha verification failed",
+          cause: new Error(`recaptcha verification failed: ${result.reason}`),
         });
       }
 

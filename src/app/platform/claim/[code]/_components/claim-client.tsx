@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
 import { isValidEmail } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -23,7 +23,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 
 type ClaimClientProps = {
   /** Invite code, forwarded to POST /api/claim. */
@@ -65,7 +65,7 @@ export function ClaimClient({
   platformDomain,
   userExists,
 }: ClaimClientProps) {
-  const captchaRef = useRef<HCaptchaHandle>(null);
+  const captchaRef = useRef<RecaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -143,9 +143,14 @@ export function ClaimClient({
     return () => clearInterval(id);
   }, [resendCooldown]);
 
-  const resetCaptcha = () => {
-    captchaRef.current?.reset();
-    setCaptchaToken("");
+  // v3 has no widget to clear — "reset" means mint a replacement, since
+  // better-auth burns the previous token at /siteverify even when the
+  // request fails for an unrelated reason (wrong password, email taken).
+  // Await the mint and restage its result explicitly rather than relying on
+  // the field's own onVerify callback to land later.
+  const resetCaptcha = async () => {
+    const token = await captchaRef.current?.reset();
+    setCaptchaToken(token ?? "");
   };
 
   /** Consume the invite once a verified session exists. */
@@ -203,6 +208,12 @@ export function ClaimClient({
 
     setSubmitting(true);
     try {
+      // Mint a fresh token right before submitting — better-auth burns the
+      // staged one at /siteverify, and this form can sit open a while (email
+      // verification link, password entry) so it can also just be stale.
+      const freshCaptchaToken =
+        (await captchaRef.current?.execute()) ?? captchaToken;
+
       const { error: signUpError } = await authClient.signUp.email({
         // Email comes from the server-passed invite, NOT a user-editable field.
         email,
@@ -211,7 +222,7 @@ export function ClaimClient({
         // Land the verification link back on THIS claim page (verified +
         // auto-signed-in) so the mount check drops into the ready-to-claim state.
         callbackURL,
-        fetchOptions: { headers: { "x-captcha-response": captchaToken } },
+        fetchOptions: { headers: { "x-captcha-response": freshCaptchaToken } },
       });
 
       if (signUpError) {
@@ -221,7 +232,7 @@ export function ClaimClient({
         const signedIn =
           sessionData?.user?.email?.toLowerCase() === email.toLowerCase();
         if (!signedIn) {
-          resetCaptcha();
+          await resetCaptcha();
           setError(signUpError.message ?? "Failed to create account");
           return;
         }
@@ -240,7 +251,7 @@ export function ClaimClient({
       }
       setPhase("verify");
     } catch {
-      resetCaptcha();
+      await resetCaptcha();
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
@@ -262,6 +273,11 @@ export function ClaimClient({
 
     setSubmitting(true);
     try {
+      // Mint a fresh token right before submitting — same reasoning as
+      // handleSignup: better-auth burns the staged token at /siteverify.
+      const freshCaptchaToken =
+        (await captchaRef.current?.execute()) ?? captchaToken;
+
       const { error: signInError } = await authClient.signIn.email({
         email,
         password,
@@ -269,7 +285,7 @@ export function ClaimClient({
         // auto-resend the verification email using THIS callbackURL — keeping the
         // return path on the claim page even for the sign-in branch.
         callbackURL,
-        fetchOptions: { headers: { "x-captcha-response": captchaToken } },
+        fetchOptions: { headers: { "x-captcha-response": freshCaptchaToken } },
       });
 
       if (signInError) {
@@ -282,14 +298,14 @@ export function ClaimClient({
           setPhase("verify");
           return;
         }
-        resetCaptcha();
+        await resetCaptcha();
         setError(signInError.message ?? "Incorrect email or password");
         return;
       }
 
       await claim();
     } catch {
-      resetCaptcha();
+      await resetCaptcha();
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
@@ -544,8 +560,9 @@ export function ClaimClient({
                 autoFocus
               />
             </div>
-            <HCaptchaField
+            <RecaptchaField
               ref={captchaRef}
+              action="auth"
               onVerify={setCaptchaToken}
               onExpire={() => setCaptchaToken("")}
               onError={() => setCaptchaToken("")}
@@ -625,8 +642,9 @@ export function ClaimClient({
               required
             />
           </div>
-          <HCaptchaField
+          <RecaptchaField
             ref={captchaRef}
+            action="auth"
             onVerify={setCaptchaToken}
             onExpire={() => setCaptchaToken("")}
             onError={() => setCaptchaToken("")}

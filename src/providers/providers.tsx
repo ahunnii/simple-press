@@ -18,7 +18,7 @@ import { authClient } from "~/server/better-auth/client";
 import { Toaster } from "~/components/ui/sonner";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { AuthProvider } from "~/components/auth/auth-provider";
-import { HCaptchaWidget } from "~/components/auth/captcha/hcaptcha-widget";
+import { RecaptchaWidget } from "~/components/auth/captcha/recaptcha-widget";
 import { CartProvider } from "~/providers/cart-context";
 import { WishlistProvider } from "~/providers/wishlist-context";
 
@@ -127,11 +127,18 @@ export function Providers({ children }: { children: ReactNode }) {
               requireEmailVerification: true,
             }}
             additionalFields={ADDITIONAL_FIELDS}
-            // Renders the hCaptcha widget on sign-in, sign-up, and
-            // forgot-password, and attaches `x-captcha-response` — matching
-            // the endpoints better-auth's server-side `captcha()` plugin
-            // protects. Without this, every credentialed auth request 400s.
-            plugins={[captchaPlugin({ render: HCaptchaWidget })]}
+            // Stages a reCAPTCHA v3 token on sign-in, sign-up, and
+            // forgot-password and attaches `x-captcha-response` — matching the
+            // endpoints our server-side `recaptcha()` plugin protects
+            // (`~/server/better-auth/plugins/recaptcha`). Without this, every
+            // credentialed auth request 400s.
+            //
+            // v3 renders no widget, so the token is minted on mount and
+            // refreshed on a timer rather than collected from a user
+            // interaction — `captchaPlugin` exposes no pre-submit hook, so a
+            // live token has to be staged ahead of submit. See
+            // `recaptcha-widget.tsx` for that lifecycle.
+            plugins={[captchaPlugin({ render: RecaptchaWidget })]}
             // `upload` is not optional in practice: without it the library
             // encodes the image as a base64 data URL and writes that into
             // `user.image`, which then rides in the 7-day

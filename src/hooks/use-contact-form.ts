@@ -6,10 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
+import { useRecaptchaV3 } from "~/lib/captcha/use-recaptcha-v3";
 import type { ContactFormData } from "~/lib/validators/contact";
 import { contactFormSchema } from "~/lib/validators/contact";
 import { api } from "~/trpc/react";
+
+/** reCAPTCHA v3 action asserted server-side for every contact-family form. */
+const RECAPTCHA_ACTION = "contact";
 
 type UseContactFormOptions = {
   messageMaxLength?: number;
@@ -32,7 +36,8 @@ export function useContactForm(options: UseContactFormOptions = {}) {
 
   const schema = contactFormSchema(messageMaxLength);
 
-  const captchaRef = useRef<HCaptchaHandle>(null);
+  const captchaRef = useRef<RecaptchaHandle>(null);
+  const { execute: executeRecaptcha } = useRecaptchaV3();
   const formRef = useRef<HTMLFormElement>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +61,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
       setIsSuccess(true);
       setCaptchaToken("");
       const handle = captchaRef.current;
-      if (handle) handle.reset();
+      if (handle) void handle.reset();
       form.reset();
     },
     onError: (err: { message?: string }) => {
@@ -65,7 +70,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
       toast.error(errorMessage);
       setError(errorMessage);
       const handle = captchaRef.current;
-      if (handle) handle.reset();
+      if (handle) void handle.reset();
       setCaptchaToken("");
     },
     onMutate: () => toast.loading("Sending message..."),
@@ -75,10 +80,18 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     (form.watch("message") as string | undefined)?.length ?? 0;
 
   const onSubmit = async (data: FormValues) => {
-    if (!captchaToken && process.env.NODE_ENV === "production") {
-      toast.error("Please complete the captcha");
-      return;
-    }
+    // Mint a fresh token at submit time rather than trusting whatever was
+    // staged on mount/refresh — v3 tokens are single-use and expire after
+    // 120s, so a token minted when the form first rendered may be stale by
+    // the time a user finishes typing. Minted via `useRecaptchaV3` directly
+    // (not through `captchaRef`) so this hook is self-sufficient: pages that
+    // render no `RecaptchaField` at all (e.g. `CoopContactPage`, which has no
+    // captcha widget by design) still get a correctly-actioned token instead
+    // of silently submitting empty. Falls back to whatever was last staged
+    // in state only if the fresh mint fails (e.g. transient network error).
+    const freshToken = await executeRecaptcha(RECAPTCHA_ACTION);
+    const tokenToSend = freshToken ?? captchaToken;
+
     setError(null);
     const payload: ContactFormData = {
       name: data.name,
@@ -86,7 +99,7 @@ export function useContactForm(options: UseContactFormOptions = {}) {
       message: data.message,
       phone: data.phone,
       preferredContactMethod: data.preferredContactMethod,
-      captchaToken,
+      captchaToken: tokenToSend,
     };
     mutate(payload);
   };

@@ -20,7 +20,7 @@ export default function CookiePolicyPage() {
       <h1>SimplePress Cookie Policy</h1>
 
       <p>
-        <strong>Last Updated:</strong> May 29, 2026
+        <strong>Last Updated:</strong> August 11, 2026
       </p>
 
       <h2>1. Introduction</h2>
@@ -102,14 +102,23 @@ export default function CookiePolicyPage() {
         <li>session activity;</li>
         <li>technical performance data.</li>
       </ul>
-      <p>We use analytics for operational and improvement purposes only.</p>
-      <p>We do not use analytics for:</p>
+      <p>
+        We use the analytics tools described in this section for operational and
+        improvement purposes only.
+      </p>
+      <p>We do not use these analytics tools for:</p>
       <ul>
         <li>behavioral advertising;</li>
         <li>cross-site ad tracking;</li>
         <li>selling personal information;</li>
         <li>advertising profiles.</li>
       </ul>
+      <p>
+        Section C below describes security and fraud-prevention technologies,
+        including Google reCAPTCHA, which also analyze visitor behavior. Those
+        technologies are provided by third parties under their own terms and are
+        not covered by the commitments above.
+      </p>
 
       <h3>C. Security and Fraud Prevention Technologies</h3>
       <p>We may use cookies or related technologies to:</p>
@@ -120,6 +129,30 @@ export default function CookiePolicyPage() {
         <li>investigate abuse;</li>
         <li>maintain platform integrity.</li>
       </ul>
+      <p>
+        As part of these protections, SimplePress uses Google reCAPTCHA on
+        sign-in, sign-up, and password reset, and on certain storefront forms
+        such as contact and testimonial submissions. reCAPTCHA runs invisibly
+        and analyzes visitor behavior to help distinguish human visitors from
+        automated bots. Information it collects is sent to Google and is subject
+        to Google&rsquo;s own{" "}
+        <a
+          href="https://policies.google.com/privacy"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Privacy Policy
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://policies.google.com/terms"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Terms of Service
+        </a>
+        .
+      </p>
 
       <h3>D. Functional Cookies</h3>
       <p>Functional technologies may remember:</p>

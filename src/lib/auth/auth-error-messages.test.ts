@@ -20,7 +20,8 @@ describe("resolveAuthErrorMessage", () => {
         }),
       ),
     ).toEqual({
-      message: 'Please complete the "I am human" check below, then try again.',
+      message:
+        "We couldn't verify your browser. Wait a moment and try again — if it keeps happening, a browser extension or network filter may be blocking reCAPTCHA.",
       field: "captcha",
     });
   });
@@ -35,7 +36,7 @@ describe("resolveAuthErrorMessage", () => {
       ),
     ).toEqual({
       message:
-        "That human-verification check didn't go through. Please try it again.",
+        "We couldn't verify this request. Please try again, or contact support if the problem continues.",
       field: "captcha",
     });
   });

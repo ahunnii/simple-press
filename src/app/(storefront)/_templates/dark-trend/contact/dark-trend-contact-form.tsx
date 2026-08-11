@@ -9,7 +9,7 @@ import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -140,9 +140,10 @@ export function DarkTrendContactForm() {
           required
         />
 
-        {/* hCaptcha */}
-        <HCaptchaField
+        {/* reCAPTCHA */}
+        <RecaptchaField
           ref={captchaRef}
+          action="contact"
           onVerify={setCaptchaToken}
           onExpire={() => setCaptchaToken("")}
           onError={() => setCaptchaToken("")}

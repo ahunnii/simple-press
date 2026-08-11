@@ -3,13 +3,14 @@ import ResetPasswordEmail from "~/emails/reset-password";
 import VerifyEmail from "~/emails/verify-email";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { captcha, organization } from "better-auth/plugins";
+import { organization } from "better-auth/plugins";
 
 import { env } from "~/env";
 import { getBusinessUrl } from "~/lib/business-url";
 import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
 import { sendResendEmail } from "~/lib/email/resend";
 import { EMAIL_FROM } from "~/lib/email/send";
+import { recaptcha } from "~/server/better-auth/plugins/recaptcha";
 import { db } from "~/server/db";
 
 async function linkGuestOrdersToUser(user: {
@@ -181,11 +182,11 @@ export const auth = betterAuth({
         },
       },
     }),
-    captcha({
-      provider: "hcaptcha",
-      secretKey: env.HCAPTCHA_SECRET_KEY,
-      siteKey: env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
-    }),
+    // Hand-rolled reCAPTCHA v3 gate. Reads its own keys via the shared
+    // verifier, so there is nothing to configure here — see
+    // `~/server/better-auth/plugins/recaptcha` for why the built-in
+    // `captcha()` plugin cannot cover our DB-backed host allowlist.
+    recaptcha(),
   ],
   databaseHooks: {
     user: {

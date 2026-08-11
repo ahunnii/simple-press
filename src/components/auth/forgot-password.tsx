@@ -15,9 +15,7 @@ import {
   FieldDescription,
   FieldError,
   FieldGroup,
-  FieldLabel,
-  // SIMPLEPRESS LOCAL ADDITION — labels the captcha group.
-  FieldTitle
+  FieldLabel
 } from "~/components/ui/field"
 import { Input } from "~/components/ui/input"
 import { Spinner } from "~/components/ui/spinner"
@@ -170,33 +168,18 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
               <FieldError>{fieldErrors.email}</FieldError>
             </Field>
 
-            {/* SIMPLEPRESS LOCAL ADDITION — the captcha was an unlabelled
-                floating widget; it is now a labelled required control with its
-                own error slot. Re-apply after a registry re-fetch. */}
-            {Captcha && (
-              <Field
-                aria-labelledby="captcha-label"
-                data-invalid={authError?.field === "captcha"}
-              >
-                <FieldTitle id="captcha-label">
-                  <span>
-                    Verify you&apos;re human
-                    <span aria-hidden="true" className="text-destructive">
-                      {" *"}
-                    </span>
-                  </span>
-                  <span className="sr-only">(required)</span>
-                </FieldTitle>
+            {/* SIMPLEPRESS LOCAL ADDITION — reCAPTCHA v3 is invisible, so this
+                slot renders only Google's required disclosure text, as fine
+                print above the submit button.
 
-                <div className="flex justify-center">{Captcha}</div>
-
-                <FieldError>
-                  {authError?.field === "captcha"
-                    ? authError.message
-                    : undefined}
-                </FieldError>
-              </Field>
-            )}
+                Deliberately NOT a labelled/required Field. It was one back when
+                this was a visible hCaptcha checkbox that needed a label; with
+                nothing to interact with, that markup announced "Verify you're
+                human, required" to screen readers over an empty field, and told
+                sighted users to complete a step that does not exist. Captcha
+                errors now surface through `AuthErrorAlert` below — the only
+                place left to put them. Re-apply after a registry re-fetch. */}
+            {Captcha}
             {/* END SIMPLEPRESS LOCAL ADDITION */}
 
             {/* SIMPLEPRESS LOCAL ADDITION — form-level failure notice. */}

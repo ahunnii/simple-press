@@ -8,7 +8,7 @@ import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import {
   Form,
   FormControl,
@@ -392,8 +392,9 @@ export function PinkContactForm({
                 <span {...fieldAttr("pink.contact.form-marketing-label")}>{marketingLabel}</span>
               </label>
 
-              <HCaptchaField
+              <RecaptchaField
                 ref={captchaRef}
+                action="contact"
                 onVerify={setCaptchaToken}
                 onExpire={() => setCaptchaToken("")}
                 onError={() => setCaptchaToken("")}
