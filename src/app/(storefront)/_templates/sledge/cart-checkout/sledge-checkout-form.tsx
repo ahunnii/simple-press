@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -29,6 +30,7 @@ import { SledgeOrderSummary } from "./sledge-order-summary";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
 const LBL =
@@ -45,7 +47,10 @@ function SectionHead({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
+export function SledgeCheckoutForm({
+  business,
+  merchantPolicies,
+}: CheckoutFormProps) {
   const {
     email,
     setEmail,
@@ -84,7 +89,8 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
     items,
     shipping,
     shippingPending,
-  } = useCheckoutForm(business);
+    termsDisclosure,
+  } = useCheckoutForm(business, merchantPolicies);
 
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
@@ -481,6 +487,12 @@ export function SledgeCheckoutForm({ business }: CheckoutFormProps) {
             </span>
             <span>→</span>
           </button>
+
+          <CheckoutTermsNotice
+            disclosure={termsDisclosure}
+            className="font-sans text-xs leading-relaxed tracking-[0.06em] text-[var(--sl-ink-soft)]"
+            linkClassName="underline"
+          />
 
           <div className="flex flex-col gap-2.5">
             {[

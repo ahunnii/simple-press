@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { checkBusiness } from "~/lib/check-business";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { isContentEmpty } from "~/lib/template-fields";
 import { db } from "~/server/db";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { ConversionCard } from "~/app/admin/dashboard/_components/conversion-card";
@@ -84,6 +86,7 @@ export default async function AdminDashboardPage() {
     prevSevenDayOrders,
     prevThirtyDayRevenue,
     prevThirtyDayPaidOrders,
+    requiredPolicyPages,
   ] = await Promise.all([
     // Total revenue (all time, paid orders that are not fully refunded)
     // Subtract refundAmountCents from partial-refund orders so the stat
@@ -357,6 +360,19 @@ export default async function AdminDashboardPage() {
         createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
       },
     }),
+
+    // Terms of Service + Refund Policy pages — the two documents checkout
+    // will soon reference ("you agree to this store's Terms of Service").
+    // Fetched regardless of `published` so the emptiness/publish check below
+    // can tell "never written" apart from "written, not published".
+    db.page.findMany({
+      where: {
+        businessId: business.id,
+        type: "policy",
+        slug: { in: ["terms-of-service", "refund-policy"] },
+      },
+      select: { slug: true, published: true, content: true },
+    }),
   ]);
 
   // Bucket raw revenue rows into one total per local calendar day, filling
@@ -420,6 +436,19 @@ export default async function AdminDashboardPage() {
       unitsSold: item._sum.quantity ?? 0,
     };
   });
+
+  // Nudge (not a gate): true when either required policy page is missing,
+  // unpublished, or empty. Mirrors the "no live policies" check on
+  // /admin/content/policies (missingRequiredPolicies in policies-manager.tsx).
+  const isPolicyLive = (slug: string) =>
+    requiredPolicyPages.some(
+      (p) =>
+        p.slug === slug &&
+        p.published &&
+        !isContentEmpty(p.content as TiptapJSON),
+    );
+  const missingPolicies =
+    !isPolicyLive("terms-of-service") || !isPolicyLive("refund-policy");
 
   // "Finish setting up" card — mirrors the 5-step completion logic in
   // /admin/welcome/page.tsx (businessCreated is always true post-onboarding).
@@ -521,6 +550,7 @@ export default async function AdminDashboardPage() {
         }
         ordersToFulfillCount={ordersToFulfillCount}
         awaitingPaymentCount={awaitingPaymentCount}
+        missingPolicies={missingPolicies}
         recentOrders={
           recentOrders as Array<{
             id: string;

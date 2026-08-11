@@ -11,6 +11,7 @@ import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
 import { sendResendEmail } from "~/lib/email/resend";
 import { EMAIL_FROM } from "~/lib/email/send";
 import { recaptcha } from "~/server/better-auth/plugins/recaptcha";
+import { resolvePlatformTermsAcceptance } from "~/server/better-auth/terms-acceptance";
 import { db } from "~/server/db";
 
 async function linkGuestOrdersToUser(user: {
@@ -191,6 +192,20 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
+        // Platform terms-of-service acceptance. See
+        // `resolvePlatformTermsAcceptance`'s docblock for the full
+        // reasoning (why `/sign-up/email` + `termsAccepted` are the gate,
+        // why `termsAccepted` is read off the raw body instead of being a
+        // `user.additionalFields` entry, and why Discord OAuth sign-ups are
+        // intentionally left with `termsAcceptedAt: null`). Kept as a
+        // separate, dependency-free module so the gating logic is unit
+        // testable without booting the whole `betterAuth()` instance.
+        before: async (user, context) => {
+          const acceptance = resolvePlatformTermsAcceptance(context);
+          if (!acceptance) return;
+
+          return { data: { ...user, ...acceptance } };
+        },
         after: async (user) => {
           await linkGuestOrdersToUser(user);
         },

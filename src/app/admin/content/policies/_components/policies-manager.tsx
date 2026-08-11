@@ -7,12 +7,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Save } from "lucide-react";
+import { ArrowLeft, FileText, Save, ShieldAlert } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { isContentEmpty } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -484,6 +486,16 @@ export function PoliciesManager({ business }: Props) {
 
   const isDirty = allForms.some((form) => form.formState.isDirty);
 
+  // A checkout will soon tell buyers "you agree to this store's Terms of
+  // Service" — hollow if these two pages aren't actually live. Published +
+  // non-empty is the same bar the dashboard nudge uses.
+  const isPolicyLive = (slug: string) => {
+    const page = existingPolicies.get(slug);
+    return !!page && page.published && !isContentEmpty(page.content);
+  };
+  const missingRequiredPolicies =
+    !isPolicyLive("terms-of-service") || !isPolicyLive("refund-policy");
+
   return (
     <div className="bg-muted/40 min-h-screen">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
@@ -538,6 +550,17 @@ export function PoliciesManager({ business }: Props) {
       </div>
 
       <div className="admin-container">
+        {missingRequiredPolicies && (
+          <Alert className="mb-4">
+            <ShieldAlert className="h-4 w-4" />
+            <AlertTitle>No published Terms of Service or Refund Policy</AlertTitle>
+            <AlertDescription>
+              Checkout tells buyers they&apos;re agreeing to this store&apos;s
+              Terms of Service — publish at least the Terms and Returns tabs
+              below so that isn&apos;t hollow.
+            </AlertDescription>
+          </Alert>
+        )}
         <p className="text-muted-foreground mb-4 text-sm">
           These templates are starting points you can edit. Review and customize
           them for your business — they are not legal advice.

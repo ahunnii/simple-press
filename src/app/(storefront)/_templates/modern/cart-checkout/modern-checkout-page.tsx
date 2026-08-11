@@ -4,6 +4,7 @@ import { ModernCheckoutForm } from "./modern-checkout-form";
 
 export function ModernCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   return (
     <div>
@@ -16,7 +17,10 @@ export function ModernCheckoutPage({
           </div>
         </div>
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <ModernCheckoutForm business={business} />
+          <ModernCheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </div>
       </div>
     </div>

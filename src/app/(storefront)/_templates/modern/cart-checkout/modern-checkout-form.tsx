@@ -13,6 +13,7 @@ import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -20,10 +21,11 @@ import {
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
-export function ModernCheckoutForm({ business }: Props) {
-  const f = useCheckoutForm(business);
+export function ModernCheckoutForm({ business, merchantPolicies }: Props) {
+  const f = useCheckoutForm(business, merchantPolicies);
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -587,6 +589,12 @@ export function ModernCheckoutForm({ business }: Props) {
               </>
             )}
           </button>
+
+          <CheckoutTermsNotice
+            disclosure={f.termsDisclosure}
+            className="text-muted-foreground mt-3 text-center text-xs"
+            linkClassName="underline hover:text-foreground"
+          />
 
           <p className="text-muted-foreground mt-3 text-center text-xs">
             All transactions are secure and encrypted via Stripe. 100% Secure

@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -28,10 +29,11 @@ import {
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
-export function ElegantCheckoutForm({ business }: Props) {
-  const f = useCheckoutForm(business);
+export function ElegantCheckoutForm({ business, merchantPolicies }: Props) {
+  const f = useCheckoutForm(business, merchantPolicies);
 
   const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -878,9 +880,21 @@ export function ElegantCheckoutForm({ business }: Props) {
               "Continue to payment"
             )}
           </button>
-          <p
+          <CheckoutTermsNotice
+            disclosure={f.termsDisclosure}
             style={{
               marginTop: 12,
+              textAlign: "center",
+              fontSize: 11,
+              color: "var(--el-ink-soft, #6b6659)",
+              fontFamily: "var(--font-sans, sans-serif)",
+              lineHeight: 1.5,
+            }}
+            linkStyle={{ textDecoration: "underline" }}
+          />
+          <p
+            style={{
+              marginTop: 8,
               textAlign: "center",
               fontSize: 11,
               color: "var(--el-ink-soft, #6b6659)",

@@ -18,6 +18,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { RecaptchaField } from "~/components/inputs/recaptcha-field";
+import { OwnerTermsAcceptance } from "~/components/legal/owner-terms-acceptance";
 
 type StoreCustomizationStepProps = {
   formData: Partial<SignupFormData>;
@@ -41,10 +42,24 @@ export function StoreCustomizationStep({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // This single step creates BOTH the account and the store, so one checkbox
+  // covers both relationships: platform ToS + Privacy (account) and the Seller
+  // & Merchant Agreement + Acceptable Use Policy (store). The flag below is only
+  // a UI gate — `/api/onboarding` re-checks it and stamps the timestamps itself.
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!acceptedTerms) {
+      setTermsError(
+        "Please accept the terms and policies to create your store.",
+      );
+      return;
+    }
+    setTermsError(null);
     setIsSubmitting(true);
 
     const completeFormData = {
@@ -53,6 +68,8 @@ export function StoreCustomizationStep({
       heroSubtitle,
       aboutText,
       primaryColor,
+      // Explicit acceptance flag — the server rejects the request without it.
+      acceptedTerms: true,
     };
 
     try {
@@ -249,6 +266,18 @@ export function StoreCustomizationStep({
               created.
             </AlertDescription>
           </Alert>
+
+          <OwnerTermsAcceptance
+            id="signup-terms-acceptance"
+            checked={acceptedTerms}
+            onCheckedChange={(next) => {
+              setAcceptedTerms(next);
+              if (next) setTermsError(null);
+            }}
+            includePlatformTerms
+            disabled={isSubmitting}
+            error={termsError}
+          />
 
           <div className="flex gap-3">
             {onBack && (

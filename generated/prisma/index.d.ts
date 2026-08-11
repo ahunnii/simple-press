@@ -5660,6 +5660,8 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     platformRole: $Enums.PlatformRole | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -5671,6 +5673,8 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     platformRole: $Enums.PlatformRole | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -5682,6 +5686,8 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     platformRole: number
+    termsAcceptedAt: number
+    termsVersion: number
     _all: number
   }
 
@@ -5695,6 +5701,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     platformRole?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -5706,6 +5714,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     platformRole?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -5717,6 +5727,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     platformRole?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
     _all?: true
   }
 
@@ -5801,6 +5813,8 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     platformRole: $Enums.PlatformRole
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -5829,6 +5843,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
     memberships?: boolean | User$membershipsArgs<ExtArgs>
@@ -5848,6 +5864,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5859,6 +5877,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -5870,9 +5890,11 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "platformRole", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "platformRole" | "termsAcceptedAt" | "termsVersion", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
@@ -5906,6 +5928,8 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       platformRole: $Enums.PlatformRole
+      termsAcceptedAt: Date | null
+      termsVersion: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -6344,6 +6368,8 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly platformRole: FieldRef<"User", 'PlatformRole'>
+    readonly termsAcceptedAt: FieldRef<"User", 'DateTime'>
+    readonly termsVersion: FieldRef<"User", 'String'>
   }
     
 
@@ -6934,6 +6960,8 @@ export namespace Prisma {
     userId: string | null
     businessId: string | null
     role: $Enums.BusinessRole | null
+    merchantTermsAcceptedAt: Date | null
+    merchantTermsVersion: string | null
   }
 
   export type BusinessMembershipMaxAggregateOutputType = {
@@ -6942,6 +6970,8 @@ export namespace Prisma {
     userId: string | null
     businessId: string | null
     role: $Enums.BusinessRole | null
+    merchantTermsAcceptedAt: Date | null
+    merchantTermsVersion: string | null
   }
 
   export type BusinessMembershipCountAggregateOutputType = {
@@ -6950,6 +6980,8 @@ export namespace Prisma {
     userId: number
     businessId: number
     role: number
+    merchantTermsAcceptedAt: number
+    merchantTermsVersion: number
     _all: number
   }
 
@@ -6960,6 +6992,8 @@ export namespace Prisma {
     userId?: true
     businessId?: true
     role?: true
+    merchantTermsAcceptedAt?: true
+    merchantTermsVersion?: true
   }
 
   export type BusinessMembershipMaxAggregateInputType = {
@@ -6968,6 +7002,8 @@ export namespace Prisma {
     userId?: true
     businessId?: true
     role?: true
+    merchantTermsAcceptedAt?: true
+    merchantTermsVersion?: true
   }
 
   export type BusinessMembershipCountAggregateInputType = {
@@ -6976,6 +7012,8 @@ export namespace Prisma {
     userId?: true
     businessId?: true
     role?: true
+    merchantTermsAcceptedAt?: true
+    merchantTermsVersion?: true
     _all?: true
   }
 
@@ -7057,6 +7095,8 @@ export namespace Prisma {
     userId: string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt: Date | null
+    merchantTermsVersion: string | null
     _count: BusinessMembershipCountAggregateOutputType | null
     _min: BusinessMembershipMinAggregateOutputType | null
     _max: BusinessMembershipMaxAggregateOutputType | null
@@ -7082,6 +7122,8 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -7092,6 +7134,8 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -7102,6 +7146,8 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -7112,9 +7158,11 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
   }
 
-  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role", ExtArgs["result"]["businessMembership"]>
+  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role" | "merchantTermsAcceptedAt" | "merchantTermsVersion", ExtArgs["result"]["businessMembership"]>
   export type BusinessMembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -7140,6 +7188,8 @@ export namespace Prisma {
       userId: string
       businessId: string
       role: $Enums.BusinessRole
+      merchantTermsAcceptedAt: Date | null
+      merchantTermsVersion: string | null
     }, ExtArgs["result"]["businessMembership"]>
     composites: {}
   }
@@ -7570,6 +7620,8 @@ export namespace Prisma {
     readonly userId: FieldRef<"BusinessMembership", 'String'>
     readonly businessId: FieldRef<"BusinessMembership", 'String'>
     readonly role: FieldRef<"BusinessMembership", 'BusinessRole'>
+    readonly merchantTermsAcceptedAt: FieldRef<"BusinessMembership", 'DateTime'>
+    readonly merchantTermsVersion: FieldRef<"BusinessMembership", 'String'>
   }
     
 
@@ -31496,6 +31548,9 @@ export namespace Prisma {
     id: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
     orderNumber: number | null
     status: string | null
     paymentStatus: string | null
@@ -31528,6 +31583,9 @@ export namespace Prisma {
     id: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
     orderNumber: number | null
     status: string | null
     paymentStatus: string | null
@@ -31560,6 +31618,9 @@ export namespace Prisma {
     id: number
     createdAt: number
     updatedAt: number
+    termsAcceptedAt: number
+    termsVersion: number
+    merchantTermsUpdatedAt: number
     orderNumber: number
     status: number
     paymentStatus: number
@@ -31614,6 +31675,9 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
     orderNumber?: true
     status?: true
     paymentStatus?: true
@@ -31646,6 +31710,9 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
     orderNumber?: true
     status?: true
     paymentStatus?: true
@@ -31678,6 +31745,9 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
     orderNumber?: true
     status?: true
     paymentStatus?: true
@@ -31797,6 +31867,9 @@ export namespace Prisma {
     id: string
     createdAt: Date
     updatedAt: Date
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
     orderNumber: number
     status: string
     paymentStatus: string
@@ -31848,6 +31921,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31889,6 +31965,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31925,6 +32004,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31961,6 +32043,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31989,7 +32074,7 @@ export namespace Prisma {
     discountCodeId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "termsAcceptedAt" | "termsVersion" | "merchantTermsUpdatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
@@ -32030,6 +32115,9 @@ export namespace Prisma {
       id: string
       createdAt: Date
       updatedAt: Date
+      termsAcceptedAt: Date | null
+      termsVersion: string | null
+      merchantTermsUpdatedAt: Date | null
       orderNumber: number
       status: string
       paymentStatus: string
@@ -32493,6 +32581,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Order", 'String'>
     readonly createdAt: FieldRef<"Order", 'DateTime'>
     readonly updatedAt: FieldRef<"Order", 'DateTime'>
+    readonly termsAcceptedAt: FieldRef<"Order", 'DateTime'>
+    readonly termsVersion: FieldRef<"Order", 'String'>
+    readonly merchantTermsUpdatedAt: FieldRef<"Order", 'DateTime'>
     readonly orderNumber: FieldRef<"Order", 'Int'>
     readonly status: FieldRef<"Order", 'String'>
     readonly paymentStatus: FieldRef<"Order", 'String'>
@@ -58951,7 +59042,9 @@ export namespace Prisma {
     image: 'image',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    platformRole: 'platformRole'
+    platformRole: 'platformRole',
+    termsAcceptedAt: 'termsAcceptedAt',
+    termsVersion: 'termsVersion'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -58962,7 +59055,9 @@ export namespace Prisma {
     createdAt: 'createdAt',
     userId: 'userId',
     businessId: 'businessId',
-    role: 'role'
+    role: 'role',
+    merchantTermsAcceptedAt: 'merchantTermsAcceptedAt',
+    merchantTermsVersion: 'merchantTermsVersion'
   };
 
   export type BusinessMembershipScalarFieldEnum = (typeof BusinessMembershipScalarFieldEnum)[keyof typeof BusinessMembershipScalarFieldEnum]
@@ -59377,6 +59472,9 @@ export namespace Prisma {
     id: 'id',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    termsAcceptedAt: 'termsAcceptedAt',
+    termsVersion: 'termsVersion',
+    merchantTermsUpdatedAt: 'merchantTermsUpdatedAt',
     orderNumber: 'orderNumber',
     status: 'status',
     paymentStatus: 'paymentStatus',
@@ -59964,6 +60062,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     platformRole?: EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+    termsAcceptedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    termsVersion?: StringNullableFilter<"User"> | string | null
     sessions?: SessionListRelationFilter
     accounts?: AccountListRelationFilter
     memberships?: BusinessMembershipListRelationFilter
@@ -59982,6 +60082,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
     sessions?: SessionOrderByRelationAggregateInput
     accounts?: AccountOrderByRelationAggregateInput
     memberships?: BusinessMembershipOrderByRelationAggregateInput
@@ -60003,6 +60105,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     platformRole?: EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+    termsAcceptedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    termsVersion?: StringNullableFilter<"User"> | string | null
     sessions?: SessionListRelationFilter
     accounts?: AccountListRelationFilter
     memberships?: BusinessMembershipListRelationFilter
@@ -60021,6 +60125,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -60038,6 +60144,8 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     platformRole?: EnumPlatformRoleWithAggregatesFilter<"User"> | $Enums.PlatformRole
+    termsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    termsVersion?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type BusinessMembershipWhereInput = {
@@ -60049,6 +60157,8 @@ export namespace Prisma {
     userId?: StringFilter<"BusinessMembership"> | string
     businessId?: StringFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
@@ -60059,6 +60169,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrderInput | SortOrder
+    merchantTermsVersion?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
   }
@@ -60073,6 +60185,8 @@ export namespace Prisma {
     userId?: StringFilter<"BusinessMembership"> | string
     businessId?: StringFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "userId_businessId">
@@ -60083,6 +60197,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrderInput | SortOrder
+    merchantTermsVersion?: SortOrderInput | SortOrder
     _count?: BusinessMembershipCountOrderByAggregateInput
     _max?: BusinessMembershipMaxOrderByAggregateInput
     _min?: BusinessMembershipMinOrderByAggregateInput
@@ -60097,6 +60213,8 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"BusinessMembership"> | string
     businessId?: StringWithAggregatesFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleWithAggregatesFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableWithAggregatesFilter<"BusinessMembership"> | string | null
   }
 
   export type SessionWhereInput = {
@@ -62303,6 +62421,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     orderNumber?: IntFilter<"Order"> | number
     status?: StringFilter<"Order"> | string
     paymentStatus?: StringFilter<"Order"> | string
@@ -62343,6 +62464,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
+    merchantTermsUpdatedAt?: SortOrderInput | SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -62388,6 +62512,9 @@ export namespace Prisma {
     NOT?: OrderWhereInput | OrderWhereInput[]
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     orderNumber?: IntFilter<"Order"> | number
     status?: StringFilter<"Order"> | string
     paymentStatus?: StringFilter<"Order"> | string
@@ -62427,6 +62554,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
+    merchantTermsUpdatedAt?: SortOrderInput | SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -62467,6 +62597,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Order"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
     orderNumber?: IntWithAggregatesFilter<"Order"> | number
     status?: StringWithAggregatesFilter<"Order"> | string
     paymentStatus?: StringWithAggregatesFilter<"Order"> | string
@@ -64434,6 +64567,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -64452,6 +64587,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -64470,6 +64607,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -64488,6 +64627,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -64506,6 +64647,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -64517,6 +64660,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -64528,12 +64673,16 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipCreateInput = {
     id?: string
     createdAt?: Date | string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
     user: UserCreateNestedOneWithoutMembershipsInput
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
@@ -64544,12 +64693,16 @@ export namespace Prisma {
     userId: string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
@@ -64560,6 +64713,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipCreateManyInput = {
@@ -64568,12 +64723,16 @@ export namespace Prisma {
     userId: string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipUncheckedUpdateManyInput = {
@@ -64582,6 +64741,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SessionCreateInput = {
@@ -67200,6 +67361,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -67236,6 +67400,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -67272,6 +67439,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -67308,6 +67478,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -67344,6 +67517,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -67376,6 +67552,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -67404,6 +67583,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -69596,6 +69778,17 @@ export namespace Prisma {
     not?: NestedEnumPlatformRoleFilter<$PrismaModel> | $Enums.PlatformRole
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type SessionListRelationFilter = {
     every?: SessionWhereInput
     some?: SessionWhereInput
@@ -69680,6 +69873,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -69691,6 +69886,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -69702,6 +69899,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -69772,6 +69971,20 @@ export namespace Prisma {
     _max?: NestedEnumPlatformRoleFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type EnumBusinessRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.BusinessRole | EnumBusinessRoleFieldRefInput<$PrismaModel>
     in?: $Enums.BusinessRole[] | ListEnumBusinessRoleFieldRefInput<$PrismaModel>
@@ -69800,6 +70013,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrder
+    merchantTermsVersion?: SortOrder
   }
 
   export type BusinessMembershipMaxOrderByAggregateInput = {
@@ -69808,6 +70023,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrder
+    merchantTermsVersion?: SortOrder
   }
 
   export type BusinessMembershipMinOrderByAggregateInput = {
@@ -69816,6 +70033,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrder
+    merchantTermsVersion?: SortOrder
   }
 
   export type EnumBusinessRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -69873,17 +70092,6 @@ export namespace Prisma {
     membershipRole?: SortOrder
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type AccountCountOrderByAggregateInput = {
     id?: SortOrder
     accountId?: SortOrder
@@ -69930,20 +70138,6 @@ export namespace Prisma {
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type VerificationCountOrderByAggregateInput = {
@@ -71619,6 +71813,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -71661,6 +71858,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -71693,6 +71893,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -72969,6 +73172,10 @@ export namespace Prisma {
     set?: $Enums.PlatformRole
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type SessionUpdateManyWithoutUserNestedInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -73215,10 +73422,6 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutAccountsInput, UserUncheckedCreateWithoutAccountsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAccountsInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
@@ -76452,6 +76655,17 @@ export namespace Prisma {
     not?: NestedEnumPlatformRoleFilter<$PrismaModel> | $Enums.PlatformRole
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -76540,6 +76754,20 @@ export namespace Prisma {
     _max?: NestedEnumPlatformRoleFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumBusinessRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.BusinessRole | EnumBusinessRoleFieldRefInput<$PrismaModel>
     in?: $Enums.BusinessRole[] | ListEnumBusinessRoleFieldRefInput<$PrismaModel>
@@ -76555,31 +76783,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBusinessRoleFilter<$PrismaModel>
     _max?: NestedEnumBusinessRoleFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumBusinessDomainStatusFilter<$PrismaModel = never> = {
@@ -76813,6 +77016,8 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
 
@@ -76821,6 +77026,8 @@ export namespace Prisma {
     createdAt?: Date | string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipCreateOrConnectWithoutUserInput = {
@@ -77093,6 +77300,8 @@ export namespace Prisma {
     userId?: StringFilter<"BusinessMembership"> | string
     businessId?: StringFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
   }
 
   export type CustomerUpsertWithWhereUniqueWithoutUserInput = {
@@ -77242,6 +77451,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
@@ -77259,6 +77470,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -77439,6 +77652,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
@@ -77456,6 +77671,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -77626,6 +77843,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
@@ -77643,6 +77862,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -77676,6 +77897,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
@@ -77693,6 +77916,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -77710,6 +77935,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
@@ -77727,6 +77954,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -77760,6 +77989,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
@@ -77777,6 +78008,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -77979,6 +78212,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -78014,6 +78250,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -78702,6 +78941,8 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
     user: UserCreateNestedOneWithoutMembershipsInput
   }
 
@@ -78710,6 +78951,8 @@ export namespace Prisma {
     createdAt?: Date | string
     userId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipCreateOrConnectWithoutBusinessInput = {
@@ -79092,6 +79335,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     orderNumber?: IntFilter<"Order"> | number
     status?: StringFilter<"Order"> | string
     paymentStatus?: StringFilter<"Order"> | string
@@ -84181,6 +84427,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -84198,6 +84446,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -84362,6 +84612,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -84397,6 +84650,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -84642,6 +84898,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -84659,6 +84917,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -84974,6 +85234,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -85009,6 +85272,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -85947,6 +86213,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -85982,6 +86251,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86033,6 +86305,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86068,6 +86343,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86235,6 +86513,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86270,6 +86551,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86465,6 +86749,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86500,6 +86787,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86682,6 +86972,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86717,6 +87010,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -87247,6 +87543,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -87282,6 +87581,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -87327,6 +87629,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -87344,6 +87648,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -87712,6 +88018,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -87747,6 +88056,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -87798,6 +88110,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -87815,6 +88129,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -89049,6 +89365,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -89066,6 +89384,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -89252,6 +89572,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -89269,6 +89591,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -90978,6 +91302,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -91013,6 +91340,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -91244,6 +91574,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -91279,6 +91612,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -91606,6 +91942,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -91623,6 +91961,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -91809,6 +92149,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -91826,6 +92168,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -93056,6 +93400,8 @@ export namespace Prisma {
     createdAt?: Date | string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type CustomerCreateManyUserInput = {
@@ -93207,6 +93553,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -93215,6 +93563,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutUserInput = {
@@ -93222,6 +93572,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CustomerUpdateWithoutUserInput = {
@@ -93483,6 +93835,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -93722,6 +94077,8 @@ export namespace Prisma {
     createdAt?: Date | string
     userId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type ShippingZoneCreateManyBusinessInput = {
@@ -94035,6 +94392,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -94070,6 +94430,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -94105,6 +94468,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -94775,6 +95141,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -94783,6 +95151,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutBusinessInput = {
@@ -94790,6 +95160,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ShippingZoneUpdateWithoutBusinessInput = {
@@ -95694,6 +96066,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -95795,6 +96170,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -95830,6 +96208,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -95865,6 +96246,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96110,6 +96494,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -96141,6 +96528,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96176,6 +96566,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96211,6 +96604,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96488,6 +96884,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -96519,6 +96918,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96554,6 +96956,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96589,6 +96994,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string

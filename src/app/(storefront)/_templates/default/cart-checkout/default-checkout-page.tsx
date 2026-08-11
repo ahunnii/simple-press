@@ -6,6 +6,7 @@ import { DefaultCheckoutForm } from "./default-checkout-form";
 
 export async function DefaultCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   if (!business.isStripeConnected && process.env.NODE_ENV !== "development") {
     return (
@@ -48,7 +49,10 @@ export async function DefaultCheckoutPage({
 
       <div className="px-6 py-12 lg:px-8">
         <div className="mx-auto max-w-[1440px]">
-          <DefaultCheckoutForm business={business} />
+          <DefaultCheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </div>
       </div>
     </div>

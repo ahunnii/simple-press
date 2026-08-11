@@ -18,6 +18,7 @@ import { PinkCheckoutForm } from "./pink-checkout-form";
  */
 export async function PinkCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   return (
     <div
@@ -25,7 +26,10 @@ export async function PinkCheckoutPage({
       style={{ background: "var(--pink-paper)" }}
     >
       <div className="mx-auto max-w-[1400px]">
-        <PinkCheckoutForm business={business} />
+        <PinkCheckoutForm
+          business={business}
+          merchantPolicies={merchantPolicies}
+        />
       </div>
     </div>
   );

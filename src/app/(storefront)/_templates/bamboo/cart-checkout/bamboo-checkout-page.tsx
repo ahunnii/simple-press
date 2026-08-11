@@ -9,6 +9,7 @@ import { CheckoutForm } from "./bamboo-checkout-form";
 
 export async function BambooCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   if (!business.isStripeConnected) {
     return (
@@ -50,7 +51,10 @@ export async function BambooCheckoutPage({
           </div>
         </FadeIn>
         <FadeIn direction="up" delay={0.1}>
-          <CheckoutForm business={business} />
+          <CheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </FadeIn>
       </section>
     </PageTransition>

@@ -13,12 +13,20 @@ import {
 } from "@better-auth-ui/react"
 import { useIsMutating } from "@tanstack/react-query"
 import { Eye, EyeOff } from "lucide-react"
-import { type SyntheticEvent, useState } from "react"
+// SIMPLEPRESS LOCAL ADDITION (imports) — `useEffect`/`useRef` are used by the
+// terms-acceptance checkbox below.
+import { type SyntheticEvent, useEffect, useRef, useState } from "react"
+// END SIMPLEPRESS LOCAL ADDITION (imports)
 import { toast } from "sonner"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+// SIMPLEPRESS LOCAL ADDITION (imports) — `Checkbox` + `FieldContent` are used
+// by the terms-acceptance checkbox below.
+import { Checkbox } from "~/components/ui/checkbox"
+// END SIMPLEPRESS LOCAL ADDITION (imports)
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
@@ -43,6 +51,12 @@ import {
   resolveAuthErrorMessage
 } from "~/lib/auth/auth-error-messages"
 import { AuthErrorAlert } from "./auth-error-alert"
+// END SIMPLEPRESS LOCAL ADDITION (imports)
+// SIMPLEPRESS LOCAL ADDITION (imports) — absolute links for the terms
+// checkbox: this form renders on tenant subdomains/custom domains, so a
+// relative `/platform/policies/...` link would resolve to the merchant's
+// site instead of the platform's.
+import { env } from "~/env"
 // END SIMPLEPRESS LOCAL ADDITION (imports)
 
 export type SignUpProps = {
@@ -155,6 +169,51 @@ export function SignUp({
     confirmPassword?: string
   }>({})
 
+  // SIMPLEPRESS LOCAL ADDITION — platform terms-of-service acceptance.
+  //
+  // This account is portable across every storefront on the platform, so it
+  // can only carry acceptance of SimplePress's own Terms of Service +
+  // Privacy Policy here — never an individual merchant's terms (those are
+  // captured per-order at checkout, see `Order.termsAcceptedAt`). The
+  // checkbox below only *signals* that the box was checked; the actual
+  // timestamp and policy version are stamped server-side in
+  // `src/server/better-auth/config.tsx`, which is the only place allowed to
+  // decide "when" and "which version" — the client cannot supply either.
+  //
+  // Wired the same way `CheckboxField` in `additional-field.tsx` documents:
+  // Radix's `CheckboxPrimitive.Root` renders a `<button role="checkbox">`
+  // plus its own hidden bubble `<input type="checkbox" required>`, and that
+  // bubble input's `invalid` event does not bubble — so a parent
+  // `onInvalid` prop never fires. A capture-phase listener on the wrapping
+  // `Field` reaches it on the way down instead, suppresses the native
+  // balloon, and renders the message through `<FieldError>` like every
+  // sibling field.
+  //
+  // Re-apply after a registry re-fetch.
+  const termsFieldRef = useRef<HTMLDivElement>(null)
+  const [termsError, setTermsError] = useState<string>()
+
+  useEffect(() => {
+    const node = termsFieldRef.current
+    if (!node) return
+
+    const handleInvalid = (event: Event) => {
+      event.preventDefault()
+
+      if (event.target instanceof HTMLInputElement) {
+        setTermsError(event.target.validationMessage)
+      }
+    }
+
+    node.addEventListener("invalid", handleInvalid, true)
+    return () => node.removeEventListener("invalid", handleInvalid, true)
+  }, [])
+
+  const platformOrigin = `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`
+  const platformTermsUrl = `${platformOrigin}/platform/policies/terms-of-service`
+  const platformPrivacyUrl = `${platformOrigin}/platform/policies/privacy-policy`
+  // END SIMPLEPRESS LOCAL ADDITION
+
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -196,6 +255,22 @@ export function SignUp({
         additionalFieldValues[field.name] = value
       }
     }
+
+    // SIMPLEPRESS LOCAL ADDITION — terms-of-service acceptance signal.
+    //
+    // The terms checkbox is `required`, so native validation already
+    // refused to dispatch this `submit` event unless it was checked; this
+    // is just that fact carried over the wire as an explicit boolean.
+    // `config.tsx` reads it to decide *whether* to stamp
+    // `termsAcceptedAt`, but computes the timestamp and version itself —
+    // the client never gets to supply either. Folded into
+    // `additionalFieldValues` (typed `Record<string, unknown>`) rather than
+    // passed as its own literal property below, since `useSignUpEmail`'s
+    // params type doesn't declare this key and a literal property would
+    // fail TypeScript's excess-property check; a spread does not.
+    // Re-apply after a registry re-fetch.
+    additionalFieldValues.termsAccepted = true
+    // END SIMPLEPRESS LOCAL ADDITION
 
     // SIMPLEPRESS LOCAL ADDITION — refuse to submit an unsolved captcha.
     //
@@ -505,6 +580,52 @@ export function SignUp({
                       />
                     )
                 )}
+
+                {/* SIMPLEPRESS LOCAL ADDITION — platform terms-of-service
+                    checkbox. See the state/refs declared above for why this
+                    needs its own capture-phase listener instead of the
+                    `onInvalid` prop the fields above use.
+                    Re-apply after a registry re-fetch. */}
+                <Field
+                  ref={termsFieldRef}
+                  orientation="horizontal"
+                  data-invalid={!!termsError}
+                >
+                  <Checkbox
+                    id="termsAccepted"
+                    name="termsAccepted"
+                    required
+                    disabled={isPending}
+                    onCheckedChange={() => setTermsError(undefined)}
+                    aria-invalid={!!termsError}
+                  />
+
+                  <FieldContent>
+                    <FieldLabel htmlFor="termsAccepted" className="font-normal">
+                      I agree to SimplePress&apos;s{" "}
+                      <a
+                        href={platformTermsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-4"
+                      >
+                        Terms of Service
+                      </a>{" "}
+                      and{" "}
+                      <a
+                        href={platformPrivacyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-4"
+                      >
+                        Privacy Policy
+                      </a>
+                    </FieldLabel>
+
+                    <FieldError>{termsError}</FieldError>
+                  </FieldContent>
+                </Field>
+                {/* END SIMPLEPRESS LOCAL ADDITION */}
 
                 {/* SIMPLEPRESS LOCAL ADDITION — reCAPTCHA v3 is invisible, so
                     this slot renders only Google's required disclosure text,

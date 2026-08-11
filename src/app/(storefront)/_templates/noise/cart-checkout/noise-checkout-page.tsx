@@ -5,6 +5,7 @@ import { NoiseCheckoutForm } from "./noise-checkout-form";
 
 export async function NoiseCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   return (
     <PageTransition>
@@ -69,7 +70,10 @@ export async function NoiseCheckoutPage({
       {/* ── Checkout form (handles address + shipping → redirects to Stripe) ── */}
       <div className="px-7 py-12" style={{ background: "var(--vn-paper)" }}>
         <FadeIn delay={0.1}>
-          <NoiseCheckoutForm business={business} />
+          <NoiseCheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </FadeIn>
       </div>
     </PageTransition>

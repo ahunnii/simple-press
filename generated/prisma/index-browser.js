@@ -129,7 +129,9 @@ exports.Prisma.UserScalarFieldEnum = {
   image: 'image',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  platformRole: 'platformRole'
+  platformRole: 'platformRole',
+  termsAcceptedAt: 'termsAcceptedAt',
+  termsVersion: 'termsVersion'
 };
 
 exports.Prisma.BusinessMembershipScalarFieldEnum = {
@@ -137,7 +139,9 @@ exports.Prisma.BusinessMembershipScalarFieldEnum = {
   createdAt: 'createdAt',
   userId: 'userId',
   businessId: 'businessId',
-  role: 'role'
+  role: 'role',
+  merchantTermsAcceptedAt: 'merchantTermsAcceptedAt',
+  merchantTermsVersion: 'merchantTermsVersion'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
@@ -495,6 +499,9 @@ exports.Prisma.OrderScalarFieldEnum = {
   id: 'id',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  termsAcceptedAt: 'termsAcceptedAt',
+  termsVersion: 'termsVersion',
+  merchantTermsUpdatedAt: 'merchantTermsUpdatedAt',
   orderNumber: 'orderNumber',
   status: 'status',
   paymentStatus: 'paymentStatus',

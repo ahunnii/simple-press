@@ -71,8 +71,22 @@ export type DefaultCartPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
 };
 
+/**
+ * Whether the merchant has published (non-empty, published) `Page` rows for
+ * the optional terms-of-service / refund-policy slugs. Resolved server-side
+ * in `checkout/page.tsx` the same way `DefaultFooter` resolves its policy
+ * links (`content.getSimplifiedPages`) — never fetched client-side. Checkout
+ * forms use this to decide which merchant policy links are safe to render;
+ * a slug with no published Page must never become a link (dead link).
+ */
+export type CheckoutMerchantPolicies = {
+  hasTermsOfService: boolean;
+  hasRefundPolicy: boolean;
+};
+
 export type DefaultCheckoutPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  merchantPolicies: CheckoutMerchantPolicies;
 };
 
 export type DefaultBlogPostPageTemplateProps = {

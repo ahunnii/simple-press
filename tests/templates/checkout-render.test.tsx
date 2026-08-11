@@ -85,6 +85,8 @@ vi.mock("sonner", () => ({
 }));
 
 type BusinessProp = DefaultCheckoutPageTemplateProps["business"];
+type MerchantPoliciesProp =
+  DefaultCheckoutPageTemplateProps["merchantPolicies"];
 
 // Minimal business the checkout forms read (shipping config, identity, Stripe).
 const business = {
@@ -107,6 +109,13 @@ const business = {
   siteContent: { logoUrl: null },
 } as unknown as BusinessProp;
 
+// No published terms-of-service/refund-policy pages in this fixture — the
+// most common real-world case (see checkout-terms-notice.tsx).
+const merchantPolicies: MerchantPoliciesProp = {
+  hasTermsOfService: false,
+  hasRefundPolicy: false,
+};
+
 const CART_KEY = "shopping-cart";
 const seededItem = {
   productId: "p1",
@@ -119,7 +128,10 @@ const seededItem = {
   sku: null,
 };
 
-type FormComponent = ComponentType<{ business: BusinessProp }>;
+type FormComponent = ComponentType<{
+  business: BusinessProp;
+  merchantPolicies: MerchantPoliciesProp;
+}>;
 
 const TEMPLATE_FORMS: [name: string, Form: FormComponent][] = [
   ["default", DefaultCheckoutForm],
@@ -145,7 +157,7 @@ describe("checkout form renders for every template", () => {
     async (_name, Form) => {
       render(
         <CartProvider>
-          <Form business={business} />
+          <Form business={business} merchantPolicies={merchantPolicies} />
         </CartProvider>,
       );
 

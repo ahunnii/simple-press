@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -33,10 +34,11 @@ const sectionHeadingClass =
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
-export function PollenCheckoutForm({ business }: Props) {
-  const f = useCheckoutForm(business);
+export function PollenCheckoutForm({ business, merchantPolicies }: Props) {
+  const f = useCheckoutForm(business, merchantPolicies);
 
   // Tracks whether the user has attempted to submit — used to derive aria-invalid on required fields.
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -513,6 +515,12 @@ export function PollenCheckoutForm({ business }: Props) {
               "Continue to Payment"
             )}
           </button>
+
+          <CheckoutTermsNotice
+            disclosure={f.termsDisclosure}
+            className="mt-3 text-center text-xs text-gray-500"
+            linkClassName="underline hover:text-gray-700"
+          />
 
           <p className="mt-3 text-center text-xs text-gray-500">
             All transactions are secure and encrypted via Stripe. 100% Secure

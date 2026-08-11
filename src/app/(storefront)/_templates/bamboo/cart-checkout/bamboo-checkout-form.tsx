@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -30,9 +31,13 @@ import {
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
-export function CheckoutForm({ business }: CheckoutFormProps) {
+export function CheckoutForm({
+  business,
+  merchantPolicies,
+}: CheckoutFormProps) {
   const {
     email,
     setEmail,
@@ -72,7 +77,8 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
     shipping,
     shippingPending,
     finalTotal,
-  } = useCheckoutForm(business);
+    termsDisclosure,
+  } = useCheckoutForm(business, merchantPolicies);
 
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
@@ -566,6 +572,12 @@ export function CheckoutForm({ business }: CheckoutFormProps) {
                 "Continue to Payment"
               )}
             </Button>
+
+            <CheckoutTermsNotice
+              disclosure={termsDisclosure}
+              className="text-muted-foreground text-center text-xs"
+              linkClassName="underline hover:text-foreground"
+            />
 
             <p className="text-muted-foreground text-center text-xs">
               All transactions are secure and encrypted via Stripe. 100% Secure

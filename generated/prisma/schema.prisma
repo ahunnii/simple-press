@@ -38,6 +38,20 @@ model User {
   updatedAt     DateTime     @updatedAt
   platformRole  PlatformRole @default(BUSINESS_USER)
 
+  // Acceptance of the PLATFORM's Terms of Service + Privacy Policy, recorded at
+  // account creation. Scoped to SimplePress only, never to an individual store:
+  // this account is portable across every storefront on the platform, so it
+  // cannot meaningfully carry consent to any one merchant's terms. Merchant
+  // terms are agreed per-transaction (see `Order`) and per-store for owners
+  // (see `BusinessMembership`).
+  //
+  // Nullable because every account that existed before this shipped has no
+  // recorded acceptance — do NOT backfill with a timestamp, which would assert
+  // an agreement that never happened. `null` honestly means "unknown".
+  // Version format is the ISO date from `~/lib/legal/policy-versions`.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+
   sessions Session[]
   accounts Account[]
 
@@ -62,6 +76,18 @@ model BusinessMembership {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   role BusinessRole // ← typed enum, not a raw string
+
+  // Acceptance of the Seller & Merchant Agreement + Acceptable Use Policy,
+  // recorded when a store is created or an owner invite is claimed. These are
+  // the documents that give the platform grounds to suspend a store, and on a
+  // free platform they are the ONLY contract with the merchant — so this is
+  // recorded per membership, not per user: one person can own two stores and
+  // accepts separately for each.
+  //
+  // Nullable for memberships that predate this. `null` = never accepted, which
+  // is exactly what it looks like; do not backfill.
+  merchantTermsAcceptedAt DateTime?
+  merchantTermsVersion    String?
 
   @@unique([userId, businessId])
   // NOTE: no @@index([userId]) — covered by the @@unique([userId, businessId]) prefix.
@@ -817,6 +843,20 @@ model Order {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Acceptance of the MERCHANT's terms, captured at checkout. This lives on the
+  // Order rather than in a consent table on purpose: the buyer↔merchant
+  // relationship is formed per-transaction, and an order is already an
+  // immutable record of one. It also covers guest buyers, who never create an
+  // account and so are never reached by `User.termsAcceptedAt`.
+  //
+  // `merchantTermsUpdatedAt` snapshots the `updatedAt` of the merchant's
+  // terms-of-service Page at time of purchase — merchants can edit their
+  // policies freely, so without this there is no way to tell which wording was
+  // actually shown. Null when the merchant published no terms page at all.
+  termsAcceptedAt        DateTime?
+  termsVersion           String?
+  merchantTermsUpdatedAt DateTime?
 
   // Order number (human-readable, e.g., #1001)
   orderNumber Int

@@ -12,6 +12,7 @@ import {
   Package,
   Palette,
   Plus,
+  ShieldAlert,
   ShoppingCart,
   TrendingUp,
   Truck,
@@ -74,6 +75,8 @@ type DashboardContentProps = {
   } | null;
   ordersToFulfillCount: number;
   awaitingPaymentCount: number;
+  /** True when Terms of Service or Refund Policy isn't published+non-empty. */
+  missingPolicies: boolean;
   recentOrders: Array<{
     id: string;
     orderNumber: number;
@@ -165,6 +168,7 @@ export function DashboardContent({
   setupProgress,
   ordersToFulfillCount,
   awaitingPaymentCount,
+  missingPolicies,
   recentOrders,
   lowStockProducts,
   lowStockPools,
@@ -240,7 +244,7 @@ export function DashboardContent({
     : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? ""}`;
 
   const hasAttentionItems =
-    ordersToFulfillCount > 0 || awaitingPaymentCount > 0;
+    ordersToFulfillCount > 0 || awaitingPaymentCount > 0 || missingPolicies;
 
   return (
     <div className="bg-muted min-h-screen">
@@ -364,6 +368,24 @@ export function DashboardContent({
                     </p>
                   </div>
                   <ArrowRight className="h-4 w-4 shrink-0 text-blue-600 transition-transform group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )}
+            {missingPolicies && (
+              <Link href="/admin/content/policies" className="group">
+                <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 transition-colors group-hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:group-hover:bg-slate-900/60">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 group-hover:bg-slate-300 dark:bg-slate-800 dark:group-hover:bg-slate-700">
+                    <ShieldAlert className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground text-sm font-semibold">
+                      No store policies published
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Add a Terms of Service &amp; Refund Policy
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 dark:text-slate-400" />
                 </div>
               </Link>
             )}

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { env } from "~/env";
+import {
+  POLICY_LAST_UPDATED,
+  formatPolicyDate,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Seller & Merchant Agreement | SimplePress",
@@ -20,7 +24,8 @@ export default function SellerMerchantPage() {
       <h1>SimplePress Seller &amp; Merchant Agreement</h1>
 
       <p>
-        <strong>Last Updated:</strong> May 29, 2026
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.sellerMerchant)}
       </p>
 
       <h2>1. Introduction</h2>

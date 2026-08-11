@@ -4,6 +4,10 @@ import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { notifyArtisanalFuturesClaimed } from "~/lib/artisanal-futures/notify";
+import {
+  MERCHANT_TERMS_VERSION,
+  PLATFORM_TERMS_VERSION,
+} from "~/lib/legal/policy-versions";
 import { signPartnerRequest } from "~/lib/partner-auth";
 import { authLimiter, getClientIp } from "~/lib/rate-limit";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
@@ -125,6 +129,14 @@ export async function POST(req: NextRequest) {
       invitationCode?: string | null;
       /** Artisanal Futures token — present only for the artisan onboarding flow. */
       aftoken?: string | null;
+      /**
+       * Explicit acceptance of the platform ToS + Privacy Policy (the account)
+       * AND the Seller & Merchant Agreement + Acceptable Use Policy (the store).
+       * Must be literally `true`; a checkbox that only exists in React is not
+       * evidence of anything, so this is required here too. The TIMESTAMP is
+       * never taken from the client — see the transaction below.
+       */
+      acceptedTerms?: unknown;
     };
 
     const {
@@ -141,6 +153,7 @@ export async function POST(req: NextRequest) {
       primaryColor,
       invitationCode,
       aftoken,
+      acceptedTerms,
     } = formData;
 
     // Verify the caller is authenticated and owns this email
@@ -156,6 +169,20 @@ export async function POST(req: NextRequest) {
     if (!email || !password || !name || !businessName || !rawSubdomain) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    // Terms acceptance is a hard precondition for creating a store: this is the
+    // only point at which anyone agrees to the documents that let the platform
+    // suspend a merchant. Require the flag explicitly (`true`, not truthy) and
+    // refuse rather than silently creating an unbound store.
+    if (acceptedTerms !== true) {
+      return NextResponse.json(
+        {
+          error:
+            "You must accept the Terms of Service, Privacy Policy, Seller & Merchant Agreement, and Acceptable Use Policy to create a store.",
+        },
         { status: 400 },
       );
     }
@@ -285,6 +312,9 @@ export async function POST(req: NextRequest) {
     // before this route is called (see StoreCustomizationStep) — verified
     // above via getSession(). Create business + site content in a transaction.
     const business = await db.$transaction(async (tx) => {
+      // Server-generated acceptance instant — never read from the request body.
+      const acceptedAt = new Date();
+
       // 1. Create business
       const newBusiness = await tx.business.create({
         data: {
@@ -313,14 +343,33 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // 3. Create business membership for the owner
+      // 3. Create business membership for the owner, carrying its acceptance of
+      // the Seller & Merchant Agreement + Acceptable Use Policy. Written in the
+      // SAME transaction as the business so a store can never exist without a
+      // recorded acceptance.
       await tx.businessMembership.create({
         data: {
           userId: existingUser.id,
           businessId: newBusiness.id,
           role: "OWNER",
+          merchantTermsAcceptedAt: acceptedAt,
+          merchantTermsVersion: MERCHANT_TERMS_VERSION,
         },
       });
+
+      // 3b. Platform ToS + Privacy attach to the ACCOUNT, which this flow just
+      // created (via better-auth on the client, immediately before this call).
+      // Only stamp when nothing is recorded yet: a retry after a failed store
+      // step must not overwrite the original acceptance instant/version.
+      if (!existingUser.termsAcceptedAt) {
+        await tx.user.update({
+          where: { id: existingUser.id },
+          data: {
+            termsAcceptedAt: acceptedAt,
+            termsVersion: PLATFORM_TERMS_VERSION,
+          },
+        });
+      }
 
       // 4. If custom domain, add to domain queue
       if (customDomain) {

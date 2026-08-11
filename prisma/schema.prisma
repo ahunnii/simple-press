@@ -2,58 +2,63 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
-    
+  provider = "postgresql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
 }
 
-
-
-
 enum PlatformRole {
-  PLATFORM_ADMIN  // Was ADMIN - global, can do anything
-  BUSINESS_USER   // Was USER - customer/shopper, no admin access
+  PLATFORM_ADMIN // Was ADMIN - global, can do anything
+  BUSINESS_USER // Was USER - customer/shopper, no admin access
 }
 
 enum BusinessRole {
-  OWNER    // Full control of one business
-  MANAGER  // Operational access, scoped per membership row
-  STAFF    // Fulfillment-only: orders and customer lookup, no products/settings/money
+  OWNER // Full control of one business
+  MANAGER // Operational access, scoped per membership row
+  STAFF // Fulfillment-only: orders and customer lookup, no products/settings/money
 }
 
-
-
-
 // Necessary for Better Auth
-
-
 
 model User {
   id            String       @id @default(cuid())
   name          String
-  email         String       @unique  // ← globally unique now
+  email         String       @unique // ← globally unique now
   emailVerified Boolean      @default(false)
   image         String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   platformRole  PlatformRole @default(BUSINESS_USER)
 
-  sessions  Session[]
-  accounts  Account[]
+  // Acceptance of the PLATFORM's Terms of Service + Privacy Policy, recorded at
+  // account creation. Scoped to SimplePress only, never to an individual store:
+  // this account is portable across every storefront on the platform, so it
+  // cannot meaningfully carry consent to any one merchant's terms. Merchant
+  // terms are agreed per-transaction (see `Order`) and per-store for owners
+  // (see `BusinessMembership`).
+  //
+  // Nullable because every account that existed before this shipped has no
+  // recorded acceptance — do NOT backfill with a timestamp, which would assert
+  // an agreement that never happened. `null` honestly means "unknown".
+  // Version format is the ISO date from `~/lib/legal/policy-versions`.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+
+  sessions Session[]
+  accounts Account[]
 
   memberships      BusinessMembership[]
   customers        Customer[]
   inventoryHistory InventoryHistory[]
-  createdInvites   PlatformInvite[]    @relation("CreatedInvites")
+  createdInvites   PlatformInvite[]     @relation("CreatedInvites")
   editorNotes      EditorNote[]
 
   // ← removed businessId direct FK, membership table handles this
@@ -61,40 +66,50 @@ model User {
 }
 
 model BusinessMembership {
-  id        String       @id @default(cuid())
-  createdAt DateTime     @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  userId     String
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   businessId String
-  business   Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  role       BusinessRole // ← typed enum, not a raw string
+  role BusinessRole // ← typed enum, not a raw string
+
+  // Acceptance of the Seller & Merchant Agreement + Acceptable Use Policy,
+  // recorded when a store is created or an owner invite is claimed. These are
+  // the documents that give the platform grounds to suspend a store, and on a
+  // free platform they are the ONLY contract with the merchant — so this is
+  // recorded per membership, not per user: one person can own two stores and
+  // accepts separately for each.
+  //
+  // Nullable for memberships that predate this. `null` = never accepted, which
+  // is exactly what it looks like; do not backfill.
+  merchantTermsAcceptedAt DateTime?
+  merchantTermsVersion    String?
 
   @@unique([userId, businessId])
   // NOTE: no @@index([userId]) — covered by the @@unique([userId, businessId]) prefix.
   @@index([businessId])
 }
 
-
 model Session {
-  id        String   @id @default(cuid())
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String? //@db.Text
-  userAgent String? //@db.Text
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activeOrganizationId String? 
+  id                   String   @id @default(cuid())
+  expiresAt            DateTime
+  token                String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  ipAddress            String? //@db.Text
+  userAgent            String? //@db.Text
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
 
   // Business context — cached at session creation
   businessId     String?
   membershipId   String?
   membershipRole String?
-
 
   @@unique([token])
   @@index([userId])
@@ -133,9 +148,9 @@ model Verification {
 }
 
 enum BusinessDomainStatus {
-    NONE
-    PENDING_DNS
-    ACTIVE
+  NONE
+  PENDING_DNS
+  ACTIVE
 }
 
 model Business {
@@ -144,12 +159,12 @@ model Business {
   updatedAt DateTime @updatedAt
 
   // Identity
-  name        String
-  slug        String   @unique // URL-friendly version of name
-  subdomain   String   @unique // "anothershop" for anothershop.myapplication.com
-  customDomain String? @unique // "anothershop.co"
-  domainStatus BusinessDomainStatus  @default(NONE) // none | pending_dns | active
-  afProvisionCode String? @unique // Artisanal Futures provisioning idempotency key
+  name            String
+  slug            String               @unique // URL-friendly version of name
+  subdomain       String               @unique // "anothershop" for anothershop.myapplication.com
+  customDomain    String?              @unique // "anothershop.co"
+  domainStatus    BusinessDomainStatus @default(NONE) // none | pending_dns | active
+  afProvisionCode String?              @unique // Artisanal Futures provisioning idempotency key
 
   // Template & Branding
   templateId String @default("modern") // modern | vintage | minimal
@@ -183,14 +198,14 @@ model Business {
   // Analytics
   umamiWebsiteId String? // Each business gets their own website ID
   umamiEnabled   Boolean @default(false)
-  
+
   // Status
-  status          String  @default("active") // active | suspended | closed
+  status             String  @default("active") // active | suspended | closed
   onboardingComplete Boolean @default(false)
 
   // SEO / AEO / GEO controls
-  localBusinessEnabled Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
-  allowAiCrawlers      Boolean @default(true)  // when false, blocks known AI-crawler bots in robots.txt
+  localBusinessEnabled        Boolean @default(false) // opt-in to emit LocalBusiness JSON-LD (only meaningful when address/phone is set)
+  allowAiCrawlers             Boolean @default(true) // when false, blocks known AI-crawler bots in robots.txt
   sendAbandonedCheckoutEmails Boolean @default(false) // recovery email to shoppers who abandon a Stripe checkout (needs their email on the expired session)
 
   // Features
@@ -205,42 +220,42 @@ model Business {
   pickupInstructions    String? @db.Text // combined "pickup hours & instructions", shown verbatim at checkout + in emails
 
   // Zone + weight shipping fields
-  originState                String? // 2-letter US state code for shipping origin
-  shippingWeightTiers        Json?   // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
-  businessHours              Json?   // BusinessHoursRow[] — see src/lib/business-hours.ts
-  shippingFallbackRate       Int?    // cents; used when destination state matches no zone
-  shippingDefaultItemWeightLb Float? @default(0) // assumed weight (lb) for products with no weight set
+  originState                 String? // 2-letter US state code for shipping origin
+  shippingWeightTiers         Json? // WeightTier[]: [{ label, minLb, maxLb }] (last tier maxLb: null = no cap)
+  businessHours               Json? // BusinessHoursRow[] — see src/lib/business-hours.ts
+  shippingFallbackRate        Int? // cents; used when destination state matches no zone
+  shippingDefaultItemWeightLb Float?  @default(0) // assumed weight (lb) for products with no weight set
 
   // Country allowlist for sales/shipping. "US" is always implicitly allowed.
   salesCountries String[] @default([]) // additional countries beyond US: subset of ["CA","MX"]
 
   // Relationships
-  products    Product[]
-  collections Collection[]
-  services    Service[]
-  orders      Order[]
-  customers   Customer[]
-  siteContent SiteContent?
-  images      Image[]
-  discountCodes DiscountCode[]
-  inventoryHistory InventoryHistory[]
+  products              Product[]
+  collections           Collection[]
+  services              Service[]
+  orders                Order[]
+  customers             Customer[]
+  siteContent           SiteContent?
+  images                Image[]
+  discountCodes         DiscountCode[]
+  inventoryHistory      InventoryHistory[]
   baseInventoryUnits    BaseInventoryUnit[]
   inventoryReservations InventoryReservation[]
-  pages         Page[]
-  editorNotes   EditorNote[]
-  productImports ProductImport[]
-  galleries     Gallery[]
-  testimonials         Testimonial[]
-  testimonialInvites   TestimonialInvite[]
-   platformInvites PlatformInvite[]
-   teamInvites     TeamInvite[]
-   memberships   BusinessMembership[]
-  zones         ShippingZone[]
-  faqItems      FaqItem[]
-  events        Event[]
-  videos        Video[]
-  videoSources  VideoSource[]
-  backInStockRequests BackInStockRequest[]
+  pages                 Page[]
+  editorNotes           EditorNote[]
+  productImports        ProductImport[]
+  galleries             Gallery[]
+  testimonials          Testimonial[]
+  testimonialInvites    TestimonialInvite[]
+  platformInvites       PlatformInvite[]
+  teamInvites           TeamInvite[]
+  memberships           BusinessMembership[]
+  zones                 ShippingZone[]
+  faqItems              FaqItem[]
+  events                Event[]
+  videos                Video[]
+  videoSources          VideoSource[]
+  backInStockRequests   BackInStockRequest[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -250,40 +265,40 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 
   // Hero Section
-  heroTitle       String?
-  heroSubtitle    String?
-  heroImageUrl    String?
-  heroButtonText  String?
-  heroButtonLink  String?
-  
+  heroTitle      String?
+  heroSubtitle   String?
+  heroImageUrl   String?
+  heroButtonText String?
+  heroButtonLink String?
+
   // About Section
-  aboutTitle      String?
-  aboutText       String? @db.Text
-  aboutImageUrl   String?
-  
+  aboutTitle    String?
+  aboutText     String? @db.Text
+  aboutImageUrl String?
+
   // Features (stored as JSON for flexibility)
-  features        Json? // [{ title, description, icon }]
-  
+  features Json? // [{ title, description, icon }]
+
   // Footer
-  footerText      String?
-  socialLinks     Json? // { instagram, facebook, twitter }
-  
+  footerText  String?
+  socialLinks Json? // { instagram, facebook, twitter }
+
   // SEO
   metaTitle       String?
   metaDescription String?
   metaKeywords    String?
   ogImage         String?
   faviconUrl      String?
-  
+
   // Logo
-  logoUrl         String?
-  logoAltText     String?
-  
+  logoUrl     String?
+  logoAltText String?
+
   // Colors & Styling (template customization)
-  primaryColor    String? @default("#000000")
-  secondaryColor  String? @default("#ffffff")
-  accentColor     String? @default("#3b82f6")
-  
+  primaryColor   String? @default("#000000")
+  secondaryColor String? @default("#ffffff")
+  accentColor    String? @default("#3b82f6")
+
   // Navigation (custom menu items)
   navigationItems Json? // [{ label, href }]
 
@@ -311,15 +326,15 @@ model SiteContent {
 // ---------------------------------------------------------------------------
 
 model FaqItem {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  question   String
-  answer     String   @db.Text
+  question String
+  answer   String @db.Text
 
-  sortOrder  Int      @default(0)
-  published  Boolean  @default(true)
+  sortOrder Int     @default(0)
+  published Boolean @default(true)
 
   // Multi-tenancy
   businessId String
@@ -334,27 +349,27 @@ model Product {
   updatedAt DateTime @updatedAt
 
   // Basic Info
-  name        String
-  slug        String // URL-friendly, unique per business
+  name String
+  slug String // URL-friendly, unique per business
 
-  excerpt String? @db.Text // Short description of the product
+  excerpt     String? @db.Text // Short description of the product
   description String? @db.Text // Long description of the product
-  
+
   // Pricing
-  price       Float   // Base price in cents or dollars
-  compareAtPrice Float?  // Original price for "sale" display
-  cost        Float?  // Cost to business (for profit tracking)
-  
+  price          Float // Base price in cents or dollars
+  compareAtPrice Float? // Original price for "sale" display
+  cost           Float? // Cost to business (for profit tracking)
+
   // Inventory
-  sku                    String?
-  barcode                String?
-  trackInventory         Boolean @default(false)
-  inventoryQty           Int     @default(0)
-  reservedQty            Int     @default(0)
-  allowBackorders        Boolean @default(false)
-  lowInventoryThreshold  Int?
-  lowInventoryAlertSent  Boolean @default(false)
-  outOfStockAlertSent    Boolean @default(false)
+  sku                   String?
+  barcode               String?
+  trackInventory        Boolean @default(false)
+  inventoryQty          Int     @default(0)
+  reservedQty           Int     @default(0)
+  allowBackorders       Boolean @default(false)
+  lowInventoryThreshold Int?
+  lowInventoryAlertSent Boolean @default(false)
+  outOfStockAlertSent   Boolean @default(false)
 
   // Base inventory unit (pool) opt-in — when set, per-product trackInventory is disabled
   baseInventoryUnitId String?
@@ -362,42 +377,42 @@ model Product {
   baseUnitsConsumed   Int?
 
   // Physical attributes
-  weight      Float? // in lbs or kg
-  weightUnit  String?  @default("lb") // lb | kg
-  
+  weight     Float? // in lbs or kg
+  weightUnit String? @default("lb") // lb | kg
+
   // Organization
-  published   Boolean  @default(false)
-  featured    Boolean  @default(false)
+  published          Boolean   @default(false)
+  featured           Boolean   @default(false)
   scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
-  sortOrder   Int      @default(0)
-  
+  sortOrder          Int       @default(0)
+
   // SEO
   metaTitle       String?
   metaDescription String?
   metaKeywords    String?
   ogImage         String?
-  
+
   // Multi-tenancy
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+
   // Relationships
   images              Image[]
   variants            ProductVariant[]
   collectionProducts  CollectionProduct[]
   orderItems          OrderItem[]
-  inventoryHistory InventoryHistory[]
+  inventoryHistory    InventoryHistory[]
   backInStockRequests BackInStockRequest[]
 
   // Computed fields (can be calculated on demand)
   averageRating Float?
-  reviewCount   Int @default(0)
+  reviewCount   Int    @default(0)
 
   // Additional fields based on template needs
   additionalFields Json? // { key: value }
 
-  reviews     ProductReview[]
-  
+  reviews ProductReview[]
+
   @@unique([businessId, slug])
   @@index([businessId, published])
   @@index([businessId, featured])
@@ -410,30 +425,30 @@ model ProductVariant {
   updatedAt DateTime @updatedAt
 
   // Variant details
-  name        String // e.g., "Small / Red"
-  sku         String?
-  barcode     String?
-  
+  name    String // e.g., "Small / Red"
+  sku     String?
+  barcode String?
+
   // Pricing (overrides product price if set)
-  price       Float?
+  price          Float?
   compareAtPrice Float?
-  
+
   // Inventory
   inventoryQty Int @default(0)
   reservedQty  Int @default(0)
 
   // Options (stored as JSON for flexibility)
   options Json // { size: "Small", color: "Red" }
-  
+
   // Image
   imageUrl String?
-  
+
   // Relationships
-  productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
   inventoryHistory InventoryHistory[]
-  orderItems OrderItem[]
-  
+  orderItems       OrderItem[]
+
   @@index([productId])
 }
 
@@ -446,10 +461,10 @@ model Collection {
   slug        String
   description String? @db.Text
   imageUrl    String?
-  
-  published   Boolean @default(true)
-  sortOrder   Int     @default(0)
-  
+
+  published Boolean @default(true)
+  sortOrder Int     @default(0)
+
   // SEO
   metaTitle       String?
   metaDescription String?
@@ -461,21 +476,21 @@ model Collection {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   collectionProducts CollectionProduct[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 
   @@unique([businessId, slug])
-  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 }
 
 model CollectionProduct {
-  id        String   @id @default(cuid())
-  sortOrder Int      @default(0)
-  
+  id        String @id @default(cuid())
+  sortOrder Int    @default(0)
+
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  
+
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+
   @@unique([collectionId, productId])
   // NOTE: no @@index([collectionId]) — covered by the @@unique([collectionId, productId]) prefix.
   @@index([productId])
@@ -498,7 +513,7 @@ model Service {
   customFields Json?
 
   published Boolean @default(false)
-  sortOrder  Int     @default(0)
+  sortOrder Int     @default(0)
 
   // SEO
   metaTitle       String?
@@ -532,9 +547,9 @@ model ServiceItem {
   // Display-only "was" price (free text, e.g. "$120"), shown struck-through.
   compareAtPriceLabel String?
   // [{ label, priceLabel, compareAtPriceLabel? }] — alternate priced rows (display-only).
-  priceTiers Json?
+  priceTiers          Json?
   // [{ name, priceLabel?, description? }] — optional extras (display-only).
-  addOns Json?
+  addOns              Json?
 
   // External booking iframe (sanitized HTTPS URL only)
   bookingEmbedSrc    String?
@@ -547,7 +562,7 @@ model ServiceItem {
   isSignature Boolean @default(false)
 
   published Boolean @default(false)
-  sortOrder  Int     @default(0)
+  sortOrder Int     @default(0)
 
   // Parent service
   serviceId String
@@ -692,7 +707,7 @@ model Video {
 
   // ── Sync-owned. Overwritten on every sync run. Never hand-edit these. ────────
   title        String
-  description  String? @db.Text
+  description  String?  @db.Text
   thumbnailUrl String?
   channelTitle String?
   publishedAt  DateTime
@@ -742,15 +757,15 @@ model Image {
   altText   String?
   width     Int?
   height    Int?
-  sortOrder Int      @default(0)
-  
+  sortOrder Int     @default(0)
+
   // What this image is for
   productId  String?
   businessId String?
-  
+
   product  Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
   business Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+
   @@index([productId])
   @@index([businessId])
 }
@@ -764,13 +779,13 @@ model Customer {
   firstName String?
   lastName  String?
   phone     String? /// @encrypted
-  
+
   // Marketing
   acceptsMarketing Boolean @default(false)
-  
+
   // Stats
-  totalSpent      Int @default(0)
-  orderCount      Int     @default(0)
+  totalSpent Int @default(0)
+  orderCount Int @default(0)
 
   // GDPR/CCPA data-subject rights
   deletionRequestedAt DateTime?
@@ -781,18 +796,18 @@ model Customer {
 
   // Link to authenticated user (if they've signed in)
   userId String?
-  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   // Multi-tenancy (customer exists per business)
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  orders         Order[]
-  shippingAddresses ShippingAddress[]
-  testimonials         Testimonial[]
-  testimonialInvites   TestimonialInvite[]
-  reviews     ProductReview[]
-  
+
+  orders             Order[]
+  shippingAddresses  ShippingAddress[]
+  testimonials       Testimonial[]
+  testimonialInvites TestimonialInvite[]
+  reviews            ProductReview[]
+
   @@unique([businessId, email])
   // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, email]) prefix.
   @@index([userId])
@@ -803,56 +818,68 @@ model ShippingAddress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  firstName   String
-  lastName    String
-  company     String? /// @encrypted
-  address1    String  /// @encrypted
-  address2    String? /// @encrypted
-  city        String  /// @encrypted
-  province    String? /// @encrypted State/Province
-  country     String
-  zip         String  /// @encrypted
-  phone       String? /// @encrypted
-  
-  isDefault   Boolean @default(false)
-  
+  firstName String
+  lastName  String
+  company   String? /// @encrypted
+  address1  String /// @encrypted
+  address2  String? /// @encrypted
+  city      String /// @encrypted
+  province  String? /// @encrypted State/Province
+  country   String
+  zip       String /// @encrypted
+  phone     String? /// @encrypted
+
+  isDefault Boolean @default(false)
+
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
+
   orders Order[]
-  
+
   @@index([customerId])
 }
-
-
 
 model Order {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Acceptance of the MERCHANT's terms, captured at checkout. This lives on the
+  // Order rather than in a consent table on purpose: the buyer↔merchant
+  // relationship is formed per-transaction, and an order is already an
+  // immutable record of one. It also covers guest buyers, who never create an
+  // account and so are never reached by `User.termsAcceptedAt`.
+  //
+  // `merchantTermsUpdatedAt` snapshots the `updatedAt` of the merchant's
+  // terms-of-service Page at time of purchase — merchants can edit their
+  // policies freely, so without this there is no way to tell which wording was
+  // actually shown. Null when the merchant published no terms page at all.
+  termsAcceptedAt        DateTime?
+  termsVersion           String?
+  merchantTermsUpdatedAt DateTime?
+
   // Order number (human-readable, e.g., #1001)
   orderNumber Int
-  
+
   // Status
   status            String @default("open") // open | completed | cancelled | refunded 
   paymentStatus     String @default("pending") // pending | paid | failed | refunded
   fulfillmentStatus String @default("unfulfilled") // unfulfilled | fulfilled | partially_fulfilled
-  
+
   // Stripe
   stripeSessionId       String? @unique
   stripePaymentIntentId String?
-  
+
   // Pricing (in cents)
   subtotal Int
   tax      Int @default(0)
   shipping Int @default(0)
   discount Int @default(0)
   total    Int
-  
+
   // Customer info (denormalized for historical record)
-  customerEmail String
-  customerName  String? // For simpler storage (combines first+last)
+  customerEmail     String
+  customerName      String? // For simpler storage (combines first+last)
   customerFirstName String?
   customerLastName  String?
   customerPhone     String? /// @encrypted
@@ -865,30 +892,30 @@ model Order {
 
   // Refund
   refundReason      String?
-  refundAmountCents Int?    // cumulative refunded amount in cents (partial or full)
+  refundAmountCents Int? // cumulative refunded amount in cents (partial or full)
 
   // Notes
   customerNote String? @db.Text
   internalNote String? @db.Text
-  
+
   // Multi-tenancy
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  
+
   shippingAddressId String?
   shippingAddress   ShippingAddress? @relation(fields: [shippingAddressId], references: [id], onDelete: SetNull)
 
   discountCodeId String?
   discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id], onDelete: SetNull)
-  
+
   items            OrderItem[]
   inventoryHistory InventoryHistory[]
   reviews          ProductReview[]
   shipments        OrderShipment[]
-  
+
   @@unique([businessId, orderNumber])
   @@index([businessId, status])
   @@index([businessId, createdAt])
@@ -917,15 +944,14 @@ model OrderShipment {
   @@index([orderId])
 }
 
-
 model OrderItem {
-  id        String   @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Product info (snapshot at time of order)
   productName String
   variantName String?
   sku         String?
-  
+
   // Pricing (snapshot)
   price    Float
   quantity Int
@@ -937,10 +963,10 @@ model OrderItem {
   // Relationships (nullable in case product is deleted)
   productId        String?
   productVariantId String?
-  
+
   product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
   productVariant ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
-  
+
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
@@ -953,19 +979,16 @@ model OrderItem {
 model DomainQueue {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  
-  domain     String  @unique
+
+  domain     String @unique
   businessId String
-  status     String  @default("pending") // pending | processing | completed | failed
-  
-  attempts   Int     @default(0)
-  lastError  String?
-  
+  status     String @default("pending") // pending | processing | completed | failed
+
+  attempts  Int     @default(0)
+  lastError String?
+
   @@index([status])
 }
-
-
-
 
 // ============================================
 // DISCOUNTS & PROMOTIONS
@@ -980,9 +1003,9 @@ model DiscountCode {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   // Code details
-  code String // "SUMMER20", "SAVE10"
-  type String // "percentage" | "fixed"
-  value Int   // 20 (for 20%) or 1000 (for $10 in cents)
+  code  String // "SUMMER20", "SAVE10"
+  type  String // "percentage" | "fixed"
+  value Int // 20 (for 20%) or 1000 (for $10 in cents)
 
   // Status
   active Boolean @default(true)
@@ -1009,7 +1032,6 @@ model DiscountCode {
   @@index([code])
 }
 
-
 // ============================================
 // INVENTORY MANAGEMENT
 // ============================================
@@ -1019,17 +1041,17 @@ model InventoryHistory {
   createdAt DateTime @default(now())
 
   // What changed
-  variantId   String?
-  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
-  productId   String?
-  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   baseInventoryUnitId String?
   baseInventoryUnit   BaseInventoryUnit? @relation(fields: [baseInventoryUnitId], references: [id], onDelete: Cascade)
 
-  businessId  String
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   // Quantity changes
   previousQty Int
@@ -1042,10 +1064,10 @@ model InventoryHistory {
 
   // References
   orderId String?
-  order   Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  
-  userId  String?
-  user    User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([variantId])
   @@index([productId])
@@ -1105,11 +1127,11 @@ model InventoryReservation {
 
   // Array of { variantId?, productId?, baseInventoryUnitId?, qty }
   items Json
+  // NOTE: no @@index([stripeSessionId]) — already @unique (own index).
 
   @@index([businessId])
   @@index([status])
   @@index([expiresAt])
-  // NOTE: no @@index([stripeSessionId]) — already @unique (own index).
 }
 
 model Page {
@@ -1119,22 +1141,22 @@ model Page {
   publishedAt DateTime?
 
   // Page identity
-  title       String
-  slug        String // about, contact, privacy, terms, etc.
-  content     Json 
-  excerpt     String?  @db.Text
+  title   String
+  slug    String // about, contact, privacy, terms, etc.
+  content Json
+  excerpt String? @db.Text
 
-  image       String?
-  
+  image String?
+
   // SEO
   metaTitle       String?
   metaDescription String?
   metaKeywords    String?
   ogImage         String?
-  
+
   // Status
-  published Boolean @default(true)
-  sortOrder Int     @default(0)
+  published          Boolean   @default(true)
+  sortOrder          Int       @default(0)
   scheduledPublishAt DateTime? // when set and in the future, the cron publish job flips published=true at/after this time
 
   // Visual-editor draft: { title, excerpt, content } — null = no draft.
@@ -1146,11 +1168,11 @@ model Page {
   // Page type
   type     String @default("page") // page | policy | blog | custom
   template String @default("default") // default | sidebar | full-width
-  
+
   // Relationships
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+
   @@unique([businessId, slug])
   @@index([businessId, published])
   @@index([businessId, type])
@@ -1170,13 +1192,13 @@ model EditorNote {
   pageKey   String? // template page key ("homepage"), "cms:<pageId>" for CMS pages, null = whole site
   pageLabel String? // display snapshot ("Homepage", "Our Story") — survives page rename/delete
 
-  body     String  @db.Text
-  status   String  @default("open") // open | resolved
-  response String? @db.Text
+  body       String    @db.Text
+  status     String    @default("open") // open | resolved
+  response   String?   @db.Text
   resolvedAt DateTime?
 
   createdByUserId String?
-  createdBy       User? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  createdBy       User?   @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
 
   @@index([businessId, status])
   @@index([status, createdAt])
@@ -1188,121 +1210,119 @@ model ProductImport {
   updatedAt DateTime @updatedAt
 
   // Import metadata
-  filename    String
-  totalRows   Int
-  status      String   @default("pending") // pending | processing | completed | failed
-  
+  filename  String
+  totalRows Int
+  status    String @default("pending") // pending | processing | completed | failed
+
   // Mapping & validation
-  mappedData  Json     // Parsed and mapped products
-  errors      Json?    // Validation errors
-  warnings    Json?    // Non-critical issues
-  
+  mappedData Json // Parsed and mapped products
+  errors     Json? // Validation errors
+  warnings   Json? // Non-critical issues
+
   // Results
-  importedCount   Int @default(0)
-  skippedCount    Int @default(0)
-  errorCount      Int @default(0)
-  
+  importedCount Int @default(0)
+  skippedCount  Int @default(0)
+  errorCount    Int @default(0)
+
   // Business
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+
   createdById String
-  
+
   @@index([businessId])
   @@index([status])
 }
 
-
-
 model Gallery {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Identity
   name        String
   slug        String
   description String?
-  
+
   // Layout
-  layout      String   @default("grid") // grid | masonry | carousel | collage | justified
-  
+  layout String @default("grid") // grid | masonry | carousel | collage | justified
+
   // Grid settings
-  columns     Int      @default(3) // 2, 3, 4, 5
-  gap         Int      @default(16) // Gap between images in px
-  aspectRatio String?  @default("1:1") // 1:1, 4:3, 16:9, auto
+  columns      Int     @default(3) // 2, 3, 4, 5
+  gap          Int     @default(16) // Gap between images in px
+  aspectRatio  String? @default("1:1") // 1:1, 4:3, 16:9, auto
   captionStyle String? @default("overlay") // overlay | hover | below
 
   // Display settings
-  showCaptions Boolean @default(true)
+  showCaptions   Boolean @default(true)
   enableLightbox Boolean @default(true)
-  
+
   // Multi-tenancy
-  businessId  String
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   // Relationships
-  images      GalleryImage[]
+  images GalleryImage[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 
   @@unique([businessId, slug])
-  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, slug]) prefix.
 }
 
 model GalleryImage {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
   // Image data
-  url         String
-  altText     String?
-  caption     String?
-  width       Int?
-  height      Int?
-  
+  url     String
+  altText String?
+  caption String?
+  width   Int?
+  height  Int?
+
   // Ordering
-  sortOrder   Int      @default(0)
-  
+  sortOrder Int @default(0)
+
   // Relationships
-  galleryId   String
-  gallery     Gallery  @relation(fields: [galleryId], references: [id], onDelete: Cascade)
-  
+  galleryId String
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
   @@index([galleryId, sortOrder])
 }
 
 model Testimonial {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Who created this
-  source      String   @default("customer") // "customer" | "owner"
+  source String @default("customer") // "customer" | "owner"
 
   // Content — name, text, photos only (no rating/video)
-  title       String?  // Optional title (owner-created often has one)
-  text        String   @db.Text
-  photoUrls   String[] // Max 5; enforced in API
+  title     String? // Optional title (owner-created often has one)
+  text      String   @db.Text
+  photoUrls String[] // Max 5; enforced in API
 
   // Status — two-boolean moderation model (mirrors ProductReview)
-  isApproved  Boolean  @default(false)  // owner has approved for display
-  isHidden    Boolean  @default(false)  // owner has hidden after approval
+  isApproved Boolean @default(false) // owner has approved for display
+  isHidden   Boolean @default(false) // owner has hidden after approval
   // Visibility: isApproved && !isHidden
   // Status: PENDING = !isApproved && !isHidden; PUBLISHED = isApproved && !isHidden; HIDDEN = isHidden
 
   // Attribution (used by both types)
   customerName    String
-  customerEmail   String?  // Optional for owner-created (may not have email)
-  customerTitle   String?  // e.g. "CEO at Acme" — for owner-created context
-  customerCompany String?  // e.g. "Acme Corp" — for owner-created context
+  customerEmail   String? // Optional for owner-created (may not have email)
+  customerTitle   String? // e.g. "CEO at Acme" — for owner-created context
+  customerCompany String? // e.g. "Acme Corp" — for owner-created context
 
   // Dates — owner can backdate testimonials from another system
   testimonialDate DateTime @default(now())
 
   // Relationships
-  businessId  String
-  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  customerId  String?
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([businessId, isApproved, isHidden])
   @@index([businessId, source])
@@ -1310,23 +1330,23 @@ model Testimonial {
 }
 
 model TestimonialInvite {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 
   // Invite details
-  email       String
-  code        String   @unique // Unique code for URL
-  used        Boolean  @default(false)
-  usedAt      DateTime?
-  maxPhotos   Int      @default(3) // 0–5 photos allowed for this invite
+  email     String
+  code      String    @unique // Unique code for URL
+  used      Boolean   @default(false)
+  usedAt    DateTime?
+  maxPhotos Int       @default(3) // 0–5 photos allowed for this invite
 
   // Relationships
-  businessId  String
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  
-  customerId  String?  // If inviting existing customer
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  customerId String? // If inviting existing customer
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   @@index([businessId])
   // NOTE: no @@index([code]) — already @unique (own index).
@@ -1334,21 +1354,20 @@ model TestimonialInvite {
   @@index([customerId])
 }
 
-
 model ProductReview {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Origin
-  source    String @default("customer") // "customer" | "owner"
+  source String @default("customer") // "customer" | "owner"
 
   // Content
-  rating    Int
-  title     String?        // Optional — owner-created often has one; customer required
-  comment   String  @db.Text
-  images    String[]
-  videoUrl  String?
+  rating   Int
+  title    String? // Optional — owner-created often has one; customer required
+  comment  String   @db.Text
+  images   String[]
+  videoUrl String?
 
   // Verification (customer only)
   verifiedPurchase Boolean @default(false)
@@ -1360,10 +1379,10 @@ model ProductReview {
   isHidden   Boolean @default(false)
 
   // Attribution
-  customerName    String
-  customerEmail   String?  // Optional for owner-created
-  customerTitle   String?  // e.g. "Verified Buyer" or "Professional Chef"
-  
+  customerName  String
+  customerEmail String? // Optional for owner-created
+  customerTitle String? // e.g. "Verified Buyer" or "Professional Chef"
+
   // Dates — owner can backdate
   reviewDate DateTime @default(now())
 
@@ -1372,16 +1391,16 @@ model ProductReview {
   notHelpfulCount Int @default(0)
 
   // Relationships
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   customerId String?
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
-  orderId    String?
-  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
-  votes      ReviewVote[]
+  votes ReviewVote[]
 
   @@index([productId, isApproved, isHidden])
   @@index([productId, source])
@@ -1390,19 +1409,19 @@ model ProductReview {
 }
 
 model ReviewVote {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  
-  isHelpful   Boolean  // true = helpful, false = not helpful
-  
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  isHelpful Boolean // true = helpful, false = not helpful
+
   // Relationships
-  reviewId    String
-  review      ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  
+  reviewId String
+  review   ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
   // Voter identification (either authenticated or by IP)
-  userId      String?
-  ipAddress   String?
-  
+  userId    String?
+  ipAddress String?
+
   // NOTE: Uniqueness is enforced by hand-written PARTIAL unique indexes
   // (`... WHERE "userId" IS NOT NULL` / `... WHERE "ipAddress" IS NOT NULL`) so that
   // NULL voter identifiers are not treated as distinct (which would let duplicate
@@ -1414,32 +1433,31 @@ model ReviewVote {
   @@index([reviewId])
 }
 
-
 // Platform admin invite codes for business creation wizard
 model PlatformInvite {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 
   // Who is this for?
-  email       String
-  code        String   @unique // Used in wizard URL
-  
+  email String
+  code  String @unique // Used in wizard URL
+
   // What role will they have?
-  role        BusinessRole   // "owner" | "admin"
-  
+  role BusinessRole // "owner" | "admin"
+
   // If owner, which business? (can be pre-created or created during wizard)
-  businessId  String?
-  business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
-  
+  businessId String?
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
   // Status
-  used        Boolean   @default(false)
-  usedAt      DateTime?
-  usedBy      String?   // userId who redeemed it
-  
+  used   Boolean   @default(false)
+  usedAt DateTime?
+  usedBy String? // userId who redeemed it
+
   // Who created this invite
-  createdBy   String?
-  creator     User?     @relation("CreatedInvites", fields: [createdBy], references: [id], onDelete: SetNull)
+  createdBy String?
+  creator   User?   @relation("CreatedInvites", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@index([email])
   // NOTE: no @@index([code]) — already @unique (own index).
@@ -1452,11 +1470,11 @@ model TeamInvite {
   createdAt DateTime @default(now())
   expiresAt DateTime
 
-  email     String
-  code      String       @unique
-  role      BusinessRole
-  used      Boolean      @default(false)
-  usedAt    DateTime?
+  email  String
+  code   String       @unique
+  role   BusinessRole
+  used   Boolean      @default(false)
+  usedAt DateTime?
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -1484,19 +1502,19 @@ model PlatformConfig {
 // ============================================
 
 model ShippingZone {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  name      String   // e.g. "Zone 1 – Origin Region"
+  name      String // e.g. "Zone 1 – Origin Region"
   states    String[] // US 2-letter state codes in this zone
   sortOrder Int      @default(0)
 
   rates ShippingRate[]
+  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, name]) prefix.
 
   @@unique([businessId, name])
-  // NOTE: no @@index([businessId]) — covered by the @@unique([businessId, name]) prefix.
 }
 
 model ShippingRate {
@@ -1507,9 +1525,9 @@ model ShippingRate {
 
   tierIndex  Int // position in Business.shippingWeightTiers (0-based)
   priceCents Int // shipping price in cents for this zone + tier combination
+  // NOTE: no @@index([zoneId]) — covered by the @@unique([zoneId, tierIndex]) prefix.
 
   @@unique([zoneId, tierIndex])
-  // NOTE: no @@index([zoneId]) — covered by the @@unique([zoneId, tierIndex]) prefix.
 }
 
 // A shopper's request to be emailed when an out-of-stock product is restocked.

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { env } from "~/env";
+import {
+  POLICY_LAST_UPDATED,
+  formatPolicyDate,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Acceptable Use Policy | SimplePress",
@@ -19,7 +23,8 @@ export default function AcceptableUsePage() {
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>SimplePress Acceptable Use Policy</h1>
       <p>
-        <strong>Last Updated:</strong> May 29, 2026
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.acceptableUse)}
       </p>
 
       <h2>1. Purpose</h2>

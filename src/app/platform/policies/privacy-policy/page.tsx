@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { env } from "~/env";
+import {
+  POLICY_LAST_UPDATED,
+  formatPolicyDate,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | SimplePress",
@@ -20,7 +24,8 @@ export default function PrivacyPolicyPage() {
       <h1>SimplePress Platform Privacy Policy</h1>
 
       <p>
-        <strong>Last Updated:</strong> August 11, 2026
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.privacyPolicy)}
       </p>
 
       <h2>1. Introduction</h2>

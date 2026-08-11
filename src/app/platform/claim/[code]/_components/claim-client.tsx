@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { RecaptchaField } from "~/components/inputs/recaptcha-field";
+import { OwnerTermsAcceptance } from "~/components/legal/owner-terms-acceptance";
 
 type ClaimClientProps = {
   /** Invite code, forwarded to POST /api/claim. */
@@ -36,6 +37,14 @@ type ClaimClientProps = {
   platformDomain: string;
   /** Whether a User with this email already exists (sign-in vs. sign-up). */
   userExists: boolean;
+  /**
+   * Whether that existing account already has a recorded acceptance of the
+   * platform ToS + Privacy Policy (`User.termsAcceptedAt`). Drives whether the
+   * acceptance checkbox also covers the ACCOUNT documents, or only the merchant
+   * ones. False for a brand-new account, and also for the (currently universal)
+   * case of an older account that predates acceptance tracking.
+   */
+  platformTermsRecorded: boolean;
 };
 
 /**
@@ -49,13 +58,7 @@ type ClaimClientProps = {
  * An in-flight request is tracked separately via `submitting` so the visible
  * phase (and thus which form renders) never changes mid-request.
  */
-type Phase =
-  | "loading"
-  | "mismatch"
-  | "signup"
-  | "signin"
-  | "verify"
-  | "ready";
+type Phase = "loading" | "mismatch" | "signup" | "signin" | "verify" | "ready";
 
 export function ClaimClient({
   code,
@@ -64,6 +67,7 @@ export function ClaimClient({
   subdomain,
   platformDomain,
   userExists,
+  platformTermsRecorded,
 }: ClaimClientProps) {
   const captchaRef = useRef<RecaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
@@ -79,8 +83,21 @@ export function ClaimClient({
   // Resend "verification email" cooldown, in seconds (0 = ready to send).
   const [resending, setResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  // Terms acceptance. Every phase that can reach `claim()` shows the checkbox,
+  // because claiming is what creates the OWNER membership — including the
+  // "ready" phase, which is where a brand-new owner actually lands after
+  // clicking the verification link (sign-up itself never yields a live session
+  // under requireEmailVerification).
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   const subdomainPreview = `${subdomain}.${platformDomain}`;
+
+  // Sign-in is the asymmetric path: it does NOT create a User, so the platform
+  // ToS + Privacy Policy are only offered (and only ever stamped) when this
+  // account has no acceptance on file. An owner who already agreed is asked for
+  // the merchant documents alone, and `/api/claim` will not re-stamp them.
+  const includePlatformTerms = !platformTermsRecorded;
 
   // Where the verification link should land the owner AFTER they verify. Better
   // Auth threads this through signUp.email / signIn.email / sendVerificationEmail
@@ -153,6 +170,20 @@ export function ClaimClient({
     setCaptchaToken(token ?? "");
   };
 
+  /**
+   * Gate every submit path on the checkbox. Returns false (and shows the inline
+   * error) when it hasn't been ticked — the server rejects the request anyway,
+   * this just avoids a pointless round trip.
+   */
+  const requireAcceptance = () => {
+    if (acceptedTerms) {
+      setTermsError(null);
+      return true;
+    }
+    setTermsError("Please accept the terms and policies to claim this site.");
+    return false;
+  };
+
   /** Consume the invite once a verified session exists. */
   const claim = async () => {
     setError(null);
@@ -161,7 +192,13 @@ export function ClaimClient({
       const res = await fetch("/api/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({
+          code,
+          // Merchant terms are accepted on every claim; the account-level ones
+          // only when this account has none recorded (see includePlatformTerms).
+          acceptedTerms: true,
+          acceptedPlatformTerms: includePlatformTerms,
+        }),
       });
       const data = (await res.json()) as {
         error?: string;
@@ -192,6 +229,10 @@ export function ClaimClient({
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Checked before signUp.email so we never create an account for someone who
+    // hasn't agreed to the documents the checkbox names.
+    if (!requireAcceptance()) return;
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
@@ -262,6 +303,8 @@ export function ClaimClient({
     e.preventDefault();
     setError(null);
 
+    if (!requireAcceptance()) return;
+
     if (!isValidEmail(email)) {
       setError("This invitation has an invalid email address.");
       return;
@@ -315,6 +358,7 @@ export function ClaimClient({
   // Re-check verification after the owner reports having verified.
   const handleVerifiedContinue = async () => {
     setError(null);
+    if (!requireAcceptance()) return;
     try {
       const { data } = await authClient.getSession();
       if (
@@ -376,6 +420,23 @@ export function ClaimClient({
   };
 
   const busy = submitting;
+
+  // Rendered in every phase that can reach `claim()` — sign-up, sign-in, verify
+  // and ready — so the acceptance is always on screen at the moment it's given.
+  const TermsAcceptance = (
+    <OwnerTermsAcceptance
+      id="claim-terms-acceptance"
+      checked={acceptedTerms}
+      onCheckedChange={(next) => {
+        setAcceptedTerms(next);
+        if (next) setTermsError(null);
+      }}
+      includePlatformTerms={includePlatformTerms}
+      disabled={busy}
+      error={termsError}
+      platformDomain={platformDomain}
+    />
+  );
 
   // ── Site header (shown in every phase) ─────────────────────────────────────
   const SiteHeader = (
@@ -484,6 +545,7 @@ export function ClaimClient({
             </AlertDescription>
           </Alert>
           {ErrorAlert}
+          {TermsAcceptance}
           <Button className="w-full" onClick={handleVerifiedContinue}>
             I&apos;ve verified my email — continue
           </Button>
@@ -520,7 +582,14 @@ export function ClaimClient({
             </AlertDescription>
           </Alert>
           {ErrorAlert}
-          <Button className="w-full" disabled={busy} onClick={() => claim()}>
+          {TermsAcceptance}
+          <Button
+            className="w-full"
+            disabled={busy}
+            onClick={() => {
+              if (requireAcceptance()) void claim();
+            }}
+          >
             {busy ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -569,6 +638,7 @@ export function ClaimClient({
               label="Verification"
               required
             />
+            {TermsAcceptance}
             <Button type="submit" className="w-full" disabled={busy}>
               {busy ? (
                 <>
@@ -651,6 +721,7 @@ export function ClaimClient({
             label="Verification"
             required
           />
+          {TermsAcceptance}
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? (
               <>

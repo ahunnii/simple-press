@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
+import type { CheckoutTermsDisclosure } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
+import type {
+  CheckoutMerchantPolicies,
+  DefaultCheckoutPageTemplateProps,
+} from "~/app/(storefront)/_templates/types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import {
   getAllowedCountries, // used at runtime inside useCheckoutForm
@@ -72,6 +76,9 @@ type UseCheckoutFormReturn = {
   // Zone+weight quote state (only populated when shippingType === "zone_weight")
   isQuotingShipping: boolean;
   shippingPending: boolean;
+  // The passive terms-of-service / refund-policy disclosure line rendered
+  // above the place-order button — see `CheckoutTermsNotice`.
+  termsDisclosure: CheckoutTermsDisclosure;
 };
 
 // Debounce delay (ms) for the zone+weight shipping quote.
@@ -84,6 +91,7 @@ const noopApplyDiscount = () => {
 
 export function useCheckoutForm(
   business: CheckoutFormBusiness,
+  merchantPolicies: CheckoutMerchantPolicies,
 ): UseCheckoutFormReturn {
   const { isEnabled } = useStorefrontFlags();
   const couponsEnabled = isEnabled("coupons");
@@ -234,6 +242,22 @@ export function useCheckoutForm(
 
   const finalTotal = subtotal - effectiveDiscountAmount + shipping;
 
+  // Only reference merchant policies that actually exist (a Page row is only
+  // ever created once the owner saves non-empty content, so most stores have
+  // none) — never assemble a link to a slug with no published Page.
+  const termsDisclosure: CheckoutTermsDisclosure = {
+    merchantName: business.name,
+    merchantLinks: [
+      ...(merchantPolicies.hasTermsOfService
+        ? [{ label: "Terms of Service", href: "/terms-of-service" }]
+        : []),
+      ...(merchantPolicies.hasRefundPolicy
+        ? [{ label: "Refund Policy", href: "/refund-policy" }]
+        : []),
+    ],
+    platformHref: "/platform/policies/terms-of-service",
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -374,5 +398,6 @@ export function useCheckoutForm(
     finalTotal,
     isQuotingShipping,
     shippingPending,
+    termsDisclosure,
   };
 }

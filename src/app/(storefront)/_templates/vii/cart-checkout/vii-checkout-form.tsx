@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -33,6 +34,7 @@ const formatPrice = (cents: number) =>
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
   contactOverline: string;
   contactHeading: string;
   deliveryOverline: string;
@@ -48,6 +50,7 @@ type Props = {
 
 export function ViiCheckoutForm({
   business,
+  merchantPolicies,
   contactOverline,
   contactHeading,
   deliveryOverline,
@@ -60,7 +63,7 @@ export function ViiCheckoutForm({
   emptyHeading,
   emptyCta,
 }: Props) {
-  const f = useCheckoutForm(business);
+  const f = useCheckoutForm(business, merchantPolicies);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const { ref, visible } = useViiReveal(0.05);
 
@@ -1308,6 +1311,20 @@ export function ViiCheckoutForm({
                   </>
                 )}
               </button>
+
+              <CheckoutTermsNotice
+                disclosure={f.termsDisclosure}
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 11,
+                  color: "var(--vii-ink-soft)",
+                  textAlign: "center",
+                  letterSpacing: "0.04em",
+                  lineHeight: 1.5,
+                  margin: 0,
+                }}
+                linkStyle={{ textDecoration: "underline" }}
+              />
 
               {/* Security note */}
               <p

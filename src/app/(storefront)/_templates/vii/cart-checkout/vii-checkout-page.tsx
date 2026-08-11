@@ -8,6 +8,7 @@ import { ViiCheckoutForm } from "./vii-checkout-form";
 
 export async function ViiCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
@@ -171,6 +172,7 @@ export async function ViiCheckoutPage({
       >
         <ViiCheckoutForm
           business={business}
+          merchantPolicies={merchantPolicies}
           contactOverline={f["vii.checkout.contact-overline"] ?? ""}
           contactHeading={f["vii.checkout.contact-heading"] ?? ""}
           deliveryOverline={f["vii.checkout.delivery-overline"] ?? ""}
