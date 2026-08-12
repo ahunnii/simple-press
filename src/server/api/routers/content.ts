@@ -96,8 +96,10 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const { templateId, clearPreviewDraft, publishCmsPageDrafts, ...data } =
-        input;
+      // No `templateId` here on purpose — see the note on `siteContentSchema`.
+      // Template switches must go through `business.updateTemplate`, which
+      // enforces per-subdomain ownership of commercial templates.
+      const { clearPreviewDraft, publishCmsPageDrafts, ...data } = input;
 
       const upsertSiteContent = (tx: TxClient) =>
         tx.siteContent.upsert({
@@ -152,16 +154,8 @@ export const contentRouter = createTRPCRouter({
           })
         : await upsertSiteContent(ctx.db);
 
-      if (templateId) {
-        await ctx.db.business.update({
-          where: { id: businessId },
-          data: { templateId },
-        });
-      }
-
       return {
         data: siteContent,
-        templateId,
       };
     }),
 

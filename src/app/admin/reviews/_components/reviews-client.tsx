@@ -572,9 +572,7 @@ export function ReviewsClient({
             <>
               <Card className={TABLE_CARD}>
                 <Table>
-                  <TableCaption className="sr-only">
-                    Product Reviews
-                  </TableCaption>
+                  <TableCaption className="sr-only">Reviews</TableCaption>
                   <TableHeader>
                     <TableRow>
                       <TableHead scope="col" className={`w-10 ${TH_CHECKBOX}`}>

@@ -2,10 +2,11 @@
  * Store Transfer — Export route handler.
  *
  * GET /api/admin/store-transfer/export
- *   ?businessId=<id>   (PLATFORM_ADMIN only — target any business)
+ *   ?businessId=<id>   (target any business; defaults to the host's business)
  *
- * Auth: OWNER/MANAGER of the resolved business, or PLATFORM_ADMIN.
- * Feature gate: storeTransfer feature flag must be enabled for the target business.
+ * Auth: PLATFORM_ADMIN only. Store Transfer is an internal tool (staging→prod
+ * moves, site duplication) — business owners and managers get the
+ * WordPress export instead. There is no feature flag for it.
  *
  * Returns a ZIP archive containing:
  *   manifest.json   — versioned content payload (all store data as DTOs)
@@ -20,8 +21,7 @@ import type {
   StoreTransferManifest,
   StoreTransferMediaEntry,
 } from "~/lib/store-transfer/types";
-import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
-import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
+import { checkBusiness } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { listBusinessObjects } from "~/lib/s3/list";
 import { keyToPublicUrl, STORAGE_BASE, STORAGE_BUCKET } from "~/lib/s3/url";
@@ -72,18 +72,18 @@ export async function GET(req: Request): Promise<Response> {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
+    if (session.user.platformRole !== "PLATFORM_ADMIN") {
+      return new Response("Forbidden", { status: 403 });
+    }
 
-    // Resolve the target business:
-    //   - PLATFORM_ADMIN may pass ?businessId= to target any business
-    //   - everyone else is scoped to the hostname-resolved business
+    // Resolve the target business: ?businessId= targets any business, otherwise
+    // fall back to the hostname-resolved one.
     const urlObj = new URL(req.url);
     const queryBusinessId = urlObj.searchParams.get("businessId") ?? undefined;
 
     let targetBusinessId: string;
 
-    if (isPlatformAdmin && queryBusinessId) {
-      // PLATFORM_ADMIN targeting a specific business
+    if (queryBusinessId) {
       const biz = await db.business.findUnique({
         where: { id: queryBusinessId },
         select: { id: true },
@@ -99,43 +99,18 @@ export async function GET(req: Request): Promise<Response> {
         return new Response("Business not found", { status: 404 });
       }
       targetBusinessId = business.id;
-
-      if (!isPlatformAdmin) {
-        const membership = await checkBusinessMembership(
-          targetBusinessId,
-          session.user.id,
-        );
-        if (
-          !membership ||
-          (membership.role !== "OWNER" && membership.role !== "MANAGER")
-        ) {
-          return new Response("Forbidden", { status: 403 });
-        }
-      }
     }
 
     resolvedBusinessId = targetBusinessId;
 
-    // ── 2. Feature gate ──────────────────────────────────────────────────────
-    const featureEnabled = await isFeatureEnabledForBusiness(
-      targetBusinessId,
-      "storeTransfer",
-    );
-    if (!featureEnabled) {
-      return new Response(
-        "The Store Transfer feature is not enabled for this business.",
-        { status: 403 },
-      );
-    }
-
-    // ── 3. Collect store content ─────────────────────────────────────────────
+    // ── 2. Collect store content ─────────────────────────────────────────────
     const { manifestContent, templateId, businessSlug } =
       await collectStoreContent(targetBusinessId);
 
-    // ── 4. Enumerate media objects ───────────────────────────────────────────
+    // ── 3. Enumerate media objects ───────────────────────────────────────────
     const listedObjects = await listBusinessObjects(targetBusinessId);
 
-    // ── 5. Fetch media bytes (bounded concurrency = 5) ───────────────────────
+    // ── 4. Fetch media bytes (bounded concurrency = 5) ───────────────────────
     const bucketBase = s3Client.buildBucketUrl(STORAGE_BUCKET);
 
     const mediaEntries = await chunkedAsync(
@@ -184,7 +159,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     );
 
-    // ── 6. Build manifest ────────────────────────────────────────────────────
+    // ── 5. Build manifest ────────────────────────────────────────────────────
     const manifest: StoreTransferManifest = {
       formatVersion: STORE_TRANSFER_FORMAT_VERSION,
       exportedAt: new Date().toISOString(),
@@ -200,7 +175,7 @@ export async function GET(req: Request): Promise<Response> {
       content: manifestContent,
     };
 
-    // ── 7. Assemble ZIP ──────────────────────────────────────────────────────
+    // ── 6. Assemble ZIP ──────────────────────────────────────────────────────
     const zip = new JSZip();
     zip.file("manifest.json", JSON.stringify(manifest, null, 2));
 
@@ -215,7 +190,7 @@ export async function GET(req: Request): Promise<Response> {
       compression: "DEFLATE",
     });
 
-    // ── 8. Return ZIP ────────────────────────────────────────────────────────
+    // ── 7. Return ZIP ────────────────────────────────────────────────────────
     const timestamp = new Date()
       .toISOString()
       .slice(0, 16)

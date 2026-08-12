@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
@@ -15,13 +14,11 @@ export default async function NavigationPage() {
   });
   if (!business || !business.siteContent || !business.pages) notFound();
 
-  let siteContent = business?.siteContent;
-  siteContent ??= await db.siteContent.create({
-    data: { businessId: business.id },
-  });
-
   const { isEnabled } = await getBusinessFlags();
   const servicesEnabled = isEnabled("services");
+  const blogEnabled = isEnabled("blog");
+  const productsEnabled = isEnabled("products");
+  const collectionsEnabled = isEnabled("collections");
 
   let services: Array<{ name: string; slug: string }> = [];
   if (servicesEnabled) {
@@ -34,7 +31,7 @@ export default async function NavigationPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "Navigation" },
         ]}
       />
@@ -42,17 +39,17 @@ export default async function NavigationPage() {
 
       <NavigationBuilder
         business={business}
-        siteContent={
-          siteContent as unknown as {
-            navigationItems: {
-              label: string;
-              href: string;
-              external?: boolean;
-            }[];
-          }
-        }
+        siteContent={{
+          navigationItems:
+            (business.siteContent.navigationItems as
+              | { label: string; href: string; external?: boolean }[]
+              | null) ?? [],
+        }}
         servicesEnabled={servicesEnabled}
         services={services}
+        blogEnabled={blogEnabled}
+        productsEnabled={productsEnabled}
+        collectionsEnabled={collectionsEnabled}
       />
     </>
   );

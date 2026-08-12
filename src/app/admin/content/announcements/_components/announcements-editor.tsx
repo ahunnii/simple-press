@@ -36,7 +36,7 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
-import { TemplateImageUploadField } from "~/app/admin/content/template/_components/template-fields-editor";
+import { TemplateImageUploadField } from "~/app/admin/content/template/_components/template-field-widgets";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

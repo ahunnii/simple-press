@@ -551,7 +551,7 @@ export function TemplateFieldsEditor({
           </Button>
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <h1 className="text-base font-medium">Template Fields </h1>
+            <h1 className="text-base font-medium">Template Fields</h1>
 
             <span
               className={`admin-status-badge ${

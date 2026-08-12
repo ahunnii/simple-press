@@ -278,7 +278,7 @@ export function DashboardContent({
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/editor">
+              <Link href="/editor?from=/admin/dashboard">
                 <Palette className="mr-1.5 h-3.5 w-3.5" />
                 Customize
               </Link>

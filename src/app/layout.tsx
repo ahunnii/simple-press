@@ -19,7 +19,7 @@ export async function generateMetadata() {
   const business = await api.business.simplifiedGet();
   if (!business) {
     return {
-      title: "Simple Press",
+      title: "SimplePress",
       description: "The simplest way to get started with your online business.",
       icons: [{ rel: "icon", url: "/favicon.ico" }],
     };

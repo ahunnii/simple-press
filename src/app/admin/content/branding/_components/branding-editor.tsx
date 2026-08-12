@@ -24,7 +24,16 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Form } from "~/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
@@ -44,10 +53,21 @@ type Props = {
     footerText: string | null;
     socialLinks: unknown;
     primaryColor: string | null;
-    secondaryColor: string | null;
-    accentColor: string | null;
   };
 };
+
+/** Fallback for the color picker when no primary color has been saved yet. */
+const DEFAULT_PRIMARY_COLOR = "#000000";
+
+/**
+ * `<input type="color">` needs a concrete value; a store that has never saved a
+ * color has `null`/`""`. Display-only — the empty value is left alone on save
+ * so the templates' own fallbacks keep working.
+ */
+const colorInputValue = (value: string | null | undefined) =>
+  value === null || value === undefined || value === ""
+    ? DEFAULT_PRIMARY_COLOR
+    : value;
 
 export function BrandingEditor({ business, siteContent }: Props) {
   const router = useRouter();
@@ -98,8 +118,6 @@ export function BrandingEditor({ business, siteContent }: Props) {
       logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
       primaryColor: siteContent?.primaryColor ?? "",
-      secondaryColor: siteContent?.secondaryColor ?? "",
-      accentColor: siteContent?.accentColor ?? "",
       templateId: business?.templateId ?? "",
       faviconUrl: siteContent.faviconUrl ?? undefined,
       faviconFile: null,
@@ -107,54 +125,13 @@ export function BrandingEditor({ business, siteContent }: Props) {
   });
 
   // Mutations
-  const updateSiteContent = api.content.updateSiteContent.useMutation({
-    onSuccess: ({ data, templateId }) => {
-      toast.dismiss();
-      toast.success("Branding updated successfully");
-
-      const newSocialLinks = (data.socialLinks as
-        | {
-            instagram?: string;
-            facebook?: string;
-            twitter?: string;
-            linkedin?: string;
-            tiktok?: string;
-            pinterest?: string;
-            youtube?: string;
-          }
-        | undefined) ?? {
-        instagram: "",
-        facebook: "",
-        twitter: "",
-        linkedin: "",
-        pinterest: "",
-        tiktok: "",
-        youtube: "",
-      };
-
-      form.reset({
-        footerText: data.footerText ?? "",
-        socialLinks: newSocialLinks,
-        logoUrl: data.logoUrl ?? null,
-        logoFile: null,
-        primaryColor: data?.primaryColor ?? "",
-        secondaryColor: data?.secondaryColor ?? "",
-        accentColor: data?.accentColor ?? "",
-        templateId: templateId ?? "",
-        faviconUrl: data.faviconUrl ?? null,
-        faviconFile: null,
-      });
-      void utils.business.invalidate();
-      router.refresh();
-    },
-    onError: (error) => {
-      toast.dismiss();
-      toast.error(error.message ?? "Failed to update general settings");
-    },
-    onMutate: () => {
-      toast.loading("Updating general settings...");
-    },
-  });
+  // A template switch is NOT part of the site-content save: commercial
+  // templates are ownership-gated per subdomain and only
+  // `business.updateTemplate` re-validates that server-side (it throws
+  // FORBIDDEN for a template this store doesn't own). Both calls are driven
+  // from `handleSubmit` so the page shows one loading state and one toast.
+  const updateSiteContent = api.content.updateSiteContent.useMutation();
+  const updateTemplate = api.business.updateTemplate.useMutation();
 
   // Image Uploads
   const logoUploader = useUploadFile({
@@ -180,8 +157,6 @@ export function BrandingEditor({ business, siteContent }: Props) {
       socialLinks: socialLinks,
       logoUrl: siteContent.logoUrl ?? "",
       primaryColor: siteContent?.primaryColor ?? "",
-      secondaryColor: siteContent?.secondaryColor ?? "",
-      accentColor: siteContent?.accentColor ?? "",
       templateId: business?.templateId ?? "",
       faviconUrl: siteContent.faviconUrl ?? "",
       faviconFile: null,
@@ -225,20 +200,85 @@ export function BrandingEditor({ business, siteContent }: Props) {
       }
     }
 
-    updateSiteContent.mutate({
-      templateId: data.templateId,
-      footerText: data.footerText ?? "",
-      socialLinks: data.socialLinks ?? {},
-      logoUrl,
-      primaryColor: data.primaryColor ?? "",
-      secondaryColor: data.secondaryColor ?? "",
-      accentColor: data.accentColor ?? "",
-      faviconUrl,
-    });
+    const nextTemplateId = data.templateId;
+    const templateChanged = nextTemplateId !== business.templateId;
+
+    // A color picker can never produce an empty value, so an empty one means
+    // this store never set a color — omit it rather than writing "" over the
+    // null the templates fall back from.
+    const primaryColor =
+      data.primaryColor === null || data.primaryColor === ""
+        ? undefined
+        : data.primaryColor;
+
+    toast.loading("Updating brand identity...");
+
+    try {
+      // Template first: if this store isn't allowed the selected template the
+      // server throws FORBIDDEN and nothing else is written.
+      if (templateChanged) {
+        await updateTemplate.mutateAsync({ templateId: nextTemplateId });
+      }
+
+      const { data: saved } = await updateSiteContent.mutateAsync({
+        footerText: data.footerText ?? "",
+        socialLinks: data.socialLinks ?? {},
+        logoUrl,
+        primaryColor,
+        faviconUrl,
+      });
+
+      const newSocialLinks = (saved.socialLinks as
+        | {
+            instagram?: string;
+            facebook?: string;
+            twitter?: string;
+            linkedin?: string;
+            tiktok?: string;
+            pinterest?: string;
+            youtube?: string;
+          }
+        | undefined) ?? {
+        instagram: "",
+        facebook: "",
+        twitter: "",
+        linkedin: "",
+        pinterest: "",
+        tiktok: "",
+        youtube: "",
+      };
+
+      form.reset({
+        footerText: saved.footerText ?? "",
+        socialLinks: newSocialLinks,
+        logoUrl: saved.logoUrl ?? null,
+        logoFile: null,
+        primaryColor: saved?.primaryColor ?? "",
+        templateId: nextTemplateId,
+        faviconUrl: saved.faviconUrl ?? null,
+        faviconFile: null,
+      });
+
+      toast.dismiss();
+      toast.success("Branding updated successfully");
+      void utils.business.invalidate();
+      router.refresh();
+    } catch (error) {
+      toast.dismiss();
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to update brand identity",
+      );
+    }
   };
 
   // Checks and Hooks
-  const isSubmitting = updateSiteContent.isPending || logoUploader.isPending;
+  const isSubmitting =
+    updateTemplate.isPending ||
+    updateSiteContent.isPending ||
+    logoUploader.isPending ||
+    faviconUploader.isPending;
   const isDirty = form.formState.isDirty;
 
   useKeyboardEnter(form, handleSubmit);
@@ -320,6 +360,36 @@ export function BrandingEditor({ business, siteContent }: Props) {
                   description="A template changes the overall look and feel of your storefront."
                   values={availableTemplates}
                   required
+                />
+
+                <FormField
+                  control={form.control}
+                  name="primaryColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Checkout accent color</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center gap-3">
+                          <Input
+                            type="color"
+                            value={colorInputValue(field.value)}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            disabled={isSubmitting}
+                            className="h-9 w-14 cursor-pointer px-1 py-1"
+                            aria-label="Checkout accent color picker"
+                          />
+                          <span className="text-muted-foreground font-mono text-sm">
+                            {colorInputValue(field.value)}
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormDescription>
+                        Shown on checkout and cart buttons on supported
+                        templates.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </CardContent>
             </Card>

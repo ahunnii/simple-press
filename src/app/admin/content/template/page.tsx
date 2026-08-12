@@ -35,7 +35,7 @@ export default async function TemplateFieldsPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "Template Fields" },
         ]}
       />

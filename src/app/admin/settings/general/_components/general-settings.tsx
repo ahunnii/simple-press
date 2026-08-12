@@ -1,6 +1,5 @@
 "use client";
 
-import type { SiteContent } from "generated/prisma";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,9 +45,7 @@ import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["getWith"]> & {
-    siteContent?: SiteContent | null;
-  };
+  business: NonNullable<RouterOutputs["business"]["getWith"]>;
 };
 
 export function GeneralSettings({ business }: Props) {
@@ -260,12 +257,12 @@ export function GeneralSettings({ business }: Props) {
               </CardContent>
             </Card>
 
-            {/* Contact Information */}
+            {/* Contact Details */}
             <Card>
               <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
+                <CardTitle>Contact Details</CardTitle>
                 <CardDescription>
-                  Email addresses for your business
+                  Email addresses and phone number for your business
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -277,15 +274,32 @@ export function GeneralSettings({ business }: Props) {
                   description="Primary contact email for the business. Used for notifications and account management. This is not a public facing email."
                   required
                 />
+                <InputFormField
+                  form={form}
+                  name="supportEmail"
+                  label="Support Email"
+                  description="Public customer support email address. Shown on your storefront."
+                  placeholder="support@example.com"
+                  type="email"
+                  required
+                />
+                <InputFormField
+                  form={form}
+                  name="phoneNumber"
+                  label="Phone Number"
+                  description="Public business phone number. Shown on your storefront."
+                  type="tel"
+                  placeholder="123-456-7890"
+                />
               </CardContent>
             </Card>
 
-            {/* Legal Information */}
+            {/* Business Address */}
             <Card>
               <CardHeader>
-                <CardTitle>Public Information</CardTitle>
+                <CardTitle>Business Address</CardTitle>
                 <CardDescription>
-                  Business address and other public information
+                  Public business address
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -295,23 +309,6 @@ export function GeneralSettings({ business }: Props) {
                   label="Business Address"
                   description="Public business address. Customers will see this address on your storefront."
                   placeholder="123 Main St, Detroit, MI, USA"
-                />
-                <InputFormField
-                  form={form}
-                  name="supportEmail"
-                  label="Support Email"
-                  description="Public customer support email address. Customers will see this email address on your storefront. This is a public facing email. "
-                  placeholder="support@example.com"
-                  type="email"
-                  required
-                />
-                <InputFormField
-                  form={form}
-                  name="phoneNumber"
-                  label="Phone Number"
-                  description="Public business phone number. Customers will see this number on your storefront."
-                  type="tel"
-                  placeholder="123-456-7890"
                 />
               </CardContent>
             </Card>

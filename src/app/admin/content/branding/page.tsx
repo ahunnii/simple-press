@@ -17,7 +17,7 @@ export default async function BrandingPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "Brand Identity" },
         ]}
       />

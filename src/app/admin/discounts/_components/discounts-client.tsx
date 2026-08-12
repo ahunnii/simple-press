@@ -432,7 +432,7 @@ export function DiscountsClient({
     <div className="admin-container">
       <div className="admin-header">
         <div>
-          <h1>Discount Codes</h1>
+          <h1>Discounts</h1>
           <p>Create and manage discount codes for your store</p>
         </div>
         <Button asChild>

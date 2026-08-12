@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { getHubCards } from "~/app/admin/_lib/admin-nav";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 
 type Props = {
   pages: Array<{
@@ -23,8 +24,12 @@ type Props = {
     published: boolean;
     updatedAt: Date;
   }>;
-  /** Shows platform-only cards (legacy Template Fields editor). */
+  /**
+   * When true, includes cards flagged `platformOnly` for this hub (e.g. the
+   * legacy Template Fields editor). Hidden from owners/managers.
+   */
   isPlatformAdmin?: boolean;
+  flags: Record<string, boolean>;
 };
 
 // Tailwind color maps — must be static strings so the compiler includes them
@@ -37,6 +42,8 @@ const bgMap: Record<string, string> = {
   indigo: "bg-indigo-100",
   teal: "bg-teal-100",
   amber: "bg-amber-100",
+  rose: "bg-rose-100",
+  slate: "bg-slate-100",
 };
 
 const textMap: Record<string, string> = {
@@ -48,6 +55,8 @@ const textMap: Record<string, string> = {
   indigo: "text-indigo-600",
   teal: "text-teal-600",
   amber: "text-amber-600",
+  rose: "text-rose-600",
+  slate: "text-slate-600",
 };
 
 const borderMap: Record<string, string> = {
@@ -59,9 +68,16 @@ const borderMap: Record<string, string> = {
   indigo: "hover:border-indigo-500",
   teal: "hover:border-teal-500",
   amber: "hover:border-amber-500",
+  rose: "hover:border-rose-500",
+  slate: "hover:border-slate-500",
 };
 
-export function ContentDashboard({ pages, isPlatformAdmin = false }: Props) {
+export function ContentDashboard({
+  pages,
+  isPlatformAdmin = false,
+  flags,
+}: Props) {
+  const { isEnabled } = useFeatureFlags({ flags });
   const regularPages = pages.filter((p) => p.type === "page");
   const policyPages = pages.filter((p) => p.type === "policy");
   const blogPages = pages.filter((p) => p.type === "blog");
@@ -76,7 +92,7 @@ export function ContentDashboard({ pages, isPlatformAdmin = false }: Props) {
 
   const contentCards = getHubCards("content", {
     includePlatformOnly: isPlatformAdmin,
-  });
+  }).filter((card) => !card.featureKey || isEnabled(card.featureKey));
 
   return (
     <>
@@ -87,7 +103,7 @@ export function ContentDashboard({ pages, isPlatformAdmin = false }: Props) {
         <span className="font-medium text-foreground">Pages</span>
         {" — create standalone CMS pages (About, Contact). "}
         <span className="font-medium text-foreground">Brand Identity</span>
-        {" — upload a logo and choose your theme."}
+        {" — upload a logo and choose your template."}
       </div>
 
       {/* Main Content Sections */}

@@ -11,6 +11,12 @@ import {
   publicProcedure,
 } from "../trpc";
 
+/**
+ * Feature keys a MANAGER may see but not toggle — only the OWNER (or a
+ * PLATFORM_ADMIN) can flip them.
+ */
+const OWNER_ONLY_TOGGLE_KEYS = new Set(["wordpressExport"]);
+
 export const featuresRouter = createTRPCRouter({
   // Get resolved flags for a business (merges defaults + overrides)
   getFlags: publicProcedure.query(async ({ ctx }) => {
@@ -71,6 +77,29 @@ export const featuresRouter = createTRPCRouter({
           code: "FORBIDDEN",
           message: "This feature can only be toggled by platform admins",
         });
+      }
+
+      // Some owner-toggleable features are still OWNER-only to flip — this
+      // procedure runs on `ownerAdminProcedure`, which also admits MANAGERs.
+      // `wordpressExport` unlocks a full store export (customer records
+      // included), so it stays with the owner, matching the Owner-only gate on
+      // /admin/settings/data.
+      if (
+        OWNER_ONLY_TOGGLE_KEYS.has(input.key) &&
+        ctx.session.user.platformRole !== "PLATFORM_ADMIN"
+      ) {
+        const membership = await ctx.db.businessMembership.findUnique({
+          where: {
+            userId_businessId: { userId: ctx.session.user.id, businessId },
+          },
+          select: { role: true },
+        });
+        if (membership?.role !== "OWNER") {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Only the store owner can turn ${feature.label} on or off.`,
+          });
+        }
       }
 
       const business = await ctx.db.business.findUnique({

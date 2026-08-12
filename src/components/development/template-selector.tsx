@@ -23,16 +23,19 @@ function TemplateSelectorInner() {
 
   const templates = getAvailableTemplates(business?.subdomain ?? "");
 
+  // `business.updateTemplate` (not `content.updateSiteContent`) — it is the
+  // only procedure that writes `Business.templateId`, and it re-checks
+  // commercial-template ownership server-side.
   const { mutate: updateTemplate, isPending } =
-    api.content.updateSiteContent.useMutation({
+    api.business.updateTemplate.useMutation({
       onSuccess: (_, variables) => {
         toast.success(`Template switched to "${variables.templateId}"`);
         void utils.business.simplifiedGet.invalidate();
         router.refresh();
         setOpen(false);
       },
-      onError: () => {
-        toast.error("Failed to switch template");
+      onError: (error) => {
+        toast.error(error.message || "Failed to switch template");
       },
     });
 

@@ -96,7 +96,7 @@ export function PagesList({ business }: PagesListProps) {
           </Button>
           <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
           <div className="hidden min-w-0 items-center gap-2 sm:flex">
-            <h1 className="text-base font-medium">Custom Pages</h1>
+            <h1 className="text-base font-medium">Pages</h1>
           </div>
         </div>
 

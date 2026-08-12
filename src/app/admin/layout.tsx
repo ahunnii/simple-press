@@ -2,6 +2,7 @@ import { env } from "~/env";
 import { resolveOwnerTermsGate } from "~/lib/legal/owner-terms-gate.server";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { requireAdminAccess } from "~/lib/require-admin-access";
+import { db } from "~/server/db";
 import { api, HydrateClient } from "~/trpc/server";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { OwnerTermsGateScreen } from "~/components/legal/owner-terms-gate-screen";
@@ -65,6 +66,17 @@ export default async function AdminLayout({ children }: Props) {
 
   const featureData = await api.features.getFlags();
 
+  // Cheap lookup for the sidebar's "Finish setup" nudge — same shape as the
+  // setupComplete check in /admin/page.tsx, minus customDomain (a subdomain
+  // store with Stripe + a product is a legitimately finished setup).
+  const welcomeSetupStatus = await db.business.findUnique({
+    where: { id: business.id },
+    select: {
+      stripeAccountId: true,
+      _count: { select: { products: true } },
+    },
+  });
+
   return (
     <HydrateClient>
       <NavigationGuardProvider>
@@ -82,6 +94,10 @@ export default async function AdminLayout({ children }: Props) {
             businessName={businessName}
             featureData={featureData}
             membershipRole={membershipRole}
+            welcomeSetupStatus={{
+              stripeConnected: Boolean(welcomeSetupStatus?.stripeAccountId),
+              hasProducts: (welcomeSetupStatus?._count.products ?? 0) > 0,
+            }}
           />
           <SidebarInset>
             <div className="bg-muted min-h-screen">{children}</div>

@@ -1,12 +1,14 @@
 import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
-  IconBrandWordpress,
+  IconBraces,
   IconBrandYoutube,
+  IconBrush,
   IconCalendarEvent,
   IconChartBar,
   IconCreditCard,
   IconDashboard,
+  IconDatabaseExport,
   IconDiscount,
   IconFolder,
   IconImageInPicture,
@@ -22,7 +24,6 @@ import {
   IconShoppingCart,
   IconSparkles,
   IconStar,
-  IconTransfer,
   IconUsers,
 } from "@tabler/icons-react";
 import {
@@ -33,6 +34,7 @@ import {
   Megaphone,
   Menu,
   Package,
+  Plug,
   Plus,
   PowerOff,
   Search,
@@ -288,8 +290,16 @@ export const NAV_ITEMS: NavItem[] = [
 
   // Content
   {
+    key: "site-editor",
+    title: "Site Editor",
+    href: "/editor",
+    icon: IconBrush,
+    section: "content",
+    keywords: ["editor", "visual", "design", "theme", "sections", "customize"],
+  },
+  {
     key: "content",
-    title: "Site content",
+    title: "Site Content",
     href: "/admin/content",
     icon: IconLanguage,
     section: "content",
@@ -393,7 +403,7 @@ export const HUB_CARDS: HubCard[] = [
     key: "settings-hours",
     title: "Business Hours",
     description: "Opening hours by day",
-    body: "Publish your opening hours for your storefront footer and contact page",
+    body: "Publish your opening hours on your storefront contact page",
     href: "/admin/settings/hours",
     hub: "settings",
     color: "cyan",
@@ -401,9 +411,9 @@ export const HUB_CARDS: HubCard[] = [
   },
   {
     key: "settings-tax",
-    title: "Tax",
+    title: "Tax Guide",
     description: "Sales tax, Stripe Tax, nexus guide",
-    body: "Set up and understand your tax obligations",
+    body: "Understand your tax obligations and how to enable Stripe Tax",
     href: "/admin/settings/tax",
     hub: "settings",
     color: "yellow",
@@ -417,7 +427,7 @@ export const HUB_CARDS: HubCard[] = [
     href: "/admin/settings/domain",
     hub: "settings",
     color: "orange",
-    icon: Shield,
+    icon: Globe,
     keywords: ["url", "website address", "dns"],
   },
   {
@@ -433,45 +443,43 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "settings-integrations",
     title: "Integrations",
-    description: "Payment gateways, email marketing, analytics, and more.",
+    description: "Stripe payments and Umami analytics",
     body: "Connect your business to third-party services",
     href: "/admin/settings/integrations",
     hub: "settings",
     color: "purple",
-    icon: FileText,
+    icon: Plug,
   },
   {
     key: "settings-availability",
-    title: "Storefront Availability",
-    description: "Maintenance mode and coming soon",
-    body: "Temporarily take your storefront offline for maintenance or launch preparation",
+    title: "Maintenance Mode",
+    description: "Take your storefront offline or show a coming-soon page",
+    body: "Show a maintenance or coming-soon screen while you prepare your launch",
     href: "/admin/settings/availability",
     hub: "settings",
     color: "red",
     icon: PowerOff,
   },
   {
-    key: "settings-store-transfer",
-    title: "Store Transfer",
-    description: "Export and import store content",
-    body: "Export your store's content to a ZIP file and import it into another store",
-    href: "/admin/settings/store-transfer",
-    hub: "settings",
-    color: "emerald",
-    icon: IconTransfer,
-    featureKey: "storeTransfer",
-  },
-  {
-    key: "settings-wordpress-export",
-    title: "Export to WordPress",
+    key: "settings-data",
+    title: "Data & Export",
     description: "Move your store to WordPress/WooCommerce",
     body: "Download your content, products, and records in WordPress/WooCommerce import formats",
-    href: "/admin/settings/wordpress-export",
+    href: "/admin/settings/data",
     hub: "settings",
     color: "blue",
-    icon: IconBrandWordpress,
+    icon: IconDatabaseExport,
     featureKey: "wordpressExport",
-    keywords: ["woocommerce", "offboard", "migrate", "leave", "cancel"],
+    keywords: [
+      "woocommerce",
+      "wordpress",
+      "offboard",
+      "migrate",
+      "leave",
+      "cancel",
+      "export",
+      "data",
+    ],
   },
   {
     key: "settings-team",
@@ -510,7 +518,7 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "content-pages",
     title: "Pages",
-    description: "Standalone pages (About, Contact, FAQ)",
+    description: "Standalone pages (About, Contact)",
     body: "About, Contact, FAQ, and custom pages",
     href: "/admin/content/pages",
     hub: "content",
@@ -527,30 +535,7 @@ export const HUB_CARDS: HubCard[] = [
     hub: "content",
     color: "purple",
     icon: FileText,
-  },
-  {
-    key: "content-events",
-    title: "Events",
-    description: "Upcoming workshops, classes, and markets",
-    body: "Post upcoming markets, classes, and workshops with a flier, date, and location",
-    href: "/admin/events",
-    hub: "content",
-    color: "cyan",
-    icon: IconCalendarEvent,
-    featureKey: "events",
-    keywords: ["calendar", "dates", "workshop", "class", "market"],
-  },
-  {
-    key: "content-videos",
-    title: "Videos",
-    description: "YouTube videos, synced automatically",
-    body: "Follow your YouTube channels and playlists — new uploads appear on your site on their own, and you choose which ones show.",
-    href: "/admin/videos",
-    hub: "content",
-    color: "rose",
-    icon: IconBrandYoutube,
-    featureKey: "videos",
-    keywords: ["youtube", "video", "gallery", "channel", "playlist"],
+    featureKey: "blog",
   },
   {
     key: "content-policies",
@@ -595,19 +580,26 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "content-announcements",
     title: "Banner & Popup",
-    description: "Site-wide announcements",
+    description: "Announcement banner and homepage popup",
     body: "Manage your announcement banner and homepage popup",
     href: "/admin/content/announcements",
     hub: "content",
     color: "amber",
     icon: Megaphone,
+    keywords: ["announcement", "banner", "popup"],
+  },
+  {
+    key: "content-template",
+    title: "Template Fields",
+    description: "Platform-admin field editor",
+    body: "Raw template field editor with JSON import/export — owners use the Site Editor instead",
+    href: "/admin/content/template",
+    hub: "content",
+    color: "slate",
+    icon: IconBraces,
+    platformOnly: true,
   },
 ];
-
-/** Return all nav items belonging to a section. */
-export function getNavItemsBySection(section: NavSection): NavItem[] {
-  return NAV_ITEMS.filter((item) => item.section === section);
-}
 
 /**
  * Whether a nav item is visible to the given membership role.
@@ -627,7 +619,7 @@ const STAFF_ALLOWED_PATH_PREFIXES = ["/admin/orders", "/admin/customers"];
 /**
  * Whether an /admin pathname is accessible to the given role.
  * OWNER and MANAGER can visit everything; STAFF is limited to fulfillment
- * pages (orders + customers). Used by the admin layout as a UX guard —
+ * pages (orders + customers). Consumed by src/lib/require-admin-access.ts —
  * hard enforcement lives in the tRPC procedure roles.
  */
 export function isPathAllowedForRole(

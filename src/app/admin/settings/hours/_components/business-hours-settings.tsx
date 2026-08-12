@@ -211,7 +211,9 @@ export function BusinessHoursSettings({ business }: Props) {
                   search engines can display your hours directly in search
                   results. Each row can cover one or more days, but a day can
                   only belong to one row — rows display on your storefront in
-                  the order listed below.
+                  the order listed below. Structured data appears in search
+                  results only when &ldquo;Show as a local business&rdquo; is
+                  enabled in Content → SEO & Meta.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

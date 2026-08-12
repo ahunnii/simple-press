@@ -13,7 +13,7 @@ import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 import { TrailHeader } from "../../_components/trail-header";
 
 export const metadata = {
-  title: "Tax Setup Guide",
+  title: "Tax Guide",
 };
 
 export default function TaxGuidePage() {
@@ -29,7 +29,7 @@ export default function TaxGuidePage() {
 
       <div className="admin-container space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Tax Setup Guide</h1>
+          <h1 className="text-2xl font-bold">Tax Guide</h1>
           <p className="text-muted-foreground mt-1">
             Understanding your sales tax obligations and how to set them up in
             Stripe.

@@ -424,6 +424,9 @@ export function PoliciesManager({ business }: Props) {
   const handleSaveAll = async () => {
     toast.promise(
       async () => {
+        const skipped: string[] = [];
+        let savedCount = 0;
+
         for (const [key, form] of Object.entries(forms)) {
           const content = form.getValues().content;
 
@@ -433,6 +436,9 @@ export function PoliciesManager({ business }: Props) {
             (content.type === "doc" &&
               (!content.content || content.content.length === 0))
           ) {
+            const template =
+              POLICY_TEMPLATES[key as keyof typeof POLICY_TEMPLATES];
+            skipped.push(template.title);
             continue;
           }
 
@@ -457,12 +463,25 @@ export function PoliciesManager({ business }: Props) {
             await createPage.mutateAsync({ data });
             form.reset({ content: data.content });
           }
+          savedCount++;
         }
         router.refresh();
+
+        // Return the message details for the toast
+        return { savedCount, skipped };
       },
       {
         loading: "Saving policies...",
-        success: "All policies saved successfully",
+        success: (data: { savedCount: number; skipped: string[] }) => {
+          if (data.savedCount === 0) {
+            return "No policies to save (all were empty)";
+          }
+          const message = `Saved ${data.savedCount} polic${data.savedCount === 1 ? "y" : "ies"}`;
+          if (data.skipped.length > 0) {
+            return `${message}. Skipped (empty): ${data.skipped.join(", ")}`;
+          }
+          return message;
+        },
         error: "Failed to save policies",
       },
     );
@@ -556,7 +575,7 @@ export function PoliciesManager({ business }: Props) {
             <AlertTitle>No published Terms of Service or Refund Policy</AlertTitle>
             <AlertDescription>
               Checkout tells buyers they&apos;re agreeing to this store&apos;s
-              Terms of Service — publish at least the Terms and Returns tabs
+              Terms of Service — publish at least the Terms and Refunds tabs
               below so that isn&apos;t hollow.
             </AlertDescription>
           </Alert>
@@ -573,7 +592,7 @@ export function PoliciesManager({ business }: Props) {
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="terms">Terms</TabsTrigger>
-            <TabsTrigger value="refund">Returns</TabsTrigger>
+            <TabsTrigger value="refund">Refunds</TabsTrigger>
             <TabsTrigger value="shipping">Shipping</TabsTrigger>
           </TabsList>
 

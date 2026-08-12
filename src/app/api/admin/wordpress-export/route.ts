@@ -4,7 +4,10 @@
  * GET /api/admin/wordpress-export
  *   ?businessId=<id>   (PLATFORM_ADMIN only — target any business)
  *
- * Auth: OWNER/MANAGER of the resolved business, or PLATFORM_ADMIN.
+ * Auth: OWNER of the resolved business, or PLATFORM_ADMIN. Managers are
+ * deliberately excluded — a full store export (including customer records) is
+ * an owner-level action, matching the Owner-only gate on
+ * /admin/settings/data.
  * Feature gate: wordpressExport feature flag must be enabled for the target business.
  *
  * Returns a ZIP archive containing README.md, content.wxr.xml, products.csv,
@@ -68,10 +71,7 @@ export async function GET(req: Request): Promise<Response> {
           targetBusinessId,
           session.user.id,
         );
-        if (
-          !membership ||
-          (membership.role !== "OWNER" && membership.role !== "MANAGER")
-        ) {
+        if (membership?.role !== "OWNER") {
           return new Response("Forbidden", { status: 403 });
         }
       }

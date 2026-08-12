@@ -25,7 +25,17 @@ export function resolveFlags(stored: unknown): ResolvedFlags {
       ? (stored as Record<string, boolean>)
       : {};
 
-  const merged = { ...getDefaultFlags(), ...overrides };
+  // Drop stored keys that are no longer in the registry. Retiring a feature
+  // (e.g. `storeTransfer`, which became a platform-admin tool) leaves stale
+  // `true` values behind in `Business.featureFlags`; without this filter those
+  // values would still merge into `flags` and satisfy `isEnabled(key)`, keeping
+  // dead nav items and hub cards visible for the businesses that once enabled
+  // the feature.
+  const knownOverrides = Object.fromEntries(
+    Object.entries(overrides).filter(([key]) => key in FEATURE_REGISTRY),
+  );
+
+  const merged = { ...getDefaultFlags(), ...knownOverrides };
   const disabledByDependency = getDisabledDueToDependency(merged);
 
   const isEnabled = (key: string): boolean => {

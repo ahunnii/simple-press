@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
+import { env } from "~/env";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -31,6 +32,8 @@ import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 type Props = {
   business: {
     id: string;
+    subdomain: string;
+    customDomain: string | null;
     localBusinessEnabled: boolean;
     allowAiCrawlers: boolean;
   };
@@ -165,6 +168,23 @@ export function SEOEditor({ business, siteContent }: Props) {
   const isDirty = form.formState.isDirty;
   const isSaving = updateSiteContent.isPending;
 
+  const isDev = process.env.NODE_ENV === "development";
+  // Explicit length check (not `||`/`??`): an empty-string customDomain must
+  // fall through to the subdomain host, and `??` would keep it.
+  const customDomain = business.customDomain?.trim();
+  const fallbackHost = isDev
+    ? `${business.subdomain}.localhost:3000`
+    : `${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const storeHost = customDomain?.length ? customDomain : fallbackHost;
+
+  // Watched here (not inline in the JSX) so the preview guard and fallbacks
+  // can test emptiness explicitly — the form defaults these to "", which is
+  // not nullish, so `??` never falls through and `||` trips the lint rule.
+  const previewTitle = form.watch("metaTitle")?.trim() ?? "";
+  const previewDescription = form.watch("metaDescription")?.trim() ?? "";
+  const showSearchPreview =
+    previewTitle.length > 0 || previewDescription.length > 0;
+
   useKeyboardEnter(form, handleSubmit);
   useDirtyForm(isDirty);
 
@@ -297,7 +317,7 @@ export function SEOEditor({ business, siteContent }: Props) {
                   form={form}
                   name="localBusinessEnabled"
                   label="Show as a local business in search & AI results"
-                  description="Emits LocalBusiness structured data (schema.org Store) using your store's address and phone number. Enable this only if your business has a physical or local presence — online-only stores should leave it off to avoid misleading search engines."
+                  description="Emits LocalBusiness structured data (schema.org Store) using your store's address and phone number from Settings → General. Enable this only if your business has a physical or local presence — online-only stores should leave it off to avoid misleading search engines. See Settings → General to manage your business address and phone number."
                 />
                 <SwitchFormField
                   form={form}
@@ -309,7 +329,7 @@ export function SEOEditor({ business, siteContent }: Props) {
             </Card>
 
             {/* Preview */}
-            {(form.watch("metaTitle") ?? form.watch("metaDescription")) && (
+            {showSearchPreview && (
               <Card>
                 <CardHeader>
                   <CardTitle>Search Result Preview</CardTitle>
@@ -320,14 +340,17 @@ export function SEOEditor({ business, siteContent }: Props) {
                 <CardContent>
                   <div className="bg-card rounded-lg border p-4">
                     <div className="text-primary mb-1 text-sm">
-                      {form.watch("metaTitle") ?? "Your Store Name"}
+                      {previewTitle.length > 0
+                        ? previewTitle
+                        : "Your Store Name"}
                     </div>
                     <div className="mb-2 text-xs text-green-700">
-                      https://yourstore.com
+                      {`https://${storeHost}`}
                     </div>
                     <div className="text-muted-foreground text-sm">
-                      {form.watch("metaDescription") ??
-                        "Your store description will appear here..."}
+                      {previewDescription.length > 0
+                        ? previewDescription
+                        : "Your store description will appear here..."}
                     </div>
                   </div>
                 </CardContent>

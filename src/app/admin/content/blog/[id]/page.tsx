@@ -24,7 +24,7 @@ export default async function EditPagePage({ params }: Props) {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "Blog", href: "/admin/content/blog" },
           { label: page.title },
         ]}

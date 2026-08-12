@@ -154,11 +154,11 @@ export default async function ReviewsPage({ searchParams }: Props) {
 
   return (
     <>
-      <TrailHeader breadcrumbs={[{ label: "Product Reviews" }]} />
+      <TrailHeader breadcrumbs={[{ label: "Reviews" }]} />
       <div className="admin-container">
         <div className="admin-header">
           <div>
-            <h1>Product Reviews</h1>
+            <h1>Reviews</h1>
             <p>Manage your product reviews</p>
           </div>
           <ReviewsActions />
@@ -181,5 +181,5 @@ export default async function ReviewsPage({ searchParams }: Props) {
 }
 
 export const metadata = {
-  title: "Product Reviews",
+  title: "Reviews",
 };

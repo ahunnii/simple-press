@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import type { FilterDefFor } from "../_components/admin-filters";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
@@ -21,6 +23,7 @@ import {
   matchesAllTokens,
   pickParam,
 } from "../_lib/table-query";
+import { TestimonialSettings } from "./_components/testimonial-settings";
 import { TestimonialsActions } from "./_components/testimonials-actions";
 import { TestimonialsClient } from "./_components/testimonials-client";
 import { TestimonialsInvites } from "./_components/testimonials-invites";
@@ -117,13 +120,17 @@ export default async function TestimonialsPage({ searchParams }: Props) {
   const tab = pickParam(params.tab, TAB_VALUES, "testimonials");
 
   // Both tabs' counts feed the tab nav regardless of which tab is active, so
-  // both datasets are always fetched together.
-  const [allTestimonials, allInvites] = await Promise.all([
+  // both datasets are always fetched together. `business` feeds the
+  // auto-approve toggle below — same `getWith({})` call the Features page
+  // used before this control moved here.
+  const [allTestimonials, allInvites, business] = await Promise.all([
     api.testimonial
       .list({ publicOnly: false })
       .catch(rethrowTrpcForErrorBoundary),
     api.testimonial.listInvites().catch(rethrowTrpcForErrorBoundary),
+    api.business.getWith({}),
   ]);
+  if (!business) notFound();
 
   const now = new Date();
 
@@ -230,10 +237,14 @@ export default async function TestimonialsPage({ searchParams }: Props) {
         <div className="admin-header">
           <div>
             <h1>Testimonials</h1>
-            <p>Manage customer testimonials and reviews</p>
+            <p>Manage customer testimonials</p>
           </div>
           <TestimonialsActions />
         </div>
+
+        <TestimonialSettings
+          testimonialsAutoApprove={business.testimonialsAutoApprove}
+        />
 
         <TestimonialsTabs
           active={tab}

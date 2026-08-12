@@ -156,7 +156,7 @@ export default async function DiscountsPage({ searchParams }: Props) {
 
   return (
     <>
-      <TrailHeader breadcrumbs={[{ label: "Discount Codes" }]} />
+      <TrailHeader breadcrumbs={[{ label: "Discounts" }]} />
       <DiscountsClient
         discounts={pageItems}
         filters={[STATUS_FILTER, SORT_FILTER]}
@@ -173,5 +173,5 @@ export default async function DiscountsPage({ searchParams }: Props) {
 }
 
 export const metadata = {
-  title: "Discount Codes",
+  title: "Discounts",
 };

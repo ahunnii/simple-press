@@ -33,7 +33,12 @@ const navigationItemsSchema = z
 const CUSTOM_FIELDS_MAX_BYTES = 1_000_000;
 
 export const siteContentSchema = z.object({
-  templateId: z.string().optional(),
+  // NOTE: `templateId` is deliberately NOT accepted here. Commercial templates
+  // are ownership-gated per subdomain (`isTemplateAvailableForSubdomain`), and
+  // this procedure never validated that — any OWNER/MANAGER could hand itself a
+  // paid template by posting one through a content save. Template changes go
+  // through `business.updateTemplate`, which re-checks ownership server-side.
+
   // Hero Section
   heroTitle: z.string().max(255).optional(),
   heroSubtitle: z.string().max(500).optional(),

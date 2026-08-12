@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { IconTerminal } from "@tabler/icons-react";
 import { Building2, Globe, LayoutDashboard, MessageSquare, Users, Wrench } from "lucide-react";
 
 import { env } from "~/env";
@@ -18,6 +17,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "~/components/ui/sidebar";
+import { SimplePressWordmark } from "~/components/shared/simplepress-wordmark";
 import { NavUser } from "~/app/admin/_components/nav-user";
 
 const navItems = [
@@ -73,15 +73,11 @@ export default async function PlatformHubLayout({
                   asChild
                   className="h-20 w-full data-[slot=sidebar-menu-button]:p-1.5!"
                 >
-                  <Link href="/dashboard" className="flex flex-col items-start">
-                    <span className="flex flex-row items-center gap-1 font-mono text-2xl font-bold">
-                      <IconTerminal className="size-8" />
-                      simple_press
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      Platform Admin
-                    </span>
-                  </Link>
+                  <SimplePressWordmark
+                    href="/dashboard"
+                    subline="Platform Admin"
+                    sublineClassName="text-gray-500"
+                  />
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

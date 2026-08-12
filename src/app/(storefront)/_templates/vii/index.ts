@@ -25,37 +25,6 @@ import {
 
 const globalBrandingData: TemplateField[] = [
   {
-    key: "vii.global.announcement-text",
-    label: "Announcement Bar Text",
-    description:
-      "Promotional message shown in the slim announcement bar at the top of every page. Leave blank to hide the bar.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Complimentary skin consultation with your first facial",
-  },
-  {
-    key: "vii.global.announcement-link-text",
-    label: "Announcement Bar Link Text",
-    description: "Text of the link inside the announcement bar.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Book Now",
-  },
-  {
-    key: "vii.global.announcement-link",
-    label: "Announcement Bar Link URL",
-    description: "URL the announcement bar link points to.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "/contact",
-  },
-  {
     key: "vii.global.location-tag",
     label: "Location Tag",
     description:
@@ -200,7 +169,7 @@ export const viiFieldGroups = {
       id: "global.branding",
       title: "Global Branding",
       description:
-        "Announcement bar, location tag, footer tagline, and booking CTA used throughout the template",
+        "Location tag, footer tagline, and booking CTA used throughout the template",
       icon: "🏷️",
       columns: 2,
     } satisfies TemplateFieldGroup,

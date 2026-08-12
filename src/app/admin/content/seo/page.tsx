@@ -15,13 +15,22 @@ export default async function SEOPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "SEO & Meta" },
         ]}
       />
       <HubSubNav hub="content" />
 
-      <SEOEditor business={business} siteContent={business.siteContent} />
+      <SEOEditor
+        business={{
+          id: business.id,
+          subdomain: business.subdomain,
+          customDomain: business.customDomain,
+          localBusinessEnabled: business.localBusinessEnabled,
+          allowAiCrawlers: business.allowAiCrawlers,
+        }}
+        siteContent={business.siteContent}
+      />
     </>
   );
 }

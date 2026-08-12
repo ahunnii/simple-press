@@ -157,8 +157,8 @@ export function SetupChecklist({
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                  <Link href="/admin/content/template">
-                    Template Fields
+                  <Link href="/editor">
+                    Site Editor
                     <ArrowRight className="ml-2 h-3 w-3" />
                   </Link>
                 </Button>

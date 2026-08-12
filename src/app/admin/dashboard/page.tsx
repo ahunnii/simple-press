@@ -484,7 +484,7 @@ export default async function AdminDashboardPage() {
     {
       done: storefrontCustomized,
       label: "Customize your storefront",
-      href: "/admin/content/template",
+      href: "/editor",
     },
   ];
   const setupCompletedSteps = setupSteps.filter((s) => s.done).length;
@@ -575,5 +575,5 @@ export default async function AdminDashboardPage() {
 }
 
 export const metadata = {
-  title: "Admin Dashboard",
+  title: "Dashboard",
 };

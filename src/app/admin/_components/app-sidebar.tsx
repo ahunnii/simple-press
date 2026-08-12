@@ -1,13 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
-import {
-  IconCompass,
-  IconHelp,
-  IconSettings,
-  IconTerminal,
-} from "@tabler/icons-react";
+import { IconCompass, IconHelp, IconSettings } from "@tabler/icons-react";
 
 import type { AdminRole, NavSection } from "~/app/admin/_lib/admin-nav";
 import type { Session } from "~/server/better-auth/config";
@@ -22,6 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import { SimplePressWordmark } from "~/components/shared/simplepress-wordmark";
 import { NavMain } from "~/app/admin/_components/nav-main";
 import { NavSecondary } from "~/app/admin/_components/nav-secondary";
 import { NavUser } from "~/app/admin/_components/nav-user";
@@ -68,6 +63,8 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   featureData?: { flags: Record<string, boolean> };
   /** Business membership role; null for PLATFORM_ADMIN (sees everything). */
   membershipRole?: AdminRole | null;
+  /** Drives the sidebar's "Finish setup" nudge — see WelcomeNotification. */
+  welcomeSetupStatus?: { stripeConnected: boolean; hasProducts: boolean };
 };
 
 export function AppSidebar({
@@ -75,6 +72,7 @@ export function AppSidebar({
   businessName,
   featureData,
   membershipRole,
+  welcomeSetupStatus,
   ...props
 }: AppSidebarProps) {
   const { isEnabled, isDisabledByDependency } = useFeatureFlags({
@@ -131,15 +129,11 @@ export function AppSidebar({
               asChild
               className="h-20 w-full data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <Link href="/" className="flex flex-col items-start">
-                <span className="flex flex-row items-center gap-1 font-mono text-2xl font-bold">
-                  <IconTerminal className="size-8" />
-                  simple_press
-                </span>
-                <span className="text-muted-foreground text-sm">
-                  {businessName ?? "Business"}
-                </span>
-              </Link>
+              <SimplePressWordmark
+                href="/"
+                subline={businessName ?? "Business"}
+                sublineClassName="text-muted-foreground"
+              />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -158,7 +152,10 @@ export function AppSidebar({
         <NavSecondary items={secondaryItems} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <WelcomeNotification />
+        <WelcomeNotification
+          stripeConnected={welcomeSetupStatus?.stripeConnected ?? false}
+          hasProducts={welcomeSetupStatus?.hasProducts ?? false}
+        />
         <NavUser />
       </SidebarFooter>
     </Sidebar>

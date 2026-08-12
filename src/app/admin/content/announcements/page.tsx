@@ -22,7 +22,7 @@ export default async function AnnouncementsPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "Banner & Popup" },
         ]}
       />

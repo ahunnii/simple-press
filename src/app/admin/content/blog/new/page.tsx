@@ -10,7 +10,7 @@ export default async function NewBlogPostPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Content", href: "/admin/content" },
           { label: "Blog", href: "/admin/content/blog" },
           { label: "New Blog Post" },
         ]}
