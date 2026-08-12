@@ -68,6 +68,7 @@ export const productRouter = createTRPCRouter({
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
           variants: true,
         },
+        omit: { cost: true },
         orderBy: { createdAt: "desc" },
         take: 4,
       });
@@ -99,6 +100,7 @@ export const productRouter = createTRPCRouter({
           images: { orderBy: { sortOrder: "asc" }, take: 1 },
           variants: true,
         },
+        omit: { cost: true },
         orderBy: featuredOnly
           ? [{ sortOrder: "asc" }, { createdAt: "desc" }]
           : { createdAt: "desc" },
@@ -134,6 +136,7 @@ export const productRouter = createTRPCRouter({
           images: { orderBy: { sortOrder: "asc" }, take: 4 },
           variants: true,
         },
+        omit: { cost: true },
         orderBy: { createdAt: "desc" },
         take: 4,
       });
@@ -167,6 +170,7 @@ export const productRouter = createTRPCRouter({
             select: { inventoryQty: true, allowBackorders: true },
           },
         },
+        omit: { cost: true },
       });
       return product;
     }),
@@ -428,6 +432,9 @@ export const productRouter = createTRPCRouter({
         ogImage,
         weight,
         weightUnit,
+        cost,
+        sku,
+        featured,
       } = input;
 
       const { businessId } = ctx;
@@ -491,6 +498,9 @@ export const productRouter = createTRPCRouter({
           ogImage: ogImage ?? null,
           weight: weight ?? null,
           weightUnit: weightUnit ?? "lb",
+          cost: cost ?? null,
+          sku: sku ?? null,
+          featured,
           businessId,
           variants: {
             create: variants.map((v) => ({
@@ -540,6 +550,9 @@ export const productRouter = createTRPCRouter({
         ogImage,
         weight,
         weightUnit,
+        cost,
+        sku,
+        featured,
       } = input;
 
       // Verify a client-supplied inventory pool belongs to THIS business before
@@ -624,6 +637,9 @@ export const productRouter = createTRPCRouter({
           ogImage: ogImage ?? null,
           weight: weight ?? null,
           weightUnit: weightUnit ?? "lb",
+          cost: cost ?? null,
+          sku: sku ?? null,
+          featured,
           // Reset alert flags when inventory is manually increased above threshold/zero
           ...(inventoryIncreased && inventoryQty > 0
             ? { outOfStockAlertSent: false }

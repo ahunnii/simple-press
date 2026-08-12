@@ -1,19 +1,31 @@
 "use client";
 
+import type { FieldErrors, Path } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile, useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Search, Trash2, Upload, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  MoreHorizontal,
+  RotateCcw,
+  Save,
+  Search,
+  Trash2,
+  TriangleAlert,
+  Upload,
+  X,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
-import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { getBusinessUrl } from "~/lib/business-url";
+import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { productFormSchema } from "~/lib/validators/product";
@@ -41,16 +53,29 @@ import {
 } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import {
   Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { InputGroup, InputGroupAddon } from "~/components/ui/input-group";
 import { Label } from "~/components/ui/label";
-import { NumberInput } from "~/components/ui/number-input";
+import { MoneyInput } from "~/components/ui/money-input";
+import {
+  InputGroupNumberInput,
+  NumberInput,
+} from "~/components/ui/number-input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
@@ -80,6 +105,63 @@ type Props = {
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
+
+type ProductFormTab = "basics" | "collections" | "seo" | "additional";
+
+const SEO_TAB_FIELDS = new Set<string>([
+  "slug",
+  "metaTitle",
+  "metaDescription",
+  "metaKeywords",
+  "ogImage",
+]);
+
+function tabForField(name: string): ProductFormTab {
+  const root = name.split(".")[0] ?? name;
+  if (SEO_TAB_FIELDS.has(root)) return "seo";
+  if (root === "additionalFields") return "additional";
+  return "basics";
+}
+
+function containsFieldError(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  if ("message" in value || "type" in value) return true;
+  return Object.values(value).some(containsFieldError);
+}
+
+function erroredTabsFor(
+  errors: FieldErrors<ProductFormSchema>,
+): Set<ProductFormTab> {
+  const tabs = new Set<ProductFormTab>();
+  for (const [name, value] of Object.entries(errors)) {
+    if (containsFieldError(value)) tabs.add(tabForField(name));
+  }
+  return tabs;
+}
+
+function TabErrorDot() {
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="bg-destructive size-1.5 shrink-0 rounded-full"
+      />
+      <span className="sr-only">has errors</span>
+    </>
+  );
+}
+
+const SHIPPING_MODE_LABELS: Record<string, string> = {
+  free: "free shipping",
+  flat_rate: "flat-rate shipping",
+  flat_rate_with_threshold: "flat-rate shipping",
+};
+
+function optionalTrimmed(value: string | null | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed;
+}
 
 /** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
 function toDatetimeLocalInput(value: Date | string | null | undefined): string {
@@ -273,6 +355,10 @@ export function ProductForm({
     : "yourstore.com";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [variantManagerKey, setVariantManagerKey] = useState(0);
+  const [activeTab, setActiveTab] = useState<ProductFormTab>("basics");
+  const [showWeightAnyway, setShowWeightAnyway] = useState(false);
+
+  const slugManuallyEditedRef = useRef(false);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
@@ -323,6 +409,9 @@ export function ProductForm({
       compareAtPrice: product?.compareAtPrice
         ? product.compareAtPrice / 100
         : undefined,
+      cost: product?.cost != null ? product.cost / 100 : undefined,
+      featured: product?.featured ?? false,
+      sku: product?.sku ?? "",
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
@@ -402,12 +491,26 @@ export function ProductForm({
     },
   });
 
-  // Auto-generate slug from name (only for new products)
+  const slugAutoSyncs = (livePublished: boolean) =>
+    !product || (!product.published && !livePublished);
+
   const handleNameChange = (value: string | null) => {
     if (!value) return;
-    if (!product) {
-      form.setValue("slug", slugify(value), { shouldValidate: true });
-    }
+    if (slugManuallyEditedRef.current) return;
+    if (!slugAutoSyncs(form.getValues("published"))) return;
+    form.setValue("slug", slugify(value), { shouldValidate: true });
+  };
+
+  const handleInvalidSubmit = (errors: FieldErrors<ProductFormSchema>) => {
+    const first = Object.keys(errors)[0];
+    if (first) setActiveTab(tabForField(first));
+  };
+
+  const revealServerErrorTab = () => {
+    const first = Object.keys(form.getValues()).find(
+      (name) => form.getFieldState(name as Path<ProductFormSchema>).invalid,
+    );
+    if (first) setActiveTab(tabForField(first));
   };
 
   // Mutations
@@ -434,6 +537,7 @@ export function ProductForm({
         fieldMap: { slug: "slug" },
         fallbackMessage: "Failed to create product",
       });
+      revealServerErrorTab();
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -452,6 +556,7 @@ export function ProductForm({
         fieldMap: { slug: "slug" },
         fallbackMessage: "Failed to update product",
       });
+      revealServerErrorTab();
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -501,6 +606,8 @@ export function ProductForm({
     const compareAtPriceInCents = data.compareAtPrice
       ? Math.round(data.compareAtPrice * 100)
       : undefined;
+    const costInCents = data.cost != null ? Math.round(data.cost * 100) : null;
+    const skuValue = optionalTrimmed(data.sku);
 
     // Resolve ogImage URL: upload new file, keep existing URL, or clear
     let resolvedOgImage: string | null;
@@ -581,11 +688,14 @@ export function ProductForm({
         description: data.description ?? undefined,
         price: priceInCents,
         compareAtPrice: compareAtPriceInCents,
+        cost: costInCents,
         published: data.published,
+        featured: data.featured,
         scheduledPublishAt:
           !data.published && data.scheduledPublishAt
             ? new Date(data.scheduledPublishAt)
             : null,
+        sku: skuValue,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
@@ -657,15 +767,18 @@ export function ProductForm({
         description: data.description ?? undefined,
         price: priceInCents,
         published: data.published,
+        featured: data.featured,
         scheduledPublishAt:
           !data.published && data.scheduledPublishAt
             ? new Date(data.scheduledPublishAt)
             : null,
+        sku: skuValue,
         trackInventory: data.trackInventory,
         allowBackorders: data.allowBackorders,
         inventoryQty: data.inventoryQty ?? 0,
         lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
         compareAtPrice: compareAtPriceInCents,
+        cost: costInCents,
         baseInventoryUnitId: data.baseInventoryUnitId ?? null,
         baseUnitsConsumed: data.baseUnitsConsumed ?? null,
         variants: variants?.map((v) => ({
@@ -714,6 +827,7 @@ export function ProductForm({
       if (response.productId) {
         if (createAnother) {
           form.reset();
+          slugManuallyEditedRef.current = false;
           setImages([]);
           setVariants([]);
           setCollectionIds([]);
@@ -721,6 +835,7 @@ export function ProductForm({
           setOgImageFile(null);
           setOgImageRemoved(false);
           setVariantManagerKey((k) => k + 1);
+          setActiveTab("basics");
           window.scrollTo({ top: 0 });
         } else {
           router.push(`/admin/products/${response.productId}`);
@@ -758,8 +873,15 @@ export function ProductForm({
     isCollectionsDirty ||
     isOgImageDirty;
 
-  useKeyboardEnter(form, onSubmit);
+  useKeyboardEnter(form, onSubmit, handleInvalidSubmit);
   useDirtyForm(isDirty);
+
+  const { errors: formErrors, isSubmitted: saveAttempted } = form.formState;
+  const erroredTabs = useMemo(
+    () =>
+      saveAttempted ? erroredTabsFor(formErrors) : new Set<ProductFormTab>(),
+    [saveAttempted, formErrors],
+  );
 
   // SEO preview values — || is intentional so empty string falls back to the default
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
@@ -771,12 +893,47 @@ export function ProductForm({
     "Your product description will appear here in search results.";
   /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
+  const watchedName = form.watch("name") ?? "";
+  const watchedSlug = form.watch("slug") ?? "";
+  const nameDerivedSlug = slugify(watchedName);
+  const slugFrozen = !slugAutoSyncs(form.watch("published"));
+  const showBasicsRenameWarning =
+    slugFrozen &&
+    !!product &&
+    watchedName.trim() !== product.name &&
+    nameDerivedSlug !== watchedSlug;
+
+  const watchedPrice = form.watch("price");
+  const watchedCost = form.watch("cost");
+  const marginPercent =
+    variants.length === 0 &&
+    typeof watchedCost === "number" &&
+    watchedCost > 0 &&
+    typeof watchedPrice === "number" &&
+    watchedPrice > 0
+      ? Math.round(((watchedPrice - watchedCost) / watchedPrice) * 100)
+      : null;
+
+  const shippingType = businessInfo?.shippingType;
+  const shippingWeightInert = !!shippingType && shippingType !== "zone_weight";
+  const shippingModeLabel =
+    (shippingType ? SHIPPING_MODE_LABELS[shippingType] : undefined) ??
+    "your current shipping mode";
+  const showWeightFields = !shippingWeightInert || showWeightAnyway;
+  const storeDefaultWeightLb = businessInfo?.shippingDefaultItemWeightLb;
+  const weightDescription =
+    typeof storeDefaultWeightLb === "number" && storeDefaultWeightLb > 0
+      ? `Leave blank to use the store default (${storeDefaultWeightLb} lb).`
+      : "Leave blank to use the store default.";
+
   return (
     <>
       <Form {...form}>
         <form
           ref={formRef}
-          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+          onSubmit={(e) =>
+            void form.handleSubmit(onSubmit, handleInvalidSubmit)(e)
+          }
           className="bg-muted min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
@@ -788,19 +945,26 @@ export function ProductForm({
                 </Link>
               </Button>
               <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
-              <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                <h1 className="truncate text-base font-medium">
+              <div className="flex min-w-0 items-center gap-2">
+                <h1 className="hidden truncate text-base font-medium sm:block">
                   {product
                     ? form.watch("name") || "Edit Product"
                     : "New Product"}
                 </h1>
 
                 <span
-                  className={`admin-status-badge ${
-                    isDirty ? "isDirty" : "isPublished"
-                  }`}
+                  className={cn(
+                    `admin-status-badge`,
+                    `${
+                      isDirty ? "isDirty" : "isPublished"
+                    } ${!product?.id ? "isNew" : ""}`,
+                  )}
                 >
-                  {isDirty ? "Unsaved Changes" : "Saved"}
+                  {isDirty
+                    ? "Unsaved Changes"
+                    : !product?.id
+                      ? "Draft"
+                      : "Saved"}
                 </span>
               </div>
             </div>
@@ -823,37 +987,62 @@ export function ProductForm({
                   </div>
                 )}
               />
-              {product && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isSubmitting}
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
-              )}
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isSubmitting || !isDirty}
-                onClick={() => {
-                  form.reset();
-                  setCollectionIds(baselineCollectionIds);
-                  setOgImageFile(null);
-                  setOgImageRemoved(false);
-                  if (ogImageFileInputRef.current)
-                    ogImageFileInputRef.current.value = "";
-                }}
-                className="hidden md:inline-flex"
-              >
-                Reset
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="ml-2 sr-only sm:not-sr-only">
+                      More Options
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {product?.id && product.published && (
+                    <DropdownMenuItem asChild>
+                      <a
+                        href={`/shop/${product.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="View on storefront (opens in new tab)"
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View on storefront
+                      </a>
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuItem
+                    disabled={isSubmitting || !isDirty}
+                    onClick={() => {
+                      form.reset();
+                      slugManuallyEditedRef.current = false;
+                      setCollectionIds(baselineCollectionIds);
+                      setOgImageFile(null);
+                      setOgImageRemoved(false);
+                      if (ogImageFileInputRef.current)
+                        ogImageFileInputRef.current.value = "";
+                    }}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </DropdownMenuItem>
+
+                  {product && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        disabled={isSubmitting}
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {!product && (
                 <Button
@@ -900,14 +1089,27 @@ export function ProductForm({
           </div>
 
           <div className="admin-container">
-            <Tabs defaultValue="basics" className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as ProductFormTab)}
+              className="w-full"
+            >
               <TabsList>
-                <TabsTrigger value="basics">Basics</TabsTrigger>
+                <TabsTrigger value="basics">
+                  Basics
+                  {erroredTabs.has("basics") && <TabErrorDot />}
+                </TabsTrigger>
                 {collectionsEnabled && (
                   <TabsTrigger value="collections">Collections</TabsTrigger>
                 )}
-                <TabsTrigger value="seo">SEO</TabsTrigger>
-                <TabsTrigger value="additional">Additional Info</TabsTrigger>
+                <TabsTrigger value="seo">
+                  SEO
+                  {erroredTabs.has("seo") && <TabErrorDot />}
+                </TabsTrigger>
+                <TabsTrigger value="additional">
+                  Product page
+                  {erroredTabs.has("additional") && <TabErrorDot />}
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="basics" className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -931,19 +1133,59 @@ export function ProductForm({
                           autoFocus
                         />
 
-                        <InputFormField
-                          form={form}
-                          name="slug"
-                          label="URL Slug"
-                          placeholder="classic-white-t-shirt"
-                          onChange={(value) =>
-                            form.setValue("slug", sanitizeSlugInput(value), {
-                              shouldValidate: true,
-                            })
-                          }
-                          required
-                          description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
-                        />
+                        {showBasicsRenameWarning ? (
+                          <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                            <div className="space-y-0.5">
+                              <p className="font-medium">
+                                Name changed — the URL hasn&apos;t.
+                              </p>
+                              <p className="text-amber-700">
+                                This product is still at{" "}
+                                <span className="font-mono">
+                                  /shop/{watchedSlug}
+                                </span>
+                                . Updating the URL to match will 404 old links,
+                                bookmarks, search results, and saved wishlists.
+                                We don&apos;t create a redirect automatically.
+                              </p>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                                onClick={() => {
+                                  slugManuallyEditedRef.current = true;
+                                  form.setValue("slug", nameDerivedSlug, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  });
+                                  setActiveTab("seo");
+                                }}
+                              >
+                                Update URL
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 text-xs">
+                            <span>
+                              Storefront URL:{" "}
+                              <span className="font-mono">
+                                /shop/{watchedSlug || "your-product"}
+                              </span>
+                            </span>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-xs"
+                              onClick={() => setActiveTab("seo")}
+                            >
+                              Edit in SEO
+                            </Button>
+                          </div>
+                        )}
 
                         <TextareaFormField
                           form={form}
@@ -990,7 +1232,7 @@ export function ProductForm({
                           Set your product pricing
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-4">
                         {variants.length > 0 ? (
                           <p className="text-muted-foreground text-sm">
                             Pricing is managed per variant. Edit each
@@ -1007,25 +1249,18 @@ export function ProductForm({
                               name="price"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Price (USD)</FormLabel>
+                                  <FormLabel>Price</FormLabel>
                                   <FormControl>
-                                    <div className="relative">
-                                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                        $
-                                      </span>
-                                      <NumberInput
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="19.99"
-                                        className="pl-7"
-                                        {...field}
-                                      />
-                                    </div>
+                                    <MoneyInput
+                                      placeholder="19.99"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormDescription>
                                     Base price in USD (variant prices can
                                     override this)
                                   </FormDescription>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -1034,89 +1269,140 @@ export function ProductForm({
                               name="compareAtPrice"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Compare At Price (USD)</FormLabel>
+                                  <FormLabel>Compare at price</FormLabel>
                                   <FormControl>
-                                    <div className="relative">
-                                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                        $
-                                      </span>
-                                      <NumberInput
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="24.99"
-                                        className="pl-7"
-                                        {...field}
-                                        value={field.value}
-                                      />
-                                    </div>
+                                    <MoneyInput
+                                      placeholder="24.99"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormDescription>
                                     Original price shown crossed out. Leave
                                     blank to disable the sale display.
                                   </FormDescription>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </div>
                         )}
+
+                        <FormField
+                          control={form.control}
+                          name="cost"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="flex items-center justify-between gap-2">
+                                <FormLabel>Cost per item</FormLabel>
+                                {marginPercent !== null && (
+                                  <span className="text-muted-foreground text-xs tabular-nums">
+                                    {marginPercent}% margin
+                                  </span>
+                                )}
+                              </div>
+                              <FormControl>
+                                <MoneyInput placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                What you pay for this item. Never shown to
+                                customers.
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </CardContent>
                     </Card>
                     {/* Shipping weight */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>Shipping</CardTitle>
+                        <CardTitle>Shipping weight</CardTitle>
                         <CardDescription>
                           Used to calculate shipping rates when zone + weight
                           pricing is active
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex gap-3">
+                        {showWeightFields ? (
                           <FormField
                             control={form.control}
                             name="weight"
                             render={({ field }) => (
-                              <FormItem className="flex-1">
-                                <FormLabel>Weight</FormLabel>
-                                <FormControl>
-                                  <NumberInput
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={field.value ?? undefined}
-                                    onChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Leave blank to use the store default
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="weightUnit"
-                            render={({ field }) => (
-                              <FormItem className="w-24 shrink-0">
-                                <FormLabel>Unit</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value ?? "lb"}
-                                >
+                              <FormItem>
+                                <FormLabel>Package weight</FormLabel>
+                                <InputGroup>
                                   <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
+                                    <InputGroupNumberInput
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0.00"
+                                      value={field.value ?? undefined}
+                                      onChange={field.onChange}
+                                    />
                                   </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="lb">lb</SelectItem>
-                                    <SelectItem value="kg">kg</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                  <InputGroupAddon
+                                    align="inline-end"
+                                    className="py-0 pr-1"
+                                  >
+                                    <FormField
+                                      control={form.control}
+                                      name="weightUnit"
+                                      render={({ field: unitField }) => (
+                                        <Select
+                                          onValueChange={unitField.onChange}
+                                          value={unitField.value ?? "lb"}
+                                        >
+                                          <SelectTrigger
+                                            size="sm"
+                                            aria-label="Weight unit"
+                                            className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent"
+                                          >
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="lb">
+                                              lb
+                                            </SelectItem>
+                                            <SelectItem value="kg">
+                                              kg
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+                                    />
+                                  </InputGroupAddon>
+                                </InputGroup>
+                                <FormDescription>
+                                  {weightDescription}
+                                </FormDescription>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
-                        </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <p className="text-muted-foreground text-sm">
+                              Your store is on {shippingModeLabel}, so package
+                              weight doesn&apos;t affect what customers are
+                              charged.{" "}
+                              <Link
+                                href="/admin/settings/shipping"
+                                className="text-foreground underline"
+                              >
+                                Shipping settings
+                              </Link>
+                            </p>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-sm"
+                              onClick={() => setShowWeightAnyway(true)}
+                            >
+                              Set a weight anyway
+                            </Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </div>
@@ -1137,6 +1423,20 @@ export function ProductForm({
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        {variants.length > 0 ? (
+                          <p className="text-muted-foreground text-sm">
+                            SKU is set per variant below.
+                          </p>
+                        ) : (
+                          <InputFormField
+                            form={form}
+                            name="sku"
+                            label="SKU"
+                            placeholder="e.g., TSHIRT-WHT-M"
+                            description="Your own stock-keeping code. Used to match rows when importing inventory."
+                          />
+                        )}
+
                         {/* Base Unit pool selector (shown when pools exist and no variants) */}
                         {pools.length > 0 && variants.length === 0 && (
                           <div className="space-y-3 rounded-lg border p-4">
@@ -1486,6 +1786,48 @@ export function ProductForm({
                       <CardContent className="space-y-4">
                         <InputFormField
                           form={form}
+                          name="slug"
+                          label="URL Slug"
+                          placeholder="classic-white-t-shirt"
+                          onChange={(value) => {
+                            slugManuallyEditedRef.current = true;
+                            form.setValue("slug", sanitizeSlugInput(value), {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            });
+                          }}
+                          required
+                          description={`Used in the product URL: /shop/${watchedSlug || "your-product"}`}
+                        />
+
+                        {product?.id && watchedSlug !== product.slug && (
+                          <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                            <div className="space-y-0.5">
+                              <p className="font-medium">
+                                Heads up — this will change the product&apos;s
+                                URL.
+                              </p>
+                              <p className="text-amber-700">
+                                Saving will change the public URL from{" "}
+                                <span className="font-mono">
+                                  /shop/{product.slug}
+                                </span>{" "}
+                                to{" "}
+                                <span className="font-mono">
+                                  /shop/{watchedSlug}
+                                </span>
+                                . Anyone with the old link — including
+                                bookmarks, search engines, and saved wishlists —
+                                will get a 404. We don&apos;t set up a redirect
+                                automatically.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        <InputFormField
+                          form={form}
                           name="metaTitle"
                           label="Meta Title"
                           placeholder={
@@ -1564,8 +1906,7 @@ export function ProductForm({
                             {seoPreviewTitle}
                           </div>
                           <div className="mb-1 text-xs text-green-700">
-                            {siteHost}/products/
-                            {form.watch("slug") || "product-slug"}
+                            {siteHost}/shop/{watchedSlug || "product-slug"}
                           </div>
                           <div className="line-clamp-2 text-sm text-gray-600">
                             {seoPreviewDesc}
@@ -1614,8 +1955,6 @@ export function ProductForm({
                       name="additionalFields.additionalInformation"
                       output="json"
                       editorContentClassName={"p-4 min-h-[400px]"}
-                      label="Additional information"
-                      description='Shown in the "Additional Information" tab on the product page.'
                       galleriesEnabled={galleriesEnabled}
                     />
                   </CardContent>
@@ -1655,6 +1994,13 @@ export function ProductForm({
                         name="additionalFields.comingSoon"
                         label="Coming soon"
                         description="Show a 'Coming Soon' badge on the product page and card"
+                      />
+
+                      <SwitchFormField
+                        form={form}
+                        name="featured"
+                        label="Featured"
+                        description="On templates that support it, featured products sort first and show a badge."
                       />
                     </CardContent>
                   </Card>

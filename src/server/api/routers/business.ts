@@ -158,6 +158,7 @@ export const businessRouter = createTRPCRouter({
           include: {
             images: true,
           },
+          omit: { cost: true },
         },
         siteContent: {
           select: {

@@ -30,6 +30,7 @@ import {
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { MoneyInput } from "~/components/ui/money-input";
 import { NumberInput } from "~/components/ui/number-input";
 import {
   Popover,
@@ -83,9 +84,14 @@ export function VariantManager({
     droppedCount: number;
   } | null>(null);
 
-  // Reset selection when the number of variants changes
   useEffect(() => {
-    setSelectedIndices(new Set());
+    setSelectedIndices((prev) => {
+      const next = new Set<number>();
+      for (const i of prev) {
+        if (i < variants.length) next.add(i);
+      }
+      return next;
+    });
   }, [variants.length]);
 
   const toggleSelect = (i: number) => {
@@ -120,9 +126,10 @@ export function VariantManager({
   const applyBulkQty = () => {
     const qty = bulkQtyInput;
     if (qty === null || isNaN(qty) || qty < 0) return;
+    const rounded = Math.round(qty);
     onChange(
       variants.map((v, i) =>
-        selectedIndices.has(i) ? { ...v, inventoryQty: qty } : v,
+        selectedIndices.has(i) ? { ...v, inventoryQty: rounded } : v,
       ),
     );
     setBulkQtyInput(null);
@@ -130,7 +137,7 @@ export function VariantManager({
 
   const deleteSelected = () => {
     onChange(variants.filter((_, i) => !selectedIndices.has(i)));
-    // selectedIndices reset handled by the variants.length useEffect
+    setSelectedIndices(new Set());
   };
 
   const prevShowOptionsEditor = useRef(showOptionsEditor);
@@ -163,7 +170,7 @@ export function VariantManager({
           name,
           options: { ...currentOptions },
           inventoryQty: 0,
-          price: basePrice,
+          price: basePrice > 0 ? basePrice : undefined,
         });
         return;
       }
@@ -274,6 +281,14 @@ export function VariantManager({
 
   const removeVariant = (index: number) => {
     onChange(variants.filter((_, i) => i !== index));
+    setSelectedIndices((prev) => {
+      const next = new Set<number>();
+      for (const i of prev) {
+        if (i < index) next.add(i);
+        else if (i > index) next.add(i - 1);
+      }
+      return next;
+    });
   };
 
   const addOption = () => {
@@ -422,6 +437,13 @@ export function VariantManager({
               </p>
             </div>
 
+            {!(basePrice > 0) && (
+              <p className="text-muted-foreground text-sm">
+                Set a base price in Pricing, or enter a price for each variant
+                below.
+              </p>
+            )}
+
             {/* Bulk actions toolbar */}
             {selectedIndices.size > 0 && (
               <div className="bg-muted/50 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2">
@@ -430,13 +452,12 @@ export function VariantManager({
                 </span>
 
                 <div className="flex items-center gap-1">
-                  <NumberInput
-                    step="0.01"
-                    min="0"
-                    placeholder="Price ($)"
+                  <MoneyInput
+                    size="sm"
+                    placeholder="Price"
                     value={bulkPriceInput}
                     onChange={(e) => setBulkPriceInput(e)}
-                    className="h-8 w-28"
+                    className="w-28"
                     onKeyDown={(e) => e.key === "Enter" && applyBulkPrice()}
                   />
                   <Button
@@ -444,7 +465,7 @@ export function VariantManager({
                     size="sm"
                     className="h-8"
                     onClick={applyBulkPrice}
-                    disabled={bulkPriceInput === null}
+                    disabled={bulkPriceInput === null || bulkPriceInput === 0}
                   >
                     Set Price
                   </Button>
@@ -491,221 +512,222 @@ export function VariantManager({
               {variants.map((variant, index) => (
                 <div
                   key={index}
-                  className="bg-card flex items-center gap-3 rounded-lg border p-3"
+                  className="bg-card space-y-2 rounded-lg border p-3"
                 >
-                  <Checkbox
-                    checked={selectedIndices.has(index)}
-                    onCheckedChange={() => toggleSelect(index)}
-                    aria-label={`Select variant ${variant.name}`}
-                  />
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      checked={selectedIndices.has(index)}
+                      onCheckedChange={() => toggleSelect(index)}
+                      aria-label={`Select variant ${variant.name}`}
+                    />
 
-                  {/* Variant image picker */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label={`Set image for ${variant.name}`}
-                        disabled={images.length === 0}
-                        title={
-                          images.length === 0
-                            ? "Add product images first"
-                            : variant.imageUrl
-                              ? "Change variant image"
-                              : "Assign a gallery image"
-                        }
-                        className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {variant.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={variant.imageUrl}
-                            alt={`Image for ${variant.name}`}
-                            loading="lazy"
-                            className="h-12 w-12 rounded object-cover"
-                          />
-                        ) : (
-                          <ImageIcon className="text-muted-foreground h-5 w-5" />
-                        )}
-                      </button>
-                    </PopoverTrigger>
-                    {images.length > 0 && (
-                      <PopoverContent className="w-56 p-2" align="start">
-                        <p className="text-muted-foreground mb-2 text-xs font-medium">
-                          Pick a gallery image
-                        </p>
-                        <div className="grid grid-cols-4 gap-1">
-                          {/* "None" option */}
-                          <button
-                            type="button"
-                            aria-label="Remove variant image"
-                            onClick={() =>
-                              updateVariant(index, "imageUrl", null)
-                            }
-                            className={`text-muted-foreground hover:border-border flex h-10 w-10 items-center justify-center rounded border text-xs ${
-                              !variant.imageUrl
-                                ? "border-blue-500 ring-1 ring-blue-500"
-                                : "border-border"
-                            }`}
-                          >
-                            None
-                          </button>
-                          {images.map((img) => (
+                    {/* Variant image picker */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label={`Set image for ${variant.name}`}
+                          disabled={images.length === 0}
+                          title={
+                            images.length === 0
+                              ? "Add product images first"
+                              : variant.imageUrl
+                                ? "Change variant image"
+                                : "Assign a gallery image"
+                          }
+                          className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {variant.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={variant.imageUrl}
+                              alt={`Image for ${variant.name}`}
+                              loading="lazy"
+                              className="h-12 w-12 rounded object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="text-muted-foreground h-5 w-5" />
+                          )}
+                        </button>
+                      </PopoverTrigger>
+                      {images.length > 0 && (
+                        <PopoverContent className="w-56 p-2" align="start">
+                          <p className="text-muted-foreground mb-2 text-xs font-medium">
+                            Pick a gallery image
+                          </p>
+                          <div className="grid grid-cols-4 gap-1">
+                            {/* "None" option */}
                             <button
-                              key={img.url}
                               type="button"
-                              aria-label={img.altText ?? img.url}
+                              aria-label="Remove variant image"
                               onClick={() =>
-                                updateVariant(index, "imageUrl", img.url)
+                                updateVariant(index, "imageUrl", null)
                               }
-                              className={`hover:border-border overflow-hidden rounded border ${
-                                variant.imageUrl === img.url
+                              className={`text-muted-foreground hover:border-border flex h-10 w-10 items-center justify-center rounded border text-xs ${
+                                !variant.imageUrl
                                   ? "border-blue-500 ring-1 ring-blue-500"
                                   : "border-border"
                               }`}
                             >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={img.url}
-                                alt={img.altText ?? ""}
-                                className="h-10 w-10 object-cover"
-                              />
+                              None
                             </button>
-                          ))}
-                        </div>
-                      </PopoverContent>
-                    )}
-                  </Popover>
-
-                  {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
-
-                  <div className="grid flex-1 grid-cols-1 items-center gap-3 md:grid-cols-5">
-                    <div>
-                      <Label className="text-muted-foreground text-xs">
-                        Name
-                      </Label>
-                      <p className="text-sm font-medium">{variant.name}</p>
-                    </div>
-
-                    <div>
-                      <Label
-                        htmlFor={`sku-${index}`}
-                        className="text-muted-foreground text-xs"
-                      >
-                        SKU
-                      </Label>
-                      <Input
-                        id={`sku-${index}`}
-                        type="text"
-                        value={variant.sku ?? ""}
-                        onChange={(e) =>
-                          updateVariant(index, "sku", e.target.value)
-                        }
-                        placeholder="Optional"
-                        className="h-8"
-                      />
-                    </div>
-
-                    <div>
-                      <Label
-                        htmlFor={`price-${index}`}
-                        className="text-muted-foreground text-xs"
-                      >
-                        Price ($)
-                      </Label>
-                      <NumberInput
-                        id={`price-${index}`}
-                        step="0.01"
-                        value={
-                          variant.price !== undefined
-                            ? variant.price / 100
-                            : null
-                        }
-                        onChange={(e) =>
-                          updateVariant(
-                            index,
-                            "price",
-                            e === null ? undefined : Math.round(e * 100),
-                          )
-                        }
-                        placeholder={(basePrice / 100).toFixed(2)}
-                        className="h-8"
-                      />
-                      {variant.price === 0 ? (
-                        <p className="text-destructive mt-1 text-xs">
-                          $0 isn&apos;t a valid override — clear this to inherit
-                          the base price.
-                        </p>
-                      ) : (
-                        <p className="text-muted-foreground mt-1 text-[11px]">
-                          Blank inherits the base price.
-                        </p>
+                            {images.map((img) => (
+                              <button
+                                key={img.url}
+                                type="button"
+                                aria-label={img.altText ?? img.url}
+                                onClick={() =>
+                                  updateVariant(index, "imageUrl", img.url)
+                                }
+                                className={`hover:border-border overflow-hidden rounded border ${
+                                  variant.imageUrl === img.url
+                                    ? "border-blue-500 ring-1 ring-blue-500"
+                                    : "border-border"
+                                }`}
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={img.url}
+                                  alt={img.altText ?? ""}
+                                  className="h-10 w-10 object-cover"
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        </PopoverContent>
                       )}
-                    </div>
+                    </Popover>
 
-                    <div>
-                      <Label
-                        htmlFor={`compare-at-price-${index}`}
-                        className="text-muted-foreground text-xs"
-                      >
-                        Compare At ($)
-                      </Label>
-                      <NumberInput
-                        id={`compare-at-price-${index}`}
-                        step="0.01"
-                        value={
-                          variant.compareAtPrice !== undefined
-                            ? variant.compareAtPrice / 100
-                            : null
-                        }
-                        onChange={(e) =>
-                          updateVariant(
-                            index,
-                            "compareAtPrice",
-                            e === null ? undefined : Math.round(e * 100),
-                          )
-                        }
-                        placeholder="Optional"
-                        className="h-8"
-                      />
-                      {variant.compareAtPrice === 0 && (
-                        <p className="text-destructive mt-1 text-xs">
-                          $0 isn&apos;t valid — leave blank if there&apos;s no
-                          compare-at price.
+                    {/* <GripVertical className="h-4 w-4 shrink-0 text-gray-400" /> */}
+
+                    <div className="grid flex-1 grid-cols-1 items-start gap-3 md:grid-cols-5">
+                      <div>
+                        <Label className="text-muted-foreground text-xs">
+                          Name
+                        </Label>
+                        <p className="flex h-8 items-center text-sm font-medium">
+                          {variant.name}
                         </p>
-                      )}
-                    </div>
+                      </div>
 
-                    {trackInventory && (
                       <div>
                         <Label
-                          htmlFor={`qty-${index}`}
+                          htmlFor={`sku-${index}`}
                           className="text-muted-foreground text-xs"
                         >
-                          Stock
+                          SKU
                         </Label>
-                        <NumberInput
-                          id={`qty-${index}`}
-                          step="1"
-                          min="0"
-                          value={variant.inventoryQty}
+                        <Input
+                          id={`sku-${index}`}
+                          type="text"
+                          value={variant.sku ?? ""}
                           onChange={(e) =>
-                            updateVariant(index, "inventoryQty", e ?? 0)
+                            updateVariant(index, "sku", e.target.value)
                           }
+                          placeholder="Optional"
                           className="h-8"
                         />
                       </div>
-                    )}
+
+                      <div>
+                        <Label
+                          htmlFor={`price-${index}`}
+                          className="text-muted-foreground text-xs"
+                        >
+                          Price
+                        </Label>
+                        <MoneyInput
+                          id={`price-${index}`}
+                          size="sm"
+                          value={
+                            variant.price !== undefined
+                              ? variant.price / 100
+                              : null
+                          }
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "price",
+                              e === null ? undefined : Math.round(e * 100),
+                            )
+                          }
+                          placeholder="0.00"
+                        />
+                      </div>
+
+                      <div>
+                        <Label
+                          htmlFor={`compare-at-price-${index}`}
+                          className="text-muted-foreground text-xs"
+                        >
+                          Compare At
+                        </Label>
+                        <MoneyInput
+                          id={`compare-at-price-${index}`}
+                          size="sm"
+                          value={
+                            variant.compareAtPrice !== undefined
+                              ? variant.compareAtPrice / 100
+                              : null
+                          }
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "compareAtPrice",
+                              e === null ? undefined : Math.round(e * 100),
+                            )
+                          }
+                          placeholder="Optional"
+                        />
+                      </div>
+
+                      {trackInventory && (
+                        <div>
+                          <Label
+                            htmlFor={`qty-${index}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            Stock
+                          </Label>
+                          <NumberInput
+                            id={`qty-${index}`}
+                            step="1"
+                            min="0"
+                            value={variant.inventoryQty}
+                            onChange={(e) =>
+                              updateVariant(index, "inventoryQty", e ?? 0)
+                            }
+                            className="h-8"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeVariant(index)}
+                      className="shrink-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeVariant(index)}
-                    className="shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  {(variant.price === 0 || variant.compareAtPrice === 0) && (
+                    <p className="text-destructive text-xs">
+                      {[
+                        variant.price === 0
+                          ? `${variant.name}: Price must be more than $0.`
+                          : null,
+                        variant.compareAtPrice === 0
+                          ? `${variant.name}: Compare-at price must be more than $0, or left blank.`
+                          : null,
+                      ]
+                        .filter((m): m is string => m !== null)
+                        .join(" ")}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

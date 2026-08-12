@@ -26,14 +26,37 @@ export const productImageSchema = z.object({
   sortOrder: z.number().int("Sort order must be a whole number"),
 });
 
-export const variantSchema = z.object({
+function hasValidComparePrice(data: {
+  price: number;
+  compareAtPrice?: number;
+}): boolean {
+  return (
+    data.compareAtPrice === undefined ||
+    data.compareAtPrice === null ||
+    data.compareAtPrice > data.price
+  );
+}
+
+const compareAtPriceRefinement = {
+  message: "Compare-at price must be greater than price",
+  path: ["compareAtPrice"],
+};
+
+const variantObjectSchema = z.object({
   id: z.string().optional(),
-  name: z.string().max(255, "Name must be 255 characters or fewer"),
+  name: z
+    .string()
+    .min(1, "Variant name is required")
+    .max(255, "Name must be 255 characters or fewer"),
   sku: z.string().max(100, "SKU must be 100 characters or fewer").optional(),
-  price: z.coerce.number().nonnegative("Price can't be negative"),
+  price: z.coerce
+    .number()
+    .nonnegative("Price can't be negative")
+    .finite("Price must be a finite number"),
   compareAtPrice: z.coerce
     .number()
     .nonnegative("Compare-at price can't be negative")
+    .finite("Compare-at price must be a finite number")
     .optional(),
   inventoryQty: z.coerce
     .number()
@@ -43,13 +66,19 @@ export const variantSchema = z.object({
   imageUrl: z.string().url("Enter a valid image URL").optional().nullable(),
 });
 
-export const productFormSchema = z.object({
+export const variantSchema = variantObjectSchema.refine(
+  hasValidComparePrice,
+  compareAtPriceRefinement,
+);
+
+const productFormObjectSchema = z.object({
   name: z
     .string()
     .min(1, "Name is required")
     .max(255, "Name must be 255 characters or fewer"),
   slug: z
     .string()
+    .min(1, "Slug is required")
     .max(255, "Slug must be 255 characters or fewer")
     .regex(
       /^[a-z0-9._~-]+$/i,
@@ -59,15 +88,27 @@ export const productFormSchema = z.object({
     .string()
     .max(10000, "Description must be 10,000 characters or fewer")
     .optional(),
-  price: z.coerce.number().nonnegative("Price can't be negative"),
+  price: z.coerce
+    .number()
+    .nonnegative("Price can't be negative")
+    .finite("Price must be a finite number"),
   compareAtPrice: z.coerce
     .number()
     .nonnegative("Compare-at price can't be negative")
+    .finite("Compare-at price must be a finite number")
     .optional(),
+  cost: z.coerce
+    .number()
+    .nonnegative("Cost can't be negative")
+    .finite("Cost must be a finite number")
+    .optional()
+    .nullable(),
   published: z.boolean(),
+  featured: z.boolean(),
   // Form-level value: datetime-local string ("" = no schedule). Router schemas
   // override this with a real Date.
   scheduledPublishAt: z.string().optional().nullable(),
+  sku: z.string().max(100, "SKU must be 100 characters or fewer").optional(),
   trackInventory: z.boolean(),
   allowBackorders: z.boolean(),
   inventoryQty: z.coerce
@@ -105,12 +146,18 @@ export const productFormSchema = z.object({
   weight: z.coerce
     .number()
     .nonnegative("Weight can't be negative")
+    .finite("Weight must be a finite number")
     .optional()
     .nullable(),
   weightUnit: z.enum(["lb", "kg"]).optional(),
 });
 
-export const productCreateSchema = productFormSchema
+export const productFormSchema = productFormObjectSchema.refine(
+  hasValidComparePrice,
+  compareAtPriceRefinement,
+);
+
+const productCreateObjectSchema = productFormObjectSchema
   .omit({
     images: true,
   })
@@ -119,13 +166,25 @@ export const productCreateSchema = productFormSchema
     weight: z
       .number()
       .nonnegative("Weight can't be negative")
+      .finite("Weight must be a finite number")
+      .nullable()
+      .optional(),
+    cost: z
+      .number()
+      .nonnegative("Cost can't be negative")
+      .finite("Cost must be a finite number")
       .nullable()
       .optional(),
     weightUnit: z.enum(["lb", "kg"]).optional(),
     scheduledPublishAt: z.date().nullable().optional(),
   });
 
-export const productUpdateSchema = productFormSchema
+export const productCreateSchema = productCreateObjectSchema.refine(
+  hasValidComparePrice,
+  compareAtPriceRefinement,
+);
+
+const productUpdateObjectSchema = productFormObjectSchema
   .omit({
     images: true,
   })
@@ -135,11 +194,23 @@ export const productUpdateSchema = productFormSchema
     weight: z
       .number()
       .nonnegative("Weight can't be negative")
+      .finite("Weight must be a finite number")
+      .nullable()
+      .optional(),
+    cost: z
+      .number()
+      .nonnegative("Cost can't be negative")
+      .finite("Cost must be a finite number")
       .nullable()
       .optional(),
     weightUnit: z.enum(["lb", "kg"]).optional(),
     scheduledPublishAt: z.date().nullable().optional(),
   });
+
+export const productUpdateSchema = productUpdateObjectSchema.refine(
+  hasValidComparePrice,
+  compareAtPriceRefinement,
+);
 
 /**
  * The accepted values for the admin Products list's filter and sort params —

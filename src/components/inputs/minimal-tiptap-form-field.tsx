@@ -53,7 +53,7 @@ export async function uploadRichTextImage(file: File): Promise<string> {
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
   name: Path<CurrentForm>;
-  label: string;
+  label?: string;
   description?: string;
   className?: string;
   disabled?: boolean;
@@ -105,10 +105,12 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
         const value = (field.value ?? EMPTY_TIPTAP_DOC) as unknown as Content;
         return (
           <FormItem className={cn("col-span-full", className)}>
-            <FormLabel>
-              {label}
-              {required && <span className="text-red-500">*</span>}
-            </FormLabel>
+            {label && (
+              <FormLabel>
+                {label}
+                {required && <span className="text-red-500">*</span>}
+              </FormLabel>
+            )}
             <FormControl>
               <MinimalTiptapEditor
                 value={value}
