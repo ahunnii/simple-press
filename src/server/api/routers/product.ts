@@ -406,6 +406,42 @@ export const productRouter = createTRPCRouter({
       return products;
     }),
 
+  searchForPicker: ownerAdminProcedure
+    .use(featureGate("products"))
+    .input(
+      z.object({
+        query: z.string().trim().max(100).default(""),
+        limit: z.number().int().min(1).max(25).default(10),
+      }),
+    )
+    .query(({ ctx, input }) =>
+      ctx.db.product.findMany({
+        where: {
+          businessId: ctx.businessId,
+          ...(input.query && {
+            OR: [
+              { name: { contains: input.query, mode: "insensitive" } },
+              { sku: { contains: input.query, mode: "insensitive" } },
+              { slug: { contains: input.query, mode: "insensitive" } },
+            ],
+          }),
+        },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          published: true,
+          images: {
+            orderBy: { sortOrder: "asc" },
+            take: 1,
+            select: { url: true },
+          },
+        },
+        orderBy: { name: "asc" },
+        take: input.limit,
+      }),
+    ),
+
   create: ownerAdminProcedure
     .use(featureGate("products"))
     .input(productCreateSchema)
@@ -968,7 +1004,9 @@ export const productRouter = createTRPCRouter({
         include: {
           variants: true,
           images: true,
-          collectionProducts: { select: { collectionId: true } },
+          collectionProducts: {
+            select: { collectionId: true, sortOrder: true },
+          },
         },
       });
 
@@ -1065,6 +1103,7 @@ export const productRouter = createTRPCRouter({
             collectionProducts: {
               create: source.collectionProducts.map((cp) => ({
                 collectionId: cp.collectionId,
+                sortOrder: cp.sortOrder,
               })),
             },
           },

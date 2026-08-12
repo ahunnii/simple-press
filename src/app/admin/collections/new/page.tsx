@@ -1,11 +1,7 @@
-import { api } from "~/trpc/server";
-
 import { CollectionForm } from "../_components/collection-form";
 import { TrailHeader } from "../../_components/trail-header";
 
-export default async function NewCollectionPage() {
-  const products = await api.product.secureGetAll();
-
+export default function NewCollectionPage() {
   return (
     <>
       <TrailHeader
@@ -14,7 +10,7 @@ export default async function NewCollectionPage() {
           { label: "New Collection" },
         ]}
       />
-      <CollectionForm allProducts={products} />
+      <CollectionForm />
     </>
   );
 }

@@ -16,6 +16,15 @@ export const collectionFormSchema = z.object({
     .max(1000, "Description must be 1000 characters or fewer")
     .optional()
     .nullable(),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Slug is required")
+    .max(255)
+    .regex(
+      /^[a-z0-9._~-]+$/i,
+      "Use letters, numbers, dots, dashes, tildes or underscores",
+    ),
   imageUrl: z.string().url().optional().nullable(),
   published: z.boolean(),
   metaTitle: z
@@ -55,13 +64,6 @@ export const collectionModifyProductSchema = z.object({
   productId: z.string(),
 });
 
-export const collectionSetProductsSchema = z.object({
-  collectionId: z.string(),
-  productIds: z
-    .array(z.string())
-    .max(500, "Too many products in one collection"),
-});
-
 // Caps come from ~/lib/validators/admin-table, shared with Products and
 // Services — delete is far lower than publish on purpose.
 export const collectionBulkPublishSchema = z.object({
@@ -84,4 +86,3 @@ export const collectionBulkDeleteSchema = z.object({
       `Too many collections selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
     ),
 });
-

@@ -7,7 +7,6 @@ import {
   collectionBulkPublishSchema,
   collectionCreateSchema,
   collectionModifyProductSchema,
-  collectionSetProductsSchema,
   collectionUpdateSchema,
 } from "~/lib/validators/collections";
 import {
@@ -77,6 +76,7 @@ export const collectionsRouter = createTRPCRouter({
                   id: true,
                   name: true,
                   price: true,
+                  published: true,
                   images: {
                     take: 1,
                     orderBy: { sortOrder: "asc" },
@@ -178,35 +178,19 @@ export const collectionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      // Generate slug
-      const baseSlug = generateCollectionSlug(input.name) || "collection";
-      let slug = baseSlug;
-
-      // Ensure unique slug
-      let counter = 1;
-      while (true) {
-        if (counter > 1000) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Could not generate a unique URL slug.",
-          });
-        }
-        const existing = await ctx.db.collection.findUnique({
-          where: {
-            businessId_slug: {
-              businessId,
-              slug,
-            },
-          },
+      const slug = input.slug;
+      const existingSlug = await ctx.db.collection.findUnique({
+        where: { businessId_slug: { businessId, slug } },
+      });
+      if (existingSlug) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A collection with this slug already exists",
         });
-
-        if (!existing) break;
-        slug = `${baseSlug}-${counter}`;
-        counter++;
       }
 
       // Validate product ownership before writing
-      const productIds = input.productIds;
+      const productIds = [...new Set(input.productIds)];
       if (productIds.length > 0) {
         const owned = await ctx.db.product.findMany({
           where: { id: { in: productIds }, businessId },
@@ -267,7 +251,8 @@ export const collectionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const { id, productIds, ...updates } = input;
+      const { id, productIds: rawProductIds, ...updates } = input;
+      const productIds = [...new Set(rawProductIds)];
 
       // Get collection with business
       const collection = await ctx.db.collection.findUnique({
@@ -286,34 +271,24 @@ export const collectionsRouter = createTRPCRouter({
         });
       }
 
-      // If name changed, update slug
       let slug = collection.slug;
-      if (updates.name && updates.name !== collection.name) {
-        const baseSlug = generateCollectionSlug(updates.name) || "collection";
-        slug = baseSlug;
+      if (updates.slug !== collection.slug) {
+        const existingSlug = await ctx.db.collection.findFirst({
+          where: {
+            businessId: collection.businessId,
+            slug: updates.slug,
+            id: { not: id },
+          },
+        });
 
-        // Ensure unique
-        let counter = 1;
-        while (true) {
-          if (counter > 1000) {
-            throw new TRPCError({
-              code: "INTERNAL_SERVER_ERROR",
-              message: "Could not generate a unique URL slug.",
-            });
-          }
-          const existing = await ctx.db.collection.findUnique({
-            where: {
-              businessId_slug: {
-                businessId: collection.businessId,
-                slug,
-              },
-            },
+        if (existingSlug) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "A collection with this slug already exists",
           });
-
-          if (!existing || existing.id === id) break;
-          slug = `${baseSlug}-${counter}`;
-          counter++;
         }
+
+        slug = updates.slug;
       }
 
       // Validate product ownership before writing
@@ -333,12 +308,27 @@ export const collectionsRouter = createTRPCRouter({
 
       const existing = await ctx.db.collectionProduct.findMany({
         where: { collectionId: id },
-        select: { productId: true },
+        select: { productId: true, sortOrder: true },
       });
 
-      const currentIds = new Set(existing.map((cp) => cp.productId));
       const inputIdSet = new Set(productIds);
-      const toRemove = [...currentIds].filter((pid) => !inputIdSet.has(pid));
+      const current = new Map(
+        existing.map((cp) => [cp.productId, cp.sortOrder]),
+      );
+
+      const toRemove = existing
+        .filter((cp) => !inputIdSet.has(cp.productId))
+        .map((cp) => cp.productId);
+      const toCreate = productIds
+        .map((productId, i) => ({ collectionId: id, productId, sortOrder: i }))
+        .filter((row) => !current.has(row.productId));
+      const toReorder = productIds
+        .map((productId, i) => ({ productId, sortOrder: i }))
+        .filter(
+          (row) =>
+            current.has(row.productId) &&
+            current.get(row.productId) !== row.sortOrder,
+        );
 
       const updated = await ctx.db.$transaction(async (tx) => {
         const result = await tx.collection.update({
@@ -349,18 +339,20 @@ export const collectionsRouter = createTRPCRouter({
           },
         });
 
-        if (toRemove.length > 0) {
+        if (toRemove.length) {
           await tx.collectionProduct.deleteMany({
             where: { collectionId: id, productId: { in: toRemove } },
           });
         }
 
-        for (let i = 0; i < productIds.length; i++) {
-          const productId = productIds[i]!;
-          await tx.collectionProduct.upsert({
-            where: { collectionId_productId: { collectionId: id, productId } },
-            create: { collectionId: id, productId, sortOrder: i },
-            update: { sortOrder: i },
+        if (toCreate.length) {
+          await tx.collectionProduct.createMany({ data: toCreate });
+        }
+
+        for (const row of toReorder) {
+          await tx.collectionProduct.updateMany({
+            where: { collectionId: id, productId: row.productId },
+            data: { sortOrder: row.sortOrder },
           });
         }
 
@@ -488,71 +480,6 @@ export const collectionsRouter = createTRPCRouter({
             productId: input.productId,
           },
         },
-      });
-
-      return { success: true };
-    }),
-
-  setProducts: ownerAdminProcedure
-    .use(featureGate("collections"))
-    .input(collectionSetProductsSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-      const { collectionId, productIds } = input;
-
-      const collection = await ctx.db.collection.findUnique({
-        where: { id: collectionId, businessId },
-        select: { id: true },
-      });
-
-      if (!collection) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Collection not found",
-        });
-      }
-
-      // Validate product ownership before writing
-      if (productIds.length > 0) {
-        const owned = await ctx.db.product.findMany({
-          where: { id: { in: productIds }, businessId },
-          select: { id: true },
-        });
-        const ownedSet = new Set(owned.map((p) => p.id));
-        if (productIds.some((id) => !ownedSet.has(id))) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "One or more products were not found in your store.",
-          });
-        }
-      }
-
-      const existing = await ctx.db.collectionProduct.findMany({
-        where: { collectionId },
-        select: { productId: true },
-      });
-
-      const currentIds = new Set(existing.map((cp) => cp.productId));
-      const inputIdSet = new Set(productIds);
-
-      const toRemove = [...currentIds].filter((id) => !inputIdSet.has(id));
-
-      await ctx.db.$transaction(async (tx) => {
-        if (toRemove.length > 0) {
-          await tx.collectionProduct.deleteMany({
-            where: { collectionId, productId: { in: toRemove } },
-          });
-        }
-        // Upsert every product in the desired order — creates new rows and
-        // updates sortOrder for products already in the collection.
-        for (let i = 0; i < productIds.length; i++) {
-          const productId = productIds[i]!;
-          await tx.collectionProduct.upsert({
-            where: { collectionId_productId: { collectionId, productId } },
-            create: { collectionId, productId, sortOrder: i },
-            update: { sortOrder: i },
-          });
-        }
       });
 
       return { success: true };

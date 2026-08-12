@@ -57,6 +57,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
+import { EMPTY_ON_STOREFRONT_MESSAGE } from "../_lib/collection-copy";
 import { AdminBulkBar } from "../../_components/admin-bulk-bar";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
@@ -114,15 +115,6 @@ const TD_CHECKBOX = TABLE_CELL_TIGHT;
 
 /** "3 of 5" — a bulk op silently touching fewer rows than asked must say so. */
 const shortfallMessage = createShortfallMessage(ITEM_NOUN);
-
-/**
- * The one place this sentence is written. The desktop Products cell and the
- * `md:hidden` reflow line both render it, so the two cannot drift — mobile used
- * to say "No live products" while desktop said this, which reads as two
- * different problems. Mobile keeps the compact badge PRESENTATION; only the
- * string is shared. Services carries the identical sentence for its own items.
- */
-const EMPTY_ON_STOREFRONT_MESSAGE = "Published, but shoppers see an empty page";
 
 const SORT_FILTER: AdminFilterDef = {
   key: "sort",

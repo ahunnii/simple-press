@@ -15,7 +15,6 @@ import {
   Search,
   Trash2,
   TriangleAlert,
-  Upload,
   X,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -24,7 +23,6 @@ import { toast } from "sonner";
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
-import { getBusinessUrl } from "~/lib/business-url";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
@@ -32,6 +30,7 @@ import { productFormSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { useSiteHost } from "~/hooks/use-site-host";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -88,8 +87,17 @@ import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
+import { OgImageUploader } from "~/components/inputs/og-image-uploader";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import {
+  SearchResultPreview,
+  SocialPreviewCard,
+} from "~/components/admin/seo-previews";
+import {
+  erroredTabsFor,
+  TabErrorDot,
+} from "~/app/admin/_components/form-tab-errors";
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
@@ -121,34 +129,6 @@ function tabForField(name: string): ProductFormTab {
   if (SEO_TAB_FIELDS.has(root)) return "seo";
   if (root === "additionalFields") return "additional";
   return "basics";
-}
-
-function containsFieldError(value: unknown): boolean {
-  if (!value || typeof value !== "object") return false;
-  if ("message" in value || "type" in value) return true;
-  return Object.values(value).some(containsFieldError);
-}
-
-function erroredTabsFor(
-  errors: FieldErrors<ProductFormSchema>,
-): Set<ProductFormTab> {
-  const tabs = new Set<ProductFormTab>();
-  for (const [name, value] of Object.entries(errors)) {
-    if (containsFieldError(value)) tabs.add(tabForField(name));
-  }
-  return tabs;
-}
-
-function TabErrorDot() {
-  return (
-    <>
-      <span
-        aria-hidden="true"
-        className="bg-destructive size-1.5 shrink-0 rounded-full"
-      />
-      <span className="sr-only">has errors</span>
-    </>
-  );
 }
 
 const SHIPPING_MODE_LABELS: Record<string, string> = {
@@ -184,152 +164,6 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
-function OgImageUploader({
-  file,
-  existingUrl,
-  fileInputRef,
-  onFileChange,
-  onRemove,
-  disabled,
-}: {
-  file: File | null;
-  existingUrl?: string;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  onFileChange: (f: File) => void;
-  onRemove: () => void;
-  disabled?: boolean;
-}) {
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!file) {
-      setObjectUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setObjectUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-
-  const previewUrl = objectUrl ?? existingUrl ?? null;
-
-  return (
-    <div className="space-y-2">
-      <input
-        ref={(el) => {
-          (
-            fileInputRef as React.MutableRefObject<HTMLInputElement | null>
-          ).current = el;
-        }}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        disabled={disabled}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFileChange(f);
-          e.target.value = "";
-        }}
-      />
-      {previewUrl && (
-        <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={previewUrl}
-            alt="OG image preview"
-            className="h-16 w-16 shrink-0 rounded-md object-cover"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-muted-foreground text-xs">
-              {file
-                ? "New image selected. Upload on submit."
-                : "Existing image."}
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            disabled={disabled}
-            aria-label="Remove image"
-            className="text-muted-foreground hover:text-destructive shrink-0"
-            onClick={onRemove}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={disabled}
-        onClick={() => fileInputRef.current?.click()}
-        className="w-full"
-      >
-        <Upload className="mr-2 h-4 w-4" />
-        {previewUrl ? "Replace image" : "Choose image"}
-      </Button>
-    </div>
-  );
-}
-
-function SocialPreviewCard({
-  title,
-  description,
-  ogImageFile,
-  existingOgImage,
-  siteHost,
-}: {
-  title: string;
-  description: string;
-  ogImageFile: File | null | undefined;
-  existingOgImage?: string;
-  siteHost: string;
-}) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!(ogImageFile instanceof File)) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(ogImageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [ogImageFile]);
-
-  const imageToShow = previewUrl ?? existingOgImage ?? null;
-
-  return (
-    <div className="overflow-hidden rounded-lg border bg-white">
-      {imageToShow ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageToShow}
-          alt="Open Graph preview"
-          className="aspect-[1200/630] w-full object-cover"
-        />
-      ) : (
-        <div className="flex aspect-[1200/630] items-center justify-center bg-gray-100 text-sm text-gray-400">
-          1200 × 630 — no image set
-        </div>
-      )}
-      <div className="border-t p-3">
-        <p className="text-xs tracking-wide text-gray-400 uppercase">
-          {siteHost}
-        </p>
-        <p className="truncate text-sm font-medium text-gray-900">{title}</p>
-        {description && (
-          <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
-            {description}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function ProductForm({
   product,
   galleriesEnabled,
@@ -343,16 +177,8 @@ export function ProductForm({
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
 
-  // Resolve the business's real storefront domain for the SEO/social
-  // previews (falls back to a clearly-generic placeholder while loading).
   const { data: businessInfo } = api.business.simplifiedGet.useQuery();
-  const siteHost = businessInfo
-    ? getBusinessUrl({
-        subdomain: businessInfo.subdomain,
-        customDomain: businessInfo.customDomain,
-        domainStatus: businessInfo.domainStatus,
-      }).replace(/^https?:\/\//, "")
-    : "yourstore.com";
+  const siteHost = useSiteHost();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [variantManagerKey, setVariantManagerKey] = useState(0);
   const [activeTab, setActiveTab] = useState<ProductFormTab>("basics");
@@ -879,7 +705,9 @@ export function ProductForm({
   const { errors: formErrors, isSubmitted: saveAttempted } = form.formState;
   const erroredTabs = useMemo(
     () =>
-      saveAttempted ? erroredTabsFor(formErrors) : new Set<ProductFormTab>(),
+      saveAttempted
+        ? erroredTabsFor(formErrors, tabForField)
+        : new Set<ProductFormTab>(),
     [saveAttempted, formErrors],
   );
 
@@ -1901,17 +1729,13 @@ export function ProductForm({
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="rounded-lg border bg-white p-4">
-                          <div className="mb-1 truncate text-sm font-medium text-blue-600">
-                            {seoPreviewTitle}
-                          </div>
-                          <div className="mb-1 text-xs text-green-700">
-                            {siteHost}/shop/{watchedSlug || "product-slug"}
-                          </div>
-                          <div className="line-clamp-2 text-sm text-gray-600">
-                            {seoPreviewDesc}
-                          </div>
-                        </div>
+                        <SearchResultPreview
+                          host={siteHost}
+                          pathPrefix="/shop"
+                          slug={watchedSlug || "product-slug"}
+                          title={seoPreviewTitle}
+                          description={seoPreviewDesc}
+                        />
                       </CardContent>
                     </Card>
 

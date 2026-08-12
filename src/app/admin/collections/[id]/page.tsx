@@ -19,10 +19,6 @@ export default async function EditCollectionPage({ params }: PageProps) {
 
   if (!collection) notFound();
 
-  const products = await api.product
-    .secureGetAll()
-    .catch(rethrowTrpcForErrorBoundary);
-
   return (
     <div className="bg-muted/40 min-h-screen">
       <TrailHeader
@@ -31,7 +27,7 @@ export default async function EditCollectionPage({ params }: PageProps) {
           { label: collection.name },
         ]}
       />
-      <CollectionForm allProducts={products} collection={collection} />
+      <CollectionForm collection={collection} />
     </div>
   );
 }
