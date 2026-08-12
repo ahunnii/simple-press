@@ -1,10 +1,16 @@
 import type { Prisma } from "generated/prisma";
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { ProductSortValue } from "~/lib/validators/product";
-import type { DbClient } from "~/server/db";
+import {
+  buildUsedMediaIndex,
+  isAlwaysInUseKey,
+  normalizeUrl,
+} from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
+import { publicUrlToKey } from "~/lib/s3/url";
 import {
   ADMIN_BULK_SELECTION_LIMIT,
   MAX_REQUESTED_PAGE,
@@ -28,28 +34,80 @@ import {
 } from "~/server/api/trpc";
 
 /**
- * Deletes the given S3 objects, but only those whose URL is no longer referenced
- * by any Image row or any Product.ogImage. Call AFTER the owning rows are removed.
- * Best-effort (deleteStoredObjects never throws).
+ * Deletes the given S3 objects, but only those that NOTHING in the business
+ * still references. Call AFTER the owning rows are removed — the index is built
+ * fresh here, so the caller's just-deleted rows are already absent from it while
+ * every surviving reference still shows up. That ordering is what makes this
+ * correct; do not hoist the scan above the delete.
+ *
+ * This used to check `Image.url` and `Product.ogImage` only, which covered the
+ * case it was written for (`product.duplicate` copies image URLs BY REFERENCE,
+ * so deleting a duplicate must not destroy the original's files) but missed the
+ * larger one: the same S3 object can be attached to a collection, a service, a
+ * page, a variant, a template field, a testimonial or a review. Two paths reach
+ * that today — `MediaPickerDialog` hands back an existing object's URL, and
+ * store-transfer import content-addresses by SHA-256 so identical bytes collapse
+ * onto one shared key. Deleting a product could therefore destroy a file a
+ * collection was still displaying. `buildUsedMediaIndex` is the platform's one
+ * authority on "who references this object" (it is what gates the Media
+ * Library's own delete), so this defers to it rather than growing a second,
+ * always-behind copy of that knowledge.
+ *
+ * Deliberately STRICTER than the Media Library's delete gate in three ways:
+ *
+ *  1. `inactiveTemplate` usages count as references here. The Media Library
+ *     treats a file whose only referents are leftovers from a template the
+ *     owner switched away from as deletable — but it scrubs those field values
+ *     out of SiteContent in the same mutation. This path has no such scrub, so
+ *     honouring the flag would leave the old template pointing at a 404 the
+ *     moment the owner switches back.
+ *  2. Objects outside `{businessId}/` are never touched. The index is
+ *     business-scoped, so a foreign tenant's object would look unreferenced
+ *     here while that tenant is still using it.
+ *  3. Logo/favicon fixed-key objects are never touched (`isAlwaysInUseKey`),
+ *     matching the media router's hard protection.
+ *
+ * Non-storage URLs are skipped rather than handed to `deleteStoredObjects`,
+ * which would only log an "unrecognised URL shape" error to Sentry.
+ *
+ * Best-effort (`deleteStoredObjects` never throws).
  */
-async function deleteUnreferencedImageObjects(db: DbClient, urls: string[]) {
-  const unique = [...new Set(urls.filter((u): u is string => !!u))];
+async function deleteUnreferencedImageObjects(
+  businessId: string,
+  urls: string[],
+) {
+  const unique = [
+    ...new Set(urls.filter((u): u is string => !!u).map(normalizeUrl)),
+  ];
   if (unique.length === 0) return;
-  const [imageRefs, ogRefs] = await Promise.all([
-    db.image.findMany({
-      where: { url: { in: unique } },
-      select: { url: true },
-    }),
-    db.product.findMany({
-      where: { ogImage: { in: unique } },
-      select: { ogImage: true },
-    }),
-  ]);
-  const referenced = new Set<string>([
-    ...imageRefs.map((i) => i.url),
-    ...ogRefs.map((p) => p.ogImage).filter((u): u is string => !!u),
-  ]);
-  const toDelete = unique.filter((u) => !referenced.has(u));
+
+  // One scan for the whole batch — callers must pass every candidate URL in a
+  // single call rather than looping (this scan touches a dozen tables).
+  //
+  // If the scan itself fails we do NOT fall back to deleting: without the index
+  // there is no evidence the objects are unreferenced, and an orphaned file is
+  // recoverable (the Media Library lists and deletes it) while a wrongly deleted
+  // one is not. Swallowing also keeps a storage-side problem from surfacing as
+  // "delete failed" on a product row that is already gone.
+  let usageIndex;
+  try {
+    usageIndex = await buildUsedMediaIndex(businessId);
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { service: "s3", operation: "delete-unreferenced" },
+      extra: { businessId, urlCount: unique.length },
+    });
+    return;
+  }
+
+  const toDelete = unique.filter((url) => {
+    const key = publicUrlToKey(url);
+    if (!key) return false; // external URL — not ours to delete
+    if (!key.startsWith(`${businessId}/`)) return false; // another tenant's object
+    if (isAlwaysInUseKey(key)) return false; // logo / favicon
+    return (usageIndex.get(url) ?? []).length === 0;
+  });
+
   if (toDelete.length > 0) await deleteStoredObjects(toDelete);
 }
 
@@ -822,7 +880,7 @@ export const productRouter = createTRPCRouter({
         product.ogImage,
       ].filter((u): u is string => !!u);
 
-      await deleteUnreferencedImageObjects(ctx.db, urlsToDelete);
+      await deleteUnreferencedImageObjects(businessId, urlsToDelete);
 
       return {
         message: "Product deleted successfully!",
@@ -898,12 +956,15 @@ export const productRouter = createTRPCRouter({
         where: { id: { in: input.ids }, businessId },
       });
 
-      // Clean up S3 objects — reference-counted, best-effort, after the DB delete
+      // Clean up S3 objects — reference-counted, best-effort, after the DB
+      // delete. ONE call for the whole batch: the guard builds a full media
+      // usage index (a dozen queries across the tenant), so calling it per
+      // product would multiply that by the selection size (up to 1,000).
       const urlsToDelete = products
         .flatMap((p) => [...p.images.map((img) => img.url), p.ogImage])
         .filter((u): u is string => !!u);
 
-      await deleteUnreferencedImageObjects(ctx.db, urlsToDelete);
+      await deleteUnreferencedImageObjects(businessId, urlsToDelete);
 
       return {
         count: result.count,
@@ -943,8 +1004,16 @@ export const productRouter = createTRPCRouter({
 
       // Delete removed images
       const toDelete = [...existingIds].filter((id) => !newIds.has(id));
+
+      // A URL the incoming payload still lists is NOT a removal, even when the
+      // row currently carrying it is being dropped: a client can legitimately
+      // drop a row and re-add the same file as a new (id-less) entry in one
+      // call. The S3 cleanup below runs before those creates land, so a fresh
+      // usage index would not yet see them and the object would be destroyed
+      // out from under the row about to reference it.
+      const keptUrls = new Set(input.images.map((img) => img.url));
       const removedUrls = product.images
-        .filter((img) => toDelete.includes(img.id))
+        .filter((img) => toDelete.includes(img.id) && !keptUrls.has(img.url))
         .map((img) => img.url);
 
       await ctx.db.image.deleteMany({
@@ -954,7 +1023,7 @@ export const productRouter = createTRPCRouter({
       });
 
       // Clean up S3 objects — reference-counted, best-effort, after the DB delete
-      await deleteUnreferencedImageObjects(ctx.db, removedUrls);
+      await deleteUnreferencedImageObjects(businessId, removedUrls);
 
       // Update or create images
       await Promise.all(

@@ -1,6 +1,6 @@
 import { type ComponentProps } from "react";
 
-import { cn } from "~/lib/utils";
+import { cn, roundToCents } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 
 export function MoneyInput({
@@ -33,7 +33,7 @@ export function MoneyInput({
         value={value ?? ""}
         onChange={(e) => {
           const number = e.target.valueAsNumber;
-          onChange(isNaN(number) ? null : number);
+          onChange(isNaN(number) ? null : roundToCents(number));
         }}
         onKeyDown={(e) => {
           if (
@@ -48,7 +48,7 @@ export function MoneyInput({
         }}
         onBlur={(e) => {
           if (typeof value === "number") {
-            const rounded = Math.round(value * 100) / 100;
+            const rounded = roundToCents(value);
             if (rounded !== value) {
               onChange(rounded);
             }

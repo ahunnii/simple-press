@@ -2,7 +2,7 @@
 
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   closestCenter,
@@ -22,13 +22,21 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { useUploadFile } from "@better-upload/client";
+import {
+  ChevronDown,
+  GripVertical,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
 import type { RouterOutputs } from "~/trpc/react";
 import { isCategoryAwareServiceTemplate } from "~/lib/service-templates";
+import { cn } from "~/lib/utils";
 import { serviceItemFormSchema } from "~/lib/validators/services";
 import { api } from "~/trpc/react";
 import {
@@ -50,6 +58,11 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -77,6 +90,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 
 type ServiceItem = RouterOutputs["services"]["getById"]["items"][number];
 
@@ -90,6 +104,8 @@ type Props = {
   items: ServiceItem[];
   serviceTemplateId: string;
   sections: SectionRow[];
+  /** Whether the `embeds` feature flag is on for this business. */
+  embedsEnabled?: boolean;
 };
 
 // ─── Sortable Row ─────────────────────────────────────────────────────────────
@@ -211,6 +227,7 @@ function ServiceItemFormDialog({
   onSuccess,
   categoryAware,
   sections,
+  embedsEnabled,
 }: {
   serviceId: string;
   item?: ServiceItem;
@@ -219,7 +236,20 @@ function ServiceItemFormDialog({
   onSuccess: () => void;
   categoryAware: boolean;
   sections: SectionRow[];
+  embedsEnabled?: boolean;
 }) {
+  const imageFileInputRef = useRef<HTMLInputElement | null>(null);
+  // URLs uploaded to S3 during the in-flight submit that aren't yet persisted
+  // to the DB. Populated right before addItem/updateItem is called (those are
+  // fire-and-forget `mutate`, not `mutateAsync`) so the mutation's onError can
+  // discard them if the save itself fails — otherwise they'd be orphaned in
+  // S3 forever. Mirrors the pattern in collection-form.tsx.
+  const pendingUploadUrlsRef = useRef<string[]>([]);
+
+  const [tiersOpen, setTiersOpen] = useState(false);
+  const [addOnsOpen, setAddOnsOpen] = useState(false);
+  const [embedOpen, setEmbedOpen] = useState(false);
+
   const form = useForm<z.input<typeof serviceItemFormSchema>>({
     resolver: zodResolver(serviceItemFormSchema),
     mode: "onTouched",
@@ -227,6 +257,7 @@ function ServiceItemFormDialog({
       name: item?.name ?? "",
       description: item?.description ?? "",
       image: item?.image ?? undefined,
+      imageFile: undefined,
       priceLabel: item?.priceLabel ?? "",
       compareAtPriceLabel: item?.compareAtPriceLabel ?? "",
       durationLabel: item?.durationLabel ?? "",
@@ -245,21 +276,32 @@ function ServiceItemFormDialog({
   // values from the previously edited item.
   useEffect(() => {
     if (!open) return;
+    const priceTiers = (item?.priceTiers as ServicePriceTier[] | null) ?? [];
+    const addOns = (item?.addOns as ServiceAddOn[] | null) ?? [];
     form.reset({
       name: item?.name ?? "",
       description: item?.description ?? "",
       image: item?.image ?? undefined,
+      imageFile: undefined,
       priceLabel: item?.priceLabel ?? "",
       compareAtPriceLabel: item?.compareAtPriceLabel ?? "",
       durationLabel: item?.durationLabel ?? "",
-      priceTiers: (item?.priceTiers as ServicePriceTier[] | null) ?? [],
-      addOns: (item?.addOns as ServiceAddOn[] | null) ?? [],
+      priceTiers,
+      addOns,
       bookingEmbedSrc: item?.bookingEmbedSrc ?? "",
       bookingEmbedHeight: item?.bookingEmbedHeight ?? undefined,
       published: item?.published ?? true,
       isSignature: item?.isSignature ?? false,
       category: item?.category ?? SECTION_NONE,
     });
+    if (imageFileInputRef.current) imageFileInputRef.current.value = "";
+    pendingUploadUrlsRef.current = [];
+    // Auto-expand any advanced section that already has data — collapsing
+    // populated data out of sight on an edit would be worse than the
+    // dialog's previous tallness. Both start closed for "Add".
+    setTiersOpen(priceTiers.length > 0);
+    setAddOnsOpen(addOns.length > 0);
+    setEmbedOpen(Boolean(item?.bookingEmbedSrc));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, item]);
 
@@ -275,26 +317,66 @@ function ServiceItemFormDialog({
     remove: removeAddOn,
   } = useFieldArray({ control: form.control, name: "addOns" });
 
+  const imageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
+  // Best-effort S3 cleanup for uploads whose parent save step failed. Not
+  // user-visible or blocking — the caller's own error path already completed.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+    },
+  });
+
+  const discardPendingUploads = () => {
+    const urls = pendingUploadUrlsRef.current;
+    pendingUploadUrlsRef.current = [];
+    if (urls.length > 0) {
+      discardUploadsMutation.mutate({ urls });
+    }
+  };
+
   const addMutation = api.services.addItem.useMutation({
     onSuccess: () => {
       toast.success("Item added");
+      // Upload from this submit is now persisted (referenced by the new
+      // item) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
       form.reset();
       onSuccess();
       onOpenChange(false);
     },
-    onError: (err) => toast.error(err.message ?? "Failed to add item"),
+    onError: (err) => {
+      discardPendingUploads();
+      toast.error(err.message ?? "Failed to add item");
+    },
   });
 
   const updateMutation = api.services.updateItem.useMutation({
     onSuccess: () => {
       toast.success("Item updated");
+      // Upload from this submit is now persisted (referenced by the updated
+      // item) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
       onSuccess();
       onOpenChange(false);
     },
-    onError: (err) => toast.error(err.message ?? "Failed to update item"),
+    onError: (err) => {
+      discardPendingUploads();
+      toast.error(err.message ?? "Failed to update item");
+    },
   });
 
-  const onSubmit = (data: z.input<typeof serviceItemFormSchema>) => {
+  const onSubmit = async (data: z.input<typeof serviceItemFormSchema>) => {
     // Normalize the "no section" sentinel to null so the DB column is cleared.
     const category = categoryAware
       ? data.category === SECTION_NONE || !data.category
@@ -302,12 +384,38 @@ function ServiceItemFormDialog({
         : data.category
       : undefined;
 
+    // Resolve the image: upload a newly-picked File now (the dialog is
+    // cancellable, so uploads are deferred until submit — never on pick),
+    // pass through null if the existing image was explicitly removed, or
+    // fall back to the unchanged existing URL.
+    let image: string | null | undefined;
+    const imageFile = data.imageFile;
+    if (imageFile === null) {
+      image = null;
+    } else if (imageFile instanceof File) {
+      try {
+        const response = await imageUploader.upload(imageFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        if (fileLocation) {
+          image = fileLocation;
+          pendingUploadUrlsRef.current = [fileLocation];
+        }
+      } catch {
+        toast.error("Failed to upload image.");
+        return;
+      }
+    } else {
+      image = data.image;
+    }
+
     if (item?.id) {
       updateMutation.mutate({
         id: item.id,
         name: data.name,
         description: data.description,
-        image: data.image,
+        image,
         priceLabel: data.priceLabel,
         compareAtPriceLabel: data.compareAtPriceLabel,
         durationLabel: data.durationLabel,
@@ -323,7 +431,7 @@ function ServiceItemFormDialog({
         serviceId,
         name: data.name,
         description: data.description,
-        image: data.image,
+        image,
         priceLabel: data.priceLabel,
         compareAtPriceLabel: data.compareAtPriceLabel,
         durationLabel: data.durationLabel,
@@ -337,11 +445,12 @@ function ServiceItemFormDialog({
     }
   };
 
-  const isPending = addMutation.isPending || updateMutation.isPending;
+  const isPending =
+    addMutation.isPending || updateMutation.isPending || imageUploader.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             {item ? "Edit service item" : "Add service item"}
@@ -354,457 +463,544 @@ function ServiceItemFormDialog({
         <Form {...form}>
           <form
             onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Name{" "}
-                    <span className="text-destructive" aria-hidden="true">
-                      *
-                    </span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Signature Facial" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {categoryAware && (
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) =>
-                  sections.length === 0 ? (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+              {/* Left column */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Section</FormLabel>
-                      <p className="text-muted-foreground text-sm">
-                        Define sections in the Page content tab first, then
-                        assign items here.
-                      </p>
-                    </FormItem>
-                  ) : (
-                    <FormItem>
-                      <FormLabel>Section</FormLabel>
-                      <Select
-                        value={field.value ?? SECTION_NONE}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="No section" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value={SECTION_NONE}>
-                            No section
-                          </SelectItem>
-                          {sections.map((s) => (
-                            <SelectItem
-                              key={s._id ?? asStr(s.label)}
-                              value={s._id ?? ""}
-                            >
-                              {asStr(s.label) || "Untitled section"}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>
+                        Name{" "}
+                        <span className="text-destructive" aria-hidden="true">
+                          *
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Signature Facial"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )
-                }
-              />
-            )}
+                  )}
+                />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe this specific service…"
-                      rows={3}
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="priceLabel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g. $85"
-                        value={field.value ?? ""}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                {categoryAware && (
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) =>
+                      sections.length === 0 ? (
+                        <FormItem>
+                          <FormLabel>Section</FormLabel>
+                          <p className="text-muted-foreground text-sm">
+                            Define sections in the Page content tab first,
+                            then assign items here.
+                          </p>
+                        </FormItem>
+                      ) : (
+                        <FormItem>
+                          <FormLabel>Section</FormLabel>
+                          <Select
+                            value={field.value ?? SECTION_NONE}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="No section" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={SECTION_NONE}>
+                                No section
+                              </SelectItem>
+                              {sections.map((s) => (
+                                <SelectItem
+                                  key={s._id ?? asStr(s.label)}
+                                  value={s._id ?? ""}
+                                >
+                                  {asStr(s.label) || "Untitled section"}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )
+                    }
+                  />
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="durationLabel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g. 60 min"
-                        value={field.value ?? ""}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
-            <FormField
-              control={form.control}
-              name="compareAtPriceLabel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Was / compare-at price</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g. $120 (was)"
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe this specific service…"
+                          rows={3}
+                          value={field.value ?? ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Price tiers */}
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm leading-none font-medium">
-                  Price options
-                </p>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  Alternate prices for different groups (membership, annual,
-                  etc.).
-                </p>
+                <ImageUploadFormField
+                  form={form}
+                  name="imageFile"
+                  label="Image"
+                  existingPreviewUrl={item?.image ?? undefined}
+                  inputRef={imageFileInputRef}
+                  disabled={isPending}
+                />
               </div>
 
-              {tierFields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="border-border bg-muted/50 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
-                >
-                  <FormField
-                    control={form.control}
-                    name={`priceTiers.${index}.label`}
-                    render={({ field: f }) => (
-                      <FormItem className="min-w-0 flex-1">
-                        <FormLabel className="text-muted-foreground text-xs">
-                          Label
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Members" {...f} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`priceTiers.${index}.priceLabel`}
-                    render={({ field: f }) => (
-                      <FormItem className="min-w-0 flex-1">
-                        <FormLabel className="text-muted-foreground text-xs">
-                          Price
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. $70" {...f} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`priceTiers.${index}.compareAtPriceLabel`}
-                    render={({ field: f }) => (
-                      <FormItem className="min-w-0 flex-1">
-                        <FormLabel className="text-muted-foreground text-xs">
-                          Was (optional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. $90"
-                            value={f.value ?? ""}
-                            onChange={f.onChange}
-                            onBlur={f.onBlur}
-                            name={f.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive/80 shrink-0"
-                    aria-label="Remove price tier"
-                    onClick={() => removeTier(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+              {/* Right column */}
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="priceLabel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. $85"
+                          value={field.value ?? ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              {tierFields.length < 8 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    appendTier({
-                      label: "",
-                      priceLabel: "",
-                      compareAtPriceLabel: "",
-                    })
-                  }
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add tier
-                </Button>
-              )}
-            </div>
+                <FormField
+                  control={form.control}
+                  name="compareAtPriceLabel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Was / compare-at price</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. $120 (was)"
+                          value={field.value ?? ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Add-ons */}
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm leading-none font-medium">Add-ons</p>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  Optional extras shown under this service.
-                </p>
+                <FormField
+                  control={form.control}
+                  name="durationLabel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duration</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. 60 min"
+                          value={field.value ?? ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="published"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          id="item-published"
+                          checked={field.value ?? false}
+                          onCheckedChange={field.onChange}
+                        />
+                        <Label htmlFor="item-published">Published</Label>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isSignature"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          id="item-is-signature"
+                          checked={field.value ?? false}
+                          onCheckedChange={field.onChange}
+                        />
+                        <div>
+                          <Label htmlFor="item-is-signature">
+                            Signature offering
+                          </Label>
+                          <p className="text-muted-foreground text-xs">
+                            Spotlight this as the flagship treatment.
+                          </p>
+                        </div>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
-
-              {addOnFields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="border-border bg-muted/50 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
-                >
-                  <FormField
-                    control={form.control}
-                    name={`addOns.${index}.name`}
-                    render={({ field: f }) => (
-                      <FormItem className="min-w-0 flex-[2]">
-                        <FormLabel className="text-muted-foreground text-xs">
-                          Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Hot stones" {...f} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`addOns.${index}.priceLabel`}
-                    render={({ field: f }) => (
-                      <FormItem className="min-w-0 flex-1">
-                        <FormLabel className="text-muted-foreground text-xs">
-                          Price
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. +$20"
-                            value={f.value ?? ""}
-                            onChange={f.onChange}
-                            onBlur={f.onBlur}
-                            name={f.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`addOns.${index}.description`}
-                    render={({ field: f }) => (
-                      <FormItem className="min-w-0 flex-[2]">
-                        <FormLabel className="text-muted-foreground text-xs">
-                          Description
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Optional"
-                            value={f.value ?? ""}
-                            onChange={f.onChange}
-                            onBlur={f.onBlur}
-                            name={f.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive/80 shrink-0"
-                    aria-label="Remove add-on"
-                    onClick={() => removeAddOn(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-
-              {addOnFields.length < 12 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    appendAddOn({ name: "", priceLabel: "", description: "" })
-                  }
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add add-on
-                </Button>
-              )}
             </div>
 
-            {/* Booking embed */}
-            <FormField
-              control={form.control}
-              name="bookingEmbedSrc"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Booking embed (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      placeholder="https://vagaro.com/... or paste an <iframe> snippet"
-                      rows={3}
+            {/* Advanced sections — collapsed by default, auto-expanded when
+                the item already has data so editing never hides it. */}
+            <div className="space-y-2">
+              <Collapsible
+                open={tiersOpen}
+                onOpenChange={setTiersOpen}
+                className="border-border rounded-lg border"
+              >
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="focus-visible:ring-ring flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-medium focus-visible:ring-1 focus-visible:outline-none"
+                  >
+                    <span>Price options ({tierFields.length})</span>
+                    <ChevronDown
+                      className={cn(
+                        "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
+                        tiersOpen && "rotate-180",
+                      )}
                     />
-                  </FormControl>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="border-border space-y-3 border-t p-3">
                   <p className="text-muted-foreground text-xs">
-                    Paste a direct booking URL (Vagaro, Mindbody, etc.) or a
-                    full{" "}
-                    <code className="bg-muted rounded px-0.5 font-mono text-[11px]">
-                      &lt;iframe&gt;
-                    </code>{" "}
-                    embed code. The server will sanitize and extract the src.
-                    Must be HTTPS.
+                    Alternate prices for different groups (membership, annual,
+                    etc.).
                   </p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="bookingEmbedHeight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Embed height (px)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={100}
-                      max={2000}
-                      placeholder="600"
-                      value={field.value ?? ""}
-                      onChange={(e) => {
-                        const n = Number(e.target.value);
-                        field.onChange(
-                          e.target.value === ""
-                            ? undefined
-                            : Number.isFinite(n) && n > 0
-                              ? n
-                              : field.value,
-                        );
-                      }}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="published"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      id="item-published"
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                    />
-                    <Label htmlFor="item-published">Published</Label>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isSignature"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-3">
-                    <Switch
-                      id="item-is-signature"
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                    />
-                    <div>
-                      <Label htmlFor="item-is-signature">
-                        Signature offering
-                      </Label>
-                      <p className="text-muted-foreground text-xs">
-                        Spotlight this as the flagship treatment.
-                      </p>
+                  {tierFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="border-border bg-muted/50 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
+                    >
+                      <FormField
+                        control={form.control}
+                        name={`priceTiers.${index}.label`}
+                        render={({ field: f }) => (
+                          <FormItem className="min-w-0 flex-1">
+                            <FormLabel className="text-muted-foreground text-xs">
+                              Label
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. Members" {...f} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`priceTiers.${index}.priceLabel`}
+                        render={({ field: f }) => (
+                          <FormItem className="min-w-0 flex-1">
+                            <FormLabel className="text-muted-foreground text-xs">
+                              Price
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. $70" {...f} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`priceTiers.${index}.compareAtPriceLabel`}
+                        render={({ field: f }) => (
+                          <FormItem className="min-w-0 flex-1">
+                            <FormLabel className="text-muted-foreground text-xs">
+                              Was (optional)
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. $90"
+                                value={f.value ?? ""}
+                                onChange={f.onChange}
+                                onBlur={f.onBlur}
+                                name={f.name}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive/80 shrink-0"
+                        aria-label="Remove price tier"
+                        onClick={() => removeTier(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
-                </FormItem>
-              )}
-            />
+                  ))}
+
+                  {tierFields.length < 8 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        appendTier({
+                          label: "",
+                          priceLabel: "",
+                          compareAtPriceLabel: "",
+                        })
+                      }
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add tier
+                    </Button>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible
+                open={addOnsOpen}
+                onOpenChange={setAddOnsOpen}
+                className="border-border rounded-lg border"
+              >
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="focus-visible:ring-ring flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-medium focus-visible:ring-1 focus-visible:outline-none"
+                  >
+                    <span>Add-ons ({addOnFields.length})</span>
+                    <ChevronDown
+                      className={cn(
+                        "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
+                        addOnsOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="border-border space-y-3 border-t p-3">
+                  <p className="text-muted-foreground text-xs">
+                    Optional extras shown under this service.
+                  </p>
+
+                  {addOnFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="border-border bg-muted/50 flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-end"
+                    >
+                      <FormField
+                        control={form.control}
+                        name={`addOns.${index}.name`}
+                        render={({ field: f }) => (
+                          <FormItem className="min-w-0 flex-[2]">
+                            <FormLabel className="text-muted-foreground text-xs">
+                              Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g. Hot stones" {...f} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`addOns.${index}.priceLabel`}
+                        render={({ field: f }) => (
+                          <FormItem className="min-w-0 flex-1">
+                            <FormLabel className="text-muted-foreground text-xs">
+                              Price
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g. +$20"
+                                value={f.value ?? ""}
+                                onChange={f.onChange}
+                                onBlur={f.onBlur}
+                                name={f.name}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`addOns.${index}.description`}
+                        render={({ field: f }) => (
+                          <FormItem className="min-w-0 flex-[2]">
+                            <FormLabel className="text-muted-foreground text-xs">
+                              Description
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Optional"
+                                value={f.value ?? ""}
+                                onChange={f.onChange}
+                                onBlur={f.onBlur}
+                                name={f.name}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive/80 shrink-0"
+                        aria-label="Remove add-on"
+                        onClick={() => removeAddOn(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+
+                  {addOnFields.length < 12 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        appendAddOn({
+                          name: "",
+                          priceLabel: "",
+                          description: "",
+                        })
+                      }
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add add-on
+                    </Button>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible
+                open={embedOpen}
+                onOpenChange={setEmbedOpen}
+                className="border-border rounded-lg border"
+              >
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="focus-visible:ring-ring flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-medium focus-visible:ring-1 focus-visible:outline-none"
+                  >
+                    <span>Booking embed</span>
+                    <ChevronDown
+                      className={cn(
+                        "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
+                        embedOpen && "rotate-180",
+                      )}
+                    />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="border-border space-y-4 border-t p-3">
+                  {embedsEnabled ? (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="bookingEmbedSrc"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Booking embed (optional)</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                value={field.value ?? ""}
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                placeholder="https://vagaro.com/... or paste an <iframe> snippet"
+                                rows={3}
+                              />
+                            </FormControl>
+                            <p className="text-muted-foreground text-xs">
+                              Paste a direct booking URL (Vagaro, Mindbody,
+                              etc.) or a full{" "}
+                              <code className="bg-muted rounded px-0.5 font-mono text-[11px]">
+                                &lt;iframe&gt;
+                              </code>{" "}
+                              embed code. The server will sanitize and extract
+                              the src. Must be HTTPS.
+                            </p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="bookingEmbedHeight"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Embed height (px)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={100}
+                                max={2000}
+                                placeholder="600"
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  const n = Number(e.target.value);
+                                  field.onChange(
+                                    e.target.value === ""
+                                      ? undefined
+                                      : Number.isFinite(n) && n > 0
+                                        ? n
+                                        : field.value,
+                                  );
+                                }}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  ) : (
+                    <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+                      Embeds are disabled for this business. Enable the
+                      Embeds feature in <strong>Settings → Features</strong>.
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
 
             <DialogFooter>
               <Button
@@ -833,6 +1029,7 @@ export function ServiceItemsEditor({
   items: initialItems,
   serviceTemplateId,
   sections,
+  embedsEnabled,
 }: Props) {
   const categoryAware = isCategoryAwareServiceTemplate(serviceTemplateId);
   const utils = api.useUtils();
@@ -910,7 +1107,8 @@ export function ServiceItemsEditor({
             <CardTitle>Specific Services</CardTitle>
             <CardDescription>
               Add the individual services within this group (e.g. specific wax
-              types, facial packages). Each can have a booking embed.
+              types, facial packages).
+              {embedsEnabled && " Each can have a booking embed."}
             </CardDescription>
           </div>
           <Button
@@ -994,6 +1192,7 @@ export function ServiceItemsEditor({
         onSuccess={handleEditSuccess}
         categoryAware={categoryAware}
         sections={sections}
+        embedsEnabled={embedsEnabled}
       />
 
       {/* Delete confirmation */}

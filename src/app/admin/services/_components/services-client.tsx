@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
+  Copy,
   ExternalLink,
   Eye,
   EyeOff,
@@ -222,6 +223,23 @@ export function ServicesClient({
     onError: (error, _id, context) => {
       dismissLoadingToast(context);
       toast.error(error.message ?? "Failed to delete service");
+    },
+  });
+
+  const duplicateMutation = api.services.duplicate.useMutation({
+    onMutate: loadingToast("Duplicating service…"),
+    onSuccess: (_data, _id, context) => {
+      dismissLoadingToast(context);
+      toast.success("Service duplicated — draft saved");
+      // Prune like every other mutation: the new draft grows the matching set,
+      // and leaving `isEscalated` true would make the bulk bar claim more rows
+      // are selected than actually are.
+      pruneSelection([]);
+      afterWrite();
+    },
+    onError: (error, _id, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message ?? "Failed to duplicate service");
     },
   });
 
@@ -737,6 +755,15 @@ export function ServicesClient({
                                     </a>
                                   </DropdownMenuItem>
                                 )}
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    duplicateMutation.mutate(service.id)
+                                  }
+                                  disabled={duplicateMutation.isPending}
+                                >
+                                  <Copy className="mr-2 h-4 w-4" />
+                                  Duplicate
+                                </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
                                   onClick={() => setDeleteId(service.id)}

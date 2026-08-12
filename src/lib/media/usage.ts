@@ -17,6 +17,7 @@
 
 import type { TemplateField } from "~/lib/template-fields";
 import { isStorageUrl } from "~/lib/s3/url";
+import { SERVICE_TEMPLATE_FIELDS } from "~/lib/service-templates";
 import { TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { getTemplateLabel } from "~/lib/template-ownership";
 import { db } from "~/server/db";
@@ -354,33 +355,65 @@ export async function buildUsedMediaIndex(
           });
         }
 
-        // additionalFields.additionalInformation → TipTap doc
-        const af = p.additionalFields as Record<string, unknown> | null;
-        const additionalInfo = af?.additionalInformation;
-        if (additionalInfo && typeof additionalInfo === "object") {
-          walkTiptap(
-            additionalInfo,
-            (src) => {
-              addUsage(map, src, {
-                url: src,
-                location: "Product additional information",
-                entityType: "product",
-                entityId: p.id,
-                entityLabel: p.name,
-                adminHref: `/admin/products/${p.id}`,
-              });
-            },
-            (id) => {
-              galleryRefs.push({
-                id,
-                location: "Product additional information",
-                entityType: "product",
-                entityId: p.id,
-                entityLabel: p.name,
-                adminHref: `/admin/products/${p.id}`,
-              });
-            },
-          );
+        // `additionalFields` is a free-form, template-specific JSON blob
+        // (happy-bamboo alone stores `productTagline`, `productFeatures[]`,
+        // `comingSoon` and `additionalInformation` in it). Only the
+        // `additionalInformation` TipTap document used to be scanned, so an
+        // image URL written under ANY other key was invisible: it reported as
+        // unused in the Media Library and was one click from deletion while
+        // still rendering on the storefront.
+        //
+        // The whole blob is now deep-walked. `deepWalkJson` still recognises
+        // embedded TipTap documents and hands them to `walkTiptap`, so
+        // rich-text images AND gallery nodes keep exactly the behaviour — and,
+        // for `additionalInformation`, exactly the label — they had before.
+        const af = p.additionalFields;
+        if (af && typeof af === "object" && !Array.isArray(af)) {
+          const productUsage = (location: string) => ({
+            location,
+            entityType: "product",
+            entityId: p.id,
+            entityLabel: p.name,
+            adminHref: `/admin/products/${p.id}`,
+          });
+
+          for (const [fieldKey, value] of Object.entries(
+            af as Record<string, unknown>,
+          )) {
+            // Preserve the pre-existing label for the one key that was already
+            // scanned, so Media Library rows don't churn.
+            const isAdditionalInfo = fieldKey === "additionalInformation";
+            const location = isAdditionalInfo
+              ? "Product additional information"
+              : `Product additional fields · ${fieldKey}`;
+            const richTextLocation = isAdditionalInfo
+              ? location
+              : `${location} (rich text)`;
+
+            deepWalkJson(
+              value,
+              (url) => {
+                addUsage(map, url, { url, ...productUsage(location) });
+              },
+              (doc) => {
+                walkTiptap(
+                  doc,
+                  (src) => {
+                    addUsage(map, src, {
+                      url: src,
+                      ...productUsage(richTextLocation),
+                    });
+                  },
+                  (id) => {
+                    galleryRefs.push({
+                      id,
+                      ...productUsage(richTextLocation),
+                    });
+                  },
+                );
+              },
+            );
+          }
         }
       }
     });
@@ -450,6 +483,8 @@ export async function buildUsedMediaIndex(
         name: true,
         image: true,
         ogImage: true,
+        serviceTemplateId: true,
+        customFields: true,
         items: { select: { id: true, name: true, image: true } },
       },
     })
@@ -485,6 +520,85 @@ export async function buildUsedMediaIndex(
               entityLabel: item.name,
               adminHref: `/admin/services/${s.id}`,
             });
+          }
+        }
+
+        // `Service.customFields` holds the service-PAGE template fields —
+        // written by `services.updateCustomFields` and edited through the same
+        // `FieldGroup` widget as the site template editor, so it carries image,
+        // video, richtext and gallery references exactly like
+        // `SiteContent.customFields` does. It was not scanned at all before:
+        // a photo placed on a service field reported as unused in the Media
+        // Library and was one click from deletion while still live on the site.
+        //
+        // Field labels/types are resolved against SERVICE_TEMPLATE_FIELDS so
+        // gallery-type fields (service-two, vii-*) resolve to their images —
+        // without that, a gallery embedded ONLY on a service page looks
+        // unreferenced to `buildGalleryExternalUsage`, and `gallery.delete`
+        // happily destroys its S3 objects.
+        //
+        // NOTE: no `inactiveTemplate` flagging here, unlike SiteContent. That
+        // flag means "deletable, and the URL gets scrubbed out of the blob in
+        // the same mutation" — but the scrub
+        // (`scrubMediaUrlsFromSiteContent` in the media router) only ever
+        // touches SiteContent. Flagging a stale service-template field would
+        // therefore delete the object and leave `Service.customFields`
+        // pointing at a 404.
+        const cf = s.customFields;
+        if (cf && typeof cf === "object" && !Array.isArray(cf)) {
+          const serviceFieldsByKey = new Map(
+            (SERVICE_TEMPLATE_FIELDS[s.serviceTemplateId] ?? []).map((f) => [
+              f.key,
+              f,
+            ]),
+          );
+
+          for (const [fieldKey, value] of Object.entries(
+            cf as Record<string, unknown>,
+          )) {
+            const field = serviceFieldsByKey.get(fieldKey);
+            const location = `Service page content · ${field?.label ?? fieldKey}`;
+            const serviceUsage = (loc: string) => ({
+              location: loc,
+              entityType: "service",
+              entityId: s.id,
+              entityLabel: s.name,
+              adminHref: `/admin/services/${s.id}`,
+            });
+
+            // gallery-type fields store a gallery ID (a string), not a URL
+            if (
+              field?.type === "gallery" &&
+              typeof value === "string" &&
+              value
+            ) {
+              galleryRefs.push({ id: value, ...serviceUsage(location) });
+              continue;
+            }
+
+            deepWalkJson(
+              value,
+              (url) => {
+                addUsage(map, url, { url, ...serviceUsage(location) });
+              },
+              (doc) => {
+                walkTiptap(
+                  doc,
+                  (src) => {
+                    addUsage(map, src, {
+                      url: src,
+                      ...serviceUsage(`${location} (rich text)`),
+                    });
+                  },
+                  (id) => {
+                    galleryRefs.push({
+                      id,
+                      ...serviceUsage(`${location} (rich text)`),
+                    });
+                  },
+                );
+              },
+            );
           }
         }
       }

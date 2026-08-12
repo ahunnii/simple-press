@@ -111,6 +111,12 @@ export function CollectionForm({ collection }: Props) {
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
   const createAnotherRef = useRef<boolean>(false);
   const slugManuallyEditedRef = useRef(false);
+  // URLs uploaded to S3 during the in-flight submit that aren't yet
+  // persisted to the DB. Populated right before `create`/`update` is called
+  // (those are fire-and-forget `mutate`, not `mutateAsync`) so the mutation's
+  // `onError` can discard them if the save itself fails — otherwise they'd be
+  // orphaned in S3 forever (the collections router never deletes from S3).
+  const pendingUploadUrlsRef = useRef<string[]>([]);
   const utils = api.useUtils();
 
   const siteHost = useSiteHost();
@@ -159,6 +165,26 @@ export function CollectionForm({ collection }: Props) {
     },
   });
 
+  // Best-effort S3 cleanup for uploads whose parent save step failed. Not
+  // user-visible or blocking — the caller's own error path already completed.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+    },
+  });
+
+  const discardPendingUploads = () => {
+    const urls = pendingUploadUrlsRef.current;
+    pendingUploadUrlsRef.current = [];
+    if (urls.length > 0) {
+      discardUploadsMutation.mutate({ urls });
+    }
+  };
+
   const slugAutoSyncs = (livePublished: boolean) =>
     !collection || (!collection.published && !livePublished);
 
@@ -184,6 +210,9 @@ export function CollectionForm({ collection }: Props) {
   const createMutation = api.collections.create.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
+      // Uploads from this submit are now persisted (referenced by the new
+      // collection) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
       void utils.collections.invalidate();
 
       if (createAnotherRef.current) {
@@ -205,6 +234,7 @@ export function CollectionForm({ collection }: Props) {
     onError: (err) => {
       createAnotherRef.current = false;
       toast.dismiss();
+      discardPendingUploads();
       applyTrpcErrorToForm(form, err, {
         fieldMap: { "not found in your store": "productIds", slug: "slug" },
         fallbackMessage: "Failed to create collection",
@@ -220,6 +250,9 @@ export function CollectionForm({ collection }: Props) {
     onSuccess: (data) => {
       toast.dismiss();
       toast.success("Collection updated successfully");
+      // Uploads from this submit are now persisted (referenced by the
+      // updated collection) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
 
       void utils.collections.invalidate();
       const values = form.getValues();
@@ -241,6 +274,7 @@ export function CollectionForm({ collection }: Props) {
     },
     onError: (err) => {
       toast.dismiss();
+      discardPendingUploads();
       applyTrpcErrorToForm(form, err, {
         fieldMap: { "not found in your store": "productIds", slug: "slug" },
         fallbackMessage: "Failed to update collection",
@@ -286,6 +320,12 @@ export function CollectionForm({ collection }: Props) {
   });
 
   const onSubmit = async (data: CollectionFormData) => {
+    // Track objects uploaded to S3 during this submit so they can be
+    // discarded if anything fails before (or during) the save mutation —
+    // otherwise a rejected save leaves orphaned S3 objects with nothing
+    // referencing them.
+    const uploadedThisSubmit: string[] = [];
+
     let imageUrl: string | null | undefined;
     const imageFile = data.imageFile;
     if (imageFile === null) {
@@ -296,7 +336,10 @@ export function CollectionForm({ collection }: Props) {
         const fileLocation =
           (response.file.objectInfo.metadata?.pathname as string | undefined) ??
           "";
-        if (fileLocation) imageUrl = fileLocation;
+        if (fileLocation) {
+          imageUrl = fileLocation;
+          uploadedThisSubmit.push(fileLocation);
+        }
       } catch {
         toast.error("Failed to upload image.");
         return;
@@ -313,8 +356,15 @@ export function CollectionForm({ collection }: Props) {
           (response.file.objectInfo.metadata?.pathname as string | undefined) ??
           "";
         resolvedOgImage = fileLocation || null;
+        if (fileLocation) uploadedThisSubmit.push(fileLocation);
       } catch {
         toast.error("Failed to upload Open Graph image.");
+        // The cover image (if any) already uploaded successfully above but
+        // we're bailing before the save mutation ever runs — nothing will
+        // reference it, so discard it now instead of leaving it orphaned.
+        if (uploadedThisSubmit.length > 0) {
+          discardUploadsMutation.mutate({ urls: uploadedThisSubmit });
+        }
         return;
       }
     } else if (ogImageRemoved) {
@@ -322,6 +372,11 @@ export function CollectionForm({ collection }: Props) {
     } else {
       resolvedOgImage = data.ogImage ?? null;
     }
+
+    // Hand off to the mutation's onError/onSuccess: `mutate` below is
+    // fire-and-forget, so this ref is how the mutation callbacks learn what
+    // was uploaded during the submit that's now in flight.
+    pendingUploadUrlsRef.current = uploadedThisSubmit;
 
     if (collection?.id) {
       updateMutation.mutate({
@@ -356,6 +411,7 @@ export function CollectionForm({ collection }: Props) {
   const isSubmitting =
     createMutation.isPending ||
     updateMutation.isPending ||
+    imageUploader.isPending ||
     ogImageUploader.isPending;
   const isDeleting = deleteMutation.isPending;
 
@@ -417,8 +473,8 @@ export function CollectionForm({ collection }: Props) {
               <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
               <div className="flex min-w-0 items-center gap-2">
                 <h1 className="hidden truncate text-base font-medium sm:block">
-                  {collection?.id
-                    ? (collection?.name ?? "Edit Collection")
+                  {collection
+                    ? form.watch("name") || "Edit Collection"
                     : "New Collection"}
                 </h1>
 
@@ -534,10 +590,21 @@ export function CollectionForm({ collection }: Props) {
                   onClick={() => {
                     createAnotherRef.current = true;
                   }}
-                  className="hidden sm:inline-flex"
                 >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Save &amp; create another
+                  {isSubmitting ? (
+                    <>
+                      <span className="saving-indicator" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        Save &amp; create another
+                      </span>
+                      <span className="sm:hidden">Save+</span>
+                    </>
+                  )}
                 </Button>
               )}
 
@@ -600,6 +667,7 @@ export function CollectionForm({ collection }: Props) {
                       onChangeAdditional={handleNameChange}
                       placeholder="Summer Collection"
                       required
+                      autoFocus
                     />
 
                     {showBasicsRenameWarning ? (

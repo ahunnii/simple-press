@@ -13,8 +13,20 @@ export const serviceFormSchema = z.object({
     .trim()
     .min(1, "Name is required")
     .max(120, "Name must be 120 characters or fewer"),
-  // slug is generated server-side from the name (see service router), so it is
-  // intentionally not part of the form schema.
+  // The slug is owner-controlled, exactly as it is for Products and
+  // Collections. It used to be re-derived from `name` on every save, which
+  // silently changed a published service's public URL — and there is no
+  // redirect infrastructure, so every existing link 404'd. Shape copied
+  // verbatim from `collectionFormSchema` so the two behave identically.
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Slug is required")
+    .max(255)
+    .regex(
+      /^[a-z0-9._~-]+$/i,
+      "Use letters, numbers, dots, dashes, tildes or underscores",
+    ),
   description: z
     .string()
     .max(2000, "Description must be 2000 characters or fewer")
@@ -38,15 +50,26 @@ export const serviceFormSchema = z.object({
     .nullable(),
   metaKeywords: z.string().optional().nullable(),
   ogImage: z.string().url().optional().nullable(),
+  // Deferred upload: the picked file lives on the form until submit, then the
+  // client uploads it and puts the resulting URL on `image`. Client-only — it
+  // is `.omit()`ed from the wire schemas below, the same way
+  // `collectionFormSchema.imageFile` is.
+  imageFile: z.instanceof(File).optional().nullable(),
 });
 
 export type ServiceFormData = z.infer<typeof serviceFormSchema>;
 
-export const serviceCreateSchema = serviceFormSchema;
-
-export const serviceUpdateSchema = serviceFormSchema.extend({
-  id: z.string(),
+export const serviceCreateSchema = serviceFormSchema.omit({
+  imageFile: true,
 });
+
+export const serviceUpdateSchema = serviceFormSchema
+  .omit({
+    imageFile: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export type ServiceCreateData = z.infer<typeof serviceCreateSchema>;
 export type ServiceUpdateData = z.infer<typeof serviceUpdateSchema>;
@@ -106,17 +129,27 @@ export const serviceItemFormSchema = z.object({
     .optional()
     .nullable(),
   published: z.boolean().default(false),
+  // Deferred upload — see the note on `serviceFormSchema.imageFile`.
+  imageFile: z.instanceof(File).optional().nullable(),
 });
 
 export type ServiceItemFormData = z.infer<typeof serviceItemFormSchema>;
 
-export const serviceItemCreateSchema = serviceItemFormSchema.extend({
-  serviceId: z.string(),
-});
+export const serviceItemCreateSchema = serviceItemFormSchema
+  .omit({
+    imageFile: true,
+  })
+  .extend({
+    serviceId: z.string(),
+  });
 
-export const serviceItemUpdateSchema = serviceItemFormSchema.extend({
-  id: z.string(),
-});
+export const serviceItemUpdateSchema = serviceItemFormSchema
+  .omit({
+    imageFile: true,
+  })
+  .extend({
+    id: z.string(),
+  });
 
 export const serviceItemDeleteSchema = z.object({
   id: z.string(),

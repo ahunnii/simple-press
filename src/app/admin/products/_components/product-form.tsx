@@ -8,8 +8,10 @@ import { useUploadFile, useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
+  Copy,
   ExternalLink,
   MoreHorizontal,
+  PlusCircle,
   RotateCcw,
   Save,
   Search,
@@ -19,6 +21,7 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import type { FormProductImage, FormVariant } from "../_validators/schema";
 import type { ProductFormSchema } from "~/lib/validators/product";
@@ -26,7 +29,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
-import { productFormSchema } from "~/lib/validators/product";
+import { productFormSchema, variantSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -100,6 +103,7 @@ import {
 } from "~/app/admin/_components/form-tab-errors";
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
+import type { ImageUploaderHandle } from "./image-uploader";
 import { ImageUploader } from "./image-uploader";
 import { ProductFeaturesField } from "./product-features-field";
 import { VariantManager } from "./variant-manager";
@@ -164,6 +168,48 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
+/**
+ * Fresh "blank product" form values, used to re-baseline after
+ * "Save & create another". A factory (not a module-level constant) — unlike
+ * collection-form's `NEW_COLLECTION_DEFAULTS`, this shape has nested
+ * arrays/objects (`additionalFields.productFeatures`,
+ * `additionalFields.additionalInformation`) that must NOT be the same
+ * instance across resets, or later mutations on one draft would leak into
+ * the "baseline" for every subsequent one.
+ */
+function getNewProductDefaults(): ProductFormSchema {
+  return {
+    published: true,
+    scheduledPublishAt: "",
+    name: "",
+    slug: "",
+    description: "",
+    price: 0,
+    compareAtPrice: undefined,
+    cost: undefined,
+    featured: false,
+    sku: "",
+    trackInventory: false,
+    inventoryQty: 0,
+    allowBackorders: false,
+    lowInventoryThreshold: undefined,
+    baseInventoryUnitId: null,
+    baseUnitsConsumed: null,
+    additionalFields: {
+      additionalInformation: { ...EMPTY_TIPTAP_DOC },
+      productFeatures: [],
+      comingSoon: false,
+      productTagline: "",
+    },
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: "",
+    ogImage: undefined,
+    weight: undefined,
+    weightUnit: "lb",
+  };
+}
+
 export function ProductForm({
   product,
   galleriesEnabled,
@@ -174,6 +220,7 @@ export function ProductForm({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const imageUploaderRef = useRef<ImageUploaderHandle>(null);
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
 
@@ -208,13 +255,26 @@ export function ProductForm({
   // Stored price/compareAtPrice of 0 (persisted by the old form's `?? priceInCents`
   // fallback) means "inherit the base price" at runtime — normalize to undefined
   // on load so the submit-time $0 guard doesn't block saving legacy products.
-  const [variants, setVariants] = useState<FormVariant[]>(
-    ((product?.variants as FormVariant[]) ?? []).map((v) => ({
-      ...v,
-      price: v.price === 0 ? undefined : v.price,
-      compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
-    })),
+  const initialVariants: FormVariant[] = (
+    (product?.variants as FormVariant[]) ?? []
+  ).map((v) => ({
+    ...v,
+    price: v.price === 0 ? undefined : v.price,
+    compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
+  }));
+  const [variants, setVariants] = useState<FormVariant[]>(initialVariants);
+  const initialVariantsRef = useRef<FormVariant[]>(initialVariants);
+  // Row-index -> message, populated from a pre-submit `variantSchema` pass so
+  // a bad variant (e.g. negative price) surfaces per-row instead of as a raw
+  // tRPC 400. Cleared whenever the variants change so a fix doesn't leave a
+  // stale error visible.
+  const [variantErrors, setVariantErrors] = useState<Record<number, string>>(
+    {},
   );
+  const handleVariantsChange = (next: FormVariant[]) => {
+    setVariants(next);
+    setVariantErrors({});
+  };
 
   const storedAdditional = parseStoredAdditionalFields(
     product?.additionalFields ?? null,
@@ -230,7 +290,7 @@ export function ProductForm({
       scheduledPublishAt: toDatetimeLocalInput(product?.scheduledPublishAt),
       name: product?.name ?? "",
       slug: product?.slug ?? "",
-      description: product?.description ?? undefined,
+      description: product?.description ?? "",
       price: product?.price ? product.price / 100 : 0, // Convert cents to dollars
       compareAtPrice: product?.compareAtPrice
         ? product.compareAtPrice / 100
@@ -328,6 +388,7 @@ export function ProductForm({
   };
 
   const handleInvalidSubmit = (errors: FieldErrors<ProductFormSchema>) => {
+    createAnotherRef.current = false;
     const first = Object.keys(errors)[0];
     if (first) setActiveTab(tabForField(first));
   };
@@ -411,6 +472,34 @@ export function ProductForm({
     },
   });
 
+  const duplicateProductMutation = api.product.duplicate.useMutation({
+    onSuccess: (data) => {
+      toast.dismiss();
+      toast.success("Product duplicated — draft saved");
+      void utils.product.invalidate();
+      router.push(`/admin/products/${data.productId}`);
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to duplicate product");
+    },
+    onMutate: () => {
+      toast.loading("Duplicating product...");
+    },
+  });
+
+  // Best-effort S3 cleanup for images/OG images uploaded during a submit
+  // whose save mutation then failed — see useDeferredImageUpload's `discard`
+  // for the same pattern. Not user-visible; failures here don't block anything.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (error) => {
+      console.warn(
+        "Failed to discard orphaned upload(s); objects may remain in S3:",
+        error,
+      );
+    },
+  });
+
   const onSubmit = async (data: ProductFormSchema) => {
     const createAnother = createAnotherRef.current;
     createAnotherRef.current = false;
@@ -435,6 +524,47 @@ export function ProductForm({
     const costInCents = data.cost != null ? Math.round(data.cost * 100) : null;
     const skuValue = optionalTrimmed(data.sku);
 
+    // Validate variants against the same `variantSchema` the server uses,
+    // resolved the same way they'll actually be sent (price defaults to the
+    // base price in cents, same as the mutation payloads below) — variants
+    // live in useState rather than RHF, so without this a bad row (e.g. a
+    // negative price) only surfaces as a raw tRPC 400 instead of inline on
+    // the row. This is in addition to, not instead of, the $0 guard above:
+    // variantSchema's `.nonnegative()` allows exactly 0.
+    const variantsForValidation = variants.map((v) => ({
+      id: v.id,
+      name: v.name,
+      sku: v.sku ?? undefined,
+      price: v.price ?? priceInCents,
+      compareAtPrice: v.compareAtPrice ?? undefined,
+      inventoryQty: v.inventoryQty,
+      options: v.options,
+      imageUrl: v.imageUrl,
+    }));
+    const variantValidation = z
+      .array(variantSchema)
+      .safeParse(variantsForValidation);
+    if (!variantValidation.success) {
+      const rowErrors: Record<number, string> = {};
+      for (const issue of variantValidation.error.issues) {
+        const rowIndex = issue.path[0];
+        if (typeof rowIndex === "number" && !(rowIndex in rowErrors)) {
+          rowErrors[rowIndex] = issue.message;
+        }
+      }
+      setVariantErrors(rowErrors);
+      toast.error("Fix the highlighted variant(s) before saving.");
+      return;
+    }
+    setVariantErrors({});
+
+    // Objects freshly uploaded to S3 during THIS submit — if the save
+    // mutation below fails, these have nothing referencing them in the DB
+    // yet, so they're discarded via `upload.discardUploads` to avoid
+    // orphaning them (see useDeferredImageUpload's `discard` for the same
+    // pattern elsewhere).
+    const newlyUploadedUrls: string[] = [];
+
     // Resolve ogImage URL: upload new file, keep existing URL, or clear
     let resolvedOgImage: string | null;
     if (ogImageFile instanceof File) {
@@ -444,6 +574,7 @@ export function ProductForm({
           (response.file.objectInfo.metadata?.pathname as string | undefined) ??
           "";
         resolvedOgImage = fileLocation || null;
+        if (fileLocation) newlyUploadedUrls.push(fileLocation);
       } catch {
         toast.error("Failed to upload Open Graph image.");
         return;
@@ -480,6 +611,7 @@ export function ProductForm({
       for (const f of galleryResult.files) {
         fileToUrl.set(f.raw, getStoredPath(f));
       }
+      newlyUploadedUrls.push(...fileToUrl.values());
       resolvedImages = images.map((img, idx) => ({
         id: img.id,
         url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
@@ -507,50 +639,60 @@ export function ProductForm({
       // Update existing product
       imagesToSyncRef.current = resolvedImages;
 
-      await updateProductMutation.mutateAsync({
-        id: product.id,
-        name: data.name,
-        slug: data.slug,
-        description: data.description ?? undefined,
-        price: priceInCents,
-        compareAtPrice: compareAtPriceInCents,
-        cost: costInCents,
-        published: data.published,
-        featured: data.featured,
-        scheduledPublishAt:
-          !data.published && data.scheduledPublishAt
-            ? new Date(data.scheduledPublishAt)
-            : null,
-        sku: skuValue,
-        trackInventory: data.trackInventory,
-        allowBackorders: data.allowBackorders,
-        inventoryQty: data.inventoryQty ?? 0,
-        lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
-        baseInventoryUnitId: data.baseInventoryUnitId ?? null,
-        baseUnitsConsumed: data.baseUnitsConsumed ?? null,
-        variants: variants?.map((v) => ({
-          id: v.id,
-          name: v.name,
-          sku: v.sku ?? undefined,
-          price: v.price ?? priceInCents,
-          compareAtPrice: v.compareAtPrice ?? undefined,
-          inventoryQty: v.inventoryQty,
-          options: v.options,
-          imageUrl: resolveVariantImageUrl(v.imageUrl),
-        })),
-        additionalFields: {
-          additionalInformation: data.additionalFields?.additionalInformation,
-          productFeatures: data.additionalFields?.productFeatures ?? [],
-          comingSoon: data.additionalFields?.comingSoon ?? false,
-          productTagline: data.additionalFields?.productTagline ?? undefined,
-        },
-        metaTitle: data.metaTitle ?? null,
-        metaDescription: data.metaDescription ?? null,
-        metaKeywords: data.metaKeywords ?? null,
-        ogImage: resolvedOgImage ?? null,
-        weight: data.weight ?? null,
-        weightUnit: data.weightUnit ?? "lb",
-      });
+      try {
+        await updateProductMutation.mutateAsync({
+          id: product.id,
+          name: data.name,
+          slug: data.slug,
+          description: data.description ?? undefined,
+          price: priceInCents,
+          compareAtPrice: compareAtPriceInCents,
+          cost: costInCents,
+          published: data.published,
+          featured: data.featured,
+          scheduledPublishAt:
+            !data.published && data.scheduledPublishAt
+              ? new Date(data.scheduledPublishAt)
+              : null,
+          sku: skuValue,
+          trackInventory: data.trackInventory,
+          allowBackorders: data.allowBackorders,
+          inventoryQty: data.inventoryQty ?? 0,
+          lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
+          baseInventoryUnitId: data.baseInventoryUnitId ?? null,
+          baseUnitsConsumed: data.baseUnitsConsumed ?? null,
+          variants: variants?.map((v) => ({
+            id: v.id,
+            name: v.name,
+            sku: v.sku ?? undefined,
+            price: v.price ?? priceInCents,
+            compareAtPrice: v.compareAtPrice ?? undefined,
+            inventoryQty: v.inventoryQty,
+            options: v.options,
+            imageUrl: resolveVariantImageUrl(v.imageUrl),
+          })),
+          additionalFields: {
+            additionalInformation:
+              data.additionalFields?.additionalInformation,
+            productFeatures: data.additionalFields?.productFeatures ?? [],
+            comingSoon: data.additionalFields?.comingSoon ?? false,
+            productTagline: data.additionalFields?.productTagline ?? undefined,
+          },
+          metaTitle: data.metaTitle ?? null,
+          metaDescription: data.metaDescription ?? null,
+          metaKeywords: data.metaKeywords ?? null,
+          ogImage: resolvedOgImage ?? null,
+          weight: data.weight ?? null,
+          weightUnit: data.weightUnit ?? "lb",
+        });
+      } catch {
+        // onError on the mutation itself already toasted + mapped field
+        // errors; here we only need to clean up orphaned uploads and stop.
+        if (newlyUploadedUrls.length > 0) {
+          discardUploadsMutation.mutate({ urls: newlyUploadedUrls });
+        }
+        return;
+      }
 
       // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
       form.reset(data);
@@ -587,48 +729,59 @@ export function ProductForm({
       }
     } else {
       // Create new product
-      const response = await createProductMutation.mutateAsync({
-        name: data.name,
-        slug: data.slug,
-        description: data.description ?? undefined,
-        price: priceInCents,
-        published: data.published,
-        featured: data.featured,
-        scheduledPublishAt:
-          !data.published && data.scheduledPublishAt
-            ? new Date(data.scheduledPublishAt)
-            : null,
-        sku: skuValue,
-        trackInventory: data.trackInventory,
-        allowBackorders: data.allowBackorders,
-        inventoryQty: data.inventoryQty ?? 0,
-        lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
-        compareAtPrice: compareAtPriceInCents,
-        cost: costInCents,
-        baseInventoryUnitId: data.baseInventoryUnitId ?? null,
-        baseUnitsConsumed: data.baseUnitsConsumed ?? null,
-        variants: variants?.map((v) => ({
-          name: v.name,
-          sku: v.sku ?? undefined,
-          price: v.price ?? priceInCents,
-          compareAtPrice: v.compareAtPrice ?? undefined,
-          inventoryQty: v.inventoryQty,
-          options: v.options,
-          imageUrl: resolveVariantImageUrl(v.imageUrl),
-        })),
-        additionalFields: {
-          additionalInformation: data.additionalFields?.additionalInformation,
-          productFeatures: data.additionalFields?.productFeatures ?? [],
-          comingSoon: data.additionalFields?.comingSoon ?? false,
-          productTagline: data.additionalFields?.productTagline ?? "",
-        },
-        metaTitle: data.metaTitle ?? null,
-        metaDescription: data.metaDescription ?? null,
-        metaKeywords: data.metaKeywords ?? null,
-        ogImage: resolvedOgImage ?? null,
-        weight: data.weight ?? null,
-        weightUnit: data.weightUnit ?? "lb",
-      });
+      let response;
+      try {
+        response = await createProductMutation.mutateAsync({
+          name: data.name,
+          slug: data.slug,
+          description: data.description ?? undefined,
+          price: priceInCents,
+          published: data.published,
+          featured: data.featured,
+          scheduledPublishAt:
+            !data.published && data.scheduledPublishAt
+              ? new Date(data.scheduledPublishAt)
+              : null,
+          sku: skuValue,
+          trackInventory: data.trackInventory,
+          allowBackorders: data.allowBackorders,
+          inventoryQty: data.inventoryQty ?? 0,
+          lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
+          compareAtPrice: compareAtPriceInCents,
+          cost: costInCents,
+          baseInventoryUnitId: data.baseInventoryUnitId ?? null,
+          baseUnitsConsumed: data.baseUnitsConsumed ?? null,
+          variants: variants?.map((v) => ({
+            name: v.name,
+            sku: v.sku ?? undefined,
+            price: v.price ?? priceInCents,
+            compareAtPrice: v.compareAtPrice ?? undefined,
+            inventoryQty: v.inventoryQty,
+            options: v.options,
+            imageUrl: resolveVariantImageUrl(v.imageUrl),
+          })),
+          additionalFields: {
+            additionalInformation:
+              data.additionalFields?.additionalInformation,
+            productFeatures: data.additionalFields?.productFeatures ?? [],
+            comingSoon: data.additionalFields?.comingSoon ?? false,
+            productTagline: data.additionalFields?.productTagline ?? "",
+          },
+          metaTitle: data.metaTitle ?? null,
+          metaDescription: data.metaDescription ?? null,
+          metaKeywords: data.metaKeywords ?? null,
+          ogImage: resolvedOgImage ?? null,
+          weight: data.weight ?? null,
+          weightUnit: data.weightUnit ?? "lb",
+        });
+      } catch {
+        // onError on the mutation itself already toasted + mapped field
+        // errors; here we only need to clean up orphaned uploads and stop.
+        if (newlyUploadedUrls.length > 0) {
+          discardUploadsMutation.mutate({ urls: newlyUploadedUrls });
+        }
+        return;
+      }
 
       if (response.productId && resolvedImages.length > 0) {
         await syncImagesMutation.mutateAsync({
@@ -652,17 +805,30 @@ export function ProductForm({
 
       if (response.productId) {
         if (createAnother) {
-          form.reset();
+          // Revoke pending gallery blob: URLs before dropping them — the
+          // images we just uploaded are gone from `images` too, but those
+          // were already resolved to real S3 URLs above, not blob: ones.
+          imageUploaderRef.current?.reset();
+          form.reset(getNewProductDefaults());
           slugManuallyEditedRef.current = false;
           setImages([]);
           setVariants([]);
+          setVariantErrors({});
           setCollectionIds([]);
           setBaselineCollectionIds([]);
+          setCollectionSearch("");
+          setShowWeightAnyway(false);
           setOgImageFile(null);
           setOgImageRemoved(false);
+          if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
           setVariantManagerKey((k) => k + 1);
           setActiveTab("basics");
           window.scrollTo({ top: 0 });
+          // Replace the mutation's generic "Product created" toast (already
+          // shown by createProductMutation's onSuccess) with one that
+          // reflects what actually happens next.
+          toast.dismiss();
+          toast.success("Product created — add another");
         } else {
           router.push(`/admin/products/${response.productId}`);
         }
@@ -730,6 +896,9 @@ export function ProductForm({
     !!product &&
     watchedName.trim() !== product.name &&
     nameDerivedSlug !== watchedSlug;
+
+  const metaTitleLength = form.watch("metaTitle")?.length ?? 0;
+  const metaDescriptionLength = form.watch("metaDescription")?.length ?? 0;
 
   const watchedPrice = form.watch("price");
   const watchedCost = form.watch("cost");
@@ -843,9 +1012,18 @@ export function ProductForm({
                   <DropdownMenuItem
                     disabled={isSubmitting || !isDirty}
                     onClick={() => {
+                      // Discard any pending (blob:) gallery images and clear
+                      // the file input before reverting `images` — otherwise
+                      // their object URLs leak and re-selecting the same
+                      // file wouldn't fire a change event.
+                      imageUploaderRef.current?.reset();
                       form.reset();
                       slugManuallyEditedRef.current = false;
                       setCollectionIds(baselineCollectionIds);
+                      setImages([...initialImagesRef.current]);
+                      setVariants([...initialVariantsRef.current]);
+                      setVariantErrors({});
+                      setVariantManagerKey((k) => k + 1);
                       setOgImageFile(null);
                       setOgImageRemoved(false);
                       if (ogImageFileInputRef.current)
@@ -855,6 +1033,16 @@ export function ProductForm({
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Reset
                   </DropdownMenuItem>
+
+                  {product?.id && (
+                    <DropdownMenuItem
+                      disabled={isSubmitting || duplicateProductMutation.isPending}
+                      onClick={() => duplicateProductMutation.mutate(product.id)}
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Duplicate
+                    </DropdownMenuItem>
+                  )}
 
                   {product && (
                     <>
@@ -889,7 +1077,7 @@ export function ProductForm({
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
+                      <PlusCircle className="mr-2 h-4 w-4" />
                       <span className="hidden sm:inline">
                         Save &amp; create another
                       </span>
@@ -899,7 +1087,14 @@ export function ProductForm({
                 </Button>
               )}
 
-              <Button type="submit" size="sm" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => {
+                  createAnotherRef.current = false;
+                }}
+              >
                 {isSubmitting ? (
                   <>
                     <span className="saving-indicator" />
@@ -1237,6 +1432,7 @@ export function ProductForm({
                   <div className="col-span-1 space-y-4">
                     {/* Images */}
                     <ImageUploader
+                      ref={imageUploaderRef}
                       images={images}
                       onImagesChange={setImages}
                       maxImages={10}
@@ -1440,7 +1636,7 @@ export function ProductForm({
                 <VariantManager
                   key={variantManagerKey}
                   variants={variants}
-                  onChange={setVariants}
+                  onChange={handleVariantsChange}
                   trackInventory={form.watch("trackInventory")}
                   basePrice={Math.round((form.watch("price") || 0) * 100)}
                   existingVariantOptions={getExistingVariantOptions(
@@ -1449,6 +1645,7 @@ export function ProductForm({
                       | undefined,
                   )}
                   images={images}
+                  errors={variantErrors}
                 />
               </TabsContent>
 
@@ -1661,7 +1858,18 @@ export function ProductForm({
                           placeholder={
                             form.watch("name") || "e.g., Classic White T-Shirt"
                           }
-                          description={`${form.watch("metaTitle")?.length ?? 0}/60 characters — leave blank to use product name`}
+                          description={
+                            <span
+                              className={
+                                metaTitleLength > 60
+                                  ? "text-destructive"
+                                  : undefined
+                              }
+                            >
+                              {metaTitleLength}/60 characters — leave blank to
+                              use product name
+                            </span>
+                          }
                           descriptionClassName="text-xs text-muted-foreground"
                         />
 
@@ -1673,7 +1881,18 @@ export function ProductForm({
                             form.watch("description") ??
                             "e.g., Soft, breathable cotton tee perfect for everyday wear."
                           }
-                          description={`${form.watch("metaDescription")?.length ?? 0}/160 characters — leave blank to use product description`}
+                          description={
+                            <span
+                              className={
+                                metaDescriptionLength > 160
+                                  ? "text-destructive"
+                                  : undefined
+                              }
+                            >
+                              {metaDescriptionLength}/160 characters — leave
+                              blank to use product description
+                            </span>
+                          }
                           descriptionClassName="text-xs text-muted-foreground"
                           rows={3}
                         />

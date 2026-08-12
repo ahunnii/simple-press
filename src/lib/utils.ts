@@ -34,6 +34,15 @@ export function sanitizeSlugInput(text: string): string {
 }
 
 /**
+ * Round a dollar amount to whole cents, compensating for binary float error.
+ * A naive `Math.round(v * 100) / 100` gets 12.555 wrong: 12.555 * 100 is
+ * 1255.4999999999998, which rounds down to 12.55 instead of 12.56.
+ */
+export function roundToCents(value: number): number {
+  return Math.round(Number((value * 100).toPrecision(12))) / 100;
+}
+
+/**
  * Format currency for display
  * Example: 1999 -> "$19.99"
  */
