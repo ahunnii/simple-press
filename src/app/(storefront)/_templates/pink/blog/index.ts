@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Field/group/section registry for pink's `BlogPage` + `BlogPostPage` slots.
@@ -365,6 +366,7 @@ export const pinkBlogSections: TemplateSection[] = [
     groupIds: ["blog.featured"],
     order: 2,
     hideable: true,
+    links: [SECTION_LINKS.blog],
   },
   {
     id: "blog.grid",
@@ -374,6 +376,7 @@ export const pinkBlogSections: TemplateSection[] = [
     groupIds: ["blog.grid"],
     order: 3,
     hideable: false,
+    links: [SECTION_LINKS.blog],
   },
   {
     id: "blog.ask",

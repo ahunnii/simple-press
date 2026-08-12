@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Collections fields for the `pink` template — index AND detail pages,
@@ -402,6 +403,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
     groupIds: ["collections.featured"],
     order: 1,
     hideable: true,
+    links: [SECTION_LINKS.collections],
   },
   {
     id: "collections.grid",
@@ -411,6 +413,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
     groupIds: ["collections.grid"],
     order: 2,
     hideable: false,
+    links: [SECTION_LINKS.collections],
   },
   {
     id: "collections.next",
@@ -429,6 +432,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
     groupIds: ["collections.detail-hero"],
     order: 4,
     hideable: false,
+    links: [SECTION_LINKS.collections],
   },
   {
     id: "collections.detail-intro",
@@ -438,6 +442,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
     groupIds: ["collections.detail-intro"],
     order: 5,
     hideable: true,
+    links: [SECTION_LINKS.collections],
   },
   {
     id: "collections.detail-gallery",
@@ -456,6 +461,7 @@ export const pinkCollectionsSections: TemplateSection[] = [
     groupIds: ["collections.detail-grid"],
     order: 7,
     hideable: false,
+    links: [SECTION_LINKS.products, SECTION_LINKS.collections],
   },
   {
     id: "collections.detail-nav",

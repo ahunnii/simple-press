@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 
 import type { TemplateSection } from "~/lib/template-sections";
 import {
@@ -50,6 +50,9 @@ export type FieldPanelProps = {
   /** Whether the Media Library feature is enabled — gates the "Choose from
    *  library" picker on image/video fields. */
   mediaEnabled: boolean;
+  /** Feature-flag keys enabled for this business — hides links to disabled
+   *  admin surfaces in the "Related content" block. */
+  enabledFeatures: ReadonlySet<string>;
   /** Freeze inputs while publish/discard is settling (edits would race it). */
   disabled?: boolean;
   /** Close the panel (deselect the active section). */
@@ -72,6 +75,7 @@ export function FieldPanel({
   onFieldChange,
   embedsEnabled,
   mediaEnabled,
+  enabledFeatures,
   disabled = false,
   onClose,
   hint,
@@ -89,6 +93,13 @@ export function FieldPanel({
       : (byGroup[groupId] ?? []);
     return groupFields.length > 0;
   });
+
+  // Entity-backed sections (product rails, testimonials, blog…) point the
+  // owner at the admin surface that actually owns their content — the field
+  // panel only edits headings and copy.
+  const visibleLinks = (section.links ?? []).filter(
+    (link) => !link.featureKey || enabledFeatures.has(link.featureKey),
+  );
 
   return (
     <aside className="bg-card animate-in slide-in-from-right-8 fade-in flex w-[380px] shrink-0 flex-col border-l duration-200">
@@ -190,6 +201,39 @@ export function FieldPanel({
             </div>
           );
         })}
+
+        {visibleLinks.length > 0 && (
+          <div className="space-y-2 border-t pt-5">
+            <h3 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              Related content
+            </h3>
+            <div className="space-y-1">
+              {visibleLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  // New tab: same-tab navigation would leave the editor and
+                  // could drop an edit still inside the save debounce window.
+                  target="_blank"
+                  rel="noopener"
+                  className="hover:bg-accent focus-visible:ring-ring flex items-start gap-2 rounded-md px-2 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <ExternalLink className="text-muted-foreground mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">
+                      {link.label}
+                    </span>
+                    {link.description && (
+                      <span className="text-muted-foreground block text-xs">
+                        {link.description}
+                      </span>
+                    )}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

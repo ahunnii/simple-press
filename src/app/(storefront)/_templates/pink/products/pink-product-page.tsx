@@ -69,9 +69,9 @@ function parseProductSpecs(raw: unknown): { label: string; value: string }[] {
  * Product page — design.md → "Per-page section concepts → Product".
  *
  * Gallery + Details are fully DB-driven (no fields, no section — see the
- * "Page key note"). `global.product-panels` / `-story` / `-related` are the
- * only fielded sections, declared `page: "global"` since product pages have
- * no editor tab of their own.
+ * "Page key note"). `product.panels` / `.story` / `.related` are the only
+ * fielded sections, on `page: "product"` — the editor previews them on a
+ * sample product; field keys keep the legacy `pink.global.product-` prefix.
  */
 export async function PinkProductPage({ product, business }: DefaultProductPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
@@ -103,9 +103,9 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
   const panelsRows = parseTemplateListRows(customFields?.["pink.global.product-panels"]);
   const panels = panelsRows.length > 0 ? panelsRows : DEFAULT_PANELS;
 
-  const panelsVisible = isSectionVisible(customFields, "pink", "global.product-panels");
-  const storyVisible = isSectionVisible(customFields, "pink", "global.product-story");
-  const relatedVisible = isSectionVisible(customFields, "pink", "global.product-related");
+  const panelsVisible = isSectionVisible(customFields, "pink", "product.panels");
+  const storyVisible = isSectionVisible(customFields, "pink", "product.story");
+  const relatedVisible = isSectionVisible(customFields, "pink", "product.related");
 
   return (
     <>
@@ -211,13 +211,13 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
         </div>
       </section>
 
-      {/* ── global.product-panels ── */}
+      {/* ── product.panels ── */}
       {panelsVisible && (
         <section
           aria-labelledby="pink-product-panels-heading"
           className="border-t px-5 py-2 md:px-10"
           style={{ borderColor: "var(--pink-line)" }}
-          {...sectionGroupAttr("global", "product-panels")}
+          {...sectionGroupAttr("product", "panels")}
         >
           <div className="mx-auto max-w-[760px]">
             {/* `PinkAccordion` triggers are h3; without an h2 the outline went
@@ -238,9 +238,9 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
         </section>
       )}
 
-      {/* ── global.product-story ── */}
+      {/* ── product.story ── */}
       {storyVisible && (
-        <PinkDarkBand ariaLabel="How it's made" sectionAttrs={sectionGroupAttr("global", "product-story")}>
+        <PinkDarkBand ariaLabel="How it's made" sectionAttrs={sectionGroupAttr("product", "story")}>
           <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-14">
             {/* Unset → a designed dark-surface fallback (review 2026-07-29,
                 P1) rather than an empty ink-tint void. A light placeholder
@@ -281,12 +281,12 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
       {/* ── Reviews — flag-gated, no fields (see pink-product-reviews.tsx) ── */}
       <PinkProductReviewsSection productId={product.id} productName={product.name} />
 
-      {/* ── global.product-related ── */}
+      {/* ── product.related ── */}
       {relatedVisible && related.length > 0 && (
         <section
           aria-label="Related products"
           className="px-5 py-16 md:px-10"
-          {...sectionGroupAttr("global", "product-related")}
+          {...sectionGroupAttr("product", "related")}
         >
           <div className="mx-auto max-w-[1400px]">
             <div className="mb-8 flex items-end justify-between gap-4">

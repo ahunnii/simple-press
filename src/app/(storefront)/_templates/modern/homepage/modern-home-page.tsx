@@ -158,7 +158,9 @@ export async function ModernHomePage() {
             </Link>
           </div>
           <div className="mt-12">
-            <FeaturedProductsGrid products={homepage?.products ?? []} />
+            <FeaturedProductsGrid
+              products={(homepage?.products ?? []).slice(0, 4)}
+            />
           </div>
           <div className="mt-8 text-center md:hidden">
             <Link

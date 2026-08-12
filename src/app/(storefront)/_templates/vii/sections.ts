@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Curated section registry for the `vii` template — homepage, about, contact,
@@ -69,6 +70,7 @@ export const viiSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.productRail"],
       order: 4,
       hideable: false,
+      links: [SECTION_LINKS.products, SECTION_LINKS.collections],
     },
     {
       id: "homepage.testimonial",
@@ -78,6 +80,7 @@ export const viiSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.testimonial"],
       order: 5,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "homepage.brands",
@@ -96,6 +99,7 @@ export const viiSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.blog"],
       order: 7,
       hideable: true,
+      links: [SECTION_LINKS.blog],
     },
     {
       id: "homepage.instagram",

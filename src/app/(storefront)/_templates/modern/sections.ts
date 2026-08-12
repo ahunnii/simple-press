@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const modernSections: Record<string, TemplateSection[]> = {
   modern: [
@@ -27,6 +28,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Featured product grid pulled from your catalog.",
       groupIds: ["homepage.products"],
       order: 2,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.about",
@@ -133,6 +135,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the collections grid.",
       groupIds: ["collections.main"],
       order: 0,
+      links: [SECTION_LINKS.collections],
     },
 
     // Products / Shop (src/app/(storefront)/_templates/modern/shop/modern-products-page.tsx)
@@ -143,6 +146,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the shop's product grid.",
       groupIds: ["products.main"],
       order: 0,
+      links: [SECTION_LINKS.products],
     },
 
     // Testimonials (src/app/(storefront)/_templates/modern/testimonials/modern-testimonials-page.tsx)
@@ -153,6 +157,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the testimonial cards.",
       groupIds: ["testimonials.page"],
       order: 0,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "testimonials.call-to-action",
@@ -172,6 +177,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the blog listing.",
       groupIds: ["blog.header"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
   ],
 };

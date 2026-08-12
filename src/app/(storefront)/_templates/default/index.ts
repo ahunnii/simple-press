@@ -68,14 +68,21 @@ const globalAuthenticationData: TemplateField[] = [
   },
 ];
 
-const globalProductData: TemplateField[] = [
+/**
+ * Product-page defaults, applied to every product. These fields moved from
+ * page `"global"` to page `"product"` so the visual editor can preview them on
+ * a real product page — their KEYS intentionally keep the legacy
+ * `default.global.product-*` prefix, because `customFields` values are keyed
+ * purely by field key and renaming would orphan every owner-saved value.
+ */
+const productDetailsData: TemplateField[] = [
   {
     key: "default.global.product-shipping-description",
     label: "Product Shipping Description",
     description: "Description of the product shipping",
     type: "textarea",
-    page: "global",
-    group: "global.product",
+    page: "product",
+    group: "product.details",
     gridColumn: "col-span-full",
     defaultValue:
       "Ships within 1-2 business days. US orders over $75 ship free. International rates calculated at checkout. 30-day returns, no questions asked.",
@@ -86,8 +93,8 @@ const globalProductData: TemplateField[] = [
     label: "Product Question Description",
     description: "Description of the product question",
     type: "textarea",
-    page: "global",
-    group: "global.product",
+    page: "product",
+    group: "product.details",
     gridColumn: "col-span-full",
     defaultValue:
       "We answer most questions within a day. Contact us and we'll get back to you.",
@@ -98,8 +105,8 @@ const globalProductData: TemplateField[] = [
     description:
       "Default trust badges that get applied to all products, comes before the product's trust badges",
     type: "list",
-    page: "global",
-    group: "global.product",
+    page: "product",
+    group: "product.details",
     gridColumn: "col-span-full",
     itemSchema: [
       {
@@ -137,7 +144,7 @@ const fieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   },
   {
-    id: "global.product",
+    id: "product.details",
     title: "Product",
     description: "Product settings for your business",
     icon: "🏪",
@@ -158,7 +165,7 @@ export const defaultTemplateData = {
     ...defaultTestimonialsData,
     ...defaultVideosData,
     ...globalAuthenticationData,
-    ...globalProductData,
+    ...productDetailsData,
   ],
 };
 

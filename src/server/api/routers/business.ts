@@ -308,7 +308,9 @@ export const businessRouter = createTRPCRouter({
               select: { inventoryQty: true, allowBackorders: true },
             },
           },
-          take: 4,
+          // 8 so templates with two product rails (default, noise) can fill
+          // both; single-rail templates cap with their own slice(0, 4).
+          take: 8,
         },
       },
     });

@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 import type { RelocationIconRow, RelocationPhotoRow } from "./rows";
 
@@ -735,6 +736,7 @@ export const relocationHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.testimonials"],
     order: 6,
     hideable: true,
+    links: [SECTION_LINKS.testimonials],
   },
   {
     id: "homepage.gallery",

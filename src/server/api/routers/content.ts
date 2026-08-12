@@ -296,6 +296,31 @@ export const contentRouter = createTRPCRouter({
     }));
   }),
 
+  /**
+   * A representative product for the visual editor's "Product" page preview —
+   * the newest published product, or `null` when the business has none (or the
+   * `products` feature is off, in which case the editor hides the entry
+   * entirely). Flags resolve off the session-scoped business rather than
+   * `getBusinessFlags()` for the same reason as `getEditorPages` above.
+   */
+  getEditorProductPreview: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const flagRow = await ctx.db.business.findUnique({
+      where: { id: businessId },
+      select: { featureFlags: true },
+    });
+    if (!resolveFlags(flagRow?.featureFlags).isEnabled("products")) return null;
+
+    const product = await ctx.db.product.findFirst({
+      where: { businessId, published: true },
+      orderBy: { createdAt: "desc" },
+      select: { slug: true, name: true },
+    });
+
+    return product ?? null;
+  }),
+
   getSimplifiedPages: publicProcedure
     .input(
       z.object({

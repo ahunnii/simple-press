@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const darkTrendSections: Record<string, TemplateSection[]> = {
   "dark-trend": [
@@ -38,6 +39,7 @@ export const darkTrendSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.second-section"],
       order: 3,
       hideable: true,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.cta",
@@ -86,6 +88,7 @@ export const darkTrendSections: Record<string, TemplateSection[]> = {
       description: "Heading and intro for the blog index page.",
       groupIds: ["blog.listing"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
   ],
 };

@@ -80,6 +80,24 @@ function cmsAdminHref(p: EditorCmsPage): string {
     : `/admin/content/pages/${p.id}`;
 }
 
+/** The representative product previewed by the "product" page entry. */
+export type EditorProductPreview = { slug: string; name: string };
+
+/**
+ * Storefront path for a template page key. Every key except `"product"` has a
+ * static path; the product page previews a representative product, so its path
+ * depends on the resolved sample (and falls back to the homepage without one).
+ */
+function resolvePreviewPath(
+  page: string,
+  productPreview: EditorProductPreview | null,
+): string {
+  if (page === "product") {
+    return productPreview ? `/shop/${productPreview.slug}` : "/";
+  }
+  return PAGE_PREVIEW_PATHS[page] ?? "/";
+}
+
 export type VisualEditorProps = {
   businessId: string;
   businessName: string;
@@ -97,10 +115,18 @@ export type VisualEditorProps = {
    * only for display (top-bar groups, storefront path, admin deep link).
    */
   cmsPages: EditorCmsPage[];
+  /**
+   * Representative product for the "Product" page entry — the newest published
+   * product, or null when the business has none (or `products` is off). Null
+   * hides the entry entirely and clamps `?page=product` deep links.
+   */
+  productPreview: EditorProductPreview | null;
   /** All sections for the active template (all pages, template order). */
   sections: TemplateSection[];
   embedsEnabled: boolean;
   mediaEnabled: boolean;
+  /** Feature-flag keys enabled for this business — filters field-panel admin links. */
+  enabledFeatures: string[];
   /** Deep-link initial page (defaults to "homepage"). */
   initialPage: string;
   /** Deep-link initial section id, or null. */
@@ -204,19 +230,42 @@ export function VisualEditor({
   previewCustomFields,
   hasDraft,
   cmsPages,
+  productPreview,
   sections,
   embedsEnabled,
   mediaEnabled,
+  enabledFeatures,
   initialPage,
   initialSection,
   isPlatformAdmin,
 }: VisualEditorProps) {
-  // Selectable pages: page keys that have both template fields and a preview path.
+  /**
+   * Whether a template page key can be shown in the preview iframe. Static
+   * paths come from `PAGE_PREVIEW_PATHS`; `"product"` is previewable only when
+   * a representative product exists, so templates with product-page fields but
+   * a business with none published never offer it.
+   */
+  const isPreviewablePage = useCallback(
+    (key: string) =>
+      key in PAGE_PREVIEW_PATHS ||
+      (key === "product" && productPreview !== null),
+    [productPreview],
+  );
+
+  // Selectable pages: page keys that have both template fields and a preview
+  // path. `groupFieldsByPage` only yields keys the template declares fields
+  // for, so "product" appears only on templates migrated to product-page
+  // fields AND businesses with a previewable product.
   const pages: EditorTopBarPage[] = useMemo(() => {
     return Object.keys(groupFieldsByPage(templateId))
-      .filter((key) => key in PAGE_PREVIEW_PATHS)
+      .filter((key) => isPreviewablePage(key))
       .map((key) => ({ value: key, label: pageLabel(key) }));
-  }, [templateId]);
+  }, [templateId, isPreviewablePage]);
+
+  const enabledFeatureSet = useMemo(
+    () => new Set(enabledFeatures),
+    [enabledFeatures],
+  );
 
   // Field type lookup — text/textarea fields get the live-patch fast path.
   const fieldTypeByKey = useMemo(() => {
@@ -245,7 +294,7 @@ export function VisualEditor({
   const initialSectionObj =
     deepLinkedSection &&
     (deepLinkedSection.page === "global" ||
-      deepLinkedSection.page in PAGE_PREVIEW_PATHS)
+      isPreviewablePage(deepLinkedSection.page))
       ? deepLinkedSection
       : null;
   const clampedInitialPage =
@@ -255,9 +304,9 @@ export function VisualEditor({
       ? initialPage
       : initialSectionObj &&
           initialSectionObj.page !== "global" &&
-          initialSectionObj.page in PAGE_PREVIEW_PATHS
+          isPreviewablePage(initialSectionObj.page)
         ? initialSectionObj.page
-        : initialPage in PAGE_PREVIEW_PATHS
+        : isPreviewablePage(initialPage)
           ? initialPage
           : defaultPage;
 
@@ -891,7 +940,14 @@ export function VisualEditor({
 
   const previewPath = activeCmsPage
     ? cmsPreviewPath(activeCmsPage)
-    : (PAGE_PREVIEW_PATHS[activePage] ?? "/");
+    : resolvePreviewPath(activePage, productPreview);
+
+  // The product page previews ONE sample product — say so, so an owner never
+  // reads a per-product edit into what is really a site-wide default.
+  const previewNotice =
+    !activeCmsPage && activePage === "product" && productPreview
+      ? `Previewing "${productPreview.name}" — changes here apply to every product page`
+      : undefined;
 
   // Human label for the active page — template label, or CMS draft title.
   const activePageLabel = useMemo(() => {
@@ -1072,14 +1128,14 @@ export function VisualEditor({
         setActiveSectionId(group);
         return;
       }
-      if (page !== activePage && page in PAGE_PREVIEW_PATHS) {
+      if (page !== activePage && isPreviewablePage(page)) {
         setActivePage(page);
       }
       setNotesOpen(false);
       setThemeOpen(false);
       setActiveSectionId(group);
     },
-    [activePage, activeCmsPage, sections],
+    [activePage, activeCmsPage, sections, isPreviewablePage],
   );
 
   const handleSelectTheme = useCallback(() => {
@@ -1156,6 +1212,7 @@ export function VisualEditor({
           path={previewPath}
           width={DEVICE_WIDTHS[device]}
           isUpdating={isUpdating}
+          notice={previewNotice}
           onEditGroup={handleEditGroup}
           onPatched={handlePatched}
           frameRef={previewRef}
@@ -1200,6 +1257,7 @@ export function VisualEditor({
             onFieldChange={applyFieldUpdate}
             embedsEnabled={embedsEnabled}
             mediaEnabled={mediaEnabled}
+            enabledFeatures={enabledFeatureSet}
             disabled={isPublishing || mutationPending}
             onClose={() => setActiveSectionId(null)}
             hint={

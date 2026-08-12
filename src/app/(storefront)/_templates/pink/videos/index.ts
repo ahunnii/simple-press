@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Videos page (`/videos`) fields for the `pink` template.
@@ -198,6 +199,7 @@ export const pinkVideosSections: TemplateSection[] = [
     groupIds: ["videos.list"],
     order: 1,
     hideable: false,
+    links: [SECTION_LINKS.videos],
   },
   {
     id: "videos.cta",

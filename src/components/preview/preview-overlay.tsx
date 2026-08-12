@@ -27,6 +27,20 @@ function isPreviewFrame() {
 }
 
 /**
+ * Walks up from `target` to the nearest ancestor carrying `data-sp-group`
+ * (an annotated, click-to-edit section). Shared by the hover/highlight
+ * listener and the dead-zone click listener below.
+ */
+function findGroup(target: EventTarget | null): HTMLElement | null {
+  let el = target as HTMLElement | null;
+  while (el && el !== document.body) {
+    if (el.dataset?.spGroup) return el;
+    el = el.parentElement;
+  }
+  return null;
+}
+
+/**
  * Preview overlay — renders hover/click hotspots over `[data-sp-group]` sections.
  * Safe to mount in the always-rendered storefront layout — self-disables for normal
  * visitors (not in an iframe with `?__preview=1`).
@@ -47,8 +61,10 @@ export function PreviewOverlay() {
 
   const [hovered, setHovered] = useState<Hotspot | null>(null);
   const [pulsing, setPulsing] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
   const raftRef = useRef<number | null>(null);
   const prefersReducedRef = useRef(false);
+  const hintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Detect whether we're running inside a preview iframe.
   useEffect(() => {
@@ -130,15 +146,6 @@ export function PreviewOverlay() {
   useEffect(() => {
     if (!isPreviewFrame()) return;
 
-    function findGroup(target: EventTarget | null): HTMLElement | null {
-      let el = target as HTMLElement | null;
-      while (el && el !== document.body) {
-        if (el.dataset?.spGroup) return el;
-        el = el.parentElement;
-      }
-      return null;
-    }
-
     function onMouseOver(e: MouseEvent) {
       // Ignore events over our own highlight button so it doesn't flicker
       // (the button sits on top of the section but isn't a [data-sp-group]).
@@ -171,6 +178,72 @@ export function PreviewOverlay() {
     };
   }, []);
 
+  // Show a transient dead-zone hint; repeat clicks reset the auto-dismiss timer.
+  const showHint = useCallback((message: string) => {
+    if (hintTimeoutRef.current !== null) clearTimeout(hintTimeoutRef.current);
+    setHint(message);
+    hintTimeoutRef.current = setTimeout(() => {
+      setHint(null);
+      hintTimeoutRef.current = null;
+    }, 2500);
+  }, []);
+
+  // Delegated bubble-phase click listener for the dead-zone catch-all.
+  // NEVER calls preventDefault/stopPropagation — it only classifies clicks
+  // that have already fully resolved (including any preventDefault() from
+  // the capture-phase nav guard in preview-frame.tsx) and shows a transient
+  // hint when appropriate.
+  //
+  // Decision chain:
+  //   1. Hotspot highlight button ([data-sp-overlay]) → it handles its own click.
+  //   2. Inside an annotated [data-sp-group] section → hotspot owns it.
+  //   3. event.defaultPrevented → the nav guard blocked an internal link.
+  //   4. Interactive element (a, button, [role=button], input, select,
+  //      textarea, label, summary, [contenteditable]) → keeps working, no hint.
+  //   5. Active text selection → tail end of a selection drag, not a dead click.
+  //   6. Otherwise → non-editable page content.
+  useEffect(() => {
+    if (!isPreviewFrame()) return;
+
+    function onClick(e: MouseEvent) {
+      const target = e.target as HTMLElement | null;
+
+      if (target?.closest?.("[data-sp-overlay]")) return;
+
+      if (findGroup(target)) return;
+
+      if (e.defaultPrevented) {
+        showHint(
+          "Page links are turned off here — use the page menu at the top of the editor.",
+        );
+        return;
+      }
+
+      if (
+        target?.closest?.(
+          "a, button, [role=button], input, select, textarea, label, summary, [contenteditable]",
+        )
+      ) {
+        return;
+      }
+
+      if (window.getSelection()?.toString()) return;
+
+      showHint(
+        "This part of the page isn't editable here. Want it changed? Leave a note for your site team.",
+      );
+    }
+
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+      if (hintTimeoutRef.current !== null) {
+        clearTimeout(hintTimeoutRef.current);
+        hintTimeoutRef.current = null;
+      }
+    };
+  }, [showHint]);
+
   function sendEditGroup(groupId: string) {
     const page = groupId.split(".")[0];
     if (!page) return;
@@ -189,8 +262,14 @@ export function PreviewOverlay() {
     if (!isPreviewFrame()) return;
     const els = document.querySelectorAll<HTMLElement>("[data-sp-group]");
     const groups: Array<{ id: string; label: string }> = [];
+    // Dedupe by group id — templates may annotate several elements with the
+    // same section (e.g. header + footer both carry global.branding), but one
+    // companion button per section is enough and duplicate ids break React keys.
+    const seen = new Set<string>();
     els.forEach((el) => {
       const id = el.dataset.spGroup ?? "";
+      if (!id || seen.has(id)) return;
+      seen.add(id);
       const label = id.split(".").pop() ?? id;
       groups.push({ id, label });
     });
@@ -294,6 +373,33 @@ export function PreviewOverlay() {
           </button>
         ))}
       </div>
+
+      {/* Dead-zone catch-all hint — transient, non-interactive */}
+      {hint && (
+        <div
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10000,
+            pointerEvents: "none",
+            maxWidth: "min(90vw, 420px)",
+            textAlign: "center",
+            background: "rgba(17, 17, 17, 0.92)",
+            color: "#fff",
+            fontSize: "12px",
+            lineHeight: 1.4,
+            padding: "8px 14px",
+            borderRadius: "9999px",
+            boxShadow: "0 4px 14px rgba(0, 0, 0, 0.3)",
+            transition: prefersReducedRef.current ? "none" : "opacity 0.15s ease",
+          }}
+        >
+          {hint}
+        </div>
+      )}
 
       <style>{`
         @keyframes sp-pulse {

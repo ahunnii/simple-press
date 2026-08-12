@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Homepage fields for the `pink` template.
@@ -800,6 +801,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.collection"],
     order: 2,
     hideable: true,
+    links: [SECTION_LINKS.products],
   },
   // Array position, not just `order`, is what the editor rail renders — this
   // entry sits third so the rail matches the page: the Make & Takes explainer
@@ -822,6 +824,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.upcoming"],
     order: 4,
     hideable: true,
+    links: [SECTION_LINKS.events],
   },
   // Below the Make & Takes and Upcoming bands, not above them: the clips are
   // the evidence for the claims those bands make, so the page argues and then
@@ -834,6 +837,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.videos"],
     order: 5,
     hideable: true,
+    links: [SECTION_LINKS.videos],
   },
   {
     id: "homepage.story",

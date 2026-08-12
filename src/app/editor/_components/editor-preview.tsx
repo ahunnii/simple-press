@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, RefreshCw } from "lucide-react";
+import { ExternalLink, Info, RefreshCw } from "lucide-react";
 
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import { PreviewFrame } from "~/components/preview/preview-frame";
@@ -22,6 +22,11 @@ export type EditorPreviewProps = {
   width: string;
   /** Whether a draft flush is in-flight — drives the shimmer overlay. */
   isUpdating: boolean;
+  /**
+   * Optional context line about what the canvas is showing (e.g. which sample
+   * product the product page previews). Rendered as a pill over the canvas.
+   */
+  notice?: string;
   /** Fired when a preview hotspot is clicked inside the iframe. */
   onEditGroup: (page: string, group: string) => void;
   /** Fired when the iframe acks a live text patch. */
@@ -41,6 +46,7 @@ export function EditorPreview({
   path,
   width,
   isUpdating,
+  notice,
   onEditGroup,
   onPatched,
   frameRef,
@@ -55,6 +61,15 @@ export function EditorPreview({
 
   return (
     <div className="bg-muted/40 relative flex min-w-0 flex-1 justify-center overflow-auto p-6">
+      {notice && (
+        <p
+          title={notice}
+          className="bg-card/90 text-muted-foreground absolute top-3 left-1/2 z-10 flex max-w-[min(28rem,60%)] -translate-x-1/2 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs shadow-sm backdrop-blur"
+        >
+          <Info className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <span className="truncate">{notice}</span>
+        </p>
+      )}
       <div className="bg-card/90 absolute top-3 right-3 z-10 flex items-center gap-1 rounded-lg border p-0.5 shadow-sm backdrop-blur">
         <Button
           type="button"

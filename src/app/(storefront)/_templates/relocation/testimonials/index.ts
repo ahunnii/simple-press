@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Reviews (`/testimonials`) field module for `relocation` (Handy
@@ -129,5 +130,6 @@ export const relocationTestimonialsSections: TemplateSection[] = [
     groupIds: ["testimonials.list"],
     order: 1,
     hideable: false,
+    links: [SECTION_LINKS.testimonials],
   },
 ];

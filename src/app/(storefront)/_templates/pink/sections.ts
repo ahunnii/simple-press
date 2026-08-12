@@ -18,7 +18,7 @@ import { pinkVideosSections } from "./videos";
 
 /**
  * Curated section registry for the `pink` template, merged in page order:
- * homepage → about → shop → product (page "global") → collections → services →
+ * homepage → about → shop → product → collections → services →
  * events → videos → blog → testimonials → contact → cart/checkout → global
  * chrome.
  *

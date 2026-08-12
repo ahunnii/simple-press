@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Events index page (`/events`) fields for the `pink` template.
@@ -230,6 +231,7 @@ export const pinkEventsSections: TemplateSection[] = [
     groupIds: ["events.list"],
     order: 1,
     hideable: false,
+    links: [SECTION_LINKS.events],
   },
   {
     id: "events.cta",

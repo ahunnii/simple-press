@@ -3,6 +3,7 @@ import type {
   TemplateFieldGroup,
 } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Field / group / section module for the `pink` template's Testimonials
@@ -278,6 +279,7 @@ export const pinkTestimonialsSections: TemplateSection[] = [
     groupIds: ["testimonials.featured"],
     order: 1,
     hideable: true,
+    links: [SECTION_LINKS.testimonials],
   },
   {
     id: "testimonials.grid",
@@ -287,6 +289,7 @@ export const pinkTestimonialsSections: TemplateSection[] = [
     groupIds: ["testimonials.grid"],
     order: 2,
     hideable: false,
+    links: [SECTION_LINKS.testimonials],
   },
   {
     id: "testimonials.press",

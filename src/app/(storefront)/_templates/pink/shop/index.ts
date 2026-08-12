@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Shop-page fields for the `pink` template.
@@ -224,5 +225,6 @@ export const pinkShopSections: TemplateSection[] = [
     groupIds: ["shop.grid"],
     order: 2,
     hideable: false,
+    links: [SECTION_LINKS.products],
   },
 ];

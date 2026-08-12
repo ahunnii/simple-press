@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const happyBambooSections: Record<string, TemplateSection[]> = {
   "happy-bamboo": [
@@ -25,6 +26,7 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       title: "Featured Products",
       groupIds: ["homepage.featured"],
       order: 2,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.benefits",
@@ -43,6 +45,7 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.testimonials"],
       order: 4,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "homepage.cta",
@@ -130,6 +133,7 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       title: "Collections Listing",
       groupIds: ["collections.listing"],
       order: 0,
+      links: [SECTION_LINKS.collections],
     },
     {
       id: "collections.cta",
@@ -148,6 +152,7 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       title: "Shop Listing",
       groupIds: ["shop.listing"],
       order: 0,
+      links: [SECTION_LINKS.products],
     },
 
     // Blog
@@ -157,6 +162,7 @@ export const happyBambooSections: Record<string, TemplateSection[]> = {
       title: "Blog Listing",
       groupIds: ["blog.listing"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
     {
       id: "blog.post",
