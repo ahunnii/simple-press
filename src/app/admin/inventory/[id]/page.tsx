@@ -98,7 +98,7 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
         {unavailable && (
           // Same amber treatment the platform already uses for a
           // "needs attention, not broken" banner (see the INFORM Act
-          // threshold alert on /admin/payments) — `destructive` would claim
+          // threshold alert on /admin/finances) — `destructive` would claim
           // the shelf is empty, which `isOutOfStock` already covers below.
           <Alert variant="warning" className="mb-6">
             <AlertTriangle className="h-4 w-4" />

@@ -13,7 +13,9 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 
+import { InformAlerts, InformComplianceCard } from "./inform-compliance";
 import { RangeSelector } from "./range-selector";
+import { RecentPayouts } from "./recent-payouts";
 
 type Data = RouterOutputs["finance"]["getBreakdown"];
 
@@ -53,8 +55,18 @@ function StatTile({
 }
 
 export function FinanceBreakdown({ data }: { data: Data }) {
-  const { range, orders, stripe, taxCollectedYtdCents, stripeAutoTaxEnabled, isStripeConnected, stripeError } =
-    data;
+  const {
+    range,
+    orders,
+    stripe,
+    taxCollectedYtdCents,
+    stripeAutoTaxEnabled,
+    isStripeConnected,
+    stripeError,
+    inform,
+    stripeDetailsSubmitted,
+    recentPayouts,
+  } = data;
 
   return (
     <div className="admin-container space-y-6">
@@ -67,6 +79,11 @@ export function FinanceBreakdown({ data }: { data: Data }) {
         </div>
         <RangeSelector current={range.key} basePath="/admin/finances" />
       </div>
+
+      <InformAlerts
+        inform={inform}
+        stripeDetailsSubmitted={stripeDetailsSubmitted}
+      />
 
       {/* Card 1 — Money in */}
       <Card>
@@ -266,6 +283,20 @@ export function FinanceBreakdown({ data }: { data: Data }) {
         </CardContent>
       </Card>
 
+      {/* Recent payouts */}
+      <RecentPayouts
+        recentPayouts={recentPayouts}
+        isStripeConnected={isStripeConnected}
+      />
+
+      {/* INFORM Act compliance card — deep-link target for the alerts above */}
+      <div id="inform" className="scroll-mt-20">
+        <InformComplianceCard
+          inform={inform}
+          stripeDetailsSubmitted={stripeDetailsSubmitted}
+        />
+      </div>
+
       {/* Card 3 — Set aside */}
       <Card>
         <CardHeader>
@@ -305,7 +336,7 @@ export function FinanceBreakdown({ data }: { data: Data }) {
                 Without Stripe Tax enabled, checkout may not be collecting the
                 correct amount of sales tax in every jurisdiction you sell
                 to. Review your{" "}
-                <Link href="/admin/settings/tax" className="underline underline-offset-2">
+                <Link href="/admin/finances/tax-guide" className="underline underline-offset-2">
                   tax settings
                 </Link>
                 .
@@ -316,7 +347,7 @@ export function FinanceBreakdown({ data }: { data: Data }) {
           <p className="text-muted-foreground text-xs">
             Sales tax isn&apos;t your money — you collect it on the state&apos;s
             behalf and remit it. See the{" "}
-            <Link href="/admin/settings/tax" className="underline underline-offset-2">
+            <Link href="/admin/finances/tax-guide" className="underline underline-offset-2">
               tax guide
             </Link>{" "}
             for nexus thresholds and remittance steps.

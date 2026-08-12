@@ -6,7 +6,6 @@ import {
   IconBrush,
   IconCalendarEvent,
   IconChartBar,
-  IconCreditCard,
   IconDashboard,
   IconDatabaseExport,
   IconDiscount,
@@ -199,15 +198,6 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["OWNER", "MANAGER", "STAFF"],
     keywords: ["buyers", "shoppers"],
   },
-  {
-    key: "payments",
-    title: "Payments",
-    href: "/admin/payments",
-    icon: IconCreditCard,
-    section: "sell",
-    featureKey: "payments",
-    keywords: ["stripe", "payouts", "balance"],
-  },
 
   // Catalog
   {
@@ -357,7 +347,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconReportMoney,
     section: "insights",
     featureKey: "payments",
-    keywords: ["revenue", "tax", "fees", "stripe", "profit", "breakdown", "money"],
+    keywords: ["revenue", "tax", "fees", "stripe", "profit", "breakdown", "money", "payouts", "balance", "payments", "inform"],
   },
 
   // Platform (PLATFORM_ADMIN only — gated in sidebar rendering). Points at
@@ -408,16 +398,6 @@ export const HUB_CARDS: HubCard[] = [
     hub: "settings",
     color: "cyan",
     icon: Clock,
-  },
-  {
-    key: "settings-tax",
-    title: "Tax Guide",
-    description: "Sales tax, Stripe Tax, nexus guide",
-    body: "Understand your tax obligations and how to enable Stripe Tax",
-    href: "/admin/settings/tax",
-    hub: "settings",
-    color: "yellow",
-    icon: IconReceiptTax,
   },
   {
     key: "settings-domain",
@@ -727,5 +707,13 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     href: "/admin/settings/general",
     icon: Wrench,
     keywords: ["general", "info", "business"],
+  },
+  {
+    key: "tax-guide",
+    title: "Tax Guide",
+    href: "/admin/finances/tax-guide",
+    icon: IconReceiptTax,
+    featureKey: "payments",
+    keywords: ["tax", "nexus", "stripe tax", "sales tax", "inform"],
   },
 ];

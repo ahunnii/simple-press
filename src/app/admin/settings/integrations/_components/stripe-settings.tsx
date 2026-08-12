@@ -240,7 +240,7 @@ export function StripeSettings({
                     first, or this toggle will reject the change and tell you
                     why.{" "}
                     <Link
-                      href="/admin/settings/tax"
+                      href="/admin/finances/tax-guide"
                       className="underline underline-offset-2"
                     >
                       Set up taxes →

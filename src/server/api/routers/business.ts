@@ -1,5 +1,4 @@
 import type { Prisma } from "generated/prisma";
-import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -608,100 +607,6 @@ export const businessRouter = createTRPCRouter({
     return business;
   }),
 
-  getPaymentsOverview: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-
-    const business = await ctx.db.business.findFirst({
-      where: { id: businessId },
-      select: { stripeAccountId: true },
-    });
-
-    // Annual order stats — current calendar year. INFORM Act thresholds
-    // measure transactions conducted, not revenue currently retained: an
-    // order that was paid counts even if it was later refunded or disputed,
-    // while an order that was never paid (pending/unpaid/failed) does not.
-    // This is gross, not net of refunds — deliberately different from the
-    // dashboard's revenue convention (paid-only, net of refunds).
-    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-    const orderStats = await ctx.db.order.aggregate({
-      where: {
-        businessId,
-        createdAt: { gte: startOfYear },
-        paymentStatus: { in: ["paid", "refunded", "disputed"] },
-      },
-      _count: { id: true },
-      _sum: { total: true },
-    });
-
-    const annualTransactions = orderStats._count.id;
-    const annualRevenueCents = orderStats._sum.total ?? 0;
-    // INFORM Act: 200+ transactions OR $5,000+ (500000 cents) annual revenue
-    const informActThresholdReached =
-      annualTransactions >= 200 || annualRevenueCents >= 500000;
-
-    let stripeDetailsSubmitted = false;
-    let stripeBalance: {
-      available: { amount: number; currency: string }[];
-      pending: { amount: number; currency: string }[];
-    } | null = null;
-    let recentPayouts:
-      | {
-          id: string;
-          amount: number;
-          currency: string;
-          status: string;
-          arrival_date: number;
-        }[]
-      | null = null;
-
-    const accountId = business?.stripeAccountId;
-    if (accountId) {
-      try {
-        const [balance, payouts, account] = await Promise.all([
-          stripeClient.balance.retrieve({ stripeAccount: accountId }),
-          stripeClient.payouts.list({ limit: 5 }, { stripeAccount: accountId }),
-          stripeClient.accounts.retrieve(accountId),
-        ]);
-
-        stripeDetailsSubmitted = account.details_submitted ?? false;
-        stripeBalance = {
-          available: balance.available.map((b) => ({
-            amount: b.amount,
-            currency: b.currency,
-          })),
-          pending: balance.pending.map((b) => ({
-            amount: b.amount,
-            currency: b.currency,
-          })),
-        };
-        recentPayouts = payouts.data.map((p) => ({
-          id: p.id,
-          amount: p.amount,
-          currency: p.currency,
-          status: p.status,
-          arrival_date: p.arrival_date,
-        }));
-      } catch (err) {
-        Sentry.captureException(err, {
-          tags: {
-            "trpc.procedure": "business.getPaymentsOverview",
-            service: "stripe",
-          },
-        });
-        // Non-fatal — return partial data
-      }
-    }
-
-    return {
-      annualTransactions,
-      annualRevenueCents,
-      informActThresholdReached,
-      stripeDetailsSubmitted,
-      stripeBalance,
-      recentPayouts,
-      isStripeConnected: !!accountId,
-    };
-  }),
 
   updateStripeSettings: ownerAdminProcedure
     .input(z.object({ stripeAutoTaxEnabled: z.boolean() }))
