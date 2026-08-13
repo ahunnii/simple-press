@@ -186,8 +186,19 @@ const formShippingAddressSchema = z.object({
 });
 
 /**
- * One line item on a manual order. Money is in **cents**, taken from the product
- * record — never typed by the admin — so there is no dollar/cent ambiguity here.
+ * One line item on a manual order. Money is in **cents**.
+ *
+ * `price` IS typed by the admin, not looked up server-side from the product
+ * record — `order.createManual` multiplies this client-supplied figure by
+ * `quantity` to derive each line's total (see `computeManualOrderTotals`).
+ * That is intentional, not a hole: `manualOrderInputSchema` only reaches
+ * `order.createManual`, an `ownerAdminProcedure` mutation, so the caller is
+ * already a trusted business owner/manager recording a real-world sale (phone
+ * order, in-person sale, backdated import) whose price may legitimately
+ * differ from the current product record — a discount given verbally, a price
+ * that has since changed, etc. This is unlike checkout, where prices are
+ * always looked up server-side from the DB because the caller there is an
+ * untrusted shopper (see `create-session/route.ts`).
  *
  * `productId` is required (`.min(1)`), unlike the nullable `OrderItem.productId`
  * column. The column is nullable so an item survives its product being deleted;
@@ -197,7 +208,9 @@ const formShippingAddressSchema = z.object({
  * and surfaced as an unhandled Prisma P2003 (a 500, not a validation error).
  *
  * There is no `total` field: the server derives it as `price * quantity` rather
- * than trusting a client-supplied figure.
+ * than trusting a client-supplied total figure — see the module-level docblock
+ * on `manualOrderInputSchema` below for what "totals are server-derived" means
+ * in practice (no `subtotal`/`total` fields at all, both computed from `items`).
  */
 const manualOrderItemSchema = z.object({
   productId: z.string().min(1, "Pick a product"),

@@ -17,7 +17,9 @@ import {
 } from "./pollen-testimonial-card";
 
 type Props = {
-  testimonials: RouterOutputs["testimonial"]["list"];
+  // `listRandom` is the PII-stripped public projection; `list` rows are a
+  // superset and remain assignable (see PollenTestimonial in the card).
+  testimonials: RouterOutputs["testimonial"]["listRandom"];
   sectionLabel?: string;
   sectionHeading?: string;
   viewAllText?: string;

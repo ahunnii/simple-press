@@ -1,8 +1,15 @@
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { buildGalleryExternalUsage } from "~/lib/media/usage";
+import {
+  buildGalleryExternalUsage,
+  buildUsedMediaIndex,
+  isAlwaysInUseKey,
+  normalizeUrl,
+} from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
+import { publicUrlToKey } from "~/lib/s3/url";
 import { generateGallerySlug } from "~/lib/slug";
 import {
   galleryCreateSchema,
@@ -19,6 +26,81 @@ import {
   ownerAdminProcedure,
   publicProcedure,
 } from "../trpc";
+
+/**
+ * Deletes the given S3 objects, but only those that NOTHING in the business
+ * still references. Call AFTER the owning GalleryImage rows are removed — the
+ * index is built fresh here, so the caller's just-deleted rows are already
+ * absent from it while every surviving reference still shows up. That ordering
+ * is what makes this correct; do not hoist the scan above the delete.
+ *
+ * This replaces a `galleryImage.count({ where: { url } })` check, which only
+ * ever asked "does another GALLERY still show this image?". That was the case it
+ * was written for (`gallery.duplicate` copies image URLs BY REFERENCE, so
+ * deleting a duplicate must not destroy the original's files) but it missed the
+ * larger one: the same S3 object can also be attached to a product, a variant, a
+ * collection, a service, a page, a template field, a testimonial or a review.
+ * Two paths reach that today — `MediaPickerDialog` hands back an existing
+ * object's URL, and store-transfer import content-addresses by SHA-256 so
+ * identical bytes collapse onto one shared key. Removing one image from a
+ * gallery could therefore destroy a file a product page was still displaying.
+ * `buildUsedMediaIndex` is the platform's one authority on "who references this
+ * object" (it gates the Media Library's own delete, and `gallery.delete`'s
+ * CONFLICT guard reaches it through `buildGalleryExternalUsage`), so this defers
+ * to it rather than growing a second, always-behind copy of that knowledge.
+ *
+ * Mirrors `deleteUnreferencedImageObjects` in
+ * `src/server/api/routers/product.ts` — same semantics, same three deliberate
+ * strictnesses: `inactiveTemplate` usages still count as references (nothing
+ * here scrubs the stale field values, so honouring the flag would leave a
+ * switched-away template pointing at a 404), objects outside `{businessId}/` are
+ * never touched (the index is business-scoped, so a foreign tenant's object
+ * would look unreferenced here), and logo/favicon fixed-key objects are never
+ * touched (`isAlwaysInUseKey`, matching the media router's hard protection —
+ * reachable here because MediaPicker can drop the logo into a gallery).
+ *
+ * Non-storage URLs are skipped rather than handed to `deleteStoredObjects`,
+ * which would only log an "unrecognised URL shape" error to Sentry.
+ *
+ * Best-effort (`deleteStoredObjects` never throws).
+ */
+async function deleteUnreferencedGalleryObjects(
+  businessId: string,
+  urls: string[],
+) {
+  const unique = [
+    ...new Set(urls.filter((u): u is string => !!u).map(normalizeUrl)),
+  ];
+  if (unique.length === 0) return;
+
+  // One scan for the whole batch — callers must pass every candidate URL in a
+  // single call rather than looping (this scan touches a dozen tables).
+  //
+  // If the scan itself fails we do NOT fall back to deleting: without the index
+  // there is no evidence the objects are unreferenced, and an orphaned file is
+  // recoverable (the Media Library lists and deletes it) while a wrongly deleted
+  // one is not.
+  let usageIndex;
+  try {
+    usageIndex = await buildUsedMediaIndex(businessId);
+  } catch (err) {
+    Sentry.captureException(err, {
+      tags: { service: "s3", operation: "delete-unreferenced" },
+      extra: { businessId, urlCount: unique.length },
+    });
+    return;
+  }
+
+  const toDelete = unique.filter((url) => {
+    const key = publicUrlToKey(url);
+    if (!key) return false; // external URL — not ours to delete
+    if (!key.startsWith(`${businessId}/`)) return false; // another tenant's object
+    if (isAlwaysInUseKey(key)) return false; // logo / favicon
+    return (usageIndex.get(url) ?? []).length === 0;
+  });
+
+  if (toDelete.length > 0) await deleteStoredObjects(toDelete);
+}
 
 export const galleryRouter = createTRPCRouter({
   list: ownerAdminProcedure
@@ -45,8 +127,7 @@ export const galleryRouter = createTRPCRouter({
     .query(async ({ ctx }) => {
       const usage = await buildGalleryExternalUsage(ctx.businessId);
       // Plain record, not a Map — lean JSON; absent key = not embedded.
-      const result: Record<string, { count: number; locations: string[] }> =
-        {};
+      const result: Record<string, { count: number; locations: string[] }> = {};
       for (const [galleryId, usages] of usage) {
         result[galleryId] = {
           count: usages.length,
@@ -191,15 +272,16 @@ export const galleryRouter = createTRPCRouter({
       // and shares its dedupe/lookup logic with the `usage` query above via
       // buildGalleryExternalUsage — the two can never drift.
       if (gallery && gallery.images.length > 0) {
-        const externalUsageByGallery = await buildGalleryExternalUsage(
-          businessId,
-        );
+        const externalUsageByGallery =
+          await buildGalleryExternalUsage(businessId);
         const list = externalUsageByGallery.get(id) ?? [];
 
         if (list.length > 0) {
           const summary = list
             .slice(0, 5)
-            .map((u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""))
+            .map(
+              (u) => u.location + (u.entityLabel ? ` (${u.entityLabel})` : ""),
+            )
             .join(", ");
           const more = list.length > 5 ? ` and ${list.length - 5} more` : "";
 
@@ -214,21 +296,21 @@ export const galleryRouter = createTRPCRouter({
         where: { id, businessId },
       });
 
-      // Clean up S3 objects — best-effort, after the DB delete
+      // Clean up S3 objects — best-effort, after the DB delete (the helper's
+      // scan must see the cascade-removed rows as already gone).
+      //
+      // The CONFLICT guard above already makes an EXTERNAL reference impossible
+      // on this path, so the old per-image `galleryImage.count()` was very
+      // nearly safe — but not entirely, and not cheaply: it issued one query per
+      // image, and it had no `isAlwaysInUseKey` protection, so a gallery that
+      // MediaPicker-ed in the business's logo could take `logo.png` down with
+      // it. Routing both delete paths through one helper also means the guard
+      // can never drift between them.
       if (gallery) {
-        const urlsToDelete: string[] = [];
-        for (const img of gallery.images) {
-          // Only delete from S3 if no other GalleryImage row references this URL
-          const remaining = await ctx.db.galleryImage.count({
-            where: { url: img.url },
-          });
-          if (remaining === 0) {
-            urlsToDelete.push(img.url);
-          }
-        }
-        if (urlsToDelete.length > 0) {
-          await deleteStoredObjects(urlsToDelete);
-        }
+        await deleteUnreferencedGalleryObjects(
+          businessId,
+          gallery.images.map((img) => img.url),
+        );
       }
 
       return { data: id, message: "Gallery deleted successfully!" };
@@ -287,9 +369,46 @@ export const galleryRouter = createTRPCRouter({
     .input(galleryReorderImagesSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const updates = input.imageIds.map((id, index) =>
+      const { galleryId, imageIds } = input;
+
+      // Verify the gallery belongs to this business (cross-tenant IDOR guard,
+      // same shape as addImages).
+      const gallery = await ctx.db.gallery.findFirst({
+        where: { id: galleryId, businessId },
+        select: { id: true },
+      });
+      if (!gallery) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Gallery not found",
+        });
+      }
+
+      // ...and that every id belongs to THAT gallery. Scoping the updates by
+      // businessId alone is not enough: `galleryId` was previously accepted and
+      // then ignored, so a same-tenant admin could pass one gallery's id with
+      // another gallery's image ids and silently rewrite the second gallery's
+      // ordering. Checked up-front so a mismatch is a clean NOT_FOUND rather
+      // than a Prisma P2025 surfacing as a 500 mid-transaction.
+      const uniqueIds = [...new Set(imageIds)];
+      if (uniqueIds.length > 0) {
+        const owned = await ctx.db.galleryImage.count({
+          where: { id: { in: uniqueIds }, galleryId },
+        });
+        if (owned !== uniqueIds.length) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "One or more images do not belong to this gallery.",
+          });
+        }
+      }
+
+      const updates = imageIds.map((id, index) =>
+        // `galleryId` repeated here on purpose — the pre-check above and this
+        // clause close the same hole from both ends (TOCTOU), and this one is
+        // what the database actually enforces.
         ctx.db.galleryImage.update({
-          where: { id, gallery: { businessId } },
+          where: { id, galleryId, gallery: { businessId } },
           data: { sortOrder: index },
         }),
       );
@@ -322,14 +441,13 @@ export const galleryRouter = createTRPCRouter({
       });
 
       // Clean up S3 object — best-effort, after the DB delete.
-      // Only delete if no other GalleryImage row references the same URL
-      // (the duplicate mutation reuses URLs across galleries).
-      const remaining = await ctx.db.galleryImage.count({
-        where: { url: image.url },
-      });
-      if (remaining === 0) {
-        await deleteStoredObjects([image.url]);
-      }
+      //
+      // Unlike `delete` above, this path has NO usage guard in front of it: an
+      // owner can remove a single image from a gallery whose other images are
+      // embedded, and the removed image's file may be attached to a product, a
+      // page, a template field, etc. So the deletability decision has to consult
+      // every referencing table, not just other GalleryImage rows.
+      await deleteUnreferencedGalleryObjects(businessId, [image.url]);
 
       return { data: image, message: "Image deleted successfully!" };
     }),

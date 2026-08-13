@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import type { Prisma } from "generated/prisma";
 import { BusinessDomainStatus } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -50,6 +51,32 @@ function buildInviteUrl(
   return `https://${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/testimonials/submit?code=${code}`;
 }
 
+// `customerEmail`/`customerId` are admin-only PII columns on Testimonial.
+// `testimonial.list`'s `canSeeAll` branch (authenticated OWNER/MANAGER/
+// PLATFORM_ADMIN) legitimately needs them — e.g.
+// `src/app/admin/testimonials/_components/owner-testimonial-dialog.tsx`
+// renders/edits `customerEmail`, and is typed against the raw Prisma
+// `Testimonial` (not a narrowed RouterOutput), so the admin branch's return
+// shape must stay a full `Testimonial[]`. The public branch redacts these
+// two (already-nullable) columns to `null` rather than `select()`-ing them
+// away, which keeps the row shape — and therefore the TS type both branches
+// share — identical; only the value that reaches a public visitor's wire
+// payload changes. Exported so the redaction can be pinned by a unit test
+// without touching the DB.
+export function redactTestimonialForPublic<
+  T extends { customerEmail: string | null; customerId: string | null },
+>(testimonial: T): T {
+  return { ...testimonial, customerEmail: null, customerId: null };
+}
+
+// `listRandom` has no admin/`canSeeAll` branch — it is public-only — so its
+// leak fix can omit these columns from the query outright instead of
+// redacting post-fetch. Exported so the shape can be pinned by a unit test.
+export const PUBLIC_TESTIMONIAL_OMIT = {
+  customerEmail: true,
+  customerId: true,
+} as const satisfies Prisma.TestimonialOmit;
+
 export const testimonialRouter = createTRPCRouter({
   // ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
@@ -90,13 +117,20 @@ export const testimonialRouter = createTRPCRouter({
         }
       }
 
-      return ctx.db.testimonial.findMany({
+      const testimonials = await ctx.db.testimonial.findMany({
         where: {
           businessId: business.id,
           ...(canSeeAll ? {} : { isApproved: true, isHidden: false }),
         },
         orderBy: { testimonialDate: "desc" },
       });
+
+      // Rows widen for `canSeeAll` above; columns must widen with them, not
+      // stay open by default — see redactTestimonialForPublic above for why
+      // this is a post-fetch redaction rather than a conditional `select`.
+      return canSeeAll
+        ? testimonials
+        : testimonials.map(redactTestimonialForPublic);
     }),
 
   listRandom: publicProcedure
@@ -118,6 +152,9 @@ export const testimonialRouter = createTRPCRouter({
       const all = await ctx.db.testimonial.findMany({
         where: { businessId: businessId.id, isApproved: true, isHidden: false },
         orderBy: { testimonialDate: "desc" },
+        // Public-only procedure, no admin branch — omit the PII columns at
+        // the query level. See PUBLIC_TESTIMONIAL_OMIT above.
+        omit: PUBLIC_TESTIMONIAL_OMIT,
         take: 20,
       });
       const shuffled = [...all].sort(() => Math.random() - 0.5);

@@ -373,7 +373,14 @@ export const financeRouter = createTRPCRouter({
           }));
         }
 
-        if (failures.length === 5) {
+        // Deliberately checked against `summaryFailures` (the 3 money reads),
+        // NOT `failures` (all 5 settled calls). `failures.length === 5` was a
+        // regression: it only tripped when every call failed, so a partial
+        // outage where just the money reads fail (but account/recent-payout
+        // succeed) fell through to the `else` branch and rendered $0.00
+        // tiles instead of the error card. All 3 money reads failing is the
+        // correct — and only — trigger for `stripeError`.
+        if (summaryFailures.length === 3) {
           stripeError = true;
         } else {
           let grossChargesCents = 0;

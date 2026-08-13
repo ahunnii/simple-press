@@ -85,10 +85,20 @@ export function StoreCustomizationStep({
       const freshCaptchaToken =
         (await captchaRef.current?.execute()) ?? captchaToken;
 
+      // Terms-of-service acceptance signal. The `acceptedTerms` guard above
+      // already refused to submit without the checkbox, so this is that fact
+      // carried over the wire — the server now REJECTS /sign-up/email without
+      // it (see resolvePlatformTermsAcceptance). Spread rather than a literal
+      // property because the client params type doesn't declare this key and a
+      // literal would fail TypeScript's excess-property check; same technique
+      // as `additionalFieldValues` in ~/components/auth/sign-up.tsx.
+      const termsSignal: Record<string, unknown> = { termsAccepted: true };
+
       const { error: signUpError } = await authClient.signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
+        ...termsSignal,
         fetchOptions: {
           headers: {
             "x-captcha-response": freshCaptchaToken,

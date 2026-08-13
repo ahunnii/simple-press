@@ -2,9 +2,12 @@ import type { z } from "zod";
 import { describe, expect, it } from "vitest";
 
 import {
+  QUOTE_ID_MAX_LENGTH,
+  QUOTE_MAX_ANSWER_NUMBER,
   QUOTE_STATUS_FILTER_VALUES,
   QUOTE_STATUS_VALUES_DB,
   quoteCalculatorDefinitionSchema,
+  quoteSubmitSchema,
   toPublicCalculatorDefinition,
 } from "./quote-calculator";
 
@@ -443,6 +446,112 @@ describe("toPublicCalculatorDefinition", () => {
       "Local",
       "Cross-country",
     ]);
+  });
+});
+
+// ─── Wire schema (what an anonymous visitor may post) ───────────────────────
+
+/**
+ * `quoteSubmitSchema` is the outermost gate on the one write path a stranger
+ * can reach. Everything here is a bound, and every bound is load-bearing: the
+ * values ride into a Postgres `Int` column and into the owner's inbox, and the
+ * strings are parsed and compared against the stored definition before
+ * anything downstream can reject them.
+ */
+describe("quoteSubmitSchema — visitor-supplied bounds", () => {
+  function submission(overrides: Record<string, unknown> = {}) {
+    return {
+      calculatorId: "calc_1",
+      answers: [{ questionId: "q_1", number: 3 }],
+      contactName: "Ada",
+      contactEmail: "ada@example.com",
+      captchaToken: "token",
+      ...overrides,
+    };
+  }
+
+  it("accepts an ordinary submission", () => {
+    expect(quoteSubmitSchema.safeParse(submission()).success).toBe(true);
+  });
+
+  it("rejects a number large enough to overflow the estimateCents column", () => {
+    // 1e10 units × any per-unit rate is already past int4 in cents. The write
+    // would fail inside `quoteSubmission.create` with a raw Prisma error
+    // serialized straight to the visitor — after the captcha, after the
+    // tenant lookup, and instead of the lead.
+    const result = quoteSubmitSchema.safeParse(
+      submission({ answers: [{ questionId: "q_1", number: 1e10 }] }),
+    );
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects the same magnitude in the negative direction", () => {
+    const result = quoteSubmitSchema.safeParse(
+      submission({ answers: [{ questionId: "q_1", number: -1e10 }] }),
+    );
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts the boundary value in both directions", () => {
+    for (const number of [QUOTE_MAX_ANSWER_NUMBER, -QUOTE_MAX_ANSWER_NUMBER]) {
+      const result = quoteSubmitSchema.safeParse(
+        submission({ answers: [{ questionId: "q_1", number }] }),
+      );
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it("still rejects a non-finite number", () => {
+    for (const number of [Infinity, -Infinity, NaN]) {
+      const result = quoteSubmitSchema.safeParse(
+        submission({ answers: [{ questionId: "q_1", number }] }),
+      );
+      expect(result.success).toBe(false);
+    }
+  });
+
+  it("bounds every id string a visitor can post", () => {
+    const tooLong = "x".repeat(QUOTE_ID_MAX_LENGTH + 1);
+
+    // calculatorId
+    expect(
+      quoteSubmitSchema.safeParse(submission({ calculatorId: tooLong }))
+        .success,
+    ).toBe(false);
+
+    // questionId
+    expect(
+      quoteSubmitSchema.safeParse(
+        submission({ answers: [{ questionId: tooLong }] }),
+      ).success,
+    ).toBe(false);
+
+    // optionId
+    expect(
+      quoteSubmitSchema.safeParse(
+        submission({ answers: [{ questionId: "q_1", optionId: tooLong }] }),
+      ).success,
+    ).toBe(false);
+
+    // every string inside optionIds
+    expect(
+      quoteSubmitSchema.safeParse(
+        submission({
+          answers: [{ questionId: "q_1", optionIds: ["ok", tooLong] }],
+        }),
+      ).success,
+    ).toBe(false);
+  });
+
+  it("accepts ids at exactly the cap, so real cuids are never turned away", () => {
+    const atCap = "c".repeat(QUOTE_ID_MAX_LENGTH);
+    const result = quoteSubmitSchema.safeParse(
+      submission({
+        calculatorId: atCap,
+        answers: [{ questionId: atCap, optionIds: [atCap] }],
+      }),
+    );
+    expect(result.success).toBe(true);
   });
 });
 

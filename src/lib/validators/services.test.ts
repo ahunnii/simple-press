@@ -346,6 +346,15 @@ describe("serviceItemCreateSchema", () => {
     expect(result.success).toBe(true);
     if (result.success) expect("imageFile" in result.data).toBe(false);
   });
+
+  it("leaves priceTiers and addOns undefined when omitted — addItem falls back to [] itself", () => {
+    const result = serviceItemCreateSchema.safeParse(validItemCreate);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.priceTiers).toBeUndefined();
+      expect(result.data.addOns).toBeUndefined();
+    }
+  });
 });
 
 describe("serviceItemUpdateSchema", () => {
@@ -375,5 +384,50 @@ describe("serviceItemUpdateSchema", () => {
     });
     expect(result.success).toBe(true);
     if (result.success) expect("imageFile" in result.data).toBe(false);
+  });
+
+  // C9: `updateItem` in the router only overwrites `priceTiers`/`addOns` when
+  // the key is present in the parsed input — a `.default([])` here would
+  // silently turn "the caller omitted this field" into "the caller sent an
+  // empty array," and the router would zero out previously-saved data on
+  // every partial update. These pin the parse-time contract the router
+  // depends on.
+  describe("priceTiers / addOns", () => {
+    it("leaves priceTiers and addOns undefined when omitted, rather than defaulting to []", () => {
+      const result = serviceItemUpdateSchema.safeParse(validItemUpdate);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.priceTiers).toBeUndefined();
+        expect(result.data.addOns).toBeUndefined();
+      }
+    });
+
+    it("round-trips explicit priceTiers and addOns", () => {
+      const result = serviceItemUpdateSchema.safeParse({
+        ...validItemUpdate,
+        priceTiers: [{ label: "Standard", priceLabel: "$100" }],
+        addOns: [{ name: "Rush fee" }],
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.priceTiers).toEqual([
+          { label: "Standard", priceLabel: "$100" },
+        ]);
+        expect(result.data.addOns).toEqual([{ name: "Rush fee" }]);
+      }
+    });
+
+    it("accepts an explicit empty array for priceTiers and addOns (an intentional clear)", () => {
+      const result = serviceItemUpdateSchema.safeParse({
+        ...validItemUpdate,
+        priceTiers: [],
+        addOns: [],
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.priceTiers).toEqual([]);
+        expect(result.data.addOns).toEqual([]);
+      }
+    });
   });
 });

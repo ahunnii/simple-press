@@ -1119,8 +1119,12 @@ export const productRouter = createTRPCRouter({
             price: source.price,
             compareAtPrice: source.compareAtPrice,
             cost: source.cost,
-            sku: source.sku,
-            barcode: source.barcode,
+            // Never copy identifiers verbatim: a duplicate SKU/barcode
+            // pollutes SKU search (secureList matches on it) and collides on
+            // WooCommerce export keying. The owner assigns real codes when
+            // readying the duplicate for publish.
+            sku: null,
+            barcode: null,
             trackInventory: source.trackInventory,
             inventoryQty: source.inventoryQty,
             allowBackorders: source.allowBackorders,
@@ -1149,8 +1153,10 @@ export const productRouter = createTRPCRouter({
             variants: {
               create: source.variants.map((v) => ({
                 name: v.name,
-                sku: v.sku,
-                barcode: v.barcode,
+                // Same rationale as the product-level sku/barcode above —
+                // never copy identifiers verbatim.
+                sku: null,
+                barcode: null,
                 price: v.price,
                 compareAtPrice: v.compareAtPrice,
                 inventoryQty: v.inventoryQty,

@@ -1,3 +1,4 @@
+import { APIError } from "better-auth";
 import { describe, expect, it } from "vitest";
 
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
@@ -34,39 +35,84 @@ describe("resolvePlatformTermsAcceptance", () => {
     expect(result?.termsAcceptedAt.getTime()).not.toBe(spoofedDate.getTime());
   });
 
-  it("returns null when the box was not checked", () => {
-    expect(
-      resolvePlatformTermsAcceptance({
-        path: "/sign-up/email",
-        body: { termsAccepted: false },
-      }),
-    ).toBeNull();
+  // D1: a direct POST to the credential sign-up endpoint with no (or a
+  // false) `termsAccepted` must be REJECTED, not silently allowed to create
+  // an account with `termsAcceptedAt` left null forever. The UI's required
+  // checkbox means this can only happen by skipping the browser form
+  // entirely.
+  describe("rejects credential sign-up when the box was not checked", () => {
+    it("throws a better-auth APIError for termsAccepted: false", () => {
+      expect(() =>
+        resolvePlatformTermsAcceptance({
+          path: "/sign-up/email",
+          body: { termsAccepted: false },
+        }),
+      ).toThrow(APIError);
+    });
 
-    expect(
-      resolvePlatformTermsAcceptance({
-        path: "/sign-up/email",
-        body: {},
-      }),
-    ).toBeNull();
+    it("throws a better-auth APIError when termsAccepted is missing from the body", () => {
+      expect(() =>
+        resolvePlatformTermsAcceptance({
+          path: "/sign-up/email",
+          body: {},
+        }),
+      ).toThrow(APIError);
+    });
+
+    it("throws a better-auth APIError when body itself is missing", () => {
+      expect(() =>
+        resolvePlatformTermsAcceptance({ path: "/sign-up/email" }),
+      ).toThrow(APIError);
+    });
+
+    it("throws with a 400-class status and a stable error code the auth UI can key off of", () => {
+      try {
+        resolvePlatformTermsAcceptance({
+          path: "/sign-up/email",
+          body: { termsAccepted: false },
+        });
+        expect.unreachable("expected resolvePlatformTermsAcceptance to throw");
+      } catch (err) {
+        expect(err).toBeInstanceOf(APIError);
+        const apiError = err as InstanceType<typeof APIError>;
+        expect(apiError.status).toBe("BAD_REQUEST");
+        expect(apiError.body).toMatchObject({ code: "TERMS_NOT_ACCEPTED" });
+      }
+    });
   });
 
-  it("returns null for a different endpoint even if termsAccepted is somehow present (e.g. Discord OAuth)", () => {
-    expect(
-      resolvePlatformTermsAcceptance({
-        path: "/callback/discord",
-        body: { termsAccepted: true },
-      }),
-    ).toBeNull();
+  // CRITICAL SCOPE: rejection must be scoped to the credential sign-up
+  // endpoint ONLY. OAuth (Discord) sign-ups have no `termsAccepted` in their
+  // body — they go through `/callback/discord`, a completely different
+  // endpoint — and must never be blocked or even inspected for the flag.
+  describe("OAuth sign-up is completely untouched", () => {
+    it("returns null (no throw) for a different endpoint even when termsAccepted is somehow present", () => {
+      expect(
+        resolvePlatformTermsAcceptance({
+          path: "/callback/discord",
+          body: { termsAccepted: true },
+        }),
+      ).toBeNull();
+    });
+
+    it("returns null (no throw) for a different endpoint with no termsAccepted at all — the normal OAuth shape", () => {
+      expect(() =>
+        resolvePlatformTermsAcceptance({
+          path: "/callback/discord",
+          body: {},
+        }),
+      ).not.toThrow();
+      expect(
+        resolvePlatformTermsAcceptance({
+          path: "/callback/discord",
+          body: {},
+        }),
+      ).toBeNull();
+    });
   });
 
   it("returns null when context is missing entirely", () => {
     expect(resolvePlatformTermsAcceptance(null)).toBeNull();
     expect(resolvePlatformTermsAcceptance(undefined)).toBeNull();
-  });
-
-  it("returns null when body is missing", () => {
-    expect(
-      resolvePlatformTermsAcceptance({ path: "/sign-up/email" }),
-    ).toBeNull();
   });
 });

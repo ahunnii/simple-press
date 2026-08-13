@@ -47,6 +47,103 @@ const cmsPageDraftValueSchema = z.object({
   content: z.any(),
 });
 
+/**
+ * The transactional body of `bulkSetPublished`, pulled out into a standalone
+ * exported function so its `count` derivation is unit-testable against a
+ * mocked `tx` (see `content.test.ts`) without a real database.
+ *
+ * `changedIds` is the rows this call will actually FLIP, captured before the
+ * write, and it is what the table's Undo re-sends. Re-sending the whole
+ * selection with `published` inverted is not an inverse: a selection of 50
+ * containing 20 already-published rows publishes all 50, then "Undo"
+ * unpublishes all 50 — including the ones the user never touched. The client
+ * cannot narrow it either (a selection spans pages, and off-page rows'
+ * `published` state never reached the browser).
+ *
+ * `count` — the number the toast and the `data.count < requested` shortfall
+ * check (page-list-client.tsx) both read — is ALWAYS derived from this same
+ * pre-write `changed` read, never from summing `updateMany` results. For the
+ * `published: true` branch that distinction is load-bearing, not cosmetic:
+ * publishing partitions the selection into two `updateMany`s (below) because
+ * a single `updateMany` can't set `publishedAt` conditionally per row. Both
+ * run over the same interactive-transaction connection, so by the time the
+ * SECOND one's `publishedAt: { not: null }` filter is evaluated, rows the
+ * FIRST one just stamped a `publishedAt` onto already satisfy it too — it
+ * re-matches (and harmlessly re-writes, but also RE-COUNTS) every
+ * never-published row the first `updateMany` just flipped. Summing the two
+ * results doubled `count` for exactly that overlap: publishing 3 fresh drafts
+ * reported `count: 6`. Reading `count` off `changedIds.length` instead sides
+ * with the number Undo actually operates on, which is also the number that
+ * is true regardless of how the write happens to be partitioned internally.
+ */
+export async function runBulkSetPublished(
+  tx: Pick<TxClient, "page">,
+  params: {
+    ids: string[];
+    businessId: string;
+    published: boolean;
+    now: Date;
+  },
+): Promise<{ changedIds: string[]; count: number }> {
+  const { ids, businessId, published, now } = params;
+
+  const changed = await tx.page.findMany({
+    where: {
+      id: { in: ids },
+      businessId,
+      published: { not: published },
+    },
+    select: { id: true },
+  });
+  const changedIds = changed.map((p) => p.id);
+
+  if (published) {
+    // Publishing means the same thing here as everywhere else that publishes
+    // a Page — the cron sweep (src/app/api/cron/route.ts) and both editors'
+    // `published ? null : …`:
+    //   - a pending `scheduledPublishAt` is superseded and cleared, or an
+    //     Unpublish later would flip the row back to "Scheduled" and the
+    //     cron would silently re-publish it;
+    //   - a row that has never been published gets a `publishedAt`, so the
+    //     storefront's `publishedAt ?? createdAt` coalesce shows the real
+    //     publish date rather than the authoring date.
+    // Split in two, like the cron, because `updateMany` cannot set a column
+    // conditionally per row. Their RESULT COUNTS are intentionally unused —
+    // see the docblock above for why summing them double-counts.
+    await Promise.all([
+      tx.page.updateMany({
+        where: { id: { in: ids }, businessId, publishedAt: null },
+        data: {
+          published: true,
+          publishedAt: now,
+          scheduledPublishAt: null,
+        },
+      }),
+      tx.page.updateMany({
+        where: {
+          id: { in: ids },
+          businessId,
+          publishedAt: { not: null },
+        },
+        data: { published: true, scheduledPublishAt: null },
+      }),
+    ]);
+  } else {
+    // Unpublishing touches `published` and nothing else. `publishedAt` is
+    // kept (it is the date this page WAS published, which re-publishing
+    // should not rewrite) and `scheduledPublishAt` is left alone — the
+    // update runs over every selected id, including rows that were already
+    // unpublished, so clearing it here would silently cancel a pending
+    // schedule on a row this action didn't change.
+    await tx.page.updateMany({
+      where: { id: { in: ids }, businessId },
+      data: { published },
+    });
+  }
+
+  return { changedIds, count: changedIds.length };
+}
+
 export const contentRouter = createTRPCRouter({
   // ==========================================
   // SITE CONTENT (Homepage, SEO, etc.)
@@ -324,73 +421,14 @@ export const contentRouter = createTRPCRouter({
       const { businessId } = ctx;
       const now = new Date();
 
-      // `changedIds` is the rows this call will actually FLIP, captured before
-      // the write, and it is what the table's Undo re-sends. Re-sending the
-      // whole selection with `published` inverted is not an inverse: a
-      // selection of 50 containing 20 already-published rows publishes all 50,
-      // then "Undo" unpublishes all 50 — including the ones the user never
-      // touched. The client cannot narrow it either (a selection spans pages,
-      // and off-page rows' `published` state never reached the browser). One
-      // transaction, so nothing can change between the read and the update.
-      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
-        const changed = await tx.page.findMany({
-          where: {
-            id: { in: input.ids },
-            businessId,
-            published: { not: input.published },
-          },
-          select: { id: true },
-        });
-
-        let count: number;
-        if (input.published) {
-          // Publishing means the same thing here as everywhere else that
-          // publishes a Page — the cron sweep (src/app/api/cron/route.ts) and
-          // both editors' `published ? null : …`:
-          //   - a pending `scheduledPublishAt` is superseded and cleared, or an
-          //     Unpublish later would flip the row back to "Scheduled" and the
-          //     cron would silently re-publish it;
-          //   - a row that has never been published gets a `publishedAt`, so
-          //     the storefront's `publishedAt ?? createdAt` coalesce shows the
-          //     real publish date rather than the authoring date.
-          // Split in two, like the cron, because `updateMany` cannot set a
-          // column conditionally per row. The two `where`s partition the same
-          // id set, so the counts sum to the rows matched.
-          const [withoutDate, withDate] = await Promise.all([
-            tx.page.updateMany({
-              where: { id: { in: input.ids }, businessId, publishedAt: null },
-              data: {
-                published: true,
-                publishedAt: now,
-                scheduledPublishAt: null,
-              },
-            }),
-            tx.page.updateMany({
-              where: {
-                id: { in: input.ids },
-                businessId,
-                publishedAt: { not: null },
-              },
-              data: { published: true, scheduledPublishAt: null },
-            }),
-          ]);
-          count = withoutDate.count + withDate.count;
-        } else {
-          // Unpublishing touches `published` and nothing else. `publishedAt` is
-          // kept (it is the date this page WAS published, which re-publishing
-          // should not rewrite) and `scheduledPublishAt` is left alone — the
-          // update runs over every selected id, including rows that were
-          // already unpublished, so clearing it here would silently cancel a
-          // pending schedule on a row this action didn't change.
-          const result = await tx.page.updateMany({
-            where: { id: { in: input.ids }, businessId },
-            data: { published: input.published },
-          });
-          count = result.count;
-        }
-
-        return { changedIds: changed.map((p) => p.id), count };
-      });
+      const { changedIds, count } = await ctx.db.$transaction((tx) =>
+        runBulkSetPublished(tx, {
+          ids: input.ids,
+          businessId,
+          published: input.published,
+          now,
+        }),
+      );
 
       return {
         count,

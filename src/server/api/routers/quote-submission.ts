@@ -13,8 +13,7 @@ import {
   sendQuoteConfirmation,
 } from "~/lib/email/templates";
 import { loadZipDataset } from "~/lib/geo/zip-lookup";
-import { formatPrice } from "~/lib/prices";
-import { computeQuote } from "~/lib/quote/evaluate";
+import { computeQuote, UNANSWERED_DISPLAY } from "~/lib/quote/evaluate";
 import { getClientIpFromHeaders, quoteSubmitLimiter } from "~/lib/rate-limit";
 import {
   quoteBulkDeleteSchema,
@@ -39,6 +38,9 @@ import {
 const GENERIC_FAILURE_MESSAGE =
   "We couldn't calculate your estimate. Please try again or contact us directly.";
 
+/** Hard ceiling on the rows `list` ships to the admin inbox. See the comment there. */
+const QUOTE_INBOX_MAX_ROWS = 1000;
+
 export const quoteSubmissionRouter = createTRPCRouter({
   // ─── Public: storefront submit ──────────────────────────────────────────────
 
@@ -52,14 +54,15 @@ export const quoteSubmissionRouter = createTRPCRouter({
    * it can send introduces a number the owner did not configure.
    */
   submit: publicProcedure
-    .use(featureGate("quoteCalculator"))
-    .input(quoteSubmitSchema)
-    .mutation(async ({ ctx, input }) => {
+    // 1. Throttle ─────────────────────────────────────────────────────────────
+    // A MIDDLEWARE, and it must stay the first one in this chain. `featureGate`
+    // below runs `getBusinessFlags()`, which is a database round trip on every
+    // call — throttling after it would mean an unauthenticated flood still gets
+    // one query each before being told no. Ordering constraint: nothing that
+    // touches the database may be inserted above this `.use()`.
+    .use(async ({ ctx, next }) => {
       const requestHost = ctx.headers.get("host") ?? "";
       const rawIp = getClientIpFromHeaders(ctx.headers);
-      const remoteIp = rawIp === "unknown" ? undefined : rawIp;
-
-      // 1. Throttle ───────────────────────────────────────────────────────────
       try {
         await quoteSubmitLimiter.consume(`${rawIp}:${requestHost}`);
       } catch {
@@ -68,6 +71,14 @@ export const quoteSubmissionRouter = createTRPCRouter({
           message: "Too many submissions. Please try again later.",
         });
       }
+      return next();
+    })
+    .use(featureGate("quoteCalculator"))
+    .input(quoteSubmitSchema)
+    .mutation(async ({ ctx, input }) => {
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      const remoteIp = rawIp === "unknown" ? undefined : rawIp;
 
       // 2. Captcha ────────────────────────────────────────────────────────────
       // No `NODE_ENV === "development"` short-circuit here — verifyRecaptcha
@@ -186,11 +197,19 @@ export const quoteSubmissionRouter = createTRPCRouter({
       );
 
       if (!result.ok) {
-        // `formula-failed` is owner misconfiguration surfacing at runtime —
-        // the visitor did nothing wrong and can do nothing about it, so they
-        // get the generic apology and we get a Sentry issue. Every other code
-        // (missing-required / unknown-option / bad-answer / unknown-zip) is
-        // about THIS submission and carries a message written for the visitor.
+        // `formula-failed` is DEFINITION drift surfacing at runtime — a parse
+        // error or a variable no question defines. The visitor did nothing
+        // wrong and can do nothing about it, so they get the generic apology
+        // and we get a Sentry issue. Every other code (missing-required /
+        // unknown-option / bad-answer / unknown-zip) is about THIS submission
+        // and carries a message written for the visitor.
+        //
+        // Note what is NOT here: a formula that fails on the visitor's own
+        // numbers (divide by a zero they typed, an overflow to Infinity) comes
+        // back `ok: true` with a null estimate, because throwing on it would
+        // destroy a real lead over a price we can compute by hand later. See
+        // `estimateFailure` below and `VALUE_LEVEL_FORMULA_CODES` in
+        // `src/lib/quote/evaluate.ts`.
         if (result.error.code === "formula-failed") {
           Sentry.captureException(new Error(result.error.message), {
             tags: { feature: "quote", step: "evaluate" },
@@ -206,6 +225,33 @@ export const quoteSubmissionRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: result.error.message,
         });
+      }
+
+      // The answers were all accepted but the formula could not put a number on
+      // them for this particular visitor (or the number blew past the storable
+      // cap). The submission is still saved, still emailed, still shown as a
+      // normal thank-you — only `estimateCents` is null. Logged as a warning,
+      // not an exception: it is worth an owner's attention (a divisor question
+      // with no `min` of 1, say) but it is not a broken deploy.
+      const { estimateCents, estimateFailure } = result;
+      if (estimateFailure) {
+        Sentry.captureMessage(
+          `quote estimate unavailable (${estimateFailure.code}): ${estimateFailure.message}`,
+          {
+            level: "warning",
+            tags: {
+              feature: "quote",
+              step: "estimate-unavailable",
+              reason: estimateFailure.code,
+            },
+            extra: {
+              calculatorId: calculator.id,
+              businessId: business.id,
+              formula: definition.formula,
+              variables: result.variables,
+            },
+          },
+        );
       }
 
       // 8. Persist ────────────────────────────────────────────────────────────
@@ -224,7 +270,12 @@ export const quoteSubmissionRouter = createTRPCRouter({
           contactEmail,
           contactPhone: contactPhone === "" ? null : contactPhone,
           answers: result.answerSnapshots as unknown as Prisma.InputJsonValue,
-          estimateCents: result.estimateCents,
+          // Nullable on purpose (`estimateCents Int?`): a lead with a blank
+          // estimate is worth infinitely more than no lead. The admin detail
+          // page already renders a null estimate.
+          estimateCents,
+          // Written even when the estimate is null — it is the ONLY record of
+          // why: the formula plus the exact variable values that broke it.
           formulaSnapshot: {
             formula: definition.formula,
             variables: result.variables,
@@ -234,33 +285,43 @@ export const quoteSubmissionRouter = createTRPCRouter({
         select: { id: true },
       });
 
-      // Rows the CUSTOMER may see: branched-away questions are dropped, because
-      // "Do you need packing? —" on a quote they never answered reads as a
-      // mistake. The owner's copy keeps them (see `hidden` below) — an owner
-      // auditing a price needs to know a question was skipped by branching
-      // rather than left blank.
+      // Rows the CUSTOMER may see. Two exclusions, same reasoning: a
+      // branched-away question ("Do you need packing? —") and an optional
+      // question they chose to skip both render as a title with an em dash,
+      // which reads as a bug in a receipt. Skipped-optional rows are NOT
+      // hidden — they take the break path in `computeQuote` with
+      // `hidden: false` and the unanswered sentinel still on `display` — so
+      // the `hidden` check alone does not catch them.
+      //
+      // The owner's copy keeps every row (see `answers` on the notification
+      // below): an owner auditing a price needs to know a question was skipped
+      // by branching rather than left blank.
       const visibleRows = result.answerSnapshots
-        .filter((row) => row.hidden === false)
+        .filter(
+          (row) => row.hidden === false && row.display !== UNANSWERED_DISPLAY,
+        )
         .map((row) => ({ title: row.title, display: row.display }));
 
       // The single source of truth for what the customer is told the price is —
       // shared by the confirmation email and the mutation's return value, so
       // the two can never disagree. `undefined` when the owner keeps the
-      // estimate internal.
-      const customerEstimate = definition.showEstimateToCustomer
-        ? definition.displayAsRange
-          ? {
-              lowCents: Math.round(
-                result.estimateCents *
-                  (1 - definition.rangePaddingPercent / 100),
-              ),
-              highCents: Math.round(
-                result.estimateCents *
-                  (1 + definition.rangePaddingPercent / 100),
-              ),
-            }
-          : { exactCents: result.estimateCents }
-        : undefined;
+      // estimate internal, and equally when there is no estimate to tell them
+      // about: the thank-you screen and the confirmation email then simply
+      // omit pricing, exactly as they do for a calculator with
+      // `showEstimateToCustomer` off.
+      const customerEstimate =
+        definition.showEstimateToCustomer && estimateCents !== null
+          ? definition.displayAsRange
+            ? {
+                lowCents: Math.round(
+                  estimateCents * (1 - definition.rangePaddingPercent / 100),
+                ),
+                highCents: Math.round(
+                  estimateCents * (1 + definition.rangePaddingPercent / 100),
+                ),
+              }
+            : { exactCents: estimateCents }
+          : undefined;
 
       // 9. Emails ─────────────────────────────────────────────────────────────
       // Each in its own try/catch: the lead is already saved, and a Resend
@@ -273,7 +334,12 @@ export const quoteSubmissionRouter = createTRPCRouter({
           contactName,
           contactEmail,
           contactPhone: contactPhone === "" ? null : contactPhone,
-          estimateCents: result.estimateCents,
+          // `null` is the owner's flag that no estimate could be computed —
+          // the notification renders an em dash where the figure goes, and the
+          // formula + variables section right below it shows exactly which
+          // values produced nothing. Their lead is intact; only the number is
+          // missing, and they price this one by hand.
+          estimateCents,
           answers: result.answerSnapshots.map((row) => ({
             title: row.title,
             display: row.display,
@@ -332,16 +398,18 @@ export const quoteSubmissionRouter = createTRPCRouter({
       // Fire-and-forget: platform-operator visibility, not part of the
       // visitor's transaction. Never awaited, so a slow webhook cannot add
       // latency to the thank-you screen.
+      //
+      // Deliberately anonymous. This webhook posts into the PLATFORM operator's
+      // channel — a third party to the transaction between a store and its
+      // customer — so it carries the shape of the event (which store, which
+      // calculator, did it price) and nothing about the person. The name, email
+      // and answers stay in the owner's inbox and the owner's email, where the
+      // customer expects them to be. Do not add them back for convenience.
       void notifyDiscordQuoteSubmission({
         businessName: businessData.name,
         subdomain: businessData.subdomain,
         calculatorName: calculator.name,
-        contactName,
-        contactEmail,
-        estimateLabel: formatPrice(result.estimateCents),
-        answerSummary: visibleRows
-          .map((row) => `${row.title}: ${row.display}`)
-          .join("\n"),
+        hasEstimate: estimateCents !== null,
       }).catch((err: unknown) =>
         Sentry.captureException(err, { tags: { service: "discord" } }),
       );
@@ -371,7 +439,7 @@ export const quoteSubmissionRouter = createTRPCRouter({
   // create new quotes, are gated.
 
   // Input-free: the admin page filters (status/search), sorts and paginates in
-  // memory, so the router ships the full tenant-scoped set. The `select` is the
+  // memory, so the router ships the tenant-scoped set. The `select` is the
   // table's row contract — `answers` and `formulaSnapshot` are deliberately
   // excluded (they are the heaviest columns on the row and nothing in the list
   // renders them; the detail page reads them through `getById`).
@@ -380,6 +448,16 @@ export const quoteSubmissionRouter = createTRPCRouter({
 
     return ctx.db.quoteSubmission.findMany({
       where: { businessId },
+      // Bounded, unlike the other in-memory admin lists. Every other one is
+      // filled by the owner (products, collections, discounts); this table's
+      // rows are created by ANONYMOUS visitors, so its size is set by whoever
+      // is submitting — including someone doing so in bulk past the rate
+      // limiter. The cap sits far above any real pipeline, so the page keeps
+      // its in-memory filter/sort/paginate behavior untouched: it just bounds
+      // the working set instead of letting one tenant's inbox become an
+      // unbounded serialized payload. Newest first, so the cap trims the
+      // stalest leads rather than the ones an owner is working today.
+      take: QUOTE_INBOX_MAX_ROWS,
       select: {
         id: true,
         contactName: true,
@@ -520,9 +598,16 @@ export const quoteSubmissionRouter = createTRPCRouter({
       const parsedAnswers = z
         .array(quoteSubmissionAnswerSchema)
         .safeParse(submission.answers);
+      // Same two exclusions as the confirmation email on the submit path: no
+      // branched-away rows, and no "Question —" rows for optional questions the
+      // customer skipped. This email quotes a price back to that same customer,
+      // so it must not read as if we lost half their answers.
       const visibleAnswers = parsedAnswers.success
         ? parsedAnswers.data
-            .filter((answer) => !answer.hidden)
+            .filter(
+              (answer) =>
+                !answer.hidden && answer.display !== UNANSWERED_DISPLAY,
+            )
             .map((answer) => ({ title: answer.title, display: answer.display }))
         : [];
 

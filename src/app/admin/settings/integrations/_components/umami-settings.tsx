@@ -29,7 +29,9 @@ import { Switch } from "~/components/ui/switch";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
-  umamiBaseUrl: string;
+  // Optional: sourced from `NEXT_PUBLIC_UMAMI_BASE_URL`, which may not be set
+  // in every deploy env yet. The dashboard link renders only when present.
+  umamiBaseUrl: string | undefined;
 };
 
 // Umami website IDs are UUIDs (e.g. "abc123-def456-...").
@@ -206,17 +208,23 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
               />
             </div>
 
-            <div className="border-t pt-2">
-              <p className="text-muted-foreground mb-2 text-sm">
-                Need your Website ID, or want to see the raw data yourself?
-              </p>
-              <Button type="button" variant="outline" size="sm" asChild>
-                <a href={umamiBaseUrl} target="_blank" rel="noopener noreferrer">
-                  Open your Umami dashboard
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </div>
+            {umamiBaseUrl ? (
+              <div className="border-t pt-2">
+                <p className="text-muted-foreground mb-2 text-sm">
+                  Need your Website ID, or want to see the raw data yourself?
+                </p>
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <a
+                    href={umamiBaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open your Umami dashboard
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+            ) : null}
 
             <div className="border-t pt-4">
               <Button type="submit" disabled={updateIntegrationsMutation.isPending}>

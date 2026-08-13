@@ -157,7 +157,12 @@ export const collectionsRouter = createTRPCRouter({
                 omit: { cost: true },
               },
             },
-            orderBy: { sortOrder: "asc" },
+            // `id` tie-break: two rows sharing a `sortOrder` (e.g. a
+            // duplicated product inheriting its source's sortOrder) otherwise
+            // have no defined relative order and Postgres can return them
+            // differently between requests. Same fix as `product.secureList`
+            // and `order.getAll`.
+            orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
           },
         },
       });
@@ -650,7 +655,8 @@ export const collectionsRouter = createTRPCRouter({
                 omit: { cost: true },
               },
             },
-            orderBy: { sortOrder: "asc" },
+            // Tie-break for stable order — see `getBySlug` above.
+            orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
           },
         },
       });

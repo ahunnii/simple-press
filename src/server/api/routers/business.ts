@@ -758,6 +758,23 @@ export const businessRouter = createTRPCRouter({
       const business = await ctx.db.business.findFirst({
         where: { id: businessId },
         include: include as Prisma.BusinessInclude,
+        // Prisma can't combine `select` with a dynamic `include`, so narrow
+        // via `omit` instead. Every caller of `business.getWith` was audited
+        // (2026-08-13): none reads these scalars — Stripe identity/settings
+        // are only consumed via `getWithIntegrations` and dedicated
+        // `select`-scoped queries elsewhere. `getWith` is tenant-scoped
+        // (ownerAdminProcedure) so this isn't fixing a live leak, just
+        // narrowing what a careless future prop-spread could ship to a
+        // client bundle. If a caller ever needs Stripe connection status,
+        // prefer a derived `isStripeConnected` boolean over re-exposing
+        // `stripeAccountId` here.
+        omit: {
+          stripeAccountId: true,
+          stripeChargesEnabled: true,
+          stripePayoutsEnabled: true,
+          stripeAutoTaxEnabled: true,
+          afProvisionCode: true,
+        },
       });
 
       if (!business) {

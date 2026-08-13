@@ -551,8 +551,12 @@ export const serviceRouter = createTRPCRouter({
         where: { id },
         data: {
           ...rest,
-          priceTiers: (priceTiers ?? []) as Prisma.InputJsonValue,
-          addOns: (addOns ?? []) as Prisma.InputJsonValue,
+          ...(priceTiers !== undefined
+            ? { priceTiers: priceTiers as Prisma.InputJsonValue }
+            : {}),
+          ...(addOns !== undefined
+            ? { addOns: addOns as Prisma.InputJsonValue }
+            : {}),
           ...(safeSrc !== undefined ? { bookingEmbedSrc: safeSrc } : {}),
           ...(safeHeight !== undefined
             ? { bookingEmbedHeight: safeHeight }
@@ -610,7 +614,7 @@ export const serviceRouter = createTRPCRouter({
       await ctx.db.$transaction(
         ids.map((id, index) =>
           ctx.db.serviceItem.update({
-            where: { id, businessId },
+            where: { id, businessId, serviceId },
             data: { sortOrder: index },
           }),
         ),

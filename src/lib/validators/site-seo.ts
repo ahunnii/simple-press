@@ -72,7 +72,19 @@ export const pageMetaEntrySchema = z.object({
 });
 export type PageMetaEntry = z.infer<typeof pageMetaEntrySchema>;
 
-export const pageMetaSchema = z.record(z.string(), pageMetaEntrySchema);
+export const pageMetaSchema = z
+  .record(z.string(), pageMetaEntrySchema)
+  .superRefine((record, ctx) => {
+    for (const key of Object.keys(record)) {
+      if (!ROUTE_KEYS.has(key)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [key],
+          message: `unknown page key: ${key}`,
+        });
+      }
+    }
+  });
 export type PageMeta = z.infer<typeof pageMetaSchema>;
 
 /**

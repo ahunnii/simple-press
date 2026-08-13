@@ -116,8 +116,17 @@ export const serviceItemFormSchema = z.object({
     .optional()
     .nullable(),
   compareAtPriceLabel: z.string().max(60).optional().nullable(),
-  priceTiers: z.array(servicePriceTierSchema).max(8).optional().default([]),
-  addOns: z.array(serviceAddOnSchema).max(12).optional().default([]),
+  // No `.default([])` here: `updateItem` distinguishes "omitted" (leave
+  // stored value alone) from "explicitly sent" (replace it), the same as
+  // every other optional field in that mutation. A defaulted key is never
+  // `undefined` after parse, which would defeat that guard and let a partial
+  // payload silently zero out previously-saved tiers/add-ons. `addItem`
+  // still falls back to `[]` explicitly for the create path (a brand-new
+  // item legitimately starts empty), and the form always sends both fields
+  // explicitly, so omission never happens in practice today — this only
+  // guards against a future partial-update caller.
+  priceTiers: z.array(servicePriceTierSchema).max(8).optional(),
+  addOns: z.array(serviceAddOnSchema).max(12).optional(),
   category: z.string().max(80).optional().nullable(),
   isSignature: z.boolean().default(false),
   // Raw embed input — bare URL or <iframe> snippet. Router sanitizes via parseEmbedInput.

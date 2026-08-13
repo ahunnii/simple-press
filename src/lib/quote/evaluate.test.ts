@@ -598,6 +598,211 @@ describe("computeQuote — estimate clamping", () => {
   });
 });
 
+// ─── Value-level formula failures ───────────────────────────────────────────
+
+/**
+ * A perfectly valid calculator that divides by a number the VISITOR supplies.
+ * It saves, it parses, every variable it names exists — and it breaks the
+ * moment somebody types 0 into a question the owner gave no `min`.
+ *
+ * This is the whole point of the section: a failure like that is not owner
+ * misconfiguration and not visitor error, so it must not be allowed to throw
+ * away a real lead. `computeQuote` returns `ok: true` with a null estimate and
+ * a full answer snapshot, and the caller persists the submission anyway.
+ */
+const PER_UNIT = defineCalculator({
+  version: 1,
+  questions: [
+    {
+      id: "q_units",
+      type: "number",
+      title: "How many units?",
+      variableName: "units",
+    },
+  ],
+  distances: [],
+  formula: "5000 / units",
+});
+
+describe("computeQuote — value-level formula failures", () => {
+  it("returns a null estimate (not an error) when the visitor divides by zero", () => {
+    const result = computeQuote(
+      PER_UNIT,
+      [{ questionId: "q_units", number: 0 }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBeNull();
+    expect(result.estimateFailure?.code).toBe("value-error");
+  });
+
+  it("keeps the full answer snapshot and variables so the lead is still persistable", () => {
+    const result = computeQuote(
+      PER_UNIT,
+      [{ questionId: "q_units", number: 0 }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Everything the submission row needs is present: without these, "persist
+    // with a null estimate" would mean persisting an empty lead.
+    expect(result.answerSnapshots).toHaveLength(1);
+    expect(result.answerSnapshots[0]?.display).toBe("0");
+    expect(result.variables).toEqual({ units: 0 });
+  });
+
+  it("does the same when a hiddenDefault of 0 reaches a divisor by branching", () => {
+    // Nobody typed the zero here — the question was branched away, so `units`
+    // took its `hiddenDefault` (0, the schema default). Same class of failure,
+    // same treatment: capture the lead, skip the number.
+    const gated = defineCalculator({
+      version: 1,
+      questions: [
+        {
+          id: "q_gate",
+          type: "choice",
+          title: "Do you need units?",
+          variableName: "gate",
+          options: [
+            { id: "yes", label: "Yes", value: 1 },
+            { id: "no", label: "No", value: 0 },
+          ],
+        },
+        {
+          id: "q_units",
+          type: "number",
+          title: "How many units?",
+          variableName: "units",
+          showIf: { questionId: "q_gate", optionId: "yes" },
+        },
+      ],
+      distances: [],
+      formula: "5000 / units",
+    });
+
+    const result = computeQuote(
+      gated,
+      [{ questionId: "q_gate", optionId: "no" }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBeNull();
+    expect(result.estimateFailure?.code).toBe("value-error");
+    expect(result.variables.units).toBe(0);
+  });
+
+  it("returns a null estimate when the arithmetic overflows to Infinity", () => {
+    // The wire schema caps a submitted number at ±1e9, so this magnitude can
+    // only arrive by REPLAYING a stored submission (which never went through
+    // the current wire schema) — a path `computeQuote` explicitly supports.
+    const squared: QuoteCalculatorDefinition = {
+      ...PER_UNIT,
+      formula: "units * units",
+    };
+
+    const result = computeQuote(
+      squared,
+      [{ questionId: "q_units", number: 1e300 }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBeNull();
+    expect(result.estimateFailure?.code).toBe("value-error");
+  });
+
+  it("still fails HARD on definition drift, so genuine bugs stay loud", () => {
+    // A stored formula that no longer parses. Nothing about this is the
+    // visitor's doing and no lead is worth persisting a broken price model
+    // over — the caller turns this into a 500 plus a Sentry issue.
+    const drifted: QuoteCalculatorDefinition = {
+      ...PER_UNIT,
+      formula: "5000 /",
+    };
+
+    const result = computeQuote(
+      drifted,
+      [{ questionId: "q_units", number: 4 }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("formula-failed");
+  });
+});
+
+// ─── Estimate cap ───────────────────────────────────────────────────────────
+
+describe("computeQuote — estimate cap", () => {
+  it("nulls an estimate past the storable cap rather than clamping it", () => {
+    // `QuoteSubmission.estimateCents` is an int4. A visitor-sized number times
+    // an owner-sized rate sails past it, and the write would fail with a raw
+    // Prisma error serialized to an anonymous visitor. Nulling keeps the lead
+    // AND keeps the owner from being shown a confident number no configured
+    // price actually produces.
+    const runaway = defineCalculator({
+      version: 1,
+      questions: [
+        {
+          id: "q_units",
+          type: "number",
+          title: "How many units?",
+          variableName: "units",
+        },
+      ],
+      distances: [],
+      formula: "units * 1000",
+    });
+
+    const result = computeQuote(
+      runaway,
+      [{ questionId: "q_units", number: 1_000_000_000 }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBeNull();
+    expect(result.estimateFailure?.code).toBe("over-cap");
+    expect(result.variables).toEqual({ units: 1_000_000_000 });
+  });
+
+  it("leaves an estimate at the cap alone", () => {
+    // $1,000,000.00 exactly — a real (if large) quote, not a runaway.
+    const atCap = defineCalculator({
+      version: 1,
+      questions: [
+        {
+          id: "q_units",
+          type: "number",
+          title: "How many units?",
+          variableName: "units",
+        },
+      ],
+      distances: [],
+      formula: "units",
+    });
+
+    const result = computeQuote(
+      atCap,
+      [{ questionId: "q_units", number: 1_000_000 }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBe(100_000_000);
+    expect(result.estimateFailure).toBeUndefined();
+  });
+});
+
 // ─── Duplicate wire answers ─────────────────────────────────────────────────
 
 describe("computeQuote — duplicate answers", () => {

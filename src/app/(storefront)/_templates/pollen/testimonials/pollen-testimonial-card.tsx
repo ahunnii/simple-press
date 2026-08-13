@@ -14,7 +14,12 @@ import {
 } from "~/components/ui/carousel";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
-export type PollenTestimonial = RouterOutputs["testimonial"]["list"][number];
+// Typed on `listRandom` — the PII-stripped public projection (no
+// customerEmail/customerId). `list` rows are a superset and remain
+// assignable, so both feeds work; the narrower type keeps this card
+// honest about never rendering the admin-only columns.
+export type PollenTestimonial =
+  RouterOutputs["testimonial"]["listRandom"][number];
 
 type PollenTestimonialCardProps = {
   testimonial: PollenTestimonial;

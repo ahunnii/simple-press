@@ -169,8 +169,19 @@ const productCreateObjectSchema = productFormObjectSchema
       .finite("Weight must be a finite number")
       .nullable()
       .optional(),
+    // Wire-level price/cost are cents, not dollars — the form schema above
+    // takes dollar input and the client always rounds to whole cents before
+    // sending (`Math.round(data.price * 100)` / `Math.round(data.cost * 100)`
+    // in product-form.tsx). `.int()` closes off a hand-rolled caller storing
+    // fractional cents.
+    price: z
+      .number()
+      .int("Price must be a whole number of cents")
+      .nonnegative("Price can't be negative")
+      .finite("Price must be a finite number"),
     cost: z
       .number()
+      .int("Cost must be a whole number of cents")
       .nonnegative("Cost can't be negative")
       .finite("Cost must be a finite number")
       .nullable()
@@ -197,8 +208,15 @@ const productUpdateObjectSchema = productFormObjectSchema
       .finite("Weight must be a finite number")
       .nullable()
       .optional(),
+    // See the matching note in productCreateObjectSchema above.
+    price: z
+      .number()
+      .int("Price must be a whole number of cents")
+      .nonnegative("Price can't be negative")
+      .finite("Price must be a finite number"),
     cost: z
       .number()
+      .int("Cost must be a whole number of cents")
       .nonnegative("Cost can't be negative")
       .finite("Cost must be a finite number")
       .nullable()

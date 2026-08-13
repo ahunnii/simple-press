@@ -776,9 +776,24 @@ export const orderRouter = createTRPCRouter({
               take: pageSize,
             });
 
+      // D2: strip internalNote + stripePaymentIntentId from STAFF rows.
+      // staffProcedure's own docblock (trpc.ts) draws the line at "anything
+      // touching money, prices, refunds, products, or settings must stay on
+      // ownerAdminProcedure" — money TOTALS are the deliberate exception here
+      // (user decision): subtotal/tax/shipping/discount/total stay visible to
+      // STAFF because a fulfillment worker needs them for packing-slip and
+      // order-context purposes. internalNote (owner-to-owner notes, may
+      // contain anything) and stripePaymentIntentId (a raw Stripe identifier,
+      // not needed for fulfillment) are not fulfillment-relevant and are
+      // nulled out below. OWNER/MANAGER and PLATFORM_ADMIN (who has no
+      // membership row, so `membershipRole` reads null) keep full rows.
+      const isStaff = ctx.session.session.membershipRole === "STAFF";
+
       return {
         orders: pageOrders.map(({ _count, ...order }) => ({
           ...order,
+          internalNote: isStaff ? null : order.internalNote,
+          stripePaymentIntentId: isStaff ? null : order.stripePaymentIntentId,
           itemCount: _count.items,
           hasOversell: _count.inventoryHistory > 0,
         })),

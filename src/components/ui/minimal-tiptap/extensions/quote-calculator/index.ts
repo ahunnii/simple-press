@@ -5,6 +5,17 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { QuoteCalculatorNodeView } from "./quote-calculator-node-view";
 
 export interface QuoteCalculatorOptions {
+  /**
+   * Accepted but UNUSED — kept only so the shared `configure()` call in
+   * `use-minimal-tiptap.ts` (which passes the same `businessId` to the Gallery
+   * extension, where it IS used) keeps type-checking.
+   *
+   * It used to be written into the node's attributes and serialized into the
+   * published HTML as `data-business-id`. That put an internal tenant id on
+   * every public page carrying a calculator, for nothing: the server resolves
+   * the tenant from the Host header on every read and write, and never once
+   * consults the attribute. Do not reintroduce it.
+   */
   businessId?: string;
   quotesEnabled?: boolean;
   HTMLAttributes: Record<string, unknown>;
@@ -42,7 +53,8 @@ export const QuoteCalculator = Node.create<QuoteCalculatorOptions>({
     return {
       calculatorId: {
         default: null,
-        parseHTML: (element) => element.getAttribute("data-quote-calculator-id"),
+        parseHTML: (element) =>
+          element.getAttribute("data-quote-calculator-id"),
         renderHTML: (attributes) => {
           if (!attributes.calculatorId) {
             return {};
@@ -52,18 +64,12 @@ export const QuoteCalculator = Node.create<QuoteCalculatorOptions>({
           };
         },
       },
-      businessId: {
-        default: this.options.businessId,
-        parseHTML: (element) => element.getAttribute("data-business-id"),
-        renderHTML: (attributes) => {
-          if (!attributes.businessId) {
-            return {};
-          }
-          return {
-            "data-business-id": attributes.businessId,
-          };
-        },
-      },
+      // No `businessId` attribute. The node needs exactly one thing to render:
+      // which calculator. Tenant comes from the request host, server-side, on
+      // both the public read (`quoteCalculator.getByIdPublic`) and the submit.
+      // Documents saved before this change still parse — the stale
+      // `data-business-id` in their stored HTML is simply dropped as an
+      // unknown attribute, and re-saving them cleans it out of the output.
     };
   },
 
@@ -91,10 +97,7 @@ export const QuoteCalculator = Node.create<QuoteCalculatorOptions>({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: {
-              ...attrs,
-              businessId: this.options.businessId,
-            },
+            attrs: { ...attrs },
           });
         },
     };

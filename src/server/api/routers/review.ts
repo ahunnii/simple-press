@@ -24,6 +24,31 @@ import {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
+// Storefront-safe review projection. `customerEmail`, `customerId`, and
+// `orderId` are admin-only PII/order-linkage columns — `review.listByProduct`
+// (publicProcedure) selects this instead of the full row, so those columns
+// never reach a shopper's browser (they were previously shipped via a bare
+// `findMany` + `include`, visible in the Network tab / RSC payload even
+// though nothing rendered them). Every field below is either read by
+// `src/components/product-reviews.tsx`'s `ReviewCard`, or by
+// `buildProductSchema`'s `ReviewForSchema` (JSON-LD) in
+// `src/app/(storefront)/shop/[slug]/page.tsx`. Exported so the shape can be
+// pinned by a unit test without touching the DB.
+export const PUBLIC_REVIEW_SELECT = {
+  id: true,
+  rating: true,
+  title: true,
+  comment: true,
+  images: true,
+  videoUrl: true,
+  verifiedPurchase: true,
+  customerName: true,
+  reviewDate: true,
+  createdAt: true,
+  helpfulCount: true,
+  notHelpfulCount: true,
+} as const satisfies Prisma.ProductReviewSelect;
+
 async function assertBusinessOwner(
   db: DbClient,
   userId: string,
@@ -139,9 +164,10 @@ export const reviewRouter = createTRPCRouter({
           ...(input.rating && { rating: input.rating }),
         },
         orderBy: orderBy[input.sortBy],
-        include: {
-          customer: { select: { firstName: true, lastName: true } },
-        },
+        // See PUBLIC_REVIEW_SELECT above — must never widen back to a bare
+        // `include`/full-row fetch, which would ship customerEmail/
+        // customerId/orderId to every storefront visitor.
+        select: PUBLIC_REVIEW_SELECT,
       });
     }),
 

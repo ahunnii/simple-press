@@ -449,6 +449,19 @@ describe("productCreateSchema", () => {
         }).success,
       ).toBe(true);
     });
+
+    it("rejects a fractional price (wire-level price is whole cents)", () => {
+      expect(
+        productCreateSchema.safeParse({ ...validProduct, price: 10.5 })
+          .success,
+      ).toBe(false);
+    });
+
+    it("rejects a fractional cost (wire-level cost is whole cents)", () => {
+      expect(
+        productCreateSchema.safeParse({ ...validProduct, cost: 4.5 }).success,
+      ).toBe(false);
+    });
   });
 
   describe("compareAtPrice", () => {
@@ -488,14 +501,14 @@ describe("productCreateSchema", () => {
         ...validProduct,
         sku: "SKU-123",
         featured: true,
-        cost: 4.5,
+        cost: 450,
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.sku).toBe("SKU-123");
         expect(result.data.featured).toBe(true);
-        expect(result.data.cost).toBe(4.5);
+        expect(result.data.cost).toBe(450);
       }
     });
 
@@ -535,6 +548,21 @@ describe("productUpdateSchema", () => {
     expect(productUpdateSchema.safeParse(validProduct).success).toBe(true);
   });
 
+  describe("price and cost bounds", () => {
+    it("rejects a fractional price (wire-level price is whole cents)", () => {
+      expect(
+        productUpdateSchema.safeParse({ ...validProduct, price: 10.5 })
+          .success,
+      ).toBe(false);
+    });
+
+    it("rejects a fractional cost (wire-level cost is whole cents)", () => {
+      expect(
+        productUpdateSchema.safeParse({ ...validProduct, cost: 4.5 }).success,
+      ).toBe(false);
+    });
+  });
+
   describe("compareAtPrice", () => {
     it("rejects a compareAtPrice equal to price, reporting the error on the compareAtPrice path", () => {
       expect(
@@ -572,14 +600,14 @@ describe("productUpdateSchema", () => {
         ...validProduct,
         sku: "SKU-123",
         featured: true,
-        cost: 4.5,
+        cost: 450,
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.sku).toBe("SKU-123");
         expect(result.data.featured).toBe(true);
-        expect(result.data.cost).toBe(4.5);
+        expect(result.data.cost).toBe(450);
       }
     });
   });

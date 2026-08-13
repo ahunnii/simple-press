@@ -1,3 +1,4 @@
+import type { FormulaFailureCode } from "~/lib/quote/formula";
 import type {
   QuoteCalculatorDefinition,
   QuoteQuestion,
@@ -10,6 +11,7 @@ import { resolveVisibility } from "~/lib/quote/visibility";
 import {
   isQuoteVariableQuestion,
   QUOTE_DATE_RE,
+  QUOTE_MAX_FINAL_CENTS,
   QUOTE_ZIP_RE,
 } from "~/lib/validators/quote-calculator";
 
@@ -58,17 +60,80 @@ export type QuoteComputationError = {
   message: string;
 };
 
+/**
+ * Why a submission that is otherwise completely valid carries no estimate.
+ *
+ * This is NOT an error result — the answers were accepted, the snapshot is
+ * intact, and the lead must still be captured. It only says "we could not put
+ * a number on this one".
+ *
+ * - `value-error` — the formula itself is fine; THIS visitor's numbers broke
+ *   it. A `0` typed into a divisor with no configured `min`, a `hiddenDefault`
+ *   of 0 feeding a divisor, or inputs large enough to overflow to Infinity.
+ *   The owner cannot "fix" a definition that is already valid, and the visitor
+ *   did nothing wrong — so neither gets an error, and the owner gets a lead
+ *   with a blank estimate to price by hand.
+ * - `over-cap` — it evaluated to a finite number past `QUOTE_MAX_FINAL_CENTS`.
+ */
+export type QuoteEstimateFailureCode = "value-error" | "over-cap";
+
+export type QuoteEstimateFailure = {
+  code: QuoteEstimateFailureCode;
+  message: string;
+};
+
 export type QuoteComputationResult =
   | {
       ok: true;
-      estimateCents: number;
+      /**
+       * `null` when the formula could not produce a storable number for this
+       * particular submission — see `estimateFailure`, which is set exactly
+       * when this is null. Callers persist the row either way.
+       */
+      estimateCents: number | null;
+      estimateFailure?: QuoteEstimateFailure;
       variables: Record<string, number>;
       answerSnapshots: QuoteSubmissionAnswer[];
     }
   | { ok: false; error: QuoteComputationError };
 
-/** What a snapshot row shows when there is nothing to show. */
-const UNANSWERED_DISPLAY = "—";
+/**
+ * What a snapshot row shows when there is nothing to show.
+ *
+ * Exported because callers have to be able to RECOGNIZE it: an optional
+ * visible question the visitor skipped snapshots as `hidden: false` with this
+ * display, and rendering "Do you need packing? —" back to the customer reads
+ * as a bug (see the confirmation-email row filter in
+ * `src/server/api/routers/quote-submission.ts`).
+ */
+export const UNANSWERED_DISPLAY = "—";
+
+/**
+ * Formula failures that are about the VISITOR'S NUMBERS, not the owner's
+ * definition.
+ *
+ * Every other `FormulaFailureCode` (syntax / unknown-variable /
+ * unknown-function / bad-arity / too-long) means the stored definition drifted
+ * out from under the validator that accepted it — a developer problem worth a
+ * hard failure and a Sentry issue. These two are reachable from a definition
+ * that is still perfectly valid, purely because of what was typed into the
+ * form, so they must never cost the owner the lead.
+ */
+const VALUE_LEVEL_FORMULA_CODES: ReadonlySet<FormulaFailureCode> =
+  new Set<FormulaFailureCode>(["division-by-zero", "not-finite"]);
+
+/**
+ * Ceiling on a computed estimate, shared with the owner-entered final quote
+ * (`quoteSetFinalQuoteSchema`) so both halves of the money story agree.
+ *
+ * Load-bearing beyond taste: `QuoteSubmission.estimateCents` is a Postgres
+ * `Int?` (int4, max 2,147,483,647). A formula that multiplies a large visitor
+ * number by a large option value sails past that, and the resulting write
+ * fails with a raw Prisma error that would be serialized to an anonymous
+ * visitor — losing the lead AND leaking internals. Capping here means the
+ * write is always in range.
+ */
+const QUOTE_MAX_ESTIMATE_CENTS = QUOTE_MAX_FINAL_CENTS;
 
 function failure(
   code: QuoteComputationErrorCode,
@@ -414,10 +479,26 @@ export function computeQuote(
   // ── Price ─────────────────────────────────────────────────────────────────
   const resolvedVariables = Object.fromEntries(variables);
   const evaluated = evaluateFormula(definition.formula, resolvedVariables);
+
   if (!evaluated.ok) {
-    // Owner misconfiguration, not visitor error — the definition passed
-    // validation when it was saved, so reaching here means something drifted.
-    // Callers surface a generic apology to the visitor and log this to Sentry.
+    // Two very different situations arrive through one `ok: false`, and
+    // collapsing them destroys leads. `division-by-zero` / `not-finite` are
+    // driven by what the VISITOR typed into a definition that is still valid;
+    // they resolve to a captured lead with no estimate. Everything else means
+    // the stored definition drifted out from under the schema — owner/developer
+    // misconfiguration, which callers surface as a generic apology plus Sentry.
+    if (VALUE_LEVEL_FORMULA_CODES.has(evaluated.error.code)) {
+      return {
+        ok: true,
+        estimateCents: null,
+        estimateFailure: {
+          code: "value-error",
+          message: evaluated.error.message,
+        },
+        variables: resolvedVariables,
+        answerSnapshots: snapshots,
+      };
+    }
     return failure("formula-failed", evaluated.error.message);
   }
 
@@ -425,11 +506,30 @@ export function computeQuote(
   // land below zero, and a negative estimate is meaningless to a customer,
   // would render as "-$120.00", and would corrupt the admin list's revenue
   // sort and totals. Zero reads as "we need to talk about this one".
-  const estimateCents = Math.max(0, Math.round(evaluated.value * 100));
+  const rawEstimateCents = Math.max(0, Math.round(evaluated.value * 100));
+
+  // Over the cap we NULL the estimate rather than clamping it. Clamping would
+  // hand the customer (and the owner's inbox) a confident "$1,000,000.00" that
+  // no configured price actually produces — a number the owner would have to
+  // un-believe. A blank estimate is honest, keeps the lead, and tells the owner
+  // exactly which submission needs a hand-priced quote. The zero-clamp above is
+  // different on purpose: 0 IS the arithmetic answer there, just floored.
+  if (rawEstimateCents > QUOTE_MAX_ESTIMATE_CENTS) {
+    return {
+      ok: true,
+      estimateCents: null,
+      estimateFailure: {
+        code: "over-cap",
+        message: `Computed estimate ${rawEstimateCents} exceeds the ${QUOTE_MAX_ESTIMATE_CENTS} cent cap`,
+      },
+      variables: resolvedVariables,
+      answerSnapshots: snapshots,
+    };
+  }
 
   return {
     ok: true,
-    estimateCents,
+    estimateCents: rawEstimateCents,
     variables: resolvedVariables,
     answerSnapshots: snapshots,
   };

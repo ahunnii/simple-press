@@ -684,6 +684,25 @@ export function toPublicCalculatorDefinition(
 // ─── Storefront submission (wire) ───────────────────────────────────────────
 
 /**
+ * Ceiling on every id the storefront may post — question ids, option ids and
+ * the calculator id.
+ *
+ * These are cuids (25 chars) and owner-authored slugs, so 64 is generous. The
+ * bound exists because this schema is the FIRST thing an anonymous request
+ * touches: without it a single POST can carry 30 answers × 12 option ids of
+ * unbounded length, and every one of those strings gets parsed, deduped and
+ * compared against the definition before anything rejects it. Cheap ceiling,
+ * whole class of amplification gone.
+ */
+export const QUOTE_ID_MAX_LENGTH = 64;
+
+/**
+ * Ceiling (in absolute value) on a visitor-entered number answer. See the
+ * `number` field below for why this is not just `.finite()`.
+ */
+export const QUOTE_MAX_ANSWER_NUMBER = 1_000_000_000;
+
+/**
  * One answer as the browser sends it: IDs and raw values only, never labels
  * and never prices. Everything here is re-validated against the stored
  * definition in `computeQuote`, so a hand-crafted payload can at worst produce
@@ -694,13 +713,33 @@ export function toPublicCalculatorDefinition(
  * ignores the rest.
  */
 export const quoteWireAnswerSchema = z.object({
-  questionId: z.string().min(1),
+  questionId: z.string().min(1).max(QUOTE_ID_MAX_LENGTH),
   /** choice / dropdown */
-  optionId: z.string().min(1).optional(),
+  optionId: z.string().min(1).max(QUOTE_ID_MAX_LENGTH).optional(),
   /** multiselect */
-  optionIds: z.array(z.string().min(1)).max(12).optional(),
-  /** number */
-  number: z.number().finite().optional(),
+  optionIds: z
+    .array(z.string().min(1).max(QUOTE_ID_MAX_LENGTH))
+    .max(12)
+    .optional(),
+  /**
+   * number
+   *
+   * Absolutely bounded, not merely `.finite()`. Two things sit downstream: the
+   * value multiplies through the owner's formula into `estimateCents`, a
+   * Postgres `Int?` (int4, max ~2.1e9) whose overflow surfaces as a raw Prisma
+   * error serialized to an anonymous visitor; and even well short of overflow,
+   * a `9e12`-bedroom "quote" persists and emails the owner a $20M lead. The
+   * ceiling here is deliberately far above any real answer (square footage,
+   * mileage, guest counts) and far below anything that can hurt — a per-question
+   * `min`/`max` is still the owner's tool for a realistic range. Negative
+   * allowed at the same magnitude: some owners model credits as negative input.
+   */
+  number: z
+    .number()
+    .finite()
+    .min(-QUOTE_MAX_ANSWER_NUMBER, "That number is too small")
+    .max(QUOTE_MAX_ANSWER_NUMBER, "That number is too large")
+    .optional(),
   /** text / longtext */
   text: z.string().max(2000).optional(),
   /** date */
@@ -712,7 +751,7 @@ export const quoteWireAnswerSchema = z.object({
 export type QuoteWireAnswer = z.infer<typeof quoteWireAnswerSchema>;
 
 export const quoteSubmitSchema = z.object({
-  calculatorId: z.string().min(1),
+  calculatorId: z.string().min(1).max(QUOTE_ID_MAX_LENGTH),
   answers: z.array(quoteWireAnswerSchema).max(30, "Too many answers submitted"),
   contactName: z
     .string()

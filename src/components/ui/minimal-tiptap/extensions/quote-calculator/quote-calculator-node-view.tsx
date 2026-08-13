@@ -29,16 +29,25 @@ export function QuoteCalculatorNodeView({
 
   const [isEditing, setIsEditing] = useState(!node.attrs.calculatorId);
 
-  // Get available quote calculators
+  // The ONE query this node view makes. `list` carries id / name / published /
+  // questionCount — everything both states below need — and is the picker feed
+  // this component already had to load anyway.
+  //
+  // It deliberately does NOT call `quoteCalculator.getById`. That returns the
+  // raw stored row, which means the owner's formula, every option `value` and
+  // every `hiddenDefault` land in the editor's client cache to render the words
+  // "3 questions". The count is computed server-side in `list` instead, so the
+  // pricing model never crosses into the browser for a preview card.
   const { data: calculators, isLoading: loadingCalculators } =
     api.quoteCalculator.list.useQuery(undefined, { enabled: quotesEnabled });
 
-  // Get selected quote calculator
-  const { data: calculator, isLoading: loadingCalculator } =
-    api.quoteCalculator.getById.useQuery(
-      { id: node.attrs.calculatorId },
-      { enabled: quotesEnabled && !!node.attrs.calculatorId },
-    );
+  const selectedId =
+    typeof node.attrs.calculatorId === "string"
+      ? node.attrs.calculatorId
+      : null;
+  const calculator = selectedId
+    ? calculators?.find((entry) => entry.id === selectedId)
+    : undefined;
 
   const handleCalculatorSelect = (calculatorId: string) => {
     updateAttributes({
@@ -58,8 +67,8 @@ export function QuoteCalculatorNodeView({
     return (
       <NodeViewWrapper className="quote-calculator-node my-4">
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-700">
-          Quote calculators are currently disabled for this business.
-          Re-enable the quote calculator feature to display this content.
+          Quote calculators are currently disabled for this business. Re-enable
+          the quote calculator feature to display this content.
         </div>
       </NodeViewWrapper>
     );
@@ -136,9 +145,7 @@ export function QuoteCalculatorNodeView({
   // An interactive multi-step form inside ProseMirror would be a focus trap
   // (tab/arrow keys would fight the editor); the storefront renders the real,
   // interactive calculator from this same `calculatorId`.
-  const questionCount =
-    (calculator?.definition as { questions?: unknown[] } | undefined)
-      ?.questions?.length ?? 0;
+  const questionCount = calculator?.questionCount ?? 0;
 
   return (
     <NodeViewWrapper className="quote-calculator-node my-6">
@@ -160,7 +167,7 @@ export function QuoteCalculatorNodeView({
         </div>
 
         {/* Quote Calculator Display */}
-        {loadingCalculator ? (
+        {loadingCalculators ? (
           <div className="flex items-center justify-center rounded-lg bg-gray-50 py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
