@@ -249,6 +249,8 @@ exports.Prisma.SiteContentScalarFieldEnum = {
   metaKeywords: 'metaKeywords',
   ogImage: 'ogImage',
   faviconUrl: 'faviconUrl',
+  pageMeta: 'pageMeta',
+  siteVerification: 'siteVerification',
   logoUrl: 'logoUrl',
   logoAltText: 'logoAltText',
   primaryColor: 'primaryColor',
@@ -833,6 +835,37 @@ exports.Prisma.BackInStockRequestScalarFieldEnum = {
   businessId: 'businessId'
 };
 
+exports.Prisma.QuoteCalculatorScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  name: 'name',
+  definition: 'definition',
+  published: 'published',
+  businessId: 'businessId'
+};
+
+exports.Prisma.QuoteSubmissionScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  status: 'status',
+  contactName: 'contactName',
+  contactEmail: 'contactEmail',
+  contactPhone: 'contactPhone',
+  answers: 'answers',
+  estimateCents: 'estimateCents',
+  formulaSnapshot: 'formulaSnapshot',
+  finalQuoteCents: 'finalQuoteCents',
+  quoteSentAt: 'quoteSentAt',
+  sentQuoteCents: 'sentQuoteCents',
+  sentMessage: 'sentMessage',
+  calculatorName: 'calculatorName',
+  showEstimateToCustomer: 'showEstimateToCustomer',
+  calculatorId: 'calculatorId',
+  businessId: 'businessId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -922,7 +955,9 @@ exports.Prisma.ModelName = {
   PlatformConfig: 'PlatformConfig',
   ShippingZone: 'ShippingZone',
   ShippingRate: 'ShippingRate',
-  BackInStockRequest: 'BackInStockRequest'
+  BackInStockRequest: 'BackInStockRequest',
+  QuoteCalculator: 'QuoteCalculator',
+  QuoteSubmission: 'QuoteSubmission'
 };
 
 /**
