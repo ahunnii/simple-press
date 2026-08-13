@@ -26,6 +26,8 @@ export function RelocationMobileMenu({
   activePath,
   triggerRef,
   id,
+  accountHref,
+  accountLabel,
 }: {
   open: boolean;
   onClose: () => void;
@@ -35,6 +37,16 @@ export function RelocationMobileMenu({
   activePath: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
   id?: string;
+  /**
+   * A single account entry point ("Log In" / "My Account"), shown as an
+   * ink-outlined pill below the phone CTA — mirrors `ViiHeader`'s mobile
+   * drawer, which collapses the desktop UserButton dropdown down to one
+   * link rather than trying to fit ghost buttons or an avatar menu into
+   * the drawer's top bar. Omit both (or leave undefined) when
+   * `customerAccounts` is off.
+   */
+  accountHref?: string;
+  accountLabel?: string;
 }) {
   const [entered, setEntered] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -186,10 +198,20 @@ export function RelocationMobileMenu({
           </Link>
         ))}
 
-        <div className="pt-8">
+        <div className="flex flex-col items-start gap-3 pt-8">
           <RelocationPillButton href={phoneHref} variant="solid">
             {phoneLabel}
           </RelocationPillButton>
+
+          {accountHref && accountLabel && (
+            <RelocationPillButton
+              href={accountHref}
+              variant="outline-light"
+              className="border-[var(--relocation-ink)] text-[var(--relocation-ink)]"
+            >
+              {accountLabel}
+            </RelocationPillButton>
+          )}
         </div>
       </nav>
     </div>

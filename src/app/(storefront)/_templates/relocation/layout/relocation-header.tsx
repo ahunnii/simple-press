@@ -3,10 +3,14 @@
 import { useId, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import { UserButton } from "~/components/auth/user/user-button";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "..";
 import { RelocationPillButton } from "../shared/relocation-pill-button";
@@ -27,11 +31,16 @@ import { RelocationMobileMenu } from "./relocation-mobile-menu";
  * everything below that (`max-[1024px]:` / `min-[1025px]:` arbitrary variants —
  * the Tailwind config is never touched).
  */
-export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
+export function RelocationHeader({
+  business,
+  session,
+}: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuId = useId();
+
+  const { isEnabled } = useStorefrontFlags();
 
   const customFields = business?.siteContent?.customFields;
   const f = resolveFields(customFields, [
@@ -86,6 +95,69 @@ export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
       pathname === href && "relocation-nav-link--active",
     );
 
+  const authActions = (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="text-[var(--relocation-ink)] hover:bg-[var(--relocation-ink)]/10 hover:text-[var(--relocation-ink)]"
+      >
+        <Link href="/auth/sign-in">Log in</Link>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className="text-[var(--relocation-ink)] hover:bg-[var(--relocation-ink)]/10 hover:text-[var(--relocation-ink)]"
+      >
+        <Link href="/auth/sign-up">Sign up</Link>
+      </Button>
+    </>
+  );
+
+  const userMenu = session?.user && (
+    <UserButton
+      size="icon"
+      className="border-primary border"
+      avatarClassName="size-10"
+      links={[
+        {
+          icon: <IconPackage className="h-4 w-4" />,
+          label: "Orders",
+          href: "/account/orders",
+        },
+        ...(session?.user?.platformRole === "PLATFORM_ADMIN" ||
+        !!session?.session?.membershipId
+          ? [
+              {
+                icon: <IconLayoutDashboard className="h-4 w-4" />,
+                label: "Admin",
+                href: "/admin",
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
+
+  // Desktop cluster: full ghost buttons / avatar dropdown, next to the nav.
+  const accountSlot = isEnabled("customerAccounts")
+    ? session?.user
+      ? userMenu
+      : authActions
+    : null;
+
+  // Mobile drawer: collapses to one pill link rather than squeezing the
+  // above into the drawer's top bar (see RelocationMobileMenu's account
+  // props doc comment — mirrors ViiHeader's mobile pattern).
+  const mobileAccountHref = isEnabled("customerAccounts")
+    ? (session?.user ? "/account/orders" : "/auth/sign-in")
+    : undefined;
+  const mobileAccountLabel = isEnabled("customerAccounts")
+    ? (session?.user ? "My Account" : "Log In")
+    : undefined;
+
   return (
     <header
       {...sectionGroupAttr("global", "branding")}
@@ -115,43 +187,54 @@ export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
           )}
         </Link>
 
-        {/* ── Desktop nav — ≥1025px ─────────────────────────────────────── */}
-        <nav
-          aria-label="Primary navigation"
-          className="hidden items-center gap-7 min-[1025px]:flex"
-        >
-          <RelocationAboutDropdown
-            label={aboutLabel}
-            links={aboutLinks}
-            activePath={pathname}
-            labelAttrs={fieldAttr("relocation.global.branding.about-label")}
-          />
-          <Link
-            href="/services"
-            className={navLinkClass("/services")}
-            aria-current={pathname === "/services" ? "page" : undefined}
-            {...fieldAttr("relocation.global.branding.services-label")}
+        {/* ── Desktop nav + account cluster — ≥1025px ─────────────────────
+            Both live in one flex item so the outer row's `justify-between`
+            still balances to exactly two clusters (logo left, everything
+            else right) instead of splitting the nav away from the phone
+            pill once a third top-level child is added. */}
+        <div className="hidden items-center gap-7 min-[1025px]:flex">
+          <nav
+            aria-label="Primary navigation"
+            className="flex items-center gap-7"
           >
-            {servicesLabel}
-          </Link>
-          <Link
-            href="/contact"
-            className={navLinkClass("/contact")}
-            aria-current={pathname === "/contact" ? "page" : undefined}
-            {...fieldAttr("relocation.global.branding.contact-label")}
-          >
-            {contactLabel}
-          </Link>
-          <RelocationPillButton
-            href={phoneHref}
-            variant="solid"
-            className="ml-1"
-            labelAttrs={fieldAttr("relocation.global.branding.phone-label")}
-          >
-            {phoneLabel}
-          </RelocationPillButton>
-        </nav>
+            <RelocationAboutDropdown
+              label={aboutLabel}
+              links={aboutLinks}
+              activePath={pathname}
+              labelAttrs={fieldAttr("relocation.global.branding.about-label")}
+            />
+            <Link
+              href="/services"
+              className={navLinkClass("/services")}
+              aria-current={pathname === "/services" ? "page" : undefined}
+              {...fieldAttr("relocation.global.branding.services-label")}
+            >
+              {servicesLabel}
+            </Link>
+            <Link
+              href="/contact"
+              className={navLinkClass("/contact")}
+              aria-current={pathname === "/contact" ? "page" : undefined}
+              {...fieldAttr("relocation.global.branding.contact-label")}
+            >
+              {contactLabel}
+            </Link>
+            <RelocationPillButton
+              href={phoneHref}
+              variant="solid"
+              className="ml-1"
+              labelAttrs={fieldAttr("relocation.global.branding.phone-label")}
+            >
+              {phoneLabel}
+            </RelocationPillButton>
+          </nav>
 
+          {accountSlot && (
+            <div className="flex items-center gap-2 border-l border-[var(--relocation-border)] pl-6">
+              {accountSlot}
+            </div>
+          )}
+        </div>
         {/* ── Hamburger — <1025px ───────────────────────────────────────── */}
         <button
           ref={hamburgerRef}
@@ -187,6 +270,8 @@ export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
         phoneHref={phoneHref}
         activePath={pathname}
         triggerRef={hamburgerRef}
+        accountHref={mobileAccountHref}
+        accountLabel={mobileAccountLabel}
       />
     </header>
   );
