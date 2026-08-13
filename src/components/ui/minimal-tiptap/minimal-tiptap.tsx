@@ -31,10 +31,12 @@ const Toolbar = ({
   editor,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
 }: {
   editor: Editor;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
 }) => (
   <div className="border-border flex h-12 shrink-0 overflow-x-auto border-b p-2">
     <div className="flex w-max items-center gap-px">
@@ -77,11 +79,13 @@ const Toolbar = ({
           "horizontalRule",
           "gallery",
           "embed",
+          "quoteCalculator",
           "table",
         ]}
         mainActionCount={0}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
+        quotesEnabled={quotesEnabled}
       />
     </div>
   </div>
@@ -94,6 +98,7 @@ export const MinimalTiptapEditor = ({
   editorContentClassName,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
   ...props
 }: MinimalTiptapProps) => {
   const editor = useMinimalTiptapEditor({
@@ -101,6 +106,7 @@ export const MinimalTiptapEditor = ({
     onUpdate: onChange,
     galleriesEnabled,
     embedsEnabled,
+    quotesEnabled,
     ...props,
   });
 
@@ -116,6 +122,7 @@ export const MinimalTiptapEditor = ({
         editorContentClassName={editorContentClassName}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
+        quotesEnabled={quotesEnabled}
       />
     </EditorContext.Provider>
   );
@@ -131,6 +138,7 @@ export const MainMinimalTiptapEditor = ({
   editorContentClassName,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
 }: MinimalTiptapProps & { editor: Editor }) => {
   // Use provided editor directly. Do not subscribe to full editor state here,
   // or every transaction (e.g. from gallery) re-renders the whole toolbar and
@@ -154,6 +162,7 @@ export const MainMinimalTiptapEditor = ({
         editor={providedEditor}
         galleriesEnabled={galleriesEnabled}
         embedsEnabled={embedsEnabled}
+        quotesEnabled={quotesEnabled}
       />
       <EditorContent
         editor={providedEditor}

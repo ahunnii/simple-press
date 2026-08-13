@@ -192,6 +192,10 @@ export function CmsPagePanel({
           </Label>
           {/* Keyed on pageId so switching pages remounts the editor instead
            * of diffing controlled TipTap JSON across unrelated documents. */}
+          {/* TODO: this instance passes no galleriesEnabled/embedsEnabled/
+           * quotesEnabled prop, so those widgets default to enabled here
+           * regardless of the business's actual feature flags — a
+           * pre-existing shared gap (not new for quotesEnabled). */}
           <MinimalTiptapEditor
             key={pageId}
             value={contentValue}

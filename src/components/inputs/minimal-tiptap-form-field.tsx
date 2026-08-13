@@ -64,6 +64,7 @@ type Props<CurrentForm extends FieldValues> = {
   businessId?: string;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
   required?: boolean;
   /**
    * Image upload function passed to the editor. Defaults to an S3 uploader
@@ -87,6 +88,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   businessId,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
   required,
   uploader,
 }: Props<CurrentForm>) => {
@@ -124,6 +126,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 businessId={businessId}
                 galleriesEnabled={galleriesEnabled}
                 embedsEnabled={embedsEnabled}
+                quotesEnabled={quotesEnabled}
                 uploader={resolvedUploader}
               />
             </FormControl>

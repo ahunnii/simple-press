@@ -125,6 +125,7 @@ function walkTiptap(
     if (typeof galleryId === "string" && galleryId) onGalleryId(galleryId);
   }
   // `embed` → intentionally ignored
+  // "quoteCalculator" nodes are intentionally ignored: they reference a calculator id, not media.
 
   const content = n.content;
   if (Array.isArray(content)) {

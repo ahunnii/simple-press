@@ -10,14 +10,16 @@ import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { ExternalLink, Images } from "lucide-react";
 
-import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
+import { QuoteCalculator } from "~/components/ui/minimal-tiptap/extensions/quote-calculator";
 import { TableKit } from "~/components/ui/minimal-tiptap/extensions/table";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { GalleryRenderer } from "~/components/gallery-renderer";
+import { QuoteCalculatorBlock } from "~/components/quote/quote-calculator-block";
+import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 /** TipTap document JSON — matches first parameter of generateHTML */
 export type TiptapJSON = Parameters<typeof generateHTML>[0];
@@ -51,6 +53,7 @@ const extensions = [
   }),
   Gallery,
   Embed,
+  QuoteCalculator,
   TableKit,
 ];
 
@@ -173,6 +176,16 @@ function isGalleryNode(
   );
 }
 
+function isQuoteCalculatorNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { calculatorId?: string | null } } {
+  return (
+    node.type === "quoteCalculator" &&
+    node.attrs != null &&
+    "calculatorId" in node.attrs
+  );
+}
+
 function isEmbedNode(node: ContentNode): node is ContentNode & {
   attrs: {
     src?: string;
@@ -203,6 +216,14 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
           <GalleryBlock
             key={`gallery-${node.attrs.galleryId}-${index}`}
             galleryId={String(node.attrs.galleryId)}
+          />
+        );
+      }
+      if (isQuoteCalculatorNode(node) && node.attrs.calculatorId) {
+        return (
+          <QuoteCalculatorBlock
+            key={`quote-${node.attrs.calculatorId}-${index}`}
+            calculatorId={String(node.attrs.calculatorId)}
           />
         );
       }

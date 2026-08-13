@@ -17,6 +17,7 @@ export default async function NewPagePage() {
       <PageEditor
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
       />
     </>
   );

@@ -256,6 +256,8 @@ model Business {
   videos                Video[]
   videoSources          VideoSource[]
   backInStockRequests   BackInStockRequest[]
+  quoteCalculators      QuoteCalculator[]
+  quoteSubmissions      QuoteSubmission[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -1577,4 +1579,79 @@ model BackInStockRequest {
   @@index([businessId, productId])
   @@index([notifiedAt, productId])
   @@index([productId])
+}
+
+// ============================================
+// QUOTE CALCULATOR
+// ============================================
+
+model QuoteCalculator {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  // Versioned definition blob: questions, options, show-if conditions, distance
+  // variables, formula, and display settings. Shape + refinements:
+  // `quoteCalculatorDefinitionSchema` in src/lib/validators/quote-calculator.ts
+  definition Json
+  published  Boolean @default(false)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  submissions QuoteSubmission[]
+
+  @@index([businessId]) // admin list + tiptap picker
+}
+
+model QuoteSubmission {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // NEW | CONTACTED | WON | LOST — QUOTE_STATUS_VALUES_DB in
+  // src/lib/validators/quote-calculator.ts
+  status String @default("NEW")
+
+  contactName  String
+  contactEmail String
+  contactPhone String?
+
+  // Self-contained answer snapshot: [{questionId, type, title, variableName?,
+  // hidden, ...answer fields, display}] — `quoteSubmissionAnswerSchema`.
+  // Labels are denormalized so the inbox renders after the calculator is
+  // edited or deleted.
+  answers Json
+  // Exact server-computed estimate in cents; always owner-visible. IMMUTABLE —
+  // owner adjustments go on `finalQuoteCents` so the computed record survives.
+  estimateCents Int?
+  // { formula, variables } captured at submit time — `quoteFormulaSnapshotSchema`.
+  // Lets the owner audit how the number was produced.
+  formulaSnapshot Json
+  // Owner-adjusted authoritative amount in cents (null = not adjusted yet).
+  // This — not estimateCents — is what a future invoice/deposit bills against.
+  finalQuoteCents Int?
+  // Last final-quote email sent to the customer: when, for how much, with what
+  // message. Audit snapshot — finalQuoteCents may be edited again afterwards.
+  quoteSentAt    DateTime?
+  sentQuoteCents Int?
+  sentMessage    String?
+  // Calculator identity/settings snapshotted at submit time (survive deletion).
+  calculatorName         String
+  showEstimateToCustomer Boolean @default(false)
+
+  // SetNull, not Cascade: submissions are business records (a lead pipeline)
+  // and must outlive the calculator that produced them; everything the inbox
+  // renders is snapshotted onto this row.
+  calculatorId String?
+  calculator   QuoteCalculator? @relation(fields: [calculatorId], references: [id], onDelete: SetNull)
+
+  // Denormalized for join-free inbox listing (Testimonial precedent).
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, status, createdAt]) // inbox: status filter + newest-first
+  @@index([businessId, createdAt]) // inbox: unfiltered listing
+  @@index([calculatorId]) // SetNull fan-out on calculator delete
 }

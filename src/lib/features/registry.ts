@@ -268,6 +268,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  quoteCalculator: {
+    key: "quoteCalculator",
+    label: "Quote Calculator",
+    description:
+      "Build multi-step quote calculators visitors fill out to request an estimate",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
+  },
 };
 
 // Ordered category labels for display

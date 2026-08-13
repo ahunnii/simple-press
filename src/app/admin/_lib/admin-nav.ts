@@ -6,6 +6,7 @@ import {
   IconBraces,
   IconBrandYoutube,
   IconBrush,
+  IconCalculator,
   IconCalendarEvent,
   IconChartBar,
   IconDashboard,
@@ -286,6 +287,15 @@ export const NAV_ITEMS: NavItem[] = [
     section: "marketing",
     featureKey: "emailMarketing",
     keywords: ["newsletter", "broadcast", "campaign", "email blast"],
+  },
+  {
+    key: "quotes",
+    title: "Quotes",
+    href: "/admin/quotes",
+    icon: IconCalculator,
+    section: "marketing",
+    featureKey: "quoteCalculator",
+    keywords: ["estimate", "calculator", "lead", "moving", "request", "quote"],
   },
 
   // Content
@@ -726,6 +736,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     icon: Zap,
     featureKey: "emailMarketing",
     keywords: ["broadcast", "newsletter", "campaign"],
+  },
+  {
+    key: "add-quote-calculator",
+    title: "New quote calculator",
+    href: "/admin/quotes/calculators/new",
+    icon: IconCalculator,
+    featureKey: "quoteCalculator",
+    keywords: ["estimate", "calculator", "lead", "quote"],
   },
   {
     key: "setup-guide",

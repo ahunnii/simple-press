@@ -197,6 +197,85 @@ export async function notifyDiscordEditorNote({
   await assertOk(response, "editor-note");
 }
 
+export async function notifyDiscordQuoteSubmission({
+  businessName,
+  subdomain,
+  calculatorName,
+  contactName,
+  contactEmail,
+  estimateLabel,
+  answerSummary,
+}: {
+  businessName: string;
+  subdomain: string;
+  calculatorName: string;
+  contactName: string;
+  contactEmail: string;
+  estimateLabel: string;
+  answerSummary: string;
+}) {
+  const webhookUrl = env.DISCORD_WEBHOOK_URL;
+
+  if (!webhookUrl) return;
+
+  const platformDomain =
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "simplepress.co";
+  const subdomainUrl = `${subdomain}.${platformDomain}`;
+
+  const truncatedSummary =
+    answerSummary.length > 950
+      ? `${answerSummary.slice(0, 950)}…`
+      : answerSummary;
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      embeds: [
+        {
+          title: "🧮 New quote request",
+          description: "A visitor submitted a quote calculator.",
+          color: 0x5865f2,
+          fields: [
+            {
+              name: "Business",
+              value: businessName,
+              inline: true,
+            },
+            {
+              name: "Site",
+              value: `\`${subdomainUrl}\``,
+              inline: true,
+            },
+            {
+              name: "Calculator",
+              value: calculatorName,
+              inline: false,
+            },
+            {
+              name: "Contact",
+              value: `${contactName} (${contactEmail})`,
+              inline: false,
+            },
+            {
+              name: "Estimate",
+              value: estimateLabel,
+              inline: false,
+            },
+            {
+              name: "Answers",
+              value: truncatedSummary,
+              inline: false,
+            },
+          ],
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    }),
+  });
+  await assertOk(response, "quote-submission");
+}
+
 export async function notifyDiscordNewDomain({
   domain,
   businessName,

@@ -5,9 +5,11 @@ import BackInStockEmail from "~/emails/back-in-stock";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
 import DisputeAlertEmail from "~/emails/dispute-alert";
+import FinalQuoteEmail from "~/emails/final-quote";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
+import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
@@ -18,6 +20,7 @@ import OrderStatusLinkEmail from "~/emails/order-status-link";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
+import QuoteConfirmationEmail from "~/emails/quote-confirmation";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import WelcomeEmail from "~/emails/welcome";
@@ -911,5 +914,165 @@ export async function sendBackInStockEmail(params: {
       { name: "category", value: "back_in_stock" },
       { name: "business", value: params.business.subdomain },
     ],
+  });
+}
+
+// Quote request received (customer)
+export async function sendQuoteConfirmation(params: {
+  to: string;
+  customerName: string;
+  calculatorName: string;
+  responseDays: number;
+  answers: Array<{ title: string; display: string }>;
+  /** Present only when the calculator's `showEstimateToCustomer` is on. */
+  estimate?: { exactCents: number } | { lowCents: number; highCents: number };
+  business: {
+    name: string;
+    ownerEmail: string;
+    supportEmail?: string | null;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+  };
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["quote-confirmation"];
+  const defaultSubject = `We received your quote request — ${params.business.name}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : defaultSubject,
+    react: QuoteConfirmationEmail({
+      customerName: params.customerName,
+      introText: override?.introText,
+      calculatorName: params.calculatorName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      ownerEmail: params.business.ownerEmail,
+      responseDays: params.responseDays,
+      answers: params.answers,
+      estimate: params.estimate,
+    }),
+    tags: [
+      { name: "category", value: "quote_confirmation" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// New quote request — notify store owner
+export async function sendNewQuoteNotification(params: {
+  submissionId: string;
+  calculatorName: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone?: string | null;
+  /** Null when the formula could not be evaluated for this submission. */
+  estimateCents: number | null;
+  answers: Array<{ title: string; display: string; hidden: boolean }>;
+  formula: string;
+  variables: Record<string, number>;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+  idempotencyKey?: string;
+}) {
+  const adminQuoteUrl = `${getBusinessUrl(params.business)}/admin/quotes/${params.submissionId}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    replyTo: params.contactEmail,
+    subject: `New quote request — ${params.calculatorName}`,
+    react: NewQuoteNotificationEmail({
+      calculatorName: params.calculatorName,
+      contactName: params.contactName,
+      contactEmail: params.contactEmail,
+      contactPhone: params.contactPhone ?? undefined,
+      estimateCents: params.estimateCents,
+      answers: params.answers,
+      formula: params.formula,
+      variables: params.variables,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      adminQuoteUrl,
+    }),
+    tags: [
+      { name: "category", value: "new_quote_owner" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// Final quote — owner-reviewed amount + message, sent from the submission
+// detail page. Reply-to is the owner so the conversation continues in email.
+export async function sendFinalQuote(params: {
+  to: string;
+  customerName: string;
+  calculatorName: string;
+  /** Always exact — the owner reviewed it; there is no range framing here. */
+  finalQuoteCents: number;
+  /** Owner-written message for this send. Plain text. */
+  message: string;
+  answers: Array<{ title: string; display: string }>;
+  business: {
+    name: string;
+    ownerEmail: string;
+    supportEmail?: string | null;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+  };
+  idempotencyKey?: string;
+}) {
+  const overrides = await getEmailOverrides(params.business.subdomain);
+  const override = overrides["final-quote"];
+  const defaultSubject = `Your quote from ${params.business.name}`;
+
+  return sendEmail({
+    from: EMAIL_FROM.SUPPORT,
+    fromName: params.business.name,
+    to: params.to,
+    replyTo: params.business.supportEmail ?? params.business.ownerEmail,
+    subject: override?.subject
+      ? applySubjectTemplate(override.subject, {
+          businessName: params.business.name,
+        })
+      : defaultSubject,
+    react: FinalQuoteEmail({
+      customerName: params.customerName,
+      calculatorName: params.calculatorName,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      ownerEmail: params.business.ownerEmail,
+      message: params.message,
+      finalQuoteCents: params.finalQuoteCents,
+      answers: params.answers,
+    }),
+    tags: [
+      { name: "category", value: "final_quote" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
   });
 }

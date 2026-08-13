@@ -154,12 +154,14 @@ type BlogPostEditorProps = {
   };
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
 };
 
 export function BlogPostEditor({
   page,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
 }: BlogPostEditorProps) {
   const router = useRouter();
   const utils = api.useUtils();
@@ -766,6 +768,7 @@ export function BlogPostEditor({
                       editorContentClassName="min-h-[400px] p-4"
                       galleriesEnabled={galleriesEnabled}
                       embedsEnabled={embedsEnabled}
+                      quotesEnabled={quotesEnabled}
                       required
                     />
                   </CardContent>

@@ -120,6 +120,20 @@ export const contactLimiter = makeLazy({
   keyPrefix: "rl:contact",
 });
 
+// 5 quote calculator submissions per 15 minutes per IP, keyed ip:host
+export const quoteSubmitLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:quote-submit",
+});
+
+// 30 public zip→city/state lookups per minute per IP (keystroke-adjacent), keyed ip:host
+export const quoteZipLookupLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:quote-zip",
+});
+
 // 10 checkout session attempts per minute per IP
 export const checkoutLimiter = makeLazy({
   points: 10,

@@ -18,6 +18,7 @@ import {
   Gallery,
   HorizontalRule,
   Image,
+  QuoteCalculator,
   ResetMarksOnEnter,
   TableKit,
   UnsetAllMarks,
@@ -37,6 +38,7 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   businessId?: string;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -59,12 +61,14 @@ const createExtensions = ({
   businessId,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
   businessId?: string;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -207,6 +211,10 @@ const createExtensions = ({
     galleriesEnabled: galleriesEnabled !== false,
   }),
   Embed.configure({ embedsEnabled: embedsEnabled !== false }),
+  QuoteCalculator.configure({
+    businessId,
+    quotesEnabled: quotesEnabled !== false,
+  }),
   TableKit.configure({}),
 ];
 
@@ -222,6 +230,7 @@ export const useMinimalTiptapEditor = ({
   businessId,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   // const lastExternalValueRef = React.useRef<Content | undefined>(value);
@@ -267,8 +276,16 @@ export const useMinimalTiptapEditor = ({
         businessId,
         galleriesEnabled,
         embedsEnabled,
+        quotesEnabled,
       }) as unknown as Extension[],
-    [placeholder, uploader, businessId, galleriesEnabled, embedsEnabled],
+    [
+      placeholder,
+      uploader,
+      businessId,
+      galleriesEnabled,
+      embedsEnabled,
+      quotesEnabled,
+    ],
   );
 
   const editorProps = React.useMemo(

@@ -138,6 +138,12 @@ function isEmbedNode(node: ContentNode): node is ContentNode & {
   return node.type === "embed" && node.attrs != null && "src" in node.attrs;
 }
 
+function isQuoteCalculatorNode(
+  node: ContentNode,
+): node is ContentNode & { attrs: { calculatorId?: string; businessId?: string } } {
+  return node.type === "quoteCalculator" && node.attrs != null;
+}
+
 /** Render a resolved gallery to a `wp-block-gallery` figure. */
 function renderGallery(gallery: GalleryForHtml): string {
   const inner = gallery.images
@@ -249,6 +255,14 @@ export function tiptapToHtml(
             typeof node.attrs.title === "string" ? node.attrs.title : undefined,
         }),
       );
+      continue;
+    }
+
+    if (isQuoteCalculatorNode(node)) {
+      warnings.push(
+        "Skipped quote calculator node (interactive widget has no WordPress equivalent)",
+      );
+      fragments.push("<p><em>[Quote calculator: interactive widget not exported]</em></p>");
       continue;
     }
 

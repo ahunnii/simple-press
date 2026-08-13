@@ -317,4 +317,32 @@ describe("tiptapToHtml", () => {
         .length,
     ).toBe(1);
   });
+
+  it("skips a quote calculator node with a warning and renders surrounding paragraphs", () => {
+    const doc = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "Before calculator" }],
+        },
+        {
+          type: "quoteCalculator",
+          attrs: { calculatorId: "calc-1", businessId: "biz-1" },
+        },
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: "After calculator" }],
+        },
+      ],
+    };
+
+    const result = tiptapToHtml(doc, emptyGalleries);
+
+    expect(result.html).toContain("Before calculator");
+    expect(result.html).toContain("After calculator");
+    expect(result.html).toContain("<em>[Quote calculator: interactive widget not exported]</em>");
+    expect(result.warnings.length).toBe(1);
+    expect(result.warnings[0]).toContain("quote calculator");
+  });
 });
