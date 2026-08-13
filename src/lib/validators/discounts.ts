@@ -68,6 +68,63 @@ export function validateDiscountDateRange(data: {
 export const DISCOUNT_DATE_RANGE_ERROR =
   "Start date must be before the expiration date";
 
+export const DISCOUNT_PERCENTAGE_NOT_INTEGER_ERROR =
+  "Percentage value must be a whole number";
+export const DISCOUNT_PERCENTAGE_NEGATIVE_ERROR =
+  "Percentage value can't be negative";
+export const DISCOUNT_PERCENTAGE_MAX_ERROR =
+  "Percentage value can't exceed 100%";
+export const DISCOUNT_FIXED_NOT_INTEGER_ERROR =
+  "Fixed discount value must be a whole number of cents";
+export const DISCOUNT_FIXED_NEGATIVE_ERROR =
+  "Fixed discount value can't be negative";
+
+/**
+ * Server-side (and reusable client-side) validation of `DiscountCode.value`,
+ * which is unit-overloaded on `type` (see prisma/schema.prisma ~line 1009):
+ * whole percent points for "percentage", cents for "fixed", ignored (forced
+ * to 0) for "free_shipping". The client's onSubmit handler and the form's
+ * `max` attribute only cover the percentage cap in the UI — this is the
+ * authoritative check called from the router so a direct tRPC call can't
+ * store an out-of-range or non-integer value. Not baked into
+ * `discountFormSchema` itself (see note above) — call this from wherever
+ * `type`/`value` are validated together.
+ */
+export function validateDiscountValue(
+  type: "percentage" | "fixed" | "free_shipping",
+  value: number,
+): { ok: true } | { ok: false; message: string } {
+  if (type === "free_shipping") {
+    return { ok: true };
+  }
+
+  if (!Number.isInteger(value)) {
+    return {
+      ok: false,
+      message:
+        type === "percentage"
+          ? DISCOUNT_PERCENTAGE_NOT_INTEGER_ERROR
+          : DISCOUNT_FIXED_NOT_INTEGER_ERROR,
+    };
+  }
+
+  if (value < 0) {
+    return {
+      ok: false,
+      message:
+        type === "percentage"
+          ? DISCOUNT_PERCENTAGE_NEGATIVE_ERROR
+          : DISCOUNT_FIXED_NEGATIVE_ERROR,
+    };
+  }
+
+  if (type === "percentage" && value > 100) {
+    return { ok: false, message: DISCOUNT_PERCENTAGE_MAX_ERROR };
+  }
+
+  return { ok: true };
+}
+
 /**
  * The accepted values for the admin Discounts list's filter and sort params.
  *

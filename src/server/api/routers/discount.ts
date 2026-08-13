@@ -11,6 +11,7 @@ import {
   discountBulkDeleteSchema,
   discountFormSchema,
   validateDiscountDateRange,
+  validateDiscountValue,
 } from "~/lib/validators/discounts";
 import {
   createTRPCRouter,
@@ -84,6 +85,14 @@ export const discountRouter = createTRPCRouter({
         });
       }
 
+      const valueCheck = validateDiscountValue(input.type, input.value);
+      if (!valueCheck.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: valueCheck.message,
+        });
+      }
+
       const existingCode = await ctx.db.discountCode.findFirst({
         where: {
           businessId,
@@ -140,6 +149,14 @@ export const discountRouter = createTRPCRouter({
         });
       }
 
+      const valueCheck = validateDiscountValue(input.type, input.value);
+      if (!valueCheck.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: valueCheck.message,
+        });
+      }
+
       const codeTaken = await ctx.db.discountCode.findFirst({
         where: {
           businessId,
@@ -161,12 +178,12 @@ export const discountRouter = createTRPCRouter({
           type: input.type,
           value: input.value,
           active: input.active,
-          usageLimit: input.usageLimit ?? undefined,
+          usageLimit: input.usageLimit ?? null,
           perCustomerLimit: input.perCustomerLimit ?? null,
           startsAt: input.startsAt ?? null,
-          expiresAt: input.expiresAt ?? undefined,
-          minPurchase: input.minPurchase ?? undefined,
-          maxDiscount: input.maxDiscount ?? undefined,
+          expiresAt: input.expiresAt ?? null,
+          minPurchase: input.minPurchase ?? null,
+          maxDiscount: input.maxDiscount ?? null,
         },
       });
 

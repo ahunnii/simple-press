@@ -203,6 +203,7 @@ export function GalleryRenderer({
 
               {/* Navigation */}
               <button
+                type="button"
                 onClick={prevImage}
                 aria-label="Previous image"
                 className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
@@ -210,6 +211,7 @@ export function GalleryRenderer({
                 <span aria-hidden="true">←</span>
               </button>
               <button
+                type="button"
                 onClick={nextImage}
                 aria-label="Next image"
                 className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
@@ -218,6 +220,7 @@ export function GalleryRenderer({
               </button>
 
               <button
+                type="button"
                 aria-label="Close lightbox"
                 onClick={closeLightbox}
                 className="absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
@@ -238,6 +241,19 @@ type LayoutProps = {
 };
 
 // Grid Layout
+// Maps the stored column count (1–5) to a responsive Tailwind `grid-cols-*` ladder,
+// mirroring `masonryColumnsClass` below. Full class strings are listed literally so
+// Tailwind's scanner keeps them.
+function gridColumnsClass(columns: number): string {
+  if (columns >= 5)
+    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
+  if (columns === 4)
+    return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+  if (columns === 3) return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3";
+  if (columns === 2) return "grid-cols-1 sm:grid-cols-2";
+  return "grid-cols-1";
+}
+
 function GridLayout({ gallery, onImageClick }: LayoutProps) {
   const captionStyle = gallery.captionStyle ?? "overlay";
   const isBelow = captionStyle === "below";
@@ -246,17 +262,7 @@ function GridLayout({ gallery, onImageClick }: LayoutProps) {
 
   return (
     <div
-      className={cn(
-        "grid",
-        // Example: 1 col mobile, 2 col sm, etc. You can adjust these breakpoints as needed
-        gallery.columns >= 4
-          ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-          : gallery.columns === 3
-            ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
-            : gallery.columns === 2
-              ? "grid-cols-1 sm:grid-cols-2"
-              : "grid-cols-1",
-      )}
+      className={cn("grid", gridColumnsClass(gallery.columns))}
       style={{
         gap: `${gallery.gap}px`,
       }}
@@ -440,6 +446,7 @@ function CarouselLayout({
       {gallery.images.length > 1 && (
         <>
           <button
+            type="button"
             onClick={prev}
             aria-label="Previous image"
             className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
@@ -447,6 +454,7 @@ function CarouselLayout({
             <span aria-hidden="true">←</span>
           </button>
           <button
+            type="button"
             onClick={next}
             aria-label="Next image"
             className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
@@ -458,6 +466,7 @@ function CarouselLayout({
             {gallery.images.map((_, index: number) => (
               <button
                 key={index}
+                type="button"
                 aria-label={`Go to image ${index + 1}`}
                 aria-pressed={index === currentIndex}
                 onClick={() => setCurrentIndex(index)}

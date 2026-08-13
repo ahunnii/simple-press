@@ -245,8 +245,18 @@ function FieldGroup({
 }: FieldGroupProps) {
   const dateButtonWide = !includeTime || timeOptional;
   return (
-    <div className="flex flex-row flex-wrap items-end gap-4">
-      <div className="flex flex-col gap-2">
+    <div
+      className={cn(
+        "flex flex-row flex-wrap items-end gap-4",
+        dateButtonWide && "w-full",
+      )}
+    >
+      <div
+        className={cn(
+          "flex flex-col gap-2",
+          dateButtonWide && "min-w-0 flex-1",
+        )}
+      >
         <span className="text-sm leading-none font-medium">{dateLabel}</span>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>

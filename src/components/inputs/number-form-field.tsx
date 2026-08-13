@@ -1,4 +1,3 @@
-import type { InputHTMLAttributes } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 import { cn } from "~/lib/utils";
@@ -21,7 +20,6 @@ type Props<CurrentForm extends FieldValues> = {
   className?: string;
   disabled?: boolean;
   placeholder?: string;
-  defaultValue?: string;
   onChange?: (value: number | null) => void;
   onChangeAdditional?: (value: number | null) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -29,7 +27,6 @@ type Props<CurrentForm extends FieldValues> = {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   inputId?: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
-  type?: InputHTMLAttributes<HTMLInputElement>["type"];
   required?: boolean;
   autoFocus?: boolean;
   labelClassName?: string;

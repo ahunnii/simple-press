@@ -148,12 +148,14 @@ export function EditShippingAddressDialog({
                 name="firstName"
                 label="First Name"
                 required
+                className="col-span-1"
               />
               <InputFormField
                 form={form}
                 name="lastName"
                 label="Last Name"
                 required
+                className="col-span-1"
               />
             </div>
 
@@ -193,7 +195,7 @@ export function EditShippingAddressDialog({
             />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <InputFormField form={form} name="city" label="City" required />
+              <InputFormField form={form} name="city" label="City" required className="col-span-1" />
               <SelectFormField
                 form={form}
                 name="province"
@@ -203,6 +205,7 @@ export function EditShippingAddressDialog({
                   value: opt.code,
                   label: opt.name,
                 }))}
+                className="col-span-1"
               />
             </div>
 

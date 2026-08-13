@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { getDiscountStatus } from "./discounts";
+import {
+  DISCOUNT_FIXED_NEGATIVE_ERROR,
+  DISCOUNT_FIXED_NOT_INTEGER_ERROR,
+  DISCOUNT_PERCENTAGE_MAX_ERROR,
+  DISCOUNT_PERCENTAGE_NEGATIVE_ERROR,
+  DISCOUNT_PERCENTAGE_NOT_INTEGER_ERROR,
+  getDiscountStatus,
+  validateDiscountValue,
+} from "./discounts";
 
 /**
  * `getDiscountStatus` returns the mechanical state of a discount code for the
@@ -169,6 +177,95 @@ describe("getDiscountStatus", () => {
         expiresAt: null,
       };
       expect(getDiscountStatus(discount, now)).toBe("inactive");
+    });
+  });
+});
+
+/**
+ * `validateDiscountValue` checks the unit-overloaded `DiscountCode.value`
+ * column: whole percent points for "percentage" (0-100), whole cents for
+ * "fixed" (no upper bound), ignored (always ok) for "free_shipping". It
+ * returns a discriminated union — `{ ok: true }` or `{ ok: false; message }`
+ * — rather than throwing, so callers narrow on `ok` instead of relying on a
+ * cast.
+ */
+describe("validateDiscountValue", () => {
+  describe("type=percentage", () => {
+    it.each([0, 1, 20, 100])("accepts whole value %i", (value) => {
+      const result = validateDiscountValue("percentage", value);
+      expect(result.ok).toBe(true);
+    });
+
+    it("rejects 101 (above the 100% cap)", () => {
+      const result = validateDiscountValue("percentage", 101);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.message).toBe(DISCOUNT_PERCENTAGE_MAX_ERROR);
+      }
+    });
+
+    it("rejects values well above the cap", () => {
+      const result = validateDiscountValue("percentage", 500);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.message).toBe(DISCOUNT_PERCENTAGE_MAX_ERROR);
+      }
+    });
+
+    it("rejects a non-integer value (12.5) since the DB column is Int", () => {
+      const result = validateDiscountValue("percentage", 12.5);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.message).toBe(DISCOUNT_PERCENTAGE_NOT_INTEGER_ERROR);
+      }
+    });
+
+    it("rejects a negative value", () => {
+      const result = validateDiscountValue("percentage", -1);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.message).toBe(DISCOUNT_PERCENTAGE_NEGATIVE_ERROR);
+      }
+    });
+  });
+
+  describe("type=fixed", () => {
+    it.each([0, 1, 500, 1_000_000])(
+      "accepts valid non-negative integer cents value %i",
+      (value) => {
+        const result = validateDiscountValue("fixed", value);
+        expect(result.ok).toBe(true);
+      },
+    );
+
+    it("accepts a large value with no upper bound (cents, not percent)", () => {
+      const result = validateDiscountValue("fixed", 1_000_000);
+      expect(result.ok).toBe(true);
+    });
+
+    it("rejects a non-integer value since cents must be whole", () => {
+      const result = validateDiscountValue("fixed", 199.99);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.message).toBe(DISCOUNT_FIXED_NOT_INTEGER_ERROR);
+      }
+    });
+
+    it("rejects a negative value", () => {
+      const result = validateDiscountValue("fixed", -100);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.message).toBe(DISCOUNT_FIXED_NEGATIVE_ERROR);
+      }
+    });
+  });
+
+  describe("type=free_shipping", () => {
+    it("passes regardless of value, since the caller zeroes it", () => {
+      expect(validateDiscountValue("free_shipping", 0).ok).toBe(true);
+      expect(validateDiscountValue("free_shipping", 50).ok).toBe(true);
+      expect(validateDiscountValue("free_shipping", -50).ok).toBe(true);
+      expect(validateDiscountValue("free_shipping", 12.5).ok).toBe(true);
     });
   });
 });
