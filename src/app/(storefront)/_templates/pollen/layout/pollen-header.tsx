@@ -15,6 +15,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { authClient } from "~/server/better-auth/client";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
@@ -211,7 +212,10 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
               {business?.siteContent?.logoUrl ? (
                 <Image
                   src={business.siteContent.logoUrl}
-                  alt={business.name}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
                   width={100}
                   height={100}
                 />
@@ -367,7 +371,10 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
               >
                 <Image
                   src={business.siteContent?.logoUrl ?? "/placeholder.svg"}
-                  alt={business.name}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
                   width={140}
                   height={140}
                   className="h-28 w-28 object-contain invert md:h-32 md:w-32"

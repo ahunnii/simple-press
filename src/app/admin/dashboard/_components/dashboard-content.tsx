@@ -71,6 +71,11 @@ type DashboardContentProps = {
   };
   /** Optional Suspense-wrapped conversion-rate card (server-rendered). */
   conversionCard?: React.ReactNode;
+  /**
+   * Optional Suspense-wrapped "Search readiness N%" strip (server-rendered).
+   * Renders nothing once the score hits 100%, same as `setupProgress`.
+   */
+  searchReadiness?: React.ReactNode;
   /** Onboarding progress from /admin/welcome; null when setup is complete. */
   setupProgress: {
     completed: number;
@@ -169,6 +174,7 @@ export function DashboardContent({
   business,
   stats,
   conversionCard,
+  searchReadiness,
   setupProgress,
   ordersToFulfillCount,
   awaitingPaymentCount,
@@ -325,6 +331,9 @@ export function DashboardContent({
             </CardContent>
           </Card>
         )}
+
+        {/* Search readiness (server-rendered; hides itself at 100%) */}
+        {searchReadiness}
 
         {/* Needs-Attention Strip */}
         {hasAttentionItems && (
@@ -589,7 +598,9 @@ export function DashboardContent({
             <CardContent>
               {lowStockProducts.length === 0 && lowStockPools.length === 0 ? (
                 <div className="py-8 text-center">
-                  <Package className={`mx-auto mb-3 h-12 w-12 ${SUCCESS_TEXT}`} />
+                  <Package
+                    className={`mx-auto mb-3 h-12 w-12 ${SUCCESS_TEXT}`}
+                  />
                   <p className="text-muted-foreground">
                     All stock levels are good!
                   </p>

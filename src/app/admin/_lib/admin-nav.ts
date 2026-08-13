@@ -1,6 +1,8 @@
 import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
+  IconAdjustments,
+  IconArticle,
   IconBraces,
   IconBrandYoutube,
   IconBrush,
@@ -9,9 +11,9 @@ import {
   IconDashboard,
   IconDatabaseExport,
   IconDiscount,
+  IconFileText,
   IconFolder,
   IconImageInPicture,
-  IconLanguage,
   IconMail,
   IconMailFast,
   IconMessageStar,
@@ -133,6 +135,14 @@ export interface HubCard {
   icon: LucideIcon | TablerIcon;
   /** Feature flag key — when set and disabled, the card is hidden from its hub. */
   featureKey?: string;
+  /**
+   * When set, the card is visible if ANY of these flags is enabled — for
+   * cards gated behind more than one independent flag (e.g. Banner & Popup,
+   * which is `banners` OR `popups`). Takes precedence over `featureKey` when
+   * both are present; use `isHubCardEnabled` rather than checking either
+   * field directly.
+   */
+  featureKeysAny?: string[];
   /**
    * True when the card links to a platform-admin-only surface (e.g. the
    * legacy Template Fields editor). Hidden from owners/managers everywhere;
@@ -289,10 +299,41 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     key: "content",
-    title: "Site Content",
+    title: "Site Setup",
     href: "/admin/content",
-    icon: IconLanguage,
+    icon: IconAdjustments,
     section: "content",
+    keywords: [
+      "brand",
+      "logo",
+      "navigation",
+      "menu",
+      "seo",
+      "meta",
+      "policies",
+      "faq",
+      "banner",
+      "popup",
+      "setup",
+    ],
+  },
+  {
+    key: "pages",
+    title: "Pages",
+    href: "/admin/content/pages",
+    icon: IconFileText,
+    section: "content",
+    featureKey: "pages",
+    keywords: ["about", "contact", "cms", "standalone"],
+  },
+  {
+    key: "blog",
+    title: "Blog",
+    href: "/admin/content/blog",
+    icon: IconArticle,
+    section: "content",
+    featureKey: "blog",
+    keywords: ["posts", "articles", "news"],
   },
   {
     key: "media",
@@ -473,49 +514,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["staff", "members", "invite", "roles", "permissions"],
   },
 
-  // Content hub — Site Editor and Brand Identity first
-  {
-    key: "content-site-editor",
-    title: "Site Editor",
-    description: "Edit your site visually",
-    body: "Click any section of your live site to change its text, images, and visibility — then publish when you're happy",
-    href: "/editor",
-    hub: "content",
-    color: "indigo",
-    icon: Globe,
-    keywords: ["editor", "visual", "sections", "theme", "design", "preview"],
-  },
+  // Content hub — one-off configuration surfaces. Site Editor, Pages, and
+  // Blog moved to the sidebar (see NAV_ITEMS above) since owners visit those
+  // constantly rather than once.
   {
     key: "content-branding",
-    title: "Brand Identity",
+    title: "Brand & Appearance",
     description: "Personality of your site",
-    body: "Edit your logo, template selection, socials, and more",
+    body: "Template, logo, favicon, footer tagline, and social links",
     href: "/admin/content/branding",
     hub: "content",
     color: "blue",
     icon: Home,
-  },
-  {
-    key: "content-pages",
-    title: "Pages",
-    description: "Standalone pages (About, Contact)",
-    body: "About, Contact, FAQ, and custom pages",
-    href: "/admin/content/pages",
-    hub: "content",
-    color: "green",
-    icon: FileText,
-    featureKey: "pages",
-  },
-  {
-    key: "content-blog",
-    title: "Blog",
-    description: "Blog posts",
-    body: "Blog posts for your site",
-    href: "/admin/content/blog",
-    hub: "content",
-    color: "purple",
-    icon: FileText,
-    featureKey: "blog",
   },
   {
     key: "content-policies",
@@ -541,7 +551,7 @@ export const HUB_CARDS: HubCard[] = [
     key: "content-seo",
     title: "SEO & Meta",
     description: "Search optimization",
-    body: "Meta tags, favicons, social media preview images",
+    body: "Meta tags, social media preview images",
     href: "/admin/content/seo",
     hub: "content",
     color: "pink",
@@ -566,6 +576,9 @@ export const HUB_CARDS: HubCard[] = [
     hub: "content",
     color: "amber",
     icon: Megaphone,
+    // Two independent flags, both `enabledByDefault: false` — either being on
+    // is enough to make this card useful. See `isHubCardEnabled`.
+    featureKeysAny: ["banners", "popups"],
     keywords: ["announcement", "banner", "popup"],
   },
   {
@@ -624,6 +637,26 @@ export function getHubCards(
     (card) =>
       card.hub === hub && (!card.platformOnly || opts?.includePlatformOnly),
   );
+}
+
+/**
+ * Whether a hub card should be shown given the business's enabled feature
+ * flags. Cards gated on a single `featureKey` need that flag on; cards gated
+ * on `featureKeysAny` (e.g. Banner & Popup, which is `banners` OR `popups`)
+ * need at least one of those on. A card with neither is always shown.
+ *
+ * Use this everywhere a hub card list is filtered by flags rather than
+ * re-deriving the `!card.featureKey || isEnabled(card.featureKey)` check —
+ * that check silently ignores `featureKeysAny`.
+ */
+export function isHubCardEnabled(
+  card: HubCard,
+  isEnabled: (key: string) => boolean,
+): boolean {
+  if (card.featureKeysAny?.length) {
+    return card.featureKeysAny.some((k) => isEnabled(k));
+  }
+  return !card.featureKey || isEnabled(card.featureKey);
 }
 
 // ─── Palette actions ────────────────────────────────────────────────────────

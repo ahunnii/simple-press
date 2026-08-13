@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { authClient } from "~/server/better-auth/client";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
@@ -257,7 +258,10 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
             {business?.siteContent?.logoUrl ? (
               <Image
                 src={business.siteContent.logoUrl}
-                alt={business.name}
+                alt={resolveLogoAlt(
+                  business.siteContent?.logoAltText,
+                  business.name,
+                )}
                 width={32}
                 height={32}
                 style={{ borderRadius: "50%", margin: "0 auto" }}

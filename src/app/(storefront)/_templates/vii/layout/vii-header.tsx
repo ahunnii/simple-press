@@ -18,6 +18,7 @@ import {
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { BannerConfig } from "~/lib/validators/site-banner";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useCart } from "~/providers/cart-context";
@@ -235,6 +236,10 @@ export function ViiHeader({
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
 
   const isActive = (href: string) => {
     if (!href || href === "#") return false;
@@ -253,7 +258,7 @@ export function ViiHeader({
       <div className="relative h-15 w-36">
         <Image
           src={logoUrl}
-          alt={businessName}
+          alt={logoAlt}
           fill
           sizes="96px"
           className="object-contain"

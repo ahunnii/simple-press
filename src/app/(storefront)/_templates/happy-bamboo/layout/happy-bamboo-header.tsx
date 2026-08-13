@@ -10,6 +10,7 @@ import { Heart, Leaf, Menu, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -118,7 +119,10 @@ export function HappyBambooHeader({
               <div className="relative aspect-video h-16 w-full rounded-sm">
                 <Image
                   src={business.siteContent.logoUrl}
-                  alt={business.name}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
                   sizes="(max-width: 768px) 100vw, 55px"
                   fill
                   className="object-contain"

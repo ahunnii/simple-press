@@ -29,6 +29,7 @@ export default async function TeamSettingsPage() {
       <TeamMembers
         memberships={data.memberships}
         pendingInvites={data.pendingInvites}
+        expiredInvites={data.expiredInvites}
         currentUserId={session.user.id}
         currentUserRole={membershipRole}
         canManage={canManage}

@@ -113,7 +113,7 @@ export function ProductExporter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-foreground text-3xl font-bold">
-            Export to WordPress
+            Export products (WooCommerce CSV)
           </h1>
           <p className="text-muted-foreground mt-2">
             Select products to export to WooCommerce

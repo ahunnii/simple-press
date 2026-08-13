@@ -9,7 +9,6 @@ import {
   getPageStatus,
 } from "~/lib/validators/content-pages";
 import { api } from "~/trpc/server";
-import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
 import type { FilterDefFor } from "../../_components/admin-filters";
 import { TrailHeader } from "../../_components/trail-header";
@@ -138,11 +137,9 @@ export default async function AdminBlogPage({ searchParams }: Props) {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Site Content", href: "/admin/content" },
           { label: "Blog" },
         ]}
       />
-      <HubSubNav hub="content" />
       <PageListClient
         kind="blog"
         rows={pageItems}

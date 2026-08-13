@@ -31,7 +31,7 @@ export default async function NavigationPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Site Content", href: "/admin/content" },
+          { label: "Site Setup", href: "/admin/content" },
           { label: "Navigation" },
         ]}
       />

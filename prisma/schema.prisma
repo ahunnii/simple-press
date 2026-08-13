@@ -290,6 +290,21 @@ model SiteContent {
   ogImage         String?
   faviconUrl      String?
 
+  // Per-route meta overrides for storefront pages that have no DB row of their
+  // own (/about, /contact, /shop, /blog, /collections, /services, /testimonials,
+  // /faq, /events, /videos). Keyed by route:
+  //   { "about": { title, description, ogImage }, ... }
+  // Shape + parser: src/lib/validators/site-seo.ts. A map rather than a column
+  // per route so shipping a new storefront route needs no migration.
+  pageMeta Json?
+
+  // Search-engine ownership tokens, e.g. { google, bing }. Emitted from the
+  // root layout as Next's `verification` metadata. Written only by
+  // business.updateSeo — deliberately kept OUT of siteContentSchema so the
+  // branding editor, navigation builder and visual-editor publish transaction
+  // cannot reach it (same protection as bannerConfig/popupConfig).
+  siteVerification Json?
+
   // Logo
   logoUrl     String?
   logoAltText String?

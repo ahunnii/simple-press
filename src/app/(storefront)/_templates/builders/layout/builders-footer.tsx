@@ -3,6 +3,7 @@ import Link from "next/link";
 import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
@@ -14,6 +15,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
   const phone = business?.phoneNumber;
   const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(business?.siteContent?.logoAltText, name);
 
   const socialLinks = business?.siteContent?.socialLinks as
     | {
@@ -52,7 +54,7 @@ export async function BuildersFooter({ business }: DefaultFooterTemplateProps) {
               <div className="relative mb-2 h-12 w-24">
                 <Image
                   src={logoUrl}
-                  alt={name}
+                  alt={logoAlt}
                   fill
                   sizes="96px"
                   className="object-contain object-left"

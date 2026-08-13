@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import { buildPageMetadata } from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildLocalBusinessSchema,
@@ -45,33 +45,12 @@ export default async function ContactPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet();
-
-  const title = "Contact Us";
-  const description = business?.siteContent?.metaDescription ?? undefined;
-  const ogImage =
-    business?.siteContent?.ogImage ??
-    business?.siteContent?.logoUrl ??
-    undefined;
-
-  return {
-    title,
-    description,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, "/contact"),
-      },
-    }),
-    openGraph: {
-      title,
-      description: description ?? "",
-      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630 }] }),
-    },
-    twitter: {
-      card: "summary_large_image" as const,
-      title,
-      description: description ?? "",
-      ...(ogImage && { images: [ogImage] }),
-    },
-  };
+  const business = await api.business.simplifiedGet().catch(() => null);
+  return buildPageMetadata({
+    business,
+    path: "/contact",
+    pageMetaKey: "contact",
+    title: "Contact Us",
+    description: business?.siteContent?.metaDescription,
+  });
 }

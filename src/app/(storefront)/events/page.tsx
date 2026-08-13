@@ -59,5 +59,10 @@ export default async function EventsPage() {
 
 export async function generateMetadata() {
   const business = await api.business.simplifiedGet().catch(() => null);
-  return buildPageMetadata({ business, path: "/events", title: "Events" });
+  return buildPageMetadata({
+    business,
+    path: "/events",
+    pageMetaKey: "events",
+    title: "Events",
+  });
 }

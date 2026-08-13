@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
@@ -57,6 +58,10 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
   // the hardcoded clone logo so the pixel-exact demo keeps looking right
   // when no owner logo has been set.
   const ownerLogoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const navLinkColorClass = overlay
     ? "text-[var(--coop-background)]"
     : "text-[var(--coop-color-001)]";
@@ -84,7 +89,7 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
             >
               <img
                 className="block w-20 max-coop-md:h-19.5"
-                alt={businessName}
+                alt={logoAlt}
                 {...(ownerLogoUrl
                   ? { src: ownerLogoUrl }
                   : { sizes: "240px", src: LOGO_SRC, srcSet: LOGO_SRC_SET })}
@@ -144,7 +149,7 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
             >
               <img
                 className="block h-29 w-30 max-w-30 overflow-clip"
-                alt={businessName}
+                alt={logoAlt}
                 {...(ownerLogoUrl
                   ? { src: ownerLogoUrl }
                   : { sizes: "320px", src: LOGO_SRC, srcSet: LOGO_SRC_SET })}

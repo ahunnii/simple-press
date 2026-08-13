@@ -8,6 +8,7 @@ import Script from "next/script";
 import { env } from "~/env";
 import { getCanonicalBaseUrl } from "~/lib/canonical";
 import { checkBusiness } from "~/lib/check-business";
+import { parseSiteVerification } from "~/lib/validators/site-seo";
 import { TRPCReactProvider } from "~/trpc/react";
 import { api } from "~/trpc/server";
 import { TooltipProvider } from "~/components/ui/tooltip";
@@ -31,6 +32,21 @@ export async function generateMetadata() {
     business.siteContent?.ogImage ??
     business.siteContent?.logoUrl ??
     "/placeholder.svg";
+
+  // Search-engine ownership tokens. Emit a key only when the owner has actually
+  // saved that token — an empty `<meta>` is worse than no tag at all, since
+  // Google reads a blank content attribute as a failed verification.
+  const verification = parseSiteVerification(
+    business.siteContent?.siteVerification,
+  );
+  const verificationTags: NonNullable<Metadata["verification"]> = {
+    ...(verification.google !== undefined
+      ? { google: verification.google }
+      : {}),
+    ...(verification.bing !== undefined
+      ? { other: { "msvalidate.01": verification.bing } }
+      : {}),
+  };
 
   return {
     metadataBase: new URL(canonicalBase),
@@ -60,6 +76,9 @@ export async function generateMetadata() {
       description: ogDescription,
       images: [ogImage],
     },
+    ...(Object.keys(verificationTags).length > 0
+      ? { verification: verificationTags }
+      : {}),
     icons: [
       { rel: "icon", url: business.siteContent?.faviconUrl ?? "/favicon.ico" },
     ],

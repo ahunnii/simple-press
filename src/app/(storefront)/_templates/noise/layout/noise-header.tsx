@@ -27,6 +27,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
@@ -261,6 +262,10 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
@@ -317,7 +322,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     <div className="relative h-14 w-28">
       <Image
         src={logoUrl}
-        alt={businessName}
+        alt={logoAlt}
         fill
         sizes="112px"
         className="object-contain"
@@ -341,7 +346,7 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
     <div className="relative h-14 w-28">
       <Image
         src={logoUrl}
-        alt={businessName}
+        alt={logoAlt}
         fill
         sizes="112px"
         className="object-contain object-left"

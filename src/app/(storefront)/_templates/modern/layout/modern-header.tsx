@@ -8,6 +8,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, ShoppingBag, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
@@ -165,7 +166,10 @@ export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
             {business.siteContent?.logoUrl ? (
               <Image
                 src={business.siteContent.logoUrl}
-                alt={business.name}
+                alt={resolveLogoAlt(
+                  business.siteContent?.logoAltText,
+                  business.name,
+                )}
                 width={50}
                 height={50}
                 className="bg-primary rounded-full"

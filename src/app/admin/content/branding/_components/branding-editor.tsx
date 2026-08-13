@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -49,6 +49,7 @@ type Props = {
   siteContent: {
     id: string;
     logoUrl: string | null;
+    logoAltText: string | null;
     faviconUrl: string | null;
     footerText: string | null;
     socialLinks: unknown;
@@ -117,6 +118,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
       },
       logoUrl: siteContent.logoUrl ?? undefined,
       logoFile: null,
+      logoAltText: siteContent.logoAltText ?? "",
       primaryColor: siteContent?.primaryColor ?? "",
       templateId: business?.templateId ?? "",
       faviconUrl: siteContent.faviconUrl ?? undefined,
@@ -156,6 +158,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
       footerText: siteContent.footerText ?? "",
       socialLinks: socialLinks,
       logoUrl: siteContent.logoUrl ?? "",
+      logoAltText: siteContent.logoAltText ?? "",
       primaryColor: siteContent?.primaryColor ?? "",
       templateId: business?.templateId ?? "",
       faviconUrl: siteContent.faviconUrl ?? "",
@@ -224,6 +227,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         footerText: data.footerText ?? "",
         socialLinks: data.socialLinks ?? {},
         logoUrl,
+        logoAltText: data.logoAltText ?? "",
         primaryColor,
         faviconUrl,
       });
@@ -253,6 +257,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
         socialLinks: newSocialLinks,
         logoUrl: saved.logoUrl ?? null,
         logoFile: null,
+        logoAltText: saved.logoAltText ?? "",
         primaryColor: saved?.primaryColor ?? "",
         templateId: nextTemplateId,
         faviconUrl: saved.faviconUrl ?? null,
@@ -301,7 +306,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
             </Button>
             <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
             <div className="hidden min-w-0 items-center gap-2 sm:flex">
-              <h1 className="text-base font-medium">Edit Brand Identity</h1>
+              <h1 className="text-base font-medium">Brand & Appearance</h1>
 
               <span
                 className={`admin-status-badge ${
@@ -391,6 +396,16 @@ export function BrandingEditor({ business, siteContent }: Props) {
                     </FormItem>
                   )}
                 />
+
+                <div className="flex items-center rounded-lg border bg-muted/50 px-4 py-3 text-sm">
+                  <Link
+                    href="/editor"
+                    className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
+                  >
+                    Edit sections, colors and fonts in the Site Editor
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
               </CardContent>
             </Card>
 
@@ -408,20 +423,29 @@ export function BrandingEditor({ business, siteContent }: Props) {
                     height — without it, stretch inflates the shorter one's
                     label row. */}
                 <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                  <ImageUploadFormField
-                    form={form}
-                    name="logoFile"
-                    label="Upload your store's logo"
-                    description="Your logo will be displayed in key places across your storefront.  Defaults to your store's name if no logo is uploaded."
-                    disabled={isSubmitting}
-                    existingPreviewUrl={siteContent?.logoUrl ?? undefined}
-                    inputRef={logoFileInputRef}
-                    className="col-span-1"
-                  />
+                  <div className="col-span-1 space-y-4">
+                    <ImageUploadFormField
+                      form={form}
+                      name="logoFile"
+                      label="Logo"
+                      description="Your logo will be displayed in key places across your storefront.  Defaults to your store's name if no logo is uploaded."
+                      disabled={isSubmitting}
+                      existingPreviewUrl={siteContent?.logoUrl ?? undefined}
+                      inputRef={logoFileInputRef}
+                    />
+                    <InputFormField
+                      form={form}
+                      name="logoAltText"
+                      label="Logo alt text"
+                      placeholder="Your business name"
+                      disabled={isSubmitting}
+                      description="Describes your logo for screen readers and for search engines when the image can't load. Usually just your business name."
+                    />
+                  </div>
                   <ImageUploadFormField
                     form={form}
                     name="faviconFile"
-                    label="Upload your store's favicon"
+                    label="Favicon"
                     description="The small icon shown in browser tabs. Recommended: 32x32px or 16x16px .ico or .png. Defaults to SimplePress's favicon if no favicon is uploaded."
                     existingPreviewUrl={siteContent.faviconUrl ?? undefined}
                     inputRef={faviconFileInputRef}
@@ -433,7 +457,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Socials and Footer</CardTitle>
+                <CardTitle>Footer & social links</CardTitle>
                 <CardDescription>
                   Promote your socials as well as add a footer tagline.
                 </CardDescription>
@@ -442,7 +466,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
                 <TextareaFormField
                   form={form}
                   name="footerText"
-                  label="Add a footer tagline"
+                  label="Footer tagline"
                   placeholder="We are here for you. Contact us for any questions or concerns."
                   rows={2}
                   description="This tagline will be displayed in the footer of your storefront. Acts like a mission statement or blurb about your business."

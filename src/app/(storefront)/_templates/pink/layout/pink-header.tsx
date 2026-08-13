@@ -10,6 +10,7 @@ import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -78,6 +79,10 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
 
   const businessName = business?.name ?? "PinkArt";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
@@ -185,7 +190,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
           {logoUrl ? (
             <Image
               src={logoUrl}
-              alt={businessName}
+              alt={logoAlt}
               width={160}
               height={40}
               className="h-8 w-auto object-contain"

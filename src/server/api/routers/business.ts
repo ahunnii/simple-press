@@ -16,6 +16,10 @@ import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
 import {
+  pageMetaSchema,
+  siteVerificationSchema,
+} from "~/lib/validators/site-seo";
+import {
   createTRPCRouter,
   ownerAdminProcedure,
   publicProcedure,
@@ -76,6 +80,12 @@ export const businessRouter = createTRPCRouter({
             metaDescription: true,
             metaKeywords: true,
             ogImage: true,
+            // Read by `generateMetadata` in the root layout (verification
+            // tokens) and in each static storefront route (per-route title /
+            // description overrides). Both are public-by-design: they end up in
+            // meta tags on every rendered page.
+            pageMeta: true,
+            siteVerification: true,
             bannerConfig: true,
             popupConfig: true,
           },
@@ -345,6 +355,7 @@ export const businessRouter = createTRPCRouter({
         name: true,
         subdomain: true,
         customDomain: true,
+        sendAbandonedCheckoutEmails: true,
         siteContent: {
           select: {
             logoUrl: true,
@@ -608,7 +619,6 @@ export const businessRouter = createTRPCRouter({
     return business;
   }),
 
-
   updateStripeSettings: ownerAdminProcedure
     .input(z.object({ stripeAutoTaxEnabled: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -723,7 +733,9 @@ export const businessRouter = createTRPCRouter({
 
       const include = {
         ...(input?.includePages
-          ? { pages: { where: { type: "page" }, orderBy: { sortOrder: "asc" } } }
+          ? {
+              pages: { where: { type: "page" }, orderBy: { sortOrder: "asc" } },
+            }
           : {}),
         ...(input?.includeSiteContent
           ? {
@@ -797,6 +809,33 @@ export const businessRouter = createTRPCRouter({
       return {
         message: "General settings updated successfully",
         businessId: updatedBusiness.id,
+        business: updatedBusiness,
+      };
+    }),
+
+  // Narrow mutation used by /admin/emails to flip whether the
+  // abandoned-checkout recovery email sends at all. Deliberately does not
+  // reuse `updateGeneral` — that mutation's input requires the full general
+  // settings payload (name, ownerEmail, supportEmail, ...), and reconstructing
+  // it from this page would risk a partial overwrite of business name,
+  // address, or phone.
+  updateEmailSettings: ownerAdminProcedure
+    .input(
+      z.object({
+        sendAbandonedCheckoutEmails: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          sendAbandonedCheckoutEmails: input.sendAbandonedCheckoutEmails,
+        },
+      });
+      return {
+        message: "Email settings updated successfully",
         business: updatedBusiness,
       };
     }),
@@ -884,6 +923,17 @@ export const businessRouter = createTRPCRouter({
       });
     }),
 
+  /**
+   * The only writer of `SiteContent.pageMeta` and `SiteContent.siteVerification`.
+   *
+   * Both live here rather than in `siteContentSchema` on purpose:
+   * `content.updateSiteContent` blind-spreads its whole payload into the
+   * upsert, so anything added to that schema also becomes writable by the
+   * branding editor, the navigation builder, the template-fields editor and the
+   * visual editor's Publish transaction. A search-engine ownership token must
+   * not sit in that blast radius — same reasoning that already keeps
+   * `bannerConfig` / `popupConfig` / `emailOverrides` out of it.
+   */
   updateSeo: ownerAdminProcedure
     .input(
       z.object({
@@ -893,6 +943,8 @@ export const businessRouter = createTRPCRouter({
         ogImage: z.string().optional(),
         localBusinessEnabled: z.boolean().optional(),
         allowAiCrawlers: z.boolean().optional(),
+        pageMeta: pageMetaSchema.optional(),
+        siteVerification: siteVerificationSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -904,7 +956,23 @@ export const businessRouter = createTRPCRouter({
         ogImage,
         localBusinessEnabled,
         allowAiCrawlers,
+        pageMeta,
+        siteVerification,
       } = input;
+
+      // The four meta strings above map to nullable `String?` columns, where an
+      // absent key is already a no-op, so they can be passed through unguarded.
+      // These two are Json columns: `undefined` is a no-op but `null` is a type
+      // error (Prisma wants `Prisma.JsonNull`), so they are only spread in when
+      // the caller actually sent them.
+      const jsonPatch = {
+        ...(pageMeta !== undefined && {
+          pageMeta: pageMeta as Prisma.InputJsonValue,
+        }),
+        ...(siteVerification !== undefined && {
+          siteVerification: siteVerification as Prisma.InputJsonValue,
+        }),
+      };
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -918,12 +986,14 @@ export const businessRouter = createTRPCRouter({
                 metaDescription,
                 metaKeywords,
                 ogImage,
+                ...jsonPatch,
               },
               update: {
                 metaTitle,
                 metaDescription,
                 metaKeywords,
                 ogImage,
+                ...jsonPatch,
               },
             },
           },

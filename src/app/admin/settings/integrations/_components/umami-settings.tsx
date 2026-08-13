@@ -29,12 +29,13 @@ import { Switch } from "~/components/ui/switch";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
+  umamiBaseUrl: string;
 };
 
 // Umami website IDs are UUIDs (e.g. "abc123-def456-...").
 const UMAMI_WEBSITE_ID_REGEX = /^[a-zA-Z0-9-]+$/;
 
-export function UmamiSettings({ business }: Props) {
+export function UmamiSettings({ business, umamiBaseUrl }: Props) {
   const router = useRouter();
 
   // Form state
@@ -154,9 +155,11 @@ export function UmamiSettings({ business }: Props) {
                 </p>
               ) : (
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Found on the website&apos;s Settings page in your Umami
-                  account after you add your storefront domain there — not
-                  your Umami account ID or API key.
+                  SimplePress runs its own Umami instance — you can&apos;t
+                  create this yourself. Ask your SimplePress administrator to
+                  add your storefront domain, and they&apos;ll give you the
+                  Website ID to paste here. Not your Umami account ID or API
+                  key.
                 </p>
               )}
             </div>
@@ -184,6 +187,12 @@ export function UmamiSettings({ business }: Props) {
                   it in-app yet; turning the feature flag on without this
                   toggle enabled shows an empty dashboard.
                 </p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  The tracking script and event data are proxied through your
+                  own storefront domain (<code>/umami.js</code>,{" "}
+                  <code>/api/send</code>) — no third-party script ever loads
+                  in your visitors&apos; browsers.
+                </p>
               </div>
               <Switch
                 id="umamiEnabled"
@@ -199,15 +208,11 @@ export function UmamiSettings({ business }: Props) {
 
             <div className="border-t pt-2">
               <p className="text-muted-foreground mb-2 text-sm">
-                Don&apos;t have a Umami account?
+                Need your Website ID, or want to see the raw data yourself?
               </p>
               <Button type="button" variant="outline" size="sm" asChild>
-                <a
-                  href="https://umami.is"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Sign up for Umami
+                <a href={umamiBaseUrl} target="_blank" rel="noopener noreferrer">
+                  Open your Umami dashboard
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>

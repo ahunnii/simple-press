@@ -825,7 +825,7 @@ export function BlogPostEditor({
                                 </span>{" "}
                                 will keep pointing there: menu links store the
                                 address, not the post, so they won&apos;t follow
-                                the rename. Update them under Site Content →
+                                the rename. Update them under Site Setup →
                                 Navigation. We don&apos;t set up a redirect
                                 automatically.
                               </p>

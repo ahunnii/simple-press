@@ -9,6 +9,7 @@ import { IconPackage } from "@tabler/icons-react";
 import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { authClient } from "~/server/better-auth/client";
@@ -304,7 +305,10 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
             {business.siteContent?.logoUrl ? (
               <Image
                 src={business.siteContent.logoUrl}
-                alt={business.name}
+                alt={resolveLogoAlt(
+                  business.siteContent?.logoAltText,
+                  business.name,
+                )}
                 width={36}
                 height={36}
                 className="rounded-full object-cover"

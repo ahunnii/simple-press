@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { computeSetupStatus } from "~/lib/admin/setup-steps";
 import { checkBusiness } from "~/lib/check-business";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { isContentEmpty } from "~/lib/template-fields";
@@ -9,6 +10,7 @@ import { db } from "~/server/db";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { ConversionCard } from "~/app/admin/dashboard/_components/conversion-card";
 import { DashboardContent } from "~/app/admin/dashboard/_components/dashboard-content";
+import { SearchReadinessStrip } from "~/app/admin/dashboard/_components/search-readiness-strip";
 import { bucketRevenueByDay } from "~/app/admin/dashboard/_lib/revenue-by-day";
 
 import { TrailHeader } from "../_components/trail-header";
@@ -35,11 +37,28 @@ export default async function AdminDashboardPage() {
     },
   });
 
-  // Cheap lookup for the "Finish setting up" card — mirrors the completion
-  // logic in /admin/welcome/page.tsx (same 5 setup steps).
+  // Cheap lookup that feeds two strips: the "Finish setting up" card (shared
+  // with /admin/welcome via `computeSetupStatus`) and the search-readiness
+  // strip (the six meta columns, scored by `computeSeoScorecard`).
+  //
+  // `pageMeta` and `siteVerification` MUST stay in this select. /admin/content/seo
+  // loads siteContent via `business.getWith({ includeSiteContent: true })` (a
+  // Prisma `include:`, so it gets every column automatically); this page uses an
+  // explicit `select:` instead, so a column added to the scorecard has to be
+  // added here by hand or it scores as permanently missing here while scoring
+  // correctly on the SEO page — two different percentages for the same store.
   const siteContentForSetup = await db.siteContent.findUnique({
     where: { businessId: business.id },
-    select: { logoUrl: true, customFields: true },
+    select: {
+      logoUrl: true,
+      customFields: true,
+      metaTitle: true,
+      metaDescription: true,
+      ogImage: true,
+      faviconUrl: true,
+      pageMeta: true,
+      siteVerification: true,
+    },
   });
 
   // Get stats for the dashboard
@@ -453,53 +472,16 @@ export default async function AdminDashboardPage() {
   const missingPolicies =
     !isPolicyLive("terms-of-service") || !isPolicyLive("refund-policy");
 
-  // "Finish setting up" card — mirrors the 5-step completion logic in
-  // /admin/welcome/page.tsx (businessCreated is always true post-onboarding).
-  const setupCustomFields = siteContentForSetup?.customFields;
-  const storefrontCustomized =
-    Boolean(siteContentForSetup?.logoUrl) ||
-    (setupCustomFields !== null &&
-      setupCustomFields !== undefined &&
-      typeof setupCustomFields === "object" &&
-      !Array.isArray(setupCustomFields) &&
-      Object.keys(setupCustomFields as Record<string, unknown>).length > 0);
-
-  const setupSteps: Array<{ done: boolean; label: string; href: string }> = [
-    { done: true, label: "Store created", href: "/admin/welcome" },
-    {
-      done: Boolean(businessData?.stripeAccountId),
-      label: "Connect payment processing",
-      href: "/admin/welcome",
-    },
-    {
-      done: Boolean(businessData?.customDomain),
-      label: "Connect a custom domain",
-      href: "/admin/welcome",
-    },
-    {
-      done: (businessData?._count.products ?? 0) > 0,
-      label: "Add your first product",
-      href: "/admin/products/new",
-    },
-    {
-      done: storefrontCustomized,
-      label: "Customize your storefront",
-      href: "/editor",
-    },
-  ];
-  const setupCompletedSteps = setupSteps.filter((s) => s.done).length;
-  const setupTotalSteps = setupSteps.length;
-  const nextSetupStep = setupSteps.find((s) => !s.done) ?? null;
-  const setupProgress =
-    setupCompletedSteps === setupTotalSteps
-      ? null
-      : {
-          completed: setupCompletedSteps,
-          total: setupTotalSteps,
-          nextStep: nextSetupStep
-            ? { label: nextSetupStep.label, href: nextSetupStep.href }
-            : null,
-        };
+  // "Finish setting up" card — the same 5-step checklist /admin/welcome renders
+  // in full (businessCreated is always true post-onboarding). `progress` is
+  // null once every step is done, which is what hides the card.
+  const setupStatus = computeSetupStatus({
+    stripeAccountId: businessData?.stripeAccountId ?? null,
+    customDomain: businessData?.customDomain ?? null,
+    productCount: businessData?._count.products ?? 0,
+    siteContent: siteContentForSetup,
+  });
+  const setupProgress = setupStatus.progress;
 
   return (
     <>
@@ -547,6 +529,18 @@ export default async function AdminDashboardPage() {
               <ConversionCard
                 websiteId={umamiWebsiteId}
                 paidOrders={thirtyDayPaidOrders}
+              />
+            </Suspense>
+          ) : undefined
+        }
+        searchReadiness={
+          businessData ? (
+            <Suspense fallback={null}>
+              <SearchReadinessStrip
+                businessId={business.id}
+                isEnabled={flags.isEnabled}
+                business={businessData}
+                siteContent={siteContentForSetup}
               />
             </Suspense>
           ) : undefined

@@ -43,8 +43,13 @@ export const teamRouter = createTRPCRouter({
 
   list: ownerAdminProcedure.query(async ({ ctx }) => {
     const { businessId } = ctx;
+    // Shared instant for both invite queries below, so a request landing
+    // exactly on the expiry boundary can't put the same invite in neither
+    // (or both) of the two lists — `gt`/`lte` on two separate `new Date()`
+    // calls could otherwise disagree by however long the first query took.
+    const now = new Date();
 
-    const [memberships, pendingInvites] = await Promise.all([
+    const [memberships, pendingInvites, expiredInvites] = await Promise.all([
       ctx.db.businessMembership.findMany({
         where: { businessId },
         include: {
@@ -56,13 +61,26 @@ export const teamRouter = createTRPCRouter({
         where: {
           businessId,
           used: false,
-          expiresAt: { gt: new Date() },
+          expiresAt: { gt: now },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      // A third array, not a loosened filter on `pendingInvites` — that
+      // field's meaning ("still usable") must not shift for the test suite
+      // or anything else already reading it. Expired invites can't be
+      // revoked (`revokeInvite` just sets `used: true`, which is meaningless
+      // once an invite is already dead) so the UI only offers Resend here.
+      ctx.db.teamInvite.findMany({
+        where: {
+          businessId,
+          used: false,
+          expiresAt: { lte: now },
         },
         orderBy: { createdAt: "desc" },
       }),
     ]);
 
-    return { memberships, pendingInvites };
+    return { memberships, pendingInvites, expiredInvites };
   }),
 
   // ─── PUBLIC ───────────────────────────────────────────────────────────────

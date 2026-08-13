@@ -17,8 +17,8 @@ export default async function BrandingPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Site Content", href: "/admin/content" },
-          { label: "Brand Identity" },
+          { label: "Site Setup", href: "/admin/content" },
+          { label: "Brand & Appearance" },
         ]}
       />
       <HubSubNav hub="content" />
@@ -29,5 +29,5 @@ export default async function BrandingPage() {
 }
 
 export const metadata = {
-  title: "Edit Brand Identity",
+  title: "Brand & Appearance",
 };

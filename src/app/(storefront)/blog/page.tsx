@@ -44,7 +44,10 @@ export default async function BlogPage() {
 
 export async function generateMetadata() {
   const business = await api.business.simplifiedGet().catch(() => null);
-  return buildPageMetadata({ business, path: "/blog", title: "Blog" });
+  return buildPageMetadata({
+    business,
+    path: "/blog",
+    pageMetaKey: "blog",
+    title: "Blog",
+  });
 }
-
-//TODO: Metadata for the blog listing page 'should' allow for the business owner to edit them

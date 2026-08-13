@@ -24,6 +24,7 @@ import {
 } from "~/components/ui/command";
 import {
   HUB_CARDS,
+  isHubCardEnabled,
   isNavItemAllowedForRole,
   NAV_ITEMS,
   PALETTE_ACTIONS,
@@ -125,7 +126,7 @@ export function AdminCommandPalette({
             (c) =>
               c.hub === "settings" &&
               (!c.platformOnly || isPlatformAdmin) &&
-              (!c.featureKey || isEnabled(c.featureKey)),
+              isHubCardEnabled(c, isEnabled),
           ),
     [isStaff, isEnabled, isPlatformAdmin],
   );
@@ -137,7 +138,7 @@ export function AdminCommandPalette({
             (c) =>
               c.hub === "content" &&
               (!c.platformOnly || isPlatformAdmin) &&
-              (!c.featureKey || isEnabled(c.featureKey)),
+              isHubCardEnabled(c, isEnabled),
           ),
     [isStaff, isEnabled, isPlatformAdmin],
   );

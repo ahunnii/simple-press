@@ -9,6 +9,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ArrowRight, Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
@@ -144,6 +145,10 @@ export function BuildersHeader({
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
 
   const isActive = (href: string) =>
     href === "/"
@@ -166,7 +171,7 @@ export function BuildersHeader({
     <div className="relative h-[3.125rem] w-[7.5rem]">
       <Image
         src={logoUrl}
-        alt={businessName}
+        alt={logoAlt}
         fill
         sizes="120px"
         className="object-contain object-left"

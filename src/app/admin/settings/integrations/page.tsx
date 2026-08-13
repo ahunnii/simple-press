@@ -1,3 +1,4 @@
+import { env } from "~/env";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
@@ -17,7 +18,10 @@ export default async function IntegrationsSettingsPage() {
       />
       <HubSubNav hub="settings" />
 
-      <IntegrationsSettings business={business} />
+      <IntegrationsSettings
+        business={business}
+        umamiBaseUrl={env.UMAMI_BASE_URL}
+      />
     </>
   );
 }

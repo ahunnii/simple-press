@@ -12,9 +12,10 @@ import { UmamiSettings } from "./umami-settings";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
+  umamiBaseUrl: string;
 };
 
-export function IntegrationsSettings({ business }: Props) {
+export function IntegrationsSettings({ business, umamiBaseUrl }: Props) {
   // This page has no single form-wide save state to report: Stripe's
   // auto-tax toggle saves itself immediately on change, and Umami has its
   // own independent form with its own Save button and pending/success
@@ -50,7 +51,7 @@ export function IntegrationsSettings({ business }: Props) {
           />
 
           {/* Umami Analytics */}
-          <UmamiSettings business={business} />
+          <UmamiSettings business={business} umamiBaseUrl={umamiBaseUrl} />
         </div>
       </div>
     </>

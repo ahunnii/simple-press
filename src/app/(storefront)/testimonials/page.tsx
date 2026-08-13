@@ -19,10 +19,11 @@ export default async function TestimonialsPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet();
+  const business = await api.business.simplifiedGet().catch(() => null);
   return buildPageMetadata({
     business,
     path: "/testimonials",
+    pageMetaKey: "testimonials",
     title: "Testimonials",
     description: "Customer testimonials",
   });

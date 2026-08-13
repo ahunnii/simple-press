@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getCanonicalUrl } from "~/lib/canonical";
+import { buildPageMetadata } from "~/lib/seo";
 import { buildFaqSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
@@ -8,16 +8,14 @@ import { JsonLd } from "~/components/json-ld";
 import { getTemplate } from "../_templates/registry";
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet();
-  return {
+  const business = await api.business.simplifiedGet().catch(() => null);
+  return buildPageMetadata({
+    business,
+    path: "/faq",
+    pageMetaKey: "faq",
     title: "FAQ",
     description: `Frequently asked questions about ${business?.name ?? "our store"}.`,
-    ...(business && {
-      alternates: {
-        canonical: getCanonicalUrl(business, "/faq"),
-      },
-    }),
-  };
+  });
 }
 
 export default async function FaqPage() {

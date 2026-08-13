@@ -11,7 +11,7 @@ export default async function FaqAdminPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Site Content", href: "/admin/content" },
+          { label: "Site Setup", href: "/admin/content" },
           { label: "FAQ" },
         ]}
       />

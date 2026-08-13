@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
@@ -69,6 +70,10 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
   const isLight = resolvedTone === "light";
 
   const businessName = business?.name ?? "PinkArt";
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const rawCustomFields = business?.siteContent?.customFields;
   const customFields = rawCustomFields as Record<string, unknown> | undefined;
   const f = resolveFields(rawCustomFields, FIELD_KEYS);
@@ -188,7 +193,7 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           ) : brandLogoUrl ? (
             <Image
               src={brandLogoUrl}
-              alt={businessName}
+              alt={logoAlt}
               width={220}
               height={56}
               // Height-capped rather than width-capped: an owner's logo can be

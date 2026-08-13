@@ -53,5 +53,10 @@ export default async function VideosPage() {
 
 export async function generateMetadata() {
   const business = await api.business.simplifiedGet().catch(() => null);
-  return buildPageMetadata({ business, path: "/videos", title: "Videos" });
+  return buildPageMetadata({
+    business,
+    path: "/videos",
+    pageMetaKey: "videos",
+    title: "Videos",
+  });
 }

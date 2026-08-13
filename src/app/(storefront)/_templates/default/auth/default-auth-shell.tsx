@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 
 import { DefaultPlatformBadge } from "./default-platform-badge";
@@ -109,7 +110,10 @@ export function DefaultAuthShell({
             {business?.siteContent?.logoUrl ? (
               <Image
                 src={business.siteContent.logoUrl}
-                alt={business.name}
+                alt={resolveLogoAlt(
+                  business.siteContent?.logoAltText,
+                  business.name,
+                )}
                 width={parseInt(logoSizeWidth)}
                 height={parseInt(logoSizeHeight)}
                 className="rounded-full"

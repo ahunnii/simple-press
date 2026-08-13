@@ -9,6 +9,7 @@ import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Heart, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
@@ -102,7 +103,10 @@ export function BambooHeader({ business }: DefaultHeaderTemplateProps) {
             <div className="relative aspect-square h-20 w-full rounded-sm">
               <Image
                 src={business.siteContent.logoUrl}
-                alt={business.name}
+                alt={resolveLogoAlt(
+                  business.siteContent?.logoAltText,
+                  business.name,
+                )}
                 sizes="(max-width: 768px) 100vw, 55px"
                 fill
                 className="object-cover"

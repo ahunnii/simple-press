@@ -52,6 +52,7 @@ export const brandingFormSchema = z.object({
     .nullable(),
   logoUrl: z.string().url().optional().nullable().or(z.literal("")),
   logoFile: z.instanceof(File).optional().nullable(),
+  logoAltText: z.string().max(255).optional().nullable(),
   // Only `primaryColor` is surfaced (and read by templates — it drives the
   // checkout/cart button color). `secondaryColor`/`accentColor` still exist on
   // SiteContent but nothing renders them, so the Brand Identity form no longer

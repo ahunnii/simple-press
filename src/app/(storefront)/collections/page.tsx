@@ -21,6 +21,11 @@ export default async function CollectionsPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet();
-  return buildPageMetadata({ business, path: "/collections", title: "Collections" });
+  const business = await api.business.simplifiedGet().catch(() => null);
+  return buildPageMetadata({
+    business,
+    path: "/collections",
+    pageMetaKey: "collections",
+    title: "Collections",
+  });
 }

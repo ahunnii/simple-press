@@ -109,8 +109,20 @@ type Props = {
   totalPages: number;
   page: number;
   pageSize: number;
-  /** Gates the WooCommerce import / WordPress export buttons. */
+  /**
+   * Gates the "Import from WooCommerce" button. Import has no owner-facing
+   * flag — it's a bulk-create wizard writing product rows from an arbitrary
+   * CSV — so it stays platform-admin-only, matching `/admin/products/import`'s
+   * own gate (`requireAdminAccess({ allowedRoles: [] })`).
+   */
   isPlatformAdmin: boolean;
+  /**
+   * Gates the "Export products (CSV)" button. Resolved server-side as
+   * `isPlatformAdmin || membershipRole === "OWNER"`, AND the `wordpressExport`
+   * flag — mirrors `/admin/products/export`'s own gate exactly, so this button
+   * is never shown to someone who'd land on that page's Owner-only alert.
+   */
+  canExportProducts: boolean;
   /** Mirrors `product.bulkDelete`'s `ownerOnlyProcedure`, resolved server-side.
    *  False OMITS the bulk Delete action rather than disabling it — a MANAGER
    *  should see the actions they have, not a greyed list of the ones they don't. */
@@ -174,6 +186,7 @@ export function ProductsClient({
   page,
   pageSize,
   isPlatformAdmin,
+  canExportProducts,
   canBulkDelete,
 }: Props) {
   const utils = api.useUtils();
@@ -451,22 +464,32 @@ export function ProductsClient({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {isPlatformAdmin && (
-            <>
-              <Button variant="outline" asChild size="sm">
-                <Link href={`${BASE_PATH}/export`}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Export to WordPress
-                </Link>
-              </Button>
+          {/* Export and Import are deliberately gated on two DIFFERENT
+              conditions, not both on `isPlatformAdmin` — each mirrors its own
+              destination page's own gate exactly:
+              - Export → `canExportProducts` (OWNER or PLATFORM_ADMIN, AND the
+                `wordpressExport` flag), matching `/admin/products/export`.
+                An OWNER with the flag on must see this button or they'd have
+                a page they can visit but no link to it.
+              - Import → `isPlatformAdmin` only, matching
+                `/admin/products/import`. There's no owner-facing flag for
+                import — it's a bulk-create wizard from an arbitrary CSV. */}
+          {canExportProducts && (
+            <Button variant="outline" asChild size="sm">
+              <Link href={`${BASE_PATH}/export`}>
+                <Download className="mr-2 h-4 w-4" />
+                Export products (CSV)
+              </Link>
+            </Button>
+          )}
 
-              <Button variant="outline" asChild size="sm">
-                <Link href={`${BASE_PATH}/import`}>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import from WooCommerce
-                </Link>
-              </Button>
-            </>
+          {isPlatformAdmin && (
+            <Button variant="outline" asChild size="sm">
+              <Link href={`${BASE_PATH}/import`}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import from WooCommerce
+              </Link>
+            </Button>
           )}
 
           <Button asChild size="sm">

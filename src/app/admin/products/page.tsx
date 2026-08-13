@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import type { FilterDefFor } from "../_components/admin-filters";
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
@@ -121,6 +122,14 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
 
+  // Mirrors `/admin/products/export/page.tsx`'s own gate exactly, so the
+  // Export button only ever appears for someone who won't land on that
+  // page's Owner-only alert or its feature-disabled fallback.
+  const { isEnabled } = await getBusinessFlags();
+  const canExportProducts =
+    (isPlatformAdmin || membershipRole === "OWNER") &&
+    isEnabled("wordpressExport");
+
   return (
     <>
       <TrailHeader breadcrumbs={[{ label: "Products" }]} />
@@ -141,6 +150,7 @@ export default async function ProductsPage({ searchParams }: Props) {
         // drift.
         pageSize={result.pageSize}
         isPlatformAdmin={isPlatformAdmin}
+        canExportProducts={canExportProducts}
         // Mirrors `ownerOnlyProcedure`, which `product.bulkDelete` uses:
         // PLATFORM_ADMIN bypasses the membership check, everyone else needs
         // OWNER. Computed here so the bulk bar can OMIT the Delete button a

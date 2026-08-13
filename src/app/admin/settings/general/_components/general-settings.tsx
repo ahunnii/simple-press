@@ -41,7 +41,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { InputFormField } from "~/components/inputs/input-form-field";
-import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
@@ -309,24 +308,6 @@ export function GeneralSettings({ business }: Props) {
                   label="Business Address"
                   description="Public business address. Customers will see this address on your storefront."
                   placeholder="123 Main St, Detroit, MI, USA"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Customer Emails */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Customer Emails</CardTitle>
-                <CardDescription>
-                  Automated emails sent to your customers
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <SwitchFormField
-                  form={form}
-                  name="sendAbandonedCheckoutEmails"
-                  label="Send abandoned checkout recovery emails"
-                  description="Email shoppers who start checkout but don't finish, inviting them back to their cart."
                 />
               </CardContent>
             </Card>

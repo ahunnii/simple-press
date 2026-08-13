@@ -32,6 +32,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 
@@ -74,6 +75,8 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
     useState<Record<string, EmailOverride>>(savedOverrides);
   const [savedState, setSavedState] =
     useState<Record<string, EmailOverride>>(savedOverrides);
+  const [sendAbandonedCheckoutEmails, setSendAbandonedCheckoutEmails] =
+    useState(business.sendAbandonedCheckoutEmails);
 
   const updateOverrides = api.business.updateEmailOverrides.useMutation({
     onSuccess: (data) => {
@@ -85,6 +88,29 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
       toast.error(error.message || "Failed to save email customizations");
     },
   });
+
+  const updateEmailSettings = api.business.updateEmailSettings.useMutation({
+    onSuccess: (data) => {
+      setSendAbandonedCheckoutEmails(
+        data.business.sendAbandonedCheckoutEmails,
+      );
+      toast.success(
+        data.business.sendAbandonedCheckoutEmails
+          ? "Abandoned checkout emails are now sending"
+          : "Abandoned checkout emails are now off",
+      );
+    },
+    onError: (error) => {
+      // Roll the switch back — the mutation didn't take.
+      setSendAbandonedCheckoutEmails((prev) => !prev);
+      toast.error(error.message || "Failed to update email settings");
+    },
+  });
+
+  const handleToggleAbandonedCheckout = (checked: boolean) => {
+    setSendAbandonedCheckoutEmails(checked);
+    updateEmailSettings.mutate({ sendAbandonedCheckoutEmails: checked });
+  };
 
   const previews = useMemo<PreviewDef[]>(() => {
     // business.getForEmailPreview only selects subdomain/customDomain (no
@@ -493,6 +519,27 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
+                {selected.key === "abandoned-checkout" && (
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="pr-4">
+                      <Label htmlFor="send-abandoned-checkout-emails">
+                        Send this email
+                      </Label>
+                      <p className="text-muted-foreground text-sm">
+                        Controls whether this email sends at all — not just
+                        how it looks. When off, shoppers who abandon checkout
+                        never receive a recovery email, regardless of the
+                        subject and intro text below.
+                      </p>
+                    </div>
+                    <Switch
+                      id="send-abandoned-checkout-emails"
+                      checked={sendAbandonedCheckoutEmails}
+                      disabled={updateEmailSettings.isPending}
+                      onCheckedChange={handleToggleAbandonedCheckout}
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email-override-subject">Subject</Label>
                   <Input

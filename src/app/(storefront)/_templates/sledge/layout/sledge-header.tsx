@@ -27,6 +27,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
@@ -259,6 +260,10 @@ export function SledgeHeader({
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
 
   const isLinkActive = (href: string) =>
     href === "/"
@@ -309,7 +314,7 @@ export function SledgeHeader({
     <div className="sl-brand-logo">
       <Image
         src={logoUrl}
-        alt={businessName}
+        alt={logoAlt}
         fill
         sizes="(max-width: 768px) 161px, 207px"
         className="object-contain object-center md:object-left"
