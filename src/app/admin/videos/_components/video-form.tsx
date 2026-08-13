@@ -1,14 +1,16 @@
 "use client";
 
-import type { z } from "zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ExternalLink, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, RotateCcw, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
+import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
 import type { RouterOutputs } from "~/trpc/react";
 import { youtubeWatchUrl } from "~/lib/youtube/parse";
 import { cn } from "~/lib/utils";
@@ -46,13 +48,32 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { TemplateImageUploadField } from "~/app/admin/content/template/_components/template-field-widgets";
+import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
+import { AdminFormMoreMenu } from "~/app/admin/_components/admin-form-more-menu";
+import { AdminThumb } from "~/app/admin/_components/admin-thumb";
 
 type Props = {
   video: RouterOutputs["videos"]["getById"];
 };
 
-type FormValues = z.input<typeof videoUpdateSchema>;
+/**
+ * The wire schema plus one client-only field: the not-yet-uploaded thumbnail.
+ *
+ * `thumbnailFile` holds a `File` in RHF state and is uploaded in `onSubmit`,
+ * NOT when the file is picked — an abandoned form must not leave an orphaned
+ * object in S3. `thumbnailOverride` (the persisted URL) stays the field that
+ * crosses the wire; `onSubmit` resolves one from the other. Same split as
+ * Collections' `imageFile`/`imageUrl`.
+ *
+ * Extended here rather than in `~/lib/validators/videos` because
+ * `videos.update` takes `videoUpdateSchema` as its input and must never see a
+ * `File`.
+ */
+const videoFormSchema = videoUpdateSchema.extend({
+  thumbnailFile: z.instanceof(File).optional().nullable(),
+});
+
+type FormValues = z.input<typeof videoFormSchema>;
 
 function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -76,39 +97,77 @@ export function VideoForm({ video }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [thumbnailOverride, setThumbnailOverride] = useState<string>(
-    video.thumbnailOverride ?? "",
-  );
+  const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
+  // URLs uploaded to S3 during the in-flight submit that aren't yet persisted
+  // to the DB. Populated right before `update` is called (that's a
+  // fire-and-forget `mutate`, not `mutateAsync`) so the mutation's `onError`
+  // can discard them if the save itself fails — otherwise they'd be orphaned
+  // in S3 forever (the videos router never deletes from S3).
+  const pendingUploadUrlsRef = useRef<string[]>([]);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(videoUpdateSchema),
+    resolver: zodResolver(videoFormSchema),
     mode: "onTouched",
     defaultValues: {
       id: video.id,
       titleOverride: video.titleOverride ?? "",
       descriptionOverride: video.descriptionOverride ?? "",
       thumbnailOverride: video.thumbnailOverride ?? undefined,
+      thumbnailFile: undefined,
       published: video.published,
     },
   });
+
+  const thumbnailUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
+  // Best-effort S3 cleanup for uploads whose parent save step failed. Not
+  // user-visible or blocking — the caller's own error path already completed.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+    },
+  });
+
+  const discardPendingUploads = () => {
+    const urls = pendingUploadUrlsRef.current;
+    pendingUploadUrlsRef.current = [];
+    if (urls.length > 0) {
+      discardUploadsMutation.mutate({ urls });
+    }
+  };
 
   const updateMutation = api.videos.update.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
       toast.success("Video updated");
+      // The upload from this submit is now persisted (referenced by the
+      // updated video) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
       void utils.videos.invalidate();
-      setThumbnailOverride(data.thumbnailOverride ?? "");
+      if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
       form.reset({
         id: data.id,
         titleOverride: data.titleOverride ?? "",
         descriptionOverride: data.descriptionOverride ?? "",
         thumbnailOverride: data.thumbnailOverride ?? undefined,
+        thumbnailFile: undefined,
         published: data.published,
       });
       router.refresh();
     },
     onError: (err) => {
       toast.dismiss();
+      discardPendingUploads();
       toast.error(err.message ?? "Failed to update video");
     },
     onMutate: () => toast.loading("Saving..."),
@@ -129,9 +188,45 @@ export function VideoForm({ video }: Props) {
     onMutate: () => toast.loading("Deleting video..."),
   });
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     const trimmedTitle = data.titleOverride?.trim() ?? "";
     const trimmedDescription = data.descriptionOverride?.trim() ?? "";
+
+    // Objects uploaded to S3 during THIS submit. Tracked so they can be
+    // discarded if the save mutation fails — otherwise a rejected save leaves
+    // orphans with nothing referencing them.
+    const uploadedThisSubmit: string[] = [];
+
+    // Three states:
+    //   File      → upload now, save the resulting URL
+    //   null      → the owner removed the override; null falls back to
+    //               YouTube's own thumbnail (`resolveVideoThumbnail`)
+    //   undefined → untouched, resend whatever `thumbnailOverride` already
+    //               holds (see the always-sent note below)
+    let thumbnailOverride: string | null;
+    const thumbnailFile = data.thumbnailFile;
+    if (thumbnailFile === null) {
+      thumbnailOverride = null;
+    } else if (thumbnailFile instanceof File) {
+      try {
+        const response = await thumbnailUploader.upload(thumbnailFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        thumbnailOverride = fileLocation || null;
+        if (fileLocation) uploadedThisSubmit.push(fileLocation);
+      } catch {
+        toast.error("Failed to upload image.");
+        return;
+      }
+    } else {
+      thumbnailOverride = data.thumbnailOverride ?? null;
+    }
+
+    // Hand off to the mutation's onError/onSuccess: `mutate` below is
+    // fire-and-forget, so this ref is how the mutation callbacks learn what
+    // was uploaded during the submit that's now in flight.
+    pendingUploadUrlsRef.current = uploadedThisSubmit;
 
     updateMutation.mutate({
       id: video.id,
@@ -152,15 +247,42 @@ export function VideoForm({ video }: Props) {
     });
   };
 
-  const isSubmitting = updateMutation.isPending;
+  const isSubmitting = updateMutation.isPending || thumbnailUploader.isPending;
   const isDeleting = deleteMutation.isPending;
-  const isDirty =
-    form.formState.isDirty ||
-    thumbnailOverride !== (video.thumbnailOverride ?? "");
+  // No local thumbnail state to fold in any more: the pending thumbnail is a
+  // real RHF field (`thumbnailFile`), so picking or removing one already marks
+  // the form dirty.
+  const isDirty = form.formState.isDirty;
 
   useDirtyForm(isDirty);
 
   const title = video.titleOverride ?? video.title;
+
+  const handleReset = () => {
+    form.reset();
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+  };
+
+  const moreMenuItems: AdminFormMoreMenuItem[] = [
+    {
+      label: "View on storefront",
+      icon: ExternalLink,
+      href: "/videos",
+    },
+    {
+      label: "Reset",
+      icon: RotateCcw,
+      disabled: isSubmitting || !isDirty,
+      onSelect: handleReset,
+    },
+    {
+      label: "Delete",
+      icon: Trash2,
+      destructive: true,
+      disabled: isSubmitting,
+      onSelect: () => setShowDeleteDialog(true),
+    },
+  ];
 
   return (
     <Form {...form}>
@@ -199,24 +321,6 @@ export function VideoForm({ video }: Props) {
           </div>
 
           <div className="toolbar-actions">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="hidden sm:inline-flex"
-            >
-              <a
-                href="/videos"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View videos on storefront"
-                title="View videos on storefront"
-              >
-                <ExternalLink className="h-4 w-4 lg:mr-2" />
-                <span className="hidden lg:inline">View on storefront</span>
-              </a>
-            </Button>
-
             <FormField
               control={form.control}
               name="published"
@@ -235,31 +339,7 @@ export function VideoForm({ video }: Props) {
               )}
             />
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={isSubmitting}
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Delete</span>
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isSubmitting || !isDirty}
-              onClick={() => {
-                form.reset();
-                setThumbnailOverride(video.thumbnailOverride ?? "");
-              }}
-              className="hidden md:inline-flex"
-            >
-              Reset
-            </Button>
+            <AdminFormMoreMenu items={moreMenuItems} />
 
             <Button type="submit" size="sm" disabled={isSubmitting}>
               {isSubmitting ? (
@@ -279,7 +359,11 @@ export function VideoForm({ video }: Props) {
         </div>
 
         <div className="admin-container space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* `items-start`: the two columns hold cards of different heights, and
+              grid defaults to `align-items: stretch` — without it the shorter
+              column is stretched to the taller one's height, which nothing
+              inside consumes. Let each column size to its own content. */}
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
             {/* Left column — read-only context synced from YouTube */}
             <div className="space-y-4">
               <Card>
@@ -294,8 +378,11 @@ export function VideoForm({ video }: Props) {
                 <CardContent className="space-y-3">
                   <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-md">
                     {video.thumbnailUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      // AdminThumb, not a plain <img>: YouTube's CDN URL is a
+                      // stored, externally-owned URL that can 404 (video made
+                      // private, thumbnail re-generated) — fall back to the
+                      // placeholder instead of a broken-image icon.
+                      <AdminThumb
                         src={video.thumbnailUrl}
                         alt=""
                         className="h-full w-full object-cover"
@@ -417,14 +504,22 @@ export function VideoForm({ video }: Props) {
                     )}
                   />
 
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium">Thumbnail</Label>
-                    <TemplateImageUploadField
-                      value={thumbnailOverride}
-                      onChange={setThumbnailOverride}
-                      description="Leave blank to use the thumbnail shown on the left. Uploading or choosing an image here replaces it on your site only — YouTube's own thumbnail is unaffected."
-                    />
-                  </div>
+                  {/* Held as a File and uploaded on Save (see onSubmit), so
+                      abandoning the form can't orphan an S3 object.
+                      `existingPreviewUrl` is watched, not read off the `video`
+                      prop, so the preview updates the moment a save lands
+                      rather than waiting on router.refresh(). */}
+                  <ImageUploadFormField
+                    form={form}
+                    name="thumbnailFile"
+                    label="Thumbnail"
+                    description="Leave blank to use the thumbnail shown on the left. Uploading an image here replaces it on your site only — YouTube's own thumbnail is unaffected."
+                    existingPreviewUrl={
+                      form.watch("thumbnailOverride") ?? undefined
+                    }
+                    inputRef={thumbnailInputRef}
+                    disabled={isSubmitting}
+                  />
                 </CardContent>
               </Card>
             </div>

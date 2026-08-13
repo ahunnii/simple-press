@@ -360,7 +360,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
                     <InputFormField
                       form={form}
                       name="customerName"
@@ -526,7 +526,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                         placeholder="Apt 4B"
                       />
 
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
                         <InputFormField
                           form={form}
                           name="shippingAddress.city"
@@ -758,7 +758,7 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
                     <MoneyField
                       form={form}
                       name="shipping"

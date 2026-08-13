@@ -13,6 +13,10 @@ import {
   previewDraftSchema,
   siteContentSchema,
 } from "~/lib/validators/content";
+import {
+  pageBulkDeleteSchema,
+  pageBulkPublishSchema,
+} from "~/lib/validators/content-pages";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 import {
   bannerConfigSchema,
@@ -27,6 +31,7 @@ import {
   featureGate,
   getBusinessProcedure,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   publicProcedure,
 } from "../trpc";
 
@@ -227,32 +232,197 @@ export const contentRouter = createTRPCRouter({
   // PAGES
   // ==========================================
 
-  // Get all pages
+  /**
+   * The list feed behind three admin surfaces: the Site Content hub dashboard
+   * (`/admin/content`, no `type` — every row), the CMS Pages list
+   * (`type: "page"`) and the Blog list (`type: "blog"`). All three narrow,
+   * sort and paginate in memory via `buildTablePage`, so this stays input-free
+   * apart from the type discriminator.
+   *
+   * Deliberately NOT feature-gated. It serves the ungated content hub as well
+   * as the blog list, so a `featureGate("blog")` would 403 the hub for any
+   * business with the blog flag off — the `baseInventoryUnit.list` situation
+   * exactly. `/admin/content/blog/layout.tsx` is the blog gate.
+   */
   getPages: ownerAdminProcedure
     .input(
       z
         .object({
-          type: z.enum(["page", "policy", "custom", "all"]).optional(),
+          type: z.enum(["page", "policy", "blog", "custom", "all"]).optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const pages = await ctx.db.page.findMany({
+      // Explicit select = the list row contract, and the leak guard for the
+      // visual-editor draft columns in one: `previewDraft` /
+      // `previewDraftUpdatedAt` are never read at all here, which is stronger
+      // than the destructuring strip this replaced (that one still pulled the
+      // drafts out of Postgres and into the server's memory first).
+      //
+      // `content` in particular is gone: it is the page's entire TipTap
+      // document, and shipping every page's body into an RSC payload for a
+      // table that renders a title and a slug is the payload-discipline
+      // failure docs/admin-table-migration.md §6 calls out. The editors read it
+      // through `getPageById`.
+      //   - id, title, slug: identity, link target and a search field
+      //   - excerpt: rendered under the title, and the third search field
+      //   - image: table thumbnail
+      //   - type: the hub dashboard's per-type counts and badges
+      //   - published, scheduledPublishAt: feed `getPageStatus`
+      //   - publishedAt: the blog list's Published column + its two date sorts
+      //   - createdAt, updatedAt: the Updated column and the newest/oldest sorts
+      // `metaTitle`/`metaDescription`/`metaKeywords`/`ogImage`/`template`/
+      // `sortOrder` are excluded — nothing in any of the three surfaces renders
+      // or sorts on them.
+      return ctx.db.page.findMany({
         where: {
           businessId,
           ...(input?.type && input?.type !== "all"
             ? { type: input?.type }
             : {}),
         },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          image: true,
+          type: true,
+          published: true,
+          publishedAt: true,
+          scheduledPublishAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        // Transport order only — both list pages re-sort by their own sort
+        // param. It still decides the hub dashboard's "Recent Pages" strip,
+        // which takes the first five, so it is left exactly as it was; the
+        // `id` tie-break is new, and only makes that strip deterministic when
+        // rows share a `sortOrder` and a `createdAt` (routine — every row
+        // created before a reorder shares the create path's default).
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }, { id: "asc" }],
+      });
+    }),
+
+  /**
+   * Bulk publish/unpublish for both admin Page lists (CMS pages and blog
+   * posts), shared because they are one model.
+   *
+   * `ownerAdminProcedure` and deliberately **ungated**, for the same reason as
+   * `getPages` above plus the Reviews precedent (docs/admin-table-migration.md
+   * §11): one procedure serves a list that is blog-gated and a list that is
+   * not, so any single gate would be wrong for the other, and an owner who has
+   * just switched the blog off should still be able to unpublish the posts it
+   * left on their storefront. Route-level gating (`content/blog/layout.tsx`)
+   * is the blog enforcement.
+   */
+  bulkSetPublished: ownerAdminProcedure
+    .input(pageBulkPublishSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const now = new Date();
+
+      // `changedIds` is the rows this call will actually FLIP, captured before
+      // the write, and it is what the table's Undo re-sends. Re-sending the
+      // whole selection with `published` inverted is not an inverse: a
+      // selection of 50 containing 20 already-published rows publishes all 50,
+      // then "Undo" unpublishes all 50 — including the ones the user never
+      // touched. The client cannot narrow it either (a selection spans pages,
+      // and off-page rows' `published` state never reached the browser). One
+      // transaction, so nothing can change between the read and the update.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.page.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            published: { not: input.published },
+          },
+          select: { id: true },
+        });
+
+        let count: number;
+        if (input.published) {
+          // Publishing means the same thing here as everywhere else that
+          // publishes a Page — the cron sweep (src/app/api/cron/route.ts) and
+          // both editors' `published ? null : …`:
+          //   - a pending `scheduledPublishAt` is superseded and cleared, or an
+          //     Unpublish later would flip the row back to "Scheduled" and the
+          //     cron would silently re-publish it;
+          //   - a row that has never been published gets a `publishedAt`, so
+          //     the storefront's `publishedAt ?? createdAt` coalesce shows the
+          //     real publish date rather than the authoring date.
+          // Split in two, like the cron, because `updateMany` cannot set a
+          // column conditionally per row. The two `where`s partition the same
+          // id set, so the counts sum to the rows matched.
+          const [withoutDate, withDate] = await Promise.all([
+            tx.page.updateMany({
+              where: { id: { in: input.ids }, businessId, publishedAt: null },
+              data: {
+                published: true,
+                publishedAt: now,
+                scheduledPublishAt: null,
+              },
+            }),
+            tx.page.updateMany({
+              where: {
+                id: { in: input.ids },
+                businessId,
+                publishedAt: { not: null },
+              },
+              data: { published: true, scheduledPublishAt: null },
+            }),
+          ]);
+          count = withoutDate.count + withDate.count;
+        } else {
+          // Unpublishing touches `published` and nothing else. `publishedAt` is
+          // kept (it is the date this page WAS published, which re-publishing
+          // should not rewrite) and `scheduledPublishAt` is left alone — the
+          // update runs over every selected id, including rows that were
+          // already unpublished, so clearing it here would silently cancel a
+          // pending schedule on a row this action didn't change.
+          const result = await tx.page.updateMany({
+            where: { id: { in: input.ids }, businessId },
+            data: { published: input.published },
+          });
+          count = result.count;
+        }
+
+        return { changedIds: changed.map((p) => p.id), count };
       });
 
-      // Never expose the visual-editor draft columns to admin list callers.
-      return pages.map(
-        ({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...page }) => page,
-      );
+      return {
+        count,
+        changedIds,
+        message: `${count} page${count === 1 ? "" : "s"} updated`,
+      };
+    }),
+
+  /**
+   * OWNER only, unlike `bulkSetPublished` above. Not a statement about
+   * trusting managers — it's blast radius. Publish/unpublish is reversible in
+   * one click (and Undo-able); deleting N pages is unrecoverable without a
+   * database restore, and every deleted row takes its storefront URL down
+   * immediately. Same reason the schema's delete cap
+   * (ADMIN_BULK_DELETE_LIMIT) sits far below the selection cap.
+   *
+   * No S3 cleanup: `Page.image` lives in the media library independently of
+   * the page row, so deleting a page must not delete the file.
+   */
+  bulkDelete: ownerOnlyProcedure
+    .input(pageBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const result = await ctx.db.page.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+
+      return {
+        count: result.count,
+        message: `${result.count} page${result.count === 1 ? "" : "s"} deleted`,
+      };
     }),
 
   getEditorPages: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -674,25 +844,14 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Reorder pages
-  reorderPages: ownerAdminProcedure
-    .input(z.object({ pageIds: z.array(z.string()) }))
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-
-      // Update sort order for each page atomically — a mid-batch failure
-      // must not leave the order partially applied.
-      await ctx.db.$transaction(
-        input.pageIds.map((pageId, index) =>
-          ctx.db.page.update({
-            where: { id: pageId, businessId },
-            data: { sortOrder: index },
-          }),
-        ),
-      );
-
-      return { success: true };
-    }),
+  // `reorderPages` used to sit here. It had zero callers anywhere in `src/` —
+  // no admin surface has ever offered drag-reordering for pages — and a bulk
+  // `sortOrder` writer with no UI is a hazard the moment either Page list
+  // gains pagination (docs/admin-table-migration.md §7: reorder and pagination
+  // are mutually exclusive). Removed during the Page-list migration, the same
+  // way `events.reorder` was. `Page.sortOrder` itself stays: it is assigned at
+  // create time and still orders `getSimplifiedPages` (nav menus) and
+  // `getBlogPages`.
 
   // ==========================================
   // BANNER & POPUP CONFIG

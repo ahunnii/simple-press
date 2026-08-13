@@ -402,7 +402,12 @@ export function BrandingEditor({ business, siteContent }: Props) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* items-start: logo/favicon previews render at different
+                    heights depending on whether an existing image is set for
+                    each, so the two `FormItem`s aren't guaranteed equal
+                    height — without it, stretch inflates the shorter one's
+                    label row. */}
+                <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
                   <ImageUploadFormField
                     form={form}
                     name="logoFile"
@@ -452,7 +457,7 @@ export function BrandingEditor({ business, siteContent }: Props) {
                       footer.
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
                     <InputFormField
                       form={form}
                       name="socialLinks.instagram"

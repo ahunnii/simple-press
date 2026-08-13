@@ -32,6 +32,8 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
+import { AdminThumb } from "../../_components/admin-thumb";
+
 type Props = {
   testimonial?: Testimonial;
   isOpen: boolean;
@@ -272,8 +274,7 @@ export function OwnerTestimonialDialog({
                       key={url}
                       className="bg-muted relative h-24 w-24 overflow-hidden rounded-lg border"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element -- thumbnails from upload URLs */}
-                      <img
+                      <AdminThumb
                         src={url}
                         alt="Testimonial photo"
                         loading="lazy"

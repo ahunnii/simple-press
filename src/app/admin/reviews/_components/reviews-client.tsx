@@ -1,6 +1,3 @@
-/* eslint-disable @next/next/no-img-element -- review photos are arbitrary S3
-   URLs rendered at a fixed 40px; next/image's optimization/loader machinery
-   buys nothing at this size and adds a remote-pattern config burden. */
 "use client";
 
 import { useState } from "react";
@@ -67,6 +64,7 @@ import { AdminBulkBar } from "../../_components/admin-bulk-bar";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
 import { AdminPagination } from "../../_components/admin-pagination";
+import { AdminThumb } from "../../_components/admin-thumb";
 import {
   TABLE_CARD,
   TABLE_CELL,
@@ -694,7 +692,7 @@ export function ReviewsClient({
                             {review.images.length > 0 && (
                               <div className="mt-1.5 flex items-center gap-1.5">
                                 {review.images.slice(0, 3).map((img, i) => (
-                                  <img
+                                  <AdminThumb
                                     key={img}
                                     src={img}
                                     alt={`Review photo ${i + 1}`}

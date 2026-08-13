@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -33,6 +32,8 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+
+import { AdminThumb } from "../../../_components/admin-thumb";
 
 export function ProductExporter() {
   const [search, setSearch] = useState("");
@@ -258,7 +259,7 @@ export function ProductExporter() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             {product.images[0] ? (
-                              <img
+                              <AdminThumb
                                 src={product.images[0].url}
                                 alt={product.name}
                                 loading="lazy"

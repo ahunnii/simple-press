@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -55,6 +54,7 @@ import {
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
 import { AdminPagination } from "../../_components/admin-pagination";
+import { AdminThumb } from "../../_components/admin-thumb";
 import {
   dismissLoadingToast,
   loadingToast,
@@ -303,7 +303,7 @@ export function GalleriesList({
                               {/* Decorative: the card's accessible name is the
                                   gallery-name link, and per-image alt text would
                                   read out as noise before it. */}
-                              <img
+                              <AdminThumb
                                 src={image.url}
                                 alt=""
                                 loading="lazy"

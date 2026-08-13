@@ -309,6 +309,7 @@ type AnalyticsContentProps = {
   topReferrers: ReferrersResult;
   events: EventsResult;
   embedEngagement: EmbedEngagementResult;
+  embedsEnabled: boolean;
 };
 
 function formatSeconds(totalSeconds: number): string {
@@ -324,6 +325,7 @@ export function AnalyticsContent({
   topReferrers,
   events,
   embedEngagement,
+  embedsEnabled,
 }: AnalyticsContentProps) {
   if (!overview.configured) {
     return (
@@ -475,7 +477,7 @@ export function AnalyticsContent({
       ) : null}
 
       {/* Embed engagement */}
-      {embedEngagement.configured ? (
+      {embedsEnabled && embedEngagement.configured ? (
         <EmbedEngagementSection
           engagements={embedEngagement.engagements}
           dwellSessions={embedEngagement.dwellSessions}

@@ -78,6 +78,7 @@ import {
 
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
+import { AdminThumb } from "../../_components/admin-thumb";
 import {
   TABLE_CARD,
   TABLE_CELL,
@@ -685,8 +686,7 @@ function SortableVideoRow({
         <div className="flex items-center gap-3">
           {thumbnail ? (
             <div className="bg-muted relative h-12 w-20 shrink-0 overflow-hidden rounded">
-              {/* eslint-disable-next-line @next/next/no-img-element -- YouTube thumbnails are arbitrary remote URLs rendered at a fixed 80px; next/image's loader buys nothing at this size and adds a remote-pattern config burden. */}
-              <img
+              <AdminThumb
                 src={thumbnail}
                 alt=""
                 loading="lazy"

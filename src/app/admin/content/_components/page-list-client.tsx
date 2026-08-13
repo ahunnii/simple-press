@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Archive,
-  ArchiveRestore,
-  CalendarDays,
+  ExternalLink,
   Eye,
   EyeOff,
+  FileText,
   MoreVertical,
+  Newspaper,
   Pencil,
   Plus,
   Search,
@@ -19,9 +19,7 @@ import { toast } from "sonner";
 
 import type { BulkAction } from "../../_components/admin-bulk-bar";
 import type { AdminFilterDef } from "../../_components/admin-filters";
-import type { EventStatus, EventWhen } from "~/lib/validators/events";
-import type { RouterOutputs } from "~/trpc/react";
-import { formatEventDate } from "~/lib/events/format";
+import type { PageStatus } from "~/lib/validators/content-pages";
 import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
@@ -62,7 +60,6 @@ import { AdminBulkBar } from "../../_components/admin-bulk-bar";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
 import { AdminPagination } from "../../_components/admin-pagination";
-import { AdminThumb } from "../../_components/admin-thumb";
 import {
   TABLE_CARD,
   TABLE_CELL,
@@ -82,23 +79,45 @@ import {
 } from "../../_lib/admin-mutation-toast";
 import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 
-// The row shape `events.getAll` returns, plus the two derivations the page
-// computes once (via `getEventStatus`/`getEventWhen` in
-// `~/lib/validators/events`) and hands down. The client never derives either
-// itself, and in particular never calls `Date.now()` during render — the old
-// client did, to split its Upcoming/Past tabs, which is a latent SSR/hydration
-// hazard: a row whose cutoff falls between the server render and the client's
-// first paint would land on different sides of the split.
-export type EventRow = RouterOutputs["events"]["getAll"][number] & {
-  status: EventStatus;
-  when: EventWhen;
+/**
+ * ONE table for both admin lists backed by the `Page` model — CMS pages
+ * (`/admin/content/pages`) and blog posts (`/admin/content/blog`).
+ *
+ * The two used to be near-verbatim clones of each other (the blog copy even
+ * re-filtered `type === "blog"` over a set the server had already filtered),
+ * which is exactly the drift this replaces: they are one model, one set of
+ * columns and one pair of bulk procedures. Everything that genuinely differs
+ * between them — route, noun, storefront URL shape, whether a Published column
+ * and its two date sorts exist — is declared once in `ENTITY` below and
+ * selected by the `kind` prop. Filter/sort vocabulary and the status
+ * derivation live further out still, in `~/lib/validators/content-pages`,
+ * shared with both `page.tsx` files.
+ *
+ * Policies (`type: "policy"`) are NOT served by this component.
+ */
+
+export type PageListKind = "page" | "blog";
+
+/** The row contract: `content.getPages`' select, plus the status the page
+ *  derives once via `getPageStatus` and hands down. The client never derives it
+ *  itself and never reads a clock during render. */
+export type PageListRow = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  image: string | null;
+  published: boolean;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  status: PageStatus;
 };
 
 type Props = {
+  kind: PageListKind;
   /** The current page slice only — filtering/sorting/paging happen in page.tsx. */
-  events: EventRow[];
-  /** Business.timeZone — every date shown here goes through formatEventDate. */
-  timeZone: string;
+  rows: PageListRow[];
   filters: AdminFilterDef[];
   /**
    * Ids of every row matching the current filters, across all pages — or
@@ -108,68 +127,134 @@ type Props = {
    * takes both.
    */
   matchingIds: string[] | null;
-  /** Unfiltered total — distinguishes "no events yet" from "no matches". */
-  totalEvents: number;
+  /** Unfiltered total — distinguishes "nothing here yet" from "no matches". */
+  totalRows: number;
   totalCount: number;
   totalPages: number;
   page: number;
   pageSize: number;
-  /** Mirrors `events.bulkDelete`'s `ownerOnlyProcedure`, resolved
+  /** `Business.timeZone`, so every date is formatted with an EXPLICIT zone and
+   *  the RSC render and the client's first paint produce identical markup. The
+   *  bare `new Date(x).toLocaleDateString()` the old lists used resolves
+   *  against the server's zone on one side and the viewer's on the other. */
+  timeZone: string;
+  /** Mirrors `content.bulkDelete`'s `ownerOnlyProcedure`, resolved
    *  server-side. False OMITS the bulk Delete action rather than disabling it. */
   canBulkDelete: boolean;
 };
 
-const BASE_PATH = "/admin/events";
-const ITEM_NOUN = { one: "event", many: "events" } as const;
+/** Everything that differs between the two lists, in one place. */
+const ENTITY = {
+  page: {
+    basePath: "/admin/content/pages",
+    noun: { one: "page", many: "pages" },
+    /** Title-cased for dialog headings and button labels. */
+    nounTitle: { one: "Page", many: "Pages" },
+    heading: "Pages",
+    subheading: "Standalone content pages like About, Contact and FAQ",
+    createLabel: "Create Page",
+    firstCreateLabel: "Create Your First Page",
+    emptyTitle: "No pages yet",
+    emptyDescription:
+      "Add a standalone page — About, Contact, FAQ — and it gets its own address on your site. To edit homepage sections, use the Site Editor instead.",
+    searchPlaceholder: "Search pages…",
+    searchAriaLabel: "Search pages by title, URL or excerpt",
+    identityHeading: "Page",
+    icon: FileText,
+    /** Relative on purpose: the admin runs on the tenant's own host, so this
+     *  resolves to the right storefront without rebuilding the URL from
+     *  `subdomain`/`customDomain` the way the old lists did. */
+    storefrontHref: (slug: string) => `/${slug}`,
+    /** Blog posts get a Published column; CMS pages have no publish-date sort
+     *  to give it a visible cause, and no scheduling control either. */
+    showPublishedColumn: false,
+  },
+  blog: {
+    basePath: "/admin/content/blog",
+    noun: { one: "blog post", many: "blog posts" },
+    nounTitle: { one: "Blog Post", many: "Blog Posts" },
+    heading: "Blog Posts",
+    subheading: "Write and publish posts for your site's blog",
+    createLabel: "Create Blog Post",
+    firstCreateLabel: "Create Your First Blog Post",
+    emptyTitle: "No blog posts yet",
+    emptyDescription:
+      "Share news, stories or updates. Posts appear on your site's blog, newest first.",
+    searchPlaceholder: "Search blog posts…",
+    searchAriaLabel: "Search blog posts by title, URL or excerpt",
+    identityHeading: "Post",
+    icon: Newspaper,
+    storefrontHref: (slug: string) => `/blog/${slug}`,
+    showPublishedColumn: true,
+  },
+} as const;
 
 const TH = TABLE_HEAD;
 const TD = TABLE_CELL;
 const TH_CHECKBOX = TABLE_HEAD_TIGHT;
 const TD_CHECKBOX = TABLE_CELL_TIGHT;
 
-/** "3 of 5" — a bulk op silently touching fewer rows than asked must say so. */
-const shortfallMessage = createShortfallMessage(ITEM_NOUN);
-
 /**
  * The ONE place these words are written. The desktop Status badge and the
- * `md:hidden` reflow line both render from this map, so the two cannot drift.
- *
- * This collapses the old table's *additive* badges — a `Published`/`Draft`
- * badge with a separate `Archived` badge appended — into the single derived
- * status `getEventStatus` computes with priority archived ▸ draft ▸ published.
- * The old pairing could read "Published · Archived", which named two states
- * for a row that is, to a shopper, simply gone.
+ * `md:hidden` reflow line both render from these maps, so the two cannot
+ * drift. Keys are `getPageStatus`'s output — "scheduled" is unreachable on the
+ * pages list, which passes `allowScheduled: false`.
  */
-const STATUS_LABEL: Record<EventStatus, string> = {
+const STATUS_LABEL: Record<PageStatus, string> = {
   published: "Published",
+  scheduled: "Scheduled",
   draft: "Draft",
-  archived: "Archived",
 };
 
-// `success` for published rather than the old table's `default` (solid primary
-// fill): Collections' Published, Discounts' Active and Reviews' Published all
-// use `success` for the same "this is the live, good state" meaning.
+// `success` for published, matching Collections, Discounts, Reviews and Events:
+// it is the live, good state.
 const STATUS_BADGE_VARIANT: Record<
-  EventStatus,
+  PageStatus,
   "success" | "secondary" | "outline"
 > = {
   published: "success",
+  scheduled: "outline",
   draft: "secondary",
-  archived: "outline",
 };
 
-export function EventsClient({
-  events,
-  timeZone,
+/** Fixed locale + explicit zone = the same string on the server and in the
+ *  browser. See the `timeZone` prop's note. */
+function formatPageDate(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone,
+  }).format(date);
+}
+
+export function PageListClient({
+  kind,
+  rows,
   filters,
   matchingIds,
-  totalEvents,
+  totalRows,
   totalCount,
   totalPages,
   page,
   pageSize,
+  timeZone,
   canBulkDelete,
 }: Props) {
+  const entity = ENTITY[kind];
+  const {
+    basePath,
+    noun: ITEM_NOUN,
+    nounTitle,
+    storefrontHref,
+    showPublishedColumn,
+  } = entity;
+  const EmptyIcon = entity.icon;
+
+  /** "3 of 5" — a bulk op silently touching fewer rows than asked must say so.
+   *  Built per render rather than at module scope because the noun is a prop. */
+  const shortfallMessage = createShortfallMessage(ITEM_NOUN);
+
   const utils = api.useUtils();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -194,7 +279,7 @@ export function EventsClient({
     onRowClickCapture,
     onFiltersChange,
   } = useAdminTableSelection({
-    rowIds: events.map((event) => event.id),
+    rowIds: rows.map((row) => row.id),
     matchingIds,
     totalCount,
     page,
@@ -204,58 +289,35 @@ export function EventsClient({
   // ── Mutations ──────────────────────────────────────────────────────────────
 
   const afterWrite = () => {
-    void utils.events.invalidate();
+    void utils.content.invalidate();
     router.refresh();
   };
 
-  // `events.delete` takes a BARE string id, not `{ id }` — unlike the bulk
-  // procedures below.
-  const deleteMutation = api.events.delete.useMutation({
-    onMutate: loadingToast("Deleting event…"),
-    onSuccess: (_data, id, context) => {
-      dismissLoadingToast(context);
-      toast.success("Event deleted");
-      pruneSelection([id]);
-      setDeleteId(null);
-      afterWrite();
-    },
-    onError: (error, _id, context) => {
-      dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to delete event");
-    },
-  });
-
-  // Per-row archive toggle. No `pruneSelection` here (unlike delete): the row
-  // stays in the list, only its flags change — same as Reviews' per-row
-  // approve/hide.
-  const archiveMutation = api.events.setArchived.useMutation({
-    onMutate: loadingToast("Updating event…"),
+  const deleteMutation = api.content.deletePage.useMutation({
+    onMutate: loadingToast(`Deleting ${ITEM_NOUN.one}…`),
     onSuccess: (_data, variables, context) => {
       dismissLoadingToast(context);
-      toast.success(
-        variables.isArchived
-          ? "Event archived — it's hidden from your site"
-          : "Event moved back to upcoming",
-      );
+      toast.success(`${nounTitle.one} deleted`);
+      pruneSelection([variables.id]);
+      setDeleteId(null);
       afterWrite();
     },
     onError: (error, _variables, context) => {
       dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to update event");
+      toast.error(error.message ?? `Failed to delete ${ITEM_NOUN.one}`);
     },
   });
 
   // Separate from `bulkPublishMutation` so undo's own success toast doesn't
   // offer another Undo, which would let the two ping-pong indefinitely.
-  const undoPublishMutation = api.events.bulkSetPublished.useMutation({
+  const undoPublishMutation = api.content.bulkSetPublished.useMutation({
     onMutate: loadingToast("Undoing…"),
     onSuccess: (data, variables, context) => {
       dismissLoadingToast(context);
-      const verb = variables.published ? "published" : "unpublished";
       toast.success(
         `Undone — ${data.count} ${
           data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
-        } ${verb}`,
+        } ${variables.published ? "published" : "unpublished"}`,
       );
       pruneSelection(variables.ids);
       afterWrite();
@@ -266,13 +328,12 @@ export function EventsClient({
     },
   });
 
-  const bulkPublishMutation = api.events.bulkSetPublished.useMutation({
-    // Direction-aware, unlike a single "Updating…": putting a season's dates
-    // live and pulling them back down are different enough operations to name
-    // while they run.
+  const bulkPublishMutation = api.content.bulkSetPublished.useMutation({
     onMutate: (variables) => ({
       toastId: toast.loading(
-        variables.published ? "Publishing events…" : "Unpublishing events…",
+        variables.published
+          ? `Publishing ${ITEM_NOUN.many}…`
+          : `Unpublishing ${ITEM_NOUN.many}…`,
       ),
     }),
     onSuccess: (data, variables, context) => {
@@ -287,10 +348,13 @@ export function EventsClient({
         // flipped, computed server-side — NOT `variables.ids`. Re-sending the
         // whole selection inverted would touch rows that were already in the
         // target state before this call, which is a second unwanted edit
-        // dressed up as a recovery.
+        // dressed up as a recovery. Nothing flipped means nothing to undo, so
+        // the toast drops the action rather than offering a no-op.
         const undoable = data.changedIds;
         toast.success(
-          `${data.count} ${data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many} ${verb}`,
+          `${data.count} ${
+            data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
+          } ${verb}`,
           undoable.length > 0
             ? {
                 action: {
@@ -311,81 +375,12 @@ export function EventsClient({
     },
     onError: (error, _variables, context) => {
       dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to update events");
+      toast.error(error.message ?? `Failed to update ${ITEM_NOUN.many}`);
     },
   });
 
-  // Same split, same reason, for the archive/unarchive pair.
-  const undoArchiveMutation = api.events.bulkSetArchived.useMutation({
-    onMutate: loadingToast("Undoing…"),
-    onSuccess: (data, variables, context) => {
-      dismissLoadingToast(context);
-      const verb = variables.isArchived ? "archived" : "unarchived";
-      toast.success(
-        `Undone — ${data.count} ${
-          data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
-        } ${verb}`,
-      );
-      pruneSelection(variables.ids);
-      afterWrite();
-    },
-    onError: (error, _variables, context) => {
-      dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to undo");
-    },
-  });
-
-  const bulkArchiveMutation = api.events.bulkSetArchived.useMutation({
-    onMutate: (variables) => ({
-      toastId: toast.loading(
-        variables.isArchived ? "Archiving events…" : "Unarchiving events…",
-      ),
-    }),
-    onSuccess: (data, variables, context) => {
-      dismissLoadingToast(context);
-      const verb = variables.isArchived ? "archived" : "unarchived";
-      const requested = variables.ids.length;
-
-      if (data.count < requested) {
-        toast.warning(shortfallMessage(data.count, requested, verb));
-      } else {
-        const undoable = data.changedIds;
-        const plural = data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many;
-        toast.success(
-          // Echoes the per-row copy above ("Event archived — it's hidden from
-          // your site"): archiving is the one bulk action here with a
-          // consequence the verb alone doesn't name.
-          variables.isArchived
-            ? `${data.count} ${plural} archived — ${
-                data.count === 1 ? "it's" : "they're"
-              } hidden from your site`
-            : `${data.count} ${plural} ${verb}`,
-          undoable.length > 0
-            ? {
-                action: {
-                  label: "Undo",
-                  onClick: () =>
-                    undoArchiveMutation.mutate({
-                      ids: undoable,
-                      isArchived: !variables.isArchived,
-                    }),
-                },
-              }
-            : undefined,
-        );
-      }
-
-      pruneSelection(variables.ids);
-      afterWrite();
-    },
-    onError: (error, _variables, context) => {
-      dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to update events");
-    },
-  });
-
-  const bulkDeleteMutation = api.events.bulkDelete.useMutation({
-    onMutate: loadingToast("Deleting events…"),
+  const bulkDeleteMutation = api.content.bulkDelete.useMutation({
+    onMutate: loadingToast(`Deleting ${ITEM_NOUN.many}…`),
     onSuccess: (data, variables, context) => {
       dismissLoadingToast(context);
       const requested = variables.ids.length;
@@ -394,7 +389,9 @@ export function EventsClient({
         toast.warning(shortfallMessage(data.count, requested, "deleted"));
       } else {
         toast.success(
-          `${data.count} ${data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many} deleted`,
+          `${data.count} ${
+            data.count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many
+          } deleted`,
         );
       }
 
@@ -404,19 +401,29 @@ export function EventsClient({
     },
     onError: (error, _variables, context) => {
       dismissLoadingToast(context);
-      toast.error(error.message ?? "Failed to delete events");
+      toast.error(error.message ?? `Failed to delete ${ITEM_NOUN.many}`);
     },
   });
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
-  const selectedOnPageRows = events.filter((event) =>
-    selectedIds.has(event.id),
-  );
-  const selectedNames = selectedOnPageRows.map((event) => event.name);
-  const deleteTarget = events.find((event) => event.id === deleteId);
+  // Confirm-dialog context. Only rows on the current page have names available
+  // here; `describeSelection` handles the shortfall in the copy.
+  const selectedOnPageRows = rows.filter((row) => selectedIds.has(row.id));
+  const selectedTitles = selectedOnPageRows.map((row) => row.title);
+  const deleteTarget = rows.find((row) => row.id === deleteId);
+
+  // Warn about storefront pages disappearing only when that's actually true.
+  // A selection can reach past this page, and unseen rows might be published —
+  // so an incomplete view has to assume the warning applies rather than omit it.
+  const selectionReachesPastPage = selectedCount > selectedOnPageRows.length;
+  const anySelectedPublished =
+    selectionReachesPastPage || selectedOnPageRows.some((row) => row.published);
 
   const overCap = createOverCapGuard(selectedCount, ITEM_NOUN);
+  /** Delete's cap is well below the selection cap, so it can be unavailable
+   *  while Publish/Unpublish are fine — the bar disables that one action and
+   *  says why, rather than letting the click fail. */
   const capReason = createCapDisabledReason(selectedCount, ITEM_NOUN);
   const deleteCapReason = capReason(ADMIN_BULK_DELETE_LIMIT, "delete");
 
@@ -427,13 +434,6 @@ export function EventsClient({
     bulkPublishMutation.mutate({ ids: [...selectedIds], published });
   };
 
-  const handleBulkArchive = (isArchived: boolean) => {
-    if (selectedCount === 0 || overCap(ADMIN_BULK_SELECTION_LIMIT, "update")) {
-      return;
-    }
-    bulkArchiveMutation.mutate({ ids: [...selectedIds], isArchived });
-  };
-
   const handleBulkDelete = () => {
     if (selectedCount === 0 || overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) {
       return;
@@ -441,14 +441,11 @@ export function EventsClient({
     bulkDeleteMutation.mutate({ ids: [...selectedIds] });
   };
 
-  // The undo mutations count: they write to the same rows the bulk bar acts
-  // on, so leaving the bar live during an undo lets a second bulk action race
-  // it.
+  // `undoPublishMutation` counts: it writes to the same rows the bulk bar acts
+  // on, so leaving the bar live during an undo lets a second bulk action race it.
   const isBulkPending =
     bulkPublishMutation.isPending ||
     undoPublishMutation.isPending ||
-    bulkArchiveMutation.isPending ||
-    undoArchiveMutation.isPending ||
     bulkDeleteMutation.isPending;
 
   const bulkActions: BulkAction[] = [
@@ -468,23 +465,7 @@ export function EventsClient({
         bulkPublishMutation.isPending &&
         bulkPublishMutation.variables?.published === false,
     },
-    {
-      label: "Archive",
-      icon: Archive,
-      onClick: () => handleBulkArchive(true),
-      pending:
-        bulkArchiveMutation.isPending &&
-        bulkArchiveMutation.variables?.isArchived === true,
-    },
-    {
-      label: "Unarchive",
-      icon: ArchiveRestore,
-      onClick: () => handleBulkArchive(false),
-      pending:
-        bulkArchiveMutation.isPending &&
-        bulkArchiveMutation.variables?.isArchived === false,
-    },
-    // Omitted, not disabled, for a MANAGER: `bulkDelete` is
+    // Omitted, not disabled, for a MANAGER: `content.bulkDelete` is
     // `ownerOnlyProcedure`, and a button that only ever produces a FORBIDDEN
     // toast is worse than no button. The procedure remains the enforcement.
     ...(canBulkDelete
@@ -493,6 +474,9 @@ export function EventsClient({
             label: "Delete",
             icon: Trash2,
             variant: "destructive" as const,
+            // `disabledReason` stops the click being worth making; this still
+            // re-checks the cap BEFORE opening the dialog, for a selection
+            // grown past it between render and click.
             onClick: () => {
               if (overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) return;
               setBulkDeleteOpen(true);
@@ -506,34 +490,34 @@ export function EventsClient({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const hasEvents = totalEvents > 0;
-  const hasResults = events.length > 0;
+  const hasRows = totalRows > 0;
+  const hasResults = rows.length > 0;
 
   return (
     <div className="admin-container">
       <div className="admin-header">
         <div>
-          <h1>Events</h1>
-          <p>Manage the markets, pop-ups, and dates shown on your site</p>
+          <h1>{entity.heading}</h1>
+          <p>{entity.subheading}</p>
         </div>
         <Button asChild>
-          <Link href={`${BASE_PATH}/new`}>
+          <Link href={`${basePath}/new`}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Event
+            {entity.createLabel}
           </Link>
         </Button>
       </div>
 
-      {!hasEvents ? (
+      {!hasRows ? (
         <AdminEmpty
-          icon={CalendarDays}
-          title="No events yet"
-          description="Add a market, pop-up, or workshop date so shoppers can see when to find you."
+          icon={EmptyIcon}
+          title={entity.emptyTitle}
+          description={entity.emptyDescription}
           action={
             <Button asChild>
-              <Link href={`${BASE_PATH}/new`}>
+              <Link href={`${basePath}/new`}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Your First Event
+                {entity.firstCreateLabel}
               </Link>
             </Button>
           }
@@ -541,9 +525,12 @@ export function EventsClient({
       ) : (
         <>
           <AdminFilters
-            basePath={BASE_PATH}
-            searchPlaceholder="Search events…"
-            searchAriaLabel="Search events by name or location"
+            basePath={basePath}
+            searchPlaceholder={entity.searchPlaceholder}
+            // Names the fields actually matched — the placeholder has no room,
+            // and a bare "Search pages" leaves a screen-reader user guessing
+            // whether typing a URL or a word from the excerpt will hit.
+            searchAriaLabel={entity.searchAriaLabel}
             filters={filters}
             resultCount={totalCount}
             itemNoun={ITEM_NOUN}
@@ -562,6 +549,8 @@ export function EventsClient({
                     total: totalCount,
                     onSelect: handleSelectAllMatching,
                     isEscalated,
+                    // Describes what's blocked — selecting *all* matches — not
+                    // the action itself.
                     disabledReason: escalationDisabledReason,
                   }
                 : undefined
@@ -571,11 +560,13 @@ export function EventsClient({
           {!hasResults ? (
             <AdminEmpty
               icon={Search}
-              title="No events match your filters"
+              title={`No ${ITEM_NOUN.many} match your filters`}
+              // AdminEmpty renders its own "Try adjusting your search or
+              // filters." line when `filtered` — don't say it twice.
               filtered
               action={
                 <Button variant="outline" asChild>
-                  <Link href={BASE_PATH}>Clear filters</Link>
+                  <Link href={basePath}>Clear filters</Link>
                 </Button>
               }
             />
@@ -583,12 +574,14 @@ export function EventsClient({
             <>
               <Card className={TABLE_CARD}>
                 <Table>
-                  <TableCaption className="sr-only">Events</TableCaption>
+                  <TableCaption className="sr-only">
+                    {entity.heading}
+                  </TableCaption>
                   <TableHeader>
                     <TableRow>
                       <TableHead scope="col" className={`w-10 ${TH_CHECKBOX}`}>
                         <Checkbox
-                          id="select-all-events"
+                          id={`select-all-${kind}`}
                           checked={
                             allPageSelected
                               ? true
@@ -597,23 +590,25 @@ export function EventsClient({
                                 : false
                           }
                           onCheckedChange={handleSelectAllOnPage}
-                          aria-label="Select all events on this page"
+                          aria-label={`Select all ${ITEM_NOUN.many} on this page`}
                         />
                       </TableHead>
                       <TableHead scope="col" className={TH}>
-                        Event
+                        {entity.identityHeading}
                       </TableHead>
+                      {showPublishedColumn && (
+                        <TableHead
+                          scope="col"
+                          className={`hidden md:table-cell ${TH}`}
+                        >
+                          Published
+                        </TableHead>
+                      )}
                       <TableHead
                         scope="col"
                         className={`hidden md:table-cell ${TH}`}
                       >
-                        Date
-                      </TableHead>
-                      <TableHead
-                        scope="col"
-                        className={`hidden md:table-cell ${TH}`}
-                      >
-                        Location
+                        Updated
                       </TableHead>
                       <TableHead
                         scope="col"
@@ -627,25 +622,22 @@ export function EventsClient({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {/* No row-level onClick / cursor-pointer: whole-row
-                        navigation was dropped in the migration and no migrated
-                        table has it. It fights the checkbox cell (every
-                        selection click needs a stopPropagation escape hatch)
-                        and it is keyboard-unreachable — a `<tr>` is not
-                        focusable. The name link and the Edit item are the
-                        navigation. */}
-                    {events.map((event, index) => {
-                      const isSelected = selectedIds.has(event.id);
+                    {rows.map((row, index) => {
+                      const isSelected = selectedIds.has(row.id);
                       // Computed once and reused by the mobile reflow line, so
                       // the two can never disagree.
-                      const dateLabel = formatEventDate(event, timeZone);
-                      const isArchiving =
-                        archiveMutation.isPending &&
-                        archiveMutation.variables?.id === event.id;
+                      const updatedLabel = formatPageDate(
+                        row.updatedAt,
+                        timeZone,
+                      );
+                      const publishedLabel = row.publishedAt
+                        ? formatPageDate(row.publishedAt, timeZone)
+                        : null;
+                      const statusLabel = STATUS_LABEL[row.status];
 
                       return (
                         <TableRow
-                          key={event.id}
+                          key={row.id}
                           data-state={isSelected ? "selected" : undefined}
                         >
                           <TableCell className={TD_CHECKBOX}>
@@ -653,16 +645,17 @@ export function EventsClient({
                               checked={isSelected}
                               onClickCapture={onRowClickCapture}
                               onCheckedChange={() => handleRowToggle(index)}
-                              aria-label={`Select ${event.name}`}
+                              aria-label={`Select ${row.title}`}
                             />
                           </TableCell>
 
                           <TableCell className={`${TD} whitespace-normal`}>
                             <div className="flex items-center gap-3">
-                              {event.coverImage ? (
+                              {row.image ? (
                                 <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
-                                  <AdminThumb
-                                    src={event.coverImage}
+                                  {/* eslint-disable-next-line @next/next/no-img-element -- cover images are arbitrary URLs (S3, or whatever host a WordPress import carried in) rendered at a fixed 40px; next/image would need a remote-pattern entry per host and buys nothing at this size. */}
+                                  <img
+                                    src={row.image}
                                     alt=""
                                     loading="lazy"
                                     className="h-full w-full object-cover"
@@ -670,46 +663,91 @@ export function EventsClient({
                                 </div>
                               ) : (
                                 <div className="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded">
-                                  <CalendarDays className="text-muted-foreground h-4 w-4" />
+                                  <EmptyIcon
+                                    aria-hidden="true"
+                                    className="text-muted-foreground h-4 w-4"
+                                  />
                                 </div>
                               )}
                               <div className="min-w-0">
-                                {/* The link wraps the NAME only, not the cell —
-                                    an anchor around the thumbnail and both text
-                                    lines reads to assistive tech as one link
-                                    named by all of it run together. */}
+                                {/* The link wraps the TITLE only, not the cell
+                                    — an anchor around the thumbnail and every
+                                    text line reads to assistive tech as one
+                                    link named by all of it run together. */}
                                 <Link
-                                  href={`${BASE_PATH}/${event.id}`}
+                                  href={`${basePath}/${row.id}`}
                                   className="font-medium hover:underline"
                                 >
-                                  {event.name}
+                                  {row.title}
                                 </Link>
-                                {/* Below md the Date/Location/Status columns
-                                    are hidden — reflow them here. */}
-                                <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm md:hidden">
-                                  <span>{dateLabel}</span>
-                                  <span aria-hidden="true">·</span>
-                                  <span>{event.location ?? "—"}</span>
-                                  <span aria-hidden="true">·</span>
-                                  <span>{STATUS_LABEL[event.status]}</span>
+                                {row.excerpt && (
+                                  <p className="text-muted-foreground line-clamp-1 text-sm">
+                                    {row.excerpt}
+                                  </p>
+                                )}
+                                {/* The slug is a search field and the row's
+                                    real address, so it stays visible at every
+                                    width — unlike the columns below, which the
+                                    reflow line picks up under md. */}
+                                <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
+                                  <span className="truncate">
+                                    {storefrontHref(row.slug)}
+                                  </span>
+                                  <span
+                                    aria-hidden="true"
+                                    className="md:hidden"
+                                  >
+                                    ·
+                                  </span>
+                                  {showPublishedColumn && (
+                                    <>
+                                      <span className="md:hidden">
+                                        {publishedLabel
+                                          ? `Published ${publishedLabel}`
+                                          : "Never published"}
+                                      </span>
+                                      <span
+                                        aria-hidden="true"
+                                        className="md:hidden"
+                                      >
+                                        ·
+                                      </span>
+                                    </>
+                                  )}
+                                  <span className="md:hidden">
+                                    Updated {updatedLabel}
+                                  </span>
+                                  <span
+                                    aria-hidden="true"
+                                    className="md:hidden"
+                                  >
+                                    ·
+                                  </span>
+                                  <span className="md:hidden">
+                                    {statusLabel}
+                                  </span>
                                 </div>
                               </div>
                             </div>
                           </TableCell>
 
-                          <TableCell className={`hidden md:table-cell ${TD}`}>
-                            {dateLabel}
+                          {showPublishedColumn && (
+                            <TableCell
+                              className={`hidden md:table-cell ${TD} text-muted-foreground`}
+                            >
+                              {publishedLabel ?? "—"}
+                            </TableCell>
+                          )}
+
+                          <TableCell
+                            className={`hidden md:table-cell ${TD} text-muted-foreground`}
+                          >
+                            {updatedLabel}
                           </TableCell>
 
                           <TableCell className={`hidden md:table-cell ${TD}`}>
-                            {event.location ?? (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
-
-                          <TableCell className={`hidden md:table-cell ${TD}`}>
-                            <Badge variant={STATUS_BADGE_VARIANT[event.status]}>
-                              {STATUS_LABEL[event.status]}
+                            <Badge variant={STATUS_BADGE_VARIANT[row.status]}>
+                              {statusLabel}
                             </Badge>
                           </TableCell>
 
@@ -719,50 +757,28 @@ export function EventsClient({
                                 <Button variant="ghost" size="sm">
                                   <MoreVertical className="h-4 w-4" />
                                   <span className="sr-only">
-                                    Actions for {event.name}
+                                    Actions for {row.title}
                                   </span>
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`${BASE_PATH}/${event.id}`}>
+                                  <Link href={`${basePath}/${row.id}`}>
                                     <Pencil className="mr-2 h-4 w-4" />
                                     Edit
                                   </Link>
                                 </DropdownMenuItem>
-
-                                {/* Keyed off the row's own `isArchived` flag,
-                                    not a tab: the old client offered Archive on
-                                    the Upcoming tab and Move-to-upcoming on the
-                                    Past tab, which mislabelled the action for a
-                                    still-unarchived event that had merely
-                                    ended. */}
-                                {event.isArchived ? (
-                                  <DropdownMenuItem
-                                    disabled={isArchiving}
-                                    onClick={() =>
-                                      archiveMutation.mutate({
-                                        id: event.id,
-                                        isArchived: false,
-                                      })
-                                    }
-                                  >
-                                    <ArchiveRestore className="mr-2 h-4 w-4" />
-                                    Move to upcoming
-                                  </DropdownMenuItem>
-                                ) : (
-                                  <DropdownMenuItem
-                                    disabled={isArchiving}
-                                    title="Archiving also hides this event from your site"
-                                    onClick={() =>
-                                      archiveMutation.mutate({
-                                        id: event.id,
-                                        isArchived: true,
-                                      })
-                                    }
-                                  >
-                                    <Archive className="mr-2 h-4 w-4" />
-                                    Archive (hides from your site)
+                                {row.published && (
+                                  <DropdownMenuItem asChild>
+                                    <a
+                                      href={storefrontHref(row.slug)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      aria-label={`View ${row.title} on storefront (opens in new tab)`}
+                                    >
+                                      <ExternalLink className="mr-2 h-4 w-4" />
+                                      View on storefront
+                                    </a>
                                   </DropdownMenuItem>
                                 )}
 
@@ -770,7 +786,7 @@ export function EventsClient({
 
                                 <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
-                                  onClick={() => setDeleteId(event.id)}
+                                  onClick={() => setDeleteId(row.id)}
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Delete
@@ -790,7 +806,7 @@ export function EventsClient({
                 totalPages={totalPages}
                 totalCount={totalCount}
                 pageSize={pageSize}
-                basePath={BASE_PATH}
+                basePath={basePath}
                 itemNoun={ITEM_NOUN}
               />
             </>
@@ -798,7 +814,9 @@ export function EventsClient({
         </>
       )}
 
-      {/* Single Delete Confirmation Dialog */}
+      {/* Single Delete Confirmation Dialog — replaces the native `confirm()`
+          the two old lists used, which is unstyleable, unfocusable-trappable
+          and blocks the main thread. */}
       <AlertDialog
         open={!!deleteId}
         onOpenChange={(open) => {
@@ -807,14 +825,18 @@ export function EventsClient({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
+            {/* Name in the TITLE, consequence in the description — the title is
+                the line people actually read before clicking through. */}
             <AlertDialogTitle>
               {deleteTarget
-                ? `Delete “${deleteTarget.name}”?`
-                : "Delete event?"}
+                ? `Delete “${deleteTarget.title}”?`
+                : `Delete ${ITEM_NOUN.one}?`}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              It will disappear from your site immediately. This action cannot
-              be undone.
+              {deleteTarget?.published
+                ? `Its page at ${storefrontHref(deleteTarget.slug)} will stop working. `
+                : ""}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -825,12 +847,11 @@ export function EventsClient({
                 asChild`, so a className lands on the inner Radix element while
                 Button still supplies `bg-primary` — and Slot concatenates the
                 two without tailwind-merge, so CSS order decides and primary
-                wins. A `className="bg-destructive"` here renders BLACK (the bug
-                the old events table shipped). */}
+                wins. A `className="bg-destructive"` here renders BLACK. */}
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
-                if (deleteId) deleteMutation.mutate(deleteId);
+                if (deleteId) deleteMutation.mutate({ id: deleteId });
               }}
               disabled={deleteMutation.isPending}
             >
@@ -845,19 +866,23 @@ export function EventsClient({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedCount} {selectedCount === 1 ? "event" : "events"}?
+              Delete {selectedCount}{" "}
+              {selectedCount === 1 ? nounTitle.one : nounTitle.many}?
             </AlertDialogTitle>
             <AlertDialogDescription>
               This will delete{" "}
-              {describeSelection(selectedNames, selectedCount, ITEM_NOUN)}.{" "}
-              {selectedCount === 1 ? "It" : "They"} will disappear from your
-              storefront immediately. This action cannot be undone.
+              {describeSelection(selectedTitles, selectedCount, ITEM_NOUN)}.
+              {anySelectedPublished
+                ? ` Published ${ITEM_NOUN.many} will stop working on your storefront.`
+                : ""}{" "}
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>
               Cancel
             </AlertDialogCancel>
+            {/* See the note on the single-delete action: `variant`, not className. */}
             <AlertDialogAction
               variant="destructive"
               onClick={handleBulkDelete}
@@ -866,7 +891,7 @@ export function EventsClient({
               {bulkDeleteMutation.isPending
                 ? "Deleting…"
                 : `Delete ${selectedCount} ${
-                    selectedCount === 1 ? "event" : "events"
+                    selectedCount === 1 ? nounTitle.one : nounTitle.many
                   }`}
             </AlertDialogAction>
           </AlertDialogFooter>

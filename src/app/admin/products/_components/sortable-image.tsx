@@ -9,6 +9,8 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
+import { AdminThumb } from "../../_components/admin-thumb";
+
 type Props = {
   image: FormProductImage;
   index: number;
@@ -43,8 +45,7 @@ export function SortableImage({ image, index, onRemove, onUpdateAlt }: Props) {
 
         {/* Image Preview */}
         <div className="bg-muted relative h-24 w-24 shrink-0 overflow-hidden rounded">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <AdminThumb
             src={image.url}
             alt={image.altText ?? "Product image"}
             loading="lazy"

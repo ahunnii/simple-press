@@ -40,6 +40,7 @@ import {
 } from "~/components/ui/popover";
 
 import { WARNING_TEXT } from "../../_components/admin-table-style";
+import { AdminThumb } from "../../_components/admin-thumb";
 
 const MAX_VARIANTS = 100;
 
@@ -730,8 +731,7 @@ export function VariantManager({
                             className="bg-muted flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded border disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {variant.imageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <AdminThumb
                                 src={variant.imageUrl}
                                 alt={`Image for ${variant.name}`}
                                 loading="lazy"
@@ -777,8 +777,7 @@ export function VariantManager({
                                       : "border-border"
                                   }`}
                                 >
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
+                                  <AdminThumb
                                     src={img.url}
                                     alt={img.altText ?? ""}
                                     className="h-10 w-10 object-cover"

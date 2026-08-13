@@ -15,6 +15,13 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 
+/**
+ * Shown when a preview URL fails to load. Admin-only surface, so this is a
+ * genuine "this image is broken" signal — unlike the storefront, where
+ * `/placeholder.svg` doubles as a "no image set" sentinel that hides sections.
+ */
+const BROKEN_IMAGE_SRC = "/placeholder.svg";
+
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
   name: Path<CurrentForm>;
@@ -69,6 +76,13 @@ function ImageUploadFormFieldInner({
   const value = field.value as File | null | undefined;
   const hasFile = value instanceof File;
   const [removedExisting, setRemovedExisting] = useState(false);
+  // The exact preview URL that failed to load, so a stored image whose object
+  // has since been deleted (or was imported pointing at another site) renders
+  // the placeholder instead of a broken-image icon. Keyed on the URL rather
+  // than a boolean so it self-clears when a different image is selected, and
+  // so a failing placeholder can't loop: once set, `src` is already the
+  // placeholder and the handler writes the same value back.
+  const [failedPreviewSrc, setFailedPreviewSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (value === undefined) setRemovedExisting(false);
@@ -112,11 +126,15 @@ function ImageUploadFormFieldInner({
           />
           {previewUrl ? (
             <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- an
+                  arbitrary S3 URL (or a blob: preview) at a fixed 64px;
+                  next/image's loader buys nothing here and would need a
+                  remote-pattern entry per storage host. */}
               <img
-                src={previewUrl}
+                src={failedPreviewSrc === previewUrl ? BROKEN_IMAGE_SRC : previewUrl}
                 alt={hasFile ? value.name : "Preview"}
                 className="h-16 w-16 shrink-0 rounded-md object-cover"
+                onError={() => setFailedPreviewSrc(previewUrl)}
               />
               <div className="min-w-0 flex-1">
                 {hasFile && (

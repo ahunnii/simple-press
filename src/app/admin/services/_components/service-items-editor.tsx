@@ -92,6 +92,8 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 
+import { AdminThumb } from "../../_components/admin-thumb";
+
 type ServiceItem = RouterOutputs["services"]["getById"]["items"][number];
 
 type SectionRow = { _id?: string; label?: unknown; [k: string]: unknown };
@@ -147,8 +149,7 @@ function SortableItemRow({
 
       {item.image ? (
         <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <AdminThumb
             src={item.image}
             alt=""
             loading="lazy"

@@ -3015,8 +3015,10 @@
     @apply bg-background/75 sticky top-0 z-10 flex min-h-16 flex-wrap justify-between gap-y-2 border-b px-4 py-2;
   }
 
+  /* Grow and shrink symmetrically to avoid wrapping action buttons when heading is long.
+     flex-1 basis-0 allows toolbar-info to collapse when needed despite max-content content. */
   .admin-form-toolbar .toolbar-info {
-    @apply flex min-w-0 items-center gap-3;
+    @apply flex min-w-0 flex-1 basis-0 items-center gap-3;
   }
 
   .admin-form-toolbar .toolbar-actions {

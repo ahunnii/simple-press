@@ -122,8 +122,13 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
               editorContentClassName="min-h-[100px] p-4"
             />
 
-            {/* Link */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Link — `col-span-1` on both fields is load-bearing:
+                `InputFormField` defaults its `FormItem` to `col-span-full`, so
+                without it these two stack full-width and the 2-col grid does
+                nothing. `items-start` because only `linkUrl` can raise a
+                validation error, and a `FormMessage` under one cell would
+                otherwise stretch the other and sink its label. */}
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <InputFormField
                 form={form}
                 name="linkUrl"
@@ -131,6 +136,7 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                 description="Optional. Where the link in the banner goes."
                 placeholder="https://example.com/sale"
                 type="url"
+                className="col-span-1"
               />
               <InputFormField
                 form={form}
@@ -138,13 +144,14 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                 label="Link label"
                 description="Text shown for the link."
                 placeholder="Shop the sale"
+                className="col-span-1"
               />
             </div>
 
             <Separator />
 
             {/* Colors */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="bgColor"
@@ -342,8 +349,9 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
 
             <Separator />
 
-            {/* CTA */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* CTA — same `col-span-1` / `items-start` reasoning as the
+                banner's Link row above. */}
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <InputFormField
                 form={form}
                 name="ctaUrl"
@@ -351,6 +359,7 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
                 description="Optional. Where the call-to-action button goes."
                 placeholder="https://example.com/sale"
                 type="url"
+                className="col-span-1"
               />
               <InputFormField
                 form={form}
@@ -358,6 +367,7 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
                 label="CTA label"
                 description="Text shown on the button."
                 placeholder="Shop the sale"
+                className="col-span-1"
               />
             </div>
 
