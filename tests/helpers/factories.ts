@@ -181,13 +181,17 @@ export function createCollectionProduct(
 
 export function createCustomer(
   businessId: string,
-  opts: { email?: string; userId?: string } = {},
+  opts: { email?: string; userId?: string; notes?: string | null } = {},
 ) {
   return db.customer.create({
     data: {
       email: opts.email ?? `${uniq("cust")}@test.dev`,
       businessId,
       userId: opts.userId ?? null,
+      // Owner-private CRM notes. Defaults to null (the storefront never writes
+      // it); pass a value to exercise the STAFF redaction in `customer.getById`
+      // / `customer.list`.
+      notes: opts.notes ?? null,
     },
   });
 }
@@ -224,6 +228,8 @@ export function createOrder(
     stripePaymentIntentId?: string | null;
     stripeSessionId?: string | null;
     refundAmountCents?: number | null;
+    /** Owner-to-owner note. Null by default; set it to exercise D2 redaction. */
+    internalNote?: string | null;
     createdAt?: Date;
     items?: CreateOrderItemInput[];
   } = {},
@@ -250,6 +256,7 @@ export function createOrder(
           : opts.stripePaymentIntentId,
       stripeSessionId: opts.stripeSessionId ?? null,
       refundAmountCents: opts.refundAmountCents ?? null,
+      internalNote: opts.internalNote ?? null,
       ...(opts.createdAt !== undefined ? { createdAt: opts.createdAt } : {}),
       ...(opts.items
         ? {

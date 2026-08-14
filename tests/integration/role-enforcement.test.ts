@@ -6,6 +6,7 @@ import { db, resetDb } from "../helpers/db";
 import {
   createBusiness,
   createCollection,
+  createCustomer,
   createDiscount,
   createMembership,
   createOrder,
@@ -560,6 +561,8 @@ describe("role enforcement across the admin procedure tiers", () => {
     const order = await createOrder(business.id, {
       status: "open",
       paymentStatus: "paid",
+      internalNote: "Owner-private: chase the supplier before shipping",
+      stripePaymentIntentId: "pi_role_fulfillment",
       items: [{ quantity: 2, price: 1000, total: 2000 }],
     });
 
@@ -572,7 +575,156 @@ describe("role enforcement across the admin procedure tiers", () => {
 
     expect(updated.fulfillmentStatus).toBe("fulfilled");
     expect(updated.shipments).toHaveLength(1);
+
+    // The mutation's own return value is a full Order row, so it is a leak
+    // path in its own right — redacting only the read procedures would hand
+    // STAFF the internal note back on the very call the role exists to make.
+    expect(updated.internalNote).toBeNull();
+    expect(updated.stripePaymentIntentId).toBeNull();
+
+    // …and the redaction is projection-only: the stored row is untouched.
+    const stored = await db.order.findUniqueOrThrow({
+      where: { id: order.id },
+    });
+    expect(stored.internalNote).toBe(
+      "Owner-private: chase the supplier before shipping",
+    );
+    expect(stored.stripePaymentIntentId).toBe("pi_role_fulfillment");
   });
+
+  // ── D2: what STAFF may not see on an order ────────────────────────────────
+  //
+  // `staffProcedure` admits OWNER, MANAGER and STAFF alike, so the tier alone
+  // says nothing about STAFF here — the field-level redaction in
+  // `redactOrderForStaff` (order.ts) is the whole boundary, and every test
+  // below therefore pairs the STAFF assertion with an OWNER positive control
+  // proving the same fields are genuinely populated and visible.
+
+  it("order.getAll hides internalNote + stripePaymentIntentId from STAFF", async () => {
+    const { business, staffCaller, ownerCaller } = await setupBusiness();
+    await createOrder(business.id, {
+      internalNote: "Owner-private: customer disputed the last order",
+      stripePaymentIntentId: "pi_role_getall",
+    });
+
+    const staffView = await staffCaller.order.getAll({});
+    expect(staffView.orders).toHaveLength(1);
+    expect(staffView.orders[0]?.internalNote).toBeNull();
+    expect(staffView.orders[0]?.stripePaymentIntentId).toBeNull();
+
+    // Positive control: the same row, the same procedure, an OWNER caller —
+    // without this a redaction bug and an empty/broken query look identical.
+    const ownerView = await ownerCaller.order.getAll({});
+    expect(ownerView.orders[0]?.internalNote).toBe(
+      "Owner-private: customer disputed the last order",
+    );
+    expect(ownerView.orders[0]?.stripePaymentIntentId).toBe("pi_role_getall");
+  }, 15_000);
+
+  it("order.getById hides internalNote + stripePaymentIntentId from STAFF", async () => {
+    // The detail page is where a fulfillment worker actually spends their time,
+    // and it is the one surface that renders both fields.
+    const { business, staffCaller, ownerCaller } = await setupBusiness();
+    const order = await createOrder(business.id, {
+      internalNote: "Owner-private: do not comp this one again",
+      stripePaymentIntentId: "pi_role_getbyid",
+    });
+
+    const staffView = await staffCaller.order.getById(order.id);
+    expect(staffView?.internalNote).toBeNull();
+    expect(staffView?.stripePaymentIntentId).toBeNull();
+    // Money totals are the deliberate exception — a packing slip needs them.
+    expect(staffView?.total).toBe(order.total);
+
+    const ownerView = await ownerCaller.order.getById(order.id);
+    expect(ownerView?.internalNote).toBe(
+      "Owner-private: do not comp this one again",
+    );
+    expect(ownerView?.stripePaymentIntentId).toBe("pi_role_getbyid");
+  }, 15_000);
+
+  it("order.updateNote is closed to STAFF — the write half of a field they cannot read", async () => {
+    // Moved from staffProcedure to ownerAdminProcedure with the D2 redaction: a
+    // caller who cannot see the current internal note must not be able to
+    // overwrite it, because a blind write is how an owner-to-owner note gets
+    // silently destroyed.
+    const { business, staffCaller, managerCaller } = await setupBusiness();
+    const order = await createOrder(business.id, {
+      internalNote: "Owner-private: original",
+    });
+
+    await expectRejection(
+      staffCaller.order.updateNote({
+        orderId: order.id,
+        internalNote: "overwritten by staff",
+      }),
+      NOT_A_MEMBER_REJECTION,
+    );
+    const untouched = await db.order.findUniqueOrThrow({
+      where: { id: order.id },
+    });
+    expect(untouched.internalNote).toBe("Owner-private: original");
+
+    // Positive control: a MANAGER is on the allowed side of this tier, so the
+    // boundary being pinned is exactly STAFF-vs-MANAGER, not "owner only".
+    const updated = await managerCaller.order.updateNote({
+      orderId: order.id,
+      internalNote: "rewritten by manager",
+    });
+    expect(updated.internalNote).toBe("rewritten by manager");
+  }, 15_000);
+
+  it("the redaction follows a live demotion — the session's role snapshot is never consulted", async () => {
+    // The contract this whole change exists for. `Session.membershipRole` is
+    // stamped once at session creation and never updated, so a demoted owner
+    // would keep owner-level visibility for the full cookie-cache lifetime if
+    // anything read it. `ctx.membershipRole` is re-resolved from the DB by the
+    // procedure tier on every request; the SAME caller — same user, same
+    // session — must therefore lose the fields the moment the membership row
+    // changes, with nothing signing in or out in between.
+    const { business, owner, ownerCaller } = await setupBusiness();
+    await createOrder(business.id, {
+      internalNote: "Owner-private: visible until the demotion lands",
+      stripePaymentIntentId: "pi_role_demotion",
+    });
+
+    const before = await ownerCaller.order.getAll({});
+    expect(before.orders[0]?.internalNote).toBe(
+      "Owner-private: visible until the demotion lands",
+    );
+    expect(before.orders[0]?.stripePaymentIntentId).toBe("pi_role_demotion");
+
+    await db.businessMembership.update({
+      where: {
+        userId_businessId: { userId: owner.id, businessId: business.id },
+      },
+      data: { role: "STAFF" },
+    });
+
+    const after = await ownerCaller.order.getAll({});
+    expect(after.orders[0]?.internalNote).toBeNull();
+    expect(after.orders[0]?.stripePaymentIntentId).toBeNull();
+  }, 15_000);
+
+  it("customer.getById hides owner-private CRM notes from STAFF", async () => {
+    // Same rule, different router: `customer.getById` is staffProcedure so a
+    // fulfillment worker can look up an address, not so they can read what the
+    // owner wrote about the person.
+    const { business, staffCaller, ownerCaller } = await setupBusiness();
+    const customer = await createCustomer(business.id, {
+      notes: "Owner-private: chargeback risk, ship signature-required",
+    });
+
+    const staffView = await staffCaller.customer.getById(customer.id);
+    expect(staffView?.notes).toBeNull();
+    // Still genuinely useful to STAFF — this is a redaction, not a rejection.
+    expect(staffView?.email).toBe(customer.email);
+
+    const ownerView = await ownerCaller.customer.getById(customer.id);
+    expect(ownerView?.notes).toBe(
+      "Owner-private: chargeback risk, ship signature-required",
+    );
+  }, 15_000);
 
   it("staffProcedure rejects a signed-in user with no membership anywhere", async () => {
     // tenant-isolation.test.ts already covers the cross-tenant shape of this

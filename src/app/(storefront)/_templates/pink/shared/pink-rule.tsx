@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 type PinkRuleProps = {
   /** Width in px — design.md calls for 38–56px depending on context. */
   width?: number;
@@ -21,7 +23,7 @@ export function PinkRule({
   return (
     <div
       aria-hidden="true"
-      className={`${animate ? "pink-anim-rule" : ""}${className ? ` ${className}` : ""}`}
+      className={cn(animate && "pink-anim-rule", className)}
       style={{
         // Height is set inline, NOT via `h-[2px]`: Tailwind does not emit
         // sub-4px arbitrary height utilities here (`h-[1px]`/`h-[2px]`/`h-[3px]`

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { api } from "~/trpc/server";
 
 import { getTemplate } from "../_templates/registry";
@@ -21,7 +21,7 @@ export default async function CollectionsPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet().catch(() => null);
+  const business = await loadSeoBusiness("/collections");
   return buildPageMetadata({
     business,
     path: "/collections",

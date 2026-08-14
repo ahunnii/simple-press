@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { PinkBadge } from "./pink-badge";
@@ -80,7 +81,7 @@ export function PinkProductCard({
   const hasImage = hasCustomImage(imageUrl);
 
   return (
-    <div className={`group flex flex-col${className ? ` ${className}` : ""}`}>
+    <div className={cn("group flex flex-col", className)}>
       {/* Relative wrapper keeps the wishlist button a sibling of the card
           link (no <button> inside <a>) while overlaying the image's
           top-right corner — mirrors default-product-card.tsx. */}

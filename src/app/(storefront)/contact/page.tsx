@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildLocalBusinessSchema,
@@ -45,7 +45,7 @@ export default async function ContactPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet().catch(() => null);
+  const business = await loadSeoBusiness("/contact");
   return buildPageMetadata({
     business,
     path: "/contact",

@@ -132,9 +132,7 @@ function isEmbedNode(node: ContentNode): node is ContentNode & {
   return node.type === "embed" && node.attrs != null && "src" in node.attrs;
 }
 
-function isQuoteCalculatorNode(
-  node: ContentNode,
-): node is ContentNode & {
+function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
   attrs: { calculatorId?: string; businessId?: string };
 } {
   return node.type === "quoteCalculator" && node.attrs != null;

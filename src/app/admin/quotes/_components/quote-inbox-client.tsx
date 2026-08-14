@@ -78,9 +78,10 @@ import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 // The intersection narrows correctly — `string & QuoteStatusDb` collapses to
 // `QuoteStatusDb` since it's a literal-union subtype of `string` — so every
 // column below reads a real status, not a bare string.
-export type QuoteRow = RouterOutputs["quoteSubmission"]["list"][number] & {
-  status: QuoteStatusDb;
-};
+export type QuoteRow =
+  RouterOutputs["quoteSubmission"]["list"]["rows"][number] & {
+    status: QuoteStatusDb;
+  };
 
 type Props = {
   /** The current page slice only — filtering/sorting/paging happen in page.tsx. */
@@ -94,6 +95,8 @@ type Props = {
   matchingIds: string[] | null;
   /** Unfiltered total — distinguishes "no quotes yet" from "no matches". */
   totalQuotes: number;
+  /** True lifetime count from the DB — exceeds totalQuotes once the fetch cap trims old rows. */
+  lifetimeTotal: number;
   totalCount: number;
   totalPages: number;
   page: number;
@@ -145,6 +148,7 @@ export function QuoteInboxClient({
   filters,
   matchingIds,
   totalQuotes,
+  lifetimeTotal,
   totalCount,
   totalPages,
   page,
@@ -401,6 +405,16 @@ export function QuoteInboxClient({
             itemNoun={ITEM_NOUN}
             onFiltersChange={onFiltersChange}
           />
+
+          {/* Cap notice shows when lifetime count exceeds the fetched rows,
+              even when a filtered search matches zero items — the owner may be
+              hunting an old lead that fell outside the cap. */}
+          {lifetimeTotal > totalQuotes && (
+            <p className="text-muted-foreground text-xs">
+              Showing the {totalQuotes} most recent of {lifetimeTotal} quote
+              requests — older requests are not listed.
+            </p>
+          )}
 
           <AdminBulkBar
             count={selectedCount}

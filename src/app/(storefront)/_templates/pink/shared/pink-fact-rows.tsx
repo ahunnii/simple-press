@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 export type PinkFactRow = { label: string; value: string; _id?: string };
 
 type PinkFactRowsProps = {
@@ -25,9 +27,7 @@ export function PinkFactRows({
   if (rows.length === 0) return null;
   const dark = surface === "dark";
   return (
-    <dl
-      className={`flex flex-col gap-[2px]${className ? ` ${className}` : ""}`}
-    >
+    <dl className={cn("flex flex-col gap-[2px]", className)}>
       {rows.map((row, i) => (
         <div
           key={row._id ?? `${row.label}-${i}`}

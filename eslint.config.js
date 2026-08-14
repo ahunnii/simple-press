@@ -64,13 +64,59 @@ export default tseslint.config(
       // inside a className template literal. That is the shape a developer writes
       // when they are trying to do the right thing, and the only shape the
       // formatter silently corrupts.
+      //
+      // 2026-08-14: two more shapes of the same trap were found, both invisible
+      // to the original single selector above. First, the "nested conditional"
+      // form —
+      //
+      //   className={`base${className ? ` ${className}` : ""}`}
+      //
+      // — puts the leading space inside the INNER template literal's first
+      // quasi, which is a `TemplateElement`, not a `Literal`. The original
+      // selector only ever matched `Literal`, so it never saw this shape at
+      // all — 15 sites across the repo used it, formatter-safe today only by
+      // accident (the plugin still strips the space; the string just happens
+      // to render "basefoo" until `className` is actually passed, so it's
+      // easy to ship without noticing). Second, a variable-assignment form —
+      //
+      //   const frameClassName = `base${className ? ` ${className}` : ""}`;
+      //
+      // — where the template literal is the initializer of a `VariableDeclarator`
+      // rather than the value of a JSX attribute, so no `JSXAttribute`-rooted
+      // selector can ever reach it, plain or nested. Both gaps are closed below
+      // with two additional selectors apiece (plain + nested, JSXAttribute +
+      // VariableDeclarator). The attribute-name test was also broadened from
+      // the literal `'className'` to `/[Cc]lassName$/` so it also catches
+      // props like `frameClassName` or `innerClassName` — free prevention,
+      // confirmed against the only two other `*ClassName`-taking template
+      // literals in the repo (both already formatter-safe; the broadened
+      // regex still matches bare `className` since `/$/` requires nothing
+      // after it).
       "no-restricted-syntax": [
         "error",
         {
           selector:
-            "JSXAttribute[name.name='className'] TemplateLiteral Literal[value=/^\\s/]",
+            "JSXAttribute[name.name=/[Cc]lassName$/] TemplateLiteral Literal[value=/^\\s/]",
           message:
-            'prettier-plugin-tailwindcss strips this leading space, merging the class into the preceding one (e.g. `foo` + ` bar` becomes `foobar`, matching neither). Use cn() from ~/lib/utils: cn("foo", cond && "bar").',
+            'prettier-plugin-tailwindcss strips this leading space, merging the class into the preceding one (e.g. `foo` + ` bar` becomes `foobar`, matching neither). This also applies to the nested-conditional form (`${cond ? ` bar` : ""}`) and to templates assigned to a `*ClassName` variable before being passed to JSX — the space is stripped in all of these. Use cn() from ~/lib/utils: cn("foo", cond && "bar").',
+        },
+        {
+          selector:
+            "JSXAttribute[name.name=/[Cc]lassName$/] TemplateLiteral TemplateLiteral[quasis.0.value.raw=/^\\s/]",
+          message:
+            'prettier-plugin-tailwindcss strips this leading space, merging the class into the preceding one (e.g. `foo` + ` bar` becomes `foobar`, matching neither). This also applies to the nested-conditional form (`${cond ? ` bar` : ""}`) and to templates assigned to a `*ClassName` variable before being passed to JSX — the space is stripped in all of these. Use cn() from ~/lib/utils: cn("foo", cond && "bar").',
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/[Cc]lassName$/] TemplateLiteral Literal[value=/^\\s/]",
+          message:
+            'prettier-plugin-tailwindcss strips this leading space, merging the class into the preceding one (e.g. `foo` + ` bar` becomes `foobar`, matching neither). This also applies to the nested-conditional form (`${cond ? ` bar` : ""}`) and to templates assigned to a `*ClassName` variable before being passed to JSX — the space is stripped in all of these. Use cn() from ~/lib/utils: cn("foo", cond && "bar").',
+        },
+        {
+          selector:
+            "VariableDeclarator[id.name=/[Cc]lassName$/] TemplateLiteral TemplateLiteral[quasis.0.value.raw=/^\\s/]",
+          message:
+            'prettier-plugin-tailwindcss strips this leading space, merging the class into the preceding one (e.g. `foo` + ` bar` becomes `foobar`, matching neither). This also applies to the nested-conditional form (`${cond ? ` bar` : ""}`) and to templates assigned to a `*ClassName` variable before being passed to JSX — the space is stripped in all of these. Use cn() from ~/lib/utils: cn("foo", cond && "bar").',
         },
       ],
     },

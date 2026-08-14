@@ -132,11 +132,11 @@ export default async function AdminQuotesPage({ searchParams }: Props) {
 
   // Input-free (see the router's comment on `list`): the full tenant-scoped
   // set, filtered/sorted/paginated in memory here — same shape as Events.
-  const all = await api.quoteSubmission
+  const { rows: allRows, totalCount: lifetimeTotal } = await api.quoteSubmission
     .list()
     .catch(rethrowTrpcForErrorBoundary);
 
-  const rows = all.map((row) => ({
+  const rows = allRows.map((row) => ({
     ...row,
     status: toQuoteStatus(row.status),
   }));
@@ -203,7 +203,8 @@ export default async function AdminQuotesPage({ searchParams }: Props) {
         submissions={pageItems}
         filters={[STATUS_FILTER, SORT_FILTER]}
         matchingIds={matchingIds}
-        totalQuotes={all.length}
+        totalQuotes={allRows.length}
+        lifetimeTotal={lifetimeTotal}
         totalCount={totalCount}
         totalPages={totalPages}
         page={page}

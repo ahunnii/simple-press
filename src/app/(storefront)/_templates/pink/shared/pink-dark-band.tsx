@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 type PinkDarkBandProps = {
   children: React.ReactNode;
   className?: string;
@@ -26,7 +28,10 @@ export function PinkDarkBand({
     <section
       id={id}
       aria-label={ariaLabel}
-      className={`pink-dark px-5 py-[76px] md:px-10 md:py-[88px]${className ? ` ${className}` : ""}`}
+      className={cn(
+        "pink-dark px-5 py-[76px] md:px-10 md:py-[88px]",
+        className,
+      )}
       style={{ background: "var(--pink-ink)", color: "var(--pink-paper)" }}
       {...sectionAttrs}
     >

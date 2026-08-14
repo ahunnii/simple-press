@@ -1,4 +1,8 @@
+import "server-only";
+
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import * as Sentry from "@sentry/nextjs";
 
 import type {
   PageMetaEntry,
@@ -6,6 +10,7 @@ import type {
 } from "~/lib/validators/site-seo";
 import { getCanonicalUrl } from "~/lib/canonical";
 import { getPageMetaEntry } from "~/lib/validators/site-seo";
+import { api } from "~/trpc/server";
 
 /**
  * Structural, not a Prisma type. Every caller hands this a `simplifiedGet()`
@@ -158,4 +163,70 @@ function preferNonBlank(
   const trimmed = value?.trim();
   if (trimmed === undefined || trimmed.length === 0) return fallback;
   return trimmed;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEO business-fetch failures → Sentry
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Same throttle shape as `reportZoneWeightFallback` in `~/lib/shipping-config`
+// and `reportCheckoutBlocked` in `~/app/api/stripe/create-session/route.ts` —
+// deliberately copied rather than extracted into a shared utility (a third
+// local copy is an accepted tradeoff here; see the F11 plan notes). One event
+// per host+path per 15 minutes keeps the issue open and its `lastSeen` honest
+// for as long as the fetch keeps failing, while capping the bill.
+const SEO_REPORT_WINDOW_MS = 15 * 60 * 1000;
+
+// Bounded by (hosts served by this process × storefront routes), so small in
+// practice — but this module lives for the life of the process, so it gets a
+// hard cap anyway. Cleared wholesale rather than evicting the oldest entry:
+// the only consequence of losing the map is at most one extra event per key.
+const MAX_TRACKED_SEO_REPORTS = 500;
+const lastSeoReport = new Map<string, number>();
+
+function shouldReportSeoFailure(key: string): boolean {
+  const now = Date.now();
+  if (now - (lastSeoReport.get(key) ?? 0) < SEO_REPORT_WINDOW_MS) return false;
+  if (lastSeoReport.size >= MAX_TRACKED_SEO_REPORTS) lastSeoReport.clear();
+  lastSeoReport.set(key, now);
+  return true;
+}
+
+/**
+ * Fetch the tenant business for a storefront `generateMetadata`, reporting to
+ * Sentry when the fetch itself throws (as opposed to legitimately resolving
+ * to no tenant).
+ *
+ * `simplifiedGet()` returns `null` both when it throws (caught below) and,
+ * completely normally, when no active business matches the request host —
+ * that second case is not an error and must keep degrading silently exactly
+ * as before (generic title, no canonical). The two are indistinguishable once
+ * they leave this function, which is why the try/catch — and the Sentry call
+ * — have to live here rather than inside `buildPageMetadata`.
+ *
+ * This is also the only place a persistent failure here CAN be observed:
+ * `generateMetadata` runs through the RSC `createCaller` (`~/trpc/server`),
+ * and throws from that path never reach the tRPC route handler's `onError` —
+ * without this catch, a DB outage would serve generic titles and no
+ * canonicals indefinitely with zero Sentry signal.
+ */
+export async function loadSeoBusiness(path: string) {
+  try {
+    return await api.business.simplifiedGet();
+  } catch (error) {
+    // No businessId is resolvable on failure — throttle per host+path instead.
+    const host = (await headers()).get("host") ?? "unknown";
+    if (shouldReportSeoFailure(`${host}:${path}`)) {
+      Sentry.captureException(error, {
+        level: "warning",
+        tags: {
+          service: "seo",
+          "seo.degrade": "business-fetch-failed",
+          route: path,
+        },
+        extra: { host },
+      });
+    }
+    return null; // degrade exactly as before: generic title, no canonical
+  }
 }

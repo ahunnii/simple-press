@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 type PinkBadgeProps = {
   children: React.ReactNode;
   /** rose (default) — new/open/featured. ink — closed/archive/sold. */
@@ -16,7 +18,10 @@ export function PinkBadge({
 }: PinkBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1.5 text-[12px] font-semibold whitespace-nowrap uppercase${className ? ` ${className}` : ""}`}
+      className={cn(
+        "inline-flex items-center px-2.5 py-1.5 text-[12px] font-semibold whitespace-nowrap uppercase",
+        className,
+      )}
       style={{
         background: tone === "ink" ? "var(--pink-ink)" : "var(--pink-rose)",
         color: "var(--pink-on-accent)",

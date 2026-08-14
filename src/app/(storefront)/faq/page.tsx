@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { buildFaqSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
@@ -8,7 +8,7 @@ import { JsonLd } from "~/components/json-ld";
 import { getTemplate } from "../_templates/registry";
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet().catch(() => null);
+  const business = await loadSeoBusiness("/faq");
   return buildPageMetadata({
     business,
     path: "/faq",

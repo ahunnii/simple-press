@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { buildItemListSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
@@ -29,7 +29,7 @@ export default async function ProductsPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet().catch(() => null);
+  const business = await loadSeoBusiness("/shop");
   return buildPageMetadata({
     business,
     path: "/shop",

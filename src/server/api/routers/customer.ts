@@ -3,7 +3,6 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
@@ -23,25 +22,6 @@ import {
   protectedProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
-
-/**
- * Owner-private CRM `notes` must never reach a STAFF (fulfillment-only) caller.
- * `staffProcedure` admits OWNER/MANAGER/STAFF, so we re-resolve the caller's
- * membership role for the resolved business (PLATFORM_ADMIN always allowed).
- */
-async function canViewCustomerNotes(
-  db: DbClient,
-  userId: string,
-  platformRole: string | null | undefined,
-  businessId: string,
-): Promise<boolean> {
-  if (platformRole === "PLATFORM_ADMIN") return true;
-  const membership = await db.businessMembership.findUnique({
-    where: { userId_businessId: { userId, businessId } },
-    select: { role: true },
-  });
-  return !!membership && ["OWNER", "MANAGER"].includes(membership.role);
-}
 
 export const customerRouter = createTRPCRouter({
   // Get customer profile for current user
@@ -689,12 +669,9 @@ export const customerRouter = createTRPCRouter({
       if (!customer) return null;
 
       // STAFF is fulfillment-only and must not see owner-private CRM notes.
-      const showNotes = await canViewCustomerNotes(
-        ctx.db,
-        ctx.session.user.id,
-        ctx.session.user.platformRole,
-        businessId,
-      );
+      // `ctx.membershipRole` is resolved live from the DB by `staffProcedure`;
+      // PLATFORM_ADMIN reads null there, so notes stay visible for them.
+      const showNotes = ctx.membershipRole !== "STAFF";
 
       return showNotes ? customer : { ...customer, notes: null };
     }),
@@ -872,13 +849,10 @@ export const customerRouter = createTRPCRouter({
 
       // STAFF is fulfillment-only and must not see owner-private CRM notes.
       // Applied to `customers` — the array actually returned — so the clamped
-      // re-query above can't slip past the redaction.
-      const showNotes = await canViewCustomerNotes(
-        ctx.db,
-        ctx.session.user.id,
-        ctx.session.user.platformRole,
-        businessId,
-      );
+      // re-query above can't slip past the redaction. `ctx.membershipRole` is
+      // resolved live from the DB by `staffProcedure`; PLATFORM_ADMIN reads
+      // null there, so notes stay visible for them.
+      const showNotes = ctx.membershipRole !== "STAFF";
       const safeCustomers = showNotes
         ? customers
         : customers.map((c) => ({ ...c, notes: null }));

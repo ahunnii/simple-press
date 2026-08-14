@@ -7,6 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
+import type { BusinessRole } from "generated/prisma";
 import { headers } from "next/headers";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
@@ -138,6 +139,22 @@ export const protectedProcedure = t.procedure
   });
 
 /**
+ * `ctx.membershipRole` — the caller's LIVE `BusinessMembership.role` for the
+ * tenant resolved from the request host, set by `ownerAdminProcedure`,
+ * `staffProcedure` and `ownerOnlyProcedure` below. `null` means PLATFORM_ADMIN:
+ * they have no membership row and bypass the check entirely, so every consumer
+ * must read null as "full access", never as "no access".
+ *
+ * NEVER read `ctx.session.session.membershipRole` for authorization. That field
+ * is a creation-time snapshot stamped once by
+ * `databaseHooks.session.create.before` (`~/server/better-auth/config.tsx`) and
+ * never updated: it is `null` for anyone invited to a business *after* they
+ * signed in, and stale for the whole 7-day cookie-cache lifetime across every
+ * promotion and demotion. The role below costs zero extra queries — the
+ * membership lookup already runs for the tier check.
+ */
+
+/**
  * Business Owner / Admin  procedure
  *
  * If the current business owner or admin needs to make a query or mutation, use this. It verifies
@@ -166,6 +183,9 @@ export const ownerAdminProcedure = t.procedure
 
     const user = ctx.session.user;
 
+    // Stays null for PLATFORM_ADMIN — see the `ctx.membershipRole` note above.
+    let membershipRole: BusinessRole | null = null;
+
     // PLATFORM_ADMIN bypasses membership check
     if (user.platformRole !== "PLATFORM_ADMIN") {
       const membership = await ctx.db.businessMembership.findUnique({
@@ -180,6 +200,7 @@ export const ownerAdminProcedure = t.procedure
           message: "Not a business member",
         });
       }
+      membershipRole = membership.role;
     }
 
     return next({
@@ -187,6 +208,7 @@ export const ownerAdminProcedure = t.procedure
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+        membershipRole,
       },
     });
   });
@@ -222,6 +244,9 @@ export const staffProcedure = t.procedure
 
     const user = ctx.session.user;
 
+    // Stays null for PLATFORM_ADMIN — see the `ctx.membershipRole` note above.
+    let membershipRole: BusinessRole | null = null;
+
     // PLATFORM_ADMIN bypasses membership check
     if (user.platformRole !== "PLATFORM_ADMIN") {
       const membership = await ctx.db.businessMembership.findUnique({
@@ -239,6 +264,7 @@ export const staffProcedure = t.procedure
           message: "Not a business member",
         });
       }
+      membershipRole = membership.role;
     }
 
     return next({
@@ -246,6 +272,7 @@ export const staffProcedure = t.procedure
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+        membershipRole,
       },
     });
   });
@@ -279,6 +306,9 @@ export const ownerOnlyProcedure = t.procedure
 
     const user = ctx.session.user;
 
+    // Stays null for PLATFORM_ADMIN — see the `ctx.membershipRole` note above.
+    let membershipRole: BusinessRole | null = null;
+
     if (user.platformRole !== "PLATFORM_ADMIN") {
       const membership = await ctx.db.businessMembership.findUnique({
         where: {
@@ -292,12 +322,15 @@ export const ownerOnlyProcedure = t.procedure
           message: "Owner access required",
         });
       }
+      // Narrowed to non-null by the optional-chain comparison above.
+      membershipRole = membership.role;
     }
 
     return next({
       ctx: {
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+        membershipRole,
       },
     });
   });

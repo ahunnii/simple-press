@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
+
 export type PinkFilterChipItem = {
   id: string;
   label: string;
@@ -53,7 +55,7 @@ export function PinkFilterChips({
     <div
       role="group"
       aria-label={ariaLabel}
-      className={`flex flex-wrap gap-[1px]${className ? ` ${className}` : ""}`}
+      className={cn("flex flex-wrap gap-[1px]", className)}
       style={{
         background: "var(--pink-line)",
         border: "1px solid var(--pink-line)",

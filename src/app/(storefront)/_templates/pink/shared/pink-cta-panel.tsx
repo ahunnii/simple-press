@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 type PinkCtaLink = { label: string; href: string };
 
@@ -38,7 +39,11 @@ export function PinkCtaPanel({
   const hasImages = images && images.length > 0;
   return (
     <div
-      className={`grid gap-8 p-8 md:p-12 ${hasImages ? "md:grid-cols-2 md:items-center" : ""}${className ? ` ${className}` : ""}`}
+      className={cn(
+        "grid gap-8 p-8 md:p-12",
+        hasImages && "md:grid-cols-2 md:items-center",
+        className,
+      )}
       style={{ background: "var(--pink-panel)" }}
       {...sectionAttrs}
     >

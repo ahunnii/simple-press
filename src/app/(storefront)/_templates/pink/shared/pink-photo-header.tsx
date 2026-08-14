@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { PinkBreadcrumbItem } from "./pink-page-header";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 type PinkPhotoHeaderProps = {
   imageUrl: string;
@@ -44,7 +45,7 @@ export function PinkPhotoHeader({
 }: PinkPhotoHeaderProps) {
   return (
     <header
-      className={`relative flex items-end overflow-hidden${className ? ` ${className}` : ""}`}
+      className={cn("relative flex items-end overflow-hidden", className)}
       style={{ minHeight, background: "var(--pink-ink)" }}
       {...sectionAttrs}
     >

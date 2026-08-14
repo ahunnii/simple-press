@@ -236,6 +236,12 @@ export const auth = betterAuth({
               ...session,
               businessId: membership?.businessId ?? null,
               membershipId: membership?.id ?? null,
+              // Creation-time SNAPSHOT, stale by design — nothing ever updates
+              // it, so it is null for anyone invited after they signed in and
+              // wrong for the whole cookie-cache lifetime after any role
+              // change. NEVER read it for authorization: server code reads
+              // `ctx.membershipRole`, which the tRPC procedure tiers re-resolve
+              // from the DB on every request (`~/server/api/trpc.ts`).
               membershipRole: membership?.role ?? null,
               activeOrganizationId: business.id, // keep for org plugin compat
             },

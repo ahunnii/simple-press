@@ -93,8 +93,14 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error("Disconnect error:", error);
     Sentry.captureException(error, {
-      tags: { route: "stripe.connect.disconnect", service: "stripe" },
-      extra: { stripeAccountId, dbCleared },
+      tags: {
+        route: "stripe.connect.disconnect",
+        service: "stripe",
+        // dbCleared as a tag: "true" here = DB cleared but the Stripe-side revoke
+        // failed — a dangling grant at Stripe worth finding/alerting on.
+        dbCleared: dbCleared ? "true" : "false",
+      },
+      extra: { stripeAccountId },
     });
 
     // If the DB was already cleared before this error hit, the business is

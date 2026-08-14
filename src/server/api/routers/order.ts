@@ -62,6 +62,41 @@ const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   fraudulent: "Fraudulent order",
 };
 
+/**
+ * D2 — what a STAFF (fulfillment-only) caller may not see on an order row.
+ *
+ * `staffProcedure`'s own docblock (`~/server/api/trpc`) draws the line at
+ * "anything touching money, prices, refunds, products, or settings must stay on
+ * ownerAdminProcedure". Money TOTALS are the deliberate exception (user
+ * decision): subtotal/tax/shipping/discount/total stay visible to STAFF because
+ * a fulfillment worker needs them for packing slips and order context. Two
+ * fields do not survive:
+ *
+ * - `internalNote` — owner-to-owner notes, may contain anything.
+ * - `stripePaymentIntentId` — a raw Stripe identifier, not fulfillment-relevant.
+ *
+ * OWNER/MANAGER keep full rows, and so does PLATFORM_ADMIN — they have no
+ * membership row, so `ctx.membershipRole` reads null and `isStaff` is false.
+ *
+ * Applied at every staff-reachable site that returns a full Order row:
+ * `getAll`, `getById`, `markAsFulfilled`, `markReadyForPickup`,
+ * `updateFulfillment`. `addShipment`/`updateShipment` return `OrderShipment`
+ * rows (no order columns) and need no redaction; every other order mutation is
+ * `ownerAdminProcedure` and therefore unreachable by STAFF. `updateNote` — the
+ * write half of `internalNote` — is `ownerAdminProcedure` for the same reason.
+ *
+ * Both columns are nullable, so the router's output types are unchanged.
+ */
+function redactOrderForStaff<
+  T extends {
+    internalNote: string | null;
+    stripePaymentIntentId: string | null;
+  },
+>(order: T, isStaff: boolean): T {
+  if (!isStaff) return order;
+  return { ...order, internalNote: null, stripePaymentIntentId: null };
+}
+
 type ShipmentItemRequest = { orderItemId: string; quantity: number };
 
 /**
@@ -274,7 +309,8 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      return updatedOrder;
+      // D2 redaction — see `redactOrderForStaff`.
+      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
     }),
 
   markReadyForPickup: staffProcedure
@@ -349,7 +385,8 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      return updatedOrder;
+      // D2 redaction — see `redactOrderForStaff`.
+      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
     }),
 
   addShipment: staffProcedure
@@ -807,24 +844,15 @@ export const orderRouter = createTRPCRouter({
               take: pageSize,
             });
 
-      // D2: strip internalNote + stripePaymentIntentId from STAFF rows.
-      // staffProcedure's own docblock (trpc.ts) draws the line at "anything
-      // touching money, prices, refunds, products, or settings must stay on
-      // ownerAdminProcedure" — money TOTALS are the deliberate exception here
-      // (user decision): subtotal/tax/shipping/discount/total stay visible to
-      // STAFF because a fulfillment worker needs them for packing-slip and
-      // order-context purposes. internalNote (owner-to-owner notes, may
-      // contain anything) and stripePaymentIntentId (a raw Stripe identifier,
-      // not needed for fulfillment) are not fulfillment-relevant and are
-      // nulled out below. OWNER/MANAGER and PLATFORM_ADMIN (who has no
-      // membership row, so `membershipRole` reads null) keep full rows.
-      const isStaff = ctx.session.session.membershipRole === "STAFF";
+      // D2 redaction — see `redactOrderForStaff` for the rationale. The role is
+      // read from `ctx.membershipRole`, resolved live from the DB by
+      // `staffProcedure` on every request; the session's own `membershipRole`
+      // is a creation-time snapshot and must never be used for this.
+      const isStaff = ctx.membershipRole === "STAFF";
 
       return {
         orders: pageOrders.map(({ _count, ...order }) => ({
-          ...order,
-          internalNote: isStaff ? null : order.internalNote,
-          stripePaymentIntentId: isStaff ? null : order.stripePaymentIntentId,
+          ...redactOrderForStaff(order, isStaff),
           itemCount: _count.items,
           hasOversell: _count.inventoryHistory > 0,
         })),
@@ -877,8 +905,11 @@ export const orderRouter = createTRPCRouter({
 
       if (!order) return order;
 
+      // D2 redaction — see `redactOrderForStaff`.
+      const isStaff = ctx.membershipRole === "STAFF";
+
       return {
-        ...order,
+        ...redactOrderForStaff(order, isStaff),
         hasOversell: order.inventoryHistory.length > 0,
         oversellItems: order.inventoryHistory.map((h) => ({
           productId: h.productId,
@@ -2034,10 +2065,16 @@ export const orderRouter = createTRPCRouter({
         });
       });
 
-      return updatedOrder;
+      // D2 redaction — see `redactOrderForStaff`.
+      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
     }),
 
-  updateNote: staffProcedure
+  // D2: the WRITE half of `internalNote`. STAFF cannot read the field (see
+  // `redactOrderForStaff`), so they must not be able to overwrite it either —
+  // a blind write from a caller who can't see the current value is exactly the
+  // way an owner-to-owner note gets silently destroyed. `ownerAdminProcedure`,
+  // not `staffProcedure`.
+  updateNote: ownerAdminProcedure
     .use(featureGate("orders"))
     .input(
       z.object({

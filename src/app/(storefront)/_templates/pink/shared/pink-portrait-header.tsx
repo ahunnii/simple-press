@@ -68,7 +68,7 @@ export function PinkPortraitHeader({
 
   return (
     <header
-      className={`px-5 py-14 md:px-10 md:py-20${className ? ` ${className}` : ""}`}
+      className={cn("px-5 py-14 md:px-10 md:py-20", className)}
       style={{ background: "var(--pink-panel)", color: "var(--pink-ink)" }}
       {...sectionAttrs}
     >

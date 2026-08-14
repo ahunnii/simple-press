@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 export type PinkBreadcrumbItem = { label: string; href?: string };
 
@@ -42,7 +43,7 @@ export function PinkPageHeader({
       // slab — the opposite of "black used selectively". Black is now reserved
       // for the homepage events band and the footer. A hairline under the
       // header keeps it separated from the page body without a filled slab.
-      className={`px-5 py-16 md:px-10 md:py-20${className ? ` ${className}` : ""}`}
+      className={cn("px-5 py-16 md:px-10 md:py-20", className)}
       style={{
         background: "var(--pink-paper)",
         color: "var(--pink-ink)",

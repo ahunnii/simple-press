@@ -446,35 +446,41 @@ export const quoteSubmissionRouter = createTRPCRouter({
   list: ownerAdminProcedure.query(async ({ ctx }) => {
     const { businessId } = ctx;
 
-    return ctx.db.quoteSubmission.findMany({
-      where: { businessId },
-      // Bounded, unlike the other in-memory admin lists. Every other one is
-      // filled by the owner (products, collections, discounts); this table's
-      // rows are created by ANONYMOUS visitors, so its size is set by whoever
-      // is submitting — including someone doing so in bulk past the rate
-      // limiter. The cap sits far above any real pipeline, so the page keeps
-      // its in-memory filter/sort/paginate behavior untouched: it just bounds
-      // the working set instead of letting one tenant's inbox become an
-      // unbounded serialized payload. Newest first, so the cap trims the
-      // stalest leads rather than the ones an owner is working today.
-      take: QUOTE_INBOX_MAX_ROWS,
-      select: {
-        id: true,
-        contactName: true,
-        contactEmail: true,
-        calculatorName: true,
-        estimateCents: true,
-        finalQuoteCents: true,
-        quoteSentAt: true,
-        status: true,
-        createdAt: true,
-      },
-      // Stable transport order only (createdAt ties broken by id); the page
-      // re-sorts in memory according to its own sort param. The id tiebreak
-      // matters — bulk-created rows can share a createdAt to the millisecond,
-      // and an unstable order makes selections jump between renders.
-      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-    });
+    const [rows, totalCount] = await ctx.db.$transaction([
+      ctx.db.quoteSubmission.findMany({
+        where: { businessId },
+        // Bounded, unlike the other in-memory admin lists. Every other one is
+        // filled by the owner (products, collections, discounts); this table's
+        // rows are created by ANONYMOUS visitors, so its size is set by whoever
+        // is submitting — including someone doing so in bulk past the rate
+        // limiter. The cap sits far above any real pipeline, so the page keeps
+        // its in-memory filter/sort/paginate behavior untouched: it just bounds
+        // the working set instead of letting one tenant's inbox become an
+        // unbounded serialized payload. Newest first, so the cap trims the
+        // stalest leads rather than the ones an owner is working today. The true
+        // lifetime count now ships alongside so the inbox can say "showing N of M".
+        take: QUOTE_INBOX_MAX_ROWS,
+        select: {
+          id: true,
+          contactName: true,
+          contactEmail: true,
+          calculatorName: true,
+          estimateCents: true,
+          finalQuoteCents: true,
+          quoteSentAt: true,
+          status: true,
+          createdAt: true,
+        },
+        // Stable transport order only (createdAt ties broken by id); the page
+        // re-sorts in memory according to its own sort param. The id tiebreak
+        // matters — bulk-created rows can share a createdAt to the millisecond,
+        // and an unstable order makes selections jump between renders.
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      }),
+      ctx.db.quoteSubmission.count({ where: { businessId } }),
+    ]);
+
+    return { rows, totalCount };
   }),
 
   getById: ownerAdminProcedure
