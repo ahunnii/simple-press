@@ -2,7 +2,7 @@ import type { TemplateSection } from "~/lib/template-sections";
 
 import { pinkAboutSections } from "./about";
 import { pinkAccountSections } from "./account";
-import { pinkBlogSections, pinkOwnerSections } from "./blog";
+import { pinkBlogSections } from "./blog";
 import { pinkCartCheckoutSections } from "./cart-checkout";
 import { pinkCollectionsSections } from "./collections";
 import { pinkContactSections } from "./contact";
@@ -56,6 +56,5 @@ export const pinkSections: Record<string, TemplateSection[]> = {
     ...pinkGenericSections,
     ...pinkAccountSections,
     ...pinkGlobalSections,
-    ...pinkOwnerSections,
   ],
 };

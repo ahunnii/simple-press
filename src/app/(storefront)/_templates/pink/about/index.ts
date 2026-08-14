@@ -80,11 +80,6 @@ const aboutStoryData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "",
   },
-  // The signature block under the story renders the owner-identity fields
-  // (`pink.blog.post-author-name` / `-role` / `-avatar`, group `global.owner`
-  // in `../blog/index.ts`) — the same person the blog byline shows. It has no
-  // fields of its own here; adding `about.story-signature-*` back would give
-  // owners two names to keep in sync.
   {
     key: "pink.about.story-image-main",
     label: "Story Image — Large",

@@ -29,12 +29,6 @@ const FIELD_KEYS = [
   "pink.about.hero-heading",
   "pink.about.hero-intro",
   "pink.about.story-heading",
-  // Owner identity — one set of fields for the signature here and the blog
-  // byline/author card. Keys keep their legacy `pink.blog.` prefix; the group
-  // is `global.owner` (see `../blog/index.ts`).
-  "pink.blog.post-author-name",
-  "pink.blog.post-author-role",
-  "pink.blog.post-author-avatar",
   "pink.about.story-image-main",
   "pink.about.story-image-2",
   "pink.about.story-image-3",
@@ -172,15 +166,6 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
     Boolean(f["pink.about.commissions-cta-label"]) ||
     Boolean(f["pink.about.commissions-secondary-label"]);
 
-  // Owner identity is a `global` section, so hiding it drops the signature
-  // here and the byline/author card on blog posts together. Same name-driven
-  // guard as `pink-blog-post-page.tsx`.
-  const ownerName = f["pink.blog.post-author-name"] ?? "";
-  const ownerAvatar = f["pink.blog.post-author-avatar"] ?? "";
-  const showSignature =
-    isSectionVisible(customFields, "pink", "global.owner") &&
-    ownerName.length > 0;
-
   return (
     <>
       {/* ── about.hero ─────────────────────────────────────────────────── */}
@@ -239,48 +224,6 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
                     {paragraph}
                   </p>
                 ))}
-              </div>
-            )}
-
-            {/* Nested hotspot: the overlay resolves the NEAREST annotated
-                ancestor, so this block opens Owner / Artist while the rest of
-                the column still opens Studio Story. */}
-            {showSignature && (
-              <div
-                className="mt-4 flex items-center gap-3"
-                {...sectionGroupAttr("global", "owner")}
-              >
-                <div
-                  className="relative h-14 w-14 shrink-0 overflow-hidden"
-                  style={{ background: "var(--pink-panel)" }}
-                >
-                  {hasCustomImage(ownerAvatar) ? (
-                    <Image
-                      src={ownerAvatar}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="56px"
-                    />
-                  ) : (
-                    <PinkImageFallback surface="paper" />
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  <span
-                    className="pink-display text-[15px] font-semibold"
-                    {...fieldAttr("pink.blog.post-author-name")}
-                  >
-                    {ownerName}
-                  </span>
-                  <span
-                    className="text-[13px]"
-                    style={{ color: "var(--pink-subtle)" }}
-                    {...fieldAttr("pink.blog.post-author-role")}
-                  >
-                    {f["pink.blog.post-author-role"] ?? ""}
-                  </span>
-                </div>
               </div>
             )}
           </PinkReveal>

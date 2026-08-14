@@ -16,14 +16,6 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * in the sections below so the editor previews it on an individual post rather
  * than on the blog index.
  *
- * Owner identity — name, role, photo, bio and the author-card button — is
- * declared in this module but lives under `page: "global"` (group
- * `global.owner`): the same person renders in the blog byline and author card
- * AND as the signature under the About story, so there is exactly one place to
- * edit it. Field keys keep their legacy `pink.blog.post-author-` prefix to
- * preserve saved owner values — the same convention as the product page's
- * `pink.global.product-` keys (see `../index.ts`).
- *
  * DEVIATIONS from the literal design.md text (see build report for the full
  * reasoning):
  *  - The blog header's right-column CTA is split into its own group
@@ -215,73 +207,6 @@ export const pinkBlogData: TemplateField[] = [
     defaultValue: "/contact",
   },
 
-  // ── global.owner (hideable, page: "global" — see the module comment) ─────
-  {
-    key: "pink.blog.post-author-name",
-    label: "Owner Name",
-    description:
-      "Shown in the byline and the author card on every blog post, and in the signature under the About story.",
-    type: "text",
-    page: "global",
-    group: "global.owner",
-    gridColumn: "col-span-1",
-    defaultValue: "Evelyn Pinkard",
-  },
-  {
-    key: "pink.blog.post-author-role",
-    label: "Owner Role",
-    description: "Small line under the name, in both places.",
-    type: "text",
-    page: "global",
-    group: "global.owner",
-    gridColumn: "col-span-1",
-    defaultValue: "Fiber artist, PinkArt LLC",
-  },
-  {
-    key: "pink.blog.post-author-avatar",
-    label: "Owner Photo",
-    description:
-      "Square photo used in the blog byline, the author card, and the About signature.",
-    type: "image",
-    page: "global",
-    group: "global.owner",
-    gridColumn: "col-span-full",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "pink.blog.post-author-bio",
-    label: "Owner Bio",
-    description:
-      "One or two sentences in the author card after each blog post. Not shown on the About page.",
-    type: "textarea",
-    page: "global",
-    group: "global.owner",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Evelyn makes dolls, magnets and jewelry by hand in Detroit, one piece at a time.",
-  },
-  {
-    key: "pink.blog.post-author-cta-label",
-    label: "Author Card Button Text",
-    description:
-      "Button on the blog author card. Leave blank to hide the button.",
-    type: "text",
-    page: "global",
-    group: "global.owner",
-    gridColumn: "col-span-1",
-    defaultValue: "Read her story",
-  },
-  {
-    key: "pink.blog.post-author-cta-link",
-    label: "Author Card Button Link",
-    description: "Where the author-card button goes.",
-    type: "url",
-    page: "global",
-    group: "global.owner",
-    gridColumn: "col-span-1",
-    defaultValue: "/about",
-  },
-
   // ── blog.post-related (hideable, renderContext: blog-post) ──────────────
   {
     key: "pink.blog.post-related-heading",
@@ -331,14 +256,6 @@ export const pinkBlogFieldGroups: TemplateFieldGroup[] = [
     title: "Ask a Question Band",
     description: "Closing band pointing readers to your contact page.",
     icon: "💬",
-    columns: 2,
-  } satisfies TemplateFieldGroup,
-  {
-    id: "global.owner",
-    title: "Owner / Artist",
-    description:
-      "One identity, two places: the byline and author card on blog posts, and the signature under the About story.",
-    icon: "🧵",
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
@@ -412,24 +329,6 @@ export const pinkBlogSections: TemplateSection[] = [
     description: "The related-posts band at the end of every post.",
     groupIds: ["blog.post-related"],
     order: 5,
-    hideable: true,
-  },
-];
-
-// Declared here (not in `../layout`) because it re-homes this module's
-// author fields, but exported separately so `../sections.ts` can spread it
-// AFTER the layout's global sections — the rail renders sections in array
-// order (nothing sorts by `order`), and `page: "global"` content belongs at
-// the end of the pinned "Site-wide" group, not ahead of the site chrome.
-export const pinkOwnerSections: TemplateSection[] = [
-  {
-    id: "global.owner",
-    page: "global",
-    title: "Owner / Artist",
-    description:
-      "Name, role, photo and bio — the blog byline and author card, and the signature under the About story.",
-    groupIds: ["global.owner"],
-    order: 8,
     hideable: true,
   },
 ];

@@ -11,24 +11,14 @@ import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
-import { PinkBlogAuthorCard } from "./pink-blog-author-card";
 import { PinkBlogPostArticle } from "./pink-blog-post-article";
-import { hasCustomImage } from "./pink-blog-shared";
 
 type PinkBlogPostPageProps = DefaultBlogPostPageTemplateProps & {
   customFields?: Record<string, string>;
   business?: { siteContent?: { customFields?: unknown } | null } | null;
 };
 
-const FIELD_KEYS = [
-  "pink.blog.post-author-name",
-  "pink.blog.post-author-role",
-  "pink.blog.post-author-avatar",
-  "pink.blog.post-author-bio",
-  "pink.blog.post-author-cta-label",
-  "pink.blog.post-author-cta-link",
-  "pink.blog.post-related-heading",
-];
+const FIELD_KEYS = ["pink.blog.post-related-heading"];
 
 /**
  * `BlogPostPage` slot for pink — design.md → "Blog (post)". Uses the light
@@ -54,17 +44,6 @@ export function PinkBlogPostPage({
   // Fixed eyebrow label — see the DEVIATIONS note above.
   const journalLabel = "Journal";
 
-  // Owner identity is a `global` section (see `./index.ts`) — hiding it drops
-  // the byline and the author card here and the signature on the About page.
-  const showAuthor = isSectionVisible(customFields, "pink", "global.owner");
-  const authorName = f["pink.blog.post-author-name"] ?? "";
-  const authorRole = f["pink.blog.post-author-role"] ?? "";
-  const authorAvatar = f["pink.blog.post-author-avatar"] ?? "/placeholder.svg";
-  const authorBio = f["pink.blog.post-author-bio"] ?? "";
-  const authorCtaLabel = (f["pink.blog.post-author-cta-label"] ?? "").trim();
-  const authorCtaLink = f["pink.blog.post-author-cta-link"] ?? "/about";
-  const hasAuthor = showAuthor && authorName.length > 0;
-
   const showRelated = isSectionVisible(
     customFields,
     "pink",
@@ -85,46 +64,6 @@ export function PinkBlogPostPage({
         ]}
         heading={page.title}
         intro={page.excerpt ?? undefined}
-        rightSlot={
-          hasAuthor ? (
-            <div
-              className="flex items-center gap-3"
-              {...sectionGroupAttr("global", "owner")}
-            >
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden">
-                {hasCustomImage(authorAvatar) ? (
-                  <Image
-                    src={authorAvatar}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="48px"
-                  />
-                ) : (
-                  <PinkImageFallback surface="dark" />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className="text-[14px] font-medium"
-                  style={{ color: "var(--pink-paper)" }}
-                  {...fieldAttr("pink.blog.post-author-name")}
-                >
-                  {authorName}
-                </span>
-                {authorRole && (
-                  <span
-                    className="text-[12px]"
-                    style={{ color: "var(--pink-ink-subtle)" }}
-                    {...fieldAttr("pink.blog.post-author-role")}
-                  >
-                    {authorRole}
-                  </span>
-                )}
-              </div>
-            </div>
-          ) : undefined
-        }
       />
 
       {page.image && (
@@ -144,21 +83,6 @@ export function PinkBlogPostPage({
       )}
 
       <PinkBlogPostArticle content={page.content as TiptapJSON} />
-
-      {hasAuthor && (
-        <section className="px-5 pb-4 md:px-10" aria-label="About the artist">
-          <div className="mx-auto max-w-[1400px]">
-            <PinkBlogAuthorCard
-              name={authorName}
-              role={authorRole || undefined}
-              avatar={authorAvatar}
-              bio={authorBio || undefined}
-              ctaLabel={authorCtaLabel || undefined}
-              ctaHref={authorCtaLink}
-            />
-          </div>
-        </section>
-      )}
 
       {showRelated && filteredRelated.length > 0 && (
         <PinkDarkBand

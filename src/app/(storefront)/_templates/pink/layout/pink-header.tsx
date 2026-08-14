@@ -29,12 +29,7 @@ import { PinkNavDropdown } from "./pink-nav-dropdown";
 export type PinkNavChild = { href: string; label: string; external?: boolean };
 export type PinkNavLink = PinkNavChild & { children?: PinkNavChild[] };
 
-const FIELD_KEYS = [
-  "pink.global.accent-word",
-  "pink.global.header-cta-text",
-  "pink.global.header-cta-link",
-  "pink.global.basket-label",
-];
+const FIELD_KEYS = ["pink.global.accent-word", "pink.global.basket-label"];
 
 /**
  * Splits a business name into { prefix, tail } where `tail` is the trailing
@@ -103,8 +98,6 @@ export function PinkHeader({
   const accentWord = f["pink.global.accent-word"] ?? "";
   const wordmark = splitAccentWordmark(businessName, accentWord);
 
-  const ctaText = (f["pink.global.header-cta-text"] ?? "").trim();
-  const ctaLink = f["pink.global.header-cta-link"] ?? "/contact";
   const basketLabel = f["pink.global.basket-label"] ?? "Basket";
 
   // Shipped nav, used until the owner saves their own items in
@@ -309,29 +302,6 @@ export function PinkHeader({
               </Link>
             )}
 
-            {ctaText && (
-              <Link
-                href={ctaLink}
-                className="hidden text-[14px] font-medium transition-colors sm:inline-flex"
-                style={{
-                  border: "1px solid var(--pink-line-button)",
-                  color: "var(--pink-ink)",
-                  padding: "11px 16px",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--pink-rose)";
-                  e.currentTarget.style.color = "var(--pink-rose)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--pink-line-button)";
-                  e.currentTarget.style.color = "var(--pink-ink)";
-                }}
-                {...fieldAttr("pink.global.header-cta-text")}
-              >
-                {ctaText}
-              </Link>
-            )}
-
             <button
               type="button"
               onClick={openCart}
@@ -405,8 +375,6 @@ export function PinkHeader({
         triggerRef={hamburgerRef}
         links={mobileLinks}
         activeHref={pathname ?? "/"}
-        ctaText={ctaText}
-        ctaLink={ctaLink}
         basketLabel={basketLabel}
         itemCount={itemCount}
         wishlist={

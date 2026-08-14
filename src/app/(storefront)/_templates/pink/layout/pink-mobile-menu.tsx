@@ -20,8 +20,6 @@ type PinkMobileMenuProps = {
   links: PinkNavChild[];
   activeHref: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
-  ctaText: string;
-  ctaLink: string;
   basketLabel: string;
   itemCount: number;
   onOpenCart: () => void;
@@ -34,7 +32,7 @@ type PinkMobileMenuProps = {
 
 /**
  * Full-screen ink overlay mobile nav (design.md → Chrome → Header →
- * "Mobile"). Nav items stacked at display 600 24px; secondary CTA + basket
+ * "Mobile"). Nav items stacked at display 600 24px; basket action stack
  * pinned to the bottom. Focus-trapped, closes on Escape, body scroll locked
  * while open — mirrors `coop/layout/coop-mobile-menu.tsx`. Route-change
  * close is handled by the parent (`pink-header.tsx`), which owns `open`.
@@ -45,8 +43,6 @@ export function PinkMobileMenu({
   links,
   activeHref,
   triggerRef,
-  ctaText,
-  ctaLink,
   basketLabel,
   itemCount,
   onOpenCart,
@@ -207,15 +203,6 @@ export function PinkMobileMenu({
         className="pink-dark flex flex-col gap-3 px-8 pt-6 pb-8"
         style={{ borderTop: "1px solid var(--pink-ink-line)" }}
       >
-        {ctaText && (
-          <Link
-            href={ctaLink}
-            onClick={onClose}
-            className="pink-btn pink-btn-ghost w-full justify-center py-3.5"
-          >
-            {ctaText}
-          </Link>
-        )}
         <button
           type="button"
           onClick={onOpenCart}
