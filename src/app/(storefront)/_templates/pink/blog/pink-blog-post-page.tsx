@@ -21,7 +21,6 @@ type PinkBlogPostPageProps = DefaultBlogPostPageTemplateProps & {
 };
 
 const FIELD_KEYS = [
-  "pink.global.nav-blog",
   "pink.blog.post-author-name",
   "pink.blog.post-author-role",
   "pink.blog.post-author-avatar",
@@ -37,8 +36,9 @@ const FIELD_KEYS = [
  * `/blog/[slug]` route) and adds the sticky scroll-progress bar.
  *
  * DEVIATIONS (see docs/templates/pink/build/reports/E-phase3.md for the
- * full reasoning): the "category eyebrow" reuses the `Journal` nav label
- * (no per-post category exists on `Page`); figure captions and the "ink
+ * full reasoning): the "category eyebrow" is a fixed `Journal` label
+ * (no per-post category exists on `Page`, and the nav-label fields it once
+ * reused moved to Content → Navigation); figure captions and the "ink
  * callout block for editorial asides" are not implemented (TiptapRenderer
  * has no figure/caption or callout extension registered, and extending it
  * is out of this agent's assigned directories); the right rail shows
@@ -51,9 +51,12 @@ export function PinkBlogPostPage({
 }: PinkBlogPostPageProps) {
   const f = resolveFields(customFields, FIELD_KEYS);
 
-  const journalLabel = f["pink.global.nav-blog"] ?? "Journal";
+  // Fixed eyebrow label — see the DEVIATIONS note above.
+  const journalLabel = "Journal";
 
-  const showAuthor = isSectionVisible(customFields, "pink", "blog.post-author");
+  // Owner identity is a `global` section (see `./index.ts`) — hiding it drops
+  // the byline and the author card here and the signature on the About page.
+  const showAuthor = isSectionVisible(customFields, "pink", "global.owner");
   const authorName = f["pink.blog.post-author-name"] ?? "";
   const authorRole = f["pink.blog.post-author-role"] ?? "";
   const authorAvatar = f["pink.blog.post-author-avatar"] ?? "/placeholder.svg";
@@ -86,7 +89,7 @@ export function PinkBlogPostPage({
           hasAuthor ? (
             <div
               className="flex items-center gap-3"
-              {...sectionGroupAttr("blog", "post-author")}
+              {...sectionGroupAttr("global", "owner")}
             >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden">
                 {hasCustomImage(authorAvatar) ? (

@@ -124,28 +124,6 @@ const homepageHeroData: TemplateField[] = [
     defaultValue: "/templates/pink/images/hero-family-home.webp",
   },
   {
-    key: "pink.homepage.hero-wordmark-accent",
-    label: "Wordmark — First Half",
-    description:
-      'The first half of the giant two-part wordmark that anchors the hero. While both halves are left at their defaults ("PINK" / "ART") the hero shows the PinkArt logo\'s actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the accent color.',
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "PINK",
-  },
-  {
-    key: "pink.homepage.hero-wordmark-ink",
-    label: "Wordmark — Second Half",
-    description:
-      'The second half of the wordmark. While both halves are left at their defaults ("PINK" / "ART") the hero shows the PinkArt logo\'s actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the ink color.',
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "ART",
-  },
-  {
     key: "pink.homepage.hero-maker-1",
     label: "Maker — Left",
     description:
@@ -730,7 +708,7 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners",
+      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners. The wordmark itself isn't set here — it follows your business name (Settings → General) split on the accent word in the global Branding group, same as the header and footer.",
     icon: "🏰",
     columns: 2,
   } satisfies TemplateFieldGroup,

@@ -8,6 +8,7 @@ import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { telHref } from "~/lib/tel-href";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
@@ -100,9 +101,11 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
     parseBusinessHours(business.businessHours),
   );
 
+  const phoneHref = business.phoneNumber ? telHref(business.phoneNumber) : "";
+
   const hasContactLinks =
     Boolean(business.supportEmail) ||
-    Boolean(business.phoneNumber) ||
+    phoneHref !== "" ||
     socialLinks.length > 0;
 
   return (
@@ -239,9 +242,9 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                             {business.supportEmail}
                           </a>
                         )}
-                        {business.phoneNumber && (
+                        {business.phoneNumber && phoneHref !== "" && (
                           <a
-                            href={`tel:${business.phoneNumber}`}
+                            href={phoneHref}
                             className="text-[14px]"
                             style={{ color: "var(--pink-blush)" }}
                           >

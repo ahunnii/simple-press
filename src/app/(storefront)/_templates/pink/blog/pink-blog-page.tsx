@@ -28,8 +28,12 @@ const FIELD_KEYS = [
   "pink.blog.ask-body",
   "pink.blog.ask-button",
   "pink.blog.ask-link",
-  "pink.global.nav-blog",
 ];
+
+// Category eyebrow on cards and the post header. Was the `pink.global.nav-blog`
+// nav-label field until nav labels moved to Content → Navigation; `Page` has no
+// category column, so a constant is the honest replacement.
+const JOURNAL_LABEL = "Journal";
 
 /**
  * `BlogPage` slot for pink — see docs/templates/pink/design.md →
@@ -52,7 +56,7 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
     subscribeHeading.length > 0 &&
     subscribeButton.length > 0;
 
-  const journalLabel = f["pink.global.nav-blog"] ?? "Journal";
+  const journalLabel = JOURNAL_LABEL;
   const showFeatured = isSectionVisible(customFields, "pink", "blog.featured");
   const featuredBadge = f["pink.blog.featured-badge"] ?? "Latest";
 

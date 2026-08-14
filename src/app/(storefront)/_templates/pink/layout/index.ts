@@ -65,80 +65,9 @@ export const pinkGlobalData: TemplateField[] = [
   // `happy-bamboo` — see `PinkSocialLinks` in `../shared/pink-social-links`.
 
   // ── global.header ────────────────────────────────────────────────────────
-  {
-    key: "pink.global.nav-shop",
-    label: "Nav Label — Shop",
-    description: "Header link to /shop.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Shop",
-  },
-  {
-    key: "pink.global.nav-collections",
-    label: "Nav Label — Collections",
-    description: "Header link to /collections.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Collections",
-  },
-  {
-    key: "pink.global.nav-services",
-    label: "Nav Label — Services",
-    description:
-      "Header link to /services. Only shown when the Services feature is on.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Make & Takes",
-  },
-  {
-    key: "pink.global.nav-blog",
-    label: "Nav Label — Journal",
-    description:
-      "Header link to /blog. Only shown when the Blog feature is on.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Journal",
-  },
-  {
-    key: "pink.global.nav-events",
-    label: "Nav Label — Events",
-    description:
-      "Header link to /events. Only shown when the Events feature is on.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Events",
-  },
-  {
-    key: "pink.global.nav-videos",
-    label: "Nav Label — Videos",
-    description:
-      "Header link to /videos. Only shown when the Videos feature is on.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "Videos",
-  },
-  {
-    key: "pink.global.nav-about",
-    label: "Nav Label — About",
-    description: "Header link to /about.",
-    type: "text",
-    page: "global",
-    group: "global.header",
-    gridColumn: "col-span-1",
-    defaultValue: "The artist",
-  },
+  // Nav labels/links are no longer template fields — they are managed in
+  // Content → Navigation (`SiteContent.navigationItems`), like every other
+  // template.
   {
     key: "pink.global.header-cta-text",
     label: "Header Secondary CTA Text",
@@ -225,17 +154,9 @@ export const pinkGlobalData: TemplateField[] = [
   },
 
   // ── global.footer-legal ──────────────────────────────────────────────────
-  {
-    key: "pink.global.footer-copyright",
-    label: "Footer Copyright Line",
-    description:
-      "Bottom-left of the footer. The year is added automatically if you leave it out.",
-    type: "text",
-    page: "global",
-    group: "global.footer-legal",
-    gridColumn: "col-span-full",
-    defaultValue: "PinkArt LLC — Detroit, Michigan",
-  },
+  // Copyright line is no longer a template field — it renders as
+  // `© {year} {business.name}` directly, so it always matches Settings →
+  // General instead of drifting out of sync with a separately-typed value.
   {
     key: "pink.global.footer-legal-links",
     label: "Footer Legal Links",
@@ -347,6 +268,28 @@ export const pinkGlobalData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
+  {
+    key: "pink.global.logo-size-width",
+    label: "Logo Size Width",
+    description:
+      "Width (in pixels) of the logo on the sign-in and sign-up pages.",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+  },
+  {
+    key: "pink.global.logo-size-height",
+    label: "Logo Size Height",
+    description:
+      "Height (in pixels) of the logo on the sign-in and sign-up pages.",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+  },
 ];
 
 export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
@@ -354,7 +297,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.branding",
     title: "Site Branding",
     description:
-      "Wordmark accent, the footer logo, and the footer blurb — shown on every page",
+      "Wordmark accent, the footer logo, and the footer blurb — shown on every page. The footer logo falls back to your logo in Content → Branding; the wordmark always starts with your business name from Settings → General.",
     icon: "🏷️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -362,7 +305,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.header",
     title: "Header",
     description:
-      "Navigation labels, the bordered secondary button, and the basket button",
+      "The bordered secondary CTA button and the basket button. Nav labels and links are managed in Content → Navigation.",
     icon: "🧭",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -376,7 +319,8 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.footer-legal",
     title: "Footer Legal Strip",
-    description: "Copyright line and policy links at the very bottom",
+    description:
+      "Policy links at the very bottom. The copyright line beside them renders your business name automatically — set it in Settings → General.",
     icon: "⚖️",
     columns: 1,
   } satisfies TemplateFieldGroup,
@@ -410,19 +354,28 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Site Branding",
     description:
-      "Wordmark accent, the footer logo, and the footer blurb — shown on every page",
+      "Wordmark accent, the footer logo, and the footer blurb — shown on every page. The footer logo falls back to your logo in Content → Branding; the wordmark always starts with your business name from Settings → General.",
     groupIds: ["global.branding"],
     order: 0,
     hideable: false,
+    links: [
+      { label: "Branding", href: "/admin/content/branding" },
+      { label: "Business info", href: "/admin/settings/general" },
+    ],
   },
   {
     id: "global.header",
     page: "global",
     title: "Header",
-    description: "Navigation labels and the two header buttons",
+    description:
+      "The bordered secondary CTA button and the basket button. Nav labels and links live in Content → Navigation.",
     groupIds: ["global.header"],
     order: 1,
     hideable: false,
+    links: [
+      { label: "Navigation", href: "/admin/content/navigation" },
+      { label: "Business info", href: "/admin/settings/general" },
+    ],
   },
   {
     id: "global.footer-links",
@@ -438,16 +391,18 @@ export const pinkGlobalSections: TemplateSection[] = [
     page: "global",
     title: "Footer Social",
     description:
-      "Social icons shown in the footer (configured in Admin → Branding)",
+      "Social icons shown in the footer — add them in Content → Branding.",
     groupIds: ["global.footer-social"],
     order: 3,
     hideable: true,
+    links: [{ label: "Branding", href: "/admin/content/branding" }],
   },
   {
     id: "global.footer-legal",
     page: "global",
     title: "Footer Legal Strip",
-    description: "Copyright line and policy links",
+    description:
+      "Policy links at the bottom of the footer. The copyright line beside them renders your business name automatically — set it in Settings → General.",
     groupIds: ["global.footer-legal"],
     order: 4,
     hideable: false,

@@ -236,6 +236,9 @@ export function NoiseHeader({
     { href: "/contact", label: "Contact" },
   ];
 
+  // `??`, never `||`: an owner who saves an empty item list in the Navigation
+  // builder means "no nav links", which `||` would silently overwrite with the
+  // shipped default.
   const customNav = business?.siteContent?.navigationItems as
     | NavLink[]
     | undefined;

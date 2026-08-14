@@ -41,7 +41,6 @@ const FIELD_KEYS = [
   "pink.global.footer-blurb",
   "pink.global.footer-col1-title",
   "pink.global.footer-col2-title",
-  "pink.global.footer-copyright",
 ];
 
 function isLightFooterRoute(pathname: string): boolean {
@@ -154,9 +153,6 @@ export function PinkFooter({
     isSectionVisible(rawCustomFields, "pink", "global.footer-social") &&
     socialLinks.length > 0;
 
-  // No hardcoded location in the fallback — the field's own defaultValue carries
-  // PinkArt's, and a different owner on this template must not inherit it.
-  const copyrightLine = f["pink.global.footer-copyright"] ?? businessName;
   const ownerLegalLinks = parseTemplateListRows(
     customFields?.["pink.global.footer-legal-links"],
   ) as { _id?: string; label?: string; url?: string }[];
@@ -285,10 +281,7 @@ export function PinkFooter({
         {...sectionGroupAttr("global", "footer-legal")}
       >
         <p className="text-[14px]">
-          <span>{new Date().getFullYear()} </span>
-          <span {...fieldAttr("pink.global.footer-copyright")}>
-            {copyrightLine}
-          </span>
+          &copy; {new Date().getFullYear()} {businessName}
         </p>
         {legalLinks.length > 0 && (
           <nav

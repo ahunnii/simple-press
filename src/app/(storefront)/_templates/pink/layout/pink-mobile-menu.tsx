@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Heart, ShoppingBag, User, X } from "lucide-react";
 
-import type { PinkNavLink } from "./pink-header";
+import type { PinkNavChild } from "./pink-header";
 import { isActiveNavLink } from "~/lib/nav-utils";
 
 type PinkAccountLink = { href: string; label: string };
@@ -16,7 +16,8 @@ type PinkWishlistInfo = { count: number; hydrated: boolean } | null;
 type PinkMobileMenuProps = {
   open: boolean;
   onClose: () => void;
-  links: PinkNavLink[];
+  /** Already flattened by `pink-header.tsx` — the drawer has one level only. */
+  links: PinkNavChild[];
   activeHref: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
   ctaText: string;
@@ -179,6 +180,8 @@ export function PinkMobileMenu({
             key={link.href + link.label}
             href={link.href}
             onClick={onClose}
+            target={link.external ? "_blank" : undefined}
+            rel={link.external ? "noopener noreferrer" : undefined}
             aria-current={isActive(link.href) ? "page" : undefined}
             // `py-1.5` brings the 24px/1.5-line-height text (36px) up to a
             // 48px hit target without changing the type scale (design.md's
@@ -193,6 +196,9 @@ export function PinkMobileMenu({
             }}
           >
             {link.label}
+            {link.external && (
+              <span className="sr-only"> (opens in new tab)</span>
+            )}
           </Link>
         ))}
       </nav>

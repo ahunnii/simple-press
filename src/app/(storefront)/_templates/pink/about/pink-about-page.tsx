@@ -16,6 +16,10 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkFactRows } from "../shared/pink-fact-rows";
+import {
+  hasCustomImage,
+  PinkImageFallback,
+} from "../shared/pink-image-fallback";
 import { PinkPortraitHeader } from "../shared/pink-portrait-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
@@ -25,12 +29,12 @@ const FIELD_KEYS = [
   "pink.about.hero-heading",
   "pink.about.hero-intro",
   "pink.about.story-heading",
-  "pink.about.story-paragraph-1",
-  "pink.about.story-paragraph-2",
-  "pink.about.story-paragraph-3",
-  "pink.about.story-signature-image",
-  "pink.about.story-signature-name",
-  "pink.about.story-signature-role",
+  // Owner identity — one set of fields for the signature here and the blog
+  // byline/author card. Keys keep their legacy `pink.blog.` prefix; the group
+  // is `global.owner` (see `../blog/index.ts`).
+  "pink.blog.post-author-name",
+  "pink.blog.post-author-role",
+  "pink.blog.post-author-avatar",
   "pink.about.story-image-main",
   "pink.about.story-image-2",
   "pink.about.story-image-3",
@@ -84,6 +88,16 @@ const DEFAULT_VALUES: ValueItem[] = [
 // self-hides on an empty list (see the `timeline.length > 0` guard below) so a
 // fresh store shows nothing here until the owner fills it in.
 const DEFAULT_TIMELINE: TimelineItem[] = [];
+
+// Shipped story copy, rendered only while `pink.about.story-body` (richtext)
+// is empty — the richtext is the sole authoring path, so this is a constant,
+// not fields (same rule as DEFAULT_VALUES). Once the owner writes their own
+// story the richtext wins and this never renders again.
+const DEFAULT_STORY_PARAGRAPHS: string[] = [
+  "Every doll starts with cotton fabric on the table and no fixed plan. Evelyn works the shape out by hand, one piece at a time, the same way she's worked since she started sewing.",
+  "Everything that goes into a piece is natural: 100% wool filling, cotton fabrics, and faces shaped from polymer clay. Nothing is printed. If a seam shows, it's because a person made it.",
+  "The studio runs on the same rhythm it always has: make, mend, teach, repeat. Make & takes carry the same weight as the dolls — a table of people, everyone leaving with something they made themselves.",
+];
 
 // Empty `image` on purpose: six placeholder slabs read as a broken photo grid
 // on a fresh store. The section collapses entirely until the owner adds at
@@ -158,6 +172,15 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
     Boolean(f["pink.about.commissions-cta-label"]) ||
     Boolean(f["pink.about.commissions-secondary-label"]);
 
+  // Owner identity is a `global` section, so hiding it drops the signature
+  // here and the byline/author card on blog posts together. Same name-driven
+  // guard as `pink-blog-post-page.tsx`.
+  const ownerName = f["pink.blog.post-author-name"] ?? "";
+  const ownerAvatar = f["pink.blog.post-author-avatar"] ?? "";
+  const showSignature =
+    isSectionVisible(customFields, "pink", "global.owner") &&
+    ownerName.length > 0;
+
   return (
     <>
       {/* ── about.hero ─────────────────────────────────────────────────── */}
@@ -198,6 +221,8 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               {f["pink.about.story-heading"] ?? ""}
             </h2>
 
+            {/* Rich text is the only story authoring path; the shipped copy
+                below is a constant so a fresh store still reads day-one. */}
             {hasStoryRichText ? (
               <TiptapRenderer
                 content={storyRichContent as TiptapJSON}
@@ -205,99 +230,121 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               />
             ) : (
               <div className="flex flex-col gap-4">
-                <p
-                  className="text-[17px] leading-[1.8]"
-                  style={{ color: "var(--pink-body)" }}
-                  {...fieldAttr("pink.about.story-paragraph-1")}
-                >
-                  {f["pink.about.story-paragraph-1"] ?? ""}
-                </p>
-                <p
-                  className="text-[17px] leading-[1.8]"
-                  style={{ color: "var(--pink-body)" }}
-                  {...fieldAttr("pink.about.story-paragraph-2")}
-                >
-                  {f["pink.about.story-paragraph-2"] ?? ""}
-                </p>
-                <p
-                  className="text-[17px] leading-[1.8]"
-                  style={{ color: "var(--pink-body)" }}
-                  {...fieldAttr("pink.about.story-paragraph-3")}
-                >
-                  {f["pink.about.story-paragraph-3"] ?? ""}
-                </p>
+                {DEFAULT_STORY_PARAGRAPHS.map((paragraph) => (
+                  <p
+                    key={paragraph}
+                    className="text-[17px] leading-[1.8]"
+                    style={{ color: "var(--pink-body)" }}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             )}
 
-            <div className="mt-4 flex items-center gap-3">
+            {/* Nested hotspot: the overlay resolves the NEAREST annotated
+                ancestor, so this block opens Owner / Artist while the rest of
+                the column still opens Studio Story. */}
+            {showSignature && (
               <div
-                className="relative h-14 w-14 shrink-0 overflow-hidden"
-                style={{ background: "var(--pink-panel)" }}
+                className="mt-4 flex items-center gap-3"
+                {...sectionGroupAttr("global", "owner")}
               >
-                <Image
-                  src={
-                    f["pink.about.story-signature-image"] ?? "/placeholder.svg"
-                  }
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="56px"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className="pink-display text-[15px] font-semibold"
-                  {...fieldAttr("pink.about.story-signature-name")}
+                <div
+                  className="relative h-14 w-14 shrink-0 overflow-hidden"
+                  style={{ background: "var(--pink-panel)" }}
                 >
-                  {f["pink.about.story-signature-name"] ?? ""}
-                </span>
-                <span
-                  className="text-[13px]"
-                  style={{ color: "var(--pink-subtle)" }}
-                  {...fieldAttr("pink.about.story-signature-role")}
-                >
-                  {f["pink.about.story-signature-role"] ?? ""}
-                </span>
+                  {hasCustomImage(ownerAvatar) ? (
+                    <Image
+                      src={ownerAvatar}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  ) : (
+                    <PinkImageFallback surface="paper" />
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <span
+                    className="pink-display text-[15px] font-semibold"
+                    {...fieldAttr("pink.blog.post-author-name")}
+                  >
+                    {ownerName}
+                  </span>
+                  <span
+                    className="text-[13px]"
+                    style={{ color: "var(--pink-subtle)" }}
+                    {...fieldAttr("pink.blog.post-author-role")}
+                  >
+                    {f["pink.blog.post-author-role"] ?? ""}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </PinkReveal>
 
+          {/* Each tile keeps its slot whether or not a photo is set — the trio
+              is the column's whole layout — so an unset one shows the designed
+              stand-in rather than a bare panel or a stock placeholder. */}
           <PinkReveal index={1} className="grid grid-cols-2 gap-3">
             <div
               className="relative col-span-2 overflow-hidden"
               style={{ aspectRatio: "3 / 2", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={f["pink.about.story-image-main"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 45vw"
-              />
+              {hasCustomImage(f["pink.about.story-image-main"]) ? (
+                <Image
+                  src={f["pink.about.story-image-main"] ?? ""}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 45vw"
+                />
+              ) : (
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
+              )}
             </div>
             <div
               className="relative overflow-hidden"
               style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={f["pink.about.story-image-2"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 22vw"
-              />
+              {hasCustomImage(f["pink.about.story-image-2"]) ? (
+                <Image
+                  src={f["pink.about.story-image-2"] ?? ""}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 22vw"
+                />
+              ) : (
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
+              )}
             </div>
             <div
               className="relative overflow-hidden"
               style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={f["pink.about.story-image-3"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 22vw"
-              />
+              {hasCustomImage(f["pink.about.story-image-3"]) ? (
+                <Image
+                  src={f["pink.about.story-image-3"] ?? ""}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 22vw"
+                />
+              ) : (
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
+              )}
             </div>
           </PinkReveal>
         </div>

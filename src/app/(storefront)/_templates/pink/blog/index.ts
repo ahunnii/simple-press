@@ -11,10 +11,18 @@ import { SECTION_LINKS } from "~/lib/section-links";
  * every page module is done, mirroring `coop/generic/index.ts`.
  *
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
- * Blog (index)" and "Blog (post)". Both pages share `page: "blog"`; the two
- * post-only groups (`blog.post-author`, `blog.post-related`) are marked
- * `renderContext: "blog-post"` in the sections below so the editor previews
- * them on an individual post rather than on the blog index.
+ * Blog (index)" and "Blog (post)". Both pages share `page: "blog"`; the
+ * post-only group (`blog.post-related`) is marked `renderContext: "blog-post"`
+ * in the sections below so the editor previews it on an individual post rather
+ * than on the blog index.
+ *
+ * Owner identity — name, role, photo, bio and the author-card button — is
+ * declared in this module but lives under `page: "global"` (group
+ * `global.owner`): the same person renders in the blog byline and author card
+ * AND as the signature under the About story, so there is exactly one place to
+ * edit it. Field keys keep their legacy `pink.blog.post-author-` prefix to
+ * preserve saved owner values — the same convention as the product page's
+ * `pink.global.product-` keys (see `../index.ts`).
  *
  * DEVIATIONS from the literal design.md text (see build report for the full
  * reasoning):
@@ -26,9 +34,10 @@ import { SECTION_LINKS } from "~/lib/section-links";
  *    implemented — `Page` has no category/taxonomy column. The hairline chip
  *    row is repurposed as a real Newest/Oldest sort control instead of a
  *    non-functional stand-in.
- *  - The "category eyebrow" shown on cards and the post header reuses the
- *    existing `pink.global.nav-blog` label (default "Journal") rather than
- *    inventing a new field or a fake per-post category.
+ *  - The "category eyebrow" shown on cards and the post header is a fixed
+ *    "Journal" label rather than a field or a fake per-post category (it
+ *    reused the `pink.global.nav-blog` nav label until nav labels moved to
+ *    Content → Navigation).
  */
 
 export const pinkBlogData: TemplateField[] = [
@@ -206,45 +215,47 @@ export const pinkBlogData: TemplateField[] = [
     defaultValue: "/contact",
   },
 
-  // ── blog.post-author (hideable, renderContext: blog-post) ───────────────
+  // ── global.owner (hideable, page: "global" — see the module comment) ─────
   {
     key: "pink.blog.post-author-name",
-    label: "Author Name",
+    label: "Owner Name",
     description:
-      "Shown in the byline on every post and the author card after the article.",
+      "Shown in the byline and the author card on every blog post, and in the signature under the About story.",
     type: "text",
-    page: "blog",
-    group: "blog.post-author",
+    page: "global",
+    group: "global.owner",
     gridColumn: "col-span-1",
     defaultValue: "Evelyn Pinkard",
   },
   {
     key: "pink.blog.post-author-role",
-    label: "Author Role",
-    description: "Small line under the author's name.",
+    label: "Owner Role",
+    description: "Small line under the name, in both places.",
     type: "text",
-    page: "blog",
-    group: "blog.post-author",
+    page: "global",
+    group: "global.owner",
     gridColumn: "col-span-1",
     defaultValue: "Fiber artist, PinkArt LLC",
   },
   {
     key: "pink.blog.post-author-avatar",
-    label: "Author Photo",
-    description: "Square photo used in the byline and the author card.",
+    label: "Owner Photo",
+    description:
+      "Square photo used in the blog byline, the author card, and the About signature.",
     type: "image",
-    page: "blog",
-    group: "blog.post-author",
+    page: "global",
+    group: "global.owner",
     gridColumn: "col-span-full",
     defaultValue: "/placeholder.svg",
   },
   {
     key: "pink.blog.post-author-bio",
-    label: "Author Bio",
-    description: "One or two sentences in the author card after the article.",
+    label: "Owner Bio",
+    description:
+      "One or two sentences in the author card after each blog post. Not shown on the About page.",
     type: "textarea",
-    page: "blog",
-    group: "blog.post-author",
+    page: "global",
+    group: "global.owner",
     gridColumn: "col-span-full",
     defaultValue:
       "Evelyn makes dolls, magnets and jewelry by hand in Detroit, one piece at a time.",
@@ -252,10 +263,11 @@ export const pinkBlogData: TemplateField[] = [
   {
     key: "pink.blog.post-author-cta-label",
     label: "Author Card Button Text",
-    description: "Leave blank to hide the button.",
+    description:
+      "Button on the blog author card. Leave blank to hide the button.",
     type: "text",
-    page: "blog",
-    group: "blog.post-author",
+    page: "global",
+    group: "global.owner",
     gridColumn: "col-span-1",
     defaultValue: "Read her story",
   },
@@ -264,8 +276,8 @@ export const pinkBlogData: TemplateField[] = [
     label: "Author Card Button Link",
     description: "Where the author-card button goes.",
     type: "url",
-    page: "blog",
-    group: "blog.post-author",
+    page: "global",
+    group: "global.owner",
     gridColumn: "col-span-1",
     defaultValue: "/about",
   },
@@ -322,9 +334,10 @@ export const pinkBlogFieldGroups: TemplateFieldGroup[] = [
     columns: 2,
   } satisfies TemplateFieldGroup,
   {
-    id: "blog.post-author",
-    title: "Blog Post — Author",
-    description: "Byline and author card shown on every post.",
+    id: "global.owner",
+    title: "Owner / Artist",
+    description:
+      "One identity, two places: the byline and author card on blog posts, and the signature under the About story.",
     icon: "🧵",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -389,18 +402,34 @@ export const pinkBlogSections: TemplateSection[] = [
   // Blog-post context is ONE section by platform convention: `noise` and
   // `sledge` both ship a single `blog.post` section, and
   // `template-sections.test.ts` asserts exactly one blog-post-context section
-  // with that exact id per curated template. The two underlying field groups
-  // stay separate (they are genuinely distinct editable areas) and are both
-  // carried in `groupIds`, so no fields are orphaned.
+  // with that exact id per curated template. The id must stay `blog.post` even
+  // though it now carries a single group.
   {
     id: "blog.post",
     page: "blog",
     renderContext: "blog-post",
-    title: "Blog Post — Author & Keep Reading",
-    description:
-      "The byline and author card on every post, plus the related-posts band at the end.",
-    groupIds: ["blog.post-author", "blog.post-related"],
+    title: "Blog Post — Keep Reading",
+    description: "The related-posts band at the end of every post.",
+    groupIds: ["blog.post-related"],
     order: 5,
+    hideable: true,
+  },
+];
+
+// Declared here (not in `../layout`) because it re-homes this module's
+// author fields, but exported separately so `../sections.ts` can spread it
+// AFTER the layout's global sections — the rail renders sections in array
+// order (nothing sorts by `order`), and `page: "global"` content belongs at
+// the end of the pinned "Site-wide" group, not ahead of the site chrome.
+export const pinkOwnerSections: TemplateSection[] = [
+  {
+    id: "global.owner",
+    page: "global",
+    title: "Owner / Artist",
+    description:
+      "Name, role, photo and bio — the blog byline and author card, and the signature under the About story.",
+    groupIds: ["global.owner"],
+    order: 8,
     hideable: true,
   },
 ];

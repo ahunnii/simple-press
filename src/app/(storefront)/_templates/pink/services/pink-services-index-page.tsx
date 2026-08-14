@@ -13,6 +13,7 @@ import { PinkBadge } from "../shared/pink-badge";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
+import { hasCustomImage } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
@@ -126,6 +127,11 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
   const signatureItem = services
     .flatMap((service) => service.items.map((item) => ({ item, service })))
     .find(({ item }) => item.isSignature);
+
+  const ctaImages = [
+    f["pink.services.cta-image-1"] ?? "",
+    f["pink.services.cta-image-2"] ?? "",
+  ].filter(hasCustomImage);
 
   return (
     <div className="flex flex-col">
@@ -332,10 +338,14 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                     }
                   : undefined
               }
-              images={[
-                { src: f["pink.services.cta-image-1"] ?? "", alt: "" },
-                { src: f["pink.services.cta-image-2"] ?? "", alt: "" },
-              ]}
+              // Only pass images once the owner has supplied a real one: the
+              // panel runs copy-only with none set (mirrors the events page's
+              // closing CTA, audit 2026-07-31, P2-7).
+              images={
+                ctaImages.length > 0
+                  ? ctaImages.map((src) => ({ src, alt: "" }))
+                  : undefined
+              }
             />
           </PinkReveal>
         </div>

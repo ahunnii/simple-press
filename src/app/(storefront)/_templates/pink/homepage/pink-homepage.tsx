@@ -33,8 +33,10 @@ const FIELD_KEYS = [
   "pink.homepage.hero-cta-secondary-label",
   "pink.homepage.hero-cta-secondary-link",
   "pink.homepage.hero-image",
-  "pink.homepage.hero-wordmark-accent",
-  "pink.homepage.hero-wordmark-ink",
+  // Wordmark split point — a global field (Brand & Appearance), read here so
+  // the hero can compute the same `pinkWordmarkSplit(business.name, …)` the
+  // header/footer use for their own wordmark.
+  "pink.global.accent-word",
   "pink.homepage.hero-maker-1",
   "pink.homepage.hero-maker-1-alt",
   "pink.homepage.hero-maker-2",
@@ -233,13 +235,11 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
 
   const collectionChips: PinkFilterChipItem[] = [
     { id: "all", label: "All pieces", href: "/shop" },
-    ...collections
-      .slice(0, 4)
-      .map((c) => ({
-        id: c.id,
-        label: c.name,
-        href: `/collections/${c.slug}`,
-      })),
+    ...collections.slice(0, 4).map((c) => ({
+      id: c.id,
+      label: c.name,
+      href: `/collections/${c.slug}`,
+    })),
   ];
 
   return (
@@ -259,8 +259,8 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
             f["pink.homepage.hero-cta-secondary-link"] ?? "#make-and-takes"
           }
           image={f["pink.homepage.hero-image"] ?? ""}
-          wordmarkAccent={f["pink.homepage.hero-wordmark-accent"] ?? ""}
-          wordmarkInk={f["pink.homepage.hero-wordmark-ink"] ?? ""}
+          businessName={business.name}
+          accentWord={f["pink.global.accent-word"] ?? ""}
           cornerDollLeft={f["pink.homepage.hero-doll-1"] ?? ""}
           cornerDollRight={f["pink.homepage.hero-doll-2"] ?? ""}
           maker1={f["pink.homepage.hero-maker-1"] ?? ""}

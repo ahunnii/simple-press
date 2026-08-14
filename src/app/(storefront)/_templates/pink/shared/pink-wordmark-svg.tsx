@@ -24,16 +24,16 @@
  * groups deliberately carry NO `fieldAttr` in either caller: the editor's
  * live-text patcher sets `textContent` on annotated elements, and on an SVG
  * `<g>` that would wipe the path children and blank half the mark (review
- * 2026-08-04). The wordmark text fields stay editable through the hero's
- * section hotspot + drawer; editing either one swaps in the live-text build,
- * which carries the per-half annotations.
+ * 2026-08-04). The wordmark follows the business name (Settings → General)
+ * split on `pink.global.accent-word` (`pink-wordmark-split.ts`) — the same
+ * derivation the header and footer use; changing either input swaps in the
+ * live-text build.
  *
  * **Who decides it renders is different per caller.** In the HERO it is
- * automatic: the mark shows only while both wordmark fields still hold their
- * defaults (`PINK_WORDMARK_DEFAULTS`), because the hero renders those two
- * fields — traced letterforms of the word "PINK" are worth nothing to a shop
- * that has renamed itself, and silently ignoring the edit would be worse than
- * a font swap. In the FOOTER it is an explicit owner switch
+ * automatic: the mark shows only while the business-name split still matches
+ * `PINK_WORDMARK_DEFAULTS` — traced letterforms of the word "PINK" are worth
+ * nothing to a shop that has renamed itself, and silently ignoring the
+ * rename would be worse than a font swap. In the FOOTER it is an explicit owner switch
  * (`pink.global.footer-brand-mark`, default on). The first cut inferred it
  * from `business.name` instead, which meant a store whose Business row is
  * named anything but "PinkArt" — the `demo` store, for one — silently got the

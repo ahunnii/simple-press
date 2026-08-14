@@ -12,6 +12,7 @@ import { parseTemplateListRows } from "~/lib/template-fields";
 import { resolveFields } from "../index";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkFactRows } from "../shared/pink-fact-rows";
+import { hasCustomImage } from "../shared/pink-image-fallback";
 import { PinkPhotoHeader } from "../shared/pink-photo-header";
 import { PinkCollectionDetailClient } from "./pink-collection-detail-client";
 
@@ -139,7 +140,16 @@ export function PinkCollectionPage({
   const galleryRows = parseTemplateListRows(
     customFields?.["pink.collections.detail-gallery-images"],
   );
-  const gallery = galleryRows.length > 0 ? galleryRows : DEFAULT_GALLERY;
+  // Rows without a real image are skipped rather than backfilled with the
+  // platform placeholder (same `hasCustomImage` rule as the events/services
+  // CTA panels) — `DEFAULT_GALLERY`'s blank `image`s mean a fresh store
+  // resolves to an empty array here, and the section hides below.
+  const gallery: (TemplateListRow & { image: string })[] = (
+    galleryRows.length > 0 ? galleryRows : DEFAULT_GALLERY
+  ).flatMap((row) => {
+    const image = typeof row.image === "string" ? row.image : "";
+    return hasCustomImage(image) ? [{ ...row, image }] : [];
+  });
 
   const description = collection.description?.trim() ?? "";
   const isLongDescription = description.length > HERO_INTRO_MAX_CHARS;
@@ -212,49 +222,44 @@ export function PinkCollectionPage({
         </section>
       )}
 
-      {galleryVisible &&
-        gallery.some((row) => typeof row.image === "string" && row.image) && (
-          <section
-            aria-label="Series gallery"
-            className="px-[2px]"
-            {...sectionGroupAttr("collections", "detail-gallery")}
+      {galleryVisible && gallery.length > 0 && (
+        <section
+          aria-label="Series gallery"
+          className="px-[2px]"
+          {...sectionGroupAttr("collections", "detail-gallery")}
+        >
+          <div
+            className="grid gap-[2px]"
+            style={{
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gridAutoRows: "180px",
+            }}
           >
-            <div
-              className="grid gap-[2px]"
-              style={{
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gridAutoRows: "180px",
-              }}
-            >
-              {gallery.slice(0, 6).map((row, i) => {
-                const colSpan = Number(row.colSpan ?? 1) || 1;
-                const rowSpan = Number(row.rowSpan ?? 1) || 1;
-                return (
-                  <div
-                    key={typeof row._id === "string" ? row._id : i}
-                    className="relative overflow-hidden"
-                    style={{
-                      gridColumn: `span ${colSpan}`,
-                      gridRow: `span ${rowSpan}`,
-                    }}
-                  >
-                    <Image
-                      src={
-                        typeof row.image === "string" && row.image
-                          ? row.image
-                          : "/placeholder.svg"
-                      }
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+            {gallery.slice(0, 6).map((row, i) => {
+              const colSpan = Number(row.colSpan ?? 1) || 1;
+              const rowSpan = Number(row.rowSpan ?? 1) || 1;
+              return (
+                <div
+                  key={typeof row._id === "string" ? row._id : i}
+                  className="relative overflow-hidden"
+                  style={{
+                    gridColumn: `span ${colSpan}`,
+                    gridRow: `span ${rowSpan}`,
+                  }}
+                >
+                  <Image
+                    src={row.image}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <PinkCollectionDetailClient
         rows={collection.collectionProducts}

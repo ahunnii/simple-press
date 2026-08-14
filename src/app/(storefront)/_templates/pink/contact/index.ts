@@ -7,8 +7,9 @@ import type { TemplateSection } from "~/lib/template-sections";
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
  * Contact". The form uses the shared `useContactForm` hook + hCaptcha (see
  * `pink-contact-form.tsx`) — never reimplemented here. Studio address/
- * email/phone come from business settings and hours from
- * `Business.businessHours`, never from a literal field default.
+ * email/phone come from Settings → General and hours from Settings → Hours
+ * (`Business.businessHours`), never from a literal field default — see the
+ * `contact.studio` section's `links` below.
  */
 
 // ── contact.header ───────────────────────────────────────────────────────────
@@ -315,7 +316,8 @@ export const pinkContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.studio",
     title: "Contact — Studio",
-    description: "Photo, label, and access note for the studio aside.",
+    description:
+      "Photo, label, and access note for the studio aside. Address, hours, phone, and email in the card below them pull from Settings → General and Settings → Hours.",
     icon: "🏠",
     columns: 2,
   },
@@ -360,10 +362,15 @@ export const pinkContactSections: TemplateSection[] = [
     id: "contact.studio",
     page: "contact",
     title: "Studio",
-    description: "Studio photo, address, hours, and contact links.",
+    description:
+      "Studio photo and access note — address, hours, phone, and email are pulled from Settings",
     groupIds: ["contact.studio"],
     order: 3,
     hideable: true,
+    links: [
+      { label: "Business info", href: "/admin/settings/general" },
+      { label: "Hours", href: "/admin/settings/hours" },
+    ],
   },
   {
     id: "contact.shortcuts",

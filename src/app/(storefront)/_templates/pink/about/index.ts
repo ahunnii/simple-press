@@ -73,76 +73,18 @@ const aboutStoryData: TemplateField[] = [
     key: "pink.about.story-body",
     label: "Story Body (rich text)",
     description:
-      "Optional formatted version of the studio story. When set, this replaces the three plain paragraphs below.",
+      "The studio story — the only place it is written. Formatted text: headings, links and lists all render.",
     type: "richtext",
     page: "about",
     group: "about.story",
     gridColumn: "col-span-full",
     defaultValue: "",
   },
-  {
-    key: "pink.about.story-paragraph-1",
-    label: "Story Paragraph 1",
-    description: "Used when the rich text field above is left empty.",
-    type: "textarea",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Every doll starts with cotton fabric on the table and no fixed plan. Evelyn works the shape out by hand, one piece at a time, the same way she's worked since she started sewing.",
-  },
-  {
-    key: "pink.about.story-paragraph-2",
-    label: "Story Paragraph 2",
-    description: "Second paragraph of the studio story.",
-    type: "textarea",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "Everything that goes into a piece is natural: 100% wool filling, cotton fabrics, and faces shaped from polymer clay. Nothing is printed. If a seam shows, it's because a person made it.",
-  },
-  {
-    key: "pink.about.story-paragraph-3",
-    label: "Story Paragraph 3",
-    description: "Third paragraph of the studio story.",
-    type: "textarea",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-full",
-    defaultValue:
-      "The studio runs on the same rhythm it always has: make, mend, teach, repeat. Make & takes carry the same weight as the dolls — a table of people, everyone leaving with something they made themselves.",
-  },
-  {
-    key: "pink.about.story-signature-image",
-    label: "Signature Photo",
-    description: "Small square photo beside the name and role.",
-    type: "image",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-1",
-    defaultValue: "/placeholder.svg",
-  },
-  {
-    key: "pink.about.story-signature-name",
-    label: "Signature Name",
-    type: "text",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-1",
-    description: "Name shown under the story.",
-    defaultValue: "Evelyn Pinkard",
-  },
-  {
-    key: "pink.about.story-signature-role",
-    label: "Signature Role",
-    description: "Title shown under the name.",
-    type: "text",
-    page: "about",
-    group: "about.story",
-    gridColumn: "col-span-1",
-    defaultValue: "Owner & maker, PinkArt LLC",
-  },
+  // The signature block under the story renders the owner-identity fields
+  // (`pink.blog.post-author-name` / `-role` / `-avatar`, group `global.owner`
+  // in `../blog/index.ts`) — the same person the blog byline shows. It has no
+  // fields of its own here; adding `about.story-signature-*` back would give
+  // owners two names to keep in sync.
   {
     key: "pink.about.story-image-main",
     label: "Story Image — Large",
@@ -421,7 +363,8 @@ export const pinkAboutFieldGroups: TemplateFieldGroup[] = [
   {
     id: "about.story",
     title: "About — Studio Story",
-    description: "The main story, a signature block, and an image trio.",
+    description:
+      "The main story and an image trio. The signature under it comes from Owner / Artist.",
     icon: "🧵",
     columns: 2,
   },
@@ -469,7 +412,7 @@ export const pinkAboutSections: TemplateSection[] = [
     id: "about.story",
     page: "about",
     title: "Studio Story",
-    description: "Main story, signature block, and image trio.",
+    description: "Main story and image trio.",
     groupIds: ["about.story"],
     order: 1,
     hideable: false,

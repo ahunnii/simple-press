@@ -16,11 +16,12 @@ type Props = {
 };
 
 /**
- * The paper author card shown after every post's article body — the second
- * of `blog.post-author`'s two renderings (the first is the byline in
- * `PinkPageHeader`'s dark header, built inline in `pink-blog-post-page.tsx`).
- * Both carry the same `data-sp-group="blog.post-author"` so either instance
- * opens the same field panel. Server-safe.
+ * The paper author card shown after every post's article body — one of
+ * `global.owner`'s three renderings (the others are the byline in
+ * `PinkPageHeader`'s dark header, built inline in `pink-blog-post-page.tsx`,
+ * and the signature under the About story). All carry the same
+ * `data-sp-group="global.owner"` so any instance opens the same field panel.
+ * Server-safe.
  */
 export function PinkBlogAuthorCard({
   name,
@@ -37,7 +38,7 @@ export function PinkBlogAuthorCard({
         background: "var(--pink-white)",
         border: "1px solid var(--pink-line)",
       }}
-      {...sectionGroupAttr("blog", "post-author")}
+      {...sectionGroupAttr("global", "owner")}
     >
       <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden">
         {hasCustomImage(avatar) ? (

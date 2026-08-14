@@ -96,7 +96,7 @@ export function PinkCtaPanel({
               className="relative aspect-square overflow-hidden"
             >
               <Image
-                src={img.src || "/placeholder.svg"}
+                src={img.src}
                 alt={img.alt}
                 fill
                 className="object-cover"
