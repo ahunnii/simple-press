@@ -792,6 +792,9 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // email/firstName/lastName stay PLAINTEXT: DB-side @@unique([businessId, email])
+  // lookups/upserts, admin contains-search, and customer.list's name orderBy all
+  // require it. Encrypted PII expansion is deliberate (scripts/encrypt-existing-pii.ts).
   email     String
   firstName String?
   lastName  String?
@@ -809,7 +812,7 @@ model Customer {
   anonymizedAt        DateTime?
 
   // Owner-facing CRM notes (never shown to the customer)
-  notes String? @db.Text
+  notes String? @db.Text /// @encrypted
 
   // Link to authenticated user (if they've signed in)
   userId String?
@@ -835,8 +838,8 @@ model ShippingAddress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  firstName String
-  lastName  String
+  firstName String /// @encrypted
+  lastName  String /// @encrypted
   company   String? /// @encrypted
   address1  String /// @encrypted
   address2  String? /// @encrypted
@@ -895,6 +898,8 @@ model Order {
   total    Int
 
   // Customer info (denormalized for historical record)
+  // customerEmail/customerName/customerFirstName/customerLastName stay PLAINTEXT —
+  // admin orders search, CSV-export filter, and global admin search run contains-filters on them.
   customerEmail     String
   customerName      String? // For simpler storage (combines first+last)
   customerFirstName String?
@@ -912,8 +917,8 @@ model Order {
   refundAmountCents Int? // cumulative refunded amount in cents (partial or full)
 
   // Notes
-  customerNote String? @db.Text
-  internalNote String? @db.Text
+  customerNote String? @db.Text /// @encrypted
+  internalNote String? @db.Text /// @encrypted
 
   // Multi-tenancy
   businessId String
@@ -1614,9 +1619,9 @@ model QuoteSubmission {
   // src/lib/validators/quote-calculator.ts
   status String @default("NEW")
 
-  contactName  String
-  contactEmail String
-  contactPhone String?
+  contactName  String /// @encrypted
+  contactEmail String /// @encrypted
+  contactPhone String? /// @encrypted
 
   // Self-contained answer snapshot: [{questionId, type, title, variableName?,
   // hidden, ...answer fields, display}] — `quoteSubmissionAnswerSchema`.
@@ -1636,7 +1641,7 @@ model QuoteSubmission {
   // message. Audit snapshot — finalQuoteCents may be edited again afterwards.
   quoteSentAt            DateTime?
   sentQuoteCents         Int?
-  sentMessage            String?
+  sentMessage            String? /// @encrypted
   // Calculator identity/settings snapshotted at submit time (survive deletion).
   calculatorName         String
   showEstimateToCustomer Boolean   @default(false)

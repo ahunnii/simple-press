@@ -29577,6 +29577,9 @@ export namespace Prisma {
       orderCount: number
       deletionRequestedAt: Date | null
       anonymizedAt: Date | null
+      /**
+       * @encrypted
+       */
       notes: string | null
       userId: string | null
       businessId: string
@@ -30906,7 +30909,13 @@ export namespace Prisma {
       id: string
       createdAt: Date
       updatedAt: Date
+      /**
+       * @encrypted
+       */
       firstName: string
+      /**
+       * @encrypted
+       */
       lastName: string
       /**
        * @encrypted
@@ -32446,7 +32455,13 @@ export namespace Prisma {
       deliveryMethod: string
       refundReason: string | null
       refundAmountCents: number | null
+      /**
+       * @encrypted
+       */
       customerNote: string | null
+      /**
+       * @encrypted
+       */
       internalNote: string | null
       businessId: string
       customerId: string | null
@@ -60833,8 +60848,17 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       status: string
+      /**
+       * @encrypted
+       */
       contactName: string
+      /**
+       * @encrypted
+       */
       contactEmail: string
+      /**
+       * @encrypted
+       */
       contactPhone: string | null
       answers: Prisma.JsonValue
       estimateCents: number | null
@@ -60842,6 +60866,9 @@ export namespace Prisma {
       finalQuoteCents: number | null
       quoteSentAt: Date | null
       sentQuoteCents: number | null
+      /**
+       * @encrypted
+       */
       sentMessage: string | null
       calculatorName: string
       showEstimateToCustomer: boolean
