@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { getClientIp, subdomainLimiter } from "~/lib/rate-limit";
 import { isSubdomainReserved } from "~/lib/utils";
@@ -40,6 +41,9 @@ export async function GET(req: NextRequest) {
       );
     }
     console.error("Error checking subdomain:", error);
+    Sentry.captureException(error, {
+      tags: { route: "signup.check-subdomain" },
+    });
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 },

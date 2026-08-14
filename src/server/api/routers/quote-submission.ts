@@ -622,12 +622,9 @@ export const quoteSubmissionRouter = createTRPCRouter({
       });
 
       if (!sendResult.success) {
-        Sentry.captureException(
-          new Error(
-            `final quote email failed: ${JSON.stringify(sendResult.error)}`,
-          ),
-          { tags: { feature: "quote", step: "email-final-quote" } },
-        );
+        // sendEmail() now captures the underlying failure to Sentry itself
+        // (tagged service: "resend", email.type: "final_quote") — no local
+        // capture needed here.
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message:

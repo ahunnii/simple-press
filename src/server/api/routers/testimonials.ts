@@ -755,7 +755,12 @@ export const testimonialRouter = createTRPCRouter({
 
       const inviteUrl = buildInviteUrl(business, code);
 
-      await sendTestimonialInviteEmail({
+      // The invite row above is already committed — sendEmail never throws
+      // (see its docblock) — so a Resend failure can't undo that write.
+      // Throwing here would report a failed mutation for a write that
+      // actually succeeded, so the outcome is surfaced as a return field
+      // instead and left for the caller to react to.
+      const emailResult = await sendTestimonialInviteEmail({
         to: input.email,
         businessName: business.name,
         inviteUrl,
@@ -763,7 +768,7 @@ export const testimonialRouter = createTRPCRouter({
         ownerEmail: business.ownerEmail,
       });
 
-      return invite;
+      return { ...invite, emailSent: emailResult.success };
     }),
 
   resendInvite: ownerAdminProcedure
@@ -813,7 +818,9 @@ export const testimonialRouter = createTRPCRouter({
 
       const inviteUrl = buildInviteUrl(business, invite.code);
 
-      await sendTestimonialInviteEmail({
+      // Same reasoning as sendInvite above: the expiry refresh is already
+      // committed, so a Resend failure is returned rather than thrown.
+      const emailResult = await sendTestimonialInviteEmail({
         to: invite.email,
         businessName: business.name,
         inviteUrl,
@@ -821,7 +828,7 @@ export const testimonialRouter = createTRPCRouter({
         ownerEmail: business.ownerEmail,
       });
 
-      return updatedInvite;
+      return { ...updatedInvite, emailSent: emailResult.success };
     }),
 
   cancelInvite: ownerAdminProcedure

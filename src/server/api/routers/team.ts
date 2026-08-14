@@ -262,7 +262,10 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       const code = crypto.randomBytes(16).toString("hex");
@@ -282,7 +285,12 @@ export const teamRouter = createTRPCRouter({
 
       const inviteUrl = buildTeamInviteUrl(code, business);
 
-      await sendTeamInviteEmail({
+      // The invite row above is already committed — `sendEmail` never
+      // throws (see its docblock), so a Resend failure can't roll that back
+      // anyway. Throwing here would report a failed mutation for a write
+      // that actually succeeded, so the outcome is surfaced as a return
+      // field instead and left for the caller to react to.
+      const emailResult = await sendTeamInviteEmail({
         to: input.email,
         businessName: business.name,
         inviteUrl,
@@ -291,7 +299,7 @@ export const teamRouter = createTRPCRouter({
         ownerEmail: business.ownerEmail,
       });
 
-      return invite;
+      return { ...invite, emailSent: emailResult.success };
     }),
 
   changeRole: ownerOnlyProcedure

@@ -802,6 +802,7 @@ export async function sendTestimonialInviteEmail({
       logoUrl,
       ownerEmail,
     }),
+    tags: [{ name: "category", value: "testimonial_invite" }],
   });
 }
 

@@ -557,9 +557,25 @@ export const orderRouter = createTRPCRouter({
 
       const { business } = order;
 
+      // Unlike every other email call site in this file (markAsFulfilled,
+      // addShipment, the refund/cancellation sends), this procedure's ENTIRE
+      // purpose is to send an email — there is no order-state side effect to
+      // protect. Those other sites intentionally swallow send failures
+      // because the order mutation they're attached to already succeeded and
+      // must not be rolled back or reported as failed just because the
+      // follow-up email didn't go out. Here there's nothing to strand: if
+      // the send fails, the "resend" did nothing, so the mutation must throw
+      // rather than return `{ success: true }` — otherwise the admin who
+      // clicked "Resend confirmation" believes the customer received it.
+      //
+      // `sendEmail` (src/lib/email/send.ts) never throws — it resolves to
+      // `{ success, ... }` — so each branch's result must be captured and
+      // checked explicitly.
+      let result: { success: boolean };
+
       switch (input.type) {
         case "confirmation": {
-          await sendOrderConfirmation({
+          result = await sendOrderConfirmation({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -598,7 +614,7 @@ export const orderRouter = createTRPCRouter({
               message: "Shipment not found",
             });
           }
-          await sendOrderShipped({
+          result = await sendOrderShipped({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -618,7 +634,7 @@ export const orderRouter = createTRPCRouter({
           break;
         }
         case "fulfilled": {
-          await sendOrderFulfilled({
+          result = await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -636,7 +652,7 @@ export const orderRouter = createTRPCRouter({
         case "refunded": {
           const storedRefund = order.refundAmountCents ?? order.total;
           const isFullRefundResend = storedRefund >= order.total;
-          await sendOrderRefunded({
+          result = await sendOrderRefunded({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -655,6 +671,21 @@ export const orderRouter = createTRPCRouter({
           });
           break;
         }
+      }
+
+      if (!result.success) {
+        // No DB write happened in this procedure, so throwing here rolls
+        // back nothing — it just reports the truth. `sendEmail` already
+        // captured the underlying Resend failure (tagged `service: resend`)
+        // before returning `{ success: false }`; this INTERNAL_SERVER_ERROR
+        // is a second, separate Sentry event from the global tRPC error
+        // handler (the one tRPC code it captures) tagged with
+        // `trpc.path: order.resendEmail`. Two events for one failed resend
+        // is intentional here, not a duplicate-reporting bug.
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `The '${input.type}' email could not be sent. Please try again.`,
+        });
       }
 
       console.log(
@@ -953,8 +984,33 @@ export const orderRouter = createTRPCRouter({
             stripeAccount: order.business.stripeAccountId!,
           });
           newTotalRefunded = charge.amount_refunded;
-        } catch {
-          // fall back to the locally computed total
+        } catch (chargeError) {
+          // Fall back to the locally computed total. That's correct for a
+          // single refund, but if a second refund lands concurrently on the
+          // same order, this locally computed number can undercount it — we
+          // never see the charge's authoritative cumulative total, so
+          // `refundAmountCents` below is written from a second-hand figure.
+          // The refund itself still succeeds, so this is a warning (visible
+          // for reconciliation) rather than an error.
+          console.error(
+            "[Orders] charges.retrieve failed; using locally computed refund total:",
+            chargeError,
+          );
+          Sentry.captureException(chargeError, {
+            level: "warning",
+            tags: {
+              service: "stripe",
+              "trpc.procedure": "order.refund",
+              "inventory.step": "refund-total-fallback",
+              businessId,
+            },
+            extra: {
+              orderId: order.id,
+              chargeId,
+              fallbackTotalCents: newTotalRefunded,
+              orderTotalCents: order.total,
+            },
+          });
         }
       }
       const isFullRefund = newTotalRefunded >= order.total;
@@ -1087,6 +1143,17 @@ export const orderRouter = createTRPCRouter({
           });
         } catch (invError) {
           console.error("Failed to restore inventory:", invError);
+          Sentry.captureException(invError, {
+            tags: {
+              "trpc.procedure": "order.refund",
+              "inventory.step": "restore-after-refund",
+              businessId,
+            },
+            extra: {
+              orderId: updatedOrder.id,
+              orderNumber: updatedOrder.orderNumber,
+            },
+          });
         }
       }
 
@@ -1308,6 +1375,14 @@ export const orderRouter = createTRPCRouter({
               "[Order Status] Failed to restock inventory on cancellation:",
               invError,
             );
+            Sentry.captureException(invError, {
+              tags: {
+                "trpc.procedure": "order.updateStatus",
+                "inventory.step": "restock-on-cancel",
+                businessId,
+              },
+              extra: { orderId: order.id, orderNumber: order.orderNumber },
+            });
           }
         }
 
@@ -1848,6 +1923,18 @@ export const orderRouter = createTRPCRouter({
           });
         } catch (invError) {
           console.error("[Manual Order] Failed to deduct inventory:", invError);
+          // Oversell risk: unlike the other four catches here, this one guards
+          // a DEDUCTION, not a restore — a swallowed failure leaves the order
+          // marked paid with stock never decremented, so it's worth flagging
+          // even though the order itself was already created successfully.
+          Sentry.captureException(invError, {
+            tags: {
+              "trpc.procedure": "order.createManual",
+              "inventory.step": "deduct-manual-order",
+              businessId,
+            },
+            extra: { orderId: order.id, orderNumber: order.orderNumber },
+          });
         }
       }
 
@@ -2123,6 +2210,14 @@ export const orderRouter = createTRPCRouter({
             "[Orders] Failed to restore inventory on manual refund:",
             invError,
           );
+          Sentry.captureException(invError, {
+            tags: {
+              "trpc.procedure": "order.markAsRefunded",
+              "inventory.step": "restore-manual-refund",
+              businessId,
+            },
+            extra: { orderId: order.id, orderNumber: order.orderNumber },
+          });
         }
       }
 

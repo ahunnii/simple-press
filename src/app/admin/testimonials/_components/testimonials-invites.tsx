@@ -140,9 +140,18 @@ export function TestimonialsInvites({
 
   const resendInviteMutation = api.testimonial.resendInvite.useMutation({
     onMutate: loadingToast("Resending invite…"),
-    onSuccess: (_data, _variables, context) => {
+    onSuccess: (data, _variables, context) => {
       dismissLoadingToast(context);
-      toast.success("Invite resent");
+      // `sendEmail` never throws, so a failed send still lands here. "Invite
+      // resent" would be a lie — and especially so on a resend, which the owner
+      // is clicking precisely because the first one didn't arrive.
+      if (data.emailSent) {
+        toast.success("Invite resent");
+      } else {
+        toast.warning(
+          "Invite refreshed, but the email could not be sent. Share the invite link with them directly.",
+        );
+      }
       afterWrite();
     },
     onError: (error, _variables, context) => {

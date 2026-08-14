@@ -3,6 +3,7 @@ import ResetPasswordEmail from "~/emails/reset-password";
 import VerifyEmail from "~/emails/verify-email";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { isAPIError } from "better-auth/api";
 import { organization } from "better-auth/plugins";
 
 import { env } from "~/env";
@@ -309,6 +310,81 @@ export const auth = betterAuth({
     cookieCache: {
       enabled: true,
       maxAge: 60 * 60 * 24 * 7, // 7 days
+    },
+  },
+
+  /**
+   * The only Sentry seam on the entire auth surface.
+   *
+   * Nothing else reports auth failures. better-auth catches every throw inside
+   * its own router (`better-auth/dist/api/index.mjs` → `createRouter({ onError
+   * })`) and answers with a JSON error body, so the request resolves 4xx/5xx
+   * *successfully* from Next's point of view. That means `onRequestError` in
+   * `src/instrumentation.ts` — which only fires for errors that escape a
+   * request — never sees them. Without this hook a Prisma adapter failure
+   * during sign-in, a Discord token-exchange failure, or a DB outage while
+   * creating a session is completely silent in production.
+   *
+   * ⚠️ Supplying `onError` REPLACES better-auth's own logging. The router does
+   * `if (options.onAPIError?.onError) { options.onAPIError.onError(e, ctx);
+   * return; }` — it returns before reaching any of its default `ctx.logger`
+   * calls. So both branches below must log unconditionally, or server logs go
+   * dark at the same time Sentry lights up.
+   *
+   * ⚠️ The discriminator is `statusCode`, NOT `status`. `APIError`'s
+   * constructor (`better-call/dist/error.mjs`) stores whatever it was handed:
+   * `this.status = status`, where `status` may be the string enum
+   * (`"BAD_REQUEST"`) or a raw number. better-auth's own `ValidationError`
+   * calls `super(400, …)`, so `status === 400` for those. Only `statusCode` is
+   * normalised to a number (`statusCode = typeof status === "number" ? status
+   * : statusCodes[status]`), which makes it the only safe thing to compare.
+   *
+   * The filter mirrors `src/app/api/trpc/[trpc]/route.ts`: **only 5xx is a
+   * bug.** Wrong password, unverified email, an expired or already-consumed
+   * reset/verification token, an unknown account, an untrusted origin — all are
+   * sub-500 `APIError`s and are expected traffic, not defects; capturing them
+   * would bury the real failures. Anything that is *not* an `APIError` has no
+   * `statusCode` at all, defaults to 500, and is captured — which is exactly
+   * the class we are blind to today (adapter/network/plugin throws).
+   *
+   * `isAPIError` is preferred over `instanceof APIError`: it also accepts
+   * `error?.name === "APIError"`, so an error minted against a second copy of
+   * better-call under pnpm's strict layout still classifies correctly.
+   *
+   * `throw` is deliberately NOT set — that would turn swallowed errors into
+   * real throws and change every HTTP response. This hook is side-effect only.
+   *
+   * PII: `sendDefaultPii: false` platform-wide. Never put an email, password,
+   * session token, or verification/reset token in these tags or extras. The
+   * endpoint path is attached separately, on an isolation scope in
+   * `src/app/api/auth/[...all]/route.ts` — `AuthContext` carries no request, so
+   * it cannot be read here.
+   */
+  onAPIError: {
+    onError: (error, ctx) => {
+      const apiError = isAPIError(error) ? error : null;
+      const statusCode = apiError?.statusCode ?? 500;
+
+      if (apiError && statusCode < 500) {
+        // Expected outcome. Log it (better-auth no longer will) and stop.
+        ctx.logger.warn(`${String(apiError.status)} ${apiError.message}`);
+        return;
+      }
+
+      console.error("[Auth] Unhandled auth error:", error);
+      Sentry.captureException(error, {
+        tags: {
+          service: "better-auth",
+          // `status` is string-or-number (see above), and non-APIError throws
+          // have no status at all — "THROWN" is the bucket for those.
+          "auth.status": String(apiError?.status ?? "THROWN"),
+        },
+        extra: {
+          statusCode,
+          code: apiError?.body?.code,
+          baseURL: ctx.baseURL,
+        },
+      });
     },
   },
 });

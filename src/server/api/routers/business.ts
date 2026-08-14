@@ -1,4 +1,5 @@
 import type { Prisma } from "generated/prisma";
+import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -656,6 +657,20 @@ export const businessRouter = createTRPCRouter({
         } catch (err) {
           // Re-throw TRPCErrors as-is; wrap Stripe API errors
           if (err instanceof TRPCError) throw err;
+          // The BAD_REQUEST below is deliberately friendly ("you haven't set
+          // this up yet"), but it's also on the tRPC handler's do-not-capture
+          // list — so without this, a Stripe outage, a revoked key, a 429,
+          // or a network failure looks identical to a merchant who simply
+          // hasn't configured Stripe Tax, and never surfaces anywhere.
+          // Capture the real error here before rewriting it.
+          Sentry.captureException(err, {
+            tags: {
+              service: "stripe",
+              "trpc.procedure": "business.updateStripeSettings",
+              step: "verify-tax-settings",
+              businessId,
+            },
+          });
           throw new TRPCError({
             code: "BAD_REQUEST",
             message:

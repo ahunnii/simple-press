@@ -33,9 +33,11 @@ const handler = (req: NextRequest) =>
           scope.setTag("trpc.path", path ?? "unknown");
           scope.setExtra("trpc.code", error.code);
           if (ctx?.session?.user) {
+            // sendDefaultPii: false does not override an explicit setUser call,
+            // so we send id only. The user id is sufficient to identify the account
+            // from the admin panel without leaking PII to the issue stream.
             scope.setUser({
               id: ctx.session.user.id,
-              email: ctx.session.user.email,
             });
           }
           Sentry.captureException(error.cause ?? error);

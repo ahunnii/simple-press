@@ -10,7 +10,14 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    // Server-render errors already reached Sentry through `onRequestError`
+    // (src/instrumentation.ts) — Next marks those with a `digest`. Capturing
+    // them here would double-count every one. Only client-side render and
+    // hydration crashes, which carry no digest, are new signal.
+    if (error.digest) return;
+    Sentry.captureException(error, {
+      tags: { component: "global-error-boundary" },
+    });
   }, [error]);
 
   return (

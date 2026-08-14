@@ -2,7 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";
-import { buildZoneWeightConfig } from "~/lib/shipping-config";
+import {
+  buildZoneWeightConfig,
+  reportZoneWeightFallback,
+} from "~/lib/shipping-config";
 import {
   calculateShipping,
   calculateZoneWeightShipping,
@@ -184,6 +187,20 @@ export const shippingRouter = createTRPCRouter({
           totalWeightLb,
           subtotalCents,
           config,
+          // The high-volume call site: this is the live quote, debounced but
+          // still re-running every time the shopper changes state, country,
+          // delivery method or cart — on a public, unauthenticated procedure.
+          // It reports anyway, because a store whose matrix quotes $99.99 loses
+          // the shopper HERE, at the price preview, and the checkout call site
+          // never gets to run — suppressing this would leave the worst case
+          // invisible. `reportZoneWeightFallback` throttles to one event per
+          // store + source + reason per 15 minutes, so a permanently broken
+          // store costs 4 events an hour, not one per keystroke.
+          onFallback: (info) =>
+            reportZoneWeightFallback(info, {
+              businessId: business.id,
+              source: "shipping.quote",
+            }),
         });
       } else {
         const shippingConfig = shippingConfigFromBusiness({

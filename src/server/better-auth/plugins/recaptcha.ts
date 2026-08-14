@@ -1,4 +1,5 @@
 import type { BetterAuthPlugin } from "better-auth";
+import * as Sentry from "@sentry/nextjs";
 import { getIp } from "better-auth/api";
 
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
@@ -158,11 +159,38 @@ export const recaptcha = () =>
 
         return;
       } catch (error) {
+        // Pathname only. This used to log `request.url`, which is the FULL url
+        // *including the query string* — and `/verify-email` and
+        // `/reset-password` carry a live, single-use credential as `?token=…`.
+        // Any log sink or error tracker that saw one of those lines held a
+        // working account-takeover token for the rest of its expiry window.
+        let endpointPath = "unknown";
+        try {
+          endpointPath = new URL(request.url).pathname;
+        } catch {
+          // Only reachable if `request.url` is what threw above; keep the
+          // sentinel rather than let the catch block itself throw.
+        }
+
         const message = error instanceof Error ? error.message : undefined;
         ctx.logger.error(message ?? "Unknown error", {
-          endpoint: request.url,
+          endpoint: endpointPath,
           message: error,
         });
+
+        // This is the highest-severity silent failure on the auth surface: the
+        // return below fails CLOSED with a 500, so for as long as the cause
+        // persists — a Google outage, a rotated or invalid
+        // RECAPTCHA_SECRET_KEY, blocked egress — EVERY sign-up and sign-in on
+        // the platform is refused. And it cannot be caught by `onAPIError` in
+        // `../config`: `onRequest` plugins short-circuit by returning a
+        // `{ response }` wrapper, they never throw an `APIError`, so the
+        // router's error path is never entered. Captured here or nowhere.
+        Sentry.captureException(error, {
+          tags: { service: "recaptcha", "auth.hook": "recaptcha-gate" },
+          extra: { pathname: endpointPath },
+        });
+
         // Never fall through to the handler on error: an unexpected throw must
         // fail closed, not silently skip verification.
         return middlewareResponse({ ...ERRORS.UNKNOWN_ERROR, status: 500 });

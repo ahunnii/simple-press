@@ -16,10 +16,10 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { InviteMemberFormData } from "~/lib/validators/team";
-import { ROLE_DESCRIPTIONS } from "~/app/admin/_lib/admin-nav";
+import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { inviteMemberFormSchema } from "~/lib/validators/team";
-import { type RouterOutputs, api } from "~/trpc/react";
+import { api } from "~/trpc/react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
   AlertDialog,
@@ -49,6 +49,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Form } from "~/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -56,17 +57,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Form } from "~/components/ui/form";
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
-  TableHead,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "~/components/ui/table";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { SelectFormField } from "~/components/inputs/select-form-field";
+import { ROLE_DESCRIPTIONS } from "~/app/admin/_lib/admin-nav";
 
 type TeamList = RouterOutputs["team"]["list"];
 type Membership = TeamList["memberships"][number];
@@ -164,8 +165,20 @@ export function TeamMembers({
   };
 
   const inviteMutation = api.team.invite.useMutation({
-    onSuccess: () => {
-      toast.success("Invitation sent!");
+    onSuccess: (data) => {
+      // `team.invite` commits the invite row and then sends the email, and
+      // `sendEmail` never throws — so a Resend failure still resolves this
+      // mutation successfully. Reporting a flat "Invitation sent!" there would
+      // tell the owner someone was invited when no email ever left. The row is
+      // real either way, so the invite still stands and the link still works;
+      // what changes is that the owner is told to pass it along themselves.
+      if (data.emailSent) {
+        toast.success("Invitation sent!");
+      } else {
+        toast.warning(
+          "Invite created, but the email could not be sent. Share the invite link with them directly.",
+        );
+      }
       setInviteOpen(false);
       inviteForm.reset(inviteDefaultValues);
       invalidate();
@@ -211,8 +224,17 @@ export function TeamMembers({
   // into a form field nobody can see. The `team.invite` procedure itself is
   // untouched; this only calls it a second, independent way.
   const resendMutation = api.team.invite.useMutation({
-    onSuccess: () => {
-      toast.success("Invitation resent");
+    onSuccess: (data) => {
+      // Same reasoning as `inviteMutation` above — a failed send still lands
+      // here, and "Invitation resent" would be a lie. Doubly so for a resend:
+      // the owner is clicking precisely because the first one didn't arrive.
+      if (data.emailSent) {
+        toast.success("Invitation resent");
+      } else {
+        toast.warning(
+          "Invite refreshed, but the email could not be sent. Share the invite link with them directly.",
+        );
+      }
       setResendingId(null);
       invalidate();
     },
@@ -332,9 +354,8 @@ export function TeamMembers({
           <AlertTitle>Team management is Owner-only</AlertTitle>
           <AlertDescription>
             {currentUserRole && ROLE_DESCRIPTIONS[currentUserRole].summary} You
-            can view the team below, but only an{" "}
-            {ROLE_DESCRIPTIONS.OWNER.label} can invite members, change roles,
-            or remove people.
+            can view the team below, but only an {ROLE_DESCRIPTIONS.OWNER.label}{" "}
+            can invite members, change roles, or remove people.
           </AlertDescription>
         </Alert>
       )}
@@ -404,9 +425,7 @@ export function TeamMembers({
                         </Select>
                       ) : (
                         <Badge
-                          variant={
-                            m.role === "OWNER" ? "default" : "secondary"
-                          }
+                          variant={m.role === "OWNER" ? "default" : "secondary"}
                         >
                           {m.role === "OWNER" ? (
                             <>

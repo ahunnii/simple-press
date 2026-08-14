@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
 import { stripeClient } from "~/lib/stripe/client";
@@ -12,9 +13,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
 
+  // Declared outside the try so the catch block can include it — it's parsed
+  // inside the try, but this is the order-confirmation page's session lookup,
+  // and knowing which sessionId failed is the whole point of the capture.
+  let sessionId: string | null = null;
   try {
     const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get("session_id");
+    sessionId = searchParams.get("session_id");
 
     if (!sessionId) {
       return NextResponse.json(
@@ -54,6 +59,20 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Retrieve session error:", error);
+    // This backs the order-confirmation page: a paying customer lands here
+    // straight out of Stripe Checkout, so a failure here means they're
+    // staring at a blank/broken confirmation for an order that (as far as
+    // Stripe is concerned) already went through. Worth capturing eagerly
+    // rather than waiting for a support ticket. `session.customer_email` is
+    // never included below — sendDefaultPii is false, IDs only.
+    Sentry.captureException(error, {
+      tags: {
+        route: "stripe.session",
+        service: "stripe",
+        businessId: business.id,
+      },
+      extra: { stripeAccountId: business.stripeAccountId, sessionId },
+    });
     return NextResponse.json(
       {
         error:

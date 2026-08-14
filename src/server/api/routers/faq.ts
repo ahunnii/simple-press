@@ -1,3 +1,4 @@
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -98,10 +99,24 @@ export const faqRouter = createTRPCRouter({
       const { id, ...rest } = input;
 
       // Ownership-scoped update — Prisma throws if the record doesn't exist or
-      // doesn't belong to this business (combined where clause).
+      // doesn't belong to this business (combined where clause). Only treat
+      // P2025 ("record required but not found") as a genuine not-found; any
+      // other error (connection blip, timeout, constraint violation) is
+      // rethrown as-is and left to propagate to the tRPC onError handler,
+      // which captures it to Sentry as an INTERNAL_SERVER_ERROR. We don't
+      // call Sentry.captureException here ourselves — letting it propagate
+      // is the capture mechanism, and adding one too would double-report.
       const updated = await ctx.db.faqItem
         .update({ where: { id, businessId }, data: rest })
-        .catch(() => null);
+        .catch((error: unknown) => {
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+          ) {
+            return null;
+          }
+          throw error;
+        });
 
       if (!updated) {
         throw new TRPCError({
@@ -119,10 +134,22 @@ export const faqRouter = createTRPCRouter({
       const { businessId } = ctx;
 
       // Ownership-scoped delete — Prisma throws if the record doesn't exist or
-      // doesn't belong to this business.
+      // doesn't belong to this business. Only treat P2025 ("record required
+      // but not found") as a genuine not-found; any other error propagates
+      // to the tRPC onError handler, which captures it to Sentry as an
+      // INTERNAL_SERVER_ERROR. No Sentry call here — propagation is the
+      // capture mechanism, and adding one too would double-report.
       const deleted = await ctx.db.faqItem
         .delete({ where: { id: input.id, businessId } })
-        .catch(() => null);
+        .catch((error: unknown) => {
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+          ) {
+            return null;
+          }
+          throw error;
+        });
 
       if (!deleted) {
         throw new TRPCError({
