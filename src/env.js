@@ -93,11 +93,6 @@ export const env = createEnv({
       .refine((s) => s === "true" || s === "false")
       .transform((s) => s === "true"),
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string(),
-    // Public counterpart of the server-only `UMAMI_BASE_URL` — used to link
-    // the owner to their Umami dashboard from a "use client" settings card.
-    // Optional so builds don't break before this is set in the deploy env;
-    // the link renders conditionally when it's absent.
-    NEXT_PUBLIC_UMAMI_BASE_URL: z.string().url().optional(),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
     NEXT_PUBLIC_STRIPE_CONNECT_CLIENT_ID: z.string(),
     NEXT_PUBLIC_PLATFORM_DOMAIN: z.string(),
@@ -136,7 +131,6 @@ export const env = createEnv({
     NEXT_PUBLIC_HELP_URL: process.env.NEXT_PUBLIC_HELP_URL,
     NEXT_PUBLIC_ENABLE_UMAMI: process.env.NEXT_PUBLIC_ENABLE_UMAMI,
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
-    NEXT_PUBLIC_UMAMI_BASE_URL: process.env.NEXT_PUBLIC_UMAMI_BASE_URL,
     UMAMI_BASE_URL: process.env.UMAMI_BASE_URL,
     INVITATION_CODE: process.env.INVITATION_CODE,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,

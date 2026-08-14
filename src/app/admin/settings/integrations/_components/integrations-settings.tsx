@@ -12,7 +12,7 @@ import { UmamiSettings } from "./umami-settings";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
-  umamiBaseUrl: string | undefined;
+  umamiBaseUrl: string;
 };
 
 export function IntegrationsSettings({ business, umamiBaseUrl }: Props) {

@@ -20,7 +20,7 @@ export default async function IntegrationsSettingsPage() {
 
       <IntegrationsSettings
         business={business}
-        umamiBaseUrl={env.NEXT_PUBLIC_UMAMI_BASE_URL}
+        umamiBaseUrl={env.UMAMI_BASE_URL}
       />
     </>
   );
