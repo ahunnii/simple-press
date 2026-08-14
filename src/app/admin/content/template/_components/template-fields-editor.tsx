@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import type { PreviewPaneHandle } from "~/components/preview/preview-pane";
 import type { TemplateField } from "~/lib/template-fields";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
+import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
+import { SP_META_KEY } from "~/lib/sp-meta";
 import {
   getGroupMetadata,
   groupFieldsByGroup,
@@ -53,8 +55,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PreviewPane } from "~/components/preview/preview-pane";
 import { ResetFormButton } from "~/components/shared/reset-form-button";
 import { SaveFormButton } from "~/components/shared/save-form-button";
-import { PAGE_PREVIEW_PATHS } from "~/lib/preview/preview-paths";
-import { SP_META_KEY } from "~/lib/sp-meta";
 
 import { FieldGroup } from "./template-field-widgets";
 
@@ -554,9 +554,10 @@ export function TemplateFieldsEditor({
             <h1 className="text-base font-medium">Template Fields</h1>
 
             <span
-              className={`admin-status-badge ${
-                isDirty ? "isDirty" : "isPublished"
-              }`}
+              className={cn(
+                "admin-status-badge",
+                isDirty ? "isDirty" : "isPublished",
+              )}
             >
               {isDirty ? "Unsaved Changes" : "Saved"}
             </span>

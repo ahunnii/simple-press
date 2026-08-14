@@ -12,6 +12,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
   Select,
@@ -523,7 +524,10 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                 required
                 aria-required="true"
                 aria-invalid={invalid.email ? true : undefined}
-                className={`pink-input${invalid.email ? "pink-input-invalid" : ""}`}
+                className={cn(
+                  "pink-input",
+                  invalid.email && "pink-input-invalid",
+                )}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -540,7 +544,10 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                 required
                 aria-required="true"
                 aria-invalid={invalid.name ? true : undefined}
-                className={`pink-input${invalid.name ? "pink-input-invalid" : ""}`}
+                className={cn(
+                  "pink-input",
+                  invalid.name && "pink-input-invalid",
+                )}
               />
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
@@ -680,7 +687,10 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={invalid.addressLine1 ? true : undefined}
-                    className={`pink-input${invalid.addressLine1 ? "pink-input-invalid" : ""}`}
+                    className={cn(
+                      "pink-input",
+                      invalid.addressLine1 && "pink-input-invalid",
+                    )}
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:col-span-2">
@@ -711,7 +721,10 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={invalid.city ? true : undefined}
-                    className={`pink-input${invalid.city ? "pink-input-invalid" : ""}`}
+                    className={cn(
+                      "pink-input",
+                      invalid.city && "pink-input-invalid",
+                    )}
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:col-span-1">
@@ -766,7 +779,10 @@ export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={invalid.postalCode ? true : undefined}
-                    className={`pink-input${invalid.postalCode ? "pink-input-invalid" : ""}`}
+                    className={cn(
+                      "pink-input",
+                      invalid.postalCode && "pink-input-invalid",
+                    )}
                   />
                 </div>
 

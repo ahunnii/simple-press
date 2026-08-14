@@ -8,6 +8,7 @@ import type { PromoHalf } from "./vii-shop-promo-band";
 import type { TemplateListRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { cn } from "~/lib/utils";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
 
 import { ViiBrandsSection } from "../homepage/vii-brands-section";
@@ -67,7 +68,7 @@ export function ViiShopClient({
       >
         <div
           ref={productsReveal.ref}
-          className={`vii-reveal${productsReveal.visible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", productsReveal.visible && "is-visible")}
           style={{ maxWidth: 1200, margin: "0 auto" }}
         >
           <h2 id="vii-shop-products-heading" className="sr-only">
@@ -323,7 +324,10 @@ export function ViiShopClient({
         >
           <div
             ref={collectionsReveal.ref}
-            className={`vii-reveal-group${collectionsReveal.visible ? " is-visible" : ""}`}
+            className={cn(
+              "vii-reveal-group",
+              collectionsReveal.visible && "is-visible",
+            )}
             style={{ maxWidth: 1200, margin: "0 auto" }}
           >
             <div style={{ marginBottom: "clamp(28px, 4vw, 48px)" }}>

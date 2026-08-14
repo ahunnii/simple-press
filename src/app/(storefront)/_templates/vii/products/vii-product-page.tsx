@@ -13,6 +13,7 @@ import {
   parseTemplateTrustBadgesListRows,
 } from "~/lib/template-fields";
 import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useProduct } from "~/hooks/use-product";
 import { TrackView } from "~/components/analytics/track-view";
@@ -362,7 +363,10 @@ export function ViiProductPage({
           >
             <div
               ref={related.ref}
-              className={`vii-reveal-group${related.visible ? " is-visible" : ""}`}
+              className={cn(
+                "vii-reveal-group",
+                related.visible && "is-visible",
+              )}
             >
               {/* Header */}
               <div

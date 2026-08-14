@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -59,7 +60,7 @@ export function ViiAboutBand({ bandImage, label, statement }: Props) {
       {/* Content */}
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{
           position: "relative",
           zIndex: 1,

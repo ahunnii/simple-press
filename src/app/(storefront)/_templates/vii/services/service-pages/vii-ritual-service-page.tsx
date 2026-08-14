@@ -28,6 +28,7 @@ import {
   parseTemplateIframeValue,
   parseTemplateRichtext,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -252,7 +253,7 @@ function RitualPhilosophy({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? "is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}
       >
         {overline && (
@@ -313,7 +314,7 @@ function RitualPhilosophy({
       {(Boolean(philosophyImageSrc) || Boolean(philosophyVideoSrc)) && (
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? "is-visible" : ""}`}
+          className={cn("vii-reveal", mediaVisible && "is-visible")}
         >
           <ServiceSectionMedia
             imageSrc={philosophyImageSrc}
@@ -336,7 +337,7 @@ function RitualPhilosophy({
 function StepsGroup({ children }: { children: React.ReactNode }) {
   const { ref, visible } = useViiReveal(0.05);
   return (
-    <div ref={ref} className={`vii-reveal-group${visible ? "is-visible" : ""}`}>
+    <div ref={ref} className={cn("vii-reveal-group", visible && "is-visible")}>
       {children}
     </div>
   );
@@ -359,7 +360,10 @@ function RitualStep({
 
   return (
     <div
-      className={`vii-reveal-item vii-ritual-step${isReversed ? "is-reversed" : ""}`}
+      className={cn(
+        "vii-reveal-item vii-ritual-step",
+        isReversed && "is-reversed",
+      )}
       style={
         {
           "--i": Math.min(index, 7),

@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "~/lib/utils";
+
 import { usePinkReveal } from "../hooks/use-pink-reveal";
 
 type Props = {
@@ -22,13 +24,19 @@ type Props = {
  * itself lives in the `.pink-js .pink-reveal[.pink-revealed]` rules in
  * globals.css and is a no-op until `.pink-js` is armed.
  */
-export function PinkReveal({ children, className, style, index = 0, as = "div" }: Props) {
+export function PinkReveal({
+  children,
+  className,
+  style,
+  index = 0,
+  as = "div",
+}: Props) {
   const { ref, revealed } = usePinkReveal(index);
   const Tag = as;
   return (
     <Tag
       ref={ref as never}
-      className={`pink-reveal${revealed ? " pink-revealed" : ""}${className ? ` ${className}` : ""}`}
+      className={cn("pink-reveal", revealed && "pink-revealed", className)}
       style={style}
     >
       {children}

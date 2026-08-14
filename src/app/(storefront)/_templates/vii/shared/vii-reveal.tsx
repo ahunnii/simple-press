@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "~/lib/utils";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
 type Props = {
@@ -28,7 +30,7 @@ export function ViiReveal({
   return (
     <div
       ref={ref}
-      className={`vii-reveal${visible ? " is-visible" : ""}${className ? ` ${className}` : ""}`}
+      className={cn("vii-reveal", visible && "is-visible", className)}
       style={style}
     >
       {children}
@@ -51,7 +53,7 @@ export function ViiRevealGroup({
   return (
     <div
       ref={ref}
-      className={`vii-reveal-group${visible ? " is-visible" : ""}${className ? ` ${className}` : ""}`}
+      className={cn("vii-reveal-group", visible && "is-visible", className)}
       style={style}
     >
       {children}

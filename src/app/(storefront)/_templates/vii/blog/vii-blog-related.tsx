@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
-import { formatDate } from "~/lib/utils";
+import { cn, formatDate } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -42,7 +42,7 @@ export function ViiBlogRelated({
         {/* Header row */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", headVisible && "is-visible")}
           style={{
             display: "flex",
             alignItems: "flex-end",
@@ -81,7 +81,7 @@ export function ViiBlogRelated({
         {/* Post grid */}
         <div
           ref={gridRef}
-          className={`vii-reveal-group${gridVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal-group", gridVisible && "is-visible")}
           style={{
             display: "flex",
             flexWrap: "wrap",

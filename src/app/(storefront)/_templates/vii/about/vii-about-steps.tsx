@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -32,7 +33,7 @@ function StepRow({
 
   return (
     <div
-      className={`vii-reveal-item vii-step-row${reversed ? "is-reversed" : ""}`}
+      className={cn("vii-reveal-item vii-step-row", reversed && "is-reversed")}
       style={
         {
           "--i": Math.min(index + 1, 7),
@@ -144,7 +145,7 @@ export function ViiAboutSteps({
     >
       <div
         ref={headRef}
-        className={`vii-reveal-group${headVisible ? "is-visible" : ""}`}
+        className={cn("vii-reveal-group", headVisible && "is-visible")}
         style={{ maxWidth: 1100, margin: "0 auto" }}
       >
         {/* Header */}

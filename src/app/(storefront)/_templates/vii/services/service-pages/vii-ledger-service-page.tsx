@@ -25,6 +25,7 @@ import {
   parseTemplateIframeValue,
   parseTemplateRichtext,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
@@ -68,7 +69,10 @@ function LedgerList({
         {(listHeading || listIntro) && (
           <div
             ref={headRef}
-            className={`vii-reveal vii-ledger-list-row${headVisible ? " is-visible" : ""}`}
+            className={cn(
+              "vii-reveal vii-ledger-list-row",
+              headVisible && "is-visible",
+            )}
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1.4fr",
@@ -121,7 +125,7 @@ function LedgerList({
 
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal-group", rowsVisible && "is-visible")}
         >
           {items.map((item, i) => (
             <TreatmentListRow

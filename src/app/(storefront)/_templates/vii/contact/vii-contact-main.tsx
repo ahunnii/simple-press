@@ -1,5 +1,7 @@
 "use client";
 
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
 import { InstagramIcon } from "~/components/icons/instagram-icon";
 import { LinkedinIcon } from "~/components/icons/linkedin-icon";
@@ -7,7 +9,6 @@ import { PinterestIcon } from "~/components/icons/pinterest-icon";
 import { TikTokIcon } from "~/components/icons/tiktok-icon";
 import { TwitterIcon } from "~/components/icons/twitter-icon";
 import { YouTubeIcon } from "~/components/icons/youtube-icon";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -110,7 +111,7 @@ export function ViiContactMain({
         {/* Left — intro + info */}
         <div
           ref={infoRef}
-          className={`vii-reveal${infoVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", infoVisible && "is-visible")}
         >
           {overline && (
             <ViiOverline
@@ -355,7 +356,7 @@ export function ViiContactMain({
         {/* Right — form card */}
         <div
           ref={formRef}
-          className={`vii-reveal${formVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", formVisible && "is-visible")}
           style={{
             background: "var(--vii-paper)",
             borderRadius: "var(--radius)",

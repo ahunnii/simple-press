@@ -28,6 +28,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { cn } from "~/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -157,11 +158,12 @@ function DeltaChip({
   const up = pct > 0;
   return (
     <p
-      className={`mt-1 text-xs font-medium ${
+      className={cn(
+        "mt-1 text-xs font-medium",
         up
           ? "text-green-600 dark:text-green-500"
-          : "text-red-600 dark:text-red-500"
-      }`}
+          : "text-red-600 dark:text-red-500",
+      )}
     >
       <span aria-hidden="true">{up ? "▲" : "▼"}</span>
       <span className="sr-only">{up ? "Up" : "Down"}</span> {Math.abs(pct)}% vs{" "}
@@ -649,7 +651,12 @@ export function DashboardContent({
                             // page: the feeding query is `lte: 10` with no lower
                             // bound, so a negative pool is in this list and must
                             // read as broken, not merely low.
-                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty <= 0 ? DANGER_TEXT : WARNING_TEXT}`}
+                            className={cn(
+                              "h-5 w-5 shrink-0",
+                              pool.inventoryQty <= 0
+                                ? DANGER_TEXT
+                                : WARNING_TEXT,
+                            )}
                           />
                           <div>
                             <p className="text-foreground text-sm font-medium">
@@ -662,7 +669,12 @@ export function DashboardContent({
                         </div>
                         <div className="text-right">
                           <p
-                            className={`text-sm font-semibold ${pool.inventoryQty <= 0 ? "text-red-700 dark:text-red-500" : "text-amber-700 dark:text-amber-500"}`}
+                            className={cn(
+                              "text-sm font-semibold",
+                              pool.inventoryQty <= 0
+                                ? "text-red-700 dark:text-red-500"
+                                : "text-amber-700 dark:text-amber-500",
+                            )}
                           >
                             {pool.inventoryQty} left
                           </p>

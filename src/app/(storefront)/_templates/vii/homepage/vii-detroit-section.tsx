@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
@@ -59,7 +60,7 @@ export function ViiDetroitSection({
         {/* ── Image ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", mediaVisible && "is-visible")}
           style={{
             position: "relative",
             width: "100%",
@@ -100,7 +101,7 @@ export function ViiDetroitSection({
         {/* ── Text ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", textVisible && "is-visible")}
         >
           {overline && (
             <p

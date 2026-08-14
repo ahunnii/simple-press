@@ -755,11 +755,12 @@ export function VariantManager({
                                 onClick={() =>
                                   updateVariant(index, "imageUrl", null)
                                 }
-                                className={`text-muted-foreground hover:border-border flex h-10 w-10 items-center justify-center rounded border text-xs ${
+                                className={cn(
+                                  "text-muted-foreground hover:border-border flex h-10 w-10 items-center justify-center rounded border text-xs",
                                   !variant.imageUrl
                                     ? "border-blue-500 ring-1 ring-blue-500"
-                                    : "border-border"
-                                }`}
+                                    : "border-border",
+                                )}
                               >
                                 None
                               </button>
@@ -771,11 +772,12 @@ export function VariantManager({
                                   onClick={() =>
                                     updateVariant(index, "imageUrl", img.url)
                                   }
-                                  className={`hover:border-border overflow-hidden rounded border ${
+                                  className={cn(
+                                    "hover:border-border overflow-hidden rounded border",
                                     variant.imageUrl === img.url
                                       ? "border-blue-500 ring-1 ring-blue-500"
-                                      : "border-border"
-                                  }`}
+                                      : "border-border",
+                                  )}
                                 >
                                   <AdminThumb
                                     src={img.url}

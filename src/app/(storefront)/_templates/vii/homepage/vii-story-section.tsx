@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 
@@ -70,7 +71,7 @@ export function ViiStorySection({
         {/* ── Left: text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", textVisible && "is-visible")}
         >
           <h2
             id="story-heading"

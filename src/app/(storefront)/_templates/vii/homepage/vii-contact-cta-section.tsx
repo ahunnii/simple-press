@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { EmbedDialog } from "~/components/embed-dialog";
 import { EmbedFrame } from "~/components/embed-frame";
 import { EmbedReveal } from "~/components/embed-reveal";
-import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -114,7 +115,7 @@ export function ViiContactCtaSection({
       {/* Content */}
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{
           position: "relative",
           zIndex: 1,

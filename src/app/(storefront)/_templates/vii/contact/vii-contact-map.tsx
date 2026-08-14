@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import type { MapViewport } from "~/components/ui/map";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import {
   Map,
   MapMarker,
@@ -53,7 +54,7 @@ export function ViiContactMap({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{ maxWidth: 1180, margin: "0 auto" }}
       >
         {heading && (

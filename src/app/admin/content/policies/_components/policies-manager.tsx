@@ -49,7 +49,11 @@ const splitBracketed = (
     .filter((part) => part.length > 0)
     .map((part) =>
       part.startsWith("[") && part.endsWith("]")
-        ? { type: "text" as const, text: part, marks: [{ type: "code" as const }] }
+        ? {
+            type: "text" as const,
+            text: part,
+            marks: [{ type: "code" as const }],
+          }
         : { type: "text" as const, text: part },
     );
 };
@@ -669,9 +673,10 @@ export function PoliciesManager({ business }: Props) {
             <h1 className="text-base font-medium">Update Policies</h1>
 
             <span
-              className={`admin-status-badge ${
-                isDirty ? "isDirty" : "isPublished"
-              }`}
+              className={cn(
+                "admin-status-badge",
+                isDirty ? "isDirty" : "isPublished",
+              )}
             >
               {isDirty ? "Unsaved Changes" : "Saved"}
             </span>
@@ -711,7 +716,9 @@ export function PoliciesManager({ business }: Props) {
         {missingRequiredPolicies && (
           <Alert className="mb-4">
             <ShieldAlert className="h-4 w-4" />
-            <AlertTitle>No published Terms of Service or Refund Policy</AlertTitle>
+            <AlertTitle>
+              No published Terms of Service or Refund Policy
+            </AlertTitle>
             <AlertDescription>
               Checkout tells buyers they&apos;re agreeing to this store&apos;s
               Terms of Service — publish at least the Terms and Refunds tabs
@@ -729,9 +736,7 @@ export function PoliciesManager({ business }: Props) {
             <AlertTitle>Review before publishing</AlertTitle>
             <AlertDescription>
               Anything shown like{" "}
-              <code className="bg-muted rounded px-1 py-0.5 text-sm">
-                this
-              </code>{" "}
+              <code className="bg-muted rounded px-1 py-0.5 text-sm">this</code>{" "}
               still needs your input before you publish.
             </AlertDescription>
           </Alert>

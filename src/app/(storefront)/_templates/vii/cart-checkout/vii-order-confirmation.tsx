@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
+import { cn } from "~/lib/utils";
 import { TrackPurchase } from "~/components/analytics/track-purchase";
 import { useCart } from "~/providers/cart-context";
 
@@ -342,7 +343,7 @@ export function ViiOrderConfirmation({
       >
         <div
           ref={ref}
-          className={`vii-reveal-group${visible ? " is-visible" : ""}`}
+          className={cn("vii-reveal-group", visible && "is-visible")}
           style={{
             maxWidth: 720,
             margin: "0 auto",

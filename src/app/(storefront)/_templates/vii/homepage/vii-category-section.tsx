@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -67,7 +68,7 @@ export function ViiCategorySection({ overline, heading, cards }: Props) {
       {/* Category tiles */}
       <div
         ref={ref}
-        className={`vii-reveal-group${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal-group", visible && "is-visible")}
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",

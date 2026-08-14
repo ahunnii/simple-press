@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -51,7 +52,7 @@ export function ViiAboutTeamOwner({
         {/* Text */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", textVisible && "is-visible")}
         >
           {overline && (
             <ViiOverline
@@ -119,7 +120,7 @@ export function ViiAboutTeamOwner({
         {/* Image */}
         <div
           ref={imgRef}
-          className={`vii-reveal${imgVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", imgVisible && "is-visible")}
           style={{
             position: "relative",
             aspectRatio: "4/5",

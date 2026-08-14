@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -126,7 +127,7 @@ export function ViiAboutTeam({ overline, heading, intro, members }: Props) {
     >
       <div
         ref={headRef}
-        className={`vii-reveal-group${headVisible ? " is-visible" : ""}`}
+        className={cn("vii-reveal-group", headVisible && "is-visible")}
         style={{ maxWidth: 1100, margin: "0 auto" }}
       >
         {/* Header */}

@@ -9,6 +9,7 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
   Select,
@@ -136,7 +137,10 @@ export function ViiCheckoutForm({
           gridTemplateColumns: "1fr",
           alignItems: "start",
         }}
-        className={`lg:grid-cols-[1fr_360px] vii-reveal-group${visible ? "is-visible" : ""}`}
+        className={cn(
+          "vii-reveal-group lg:grid-cols-[1fr_360px]",
+          visible && "is-visible",
+        )}
       >
         {/* ── Left: fieldsets ─────────────────────────────────────────────── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
