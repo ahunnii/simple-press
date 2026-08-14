@@ -39,9 +39,7 @@ export async function uploadRichTextImage(file: File): Promise<string> {
     file,
   });
 
-  const url = result.file.objectInfo.metadata?.pathname as
-    | string
-    | undefined;
+  const url = result.file.objectInfo.metadata?.pathname as string | undefined;
 
   if (!url) {
     throw new Error("Upload succeeded but no file URL was returned.");

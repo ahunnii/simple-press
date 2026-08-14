@@ -4,22 +4,17 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
-import {
-  Heart,
-  MessageSquare,
-  ShoppingBag,
-  X,
-} from "lucide-react";
+import { Heart, MessageSquare, ShoppingBag, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -448,15 +443,19 @@ export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
                   </Link>
                 </Button>
 
-                {isPending ? (
-                  <div className="bg-muted h-9 w-24 animate-pulse rounded" />
-                ) : user ? (
-                  <div className="flex items-center gap-2">
-                    <UserButton />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">{authActions}</div>
-                )}
+                {/* Same `customerAccounts` gate the desktop cluster uses — the
+                    drawer was offering sign-in links on stores that have
+                    accounts turned off. */}
+                {isStorefrontEnabled("customerAccounts") &&
+                  (isPending ? (
+                    <div className="bg-muted h-9 w-24 animate-pulse rounded" />
+                  ) : user ? (
+                    <div className="flex items-center gap-2">
+                      <UserButton />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">{authActions}</div>
+                  ))}
               </motion.div>
             </div>
           </motion.div>

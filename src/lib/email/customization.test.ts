@@ -39,16 +39,16 @@ describe("emailOverrideSchema", () => {
       false,
     );
     const justRight = "a".repeat(150);
-    expect(
-      emailOverrideSchema.safeParse({ subject: justRight }).success,
-    ).toBe(true);
+    expect(emailOverrideSchema.safeParse({ subject: justRight }).success).toBe(
+      true,
+    );
   });
 
   it("enforces max length on introText (1000 chars)", () => {
     const tooLong = "a".repeat(1001);
-    expect(
-      emailOverrideSchema.safeParse({ introText: tooLong }).success,
-    ).toBe(false);
+    expect(emailOverrideSchema.safeParse({ introText: tooLong }).success).toBe(
+      false,
+    );
   });
 });
 

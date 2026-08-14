@@ -82,7 +82,11 @@ export default async function ProductsPage({ searchParams }: Props) {
     PRODUCT_STATUS_VALUES,
     PRODUCT_STATUS_DEFAULT,
   );
-  const sort = pickParam(params.sort, PRODUCT_SORT_VALUES, PRODUCT_SORT_DEFAULT);
+  const sort = pickParam(
+    params.sort,
+    PRODUCT_SORT_VALUES,
+    PRODUCT_SORT_DEFAULT,
+  );
   const requestedPage = parsePageParam(params.page);
 
   const listInput = {
@@ -117,8 +121,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   const hasProducts =
     result.totalCount > 0 ||
     (filtersNarrow &&
-      (await api.product.hasAny().catch(rethrowTrpcForErrorBoundary))
-        .hasAny);
+      (await api.product.hasAny().catch(rethrowTrpcForErrorBoundary)).hasAny);
 
   const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
 

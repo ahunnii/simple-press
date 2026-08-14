@@ -29,7 +29,7 @@ vi.mock("next/image", () => ({
       alt?: string;
       sizes?: string;
     };
-     
+
     return (
       <img
         src={typeof src === "string" ? src : ""}

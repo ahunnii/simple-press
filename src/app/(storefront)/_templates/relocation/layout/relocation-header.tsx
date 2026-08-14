@@ -6,11 +6,11 @@ import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { isActiveNavLink } from "~/lib/nav-utils";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -58,24 +58,27 @@ const DEFAULT_NAV: NavLink[] = [
  * ("CALL US AT") plus the shipped fallback logo.
  *
  * Client component because it needs `usePathname()` for the active-link
- * underline, holds the mobile drawer's open state, and reads the live session
- * through `useHydratedSession()` — a server-rendered `session` prop replays
- * its signed-out RSC payload after a client-side post-login navigation, so the
- * header never flips to the avatar without a hard refresh (canonical pattern:
- * `modern/layout/modern-header.tsx`).
+ * underline, holds the mobile drawer's open state, and reads the session
+ * through `useHydratedSession(initialSession)` — seeded with the layout's
+ * server-side `getSession()` so the signed-in header is right in the first
+ * paint, then handed over to the client store so a post-login (or post-logout)
+ * client navigation flips it without a hard refresh.
  *
  * Breakpoint: the clone's desktop starts at 1025px, so the hamburger owns
  * everything below that (`max-[1024px]:` / `min-[1025px]:` arbitrary variants —
  * the Tailwind config is never touched).
  */
-export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
+export function RelocationHeader({
+  business,
+  initialSession,
+}: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuId = useId();
 
   const { isEnabled } = useStorefrontFlags();
-  const { data: session, isPending } = useHydratedSession();
+  const { data: session, isPending } = useHydratedSession(initialSession);
 
   const customFields = business?.siteContent?.customFields;
   const f = resolveFields(customFields, [
@@ -182,13 +185,17 @@ export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
 
   // Mobile drawer: collapses to one pill link rather than squeezing the
   // above into the drawer's top bar (see RelocationMobileMenu's account
-  // props doc comment — mirrors ViiHeader's mobile pattern).
-  const mobileAccountHref = isEnabled("customerAccounts")
+  // props doc comment — mirrors ViiHeader's mobile pattern). Left undefined
+  // while the session is pending, which drops the row entirely — the drawer
+  // has no room for a placeholder, and a link whose destination is the
+  // session state is worse wrong than late.
+  const showMobileAccount = isEnabled("customerAccounts") && !isPending;
+  const mobileAccountHref = showMobileAccount
     ? session?.user
       ? "/account/orders"
       : "/auth/sign-in"
     : undefined;
-  const mobileAccountLabel = isEnabled("customerAccounts")
+  const mobileAccountLabel = showMobileAccount
     ? session?.user
       ? "My Account"
       : "Log In"

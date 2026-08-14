@@ -67,8 +67,7 @@ describe("createOrderStatusToken / verifyOrderStatusToken", () => {
 
       // TTL is 90 days — advance 91 days.
       vi.setSystemTime(
-        new Date("2026-01-01T00:00:00Z").getTime() +
-          91 * 24 * 60 * 60 * 1000,
+        new Date("2026-01-01T00:00:00Z").getTime() + 91 * 24 * 60 * 60 * 1000,
       );
 
       expect(verifyOrderStatusToken(token, SECRET)).toBeNull();
@@ -79,8 +78,7 @@ describe("createOrderStatusToken / verifyOrderStatusToken", () => {
       const token = createOrderStatusToken("order_123", SECRET);
 
       vi.setSystemTime(
-        new Date("2026-01-01T00:00:00Z").getTime() +
-          89 * 24 * 60 * 60 * 1000,
+        new Date("2026-01-01T00:00:00Z").getTime() + 89 * 24 * 60 * 60 * 1000,
       );
 
       expect(verifyOrderStatusToken(token, SECRET)).toEqual({

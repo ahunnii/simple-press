@@ -1,7 +1,14 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Building2, Globe, LayoutDashboard, MessageSquare, Users, Wrench } from "lucide-react";
+import {
+  Building2,
+  Globe,
+  LayoutDashboard,
+  MessageSquare,
+  Users,
+  Wrench,
+} from "lucide-react";
 
 import { env } from "~/env";
 import { getSession } from "~/server/better-auth/server";

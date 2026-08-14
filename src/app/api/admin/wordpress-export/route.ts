@@ -92,9 +92,8 @@ export async function GET(req: Request): Promise<Response> {
     }
 
     // ── 3. Collect export content ────────────────────────────────────────────
-    const { businessSlug, files } = await collectWordPressExport(
-      targetBusinessId,
-    );
+    const { businessSlug, files } =
+      await collectWordPressExport(targetBusinessId);
 
     // ── 4. Assemble ZIP ──────────────────────────────────────────────────────
     const zip = new JSZip();

@@ -255,11 +255,20 @@ export function ClaimClient({
       const freshCaptchaToken =
         (await captchaRef.current?.execute()) ?? captchaToken;
 
+      // `resolvePlatformTermsAcceptance` rejects any /sign-up/email call that
+      // doesn't carry this flag — the post-hoc stamp in POST /api/claim is no
+      // longer enough on its own. `requireAcceptance()` above guarantees the
+      // box really was checked. Spread from a Record because the client params
+      // type doesn't declare this key and a literal property would fail the
+      // excess-property check; same technique as store-customization-step.tsx.
+      const termsSignal: Record<string, unknown> = { termsAccepted: true };
+
       const { error: signUpError } = await authClient.signUp.email({
         // Email comes from the server-passed invite, NOT a user-editable field.
         email,
         password,
         name: name.trim(),
+        ...termsSignal,
         // Land the verification link back on THIS claim page (verified +
         // auto-signed-in) so the mount check drops into the ready-to-claim state.
         callbackURL,

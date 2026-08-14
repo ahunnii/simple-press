@@ -1,4 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
+import type { PinkFactRow } from "../shared/pink-fact-rows";
+import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
+import type { PinkFeaturedProduct } from "./pink-collection-section";
 import type { TemplateListRow } from "~/lib/template-fields";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolvePopup } from "~/lib/site-banner/resolve";
@@ -8,9 +11,7 @@ import { api, HydrateClient } from "~/trpc/server";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import type { PinkFactRow } from "../shared/pink-fact-rows";
-import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
-import { PinkCollectionSection, type PinkFeaturedProduct } from "./pink-collection-section";
+import { PinkCollectionSection } from "./pink-collection-section";
 import { PinkEventsSection } from "./pink-events-section";
 import { PinkHeroSection } from "./pink-hero-section";
 import { rowStr } from "./pink-homepage-list-utils";
@@ -148,13 +149,21 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
   // any values an owner saved for either before their respective redesign
   // landed are silently ignored, same precedent as other removed keys.
 
-  const promiseItemsRaw = parseTemplateListRows(customFields?.["pink.homepage.promises-items"]);
-  const promiseItems = promiseItemsRaw.length > 0 ? promiseItemsRaw : DEFAULT_PROMISES;
+  const promiseItemsRaw = parseTemplateListRows(
+    customFields?.["pink.homepage.promises-items"],
+  );
+  const promiseItems =
+    promiseItemsRaw.length > 0 ? promiseItemsRaw : DEFAULT_PROMISES;
 
-  const eventsMosaicRaw = parseTemplateListRows(customFields?.["pink.homepage.events-mosaic"]);
-  const eventsMosaic = eventsMosaicRaw.length > 0 ? eventsMosaicRaw : DEFAULT_EVENTS_MOSAIC;
+  const eventsMosaicRaw = parseTemplateListRows(
+    customFields?.["pink.homepage.events-mosaic"],
+  );
+  const eventsMosaic =
+    eventsMosaicRaw.length > 0 ? eventsMosaicRaw : DEFAULT_EVENTS_MOSAIC;
 
-  const eventsFactsRaw = parseTemplateListRows(customFields?.["pink.homepage.events-facts"]);
+  const eventsFactsRaw = parseTemplateListRows(
+    customFields?.["pink.homepage.events-facts"],
+  );
   const eventsFacts: PinkFactRow[] = (
     eventsFactsRaw.length > 0
       ? eventsFactsRaw.map((row) => ({
@@ -224,7 +233,13 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
 
   const collectionChips: PinkFilterChipItem[] = [
     { id: "all", label: "All pieces", href: "/shop" },
-    ...collections.slice(0, 4).map((c) => ({ id: c.id, label: c.name, href: `/collections/${c.slug}` })),
+    ...collections
+      .slice(0, 4)
+      .map((c) => ({
+        id: c.id,
+        label: c.name,
+        href: `/collections/${c.slug}`,
+      })),
   ];
 
   return (
@@ -240,7 +255,9 @@ export async function PinkHomepage({ business }: DefaultHomepageTemplateProps) {
           ctaPrimaryLabel={f["pink.homepage.hero-cta-primary-label"] ?? ""}
           ctaPrimaryLink={f["pink.homepage.hero-cta-primary-link"] ?? "/shop"}
           ctaSecondaryLabel={f["pink.homepage.hero-cta-secondary-label"] ?? ""}
-          ctaSecondaryLink={f["pink.homepage.hero-cta-secondary-link"] ?? "#make-and-takes"}
+          ctaSecondaryLink={
+            f["pink.homepage.hero-cta-secondary-link"] ?? "#make-and-takes"
+          }
           image={f["pink.homepage.hero-image"] ?? ""}
           wordmarkAccent={f["pink.homepage.hero-wordmark-accent"] ?? ""}
           wordmarkInk={f["pink.homepage.hero-wordmark-ink"] ?? ""}

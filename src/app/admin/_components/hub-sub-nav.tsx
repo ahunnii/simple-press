@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { NavHub } from "~/app/admin/_lib/admin-nav";
-import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { api } from "~/trpc/react";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
 
 const HUB_LABELS: Record<NavHub, string> = {
   settings: "Settings",

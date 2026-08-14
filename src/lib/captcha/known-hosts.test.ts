@@ -13,8 +13,8 @@
  *
  * NEXT_PUBLIC_PLATFORM_DOMAIN is "simplepress.test" (tests/helpers/test-env.ts).
  */
-import { BusinessDomainStatus } from "generated/prisma";
 import type { Mock } from "vitest";
+import { BusinessDomainStatus } from "generated/prisma";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("~/server/db", () => ({
@@ -47,30 +47,30 @@ describe("isKnownCaptchaHost — platform aliases (no Business row)", () => {
   });
 
   it("accepts mystore.<platform-domain> (middleware treats it as the platform domain)", async () => {
-    await expect(
-      isKnownCaptchaHost("mystore.simplepress.test"),
-    ).resolves.toBe(true);
+    await expect(isKnownCaptchaHost("mystore.simplepress.test")).resolves.toBe(
+      true,
+    );
     expect(findFirst).not.toHaveBeenCalled();
   });
 
   it("accepts platform.<platform-domain> (the platform-admin subdomain)", async () => {
-    await expect(
-      isKnownCaptchaHost("platform.simplepress.test"),
-    ).resolves.toBe(true);
+    await expect(isKnownCaptchaHost("platform.simplepress.test")).resolves.toBe(
+      true,
+    );
     expect(findFirst).not.toHaveBeenCalled();
   });
 
   it("accepts preview.<platform-domain> (preview deployment alias)", async () => {
-    await expect(
-      isKnownCaptchaHost("preview.simplepress.test"),
-    ).resolves.toBe(true);
+    await expect(isKnownCaptchaHost("preview.simplepress.test")).resolves.toBe(
+      true,
+    );
     expect(findFirst).not.toHaveBeenCalled();
   });
 
   it("is case-insensitive and port-tolerant for the platform apex", async () => {
-    await expect(
-      isKnownCaptchaHost("SimplePress.Test:3000"),
-    ).resolves.toBe(true);
+    await expect(isKnownCaptchaHost("SimplePress.Test:3000")).resolves.toBe(
+      true,
+    );
     expect(findFirst).not.toHaveBeenCalled();
   });
 });
@@ -149,9 +149,7 @@ describe("isKnownCaptchaHost — custom domain", () => {
     // fails loudly here.
     findFirst.mockResolvedValueOnce(null);
 
-    await expect(isKnownCaptchaHost("bloom.florist.com")).resolves.toBe(
-      false,
-    );
+    await expect(isKnownCaptchaHost("bloom.florist.com")).resolves.toBe(false);
 
     expect(findFirst).toHaveBeenCalledTimes(1);
     const call = findFirst.mock.calls[0]?.[0];
@@ -191,9 +189,7 @@ describe("isKnownCaptchaHost — dev-only localhost", () => {
   it("accepts a tenant subdomain of localhost when NODE_ENV=development", async () => {
     vi.stubEnv("NODE_ENV", "development");
 
-    await expect(isKnownCaptchaHost("demo.localhost:3000")).resolves.toBe(
-      true,
-    );
+    await expect(isKnownCaptchaHost("demo.localhost:3000")).resolves.toBe(true);
     expect(findFirst).not.toHaveBeenCalled();
   });
 

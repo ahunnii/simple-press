@@ -104,7 +104,7 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="text-muted-foreground h-4 w-4" />
               Audience
             </CardTitle>
           </CardHeader>
@@ -114,7 +114,7 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
                 <Badge variant="secondary" className="text-sm tabular-nums">
                   {recipientCount.toLocaleString()}
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {recipientCount === 1
                     ? "customer opted in to marketing emails"
                     : "customers opted in to marketing emails"}
@@ -123,7 +123,7 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
               <ExportRecipientsButton disabled={recipientCount === 0} />
             </div>
             {recipientCount === 0 && (
-              <p className="mt-3 text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-3 text-sm">
                 No customers have opted in yet. Customers can enable marketing
                 emails from their account preferences page.
               </p>
@@ -135,7 +135,7 @@ export function BroadcastComposer({ recipientCount }: BroadcastComposerProps) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base font-medium">
-              <Mail className="h-4 w-4 text-muted-foreground" />
+              <Mail className="text-muted-foreground h-4 w-4" />
               Compose
             </CardTitle>
           </CardHeader>

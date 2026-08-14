@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-
 import { describe, expect, it } from "vitest";
 
 import { parseFeedXml } from "./feed";
@@ -46,9 +45,7 @@ describe("parseFeedXml — real captured fixtures", () => {
     const entries = parseFeedXml(playlistXml);
     const entry = entries.find((e) => e.youtubeId === "vN6uK5Qm23c");
     expect(entry).toBeDefined();
-    expect(entry!.title).toBe(
-      "Serverless & AI/ML - Pittsburgh ML Summit ‘19",
-    );
+    expect(entry!.title).toBe("Serverless & AI/ML - Pittsburgh ML Summit ‘19");
     // Guard against the raw entity ever leaking through unescaped.
     expect(entry!.title).not.toContain("&amp;");
     expect(entry!.thumbnailUrl).toBe(
@@ -62,11 +59,10 @@ describe("parseFeedXml — real captured fixtures", () => {
     // Verified fact: the feed-root <yt:channelId> is the UC-prefix-stripped
     // form ("_x5XG1OV2P6uZZ5FSM9Ttw"), not a valid channel/author name. Every
     // parsed entry's channelTitle must be the human-readable author name.
-    expect(entries.every((e) => e.channelTitle === "Google for Developers"))
-      .toBe(true);
-    expect(entries.some((e) => e.channelTitle?.includes("_x5XG1"))).toBe(
-      false,
-    );
+    expect(
+      entries.every((e) => e.channelTitle === "Google for Developers"),
+    ).toBe(true);
+    expect(entries.some((e) => e.channelTitle?.includes("_x5XG1"))).toBe(false);
   });
 });
 

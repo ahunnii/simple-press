@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 import {
-  POLICY_LAST_UPDATED,
   formatPolicyDate,
+  POLICY_LAST_UPDATED,
 } from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | SimplePress",
-  description: "How SimplePress collects, uses, and protects your personal information.",
+  description:
+    "How SimplePress collects, uses, and protects your personal information.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/privacy-policy`,
   },

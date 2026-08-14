@@ -383,8 +383,7 @@ export const pinkGlobalFieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.page-facts",
     title: "Custom Page Facts",
-    description:
-      "Label/value rows in the dark header of your custom CMS pages",
+    description: "Label/value rows in the dark header of your custom CMS pages",
     icon: "📋",
     columns: 1,
   } satisfies TemplateFieldGroup,
@@ -438,7 +437,8 @@ export const pinkGlobalSections: TemplateSection[] = [
     id: "global.footer-social",
     page: "global",
     title: "Footer Social",
-    description: "Social icons shown in the footer (configured in Admin → Branding)",
+    description:
+      "Social icons shown in the footer (configured in Admin → Branding)",
     groupIds: ["global.footer-social"],
     order: 3,
     hideable: true,

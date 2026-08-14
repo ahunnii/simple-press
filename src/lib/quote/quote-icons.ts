@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Armchair,
   ArrowUpDown,
   Bed,
   BedDouble,
@@ -25,7 +26,6 @@ import {
   User,
   Users,
   Warehouse,
-  Armchair,
 } from "lucide-react";
 
 /** Curated icons available in quote calculator choice cards. */

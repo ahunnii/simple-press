@@ -127,7 +127,7 @@ const homepageHeroData: TemplateField[] = [
     key: "pink.homepage.hero-wordmark-accent",
     label: "Wordmark — First Half",
     description:
-      "The first half of the giant two-part wordmark that anchors the hero. While both halves are left at their defaults (\"PINK\" / \"ART\") the hero shows the PinkArt logo's actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the accent color.",
+      'The first half of the giant two-part wordmark that anchors the hero. While both halves are left at their defaults ("PINK" / "ART") the hero shows the PinkArt logo\'s actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the accent color.',
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -138,7 +138,7 @@ const homepageHeroData: TemplateField[] = [
     key: "pink.homepage.hero-wordmark-ink",
     label: "Wordmark — Second Half",
     description:
-      "The second half of the wordmark. While both halves are left at their defaults (\"PINK\" / \"ART\") the hero shows the PinkArt logo's actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the ink color.",
+      'The second half of the wordmark. While both halves are left at their defaults ("PINK" / "ART") the hero shows the PinkArt logo\'s actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the ink color.',
     type: "text",
     page: "homepage",
     group: "homepage.hero",
@@ -298,7 +298,12 @@ const homepagePromisesData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 6,
     itemSchema: [
-      { key: "title", label: "Title", type: "text", placeholder: "One of a kind" },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "One of a kind",
+      },
       {
         key: "body",
         label: "Body",
@@ -326,7 +331,8 @@ const homepageCollectionData: TemplateField[] = [
   {
     key: "pink.homepage.collection-note",
     label: "Collection Note",
-    description: "Short right-aligned line beside the heading. Leave blank to hide.",
+    description:
+      "Short right-aligned line beside the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.collection",
@@ -519,7 +525,8 @@ const homepageEventsData: TemplateField[] = [
         key: "value",
         label: "Value",
         type: "text",
-        placeholder: "Your space — school, church, library, workplace or back yard",
+        placeholder:
+          "Your space — school, church, library, workplace or back yard",
       },
     ],
     defaultValue: "",
@@ -645,7 +652,8 @@ const homepageStoryData: TemplateField[] = [
   {
     key: "pink.homepage.story-image",
     label: "Story Image",
-    description: "Portrait image beside the pull-quote — a studio or working photo.",
+    description:
+      "Portrait image beside the pull-quote — a studio or working photo.",
     type: "image",
     page: "homepage",
     group: "homepage.story",

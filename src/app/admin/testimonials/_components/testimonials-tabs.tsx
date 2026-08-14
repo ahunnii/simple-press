@@ -31,10 +31,7 @@ export function TestimonialsTabs({
   inviteCount,
 }: Props) {
   return (
-    <nav
-      aria-label="Testimonial views"
-      className="border-border mb-6 border-b"
-    >
+    <nav aria-label="Testimonial views" className="border-border mb-6 border-b">
       <div className="-mb-px flex">
         <Link
           href="/admin/testimonials"

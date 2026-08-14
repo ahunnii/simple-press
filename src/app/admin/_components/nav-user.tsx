@@ -1,8 +1,7 @@
 "use client";
 
-import { UserButton } from "~/components/auth/user/user-button";
-
 import { SidebarMenu, SidebarMenuItem } from "~/components/ui/sidebar";
+import { UserButton } from "~/components/auth/user/user-button";
 
 export function NavUser() {
   return (

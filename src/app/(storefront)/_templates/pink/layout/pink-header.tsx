@@ -4,22 +4,22 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
+import { isActiveNavLink } from "~/lib/nav-utils";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveThemeVars } from "~/lib/template-themes";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
-import { resolveThemeVars } from "~/lib/template-themes";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
-import { isActiveNavLink } from "~/lib/nav-utils";
 import { PinkMobileMenu } from "./pink-mobile-menu";
 
 export type PinkNavLink = { href: string; label: string; fieldKey?: string };
@@ -47,7 +47,10 @@ const FIELD_KEYS = [
  */
 function splitAccentWordmark(name: string, accentWord: string) {
   const trimmedAccent = accentWord.trim();
-  if (!trimmedAccent || !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())) {
+  if (
+    !trimmedAccent ||
+    !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())
+  ) {
     return { matches: false as const };
   }
   const splitIndex = name.length - trimmedAccent.length;
@@ -58,9 +61,12 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
+export function PinkHeader({
+  business,
+  initialSession,
+}: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
-  const { data: session, isPending } = useHydratedSession();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const { isEnabled } = useStorefrontFlags();
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
@@ -91,9 +97,10 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
   const f = resolveFields(customFields, FIELD_KEYS);
   // The cart drawer portals outside the layout wrapper that carries these, so
   // it has to be handed them directly or theme presets skip it.
-  const themeVars = resolveThemeVars("pink", customFields) as
-    | React.CSSProperties
-    | null;
+  const themeVars = resolveThemeVars(
+    "pink",
+    customFields,
+  ) as React.CSSProperties | null;
 
   const accentWord = f["pink.global.accent-word"] ?? "";
   const wordmark = splitAccentWordmark(businessName, accentWord);
@@ -211,7 +218,9 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
               {wordmark.matches ? (
                 <>
                   {wordmark.prefix}
-                  <span style={{ color: "var(--pink-rose)" }}>{wordmark.tail}</span>
+                  <span style={{ color: "var(--pink-rose)" }}>
+                    {wordmark.tail}
+                  </span>
                 </>
               ) : (
                 businessName
@@ -246,11 +255,14 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
             {isEnabled("customerAccounts") && (
               <div className="hidden lg:block">
                 {isPending ? (
-                  <div className="h-8 w-8 animate-pulse rounded-full" style={{ background: "var(--pink-line)" }} />
+                  <div
+                    className="h-8 w-8 animate-pulse rounded-full"
+                    style={{ background: "var(--pink-line)" }}
+                  />
                 ) : session?.user ? (
                   <UserButton
                     size="icon"
-                    className="rounded-full w-auto h-auto p-0"
+                    className="h-auto w-auto rounded-full p-0"
                     avatarClassName="size-8 ring-1 ring-[var(--pink-rose)] ring-offset-1 ring-offset-[var(--pink-paper)]"
                     links={[
                       {
@@ -364,7 +376,9 @@ export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
               }}
             >
               <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-              <span {...fieldAttr("pink.global.basket-label")}>{basketLabel}</span>
+              <span {...fieldAttr("pink.global.basket-label")}>
+                {basketLabel}
+              </span>
               {/* `opacity: 0.7` composited white onto `--pink-rose` at 4.05:1,
                   under AA. 0.85 measures 5.29:1 and keeps the de-emphasis
                   (full white is 6.7:1). `aria-hidden` because the button's

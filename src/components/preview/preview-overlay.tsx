@@ -394,7 +394,9 @@ export function PreviewOverlay() {
             padding: "8px 14px",
             borderRadius: "9999px",
             boxShadow: "0 4px 14px rgba(0, 0, 0, 0.3)",
-            transition: prefersReducedRef.current ? "none" : "opacity 0.15s ease",
+            transition: prefersReducedRef.current
+              ? "none"
+              : "opacity 0.15s ease",
           }}
         >
           {hint}

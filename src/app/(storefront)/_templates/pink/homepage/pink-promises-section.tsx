@@ -32,7 +32,11 @@ export function PinkPromisesSection({ items }: Props) {
         </h2>
         <PinkHairlineGrid columnsClassName="grid-cols-1 md:grid-cols-3">
           {items.map((item, i) => (
-            <PinkReveal key={item._id ?? i} index={i} className="flex flex-col gap-4 p-8 md:p-9">
+            <PinkReveal
+              key={item._id ?? i}
+              index={i}
+              className="flex flex-col gap-4 p-8 md:p-9"
+            >
               <PinkRule width={38} />
               <h3
                 className="pink-display text-[19px] font-semibold tracking-[-0.01em]"
@@ -40,7 +44,10 @@ export function PinkPromisesSection({ items }: Props) {
               >
                 {rowStr(item, "title")}
               </h3>
-              <p className="text-[15px] leading-[1.7]" style={{ color: "var(--pink-body)" }}>
+              <p
+                className="text-[15px] leading-[1.7]"
+                style={{ color: "var(--pink-body)" }}
+              >
                 {rowStr(item, "body")}
               </p>
             </PinkReveal>

@@ -2,6 +2,7 @@ import { APIError } from "better-auth";
 import { describe, expect, it } from "vitest";
 
 import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
+
 import { resolvePlatformTermsAcceptance } from "./terms-acceptance";
 
 describe("resolvePlatformTermsAcceptance", () => {

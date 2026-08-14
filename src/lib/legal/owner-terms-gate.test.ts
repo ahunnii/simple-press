@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  MERCHANT_TERMS_VERSION,
-  PLATFORM_TERMS_VERSION,
-} from "~/lib/legal/policy-versions";
-import {
   resolveOwnerTermsWrite,
   shouldPromptOwnerTerms,
 } from "~/lib/legal/owner-terms-gate";
+import {
+  MERCHANT_TERMS_VERSION,
+  PLATFORM_TERMS_VERSION,
+} from "~/lib/legal/policy-versions";
 
 const NOW = new Date("2026-08-11T12:00:00.000Z");
 const EARLIER = new Date("2026-01-02T03:04:05.000Z");

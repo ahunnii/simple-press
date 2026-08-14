@@ -1,6 +1,5 @@
-import { resolveVariantPrice } from "~/lib/variant-price";
-
 import type { CartLineItem, ProductMap, VariantMap } from "./types";
+import { resolveVariantPrice } from "~/lib/variant-price";
 
 /**
  * Compute the cart subtotal in cents from *server-fetched* prices only — never

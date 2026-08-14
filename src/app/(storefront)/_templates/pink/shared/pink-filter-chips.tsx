@@ -54,11 +54,15 @@ export function PinkFilterChips({
       role="group"
       aria-label={ariaLabel}
       className={`flex flex-wrap gap-[1px]${className ? ` ${className}` : ""}`}
-      style={{ background: "var(--pink-line)", border: "1px solid var(--pink-line)" }}
+      style={{
+        background: "var(--pink-line)",
+        border: "1px solid var(--pink-line)",
+      }}
     >
       {items.map((item) => {
         const active = item.id === activeId;
-        const label = item.count != null ? `${item.label} (${item.count})` : item.label;
+        const label =
+          item.count != null ? `${item.label} (${item.count})` : item.label;
         const style: React.CSSProperties = {
           background: active ? "var(--pink-ink)" : "var(--pink-paper)",
           color: active ? "var(--pink-paper)" : "var(--pink-muted)",

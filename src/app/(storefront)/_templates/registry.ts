@@ -194,16 +194,6 @@ import { NoiseGenericPage } from "./noise/noise-generic-page";
 import { NoiseProductPage } from "./noise/products/noise-product-page";
 import { NoiseShopPage } from "./noise/shop/noise-shop-page";
 import { NoiseTestimonialsPage } from "./noise/testimonials/noise-testimonials-page";
-// ---------------------------------------------------------------------------
-// PinkArt
-// ---------------------------------------------------------------------------
-import { RelocationAboutPage } from "./relocation/about/relocation-about-page";
-import { RelocationContactPage } from "./relocation/contact/relocation-contact-page";
-import { RelocationFaqPage } from "./relocation/faq/relocation-faq-page";
-import { RelocationGenericPage } from "./relocation/generic/relocation-generic-page";
-import { RelocationLayout } from "./relocation/layout/relocation-layout";
-import { RelocationServicesPage } from "./relocation/services/relocation-services-page";
-import { RelocationTestimonialsPage } from "./relocation/testimonials/relocation-testimonials-page";
 import { PinkAboutPage } from "./pink/about/pink-about-page";
 import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
 import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
@@ -254,6 +244,16 @@ import { PollenProductPage } from "./pollen/products/pollen-product-page";
 import { PollenServicesPage } from "./pollen/services/pollen-services-page";
 import { PollenShopPage } from "./pollen/shop/pollen-shop-page";
 import { PollenTestimonialsPage } from "./pollen/testimonials/pollen-testimonials-page";
+// ---------------------------------------------------------------------------
+// PinkArt
+// ---------------------------------------------------------------------------
+import { RelocationAboutPage } from "./relocation/about/relocation-about-page";
+import { RelocationContactPage } from "./relocation/contact/relocation-contact-page";
+import { RelocationFaqPage } from "./relocation/faq/relocation-faq-page";
+import { RelocationGenericPage } from "./relocation/generic/relocation-generic-page";
+import { RelocationLayout } from "./relocation/layout/relocation-layout";
+import { RelocationServicesPage } from "./relocation/services/relocation-services-page";
+import { RelocationTestimonialsPage } from "./relocation/testimonials/relocation-testimonials-page";
 // ---------------------------------------------------------------------------
 // Sledge
 // ---------------------------------------------------------------------------

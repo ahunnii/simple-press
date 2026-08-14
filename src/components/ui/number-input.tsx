@@ -20,12 +20,7 @@ export function NumberInput({
         onChange(isNaN(number) ? null : number);
       }}
       onKeyDown={(e) => {
-        if (
-          e.key === "-" ||
-          e.key === "+" ||
-          e.key === "e" ||
-          e.key === "E"
-        ) {
+        if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") {
           e.preventDefault();
         }
         onKeyDown?.(e);

@@ -30,11 +30,11 @@ import type {
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
-  TableHead,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "~/components/ui/table";
 
 // ─── Stat cards ───────────────────────────────────────────────────────────────

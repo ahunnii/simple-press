@@ -188,7 +188,12 @@ export type EventSortValue = (typeof EVENT_SORT_VALUES)[number];
  * event whose cutoff equals `now` exactly is still upcoming.
  */
 export function isEventPast(
-  e: { startAt: Date; endAt: Date | null; allDay: boolean; isArchived: boolean },
+  e: {
+    startAt: Date;
+    endAt: Date | null;
+    allDay: boolean;
+    isArchived: boolean;
+  },
   now: Date,
 ): boolean {
   return e.isArchived || eventCutoff(e).getTime() < now.getTime();
@@ -203,7 +208,12 @@ export function isEventPast(
  * tab's exclusion of archived rows (`events-client.tsx`'s mirror test case).
  */
 export function getEventWhen(
-  e: { startAt: Date; endAt: Date | null; allDay: boolean; isArchived: boolean },
+  e: {
+    startAt: Date;
+    endAt: Date | null;
+    allDay: boolean;
+    isArchived: boolean;
+  },
   now: Date,
 ): EventWhen {
   return isEventPast(e, now) ? "past" : "upcoming";

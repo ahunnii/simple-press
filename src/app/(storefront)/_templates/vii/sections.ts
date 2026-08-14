@@ -30,7 +30,8 @@ export const viiSections: Record<string, TemplateSection[]> = {
       id: "homepage.hero",
       page: "homepage",
       title: "Hero",
-      description: "Full-viewport hero with background image/video and booking CTA",
+      description:
+        "Full-viewport hero with background image/video and booking CTA",
       groupIds: ["homepage.hero"],
       order: 0,
       hideable: false,
@@ -114,7 +115,8 @@ export const viiSections: Record<string, TemplateSection[]> = {
       id: "homepage.detroit",
       page: "homepage",
       title: "Detroit / Location",
-      description: "Brand-identity section pairing a location photo with roots copy",
+      description:
+        "Brand-identity section pairing a location photo with roots copy",
       groupIds: ["homepage.detroit"],
       order: 9,
       hideable: false,
@@ -152,7 +154,8 @@ export const viiSections: Record<string, TemplateSection[]> = {
       id: "about.steps",
       page: "about",
       title: "Facial Steps",
-      description: "Heading, intro, and alternating image-and-text ritual steps",
+      description:
+        "Heading, intro, and alternating image-and-text ritual steps",
       groupIds: ["about.steps"],
       order: 2,
       hideable: false,

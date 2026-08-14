@@ -7,7 +7,6 @@ import { ChevronDown, Star } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { OwnerReviewFormData } from "~/lib/validators/reviews";
 // Type-only import from the client that renders this dialog — safe despite
 // `reviews-client.tsx` importing this component by value: `import type` is
 // erased before module evaluation, so there is no runtime cycle, only a
@@ -16,11 +15,11 @@ import type { OwnerReviewFormData } from "~/lib/validators/reviews";
 // shape the whole Reviews table already uses, instead of a second
 // hand-copied structural type that could drift from it.
 import type { ReviewRow } from "./reviews-client";
+import type { OwnerReviewFormData } from "~/lib/validators/reviews";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { cn } from "~/lib/utils";
 import { ownerReviewFormSchema } from "~/lib/validators/reviews";
 import { api } from "~/trpc/react";
-import { EntityFormDialog } from "~/components/admin/entity-form-dialog";
 import {
   Collapsible,
   CollapsibleContent,
@@ -36,6 +35,7 @@ import { InputFormField } from "~/components/inputs/input-form-field";
 import { SelectFormField } from "~/components/inputs/select-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { EntityFormDialog } from "~/components/admin/entity-form-dialog";
 
 type Props = {
   review?: ReviewRow; // If provided → edit mode

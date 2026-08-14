@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
-import { createBusiness, createOwnerUser, createPage } from "../helpers/factories";
+import {
+  createBusiness,
+  createOwnerUser,
+  createPage,
+} from "../helpers/factories";
 
 // Procedures resolve the tenant from the request host via `next/headers`. Mock it
 // with a mutable host so we can act as different tenants in one process (same
@@ -27,9 +31,7 @@ vi.mock("~/lib/preview/preview-context", () => ({
 
 const draftDoc = (label: string) => ({
   type: "doc",
-  content: [
-    { type: "paragraph", content: [{ type: "text", text: label }] },
-  ],
+  content: [{ type: "paragraph", content: [{ type: "text", text: label }] }],
 });
 
 describe("editor blog drafts", () => {
@@ -82,9 +84,7 @@ describe("editor blog drafts", () => {
       expect(ids).not.toContain(customPage.id);
 
       expect(result.find((p) => p.id === page.id)?.type).toBe("page");
-      expect(result.find((p) => p.id === publishedBlog.id)?.type).toBe(
-        "blog",
-      );
+      expect(result.find((p) => p.id === publishedBlog.id)?.type).toBe("blog");
       const draftRow = result.find((p) => p.id === unpublishedBlog.id);
       expect(draftRow?.type).toBe("blog");
       expect(draftRow?.published).toBe(false);
@@ -103,6 +103,35 @@ describe("editor blog drafts", () => {
       const result = await caller.content.getEditorPages();
       expect(result.map((p) => p.id)).toEqual([page.id]);
       expect(result.every((p) => p.type === "page")).toBe(true);
+    });
+
+    it("normalizes a `{}` previewDraft residue row to hasDraft:false and draft:null", async () => {
+      // Regression for the `{}`-not-DbNull dev-serialization quirk (see
+      // `isPreviewDraft`): before the fix, a `{}` residue row reported
+      // `hasDraft: true` forever and `draft` as `{}`, which crashed the
+      // editor's CMS page panel (`draft ?? live` resolved to `{}`).
+      const business = await createBusiness({ subdomain: "editor-residue" });
+      const owner = await createOwnerUser(business.id);
+
+      const page = await createPage(business.id, {
+        type: "page",
+        title: "About",
+      });
+      // Write the residue directly — this is not something any mutation
+      // produces on purpose, it's what a foreign Prisma sentinel landed on
+      // disk in production (see the docblock on `isPreviewDraft`).
+      await db.page.update({
+        where: { id: page.id },
+        data: { previewDraft: {} },
+      });
+
+      reqHost.value = "editor-residue.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      const result = await caller.content.getEditorPages();
+      const row = result.find((p) => p.id === page.id);
+      expect(row?.hasDraft).toBe(false);
+      expect(row?.draft).toBeNull();
     });
   });
 
@@ -228,6 +257,41 @@ describe("editor blog drafts", () => {
       expect(updatedBlog?.previewDraft).toBeNull();
       expect(updatedBlog?.previewDraftUpdatedAt).toBeNull();
     });
+
+    it("does not promote a `{}` previewDraft residue row over live content, but clears it", async () => {
+      // Regression: `{}` fails `cmsPageDraftValueSchema` (no `title`), so the
+      // OLD `{ not: Prisma.DbNull }` filter mattered only for whether the row
+      // was even considered — it silently failed to match `{}` at all, so the
+      // residue was never healed by a Publish either.
+      const business = await createBusiness({ subdomain: "publish-residue" });
+      const owner = await createOwnerUser(business.id);
+
+      const page = await createPage(business.id, {
+        type: "page",
+        title: "Live Title",
+        excerpt: "Live excerpt",
+      });
+      await db.page.update({
+        where: { id: page.id },
+        data: { previewDraft: {} },
+      });
+
+      reqHost.value = "publish-residue.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      await caller.content.updateSiteContent({
+        customFields: {},
+        clearPreviewDraft: true,
+        publishCmsPageDrafts: true,
+      });
+
+      const row = await db.page.findUnique({ where: { id: page.id } });
+      // Live content is untouched — `{}` was never a real draft.
+      expect(row?.title).toBe("Live Title");
+      expect(row?.excerpt).toBe("Live excerpt");
+      // But the residue is healed in the same pass.
+      expect(row?.previewDraft).toBeNull();
+    });
   });
 
   describe("discardEditorDrafts", () => {
@@ -258,6 +322,33 @@ describe("editor blog drafts", () => {
       expect(row?.previewDraftUpdatedAt).toBeNull();
       expect(row?.title).toBe("Live Title");
       expect(row?.excerpt).toBe("Live excerpt");
+    });
+
+    it("heals a `{}` previewDraft residue row (not just a real draft)", async () => {
+      // Regression: the old `{ not: Prisma.DbNull }` filter silently failed
+      // to match `{}` (see `isPreviewDraft`), so a residue row could never be
+      // cleared and the editor's "Unpublished changes" pill stayed lit
+      // forever with no way to dismiss it.
+      const business = await createBusiness({ subdomain: "discard-residue" });
+      const owner = await createOwnerUser(business.id);
+
+      const page = await createPage(business.id, {
+        type: "page",
+        title: "Live Title",
+      });
+      await db.page.update({
+        where: { id: page.id },
+        data: { previewDraft: {} },
+      });
+
+      reqHost.value = "discard-residue.simplepress.test";
+      const caller = createTestCaller({ userId: owner.id });
+
+      await caller.content.discardEditorDrafts();
+
+      const row = await db.page.findUnique({ where: { id: page.id } });
+      expect(row?.previewDraft).toBeNull();
+      expect(row?.title).toBe("Live Title");
     });
   });
 

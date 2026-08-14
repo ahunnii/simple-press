@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import type { RouterOutputs } from "~/trpc/react";
 import type { TemplateField } from "~/lib/template-fields";
+import type { RouterOutputs } from "~/trpc/react";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveTemplateFields, TEMPLATE_FIELDS } from "~/lib/template-fields";
@@ -157,7 +157,10 @@ export function DefaultAuthShell({
   // read from the DRAFT — `business.simplifiedGet` swaps
   // `customFields ← previewCustomFields` under the preview guard.
   const { authImageUrl, logoSizeWidth, logoSizeHeight, declaresAuthFields } =
-    resolveAuthFields(business?.templateId, business?.siteContent?.customFields);
+    resolveAuthFields(
+      business?.templateId,
+      business?.siteContent?.customFields,
+    );
 
   // Several templates also declare a `global.image-overlay-color` field; the
   // overlay it drives is still commented out below. To wire it up, add

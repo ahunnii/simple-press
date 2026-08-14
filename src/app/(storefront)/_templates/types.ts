@@ -1,3 +1,4 @@
+import type { Session } from "~/server/better-auth/config";
 import type { RouterOutputs } from "~/trpc/react";
 
 export type DefaultHomepageTemplateProps = {
@@ -11,6 +12,15 @@ export type DefaultLayoutTemplateProps = {
 
 export type DefaultHeaderTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
+  /**
+   * The session as the layout's server-side `getSession()` saw it — an SSR
+   * seed, never live state. Headers hand it to `useHydratedSession(seed)`,
+   * which renders it on the server and on the first client render (so the
+   * signed-in header is correct in the initial HTML) and then defers to the
+   * client store once that settles. Optional: a layout that doesn't fetch a
+   * session omits it and its header falls back to the unseeded hook.
+   */
+  initialSession?: Session | null;
 };
 
 export type DefaultFooterTemplateProps = {

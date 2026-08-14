@@ -12,9 +12,9 @@ import { z } from "zod";
 
 import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
 import type { RouterOutputs } from "~/trpc/react";
-import { youtubeWatchUrl } from "~/lib/youtube/parse";
 import { cn } from "~/lib/utils";
 import { videoUpdateSchema } from "~/lib/validators/videos";
+import { youtubeWatchUrl } from "~/lib/youtube/parse";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import {
@@ -370,9 +370,9 @@ export function VideoForm({ video }: Props) {
                 <CardHeader>
                   <CardTitle>From YouTube</CardTitle>
                   <CardDescription>
-                    Synced automatically, roughly every 30 minutes.
-                    You can&apos;t edit these directly — use the overrides on
-                    the right to change what shoppers see.
+                    Synced automatically, roughly every 30 minutes. You
+                    can&apos;t edit these directly — use the overrides on the
+                    right to change what shoppers see.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -422,8 +422,8 @@ export function VideoForm({ video }: Props) {
                   <CardTitle>Your overrides</CardTitle>
                   <CardDescription>
                     Anything you set here replaces YouTube&apos;s version on
-                    your site and survives future syncs. Leave a field blank
-                    to keep using YouTube&apos;s.
+                    your site and survives future syncs. Leave a field blank to
+                    keep using YouTube&apos;s.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

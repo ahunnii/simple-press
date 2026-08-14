@@ -6,8 +6,8 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 
 import type { DefaultBlogPageTemplateProps } from "../../types";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { blobIncludesQuery, buildBlogSearchBlob } from "~/lib/blog-search";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { PinkBadge } from "../shared/pink-badge";
 import { PinkEmptyState } from "../shared/pink-empty-state";
@@ -116,7 +116,10 @@ export function PinkBlogListing({
         >
           <PinkReveal
             className="mx-auto grid max-w-[1400px] md:grid-cols-[1.1fr_.9fr]"
-            style={{ border: "1px solid var(--pink-line)", background: "var(--pink-white)" }}
+            style={{
+              border: "1px solid var(--pink-line)",
+              background: "var(--pink-white)",
+            }}
           >
             <Link
               href={`/blog/${featured.slug}`}
@@ -138,14 +141,23 @@ export function PinkBlogListing({
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
-                <PinkImageFallback surface="paper" className="absolute inset-0" />
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
               )}
-              <span className="absolute top-3 left-3" {...fieldAttr("pink.blog.featured-badge")}>
+              <span
+                className="absolute top-3 left-3"
+                {...fieldAttr("pink.blog.featured-badge")}
+              >
                 <PinkBadge>{featuredBadge}</PinkBadge>
               </span>
             </Link>
             <div className="flex flex-col justify-center gap-4 p-8 md:p-10">
-              <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+              <p
+                className="text-[13px]"
+                style={{ color: "var(--pink-subtle)" }}
+              >
                 <span>{journalLabel}</span>
                 <span aria-hidden="true"> · </span>
                 <span>{formatBlogDate(featured.createdAt)}</span>
@@ -197,7 +209,9 @@ export function PinkBlogListing({
                 aria-hidden="true"
                 className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                 style={{
-                  color: searchFocused ? "var(--pink-rose)" : "var(--pink-subtle)",
+                  color: searchFocused
+                    ? "var(--pink-rose)"
+                    : "var(--pink-subtle)",
                 }}
               />
               <input
@@ -228,7 +242,11 @@ export function PinkBlogListing({
           >
             <h2
               className="pink-display"
-              style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
+              style={{
+                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                fontWeight: 600,
+                letterSpacing: "-0.025em",
+              }}
             >
               {isSearching
                 ? `${searchResults.length} ${searchResults.length === 1 ? "result" : "results"}`
@@ -254,7 +272,10 @@ export function PinkBlogListing({
             isSearching ? (
               <div
                 className="flex flex-col items-center gap-2 p-12 text-center"
-                style={{ background: "var(--pink-panel)", border: "1px solid var(--pink-line)" }}
+                style={{
+                  background: "var(--pink-panel)",
+                  border: "1px solid var(--pink-line)",
+                }}
               >
                 <p
                   className="pink-display text-[18px] font-semibold"
@@ -262,7 +283,10 @@ export function PinkBlogListing({
                 >
                   {searchEmptyMessage}
                 </p>
-                <p className="text-[14px]" style={{ color: "var(--pink-muted)" }}>
+                <p
+                  className="text-[14px]"
+                  style={{ color: "var(--pink-muted)" }}
+                >
                   Try a different word, or{" "}
                   <button
                     type="button"
@@ -287,7 +311,12 @@ export function PinkBlogListing({
             <>
               <div className="grid grid-cols-1 gap-[26px] sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((post, i) => (
-                  <PinkReveal as="article" key={post.slug} index={i % 6} className="flex flex-col">
+                  <PinkReveal
+                    as="article"
+                    key={post.slug}
+                    index={i % 6}
+                    className="flex flex-col"
+                  >
                     <Link
                       href={`/blog/${post.slug}`}
                       // The title link directly below points at the same URL and
@@ -299,7 +328,10 @@ export function PinkBlogListing({
                       aria-hidden="true"
                       tabIndex={-1}
                       className="pink-lift relative block overflow-hidden"
-                      style={{ aspectRatio: "4/3", background: "var(--pink-panel)" }}
+                      style={{
+                        aspectRatio: "4/3",
+                        background: "var(--pink-panel)",
+                      }}
                     >
                       {post.image ? (
                         <Image
@@ -310,14 +342,20 @@ export function PinkBlogListing({
                           className="object-cover"
                         />
                       ) : (
-                        <PinkImageFallback surface="paper" className="absolute inset-0" />
+                        <PinkImageFallback
+                          surface="paper"
+                          className="absolute inset-0"
+                        />
                       )}
                     </Link>
                     <div
                       className="mt-4 flex flex-1 flex-col gap-2 pt-4"
                       style={{ borderTop: "1px solid var(--pink-ink)" }}
                     >
-                      <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+                      <p
+                        className="text-[13px]"
+                        style={{ color: "var(--pink-subtle)" }}
+                      >
                         <span>{journalLabel}</span>
                         <span aria-hidden="true"> · </span>
                         <span>{formatBlogDate(post.createdAt)}</span>
@@ -325,7 +363,12 @@ export function PinkBlogListing({
                       <Link
                         href={`/blog/${post.slug}`}
                         className="pink-display"
-                        style={{ fontSize: "20px", fontWeight: 600, letterSpacing: "-0.01em", color: "var(--pink-ink)" }}
+                        style={{
+                          fontSize: "20px",
+                          fontWeight: 600,
+                          letterSpacing: "-0.01em",
+                          color: "var(--pink-ink)",
+                        }}
                       >
                         {post.title}
                       </Link>
@@ -337,7 +380,10 @@ export function PinkBlogListing({
                           {post.excerpt}
                         </p>
                       )}
-                      <p className="mt-auto text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+                      <p
+                        className="mt-auto text-[13px]"
+                        style={{ color: "var(--pink-subtle)" }}
+                      >
                         {estimateReadMinutes(post.content)} min read
                       </p>
                     </div>

@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 import {
-  POLICY_LAST_UPDATED,
   formatPolicyDate,
+  POLICY_LAST_UPDATED,
 } from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "DMCA Policy | SimplePress",
-  description: "How to submit a copyright takedown notice or counter-notice under the DMCA.",
+  description:
+    "How to submit a copyright takedown notice or counter-notice under the DMCA.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/dmca`,
   },

@@ -1,7 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { FieldValues, SubmitHandler, UseFormReturn } from "react-hook-form";
+import type {
+  FieldValues,
+  SubmitHandler,
+  UseFormReturn,
+} from "react-hook-form";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";

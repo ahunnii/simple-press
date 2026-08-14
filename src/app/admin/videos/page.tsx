@@ -1,8 +1,8 @@
+import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
   resolveVideoTitle,
   videoSourceBadgeText,
 } from "~/lib/validators/videos";
-import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
@@ -48,7 +48,10 @@ export default async function AdminVideosPage({ searchParams }: Props) {
     matchesAllTokens(search, [
       resolveVideoTitle(v),
       v.channelTitle,
-      videoSourceBadgeText(v, v.sourceId ? sourceById.get(v.sourceId) : undefined),
+      videoSourceBadgeText(
+        v,
+        v.sourceId ? sourceById.get(v.sourceId) : undefined,
+      ),
     ]),
   );
 

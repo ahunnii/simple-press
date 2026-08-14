@@ -27,14 +27,15 @@ export function TeamInviteEmail({
       logoUrl={logoUrl}
       ownerEmail={ownerEmail}
     >
-      <Text style={heading}>You&apos;ve been invited to join {businessName}</Text>
+      <Text style={heading}>
+        You&apos;ve been invited to join {businessName}
+      </Text>
 
       <Text style={text}>Hi there,</Text>
 
       <Text style={text}>
-        You&apos;ve been invited to join{" "}
-        <strong>{businessName}</strong> as a <strong>{roleLabel}</strong> on
-        SimplePress.
+        You&apos;ve been invited to join <strong>{businessName}</strong> as a{" "}
+        <strong>{roleLabel}</strong> on SimplePress.
       </Text>
 
       <Text style={text}>

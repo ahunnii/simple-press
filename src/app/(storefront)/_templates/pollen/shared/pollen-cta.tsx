@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { cn } from "~/lib/utils";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 import { buttonVariants } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
 

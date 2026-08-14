@@ -67,8 +67,8 @@ describe("resolveOwnAvatarKey", () => {
 
   it("refuses empty input", () => {
     expect(resolveOwnAvatarKey("", USER)).toBe(null);
-    expect(resolveOwnAvatarKey(keyToPublicUrl(`avatars/${USER}.webp`), "")).toBe(
-      null,
-    );
+    expect(
+      resolveOwnAvatarKey(keyToPublicUrl(`avatars/${USER}.webp`), ""),
+    ).toBe(null);
   });
 });

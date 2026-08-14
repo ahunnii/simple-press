@@ -221,8 +221,7 @@ export async function PollenServicesPage({ business }: Props) {
                   <Link
                     href={
                       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- || is intentional so an empty saved value also falls back
-                      f["pollen.services.faq-contact-button-link"] ||
-                      "/contact"
+                      f["pollen.services.faq-contact-button-link"] || "/contact"
                     }
                     className={buttonVariants({
                       size: "lg",

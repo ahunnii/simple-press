@@ -57,9 +57,7 @@ export function AddVideoDialog({ open, onOpenChange }: Props) {
       onOpenChange(false);
     },
     onError: (err) => {
-      setError(
-        err.message || "Couldn't add that video — please try again.",
-      );
+      setError(err.message || "Couldn't add that video — please try again.");
     },
   });
 

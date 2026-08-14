@@ -5,8 +5,8 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 
 import { EMBED_SANDBOX } from "~/lib/embed";
-import { youtubeEmbedUrl } from "~/lib/youtube/parse";
 import { cn } from "~/lib/utils";
+import { youtubeEmbedUrl } from "~/lib/youtube/parse";
 
 export type VideoFacadeProps = {
   youtubeId: string;
@@ -65,7 +65,7 @@ export function VideoFacade({
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-md bg-muted",
+        "bg-muted relative w-full overflow-hidden rounded-md",
         className,
       )}
       style={{ aspectRatio: "16 / 9" }}
@@ -81,7 +81,7 @@ export function VideoFacade({
       ) : (
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/10"
+          className="from-muted to-muted-foreground/10 absolute inset-0 bg-gradient-to-br"
         />
       )}
 
@@ -91,7 +91,7 @@ export function VideoFacade({
         aria-label={`Play video: ${title}`}
         className={cn(
           "group absolute inset-0 flex h-full w-full flex-col items-center justify-center gap-3",
-          "bg-black/20 outline-none transition-colors duration-200 motion-reduce:transition-none",
+          "bg-black/20 transition-colors duration-200 outline-none motion-reduce:transition-none",
           "hover:bg-black/30 focus-visible:bg-black/30",
           "focus-visible:ring-4 focus-visible:ring-white/80 focus-visible:ring-inset",
         )}

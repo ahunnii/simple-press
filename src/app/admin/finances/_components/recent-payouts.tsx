@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { formatCurrency } from "~/lib/utils";
 import {
   Card,
   CardContent,
@@ -18,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { formatCurrency } from "~/lib/utils";
 
 type BreakdownData = RouterOutputs["finance"]["getBreakdown"];
 

@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DefaultFooterTemplateProps } from "../../types";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
@@ -51,7 +51,10 @@ function isLightFooterRoute(pathname: string): boolean {
 /** Mirrors the split used in `pink-header.tsx` — see that file for details. */
 function splitAccentWordmark(name: string, accentWord: string) {
   const trimmedAccent = accentWord.trim();
-  if (!trimmedAccent || !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())) {
+  if (
+    !trimmedAccent ||
+    !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())
+  ) {
     return { matches: false as const };
   }
   const splitIndex = name.length - trimmedAccent.length;
@@ -62,7 +65,11 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterProps) {
+export function PinkFooter({
+  business,
+  tone,
+  resolvedLegalLinks,
+}: PinkFooterProps) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
   const resolvedTone: "dark" | "light" =
@@ -120,8 +127,12 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
       ? col1LinksRaw
       : [
           { label: "Shop all", url: "/shop" },
-          ...(isEnabled("collections") ? [{ label: "Collections", url: "/collections" }] : []),
-          ...(isEnabled("services") ? [{ label: "Make & takes", url: "/services" }] : []),
+          ...(isEnabled("collections")
+            ? [{ label: "Collections", url: "/collections" }]
+            : []),
+          ...(isEnabled("services")
+            ? [{ label: "Make & takes", url: "/services" }]
+            : []),
         ];
   const col2Links =
     col2LinksRaw.length > 0
@@ -131,7 +142,9 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           ...(isEnabled("blog") ? [{ label: "Journal", url: "/blog" }] : []),
           ...(isEnabled("events") ? [{ label: "Events", url: "/events" }] : []),
           ...(isEnabled("videos") ? [{ label: "Videos", url: "/videos" }] : []),
-          ...(isEnabled("testimonials") ? [{ label: "Testimonials", url: "/testimonials" }] : []),
+          ...(isEnabled("testimonials")
+            ? [{ label: "Testimonials", url: "/testimonials" }]
+            : []),
           { label: "Contact", url: "/contact" },
         ];
 
@@ -250,8 +263,18 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           className="col-span-full grid grid-cols-2 gap-8 sm:col-span-2 sm:contents"
           {...sectionGroupAttr("global", "footer-links")}
         >
-          <FooterCol title={col1Title} links={col1Links} labelClass={labelClass} fg={fg} />
-          <FooterCol title={col2Title} links={col2Links} labelClass={labelClass} fg={fg} />
+          <FooterCol
+            title={col1Title}
+            links={col1Links}
+            labelClass={labelClass}
+            fg={fg}
+          />
+          <FooterCol
+            title={col2Title}
+            links={col2Links}
+            labelClass={labelClass}
+            fg={fg}
+          />
         </div>
       </div>
 
@@ -263,13 +286,22 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
       >
         <p className="text-[14px]">
           <span>{new Date().getFullYear()} </span>
-          <span {...fieldAttr("pink.global.footer-copyright")}>{copyrightLine}</span>
+          <span {...fieldAttr("pink.global.footer-copyright")}>
+            {copyrightLine}
+          </span>
         </p>
         {legalLinks.length > 0 && (
-          <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-2 text-[14px]">
+          <nav
+            aria-label="Legal"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-[14px]"
+          >
             {legalLinks.map((l) =>
               l.url ? (
-                <Link key={l._id ?? l.label} href={l.url} className="transition-colors">
+                <Link
+                  key={l._id ?? l.label}
+                  href={l.url}
+                  className="transition-colors"
+                >
                   {l.label ?? "Link"}
                 </Link>
               ) : null,

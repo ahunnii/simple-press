@@ -42,7 +42,8 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "homepage.testimonials",
       page: "homepage",
       title: "Testimonials",
-      description: "Three customer testimonials with a link to the testimonials page.",
+      description:
+        "Three customer testimonials with a link to the testimonials page.",
       groupIds: ["homepage.testimonials"],
       order: 4,
       hideable: true,
@@ -138,7 +139,8 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "contact.map",
       page: "contact",
       title: "Location Map",
-      description: "Interactive map with directions, shown below the contact form.",
+      description:
+        "Interactive map with directions, shown below the contact form.",
       groupIds: ["contact.map"],
       order: 1,
       hideable: true,

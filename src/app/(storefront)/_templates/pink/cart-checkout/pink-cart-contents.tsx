@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, X } from "lucide-react";
 
-import { formatPrice } from "~/lib/prices";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { formatPrice } from "~/lib/prices";
 import { useCart } from "~/providers/cart-context";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
@@ -37,8 +37,14 @@ export function PinkCartContents({
   emptyBody,
   emptyCta,
 }: Props) {
-  const { items, incrementItem, decrementItem, removeItem, subtotal, isHydrated } =
-    useCart();
+  const {
+    items,
+    incrementItem,
+    decrementItem,
+    removeItem,
+    subtotal,
+    isHydrated,
+  } = useCart();
 
   // Hydration guard — neutral skeleton prevents an empty→filled flash.
   if (!isHydrated) {
@@ -73,7 +79,7 @@ export function PinkCartContents({
       {/* Basket summary — order-first on mobile so totals/CTA show before the list */}
       <aside
         aria-label="Basket summary"
-        className="order-first lg:order-2 lg:sticky"
+        className="order-first lg:sticky lg:order-2"
         style={{ top: "var(--pink-sticky-top)" }}
       >
         <div
@@ -98,7 +104,10 @@ export function PinkCartContents({
 
           <div className="flex items-baseline justify-between">
             <span className="pink-label-dark">Subtotal</span>
-            <span className="pink-display" style={{ fontSize: 20, fontWeight: 600 }}>
+            <span
+              className="pink-display"
+              style={{ fontSize: 20, fontWeight: 600 }}
+            >
               {formatPrice(subtotal)}
             </span>
           </div>
@@ -151,7 +160,11 @@ export function PinkCartContents({
             >
               <div
                 className="relative shrink-0 overflow-hidden"
-                style={{ width: 96, aspectRatio: "4 / 5", background: "var(--pink-panel)" }}
+                style={{
+                  width: 96,
+                  aspectRatio: "4 / 5",
+                  background: "var(--pink-panel)",
+                }}
               >
                 <Image
                   src={item.imageUrl ?? "/placeholder.svg"}
@@ -172,7 +185,10 @@ export function PinkCartContents({
                       {item.productName}
                     </h2>
                     {item.variantName && (
-                      <p className="mt-0.5 text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+                      <p
+                        className="mt-0.5 text-[13px]"
+                        style={{ color: "var(--pink-subtle)" }}
+                      >
                         {item.variantName}
                       </p>
                     )}
@@ -197,7 +213,9 @@ export function PinkCartContents({
                   >
                     <button
                       type="button"
-                      onClick={() => decrementItem(item.productId, item.variantId)}
+                      onClick={() =>
+                        decrementItem(item.productId, item.variantId)
+                      }
                       disabled={item.quantity <= 1}
                       aria-label={`Decrease quantity of ${item.productName}`}
                       className="flex h-10 w-10 items-center justify-center disabled:opacity-30"
@@ -213,7 +231,9 @@ export function PinkCartContents({
                     </span>
                     <button
                       type="button"
-                      onClick={() => incrementItem(item.productId, item.variantId)}
+                      onClick={() =>
+                        incrementItem(item.productId, item.variantId)
+                      }
                       disabled={
                         item.maxInventory !== undefined &&
                         item.quantity >= item.maxInventory
@@ -225,7 +245,10 @@ export function PinkCartContents({
                     </button>
                   </div>
 
-                  <span className="pink-display" style={{ fontSize: 15, fontWeight: 600 }}>
+                  <span
+                    className="pink-display"
+                    style={{ fontSize: 15, fontWeight: 600 }}
+                  >
                     {formatPrice(lineTotal)}
                   </span>
                 </div>

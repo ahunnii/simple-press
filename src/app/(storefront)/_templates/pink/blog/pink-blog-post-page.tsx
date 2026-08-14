@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { DefaultBlogPostPageTemplateProps } from "../../types";
+import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
@@ -62,7 +62,11 @@ export function PinkBlogPostPage({
   const authorCtaLink = f["pink.blog.post-author-cta-link"] ?? "/about";
   const hasAuthor = showAuthor && authorName.length > 0;
 
-  const showRelated = isSectionVisible(customFields, "pink", "blog.post-related");
+  const showRelated = isSectionVisible(
+    customFields,
+    "pink",
+    "blog.post-related",
+  );
   const relatedHeading = f["pink.blog.post-related-heading"] ?? "Keep reading";
   const filteredRelated = relatedPosts
     .filter((p) => p.slug !== page.slug)
@@ -80,10 +84,19 @@ export function PinkBlogPostPage({
         intro={page.excerpt ?? undefined}
         rightSlot={
           hasAuthor ? (
-            <div className="flex items-center gap-3" {...sectionGroupAttr("blog", "post-author")}>
+            <div
+              className="flex items-center gap-3"
+              {...sectionGroupAttr("blog", "post-author")}
+            >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden">
                 {hasCustomImage(authorAvatar) ? (
-                  <Image src={authorAvatar} alt="" fill className="object-cover" sizes="48px" />
+                  <Image
+                    src={authorAvatar}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
                 ) : (
                   <PinkImageFallback surface="dark" />
                 )}
@@ -112,7 +125,10 @@ export function PinkBlogPostPage({
       />
 
       {page.image && (
-        <div className="relative w-full overflow-hidden" style={{ aspectRatio: "21/9", background: "var(--pink-panel)" }}>
+        <div
+          className="relative w-full overflow-hidden"
+          style={{ aspectRatio: "21/9", background: "var(--pink-panel)" }}
+        >
           <Image
             src={page.image}
             alt={page.title}
@@ -142,24 +158,38 @@ export function PinkBlogPostPage({
       )}
 
       {showRelated && filteredRelated.length > 0 && (
-        <PinkDarkBand ariaLabel="Keep reading" sectionAttrs={sectionGroupAttr("blog", "post-related")}>
+        <PinkDarkBand
+          ariaLabel="Keep reading"
+          sectionAttrs={sectionGroupAttr("blog", "post-related")}
+        >
           <div
             className="mb-8 flex flex-wrap items-end justify-between gap-4 pb-5"
             style={{ borderBottom: "1px solid var(--pink-ink-line)" }}
           >
             <h2
               className="pink-display"
-              style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
+              style={{
+                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                fontWeight: 600,
+                letterSpacing: "-0.025em",
+              }}
               {...fieldAttr("pink.blog.post-related-heading")}
             >
               {relatedHeading}
             </h2>
-            <Link href="/blog" className="text-[14px] font-medium" style={{ color: "var(--pink-blush)" }}>
+            <Link
+              href="/blog"
+              className="text-[14px] font-medium"
+              style={{ color: "var(--pink-blush)" }}
+            >
               All posts →
             </Link>
           </div>
 
-          <PinkHairlineGrid tone="dark" columnsClassName="grid-cols-1 sm:grid-cols-3">
+          <PinkHairlineGrid
+            tone="dark"
+            columnsClassName="grid-cols-1 sm:grid-cols-3"
+          >
             {filteredRelated.map((post) => (
               <Link
                 key={post.slug}
@@ -168,7 +198,10 @@ export function PinkBlogPostPage({
               >
                 <div
                   className="relative overflow-hidden"
-                  style={{ aspectRatio: "4/3", background: "var(--pink-ink-tint)" }}
+                  style={{
+                    aspectRatio: "4/3",
+                    background: "var(--pink-ink-tint)",
+                  }}
                 >
                   {post.image ? (
                     <Image
@@ -181,12 +214,20 @@ export function PinkBlogPostPage({
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                   ) : (
-                    <PinkImageFallback surface="dark" className="absolute inset-0" />
+                    <PinkImageFallback
+                      surface="dark"
+                      className="absolute inset-0"
+                    />
                   )}
                 </div>
                 <p
                   className="pink-display"
-                  style={{ fontSize: "17px", fontWeight: 600, letterSpacing: "-0.01em", color: "var(--pink-paper)" }}
+                  style={{
+                    fontSize: "17px",
+                    fontWeight: 600,
+                    letterSpacing: "-0.01em",
+                    color: "var(--pink-paper)",
+                  }}
                 >
                   {post.title}
                 </p>

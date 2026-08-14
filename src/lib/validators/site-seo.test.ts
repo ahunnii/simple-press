@@ -87,9 +87,11 @@ describe("pageMetaSchema — route key validation", () => {
     });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues.some((issue) =>
-        issue.message.includes("unknown page key: invalidKey"),
-      )).toBe(true);
+      expect(
+        result.error.issues.some((issue) =>
+          issue.message.includes("unknown page key: invalidKey"),
+        ),
+      ).toBe(true);
     }
   });
 

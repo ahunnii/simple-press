@@ -398,7 +398,19 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconReportMoney,
     section: "insights",
     featureKey: "payments",
-    keywords: ["revenue", "tax", "fees", "stripe", "profit", "breakdown", "money", "payouts", "balance", "payments", "inform"],
+    keywords: [
+      "revenue",
+      "tax",
+      "fees",
+      "stripe",
+      "profit",
+      "breakdown",
+      "money",
+      "payouts",
+      "balance",
+      "payments",
+      "inform",
+    ],
   },
 
   // Platform (PLATFORM_ADMIN only — gated in sidebar rendering). Points at

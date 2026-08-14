@@ -387,7 +387,12 @@ describe("manualOrderFormSchema", () => {
       issues({
         ...base,
         includeAddress: true,
-        shippingAddress: { ...base.shippingAddress, line1: "   ", city: "NY", postal_code: "10001" },
+        shippingAddress: {
+          ...base.shippingAddress,
+          line1: "   ",
+          city: "NY",
+          postal_code: "10001",
+        },
       }),
     ).toEqual(["shippingAddress.line1: Street address is required"]);
   });
@@ -405,11 +410,21 @@ describe("manualOrderFormSchema", () => {
     ]);
 
     expect(
-      issues({ ...base, items: [], useDirectSubtotal: true, directSubtotal: 25 }),
+      issues({
+        ...base,
+        items: [],
+        useDirectSubtotal: true,
+        directSubtotal: 25,
+      }),
     ).toEqual([]);
 
     expect(
-      issues({ ...base, items: [], useDirectSubtotal: true, directSubtotal: null }),
+      issues({
+        ...base,
+        items: [],
+        useDirectSubtotal: true,
+        directSubtotal: null,
+      }),
     ).toEqual(["directSubtotal: Enter a subtotal."]);
   });
 });

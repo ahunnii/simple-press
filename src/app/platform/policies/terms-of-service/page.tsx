@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 import {
-  POLICY_LAST_UPDATED,
   formatPolicyDate,
+  POLICY_LAST_UPDATED,
 } from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {

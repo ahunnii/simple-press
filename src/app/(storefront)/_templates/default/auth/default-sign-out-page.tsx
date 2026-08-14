@@ -1,7 +1,7 @@
 import type { RouterOutputs } from "~/trpc/react";
-import { SignOut } from "~/components/auth/sign-out";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { FieldDescription } from "~/components/ui/field";
+import { SignOut } from "~/components/auth/sign-out";
 
 import { DefaultAuthShell } from "./default-auth-shell";
 

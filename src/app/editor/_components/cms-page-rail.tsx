@@ -9,9 +9,9 @@ import { cn } from "~/lib/utils";
 import { SectionRow } from "./section-rail";
 
 export type CmsPageRailProps = {
-  pageTitle: string;    // the CMS page's title
-  adminHref: string;    // /admin/content/pages/<id>
-  isActive: boolean;    // whether the content panel is currently open
+  pageTitle: string; // the CMS page's title
+  adminHref: string; // /admin/content/pages/<id>
+  isActive: boolean; // whether the content panel is currently open
   onSelect: () => void; // open the content panel
   kind: "page" | "blog"; // "page" for CMS pages, "blog" for blog posts
   /** Template sections that render on individual blog posts (blog kind only). */
@@ -78,9 +78,7 @@ export function CmsPageRail({
             onClick={onSelect}
             className={cn(
               "group relative mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors",
-              isActive
-                ? "bg-muted font-medium"
-                : "hover:bg-muted/60",
+              isActive ? "bg-muted font-medium" : "hover:bg-muted/60",
             )}
           >
             {isActive && (

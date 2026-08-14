@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { buildLucideIconsWithLabels } from "~/lib/lucide-template-icons";
-import { pickInitialVariant } from "~/lib/products/initial-variant";
 import { parseCardAdditionalFields } from "~/lib/products";
+import { pickInitialVariant } from "~/lib/products/initial-variant";
 import {
   resolveVariantCompareAtPrice,
   resolveVariantPrice,

@@ -73,7 +73,9 @@ describe("multi-tenant isolation", () => {
 
     // Same "needle" value planted in both businesses so a leak would be
     // detectable — the assertions below must only ever see business A's rows.
-    const productA = await createProduct(businessA.id, { name: "Needle Widget" });
+    const productA = await createProduct(businessA.id, {
+      name: "Needle Widget",
+    });
     await createProduct(businessB.id, { name: "Needle Widget" });
     const customerA = await createCustomer(businessA.id, {
       email: "needle-a@test.dev",

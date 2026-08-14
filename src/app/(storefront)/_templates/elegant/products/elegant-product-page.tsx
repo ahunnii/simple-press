@@ -537,9 +537,7 @@ export function ElegantProductPage({
                   }}
                 >
                   {activeTab === "details" && <p>{product.description}</p>}
-                  {activeTab === "how" && howToUseText && (
-                    <p>{howToUseText}</p>
-                  )}
+                  {activeTab === "how" && howToUseText && <p>{howToUseText}</p>}
                   {activeTab === "info" && (
                     <ProductDetailsAdditionalInfoAccordion
                       product={product}

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { authClient } from "~/server/better-auth/client";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 
 import { PinkPageHeader } from "../shared/pink-page-header";
 
@@ -44,7 +44,11 @@ export function PinkAccountLayout({
   description,
 }: PinkAccountLayoutProps) {
   const pathname = usePathname();
-  const { data: session } = authClient.useSession();
+  // No server seed reaches this component, so the unseeded hook is the right
+  // shape: `intro` below renders a conditional element off the session, which
+  // the raw `authClient.useSession()` could resolve before hydration and
+  // mismatch against the server's markup.
+  const { data: session } = useHydratedSession();
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);

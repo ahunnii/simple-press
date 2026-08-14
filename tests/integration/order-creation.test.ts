@@ -1,5 +1,5 @@
-import { Prisma } from "generated/prisma";
 import type Stripe from "stripe";
+import { Prisma } from "generated/prisma";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { DbClient } from "~/server/db";
@@ -118,9 +118,8 @@ function withFlakyOrderCreate(failCount: number): {
   let calls = 0;
   const flakyDb = {
     order: {
-      findFirst: (
-        ...args: Parameters<DbClient["order"]["findFirst"]>
-      ) => db.order.findFirst(...args),
+      findFirst: (...args: Parameters<DbClient["order"]["findFirst"]>) =>
+        db.order.findFirst(...args),
       create: (...args: Parameters<DbClient["order"]["create"]>) => {
         calls++;
         if (calls <= failCount) {

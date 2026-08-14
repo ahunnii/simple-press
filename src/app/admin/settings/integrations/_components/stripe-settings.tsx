@@ -135,8 +135,8 @@ export function StripeSettings({
             </CardTitle>
             <CardDescription>
               Required to process orders — customers cannot check out until a
-              Stripe account is connected. Payouts go directly to this
-              account; SimplePress never holds your funds.
+              Stripe account is connected. Payouts go directly to this account;
+              SimplePress never holds your funds.
             </CardDescription>
           </div>
           {stripeAccountId ? (
@@ -235,10 +235,9 @@ export function StripeSettings({
                   <p className="text-muted-foreground text-sm">
                     Automatically calculate and collect sales tax at checkout
                     via Stripe Tax, based on the customer&apos;s address.
-                    Requires an active Stripe Tax registration on your
-                    connected account — enable it in your Stripe dashboard
-                    first, or this toggle will reject the change and tell you
-                    why.{" "}
+                    Requires an active Stripe Tax registration on your connected
+                    account — enable it in your Stripe dashboard first, or this
+                    toggle will reject the change and tell you why.{" "}
                     <Link
                       href="/admin/finances/tax-guide"
                       className="underline underline-offset-2"
@@ -293,10 +292,10 @@ export function StripeSettings({
         ) : (
           <>
             <p className="text-muted-foreground text-sm">
-              Connect a Stripe account to start accepting payments —
-              until then, checkout is disabled and customers can&apos;t place
-              orders. Stripe handles card details and payment processing
-              directly; SimplePress never sees or stores card numbers.
+              Connect a Stripe account to start accepting payments — until then,
+              checkout is disabled and customers can&apos;t place orders. Stripe
+              handles card details and payment processing directly; SimplePress
+              never sees or stores card numbers.
             </p>
             <Button onClick={handleConnect}>Connect with Stripe</Button>
           </>

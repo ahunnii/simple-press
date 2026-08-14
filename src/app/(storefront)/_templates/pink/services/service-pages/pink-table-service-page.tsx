@@ -1,6 +1,10 @@
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { getRichTextFieldValue, isContentEmpty, parseTemplateListRows } from "~/lib/template-fields";
+import {
+  getRichTextFieldValue,
+  isContentEmpty,
+  parseTemplateListRows,
+} from "~/lib/template-fields";
 
 import { PinkFactRows } from "../../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../../shared/pink-photo-header";
@@ -12,7 +16,10 @@ import { PinkTableBody } from "./pink-table-body";
 // field-conventions.md), so the hero fact rows — not hideable — need a real
 // hardcoded fallback or a fresh Service renders an empty panel.
 const DEFAULT_FACT_ROWS: TemplateListRow[] = [
-  { label: "Where", value: "Your space — school, church, library or workplace" },
+  {
+    label: "Where",
+    value: "Your space — school, church, library or workplace",
+  },
   { label: "Group size", value: "10 to 12 at a table" },
   { label: "Materials", value: "Everything included" },
   { label: "Notice", value: "Book at least 2 weeks out" },
@@ -61,40 +68,52 @@ export function PinkTableServicePage({
     "pink-table.request-fallback-label",
   ]);
 
-  const richTextRaw = getRichTextFieldValue(customFields, "pink-table.body-richtext");
-  const richText = richTextRaw && !isContentEmpty(richTextRaw) ? richTextRaw : null;
+  const richTextRaw = getRichTextFieldValue(
+    customFields,
+    "pink-table.body-richtext",
+  );
+  const richText =
+    richTextRaw && !isContentEmpty(richTextRaw) ? richTextRaw : null;
 
   const parsedFactRows = parseTemplateListRows(raw?.["pink-table.fact-rows"]);
-  const factRows = (parsedFactRows.length > 0 ? parsedFactRows : DEFAULT_FACT_ROWS).map(
+  const factRows = (
+    parsedFactRows.length > 0 ? parsedFactRows : DEFAULT_FACT_ROWS
+  ).map((row) => ({
+    label: typeof row.label === "string" ? row.label : "",
+    value: typeof row.value === "string" ? row.value : "",
+    _id: row._id,
+  }));
+
+  const timeline = parseTemplateListRows(raw?.["pink-table.timeline"]).map(
     (row) => ({
-      label: typeof row.label === "string" ? row.label : "",
-      value: typeof row.value === "string" ? row.value : "",
+      time: typeof row.time === "string" ? row.time : "",
+      title: typeof row.title === "string" ? row.title : "",
+      body: typeof row.body === "string" ? row.body : "",
       _id: row._id,
     }),
   );
 
-  const timeline = parseTemplateListRows(raw?.["pink-table.timeline"]).map((row) => ({
-    time: typeof row.time === "string" ? row.time : "",
-    title: typeof row.title === "string" ? row.title : "",
-    body: typeof row.body === "string" ? row.body : "",
-    _id: row._id,
-  }));
+  const brings = parseTemplateListRows(raw?.["pink-table.brings"]).map(
+    (row) => ({
+      text: typeof row.text === "string" ? row.text : "",
+      _id: row._id,
+    }),
+  );
 
-  const brings = parseTemplateListRows(raw?.["pink-table.brings"]).map((row) => ({
-    text: typeof row.text === "string" ? row.text : "",
-    _id: row._id,
-  }));
+  const provides = parseTemplateListRows(raw?.["pink-table.provides"]).map(
+    (row) => ({
+      text: typeof row.text === "string" ? row.text : "",
+      _id: row._id,
+    }),
+  );
 
-  const provides = parseTemplateListRows(raw?.["pink-table.provides"]).map((row) => ({
-    text: typeof row.text === "string" ? row.text : "",
-    _id: row._id,
-  }));
-
-  const gallery = parseTemplateListRows(raw?.["pink-table.gallery"]).map((row) => ({
-    image: typeof row.image === "string" ? row.image : "",
-    alt: typeof row.alt === "string" ? row.alt : "",
-    _id: row._id,
-  }));
+  const gallery = parseTemplateListRows(raw?.["pink-table.gallery"]).map(
+    (row) => ({
+      image: typeof row.image === "string" ? row.image : "",
+      alt: typeof row.alt === "string" ? row.alt : "",
+      _id: row._id,
+    }),
+  );
 
   const faq = parseTemplateListRows(raw?.["pink-table.faq"]).map((row) => ({
     question: typeof row.question === "string" ? row.question : "",
@@ -115,7 +134,9 @@ export function PinkTableServicePage({
         ]}
         heading={service.name}
         intro={f["pink-table.hero-intro"] ?? ""}
-        factRows={factRows.length > 0 ? <PinkFactRows rows={factRows} /> : undefined}
+        factRows={
+          factRows.length > 0 ? <PinkFactRows rows={factRows} /> : undefined
+        }
       />
 
       <PinkTableBody

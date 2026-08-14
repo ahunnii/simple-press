@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 
+import { cn } from "~/lib/utils";
 import {
   Dialog,
   DialogClose,
@@ -11,7 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { cn } from "~/lib/utils";
 
 type Props = {
   src: string;

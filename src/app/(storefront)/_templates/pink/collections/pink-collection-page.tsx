@@ -2,15 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
+import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { parseTemplateListRows } from "~/lib/template-fields";
-import { formatPrice } from "~/lib/prices";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatPrice } from "~/lib/prices";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "../index";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import type { PinkFactRow } from "../shared/pink-fact-rows";
 import { PinkFactRows } from "../shared/pink-fact-rows";
 import { PinkPhotoHeader } from "../shared/pink-photo-header";
 import { PinkCollectionDetailClient } from "./pink-collection-detail-client";
@@ -103,19 +103,31 @@ export function PinkCollectionPage({
   const pieceCount = products.length;
   const availableCount = products.filter(isRowInStock).length;
   const prices = products.map((p) =>
-    p.variants.length > 0 ? Math.min(...p.variants.map((v) => v.price ?? p.price)) : p.price,
+    p.variants.length > 0
+      ? Math.min(...p.variants.map((v) => v.price ?? p.price))
+      : p.price,
   );
   const fromPrice = prices.length > 0 ? Math.min(...prices) : null;
 
   const siblings = additionalCollections ?? [];
   const currentIndex = siblings.findIndex((c) => c.slug === collection.slug);
-  const prevCollection = currentIndex > 0 ? siblings[currentIndex - 1] : undefined;
+  const prevCollection =
+    currentIndex > 0 ? siblings[currentIndex - 1] : undefined;
   const nextCollection =
-    currentIndex >= 0 && currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : undefined;
+    currentIndex >= 0 && currentIndex < siblings.length - 1
+      ? siblings[currentIndex + 1]
+      : undefined;
 
   const factRows: PinkFactRow[] = [
-    { label: f["pink.collections.detail-hero-fact-pieces-label"] ?? "Pieces", value: String(pieceCount) },
-    { label: f["pink.collections.detail-hero-fact-available-label"] ?? "Available", value: String(availableCount) },
+    {
+      label: f["pink.collections.detail-hero-fact-pieces-label"] ?? "Pieces",
+      value: String(pieceCount),
+    },
+    {
+      label:
+        f["pink.collections.detail-hero-fact-available-label"] ?? "Available",
+      value: String(availableCount),
+    },
   ];
   if (fromPrice != null) {
     factRows.push({
@@ -124,7 +136,9 @@ export function PinkCollectionPage({
     });
   }
 
-  const galleryRows = parseTemplateListRows(customFields?.["pink.collections.detail-gallery-images"]);
+  const galleryRows = parseTemplateListRows(
+    customFields?.["pink.collections.detail-gallery-images"],
+  );
   const gallery = galleryRows.length > 0 ? galleryRows : DEFAULT_GALLERY;
 
   const description = collection.description?.trim() ?? "";
@@ -138,9 +152,18 @@ export function PinkCollectionPage({
   // Only worth its own band when it holds more than the hero already shows
   // in full (see the comment on HERO_INTRO_MAX_CHARS above).
   const introVisible =
-    isSectionVisible(customFields, "pink", "collections.detail-intro") && isLongDescription;
-  const galleryVisible = isSectionVisible(customFields, "pink", "collections.detail-gallery");
-  const navVisible = isSectionVisible(customFields, "pink", "collections.detail-nav");
+    isSectionVisible(customFields, "pink", "collections.detail-intro") &&
+    isLongDescription;
+  const galleryVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "collections.detail-gallery",
+  );
+  const navVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "collections.detail-nav",
+  );
 
   return (
     <>
@@ -169,7 +192,11 @@ export function PinkCollectionPage({
             <div className="flex flex-col gap-3">
               <h2
                 className="pink-display"
-                style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
+                style={{
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.025em",
+                }}
                 {...fieldAttr("pink.collections.detail-intro-heading")}
               >
                 {f["pink.collections.detail-intro-heading"] ?? ""}
@@ -185,49 +212,65 @@ export function PinkCollectionPage({
         </section>
       )}
 
-      {galleryVisible && gallery.some((row) => typeof row.image === "string" && row.image) && (
-        <section
-          aria-label="Series gallery"
-          className="px-[2px]"
-          {...sectionGroupAttr("collections", "detail-gallery")}
-        >
-          <div
-            className="grid gap-[2px]"
-            style={{ gridTemplateColumns: "repeat(4, 1fr)", gridAutoRows: "180px" }}
+      {galleryVisible &&
+        gallery.some((row) => typeof row.image === "string" && row.image) && (
+          <section
+            aria-label="Series gallery"
+            className="px-[2px]"
+            {...sectionGroupAttr("collections", "detail-gallery")}
           >
-            {gallery.slice(0, 6).map((row, i) => {
-              const colSpan = Number(row.colSpan ?? 1) || 1;
-              const rowSpan = Number(row.rowSpan ?? 1) || 1;
-              return (
-                <div
-                  key={typeof row._id === "string" ? row._id : i}
-                  className="relative overflow-hidden"
-                  style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
-                >
-                  <Image
-                    src={typeof row.image === "string" && row.image ? row.image : "/placeholder.svg"}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+            <div
+              className="grid gap-[2px]"
+              style={{
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gridAutoRows: "180px",
+              }}
+            >
+              {gallery.slice(0, 6).map((row, i) => {
+                const colSpan = Number(row.colSpan ?? 1) || 1;
+                const rowSpan = Number(row.rowSpan ?? 1) || 1;
+                return (
+                  <div
+                    key={typeof row._id === "string" ? row._id : i}
+                    className="relative overflow-hidden"
+                    style={{
+                      gridColumn: `span ${colSpan}`,
+                      gridRow: `span ${rowSpan}`,
+                    }}
+                  >
+                    <Image
+                      src={
+                        typeof row.image === "string" && row.image
+                          ? row.image
+                          : "/placeholder.svg"
+                      }
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
       <PinkCollectionDetailClient
         rows={collection.collectionProducts}
         copy={{
-          headingPrefix: f["pink.collections.detail-grid-heading-prefix"] ?? "The",
+          headingPrefix:
+            f["pink.collections.detail-grid-heading-prefix"] ?? "The",
           filterAll: f["pink.collections.detail-grid-filter-all"] ?? "All",
-          filterAvailable: f["pink.collections.detail-grid-filter-available"] ?? "Available",
-          filterArchive: f["pink.collections.detail-grid-filter-archive"] ?? "Archive",
+          filterAvailable:
+            f["pink.collections.detail-grid-filter-available"] ?? "Available",
+          filterArchive:
+            f["pink.collections.detail-grid-filter-archive"] ?? "Archive",
           soldLabel: f["pink.collections.detail-grid-sold-label"] ?? "Sold",
           soldBadge: f["pink.collections.detail-grid-sold-badge"] ?? "Rehomed",
-          soldCta: f["pink.collections.detail-grid-sold-cta"] ?? "Ask about a custom order",
+          soldCta:
+            f["pink.collections.detail-grid-sold-cta"] ??
+            "Ask about a custom order",
         }}
       />
 
@@ -236,7 +279,10 @@ export function PinkCollectionPage({
           read as a broken/unfinished card. The remaining side takes the full
           band on its own instead. */}
       {navVisible && (prevCollection ?? nextCollection) && (
-        <PinkDarkBand ariaLabel="More series" sectionAttrs={sectionGroupAttr("collections", "detail-nav")}>
+        <PinkDarkBand
+          ariaLabel="More series"
+          sectionAttrs={sectionGroupAttr("collections", "detail-nav")}
+        >
           <div
             className={`grid gap-[2px] ${prevCollection && nextCollection ? "sm:grid-cols-2" : "sm:grid-cols-1"}`}
           >
@@ -246,10 +292,21 @@ export function PinkCollectionPage({
                 className="flex flex-col gap-2 p-8"
                 style={{ background: "var(--pink-ink-panel)" }}
               >
-                <span {...fieldAttr("pink.collections.detail-nav-prev-label")} className="pink-label-dark">
-                  {f["pink.collections.detail-nav-prev-label"] ?? "Previous series"}
+                <span
+                  {...fieldAttr("pink.collections.detail-nav-prev-label")}
+                  className="pink-label-dark"
+                >
+                  {f["pink.collections.detail-nav-prev-label"] ??
+                    "Previous series"}
                 </span>
-                <span className="pink-display" style={{ fontSize: "22px", fontWeight: 600, color: "var(--pink-paper)" }}>
+                <span
+                  className="pink-display"
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: 600,
+                    color: "var(--pink-paper)",
+                  }}
+                >
                   {prevCollection.name}
                 </span>
               </Link>
@@ -260,10 +317,20 @@ export function PinkCollectionPage({
                 className="flex flex-col items-end gap-2 p-8 text-right"
                 style={{ background: "var(--pink-ink-panel)" }}
               >
-                <span {...fieldAttr("pink.collections.detail-nav-next-label")} className="pink-label-dark">
+                <span
+                  {...fieldAttr("pink.collections.detail-nav-next-label")}
+                  className="pink-label-dark"
+                >
                   {f["pink.collections.detail-nav-next-label"] ?? "Next series"}
                 </span>
-                <span className="pink-display" style={{ fontSize: "22px", fontWeight: 600, color: "var(--pink-paper)" }}>
+                <span
+                  className="pink-display"
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: 600,
+                    color: "var(--pink-paper)",
+                  }}
+                >
                   {nextCollection.name}
                 </span>
               </Link>

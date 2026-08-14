@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import type { CmsPageDraftValues } from "./cms-page-panel";
+import type { DeviceKind } from "./editor-preview";
+import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
@@ -15,17 +18,14 @@ import {
   setThemeSelection,
   SP_META_KEY,
 } from "~/lib/sp-meta";
+import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { isBlogPostContextSection } from "~/lib/template-sections";
 import { getTemplateTheme } from "~/lib/template-themes";
-import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { api } from "~/trpc/react";
 
-import type { DeviceKind } from "./editor-preview";
-import { DEVICE_WIDTHS, EditorPreview } from "./editor-preview";
-import type { CmsPageDraftValues } from "./cms-page-panel";
 import { CmsPagePanel } from "./cms-page-panel";
 import { CmsPageRail } from "./cms-page-rail";
-import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
+import { DEVICE_WIDTHS, EditorPreview } from "./editor-preview";
 import { EditorTopBar } from "./editor-top-bar";
 import { FieldPanel } from "./field-panel";
 import { NotesPanel } from "./notes-panel";
@@ -170,7 +170,9 @@ function stableStringify(value: unknown): string {
 }
 
 /** Strip the reserved `_sp` editor-metadata namespace before comparing. */
-function withoutSpMeta(fields: Record<string, unknown>): Record<string, unknown> {
+function withoutSpMeta(
+  fields: Record<string, unknown>,
+): Record<string, unknown> {
   const rest = { ...fields };
   delete rest[SP_META_KEY];
   return rest;
@@ -401,11 +403,13 @@ export function VisualEditor({
     return map;
   });
   /** Page ids whose draft is persisted server-side. */
-  const [serverCmsDraftIds, setServerCmsDraftIds] = useState<Set<string>>(() => {
-    const set = new Set<string>();
-    for (const p of cmsPages) if (p.hasDraft) set.add(p.id);
-    return set;
-  });
+  const [serverCmsDraftIds, setServerCmsDraftIds] = useState<Set<string>>(
+    () => {
+      const set = new Set<string>();
+      for (const p of cmsPages) if (p.hasDraft) set.add(p.id);
+      return set;
+    },
+  );
 
   // ── Refs ──
   const previewRef = useRef<PreviewFrameHandle>(null);
@@ -669,7 +673,10 @@ export function VisualEditor({
       // Live-patch fast path: text/textarea edits are pushed straight into
       // the iframe DOM. Everything else reloads the preview on next flush.
       const type = fieldTypeByKey.get(key);
-      if ((type === "text" || type === "textarea") && typeof value === "string") {
+      if (
+        (type === "text" || type === "textarea") &&
+        typeof value === "string"
+      ) {
         const sent = previewRef.current?.postMessage({
           source: PREVIEW_SOURCE,
           type: "sp:patch-fields",
@@ -787,7 +794,10 @@ export function VisualEditor({
             pendingCmsIds.map((id) => {
               const values = cmsDraftsRef.current[id];
               if (!values) return Promise.resolve();
-              return saveCmsPageDraft.mutateAsync({ pageId: id, draft: values });
+              return saveCmsPageDraft.mutateAsync({
+                pageId: id,
+                draft: values,
+              });
             }),
           );
           setServerCmsDraftIds((prev) => {
@@ -992,7 +1002,11 @@ export function VisualEditor({
   // The rail/panel/label all read the DRAFT title so renames reflect live.
   const activeCmsTitle =
     activeCmsId !== null
-      ? (cmsDrafts[activeCmsId]?.title ?? activeCmsPage?.live.title ?? "").trim()
+      ? (
+          cmsDrafts[activeCmsId]?.title ??
+          activeCmsPage?.live.title ??
+          ""
+        ).trim()
       : "";
 
   const previewPath = activeCmsPage
@@ -1014,7 +1028,9 @@ export function VisualEditor({
   // Human label for the active page — template label, or CMS draft title.
   const activePageLabel = useMemo(() => {
     if (activeCmsId !== null) return titleOrUntitled(activeCmsTitle);
-    return pages.find((p) => p.value === activePage)?.label ?? pageLabel(activePage);
+    return (
+      pages.find((p) => p.value === activePage)?.label ?? pageLabel(activePage)
+    );
   }, [activeCmsId, activeCmsTitle, pages, activePage]);
 
   // CMS Select entries for the top bar (value `cms:<id>`, label = draft title).

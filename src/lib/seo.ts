@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
-import { getCanonicalUrl } from "~/lib/canonical";
-import {
-  getPageMetaEntry,
-  type PageMetaEntry,
-  type StaticSeoRouteKey,
+import type {
+  PageMetaEntry,
+  StaticSeoRouteKey,
 } from "~/lib/validators/site-seo";
+import { getCanonicalUrl } from "~/lib/canonical";
+import { getPageMetaEntry } from "~/lib/validators/site-seo";
 
 /**
  * Structural, not a Prisma type. Every caller hands this a `simplifiedGet()`

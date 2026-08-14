@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 import {
-  POLICY_LAST_UPDATED,
   formatPolicyDate,
+  POLICY_LAST_UPDATED,
 } from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Accessibility Statement | SimplePress",
-  description: "SimplePress commitment to WCAG 2.1 AA accessibility and how to report issues.",
+  description:
+    "SimplePress commitment to WCAG 2.1 AA accessibility and how to report issues.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/accessibility`,
   },

@@ -44,7 +44,10 @@ export const ORDER_STATUS_WRITE_VALUES = [
   "cancelled",
   "refunded",
 ] as const;
-export const ORDER_STATUS_VALUES = ["all", ...ORDER_STATUS_WRITE_VALUES] as const;
+export const ORDER_STATUS_VALUES = [
+  "all",
+  ...ORDER_STATUS_WRITE_VALUES,
+] as const;
 export const ORDER_STATUS_DEFAULT = "all";
 
 export const ORDER_FULFILLMENT_WRITE_VALUES = [

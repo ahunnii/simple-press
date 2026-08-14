@@ -61,7 +61,10 @@ export function PinkPopup({ popup }: PinkPopupProps) {
           {popup.mode === "image" ? (
             <>
               {popup.imagePath && (
-                <div className="relative w-full" style={{ aspectRatio: "4 / 3" }}>
+                <div
+                  className="relative w-full"
+                  style={{ aspectRatio: "4 / 3" }}
+                >
                   <Image
                     src={popup.imagePath}
                     alt={popup.imageAlt ?? ""}
@@ -82,7 +85,11 @@ export function PinkPopup({ popup }: PinkPopupProps) {
                     </p>
                   )}
                   {popup.ctaUrl && (
-                    <PinkPopupCta href={popup.ctaUrl} label={popup.ctaLabel ?? "See more"} onClick={close} />
+                    <PinkPopupCta
+                      href={popup.ctaUrl}
+                      label={popup.ctaLabel ?? "See more"}
+                      onClick={close}
+                    />
                   )}
                 </div>
               )}
@@ -98,13 +105,20 @@ export function PinkPopup({ popup }: PinkPopupProps) {
                 </p>
               )}
               {popup.content !== null && (
-                <div className="text-[15px] leading-[1.7]" style={{ color: "var(--pink-ink-body)" }}>
+                <div
+                  className="text-[15px] leading-[1.7]"
+                  style={{ color: "var(--pink-ink-body)" }}
+                >
                   <TiptapRenderer content={popup.content as TiptapJSON} />
                 </div>
               )}
               {popup.ctaUrl && (
                 <div className="mt-5">
-                  <PinkPopupCta href={popup.ctaUrl} label={popup.ctaLabel ?? "See more"} onClick={close} />
+                  <PinkPopupCta
+                    href={popup.ctaUrl}
+                    label={popup.ctaLabel ?? "See more"}
+                    onClick={close}
+                  />
                 </div>
               )}
             </div>
@@ -128,7 +142,13 @@ function PinkPopupCta({
 
   if (isExternal) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="pink-btn pink-btn-solid" onClick={onClick}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="pink-btn pink-btn-solid"
+        onClick={onClick}
+      >
         {label}
         <span className="sr-only"> (opens in new tab)</span>
       </a>

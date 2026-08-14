@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ReactNode } from "react";
 import {
   Body,
   Button,
@@ -9,19 +9,17 @@ import {
   Html,
   Img,
   Link,
-  Preview,
   pixelBasedPreset,
+  Preview,
   Section,
   Tailwind,
-  Text
-} from "react-email"
+  Text,
+} from "react-email";
 
-import { cn } from "../../../lib/utils"
-import {
-  type EmailClassNames,
-  type EmailColors,
-  EmailStyles
-} from "./email-styles"
+import type { EmailClassNames, EmailColors } from "./email-styles";
+
+import { cn } from "../../../lib/utils";
+import { EmailStyles } from "./email-styles";
 
 const passwordChangedEmailLocalization = {
   YOUR_PASSWORD_HAS_BEEN_CHANGED: "Your password has been changed",
@@ -36,8 +34,8 @@ const passwordChangedEmailLocalization = {
   EMAIL_SENT_BY: "Email sent by {appName}.",
   IF_YOU_DIDNT_AUTHORIZE_THIS_CHANGE:
     "If you didn't authorize this change, please contact support immediately {supportEmail} to secure your account.",
-  POWERED_BY_BETTER_AUTH: "Powered by {betterAuth}"
-}
+  POWERED_BY_BETTER_AUTH: "Powered by {betterAuth}",
+};
 
 /**
  * Localization strings for the PasswordChangedEmail component.
@@ -45,39 +43,39 @@ const passwordChangedEmailLocalization = {
  * Contains all text content used in the password changed notification email template.
  */
 export type PasswordChangedEmailLocalization =
-  typeof passwordChangedEmailLocalization
+  typeof passwordChangedEmailLocalization;
 
 /**
  * Props for the PasswordChangedEmail component.
  */
 export interface PasswordChangedEmailProps {
   /** Email address of the user account */
-  email?: string
+  email?: string;
   /** Timestamp when the password was changed */
-  timestamp?: string
+  timestamp?: string;
   /** URL to secure the account if unauthorized change occurred */
-  secureAccountURL?: string
+  secureAccountURL?: string;
   /** Name of the application sending the email */
-  appName?: string
+  appName?: string;
   /** Support email address for security concerns */
-  supportEmail?: string
+  supportEmail?: string;
   /** Logo URL(s) - a single string or light/dark variants. If omitted, no logo is shown. */
-  logoURL?: string | { light: string; dark: string }
+  logoURL?: string | { light: string; dark: string };
   /** Custom CSS class names for styling specific parts of the email */
-  classNames?: EmailClassNames
+  classNames?: EmailClassNames;
   /** Custom color scheme for light and dark modes */
-  colors?: EmailColors
+  colors?: EmailColors;
   /** Whether to show the "Powered by better-auth" footer */
-  poweredBy?: boolean
+  poweredBy?: boolean;
   /** Whether to enable dark mode support */
-  darkMode?: boolean
+  darkMode?: boolean;
   /** Additional React nodes to inject into the email head */
-  head?: ReactNode
+  head?: ReactNode;
   /**
    * Localization overrides for customizing email text
    * @remarks `PasswordChangedEmailLocalization`
    */
-  localization?: Partial<PasswordChangedEmailLocalization>
+  localization?: Partial<PasswordChangedEmailLocalization>;
 }
 
 /**
@@ -120,10 +118,10 @@ export const PasswordChangedEmail = ({
 }: PasswordChangedEmailProps) => {
   const localization = {
     ...PasswordChangedEmail.localization,
-    ...props.localization
-  }
+    ...props.localization,
+  };
 
-  const previewText = localization.YOUR_PASSWORD_HAS_BEEN_CHANGED
+  const previewText = localization.YOUR_PASSWORD_HAS_BEEN_CHANGED;
 
   return (
     <Html>
@@ -143,13 +141,13 @@ export const PasswordChangedEmail = ({
           <Container
             className={cn(
               "mx-auto my-auto max-w-xl px-2 py-10",
-              classNames?.container
+              classNames?.container,
             )}
           >
             <Section
               className={cn(
-                "bg-card text-card-foreground rounded-none border border-border p-8",
-                classNames?.card
+                "bg-card text-card-foreground border-border rounded-none border p-8",
+                classNames?.card,
               )}
             >
               {logoURL &&
@@ -169,8 +167,8 @@ export const PasswordChangedEmail = ({
                       height={48}
                       alt={appName || localization.LOGO}
                       className={cn(
-                        "mx-auto mb-8 logo-light",
-                        classNames?.logo
+                        "logo-light mx-auto mb-8",
+                        classNames?.logo,
                       )}
                     />
                     <Img
@@ -179,8 +177,8 @@ export const PasswordChangedEmail = ({
                       height={48}
                       alt={appName || localization.LOGO}
                       className={cn(
-                        "hidden mx-auto mb-8 logo-dark",
-                        classNames?.logo
+                        "logo-dark mx-auto mb-8 hidden",
+                        classNames?.logo,
                       )}
                     />
                   </>
@@ -189,7 +187,7 @@ export const PasswordChangedEmail = ({
               <Heading
                 className={cn(
                   "m-0 mb-5 text-2xl font-semibold",
-                  classNames?.title
+                  classNames?.title,
                 )}
               >
                 {localization.PASSWORD_CHANGED_SUCCESSFULLY}
@@ -200,13 +198,13 @@ export const PasswordChangedEmail = ({
                   const textWithAppName =
                     localization.PASSWORD_FOR_YOUR_ACCOUNT_CHANGED.replace(
                       "{appName}",
-                      appName || ""
+                      appName || "",
                     )
                       .replace(/\s{2,}/g, " ")
-                      .replace(" .", ".")
+                      .replace(" .", ".");
 
                   const [beforeUserEmail, afterUserEmail] =
-                    textWithAppName.split("{userEmail}")
+                    textWithAppName.split("{userEmail}");
 
                   return email ? (
                     <>
@@ -226,21 +224,21 @@ export const PasswordChangedEmail = ({
                       .replace("{userEmail}", "")
                       .replace(/\s{2,}/g, " ")
                       .replace(" .", ".")
-                  )
+                  );
                 })()}
               </Text>
 
               {timestamp && (
                 <Section
                   className={cn(
-                    "my-6 border border-border bg-muted p-4",
-                    classNames?.codeBlock
+                    "border-border bg-muted my-6 border p-4",
+                    classNames?.codeBlock,
                   )}
                 >
                   <Text
                     className={cn(
-                      "m-0 mb-2 text-xs text-muted-foreground",
-                      classNames?.description
+                      "text-muted-foreground m-0 mb-2 text-xs",
+                      classNames?.description,
                     )}
                   >
                     {localization.CHANGED_AT}:
@@ -248,7 +246,7 @@ export const PasswordChangedEmail = ({
                   <Text
                     className={cn(
                       "m-0 text-sm font-semibold",
-                      classNames?.content
+                      classNames?.content,
                     )}
                   >
                     {timestamp}
@@ -265,8 +263,8 @@ export const PasswordChangedEmail = ({
                   <Button
                     href={secureAccountURL}
                     className={cn(
-                      "inline-block whitespace-nowrap rounded-none text-sm font-medium py-2.5 px-6 bg-primary text-primary-foreground no-underline",
-                      classNames?.button
+                      "bg-primary text-primary-foreground inline-block rounded-none px-6 py-2.5 text-sm font-medium whitespace-nowrap no-underline",
+                      classNames?.button,
                     )}
                   >
                     {localization.I_DIDNT_MAKE_THIS_CHANGE}
@@ -276,16 +274,16 @@ export const PasswordChangedEmail = ({
 
               <Hr
                 className={cn(
-                  "my-6 w-full border border-solid border-border",
-                  classNames?.separator
+                  "border-border my-6 w-full border border-solid",
+                  classNames?.separator,
                 )}
               />
 
               {appName && (
                 <Text
                   className={cn(
-                    "mb-3 text-xs text-muted-foreground",
-                    classNames?.description
+                    "text-muted-foreground mb-3 text-xs",
+                    classNames?.description,
                   )}
                 >
                   {localization.EMAIL_SENT_BY.replace("{appName}", appName)}
@@ -294,15 +292,15 @@ export const PasswordChangedEmail = ({
 
               <Text
                 className={cn(
-                  "mt-3 text-xs text-muted-foreground",
-                  classNames?.description
+                  "text-muted-foreground mt-3 text-xs",
+                  classNames?.description,
                 )}
               >
                 {(() => {
                   const [beforeSupportEmail, afterSupportEmail] =
                     localization.IF_YOU_DIDNT_AUTHORIZE_THIS_CHANGE.split(
-                      "{supportEmail}"
-                    )
+                      "{supportEmail}",
+                    );
 
                   return supportEmail ? (
                     <>
@@ -311,7 +309,7 @@ export const PasswordChangedEmail = ({
                         href={`mailto:${supportEmail}`}
                         className={cn(
                           "text-primary underline",
-                          classNames?.link
+                          classNames?.link,
                         )}
                       >
                         {supportEmail}
@@ -321,24 +319,24 @@ export const PasswordChangedEmail = ({
                   ) : (
                     localization.IF_YOU_DIDNT_AUTHORIZE_THIS_CHANGE.replace(
                       "{supportEmail}",
-                      ""
+                      "",
                     )
                       .replace(/\s{2,}/g, " ")
                       .replace(" .", ".")
-                  )
+                  );
                 })()}
               </Text>
 
               {poweredBy && (
                 <Text
                   className={cn(
-                    "mt-4 mb-0 text-center text-[11px] text-muted-foreground",
-                    classNames?.poweredBy
+                    "text-muted-foreground mt-4 mb-0 text-center text-[11px]",
+                    classNames?.poweredBy,
                   )}
                 >
                   {(() => {
                     const [beforeBetterAuth, afterBetterAuth] =
-                      localization.POWERED_BY_BETTER_AUTH.split("{betterAuth}")
+                      localization.POWERED_BY_BETTER_AUTH.split("{betterAuth}");
 
                     return (
                       <>
@@ -347,14 +345,14 @@ export const PasswordChangedEmail = ({
                           href="https://better-auth.com"
                           className={cn(
                             "text-primary underline",
-                            classNames?.link
+                            classNames?.link,
                           )}
                         >
                           better-auth
                         </Link>
                         {afterBetterAuth}
                       </>
-                    )
+                    );
                   })()}
                 </Text>
               )}
@@ -363,10 +361,10 @@ export const PasswordChangedEmail = ({
         </Body>
       </Tailwind>
     </Html>
-  )
-}
+  );
+};
 
-PasswordChangedEmail.localization = passwordChangedEmailLocalization
+PasswordChangedEmail.localization = passwordChangedEmailLocalization;
 
 PasswordChangedEmail.PreviewProps = {
   email: "m@example.com",
@@ -374,7 +372,7 @@ PasswordChangedEmail.PreviewProps = {
   secureAccountURL: "https://better-auth-ui.com/settings/security",
   appName: "Better Auth",
   supportEmail: "support@example.com",
-  darkMode: true
-} as PasswordChangedEmailProps
+  darkMode: true,
+} as PasswordChangedEmailProps;
 
-export default PasswordChangedEmail
+export default PasswordChangedEmail;

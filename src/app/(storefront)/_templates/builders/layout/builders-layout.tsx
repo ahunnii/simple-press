@@ -4,6 +4,7 @@ import { Agdasima, Jost } from "next/font/google";
 
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { getSession } from "~/server/better-auth/server";
 
 import { BuildersFooter } from "./builders-footer";
 import { BuildersHeader } from "./builders-header";
@@ -24,7 +25,7 @@ export async function BuildersLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  await getBusinessFlags();
+  const [session] = await Promise.all([getSession(), getBusinessFlags()]);
 
   return (
     <div
@@ -63,7 +64,7 @@ export async function BuildersLayout({
       >
         Skip to main content
       </a>
-      <BuildersHeader business={business} />
+      <BuildersHeader business={business} initialSession={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>

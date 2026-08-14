@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -56,15 +57,14 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import {
-  SearchResultPreview,
-  SocialPreviewCard,
-} from "~/components/admin/seo-previews";
 import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
-import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
+import {
+  SearchResultPreview,
+  SocialPreviewCard,
+} from "~/components/admin/seo-previews";
 import { AdminFormMoreMenu } from "~/app/admin/_components/admin-form-more-menu";
 import {
   erroredTabsFor,
@@ -840,7 +840,9 @@ export function BlogPostEditor({
                           form={form}
                           name="metaTitle"
                           label="Meta Title"
-                          placeholder={form.watch("title") || "All About a Thing"}
+                          placeholder={
+                            form.watch("title") || "All About a Thing"
+                          }
                           description={
                             <span
                               className={

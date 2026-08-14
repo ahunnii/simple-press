@@ -48,7 +48,8 @@ export function PinkCartDrawer({
   checkoutLabel = "Checkout",
   noteText = "Shipping and taxes are calculated at checkout.",
 }: PinkCartDrawerProps) {
-  const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } = useCart();
+  const { items, subtotal, isOpen, setIsOpen, updateQuantity, removeItem } =
+    useCart();
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -77,7 +78,11 @@ export function PinkCartDrawer({
             <div className="flex items-center justify-between">
               <span
                 className="pink-display"
-                style={{ fontSize: "18px", fontWeight: 600, color: "var(--pink-paper)" }}
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "var(--pink-paper)",
+                }}
               >
                 {title}
               </span>
@@ -92,15 +97,25 @@ export function PinkCartDrawer({
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-            <ShoppingBag className="h-6 w-6" style={{ color: "var(--pink-ink-line-strong)" }} />
+            <ShoppingBag
+              className="h-6 w-6"
+              style={{ color: "var(--pink-ink-line-strong)" }}
+            />
             <div className="flex flex-col gap-1.5">
               <p
                 className="pink-display"
-                style={{ fontSize: "18px", fontWeight: 600, color: "var(--pink-paper)" }}
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "var(--pink-paper)",
+                }}
               >
                 {emptyHeading}
               </p>
-              <p className="text-[13px]" style={{ color: "var(--pink-ink-muted)" }}>
+              <p
+                className="text-[13px]"
+                style={{ color: "var(--pink-ink-muted)" }}
+              >
                 {emptyBody}
               </p>
             </div>
@@ -127,7 +142,11 @@ export function PinkCartDrawer({
                 >
                   <div
                     className="relative shrink-0 overflow-hidden"
-                    style={{ width: 64, aspectRatio: "4 / 5", background: "var(--pink-ink-tint)" }}
+                    style={{
+                      width: 64,
+                      aspectRatio: "4 / 5",
+                      background: "var(--pink-ink-tint)",
+                    }}
                   >
                     <Image
                       src={item.imageUrl ?? "/placeholder.svg"}
@@ -139,22 +158,34 @@ export function PinkCartDrawer({
                   </div>
 
                   <div className="flex min-w-0 flex-col gap-1.5">
-                    <p className="truncate text-[13px] font-medium" style={{ color: "var(--pink-paper)" }}>
+                    <p
+                      className="truncate text-[13px] font-medium"
+                      style={{ color: "var(--pink-paper)" }}
+                    >
                       {item.productName}
                     </p>
                     {item.variantName && (
-                      <p className="text-[11px]" style={{ color: "var(--pink-ink-subtle)" }}>
+                      <p
+                        className="text-[11px]"
+                        style={{ color: "var(--pink-ink-subtle)" }}
+                      >
                         {item.variantName}
                       </p>
                     )}
                     <div
                       className="mt-1 flex w-fit items-center"
-                      style={{ border: "1px solid var(--pink-ink-line-strong)" }}
+                      style={{
+                        border: "1px solid var(--pink-ink-line-strong)",
+                      }}
                     >
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item.productId, item.variantId, item.quantity - 1)
+                          updateQuantity(
+                            item.productId,
+                            item.variantId,
+                            item.quantity - 1,
+                          )
                         }
                         disabled={item.quantity <= 1}
                         aria-label="Decrease quantity"
@@ -174,7 +205,11 @@ export function PinkCartDrawer({
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item.productId, item.variantId, item.quantity + 1)
+                          updateQuantity(
+                            item.productId,
+                            item.variantId,
+                            item.quantity + 1,
+                          )
                         }
                         aria-label="Increase quantity"
                         className="flex h-8 w-8 items-center justify-center"
@@ -193,7 +228,10 @@ export function PinkCartDrawer({
                     </button>
                   </div>
 
-                  <span className="shrink-0 text-[13px] font-medium" style={{ color: "var(--pink-paper)" }}>
+                  <span
+                    className="shrink-0 text-[13px] font-medium"
+                    style={{ color: "var(--pink-paper)" }}
+                  >
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
@@ -206,7 +244,14 @@ export function PinkCartDrawer({
             >
               <div className="flex items-baseline justify-between">
                 <span className="pink-label-dark">Subtotal</span>
-                <span className="pink-display" style={{ fontSize: "16px", fontWeight: 600, color: "var(--pink-paper)" }}>
+                <span
+                  className="pink-display"
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: "var(--pink-paper)",
+                  }}
+                >
                   {formatPrice(subtotal)}
                 </span>
               </div>
@@ -221,7 +266,10 @@ export function PinkCartDrawer({
               </Link>
 
               {noteText && (
-                <p className="text-center text-[12px]" style={{ color: "var(--pink-ink-subtle)" }}>
+                <p
+                  className="text-center text-[12px]"
+                  style={{ color: "var(--pink-ink-subtle)" }}
+                >
                   {noteText}
                 </p>
               )}

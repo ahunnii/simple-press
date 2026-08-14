@@ -54,8 +54,14 @@ export function PinkProductActions({ product }: Props) {
 
   if (additionalFields?.comingSoon) {
     return (
-      <div className="flex flex-col gap-2 p-5" style={{ background: "var(--pink-panel)" }}>
-        <p className="pink-display" style={{ fontSize: "17px", fontWeight: 600 }}>
+      <div
+        className="flex flex-col gap-2 p-5"
+        style={{ background: "var(--pink-panel)" }}
+      >
+        <p
+          className="pink-display"
+          style={{ fontSize: "17px", fontWeight: 600 }}
+        >
           Coming soon
         </p>
         <p className="text-[14px]" style={{ color: "var(--pink-muted)" }}>
@@ -69,12 +75,21 @@ export function PinkProductActions({ product }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-baseline gap-3" style={{ borderTop: "1px solid var(--pink-ink)", paddingTop: "20px" }}>
-        <span className="pink-display" style={{ fontSize: "26px", fontWeight: 600 }}>
+      <div
+        className="flex items-baseline gap-3"
+        style={{ borderTop: "1px solid var(--pink-ink)", paddingTop: "20px" }}
+      >
+        <span
+          className="pink-display"
+          style={{ fontSize: "26px", fontWeight: 600 }}
+        >
           {formatPrice(displayPrice)}
         </span>
         {isOnSale && displayCompareAtPrice && (
-          <span className="text-[16px] line-through" style={{ color: "var(--pink-subtle)" }}>
+          <span
+            className="text-[16px] line-through"
+            style={{ color: "var(--pink-subtle)" }}
+          >
             {formatPrice(displayCompareAtPrice)}
           </span>
         )}
@@ -98,7 +113,10 @@ export function PinkProductActions({ product }: Props) {
             aria-disabled="true"
             onClick={(e) => e.preventDefault()}
             className="w-full cursor-not-allowed py-4 text-[14px] font-semibold"
-            style={{ background: "var(--pink-line)", color: "var(--pink-subtle)" }}
+            style={{
+              background: "var(--pink-line)",
+              color: "var(--pink-subtle)",
+            }}
           >
             Sold out
           </button>
@@ -114,7 +132,10 @@ export function PinkProductActions({ product }: Props) {
       ) : (
         <>
           <div className="flex items-stretch gap-3">
-            <div className="flex items-center" style={{ border: "1px solid var(--pink-ink)" }}>
+            <div
+              className="flex items-center"
+              style={{ border: "1px solid var(--pink-ink)" }}
+            >
               <button
                 type="button"
                 onClick={handleDecrement}
@@ -125,7 +146,11 @@ export function PinkProductActions({ product }: Props) {
               >
                 <Minus className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
-              <span className="w-10 text-center text-[15px]" aria-live="polite" aria-atomic="true">
+              <span
+                className="w-10 text-center text-[15px]"
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 {quantity}
               </span>
               <button
@@ -187,14 +212,24 @@ export function PinkProductActions({ product }: Props) {
           set in admin. Silently unused before this fix (review 2026-07-29,
           F7). Rendered as a restrained check row, not a badge wall. */}
       {displayTrustBadges.length > 0 && (
-        <ul className="flex flex-col gap-1.5" style={{ borderTop: "1px solid var(--pink-line)", paddingTop: "16px" }}>
+        <ul
+          className="flex flex-col gap-1.5"
+          style={{
+            borderTop: "1px solid var(--pink-line)",
+            paddingTop: "16px",
+          }}
+        >
           {displayTrustBadges.map((badge, i) => (
             <li
               key={`${badge.label}-${i}`}
               className="flex items-center gap-2 text-[13px]"
               style={{ color: "var(--pink-muted)" }}
             >
-              <badge.Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--pink-rose)" }} aria-hidden="true" />
+              <badge.Icon
+                className="h-3.5 w-3.5 shrink-0"
+                style={{ color: "var(--pink-rose)" }}
+                aria-hidden="true"
+              />
               {badge.label}
             </li>
           ))}

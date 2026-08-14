@@ -187,7 +187,9 @@ export function PinkMobileMenu({
             style={{
               fontSize: "24px",
               fontWeight: 600,
-              color: isActive(link.href) ? "var(--pink-blush)" : "var(--pink-paper)",
+              color: isActive(link.href)
+                ? "var(--pink-blush)"
+                : "var(--pink-paper)",
             }}
           >
             {link.label}

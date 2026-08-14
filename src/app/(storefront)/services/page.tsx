@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { JsonLd } from "~/components/json-ld";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { buildPageMetadata } from "~/lib/seo";
 import { buildItemListSchema } from "~/lib/structured-data";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { getTemplate } from "../_templates/registry";
 

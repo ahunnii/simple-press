@@ -1,11 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, ExternalLink, Eye, EyeOff, Palette, Wrench } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Palette,
+  Wrench,
+} from "lucide-react";
 
-import { EDITOR_ADMIN_LINKS } from "~/app/editor/_lib/editor-admin-links";
 import type { TemplateSection } from "~/lib/template-sections";
 import { cn } from "~/lib/utils";
+import { EDITOR_ADMIN_LINKS } from "~/app/editor/_lib/editor-admin-links";
 
 export type SectionRailProps = {
   /** Sections belonging to the active page, already in template order. */
@@ -194,7 +201,7 @@ export function SectionRail({
             >
               <span className="min-w-0 flex-1 truncate">{link.label}</span>
               <ExternalLink
-                className="h-3 w-3 shrink-0 text-muted-foreground"
+                className="text-muted-foreground h-3 w-3 shrink-0"
                 aria-hidden="true"
               />
             </a>
@@ -213,9 +220,7 @@ export function SectionRail({
             onClick={onSelectTheme}
             className={cn(
               "group relative mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors",
-              themeActive
-                ? "bg-muted font-medium"
-                : "hover:bg-muted/60",
+              themeActive ? "bg-muted font-medium" : "hover:bg-muted/60",
             )}
           >
             {themeActive && (

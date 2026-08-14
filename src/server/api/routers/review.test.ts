@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { PUBLIC_REVIEW_SELECT } from "./review";
+
 // Importing the router pulls in `../trpc` → the real better-auth singleton,
 // whose construction eagerly fires `trustedOrigins()` (a live
 // `db.business.findMany()`) — an unhandled rejection against Postgres in the
 // DB-less unit project. Same stub as content.test.ts.
 vi.mock("~/server/better-auth", () => ({ auth: {} }));
-
-import { PUBLIC_REVIEW_SELECT } from "./review";
 
 /**
  * `review.listByProduct` is a `publicProcedure` — every storefront visitor's

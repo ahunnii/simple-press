@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { formatPrice, getEffectivePrice } from "~/lib/prices";
 import { slugify } from "~/lib/utils";
+import { api } from "~/trpc/react";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { api } from "~/trpc/react";
 
 import { PinkProductCard } from "../shared/pink-product-card";
 import { countH2Headings } from "./pink-blog-shared";
@@ -100,7 +100,11 @@ function PinkShareBlock() {
 /** "In this post" — auto-built TOC from the article's own H2s (design.md:
  * "one 15px row per H2 in page.content", sticky, ink hover). DOM-based (not
  * JSON-based) so the ids match exactly what TiptapRenderer produces. */
-function PinkPostToc({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | null> }) {
+function PinkPostToc({
+  contentRef,
+}: {
+  contentRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState("");
 
@@ -143,17 +147,30 @@ function PinkPostToc({ contentRef }: { contentRef: React.RefObject<HTMLDivElemen
   if (headings.length < 2) return null;
 
   return (
-    <nav aria-label="In this post" className="sticky hidden self-start lg:block" style={{ top: "110px" }}>
-      <p className="pink-label mb-3 pb-3" style={{ borderBottom: "1px solid var(--pink-ink)" }}>
+    <nav
+      aria-label="In this post"
+      className="sticky hidden self-start lg:block"
+      style={{ top: "110px" }}
+    >
+      <p
+        className="pink-label mb-3 pb-3"
+        style={{ borderBottom: "1px solid var(--pink-ink)" }}
+      >
         In this post
       </p>
       <ul className="flex flex-col">
         {headings.map((h) => (
-          <li key={h.id} style={{ borderBottom: "1px solid var(--pink-line-soft)" }}>
+          <li
+            key={h.id}
+            style={{ borderBottom: "1px solid var(--pink-line-soft)" }}
+          >
             <a
               href={`#${h.id}`}
               className="block py-2.5 text-[15px] transition-colors"
-              style={{ color: activeId === h.id ? "var(--pink-rose)" : "var(--pink-body)" }}
+              style={{
+                color:
+                  activeId === h.id ? "var(--pink-rose)" : "var(--pink-body)",
+              }}
             >
               {h.text}
             </a>
@@ -185,7 +202,10 @@ function PinkPostProductRail() {
   return (
     <aside aria-label="From the studio" className="hidden lg:block">
       <div className="sticky flex flex-col gap-5" style={{ top: "110px" }}>
-        <p className="pink-label pb-3" style={{ borderBottom: "1px solid var(--pink-ink)" }}>
+        <p
+          className="pink-label pb-3"
+          style={{ borderBottom: "1px solid var(--pink-ink)" }}
+        >
           From the studio
         </p>
         <div className="flex flex-col gap-6">

@@ -1,7 +1,7 @@
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { Product } from "~/types";
-import { isInStock } from "~/lib/product-stock";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isInStock } from "~/lib/product-stock";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "../index";
@@ -68,7 +68,10 @@ export function PinkShopPage({ business }: DefaultProductsPageTemplateProps) {
               {totalShown === 1 ? "piece shown" : "pieces shown"}
             </p>
             <p className="text-[15px]" style={{ color: "var(--pink-subtle)" }}>
-              <span className="font-semibold" style={{ color: "var(--pink-ink)" }}>
+              <span
+                className="font-semibold"
+                style={{ color: "var(--pink-ink)" }}
+              >
                 {readyToShip}
               </span>{" "}
               ready to ship
@@ -87,9 +90,11 @@ export function PinkShopPage({ business }: DefaultProductsPageTemplateProps) {
           href: f["pink.shop.filters-cta-href"] ?? "/contact",
         }}
         copy={{
-          addToBasketLabel: f["pink.shop.add-to-basket-label"] ?? "Add to basket",
+          addToBasketLabel:
+            f["pink.shop.add-to-basket-label"] ?? "Add to basket",
           addedLabel: f["pink.shop.add-to-basket-added-label"] ?? "Added ✓",
-          chooseOptionsLabel: f["pink.shop.choose-options-label"] ?? "Choose options",
+          chooseOptionsLabel:
+            f["pink.shop.choose-options-label"] ?? "Choose options",
           soldOutLabel: f["pink.shop.sold-out-label"] ?? "Sold out",
           loadMoreLabel: f["pink.shop.load-more-label"] ?? "Load more",
           emptyHeading: f["pink.shop.empty-heading"] ?? "Nothing here yet.",

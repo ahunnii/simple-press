@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { TxClient } from "~/server/db";
+
+import { runBulkSetPublished } from "./content";
+
 // `content.ts` pulls in `../trpc`, which imports the real `auth` (better-auth)
 // singleton from `~/server/better-auth`. Constructing that singleton eagerly
 // kicks off `trustedOrigins()` (src/server/better-auth/config.tsx), which
@@ -10,10 +14,6 @@ import { describe, expect, it, vi } from "vitest";
 // only ever referenced inside `createTRPCContext`'s body in trpc.ts, never at
 // module load, so an empty stub is enough.
 vi.mock("~/server/better-auth", () => ({ auth: {} }));
-
-import type { TxClient } from "~/server/db";
-
-import { runBulkSetPublished } from "./content";
 
 /**
  * `runBulkSetPublished` is the transactional body of `content.bulkSetPublished`

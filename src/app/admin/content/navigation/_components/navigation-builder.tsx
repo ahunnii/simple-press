@@ -257,12 +257,14 @@ export function NavigationBuilder({
       <div className="admin-container">
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
-          <AlertTitle>Custom items replace your template&apos;s menu</AlertTitle>
+          <AlertTitle>
+            Custom items replace your template&apos;s menu
+          </AlertTitle>
           <AlertDescription>
-            Once you add an item here, it replaces your template&apos;s
-            built-in navigation entirely — including the &quot;Nav
-            Label&quot; fields in the Site Editor. On some templates, it also
-            replaces the footer&apos;s link columns.
+            Once you add an item here, it replaces your template&apos;s built-in
+            navigation entirely — including the &quot;Nav Label&quot; fields in
+            the Site Editor. On some templates, it also replaces the
+            footer&apos;s link columns.
           </AlertDescription>
         </Alert>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

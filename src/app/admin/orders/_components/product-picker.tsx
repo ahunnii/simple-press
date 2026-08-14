@@ -1,6 +1,10 @@
 "use client";
 
-import type { Image as ProductImage, Product, ProductVariant } from "generated/prisma";
+import type {
+  Product,
+  Image as ProductImage,
+  ProductVariant,
+} from "generated/prisma";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Check, ChevronsUpDown, Package } from "lucide-react";
@@ -144,11 +148,20 @@ function ProductRow({
     <CommandItem value={searchValue} onSelect={onSelect} className="gap-3">
       {thumbnail ? (
         <div className="bg-muted relative h-9 w-9 shrink-0 overflow-hidden rounded">
-          <Image src={thumbnail.url} alt="" fill sizes="36px" className="object-cover" />
+          <Image
+            src={thumbnail.url}
+            alt=""
+            fill
+            sizes="36px"
+            className="object-cover"
+          />
         </div>
       ) : (
         <div className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded">
-          <Package aria-hidden="true" className="text-muted-foreground h-4 w-4" />
+          <Package
+            aria-hidden="true"
+            className="text-muted-foreground h-4 w-4"
+          />
         </div>
       )}
 
@@ -188,7 +201,9 @@ function StockLabel({ product }: { product: PickableProduct }) {
   }
 
   if (product.baseInventoryUnitId) {
-    return <span className="text-muted-foreground shrink-0 text-xs">Pooled</span>;
+    return (
+      <span className="text-muted-foreground shrink-0 text-xs">Pooled</span>
+    );
   }
 
   if (!product.trackInventory) return null;

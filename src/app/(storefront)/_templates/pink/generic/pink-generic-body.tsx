@@ -16,7 +16,11 @@ type Heading = { id: string; text: string };
  * design.md: "one 15px row per H2 in page.content", rendered only when
  * there are ≥2 H2s.
  */
-function PinkGenericToc({ contentRef }: { contentRef: React.RefObject<HTMLDivElement | null> }) {
+function PinkGenericToc({
+  contentRef,
+}: {
+  contentRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState("");
 
@@ -64,16 +68,25 @@ function PinkGenericToc({ contentRef }: { contentRef: React.RefObject<HTMLDivEle
       className="sticky hidden self-start lg:block"
       style={{ top: "var(--pink-sticky-top)" }}
     >
-      <p className="pink-label mb-3 pb-3" style={{ borderBottom: "1px solid var(--pink-ink)" }}>
+      <p
+        className="pink-label mb-3 pb-3"
+        style={{ borderBottom: "1px solid var(--pink-ink)" }}
+      >
         On this page
       </p>
       <ul className="flex flex-col">
         {headings.map((h) => (
-          <li key={h.id} style={{ borderBottom: "1px solid var(--pink-line-soft)" }}>
+          <li
+            key={h.id}
+            style={{ borderBottom: "1px solid var(--pink-line-soft)" }}
+          >
             <a
               href={`#${h.id}`}
               className="block py-2.5 text-[15px] transition-colors"
-              style={{ color: activeId === h.id ? "var(--pink-rose)" : "var(--pink-body)" }}
+              style={{
+                color:
+                  activeId === h.id ? "var(--pink-rose)" : "var(--pink-body)",
+              }}
             >
               {h.text}
             </a>
@@ -112,7 +125,12 @@ type Props = {
  * (`pink-generic-page.tsx`) resolves everything else and hands this off
  * (server → client handoff idiom).
  */
-export function PinkGenericBody({ content, isPolicy, updatedAt, sidebar }: Props) {
+export function PinkGenericBody({
+  content,
+  isPolicy,
+  updatedAt,
+  sidebar,
+}: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const hasToc = countH2Headings(content) >= 2;
 
@@ -140,7 +158,10 @@ export function PinkGenericBody({ content, isPolicy, updatedAt, sidebar }: Props
                 Last updated · {formatUpdated(updatedAt)}
               </p>
             )}
-            <TiptapRenderer content={content as TiptapJSON} className="pink-prose max-w-[74ch]" />
+            <TiptapRenderer
+              content={content as TiptapJSON}
+              className="pink-prose max-w-[74ch]"
+            />
           </div>
           {!hasToc && sidebar}
         </div>

@@ -387,7 +387,9 @@ export function PoolsTable({
 
                           <TableCell className={TD}>
                             <div className="flex items-center gap-2">
-                              <span className={`min-w-[4ch] text-right tabular-nums ${qtyTone(pool)}`}>
+                              <span
+                                className={`min-w-[4ch] text-right tabular-nums ${qtyTone(pool)}`}
+                              >
                                 {pool.inventoryQty}
                               </span>
                               <Button

@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-
 type PinkCtaLink = { label: string; href: string };
 
 type PinkCtaPanelProps = {
@@ -73,7 +72,10 @@ export function PinkCtaPanel({
               </Link>
             )}
             {secondaryCta && (
-              <Link href={secondaryCta.href} className="pink-btn pink-btn-ghost">
+              <Link
+                href={secondaryCta.href}
+                className="pink-btn pink-btn-ghost"
+              >
                 {secondaryCta.label}
               </Link>
             )}
@@ -89,7 +91,10 @@ export function PinkCtaPanel({
           className={`grid gap-3 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
         >
           {images.slice(0, 2).map((img, i) => (
-            <div key={img.src + i} className="relative aspect-square overflow-hidden">
+            <div
+              key={img.src + i}
+              className="relative aspect-square overflow-hidden"
+            >
               <Image
                 src={img.src || "/placeholder.svg"}
                 alt={img.alt}

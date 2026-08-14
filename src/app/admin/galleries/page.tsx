@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+import type { FilterDefFor } from "../_components/admin-filters";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
   GALLERY_LAYOUT_FILTER_DEFAULT,
@@ -11,9 +12,12 @@ import {
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 
-import type { FilterDefFor } from "../_components/admin-filters";
 import { TrailHeader } from "../_components/trail-header";
-import { buildTablePage, matchesAllTokens, pickParam } from "../_lib/table-query";
+import {
+  buildTablePage,
+  matchesAllTokens,
+  pickParam,
+} from "../_lib/table-query";
 import { GalleriesList } from "./_components/galleries-list";
 
 type Props = {
@@ -73,7 +77,11 @@ export default async function GalleriesPage({ searchParams }: Props) {
     GALLERY_LAYOUT_FILTER_VALUES,
     GALLERY_LAYOUT_FILTER_DEFAULT,
   );
-  const sort = pickParam(params.sort, GALLERY_SORT_VALUES, GALLERY_SORT_DEFAULT);
+  const sort = pickParam(
+    params.sort,
+    GALLERY_SORT_VALUES,
+    GALLERY_SORT_DEFAULT,
+  );
 
   const [galleries, usage] = await Promise.all([
     api.gallery.list().catch(rethrowTrpcForErrorBoundary),
@@ -114,9 +122,13 @@ export default async function GalleriesPage({ searchParams }: Props) {
         case "name-desc":
           return b.name.localeCompare(a.name);
         case "most-images":
-          return b._count.images - a._count.images || a.name.localeCompare(b.name);
+          return (
+            b._count.images - a._count.images || a.name.localeCompare(b.name)
+          );
         case "fewest-images":
-          return a._count.images - b._count.images || a.name.localeCompare(b.name);
+          return (
+            a._count.images - b._count.images || a.name.localeCompare(b.name)
+          );
         case "recently-updated":
         default: // must match GALLERY_SORT_DEFAULT
           return b.updatedAt.getTime() - a.updatedAt.getTime();

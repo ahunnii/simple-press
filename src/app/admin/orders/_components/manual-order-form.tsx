@@ -18,17 +18,17 @@ import {
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { PickableProduct } from "./product-picker";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { ManualOrderFormValues } from "~/lib/validators/order";
-import type { PickableProduct } from "./product-picker";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { dollarsToCents, formatPrice } from "~/lib/prices";
 import { cn } from "~/lib/utils";
-import { resolveVariantPrice } from "~/lib/variant-price";
 import {
   computeManualOrderTotals,
   manualOrderFormSchema,
 } from "~/lib/validators/order";
+import { resolveVariantPrice } from "~/lib/variant-price";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
@@ -62,6 +62,7 @@ import {
 } from "~/components/ui/select";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+
 import { CustomerPicker } from "./customer-picker";
 import { ProductPicker } from "./product-picker";
 
@@ -214,7 +215,8 @@ export function ManualOrderForm({ products, allowedCountries }: Props) {
       }
     }
 
-    const captureAddress = data.includeAddress && data.deliveryMethod === "ship";
+    const captureAddress =
+      data.includeAddress && data.deliveryMethod === "ship";
     const trimmedShippingName = data.shippingName?.trim() ?? "";
     const recipientName =
       trimmedShippingName === "" ? data.customerName : trimmedShippingName;

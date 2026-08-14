@@ -4,9 +4,9 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import type { AdminRole } from "~/app/admin/_lib/admin-nav";
-import { isPathAllowedForRole } from "~/app/admin/_lib/admin-nav";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
+import { isPathAllowedForRole } from "~/app/admin/_lib/admin-nav";
 
 export type RequireAdminAccessResult = {
   session: NonNullable<Awaited<ReturnType<typeof getSession>>>;
@@ -77,10 +77,7 @@ export async function requireAdminAccess(
       business.id,
       session.user.id,
     );
-    if (
-      !membership ||
-      !allowedRoles.includes(membership.role as AdminRole)
-    ) {
+    if (!membership || !allowedRoles.includes(membership.role as AdminRole)) {
       redirect("/not-permitted");
     }
     membershipRole = membership.role as AdminRole;

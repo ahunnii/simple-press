@@ -259,7 +259,10 @@ export function PinkHeroSection({
             and the header wordmark plus the H1 already say it in the
             accessibility tree. The overflow mask is what the `.pink-anim-rise`
             translate reveals against, so it wraps either build. */}
-        <div aria-hidden="true" className="pink-hero-wordmark-wrap w-full overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pink-hero-wordmark-wrap w-full overflow-hidden"
+        >
           <span
             className="pink-anim-rise block"
             style={{ animationDelay: ".3s" }}

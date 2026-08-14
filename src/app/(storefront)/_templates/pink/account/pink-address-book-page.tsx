@@ -1,8 +1,8 @@
 "use client";
 
 import type { AccountAddressBookPageProps } from "../../types";
-import { AddressBookContent } from "~/app/(storefront)/_components/account/address-components";
 import { PageTransition } from "~/components/page-animations";
+import { AddressBookContent } from "~/app/(storefront)/_components/account/address-components";
 
 import { PinkAccountLayout } from "./pink-account-layout";
 

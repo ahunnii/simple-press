@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+
 import { PlatformListFilters } from "../_components/platform-list-filters";
 import { PlatformListPagination } from "../_components/platform-list-pagination";
 import { PlatformTrailHeader } from "../_components/platform-trail-header";
@@ -71,7 +72,7 @@ export default async function PlatformNotesPage({ searchParams }: Props) {
           </div>
         </div>
 
-        <div className="mb-6 flex items-center gap-1 rounded-lg border bg-white p-1 w-fit">
+        <div className="mb-6 flex w-fit items-center gap-1 rounded-lg border bg-white p-1">
           {STATUS_TABS.map((tab) => (
             <Link
               key={tab.value}

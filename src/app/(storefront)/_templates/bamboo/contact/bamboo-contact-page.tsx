@@ -4,12 +4,12 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { FadeIn, PageTransition } from "~/components/page-animations";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { FadeIn, PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
-import { BambooContactForm } from "./bamboo-contact-form";
 import { BambooMap } from "../shared/bamboo-map";
+import { BambooContactForm } from "./bamboo-contact-form";
 
 export function BambooContactPage({
   business,

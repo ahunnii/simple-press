@@ -4,7 +4,9 @@ import { computeNavigationIntercept } from "./navigation-guard-context";
 
 const CURRENT = "https://admin.example.com/admin/products/123";
 
-function base(overrides: Partial<Parameters<typeof computeNavigationIntercept>[0]> = {}) {
+function base(
+  overrides: Partial<Parameters<typeof computeNavigationIntercept>[0]> = {},
+) {
   return {
     hasActiveBlocker: true,
     defaultPrevented: false,

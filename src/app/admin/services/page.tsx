@@ -4,7 +4,11 @@ import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
-import { buildTablePage, matchesAllTokens, pickParam } from "../_lib/table-query";
+import {
+  buildTablePage,
+  matchesAllTokens,
+  pickParam,
+} from "../_lib/table-query";
 import { ServicesClient } from "./_components/services-client";
 
 type Props = {

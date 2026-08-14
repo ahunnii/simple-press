@@ -1,38 +1,40 @@
-"use client"
+"use client";
 
-import { getViewURL } from "@better-auth-ui/core"
+import type { SyntheticEvent } from "react";
+import { useState } from "react";
+import { getViewURL } from "@better-auth-ui/core";
 import {
   useAuth,
   useFetchOptions,
-  useRequestPasswordReset
-} from "@better-auth-ui/react"
-import { type SyntheticEvent, useState } from "react"
+  useRequestPasswordReset,
+} from "@better-auth-ui/react";
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+import type { AuthErrorInfo } from "~/lib/auth/auth-error-messages";
+import { resolveAuthErrorMessage } from "~/lib/auth/auth-error-messages";
+import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
-  FieldLabel
-} from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
-import { Spinner } from "~/components/ui/spinner"
-import { cn } from "~/lib/utils"
-import { RESET_LINK_SENT_STORAGE_KEY } from "./reset-link-sent"
+  FieldLabel,
+} from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
+import { Spinner } from "~/components/ui/spinner";
+
+import { AuthErrorAlert } from "./auth-error-alert";
+import { RESET_LINK_SENT_STORAGE_KEY } from "./reset-link-sent";
+
 // SIMPLEPRESS LOCAL ADDITION (imports) — inline auth error reporting.
 // Re-apply after re-fetching this file from the Better Auth UI registry.
-import {
-  type AuthErrorInfo,
-  resolveAuthErrorMessage
-} from "~/lib/auth/auth-error-messages"
-import { AuthErrorAlert } from "./auth-error-alert"
+
 // END SIMPLEPRESS LOCAL ADDITION (imports)
 
 export type ForgotPasswordProps = {
-  className?: string
-}
+  className?: string;
+};
 
 /**
  * Render a card-based "Forgot Password" form that sends a password-reset email.
@@ -54,35 +56,35 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
     navigate,
     plugins,
     viewPaths,
-    Link
-  } = useAuth()
+    Link,
+  } = useAuth();
 
-  const { fetchOptions, resetFetchOptions } = useFetchOptions()
+  const { fetchOptions, resetFetchOptions } = useFetchOptions();
 
   // SIMPLEPRESS LOCAL ADDITION — inline auth error, rendered in the form
   // instead of only as a toast. Re-apply after a registry re-fetch.
-  const [authError, setAuthError] = useState<AuthErrorInfo | null>(null)
+  const [authError, setAuthError] = useState<AuthErrorInfo | null>(null);
   // END SIMPLEPRESS LOCAL ADDITION
 
   const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset(
     authClient,
     {
       onError: (error) => {
-        resetFetchOptions()
+        resetFetchOptions();
 
         // SIMPLEPRESS LOCAL ADDITION — additive; the reset above is upstream.
-        setAuthError(resolveAuthErrorMessage(error))
+        setAuthError(resolveAuthErrorMessage(error));
         // END SIMPLEPRESS LOCAL ADDITION
       },
       onSuccess: (_data, { email }) => {
-        sessionStorage.setItem(RESET_LINK_SENT_STORAGE_KEY, email)
-        navigate({ to: `${basePaths.auth}/${viewPaths.auth.resetLinkSent}` })
-      }
-    }
-  )
+        sessionStorage.setItem(RESET_LINK_SENT_STORAGE_KEY, email);
+        navigate({ to: `${basePaths.auth}/${viewPaths.auth.resetLinkSent}` });
+      },
+    },
+  );
 
   function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
-    e.preventDefault()
+    e.preventDefault();
 
     // SIMPLEPRESS LOCAL ADDITION — clear the previous failure, then refuse to
     // submit an unsolved captcha.
@@ -92,35 +94,35 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
     // the request when the header is absent.
     //
     // Re-apply after a registry re-fetch.
-    setAuthError(null)
+    setAuthError(null);
 
     if (Captcha && !fetchOptions?.headers?.["x-captcha-response"]) {
       setAuthError(
-        resolveAuthErrorMessage({ error: { code: "MISSING_RESPONSE" } })
-      )
-      return
+        resolveAuthErrorMessage({ error: { code: "MISSING_RESPONSE" } }),
+      );
+      return;
     }
     // END SIMPLEPRESS LOCAL ADDITION
 
-    const formData = new FormData(e.currentTarget)
+    const formData = new FormData(e.currentTarget);
     requestPasswordReset({
       email: formData.get("email") as string,
       redirectTo: getViewURL(
         baseURL,
         basePaths.auth,
-        viewPaths.auth.resetPassword
+        viewPaths.auth.resetPassword,
       ),
-      fetchOptions
-    })
+      fetchOptions,
+    });
   }
 
   const Captcha = plugins.find(
-    (plugin) => plugin.captchaComponent
-  )?.captchaComponent
+    (plugin) => plugin.captchaComponent,
+  )?.captchaComponent;
 
   const [fieldErrors, setFieldErrors] = useState<{
-    email?: string
-  }>({})
+    email?: string;
+  }>({});
 
   return (
     <Card className={cn("w-full max-w-sm", className)}>
@@ -147,20 +149,20 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
                 onChange={() => {
                   setFieldErrors((prev) => ({
                     ...prev,
-                    email: undefined
-                  }))
+                    email: undefined,
+                  }));
                 }}
                 onInvalid={(e) => {
-                  e.preventDefault()
-                  const el = e.target as HTMLInputElement
+                  e.preventDefault();
+                  const el = e.target as HTMLInputElement;
                   const msg = el.validity.valueMissing
                     ? localization.auth.fieldRequired
-                    : localization.auth.invalidEmail
+                    : localization.auth.invalidEmail;
 
                   setFieldErrors((prev) => ({
                     ...prev,
-                    email: msg
-                  }))
+                    email: msg,
+                  }));
                 }}
                 aria-invalid={!!fieldErrors.email}
               />
@@ -196,7 +198,7 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
           </FieldGroup>
         </form>
 
-        <div className="flex flex-col gap-3 items-center w-full mt-4">
+        <div className="mt-4 flex w-full flex-col items-center gap-3">
           <FieldDescription className="text-center">
             {localization.auth.rememberYourPassword}{" "}
             <Link
@@ -209,5 +211,5 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

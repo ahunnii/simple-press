@@ -4,12 +4,12 @@ import { writeFileSync } from "node:fs";
 // SKIP_ENV_VALIDATION before `~/server/db` (via the factories) constructs.
 import "../tests/helpers/test-env";
 
-import type { SeedTenant } from "./global-setup";
-
 // better-auth's own password hasher (scrypt) — used to seed a credential
 // `Account` row directly, bypassing the real /sign-up/email flow (which would
 // leave the user unverified and unable to sign in; see SEED_USER's doc comment).
 import { hashPassword } from "better-auth/crypto";
+
+import type { SeedTenant } from "./global-setup";
 
 import { db } from "../tests/helpers/db";
 import { createBusiness, createProduct } from "../tests/helpers/factories";

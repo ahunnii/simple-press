@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ChevronDown, Heart, Menu, ShoppingBag } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";

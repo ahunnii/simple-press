@@ -17,8 +17,8 @@ import { toast } from "sonner";
 
 import type { BulkAction } from "../../_components/admin-bulk-bar";
 import type { AdminFilterDef } from "../../_components/admin-filters";
-import type { RouterOutputs } from "~/trpc/react";
 import type { DiscountStatus } from "~/lib/validators/discounts";
+import type { RouterOutputs } from "~/trpc/react";
 import {
   ADMIN_BULK_DELETE_LIMIT,
   ADMIN_BULK_SELECTION_LIMIT,
@@ -504,7 +504,9 @@ export function DiscountsClient({
             <>
               <Card className={TABLE_CARD}>
                 <Table>
-                  <TableCaption className="sr-only">Discount codes</TableCaption>
+                  <TableCaption className="sr-only">
+                    Discount codes
+                  </TableCaption>
                   <TableHeader>
                     <TableRow>
                       <TableHead scope="col" className={`w-10 ${TH_CHECKBOX}`}>
@@ -620,7 +622,9 @@ export function DiscountsClient({
                           </TableCell>
 
                           <TableCell className={`hidden md:table-cell ${TD}`}>
-                            <Badge variant={STATUS_BADGE_VARIANT[discount.status]}>
+                            <Badge
+                              variant={STATUS_BADGE_VARIANT[discount.status]}
+                            >
                               {statusText(discount)}
                             </Badge>
                           </TableCell>
@@ -682,12 +686,13 @@ export function DiscountsClient({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteTarget ? `Delete “${deleteTarget.code}”?` : "Delete Discount?"}
+              {deleteTarget
+                ? `Delete “${deleteTarget.code}”?`
+                : "Delete Discount?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Shoppers will no longer be able to redeem it. Orders that
-              already used this code keep their records. This action cannot
-              be undone.
+              Shoppers will no longer be able to redeem it. Orders that already
+              used this code keep their records. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

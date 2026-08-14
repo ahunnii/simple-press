@@ -88,8 +88,8 @@ export function AcceptInviteClient({ code, invite, errorMessage }: Props) {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm">
-            Sign in or create an account with <strong>{invite.email}</strong>{" "}
-            to accept this invitation.
+            Sign in or create an account with <strong>{invite.email}</strong> to
+            accept this invitation.
           </p>
         </CardContent>
         <CardFooter className="flex gap-3">

@@ -3,11 +3,11 @@ import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { TxClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
 import { isPreviewDraft } from "~/lib/preview/preview-draft";
-import type { TxClient } from "~/server/db";
 import {
   cmsPageDraftSchema,
   pageSchema,
@@ -232,15 +232,39 @@ export const contentRouter = createTRPCRouter({
           await ctx.db.$transaction(async (tx) => {
             const sc = await upsertSiteContent(tx);
 
+            // `{ previewDraft: { not: Prisma.DbNull } }` looks like the right
+            // filter here, but it silently fails to match a `{}` residue row
+            // (see `isPreviewDraft`) — so a stuck `{}` could never be healed
+            // by a Publish either. Select id + previewDraft for the whole
+            // business instead (cheap — page counts are small) and decide in
+            // JS what each row is.
             const drafts = await tx.page.findMany({
-              where: { businessId, previewDraft: { not: Prisma.DbNull } },
+              where: { businessId },
               select: { id: true, previewDraft: true },
             });
 
             for (const p of drafts) {
+              if (p.previewDraft === null) continue;
+
+              if (!isPreviewDraft(p.previewDraft)) {
+                // `{}` residue is not a real draft, but publish clears it
+                // anyway (a harmless heal) so the editor's "Unpublished
+                // changes" pill can't stay stuck lit on a page nobody
+                // actually edited after a Publish.
+                await tx.page.update({
+                  where: { id: p.id },
+                  data: {
+                    previewDraft: Prisma.DbNull,
+                    previewDraftUpdatedAt: null,
+                  },
+                });
+                continue;
+              }
+
               const parsed = cmsPageDraftValueSchema.safeParse(p.previewDraft);
-              // Skip a malformed draft silently — a bad row must not fail the
-              // whole publish.
+              // Skip a malformed (but non-empty) draft silently — a bad row
+              // must not fail the whole publish, and unlike `{}` residue we
+              // don't know it's safe to discard.
               if (!parsed.success) continue;
               await tx.page.update({
                 where: { id: p.id },
@@ -307,22 +331,42 @@ export const contentRouter = createTRPCRouter({
   discardEditorDrafts: ownerAdminProcedure.mutation(async ({ ctx }) => {
     const { businessId } = ctx;
 
-    await ctx.db.$transaction([
-      ctx.db.siteContent.updateMany({
+    await ctx.db.$transaction(async (tx) => {
+      await tx.siteContent.updateMany({
         where: { businessId },
         data: {
           previewCustomFields: Prisma.JsonNull,
           previewUpdatedAt: null,
         },
-      }),
-      ctx.db.page.updateMany({
-        where: { businessId, previewDraft: { not: Prisma.DbNull } },
-        data: {
-          previewDraft: Prisma.DbNull,
-          previewDraftUpdatedAt: null,
-        },
-      }),
-    ]);
+      });
+
+      // `{ previewDraft: { not: Prisma.DbNull } }` looks like the right
+      // filter here too, but it silently fails to match a `{}` residue row
+      // (see `isPreviewDraft`) — so that row could never be cleared, and
+      // `getEditorPages`'s "Unpublished changes" pill would stay lit forever.
+      // Select id + previewDraft for the whole business instead (cheap —
+      // page counts are small) and filter in JS. Unlike the publish path
+      // above, discard clears BOTH real drafts and `{}` residue — it never
+      // inspects a draft's content, so there is no distinction worth
+      // preserving; anything non-null is scrubbed.
+      const candidates = await tx.page.findMany({
+        where: { businessId },
+        select: { id: true, previewDraft: true },
+      });
+      const idsToClear = candidates
+        .filter((p) => p.previewDraft !== null)
+        .map((p) => p.id);
+
+      if (idsToClear.length > 0) {
+        await tx.page.updateMany({
+          where: { id: { in: idsToClear } },
+          data: {
+            previewDraft: Prisma.DbNull,
+            previewDraftUpdatedAt: null,
+          },
+        });
+      }
+    });
 
     return { ok: true };
   }),
@@ -488,22 +532,28 @@ export const contentRouter = createTRPCRouter({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
 
-    return pages.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      type: p.type as "page" | "blog",
-      published: p.published,
-      live: { title: p.title, excerpt: p.excerpt, content: p.content },
-      draft:
-        p.previewDraft == null
-          ? null
-          : (p.previewDraft as unknown as {
-              title: string;
-              excerpt: string | null;
-              content: unknown;
-            }),
-      hasDraft: p.previewDraft != null,
-    }));
+    return pages.map((p) => {
+      // A cleared draft can come back as `{}` instead of JSON null (see
+      // `isPreviewDraft`) — normalize it to "no draft" the same way
+      // `getEditorState` does for `SiteContent.previewCustomFields`, or a
+      // `{}` row reports `hasDraft: true` here even after discard/publish
+      // have healed it elsewhere, and the editor's `draft ?? live` resolves
+      // to `{}`, crashing the CMS page panel on missing fields.
+      const draft = isPreviewDraft(p.previewDraft) ? p.previewDraft : null;
+      return {
+        id: p.id,
+        slug: p.slug,
+        type: p.type as "page" | "blog",
+        published: p.published,
+        live: { title: p.title, excerpt: p.excerpt, content: p.content },
+        draft: draft as {
+          title: string;
+          excerpt: string | null;
+          content: unknown;
+        } | null,
+        hasDraft: draft !== null,
+      };
+    });
   }),
 
   /**
@@ -655,8 +705,11 @@ export const contentRouter = createTRPCRouter({
       // unconditionally; for an authorized preview the draft *values* are
       // swapped into title/excerpt/content below instead.
       const previewDraft = page.previewDraft;
-      const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
-        rest)(page);
+      const safe = (({
+        previewDraft: _pd,
+        previewDraftUpdatedAt: _pu,
+        ...rest
+      }) => rest)(page);
 
       if (isPreview && previewDraft != null) {
         const parsed = cmsPageDraftValueSchema.safeParse(previewDraft);
@@ -706,8 +759,11 @@ export const contentRouter = createTRPCRouter({
       // unconditionally; for an authorized preview the draft *values* are
       // swapped into title/excerpt/content below instead.
       const previewDraft = page.previewDraft;
-      const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
-        rest)(page);
+      const safe = (({
+        previewDraft: _pd,
+        previewDraftUpdatedAt: _pu,
+        ...rest
+      }) => rest)(page);
 
       // An unpublished preview has no `publishedAt`, so the fallback to
       // `createdAt` still yields a sensible date on every path.

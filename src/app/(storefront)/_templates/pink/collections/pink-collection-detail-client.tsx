@@ -3,17 +3,18 @@
 import { useMemo, useState } from "react";
 
 import type { DefaultCollectionPageTemplateProps } from "../../types";
-import { formatPrice } from "~/lib/prices";
+import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { formatPrice } from "~/lib/prices";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
-import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { PinkFilterChips } from "../shared/pink-filter-chips";
 import { PinkProductCard } from "../shared/pink-product-card";
 import { PinkReveal } from "../shared/pink-reveal";
 
-type CollectionProductRow =
-  NonNullable<DefaultCollectionPageTemplateProps["collection"]>["collectionProducts"][number];
+type CollectionProductRow = NonNullable<
+  DefaultCollectionPageTemplateProps["collection"]
+>["collectionProducts"][number];
 
 type Copy = {
   headingPrefix: string;
@@ -46,7 +47,9 @@ function isRowInStock(product: CollectionProductRow["product"]): boolean {
   return (product.inventoryQty ?? 0) > 0;
 }
 
-function effectivePrice(product: NonNullable<CollectionProductRow["product"]>): number {
+function effectivePrice(
+  product: NonNullable<CollectionProductRow["product"]>,
+): number {
   return product.variants.length > 0
     ? Math.min(...product.variants.map((v) => v.price ?? product.price))
     : product.price;
@@ -60,7 +63,10 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
   const [filter, setFilter] = useState<"all" | "available" | "archive">("all");
 
   const products = useMemo(
-    () => rows.map((r) => r.product).filter((p): p is NonNullable<typeof p> => p != null),
+    () =>
+      rows
+        .map((r) => r.product)
+        .filter((p): p is NonNullable<typeof p> => p != null),
     [rows],
   );
 
@@ -107,11 +113,26 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
             className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
             style={{ borderBottom: "1px solid var(--pink-ink)" }}
           >
-            <h2 className="pink-display" style={{ fontSize: "clamp(1.5rem, 2.6vw, 2rem)", fontWeight: 600 }}>
-              <span {...fieldAttr("pink.collections.detail-grid-heading-prefix")}>{copy.headingPrefix}</span>{" "}
+            <h2
+              className="pink-display"
+              style={{
+                fontSize: "clamp(1.5rem, 2.6vw, 2rem)",
+                fontWeight: 600,
+              }}
+            >
+              <span
+                {...fieldAttr("pink.collections.detail-grid-heading-prefix")}
+              >
+                {copy.headingPrefix}
+              </span>{" "}
               {countWord}
             </h2>
-            <PinkFilterChips items={chips} activeId={filter} onSelect={(id) => setFilter(id as typeof filter)} aria-label="Filter pieces" />
+            <PinkFilterChips
+              items={chips}
+              activeId={filter}
+              onSelect={(id) => setFilter(id as typeof filter)}
+              aria-label="Filter pieces"
+            />
           </div>
         )}
 
@@ -124,7 +145,10 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
               ctaHref="/shop"
             />
           ) : (
-            <PinkEmptyState heading="No pieces here." body="Try a different filter." />
+            <PinkEmptyState
+              heading="No pieces here."
+              body="Try a different filter."
+            />
           )
         ) : (
           <div className={gridClassName}>
@@ -138,12 +162,24 @@ export function PinkCollectionDetailClient({ rows, copy }: Props) {
                     imageUrl={product.images[0]?.url}
                     imageAlt={product.name}
                     title={product.name}
-                    price={inStock ? formatPrice(effectivePrice(product)) : copy.soldLabel}
-                    badge={inStock ? undefined : { label: copy.soldBadge, tone: "ink" }}
+                    price={
+                      inStock
+                        ? formatPrice(effectivePrice(product))
+                        : copy.soldLabel
+                    }
+                    badge={
+                      inStock
+                        ? undefined
+                        : { label: copy.soldBadge, tone: "ink" }
+                    }
                     addToBasket={
                       inStock
                         ? undefined
-                        : { label: copy.soldCta, disabled: true, onClick: () => undefined }
+                        : {
+                            label: copy.soldCta,
+                            disabled: true,
+                            onClick: () => undefined,
+                          }
                     }
                     wishlist={{
                       productId: product.id,

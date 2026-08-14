@@ -371,10 +371,7 @@ export async function BuildersTestimonialsPage({
       style={{ background: "var(--builders-bg, #F8F9FA)" }}
     >
       {/* ── 1. Header ───────────────────────────────────────────────────────── */}
-      <section
-        {...sectionGroupAttr("testimonials", "page")}
-        className="mb-32"
-      >
+      <section {...sectionGroupAttr("testimonials", "page")} className="mb-32">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
           <div className="flex flex-col justify-end md:col-span-8">
             <h1

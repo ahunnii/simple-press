@@ -3,6 +3,7 @@
 import { AlertTriangle, CheckCircle, ExternalLink } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { formatCurrency } from "~/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -13,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { formatCurrency } from "~/lib/utils";
 
 type BreakdownData = RouterOutputs["finance"]["getBreakdown"];
 
@@ -99,9 +99,9 @@ export function InformAlerts({
           <AlertDescription className="mt-1 space-y-2">
             <p>
               Your store has reached a threshold that may require identity
-              verification under the <strong>INFORM Consumers Act</strong>{" "}
-              (200+ transactions or $5,000+ in annual sales). Please complete
-              your Stripe account verification to remain compliant.
+              verification under the <strong>INFORM Consumers Act</strong> (200+
+              transactions or $5,000+ in annual sales). Please complete your
+              Stripe account verification to remain compliant.
             </p>
             <Button size="sm" variant="outline" asChild>
               <a

@@ -87,7 +87,12 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
             >
               <h2
                 className="pink-display"
-                style={{ fontSize: "18px", fontWeight: 600, letterSpacing: "-0.01em", color: "var(--pink-paper)" }}
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  letterSpacing: "-0.01em",
+                  color: "var(--pink-paper)",
+                }}
                 {...fieldAttr("pink.blog.subscribe-heading")}
               >
                 {subscribeHeading}
@@ -118,20 +123,32 @@ export function PinkBlogPage({ pages, customFields }: PinkBlogPageProps) {
         journalLabel={journalLabel}
         showFeatured={showFeatured}
         featuredBadge={featuredBadge}
-        emptyHeading={f["pink.blog.grid-empty-heading"] ?? "Nothing published yet"}
+        emptyHeading={
+          f["pink.blog.grid-empty-heading"] ?? "Nothing published yet"
+        }
         emptyBody={f["pink.blog.grid-empty-body"] ?? ""}
         emptyCtaLabel={f["pink.blog.grid-empty-cta-label"] ?? ""}
         emptyCtaLink={f["pink.blog.grid-empty-cta-link"] ?? "/shop"}
-        searchEmptyMessage={f["pink.blog.search-empty-state"] ?? "No posts match your search."}
+        searchEmptyMessage={
+          f["pink.blog.search-empty-state"] ?? "No posts match your search."
+        }
       />
 
       {showAsk && (
-        <PinkDarkBand ariaLabel="Have a question" sectionAttrs={sectionGroupAttr("blog", "ask")}>
+        <PinkDarkBand
+          ariaLabel="Have a question"
+          sectionAttrs={sectionGroupAttr("blog", "ask")}
+        >
           <div className="grid gap-8 md:grid-cols-[1fr_.9fr] md:items-center">
             <div className="flex flex-col gap-4">
               <h2
                 className="pink-display max-w-[24ch]"
-                style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1.1 }}
+                style={{
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.025em",
+                  lineHeight: 1.1,
+                }}
                 {...fieldAttr("pink.blog.ask-heading")}
               >
                 {askHeading}

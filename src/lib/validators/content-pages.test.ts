@@ -40,7 +40,10 @@ describe("getPageStatus", () => {
 
     it("returns 'published' even if a stale schedule is still set (published outranks scheduled)", () => {
       expect(
-        getPageStatus({ published: true, scheduledPublishAt: scheduled }, options),
+        getPageStatus(
+          { published: true, scheduledPublishAt: scheduled },
+          options,
+        ),
       ).toBe("published");
     });
 
@@ -60,7 +63,10 @@ describe("getPageStatus", () => {
       // "Scheduled" keeps it from flickering Draft on its way to Published.
       const overdue = new Date("2020-01-01T00:00:00Z");
       expect(
-        getPageStatus({ published: false, scheduledPublishAt: overdue }, options),
+        getPageStatus(
+          { published: false, scheduledPublishAt: overdue },
+          options,
+        ),
       ).toBe("scheduled");
     });
 
@@ -222,15 +228,21 @@ describe("comparePageListRows", () => {
     const draft = row({ title: "Draft", publishedAt: null });
     const live = row({ title: "Live", publishedAt: older });
 
-    expect(comparePageListRows("published-desc", draft, live)).toBeGreaterThan(0);
-    expect(comparePageListRows("published-asc", draft, live)).toBeGreaterThan(0);
+    expect(comparePageListRows("published-desc", draft, live)).toBeGreaterThan(
+      0,
+    );
+    expect(comparePageListRows("published-asc", draft, live)).toBeGreaterThan(
+      0,
+    );
   });
 
   it("orders published rows by date in the requested direction", () => {
     const first = row({ title: "First", publishedAt: older });
     const latest = row({ title: "Latest", publishedAt: newer });
 
-    expect(comparePageListRows("published-desc", latest, first)).toBeLessThan(0);
+    expect(comparePageListRows("published-desc", latest, first)).toBeLessThan(
+      0,
+    );
     expect(comparePageListRows("published-asc", first, latest)).toBeLessThan(0);
   });
 

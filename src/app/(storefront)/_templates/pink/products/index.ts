@@ -26,7 +26,12 @@ export const pinkProductData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 6,
     itemSchema: [
-      { key: "title", label: "Title", type: "text", placeholder: "Care & keeping" },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "Care & keeping",
+      },
       { key: "body", label: "Body", type: "textarea", placeholder: "…" },
     ],
   },
@@ -34,7 +39,7 @@ export const pinkProductData: TemplateField[] = [
     key: "pink.global.product-question",
     label: "Ask a Question Line",
     description:
-      "One short line shown under the buy box, e.g. \"Have a question about this piece?\" — followed by an \"Ask us a question\" link to /contact. Leave blank to hide (review 2026-07-29, F7).",
+      'One short line shown under the buy box, e.g. "Have a question about this piece?" — followed by an "Ask us a question" link to /contact. Leave blank to hide (review 2026-07-29, F7).',
     type: "text",
     page: "product",
     group: "product.panels",
@@ -103,7 +108,8 @@ export const pinkProductFieldGroups: TemplateFieldGroup[] = [
   {
     id: "product.panels",
     title: "Product Page — Accordion",
-    description: "Care, shipping and custom order rows shown under every product's buy box",
+    description:
+      "Care, shipping and custom order rows shown under every product's buy box",
     icon: "📦",
     columns: 1,
   } satisfies TemplateFieldGroup,
@@ -117,7 +123,7 @@ export const pinkProductFieldGroups: TemplateFieldGroup[] = [
   {
     id: "product.related",
     title: "Product Page — Related Products",
-    description: "Heading and link over the \"you may also like\" grid",
+    description: 'Heading and link over the "you may also like" grid',
     icon: "🔗",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -128,7 +134,8 @@ export const pinkProductSections: TemplateSection[] = [
     id: "product.panels",
     page: "product",
     title: "Product Page — Accordion",
-    description: "Care, shipping and custom order rows shown under every product's buy box",
+    description:
+      "Care, shipping and custom order rows shown under every product's buy box",
     groupIds: ["product.panels"],
     order: 0,
     hideable: true,
@@ -146,7 +153,7 @@ export const pinkProductSections: TemplateSection[] = [
     id: "product.related",
     page: "product",
     title: "Product Page — Related Products",
-    description: "Heading and link over the \"you may also like\" grid",
+    description: 'Heading and link over the "you may also like" grid',
     groupIds: ["product.related"],
     order: 2,
     hideable: true,

@@ -12,27 +12,27 @@ import { getEventStatus, getEventWhen, isEventPast } from "./events";
  */
 describe("getEventStatus", () => {
   it("returns 'archived' for an archived, unpublished (draft) event", () => {
-    expect(
-      getEventStatus({ published: false, isArchived: true }),
-    ).toBe("archived");
+    expect(getEventStatus({ published: false, isArchived: true })).toBe(
+      "archived",
+    );
   });
 
   it("returns 'archived' for an archived, published event (archived wins)", () => {
-    expect(
-      getEventStatus({ published: true, isArchived: true }),
-    ).toBe("archived");
+    expect(getEventStatus({ published: true, isArchived: true })).toBe(
+      "archived",
+    );
   });
 
   it("returns 'draft' for an unarchived, unpublished event", () => {
-    expect(
-      getEventStatus({ published: false, isArchived: false }),
-    ).toBe("draft");
+    expect(getEventStatus({ published: false, isArchived: false })).toBe(
+      "draft",
+    );
   });
 
   it("returns 'published' for an unarchived, published event", () => {
-    expect(
-      getEventStatus({ published: true, isArchived: false }),
-    ).toBe("published");
+    expect(getEventStatus({ published: true, isArchived: false })).toBe(
+      "published",
+    );
   });
 });
 

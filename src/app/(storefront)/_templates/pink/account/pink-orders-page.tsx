@@ -178,13 +178,7 @@ export function PinkOrdersPage({ orders }: OrdersPageTemplateProps) {
  * shows the piece's initial on a panel square rather than a photo, a
  * deviation noted in the build report) beside the piece name and quantity.
  */
-function ItemThumb({
-  name,
-  quantity,
-}: {
-  name: string;
-  quantity: number;
-}) {
+function ItemThumb({ name, quantity }: { name: string; quantity: number }) {
   const initial = name.trim().charAt(0).toUpperCase() || "•";
   return (
     <span className="inline-flex items-center gap-2">

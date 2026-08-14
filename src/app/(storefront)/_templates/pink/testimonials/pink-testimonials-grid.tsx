@@ -3,11 +3,11 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import type { RouterOutputs } from "~/trpc/react";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
-import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { PinkFilterChips } from "../shared/pink-filter-chips";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
 
@@ -26,7 +26,9 @@ type Props = {
 const CATEGORY_KEEPER = "keeper";
 const CATEGORY_STUDIO = "studio";
 
-function categoryOf(t: Testimonial): typeof CATEGORY_KEEPER | typeof CATEGORY_STUDIO {
+function categoryOf(
+  t: Testimonial,
+): typeof CATEGORY_KEEPER | typeof CATEGORY_STUDIO {
   return t.source === "owner" ? CATEGORY_STUDIO : CATEGORY_KEEPER;
 }
 
@@ -63,7 +65,9 @@ export function PinkTestimonialsGrid({
 }: Props) {
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  const hasStudioNotes = testimonials.some((t) => categoryOf(t) === CATEGORY_STUDIO);
+  const hasStudioNotes = testimonials.some(
+    (t) => categoryOf(t) === CATEGORY_STUDIO,
+  );
 
   const filters: PinkFilterChipItem[] = [
     { id: "all", label: allLabel },
@@ -89,10 +93,16 @@ export function PinkTestimonialsGrid({
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h2
               className="pink-display"
-              style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
+              style={{
+                fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                fontWeight: 600,
+                letterSpacing: "-0.025em",
+              }}
             >
               {testimonials.length}{" "}
-              {testimonials.length === 1 ? singularize(headingSuffix) : headingSuffix}
+              {testimonials.length === 1
+                ? singularize(headingSuffix)
+                : headingSuffix}
             </h2>
             <PinkFilterChips
               items={filters}
@@ -130,16 +140,16 @@ function TestimonialCard({ t }: { t: Testimonial }) {
         border: "1px solid var(--pink-line)",
       }}
     >
-      <span
-        className="pink-eyebrow"
-        style={{ fontSize: "12px" }}
-      >
+      <span className="pink-eyebrow" style={{ fontSize: "12px" }}>
         {category === CATEGORY_STUDIO ? "From the studio" : "From a customer"}
       </span>
       {t.title && (
         <p className="pink-display text-[16px] font-semibold">{t.title}</p>
       )}
-      <p className="text-[16px] leading-[1.75]" style={{ color: "var(--pink-body)" }}>
+      <p
+        className="text-[16px] leading-[1.75]"
+        style={{ color: "var(--pink-body)" }}
+      >
         {t.text}
       </p>
       <div
@@ -148,17 +158,29 @@ function TestimonialCard({ t }: { t: Testimonial }) {
       >
         <div className="relative h-[42px] w-[42px] shrink-0 overflow-hidden">
           {avatar ? (
-            <Image src={avatar} alt="" fill className="object-cover" sizes="42px" />
+            <Image
+              src={avatar}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="42px"
+            />
           ) : (
             <PinkImageFallback surface="paper" />
           )}
         </div>
         <div className="flex flex-col">
-          <span className="text-[14px] font-medium" style={{ color: "var(--pink-ink)" }}>
+          <span
+            className="text-[14px] font-medium"
+            style={{ color: "var(--pink-ink)" }}
+          >
             {t.customerName}
           </span>
           {(t.customerTitle ?? t.customerCompany) && (
-            <span className="text-[12px]" style={{ color: "var(--pink-subtle)" }}>
+            <span
+              className="text-[12px]"
+              style={{ color: "var(--pink-subtle)" }}
+            >
               {t.customerTitle ?? t.customerCompany}
             </span>
           )}

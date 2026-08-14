@@ -66,7 +66,8 @@ export function GeneralSettings({ business }: Props) {
       supportEmail: business.supportEmail ?? "",
       businessAddress: business.businessAddress ?? "",
       slug: business.slug ?? "",
-      sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
+      sendAbandonedCheckoutEmails:
+        business.sendAbandonedCheckoutEmails ?? false,
       timeZone: business.timeZone ?? "America/Detroit",
     },
   });
@@ -118,7 +119,8 @@ export function GeneralSettings({ business }: Props) {
         supportEmail: business.supportEmail ?? undefined,
         businessAddress: business.businessAddress ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
-        sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
+        sendAbandonedCheckoutEmails:
+          business.sendAbandonedCheckoutEmails ?? false,
         timeZone: business.timeZone ?? "America/Detroit",
       },
     );
@@ -223,7 +225,10 @@ export function GeneralSettings({ business }: Props) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Time Zone</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -238,9 +243,9 @@ export function GeneralSettings({ business }: Props) {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Used when showing event dates and times to you and
-                        your shoppers. Pick the zone your shop actually
-                        operates in — this also applies to the hours shown on{" "}
+                        Used when showing event dates and times to you and your
+                        shoppers. Pick the zone your shop actually operates in —
+                        this also applies to the hours shown on{" "}
                         <Link
                           href="/admin/settings/hours"
                           className="underline underline-offset-2"
@@ -297,9 +302,7 @@ export function GeneralSettings({ business }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Business Address</CardTitle>
-                <CardDescription>
-                  Public business address
-                </CardDescription>
+                <CardDescription>Public business address</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <TextareaFormField

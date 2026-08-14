@@ -366,9 +366,7 @@ function ImportSummary({ result }: { result: ImportResult }) {
                   </span>
                   <div className="flex gap-2">
                     {counts.created > 0 && (
-                      <Badge variant="success">
-                        +{counts.created} created
-                      </Badge>
+                      <Badge variant="success">+{counts.created} created</Badge>
                     )}
                     {counts.updated > 0 && (
                       <Badge

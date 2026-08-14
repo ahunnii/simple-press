@@ -1,6 +1,7 @@
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
-import { requireAdminAccess } from "~/lib/require-admin-access";
+
 import { TrailHeader } from "../../_components/trail-header";
 import { TeamMembers } from "./_components/team-members";
 

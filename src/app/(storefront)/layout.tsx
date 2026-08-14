@@ -3,12 +3,12 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
-import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 import { api, HydrateClient } from "~/trpc/server";
 import { TemplateSelectorDevTool } from "~/components/development/template-selector";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewFieldPatcher } from "~/components/preview/preview-field-patcher";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
+import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { CartRevalidator } from "./_components/cart-revalidator";
 import { getTemplate } from "./_templates/registry";

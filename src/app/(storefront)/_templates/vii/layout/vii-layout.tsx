@@ -6,6 +6,7 @@ import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
 import { resolveThemeVars } from "~/lib/template-themes";
+import { getSession } from "~/server/better-auth/server";
 
 import { ViiFooter } from "./vii-footer";
 import { ViiHeader } from "./vii-header";
@@ -27,13 +28,13 @@ export async function ViiLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const { isEnabled } = await getBusinessFlags();
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
+    getBusinessFlags(),
+  ]);
 
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
-  const themeVars = resolveThemeVars(
-    "vii",
-    business.siteContent?.customFields,
-  );
+  const themeVars = resolveThemeVars("vii", business.siteContent?.customFields);
 
   return (
     <div
@@ -60,7 +61,11 @@ export async function ViiLayout({
         rather than mounting it here above the header, which would push page
         content down but leave the bar floating above the fixed nav unpredictably.
       */}
-      <ViiHeader business={business} banner={banner} />
+      <ViiHeader
+        business={business}
+        initialSession={session ?? null}
+        banner={banner}
+      />
 
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}

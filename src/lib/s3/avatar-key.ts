@@ -32,7 +32,8 @@ export function resolveOwnAvatarKey(
   // Everything after the prefix must be a bare extension. Guards against a
   // crafted id turning into a path (`avatars/{id}./../../secret`).
   const rest = key.slice(prefix.length);
-  if (rest.length === 0 || rest.includes("/") || rest.includes(".")) return null;
+  if (rest.length === 0 || rest.includes("/") || rest.includes("."))
+    return null;
 
   return key;
 }

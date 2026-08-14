@@ -8,9 +8,9 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
 import { Textarea } from "~/components/ui/textarea";
 import { uploadRichTextImage } from "~/components/inputs/minimal-tiptap-form-field";
-import { MinimalTiptapEditor } from "~/components/ui/minimal-tiptap";
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
 
@@ -97,7 +97,8 @@ export function CmsPagePanel({
   const contentModified =
     stableStringify(values.content) !== stableStringify(baseline.content);
 
-  const contentValue = (values.content ?? EMPTY_TIPTAP_DOC) as unknown as Content;
+  const contentValue = (values.content ??
+    EMPTY_TIPTAP_DOC) as unknown as Content;
 
   return (
     <aside className="bg-card animate-in slide-in-from-right-8 fade-in flex w-[380px] shrink-0 flex-col border-l duration-200">
@@ -137,8 +138,8 @@ export function CmsPagePanel({
       >
         {!published && (
           <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            This {isBlog ? "post" : "page"} is unpublished — visitors
-            can&apos;t see it. You&apos;re viewing it in preview.
+            This {isBlog ? "post" : "page"} is unpublished — visitors can&apos;t
+            see it. You&apos;re viewing it in preview.
           </div>
         )}
 

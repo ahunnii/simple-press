@@ -12,7 +12,11 @@ type Props = {
  * or price logic lives here (page-playbooks.md → ProductPage: "delegate to a
  * dedicated variant-selector component").
  */
-export function PinkProductVariantPills({ variantOptions, selectedOptions, onSelect }: Props) {
+export function PinkProductVariantPills({
+  variantOptions,
+  selectedOptions,
+  onSelect,
+}: Props) {
   const entries = Object.entries(variantOptions);
   if (entries.length === 0) return null;
 
@@ -21,7 +25,11 @@ export function PinkProductVariantPills({ variantOptions, selectedOptions, onSel
       {entries.map(([optionType, values]) => (
         <div key={optionType} className="flex flex-col gap-2.5">
           <p className="pink-label">{optionType}</p>
-          <div className="flex flex-wrap gap-2" role="group" aria-label={optionType}>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={optionType}
+          >
             {values.map((value) => {
               const active = selectedOptions[optionType] === value;
               return (

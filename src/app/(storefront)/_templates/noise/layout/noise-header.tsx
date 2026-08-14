@@ -4,7 +4,6 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import {
   IconLayoutDashboard,
   IconLogout,
@@ -27,14 +26,15 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -61,10 +61,13 @@ const MOBILE_ACCOUNT_LINKS = [
 // Mobile nav animation variants are computed inside the component
 // to respond to the user's reduced-motion preference.
 
-export function NoiseHeader({ business }: DefaultHeaderTemplateProps) {
+export function NoiseHeader({
+  business,
+  initialSession,
+}: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
-  const { data: session, isPending } = useHydratedSession();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -289,7 +292,7 @@ export function NoiseHeader({ business }: DefaultHeaderTemplateProps) {
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      className="rounded-full w-auto h-auto p-0 border border-foreground/30"
+      className="border-foreground/30 h-auto w-auto rounded-full border p-0"
       avatarClassName="size-7"
       links={[
         {
@@ -916,47 +919,53 @@ export function NoiseHeader({ business }: DefaultHeaderTemplateProps) {
                     </Link>
                   )}
 
-                  {session?.user ? (
-                    <button
-                      type="button"
-                      id={`${accountMenuId}-trigger`}
-                      aria-haspopup="true"
-                      aria-expanded={accountMenuOpen}
-                      aria-controls={
-                        accountMenuOpen ? accountMenuId : undefined
-                      }
-                      onClick={() => setAccountMenuOpen((open) => !open)}
-                      className={cn(
-                        "vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80",
-                        accountMenuOpen
-                          ? "border-[var(--vn-accent)] text-[var(--vn-accent)]"
-                          : "border-[var(--vn-rule)] text-[var(--vn-ink-soft)]",
-                      )}
-                    >
-                      <User className="h-4 w-4" aria-hidden="true" />
-                      Account
-                      <ChevronUp
+                  {/* Same `customerAccounts` gate as the desktop cluster, plus
+                      a pending guard — this row is either the account menu or
+                      a "Login" link, so rendering it before the session lands
+                      shows a signed-in shopper the wrong one. */}
+                  {isStorefrontEnabled("customerAccounts") &&
+                    !isPending &&
+                    (session?.user ? (
+                      <button
+                        type="button"
+                        id={`${accountMenuId}-trigger`}
+                        aria-haspopup="true"
+                        aria-expanded={accountMenuOpen}
+                        aria-controls={
+                          accountMenuOpen ? accountMenuId : undefined
+                        }
+                        onClick={() => setAccountMenuOpen((open) => !open)}
                         className={cn(
-                          "h-3.5 w-3.5 transition-transform duration-200",
-                          accountMenuOpen ? "rotate-180" : "",
+                          "vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80",
+                          accountMenuOpen
+                            ? "border-[var(--vn-accent)] text-[var(--vn-accent)]"
+                            : "border-[var(--vn-rule)] text-[var(--vn-ink-soft)]",
                         )}
-                        aria-hidden="true"
-                      />
-                    </button>
-                  ) : (
-                    <Link
-                      href="/auth/sign-in"
-                      onClick={closeMobileMenu}
-                      className="vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80"
-                      style={{
-                        borderColor: "var(--vn-rule)",
-                        color: "var(--vn-ink-soft)",
-                      }}
-                    >
-                      <User className="h-4 w-4" aria-hidden="true" />
-                      Login
-                    </Link>
-                  )}
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                        Account
+                        <ChevronUp
+                          className={cn(
+                            "h-3.5 w-3.5 transition-transform duration-200",
+                            accountMenuOpen ? "rotate-180" : "",
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    ) : (
+                      <Link
+                        href="/auth/sign-in"
+                        onClick={closeMobileMenu}
+                        className="vn-mobile-action-btn rounded-none border transition-opacity hover:opacity-80"
+                        style={{
+                          borderColor: "var(--vn-rule)",
+                          color: "var(--vn-ink-soft)",
+                        }}
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                        Login
+                      </Link>
+                    ))}
                 </div>
               </div>
             </motion.div>

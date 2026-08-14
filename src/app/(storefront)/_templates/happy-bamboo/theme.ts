@@ -23,7 +23,11 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
       {
         id: "forest",
         label: "Forest",
-        swatch: ["oklch(0.28 0.08 145)", "oklch(0.42 0.11 145)", "oklch(0.90 0.03 145)"],
+        swatch: [
+          "oklch(0.28 0.08 145)",
+          "oklch(0.42 0.11 145)",
+          "oklch(0.90 0.03 145)",
+        ],
         cssVars: {
           "--hb-brand": "oklch(0.42 0.11 145)",
           "--hb-brand-deep": "oklch(0.30 0.09 145)",
@@ -44,7 +48,11 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
       {
         id: "terracotta",
         label: "Terracotta",
-        swatch: ["oklch(0.32 0.10 40)", "oklch(0.48 0.13 40)", "oklch(0.90 0.04 50)"],
+        swatch: [
+          "oklch(0.32 0.10 40)",
+          "oklch(0.48 0.13 40)",
+          "oklch(0.90 0.04 50)",
+        ],
         cssVars: {
           "--hb-brand": "oklch(0.48 0.13 40)",
           "--hb-brand-deep": "oklch(0.34 0.11 40)",
@@ -65,7 +73,11 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
       {
         id: "ocean",
         label: "Ocean",
-        swatch: ["oklch(0.30 0.07 210)", "oklch(0.46 0.10 210)", "oklch(0.90 0.03 210)"],
+        swatch: [
+          "oklch(0.30 0.07 210)",
+          "oklch(0.46 0.10 210)",
+          "oklch(0.90 0.03 210)",
+        ],
         cssVars: {
           "--hb-brand": "oklch(0.46 0.10 210)",
           "--hb-brand-deep": "oklch(0.32 0.08 210)",
@@ -86,7 +98,11 @@ export const happyBambooTheme: Record<string, TemplateTheme> = {
       {
         id: "honey",
         label: "Honey",
-        swatch: ["oklch(0.40 0.09 85)", "oklch(0.72 0.14 85)", "oklch(0.95 0.03 85)"],
+        swatch: [
+          "oklch(0.40 0.09 85)",
+          "oklch(0.72 0.14 85)",
+          "oklch(0.95 0.03 85)",
+        ],
         cssVars: {
           "--hb-brand": "oklch(0.40 0.09 85)",
           "--hb-brand-deep": "oklch(0.30 0.07 85)",

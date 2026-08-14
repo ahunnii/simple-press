@@ -5,13 +5,13 @@ import { ArrowRight } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import type { Product } from "~/types";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { HappyBambooProductCard } from "../shared/happy-bamboo-product-card";
 

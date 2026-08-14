@@ -82,12 +82,17 @@ export async function PinkVideosPage({
         {videos.length === 0 ? (
           <PinkEmptyState
             heading={
-              firstNonBlank(f["pink.videos.list-empty-heading"], "Nothing up yet") ??
-              "Nothing up yet"
+              firstNonBlank(
+                f["pink.videos.list-empty-heading"],
+                "Nothing up yet",
+              ) ?? "Nothing up yet"
             }
             body={f["pink.videos.list-empty-body"] ?? ""}
             ctaLabel={firstNonBlank(f["pink.videos.list-empty-cta-label"])}
-            ctaHref={firstNonBlank(f["pink.videos.list-empty-cta-link"], "/shop")}
+            ctaHref={firstNonBlank(
+              f["pink.videos.list-empty-cta-link"],
+              "/shop",
+            )}
           />
         ) : (
           <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

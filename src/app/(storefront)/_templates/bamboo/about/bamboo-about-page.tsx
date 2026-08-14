@@ -4,11 +4,11 @@ import { ArrowRight } from "lucide-react";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
-import { isSectionVisible } from "~/lib/sp-meta";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {

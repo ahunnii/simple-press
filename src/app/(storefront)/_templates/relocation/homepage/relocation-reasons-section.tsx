@@ -2,13 +2,13 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 
 import { DEFAULT_RELOCATION_REASONS } from ".";
-import { toRelocationIconRows } from "./rows";
 import { resolveFields } from "..";
 import {
   RelocationReveal,
   RelocationRevealGroup,
 } from "../shared/relocation-reveal";
 import { RelocationSectionHeading } from "../shared/relocation-section-heading";
+import { toRelocationIconRows } from "./rows";
 
 /**
  * Homepage §6 — "3 GREAT REASONS TO CHOOSE HANDY" (design.md → Homepage):

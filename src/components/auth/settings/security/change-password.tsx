@@ -1,36 +1,38 @@
-"use client"
+"use client";
 
-import { getViewURL } from "@better-auth-ui/core"
+import type { SyntheticEvent } from "react";
+import { useState } from "react";
+import { getViewURL } from "@better-auth-ui/core";
 import {
   useAuth,
   useChangePassword,
   useFetchOptions,
   useListAccounts,
   useRequestPasswordReset,
-  useSession
-} from "@better-auth-ui/react"
-import { Eye, EyeOff } from "lucide-react"
-import { type SyntheticEvent, useState } from "react"
-import { toast } from "sonner"
+  useSession,
+} from "@better-auth-ui/react";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardFooter } from "~/components/ui/card"
-import { Field, FieldError, FieldLabel } from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
+import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardFooter } from "~/components/ui/card";
+import { Field, FieldError, FieldLabel } from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupInput
-} from "~/components/ui/input-group"
-import { Skeleton } from "~/components/ui/skeleton"
-import { Spinner } from "~/components/ui/spinner"
-import { cn } from "~/lib/utils"
-import { OpenEmailButton } from "../../open-email-button"
+  InputGroupInput,
+} from "~/components/ui/input-group";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Spinner } from "~/components/ui/spinner";
+
+import { OpenEmailButton } from "../../open-email-button";
 
 export type ChangePasswordProps = {
-  className?: string
-}
+  className?: string;
+};
 
 /**
  * Render a card form for changing the authenticated user's password.
@@ -42,17 +44,17 @@ export type ChangePasswordProps = {
  * @returns A JSX element containing the change-password or set-password card
  */
 export function ChangePassword({ className }: ChangePasswordProps) {
-  const { authClient, emailAndPassword, localization } = useAuth()
-  const { data: session } = useSession(authClient)
+  const { authClient, emailAndPassword, localization } = useAuth();
+  const { data: session } = useSession(authClient);
   const { data: accounts, isPending: isAccountsPending } =
-    useListAccounts(authClient)
+    useListAccounts(authClient);
 
   const hasCredentialAccount = accounts?.some(
-    (account) => account.providerId === "credential"
-  )
+    (account) => account.providerId === "credential",
+  );
 
   if (!isAccountsPending && !hasCredentialAccount) {
-    return <SetPassword className={className} />
+    return <SetPassword className={className} />;
   }
 
   return (
@@ -62,77 +64,77 @@ export function ChangePassword({ className }: ChangePasswordProps) {
       localization={localization}
       session={isAccountsPending ? undefined : session}
     />
-  )
+  );
 }
 
 function SetPassword({ className }: { className?: string }) {
   const { authClient, basePaths, baseURL, localization, plugins, viewPaths } =
-    useAuth()
-  const { data: session } = useSession(authClient)
-  const { fetchOptions, resetFetchOptions } = useFetchOptions()
-  const [sentEmail, setSentEmail] = useState("")
+    useAuth();
+  const { data: session } = useSession(authClient);
+  const { fetchOptions, resetFetchOptions } = useFetchOptions();
+  const [sentEmail, setSentEmail] = useState("");
 
   const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset(
     authClient,
     {
       onError: () => {
-        resetFetchOptions()
+        resetFetchOptions();
       },
       onSuccess: (_data, { email }) => {
-        setSentEmail(email)
-      }
-    }
-  )
+        setSentEmail(email);
+      },
+    },
+  );
 
   const Captcha = plugins.find(
-    (plugin) => plugin.captchaComponent
-  )?.captchaComponent
+    (plugin) => plugin.captchaComponent,
+  )?.captchaComponent;
 
   const handleSetPassword = () => {
-    if (!session) return
+    if (!session) return;
 
     requestPasswordReset({
       email: session.user.email,
       redirectTo: getViewURL(
         baseURL,
         basePaths.auth,
-        viewPaths.auth.resetPassword
+        viewPaths.auth.resetPassword,
       ),
-      fetchOptions
-    })
-  }
+      fetchOptions,
+    });
+  };
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">
+      <h2 className="mb-3 text-sm font-semibold">
         {localization.settings.changePassword}
       </h2>
 
       <Card className={cn(className)}>
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium leading-tight">
+            <p className="text-sm leading-tight font-medium">
               {localization.settings.setPassword}
             </p>
 
-            <p className="text-muted-foreground text-xs mt-0.5">
+            <p className="text-muted-foreground mt-0.5 text-xs">
               {localization.settings.setPasswordDescription}
             </p>
           </div>
 
           {sentEmail ? (
-            <div className="flex flex-col gap-3 items-start sm:items-end">
+            <div className="flex flex-col items-start gap-3 sm:items-end">
               <p className="text-sm" role="status">
                 {localization.auth.resetLinkSentTo.replace(
                   "{{email}}",
-                  sentEmail
+                  sentEmail,
                 )}
               </p>
 
               <OpenEmailButton email={sentEmail} className="w-auto" />
             </div>
           ) : (
-            <div className="flex flex-col gap-3 items-start sm:items-end">
+            <div className="flex flex-col items-start gap-3 sm:items-end">
               {Captcha && <div>{Captcha}</div>}
 
               <Button
@@ -149,72 +151,72 @@ function SetPassword({ className }: { className?: string }) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 function ChangePasswordForm({
   className,
   emailAndPassword,
   localization,
-  session
+  session,
 }: {
-  className?: string
-  emailAndPassword: ReturnType<typeof useAuth>["emailAndPassword"]
-  localization: ReturnType<typeof useAuth>["localization"]
-  session: ReturnType<typeof useSession>["data"]
+  className?: string;
+  emailAndPassword: ReturnType<typeof useAuth>["emailAndPassword"];
+  localization: ReturnType<typeof useAuth>["localization"];
+  session: ReturnType<typeof useSession>["data"];
 }) {
-  const { authClient } = useAuth()
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const { authClient } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const { mutate: changePassword, isPending } = useChangePassword(authClient, {
     onError: () => {
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     },
     onSuccess: () => {
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
-      toast.success(localization.settings.changePasswordSuccess)
-    }
-  })
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success(localization.settings.changePasswordSuccess);
+    },
+  });
 
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
-    useState(false)
-  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false)
+    useState(false);
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false)
+    useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<{
-    currentPassword?: string
-    newPassword?: string
-    confirmPassword?: string
-  }>({})
+    currentPassword?: string;
+    newPassword?: string;
+    confirmPassword?: string;
+  }>({});
 
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (emailAndPassword.confirmPassword && newPassword !== confirmPassword) {
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
-      toast.error(localization.auth.passwordsDoNotMatch)
-      return
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.error(localization.auth.passwordsDoNotMatch);
+      return;
     }
 
     changePassword({
       currentPassword,
       newPassword,
-      revokeOtherSessions: true
-    })
-  }
+      revokeOtherSessions: true,
+    });
+  };
 
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-3">
+      <h2 className="mb-3 text-sm font-semibold">
         {localization.settings.changePassword}
       </h2>
 
@@ -238,23 +240,23 @@ function ChangePasswordForm({
                     }
                     value={currentPassword}
                     onChange={(e) => {
-                      setCurrentPassword(e.target.value)
+                      setCurrentPassword(e.target.value);
 
                       setFieldErrors((prev) => ({
                         ...prev,
-                        currentPassword: undefined
-                      }))
+                        currentPassword: undefined,
+                      }));
                     }}
                     disabled={isPending}
                     required
                     onInvalid={(e) => {
-                      e.preventDefault()
+                      e.preventDefault();
 
                       setFieldErrors((prev) => ({
                         ...prev,
                         currentPassword: (e.target as HTMLInputElement)
-                          .validationMessage
-                      }))
+                          .validationMessage,
+                      }));
                     }}
                     aria-invalid={!!fieldErrors.currentPassword}
                   />
@@ -273,7 +275,7 @@ function ChangePasswordForm({
                           : localization.auth.showPassword
                       }
                       onClick={() => {
-                        setIsCurrentPasswordVisible((visible) => !visible)
+                        setIsCurrentPasswordVisible((visible) => !visible);
                       }}
                     >
                       {isCurrentPasswordVisible ? <EyeOff /> : <Eye />}
@@ -304,24 +306,24 @@ function ChangePasswordForm({
                     placeholder={localization.auth.newPasswordPlaceholder}
                     value={newPassword}
                     onChange={(e) => {
-                      setNewPassword(e.target.value)
+                      setNewPassword(e.target.value);
 
                       setFieldErrors((prev) => ({
                         ...prev,
-                        newPassword: undefined
-                      }))
+                        newPassword: undefined,
+                      }));
                     }}
                     minLength={emailAndPassword.minPasswordLength}
                     maxLength={emailAndPassword.maxPasswordLength}
                     disabled={isPending}
                     required
                     onInvalid={(e) => {
-                      e.preventDefault()
+                      e.preventDefault();
                       setFieldErrors((prev) => ({
                         ...prev,
                         newPassword: (e.target as HTMLInputElement)
-                          .validationMessage
-                      }))
+                          .validationMessage,
+                      }));
                     }}
                     aria-invalid={!!fieldErrors.newPassword}
                   />
@@ -367,25 +369,25 @@ function ChangePasswordForm({
                       placeholder={localization.auth.confirmPasswordPlaceholder}
                       value={confirmPassword}
                       onChange={(e) => {
-                        setConfirmPassword(e.target.value)
+                        setConfirmPassword(e.target.value);
 
                         setFieldErrors((prev) => ({
                           ...prev,
-                          confirmPassword: undefined
-                        }))
+                          confirmPassword: undefined,
+                        }));
                       }}
                       minLength={emailAndPassword.minPasswordLength}
                       maxLength={emailAndPassword.maxPasswordLength}
                       disabled={isPending}
                       required
                       onInvalid={(e) => {
-                        e.preventDefault()
+                        e.preventDefault();
 
                         setFieldErrors((prev) => ({
                           ...prev,
                           confirmPassword: (e.target as HTMLInputElement)
-                            .validationMessage
-                        }))
+                            .validationMessage,
+                        }));
                       }}
                       aria-invalid={!!fieldErrors.confirmPassword}
                     />
@@ -431,5 +433,5 @@ function ChangePasswordForm({
         </Card>
       </form>
     </div>
-  )
+  );
 }

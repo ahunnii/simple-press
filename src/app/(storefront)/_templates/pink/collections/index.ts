@@ -69,7 +69,8 @@ export const pinkCollectionsData: TemplateField[] = [
   {
     key: "pink.collections.grid-badge-closed",
     label: "Grid Badge — Closed",
-    description: "Status badge on cards for unpublished-going-forward collections.",
+    description:
+      "Status badge on cards for unpublished-going-forward collections.",
     type: "text",
     page: "collections",
     group: "collections.grid",
@@ -219,8 +220,18 @@ export const pinkCollectionsData: TemplateField[] = [
     maxItems: 6,
     itemSchema: [
       { key: "image", label: "Image", type: "image" },
-      { key: "colSpan", label: "Column Span (1–4)", type: "text", placeholder: "1" },
-      { key: "rowSpan", label: "Row Span (1–2)", type: "text", placeholder: "1" },
+      {
+        key: "colSpan",
+        label: "Column Span (1–4)",
+        type: "text",
+        placeholder: "1",
+      },
+      {
+        key: "rowSpan",
+        label: "Row Span (1–2)",
+        type: "text",
+        placeholder: "1",
+      },
     ],
   },
 
@@ -323,7 +334,8 @@ export const pinkCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.header",
     title: "Collections — Header",
-    description: "Eyebrow, heading and intro at the top of the collections index",
+    description:
+      "Eyebrow, heading and intro at the top of the collections index",
     icon: "🗂️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -351,7 +363,8 @@ export const pinkCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.detail-hero",
     title: "Collection Detail — Hero",
-    description: "Eyebrow prefix and fact-row labels on every collection detail page",
+    description:
+      "Eyebrow prefix and fact-row labels on every collection detail page",
     icon: "🖼️",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -365,7 +378,8 @@ export const pinkCollectionsFieldGroups: TemplateFieldGroup[] = [
   {
     id: "collections.detail-gallery",
     title: "Collection Detail — Gallery Mosaic",
-    description: "The shared image mosaic shown on every collection detail page",
+    description:
+      "The shared image mosaic shown on every collection detail page",
     icon: "🧵",
     columns: 1,
   } satisfies TemplateFieldGroup,
@@ -390,7 +404,8 @@ export const pinkCollectionsSections: TemplateSection[] = [
     id: "collections.header",
     page: "collections",
     title: "Collections — Header",
-    description: "Eyebrow, heading and intro at the top of the collections index",
+    description:
+      "Eyebrow, heading and intro at the top of the collections index",
     groupIds: ["collections.header"],
     order: 0,
     hideable: false,

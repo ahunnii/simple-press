@@ -37,9 +37,7 @@ let datasetPromise: Promise<ReadonlyMap<string, ZipEntry>> | null = null;
  * router) should await this once and then read from the returned Map
  * synchronously, rather than calling `lookupZip` in a loop.
  */
-export async function loadZipDataset(): Promise<
-  ReadonlyMap<string, ZipEntry>
-> {
+export async function loadZipDataset(): Promise<ReadonlyMap<string, ZipEntry>> {
   datasetPromise ??= (async () => {
     // The JSON file has ~41k top-level keys — letting TS infer its literal
     // structural type (via resolveJsonModule) produces an object type with

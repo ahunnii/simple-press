@@ -124,7 +124,8 @@ export const pinkShopData: TemplateField[] = [
   {
     key: "pink.shop.load-more-label",
     label: "Load More Label",
-    description: "Button text at the bottom of the grid when there are more pieces to show.",
+    description:
+      "Button text at the bottom of the grid when there are more pieces to show.",
     type: "text",
     page: "shop",
     group: "shop.grid",
@@ -134,7 +135,8 @@ export const pinkShopData: TemplateField[] = [
   {
     key: "pink.shop.empty-heading",
     label: "Empty State Heading",
-    description: "Shown when no pieces match the current filters, or the shop is empty.",
+    description:
+      "Shown when no pieces match the current filters, or the shop is empty.",
     type: "text",
     page: "shop",
     group: "shop.grid",
@@ -212,7 +214,8 @@ export const pinkShopSections: TemplateSection[] = [
     id: "shop.filters",
     page: "shop",
     title: "Filter Sidebar",
-    description: "Category, price and availability filters, plus the closing CTA box",
+    description:
+      "Category, price and availability filters, plus the closing CTA box",
     groupIds: ["shop.filters"],
     order: 1,
     hideable: true,

@@ -38,7 +38,11 @@ export async function PinkCheckoutUnavailable() {
     | Record<string, unknown>
     | undefined;
 
-  const visible = isSectionVisible(customFields, "pink", "checkout.unavailable");
+  const visible = isSectionVisible(
+    customFields,
+    "pink",
+    "checkout.unavailable",
+  );
 
   const f = visible
     ? resolveFields(customFields, [
@@ -63,14 +67,19 @@ export async function PinkCheckoutUnavailable() {
       <PinkPageHeader
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Checkout" }]}
         heading={heading}
-        headingFieldKey={visible ? "pink.checkout.unavailable-heading" : undefined}
+        headingFieldKey={
+          visible ? "pink.checkout.unavailable-heading" : undefined
+        }
         intro={body}
         introFieldKey={visible ? "pink.checkout.unavailable-body" : undefined}
       />
       <div className="flex justify-center px-5 py-16 md:px-10">
         <div
           className="flex max-w-[420px] flex-col items-center p-10 text-center"
-          style={{ background: "var(--pink-panel)", border: "1px solid var(--pink-line)" }}
+          style={{
+            background: "var(--pink-panel)",
+            border: "1px solid var(--pink-line)",
+          }}
         >
           <Link
             href="/shop"

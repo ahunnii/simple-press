@@ -1,9 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
-
 import type { PinkBreadcrumbItem } from "./pink-page-header";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 
 type PinkPhotoHeaderProps = {
   imageUrl: string;
@@ -85,11 +84,20 @@ export function PinkPhotoHeader({
         <div className="mx-auto flex max-w-[1400px] flex-col gap-6">
           <div className="flex flex-col gap-4">
             {breadcrumb && breadcrumb.length > 0 && (
-              <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5">
+              <nav
+                aria-label="Breadcrumb"
+                className="flex flex-wrap items-center gap-1.5"
+              >
                 {breadcrumb.map((crumb, i) => (
-                  <span key={crumb.label + i} className="flex items-center gap-1.5">
+                  <span
+                    key={crumb.label + i}
+                    className="flex items-center gap-1.5"
+                  >
                     {i > 0 && (
-                      <span aria-hidden="true" style={{ color: "var(--pink-over-photo)" }}>
+                      <span
+                        aria-hidden="true"
+                        style={{ color: "var(--pink-over-photo)" }}
+                      >
                         /
                       </span>
                     )}
@@ -102,7 +110,10 @@ export function PinkPhotoHeader({
                         {crumb.label}
                       </Link>
                     ) : (
-                      <span className="text-[13px]" style={{ color: "var(--pink-over-photo)" }}>
+                      <span
+                        className="text-[13px]"
+                        style={{ color: "var(--pink-over-photo)" }}
+                      >
                         {crumb.label}
                       </span>
                     )}
@@ -140,7 +151,8 @@ export function PinkPhotoHeader({
             <div
               className="w-fit"
               style={{
-                background: "color-mix(in srgb, var(--pink-ink-panel) 86%, transparent)",
+                background:
+                  "color-mix(in srgb, var(--pink-ink-panel) 86%, transparent)",
                 backdropFilter: "blur(6px)",
               }}
             >

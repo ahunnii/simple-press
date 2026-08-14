@@ -2,7 +2,6 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 
 import { DEFAULT_RELOCATION_GALLERY } from ".";
-import { toRelocationPhotoRows } from "./rows";
 import { resolveFields } from "..";
 import { RelocationCircleImage } from "../shared/relocation-circle-image";
 import {
@@ -10,6 +9,7 @@ import {
   RelocationRevealGroup,
 } from "../shared/relocation-reveal";
 import { RelocationSectionHeading } from "../shared/relocation-section-heading";
+import { toRelocationPhotoRows } from "./rows";
 
 /**
  * Homepage §8 — "HANDY RELOCATIONS MOVERS IN ACTION" (design.md → Homepage):

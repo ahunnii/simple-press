@@ -119,24 +119,54 @@ describe("verifyPartnerRequest", () => {
   const now = PARTNER_AUTH_TEST_VECTORS[0].timestamp;
 
   it("accepts a correctly-signed request", () => {
-    const req = makeSignedRequest({ bearer: BEARER, hmacSecret, rawBody, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: BEARER,
+      hmacSecret,
+      rawBody,
+      timestamp: now,
+    });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: true });
   });
 
   it("accepts a GET-style request signed over its query string", () => {
     const q = "code=A1B2C3D4";
-    const req = makeSignedRequest({ bearer: BEARER, hmacSecret, rawBody: q, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: BEARER,
+      hmacSecret,
+      rawBody: q,
+      timestamp: now,
+    });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody: q, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody: q,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: true });
   });
 
   it("rejects a wrong bearer", () => {
-    const req = makeSignedRequest({ bearer: "wrong-token", hmacSecret, rawBody, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: "wrong-token",
+      hmacSecret,
+      rawBody,
+      timestamp: now,
+    });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: false, reason: "bearer" });
   });
 
@@ -145,17 +175,28 @@ describe("verifyPartnerRequest", () => {
       method: "POST",
       headers: {
         "x-partner-timestamp": String(now),
-        "x-partner-signature": signPartnerRequest(rawBody, hmacSecret, now).signature,
+        "x-partner-signature": signPartnerRequest(rawBody, hmacSecret, now)
+          .signature,
       },
       body: rawBody,
     });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: false, reason: "bearer" });
   });
 
   it("rejects a stale timestamp (too old, >300s)", () => {
-    const req = makeSignedRequest({ bearer: BEARER, hmacSecret, rawBody, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: BEARER,
+      hmacSecret,
+      rawBody,
+      timestamp: now,
+    });
     expect(
       verifyPartnerRequest(req, {
         bearer: BEARER,
@@ -167,7 +208,12 @@ describe("verifyPartnerRequest", () => {
   });
 
   it("rejects a future timestamp (>300s ahead)", () => {
-    const req = makeSignedRequest({ bearer: BEARER, hmacSecret, rawBody, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: BEARER,
+      hmacSecret,
+      rawBody,
+      timestamp: now,
+    });
     expect(
       verifyPartnerRequest(req, {
         bearer: BEARER,
@@ -179,7 +225,12 @@ describe("verifyPartnerRequest", () => {
   });
 
   it("accepts a timestamp exactly at the 300s boundary", () => {
-    const req = makeSignedRequest({ bearer: BEARER, hmacSecret, rawBody, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: BEARER,
+      hmacSecret,
+      rawBody,
+      timestamp: now,
+    });
     expect(
       verifyPartnerRequest(req, {
         bearer: BEARER,
@@ -196,17 +247,28 @@ describe("verifyPartnerRequest", () => {
       headers: {
         authorization: `Bearer ${BEARER}`,
         "x-partner-timestamp": "not-a-number",
-        "x-partner-signature": signPartnerRequest(rawBody, hmacSecret, now).signature,
+        "x-partner-signature": signPartnerRequest(rawBody, hmacSecret, now)
+          .signature,
       },
       body: rawBody,
     });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: false, reason: "timestamp" });
   });
 
   it("rejects a tampered body (signature no longer matches)", () => {
-    const req = makeSignedRequest({ bearer: BEARER, hmacSecret, rawBody, timestamp: now });
+    const req = makeSignedRequest({
+      bearer: BEARER,
+      hmacSecret,
+      rawBody,
+      timestamp: now,
+    });
     // Verify against a different rawBody than what was signed.
     expect(
       verifyPartnerRequest(req, {
@@ -226,7 +288,12 @@ describe("verifyPartnerRequest", () => {
       timestamp: now,
     });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: false, reason: "signature" });
   });
 
@@ -239,7 +306,12 @@ describe("verifyPartnerRequest", () => {
       signature: "deadbeef",
     });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: false, reason: "malformed" });
   });
 
@@ -253,7 +325,12 @@ describe("verifyPartnerRequest", () => {
       body: rawBody,
     });
     expect(
-      verifyPartnerRequest(req, { bearer: BEARER, hmacSecret, rawBody, nowSeconds: now }),
+      verifyPartnerRequest(req, {
+        bearer: BEARER,
+        hmacSecret,
+        rawBody,
+        nowSeconds: now,
+      }),
     ).toEqual({ ok: false, reason: "malformed" });
   });
 });

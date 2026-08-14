@@ -42,6 +42,8 @@ describe("resolveVariantCompareAtPrice", () => {
 
   it("returns null when neither variant nor product has a compare-at", () => {
     expect(resolveVariantCompareAtPrice(0, null, null)).toBeNull();
-    expect(resolveVariantCompareAtPrice(undefined, undefined, undefined)).toBeNull();
+    expect(
+      resolveVariantCompareAtPrice(undefined, undefined, undefined),
+    ).toBeNull();
   });
 });

@@ -120,7 +120,8 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       page: "blog",
       renderContext: "blog-post",
       title: "Blog Post — Shop CTA",
-      description: "Call-to-action band shown at the bottom of every blog post.",
+      description:
+        "Call-to-action band shown at the bottom of every blog post.",
       groupIds: ["blog.post"],
       order: 1,
       hideable: true,

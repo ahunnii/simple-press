@@ -283,7 +283,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.info",
     title: "Contact Info",
-    description: "Header, subheader, description, and image for the contact page.",
+    description:
+      "Header, subheader, description, and image for the contact page.",
     icon: "📞",
     columns: 2,
   },

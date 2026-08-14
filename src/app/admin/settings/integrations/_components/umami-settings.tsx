@@ -53,9 +53,7 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
   ): string | null => {
     const trimmed = value.trim();
     if (!trimmed) {
-      return enabled
-        ? "Website ID is required to enable analytics"
-        : null;
+      return enabled ? "Website ID is required to enable analytics" : null;
     }
     if (!UMAMI_WEBSITE_ID_REGEX.test(trimmed)) {
       return "Enter a valid Umami website ID";
@@ -171,8 +169,8 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                 <Label htmlFor="umamiEnabled">Enable Analytics</Label>
                 <p className="text-muted-foreground text-sm">
                   Adds the tracking script to every storefront page, which
-                  starts collecting visit data right away. Leave off to
-                  collect nothing, regardless of the Website ID saved above.
+                  starts collecting visit data right away. Leave off to collect
+                  nothing, regardless of the Website ID saved above.
                 </p>
                 <p className="text-muted-foreground mt-1 text-sm">
                   This is independent of the{" "}
@@ -183,17 +181,17 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                     Analytics feature flag
                   </Link>
                   : this toggle controls whether data is collected, while the
-                  feature flag controls whether the in-admin Analytics
-                  dashboard is visible. Turning this on without the feature
-                  flag enabled means data is collected but you can&apos;t view
-                  it in-app yet; turning the feature flag on without this
-                  toggle enabled shows an empty dashboard.
+                  feature flag controls whether the in-admin Analytics dashboard
+                  is visible. Turning this on without the feature flag enabled
+                  means data is collected but you can&apos;t view it in-app yet;
+                  turning the feature flag on without this toggle enabled shows
+                  an empty dashboard.
                 </p>
                 <p className="text-muted-foreground mt-1 text-sm">
                   The tracking script and event data are proxied through your
                   own storefront domain (<code>/umami.js</code>,{" "}
-                  <code>/api/send</code>) — no third-party script ever loads
-                  in your visitors&apos; browsers.
+                  <code>/api/send</code>) — no third-party script ever loads in
+                  your visitors&apos; browsers.
                 </p>
               </div>
               <Switch
@@ -201,9 +199,7 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
                 checked={umamiEnabled}
                 onCheckedChange={(checked) => {
                   setUmamiEnabled(checked);
-                  setWebsiteIdError(
-                    validateWebsiteId(umamiWebsiteId, checked),
-                  );
+                  setWebsiteIdError(validateWebsiteId(umamiWebsiteId, checked));
                 }}
               />
             </div>
@@ -227,7 +223,10 @@ export function UmamiSettings({ business, umamiBaseUrl }: Props) {
             ) : null}
 
             <div className="border-t pt-4">
-              <Button type="submit" disabled={updateIntegrationsMutation.isPending}>
+              <Button
+                type="submit"
+                disabled={updateIntegrationsMutation.isPending}
+              >
                 {updateIntegrationsMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

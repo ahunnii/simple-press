@@ -20,12 +20,19 @@ import { NoiseProductRail } from "./noise-product-rail";
 import { NoiseTestimonialStrip } from "./noise-testimonial-strip";
 
 export async function NoiseHomepage(_props?: DefaultHomepageTemplateProps) {
-  const [homepage, testimonials] = await Promise.all([
+  const [homepage, flags] = await Promise.all([
     api.business.getHomepage(),
-    api.testimonial.listRandom({ limit: 6 }),
+    getBusinessFlags(),
   ]);
 
-  const flags = await getBusinessFlags();
+  // `listRandom` is behind `featureGate("testimonials")` and FORBIDs when the
+  // flag is off — fetched eagerly it 500s the whole homepage for a store that
+  // merely disabled testimonials. The strip's render below is already gated on
+  // the same flag, so the fetch must be too (same shape as every other
+  // template's homepage).
+  const testimonials = flags.isEnabled("testimonials")
+    ? await api.testimonial.listRandom({ limit: 6 })
+    : [];
 
   const themeFields = homepage?.siteContent?.customFields as
     | Record<string, string>

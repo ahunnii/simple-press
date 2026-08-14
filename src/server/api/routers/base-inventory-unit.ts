@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { PoolLedgerGroupRow } from "~/lib/inventory";
 import {
   EMPTY_POOL_SALES,
   poolSalesWhere,
   summarizePoolSales,
-  type PoolLedgerGroupRow,
 } from "~/lib/inventory";
 import {
   createTRPCRouter,

@@ -13,6 +13,7 @@ import {
   Tablet,
 } from "lucide-react";
 
+import type { DeviceKind } from "./editor-preview";
 import { cn } from "~/lib/utils";
 import {
   AlertDialog,
@@ -35,8 +36,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-
-import type { DeviceKind } from "./editor-preview";
 
 /** Fallback Exit destination when no valid `?from=` deep link is present. */
 const DEFAULT_EXIT_HREF = "/admin/content";
@@ -259,10 +258,7 @@ export function EditorTopBar({
           size="sm"
           aria-pressed={notesOpen}
           onClick={onToggleNotes}
-          className={cn(
-            "shrink-0",
-            notesOpen && "bg-muted text-foreground",
-          )}
+          className={cn("shrink-0", notesOpen && "bg-muted text-foreground")}
         >
           <MessageSquare className="h-4 w-4 sm:mr-1.5" />
           <span className="hidden sm:inline">Notes</span>
@@ -287,13 +283,19 @@ export function EditorTopBar({
                 className="text-destructive h-3.5 w-3.5"
                 aria-hidden="true"
               />
-              <span className="text-destructive" title="Editing again will retry">
+              <span
+                className="text-destructive"
+                title="Editing again will retry"
+              >
                 {statusLabel}
               </span>
             </>
           ) : flushPending ? (
             <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              <Loader2
+                className="h-3.5 w-3.5 animate-spin"
+                aria-hidden="true"
+              />
               <span>{statusLabel}</span>
             </>
           ) : hasUnpublishedChanges ? (
@@ -344,8 +346,8 @@ export function EditorTopBar({
           <AlertDialogHeader>
             <AlertDialogTitle>Leave the editor?</AlertDialogTitle>
             <AlertDialogDescription>
-              A change is still saving to your draft. Leave now and the last edit
-              may not be saved.
+              A change is still saving to your draft. Leave now and the last
+              edit may not be saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -371,7 +373,7 @@ export function EditorTopBar({
             <AlertDialogCancel>Keep editing</AlertDialogCancel>
             <AlertDialogAction
               onClick={onDiscard}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-white"
             >
               Discard
             </AlertDialogAction>

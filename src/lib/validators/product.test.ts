@@ -452,8 +452,7 @@ describe("productCreateSchema", () => {
 
     it("rejects a fractional price (wire-level price is whole cents)", () => {
       expect(
-        productCreateSchema.safeParse({ ...validProduct, price: 10.5 })
-          .success,
+        productCreateSchema.safeParse({ ...validProduct, price: 10.5 }).success,
       ).toBe(false);
     });
 
@@ -551,8 +550,7 @@ describe("productUpdateSchema", () => {
   describe("price and cost bounds", () => {
     it("rejects a fractional price (wire-level price is whole cents)", () => {
       expect(
-        productUpdateSchema.safeParse({ ...validProduct, price: 10.5 })
-          .success,
+        productUpdateSchema.safeParse({ ...validProduct, price: 10.5 }).success,
       ).toBe(false);
     });
 

@@ -7,8 +7,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
-import { useRecaptchaV3 } from "~/lib/captcha/use-recaptcha-v3";
 import type { ContactFormData } from "~/lib/validators/contact";
+import { useRecaptchaV3 } from "~/lib/captcha/use-recaptcha-v3";
 import { contactFormSchema } from "~/lib/validators/contact";
 import { api } from "~/trpc/react";
 
@@ -66,7 +66,8 @@ export function useContactForm(options: UseContactFormOptions = {}) {
     },
     onError: (err: { message?: string }) => {
       toast.dismiss();
-      const errorMessage = err.message ?? "Something went wrong. Please try again.";
+      const errorMessage =
+        err.message ?? "Something went wrong. Please try again.";
       toast.error(errorMessage);
       setError(errorMessage);
       const handle = captchaRef.current;

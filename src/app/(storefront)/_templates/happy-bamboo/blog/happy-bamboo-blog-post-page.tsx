@@ -157,7 +157,9 @@ export function HappyBambooBlogPostPage({
                           <Button asChild className="group">
                             <Link href={ctaHref}>
                               <span
-                                {...fieldAttr("happy-bamboo.blog.post-cta-button-text")}
+                                {...fieldAttr(
+                                  "happy-bamboo.blog.post-cta-button-text",
+                                )}
                               >
                                 {ctaButtonText}
                               </span>

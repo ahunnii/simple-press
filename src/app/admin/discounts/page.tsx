@@ -13,7 +13,11 @@ import { db } from "~/server/db";
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
-import { buildTablePage, matchesAllTokens, pickParam } from "../_lib/table-query";
+import {
+  buildTablePage,
+  matchesAllTokens,
+  pickParam,
+} from "../_lib/table-query";
 import { DiscountsClient } from "./_components/discounts-client";
 
 type Props = {
@@ -90,7 +94,11 @@ export default async function DiscountsPage({ searchParams }: Props) {
     DISCOUNT_STATUS_VALUES,
     DISCOUNT_STATUS_DEFAULT,
   );
-  const sort = pickParam(params.sort, DISCOUNT_SORT_VALUES, DISCOUNT_SORT_DEFAULT);
+  const sort = pickParam(
+    params.sort,
+    DISCOUNT_SORT_VALUES,
+    DISCOUNT_SORT_DEFAULT,
+  );
 
   // `discount.getAll` is input-free — closest model is Collections, not
   // Products: "scheduled"/"expired" are computed date windows Prisma can't

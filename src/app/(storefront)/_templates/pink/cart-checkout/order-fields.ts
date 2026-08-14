@@ -158,7 +158,8 @@ export const pinkOrderData: TemplateField[] = [
     page: "checkout",
     group: "checkout.success",
     gridColumn: "col-span-full",
-    defaultValue: "New pieces post to the shop first. Make & takes are booked by request.",
+    defaultValue:
+      "New pieces post to the shop first. Make & takes are booked by request.",
   },
   {
     key: "pink.order.cta-button",
@@ -183,7 +184,8 @@ export const pinkOrderData: TemplateField[] = [
   {
     key: "pink.order.cta-secondary-label",
     label: "Closing CTA Secondary Label",
-    description: "Label on the secondary (ghost) button. Leave blank to hide it.",
+    description:
+      "Label on the secondary (ghost) button. Leave blank to hide it.",
     type: "text",
     page: "checkout",
     group: "checkout.success",

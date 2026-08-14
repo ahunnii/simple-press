@@ -66,8 +66,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-border p-6">
-      <h2 className="mb-4 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+    <div className="border-border rounded-[var(--radius)] border p-6">
+      <h2 className="text-muted-foreground mb-4 text-[11px] font-medium tracking-[0.14em] uppercase">
         {title}
       </h2>
       {children}
@@ -78,14 +78,14 @@ function Section({
 function ExpiredState() {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-16 sm:py-24">
-      <div className="rounded-[var(--radius)] border border-border p-8 text-center sm:p-12">
+      <div className="border-border rounded-[var(--radius)] border p-8 text-center sm:p-12">
         <h1 className="mb-3 text-2xl font-medium tracking-tight">
           This link has expired
         </h1>
-        <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed text-muted-foreground">
-          Order status links are valid for 90 days. This one is no longer
-          valid, but you can request a fresh link — we&apos;ll email it to the
-          address used on your order.
+        <p className="text-muted-foreground mx-auto mb-8 max-w-md text-sm leading-relaxed">
+          Order status links are valid for 90 days. This one is no longer valid,
+          but you can request a fresh link — we&apos;ll email it to the address
+          used on your order.
         </p>
         <Link
           href="/order-status"
@@ -131,7 +131,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-12 sm:py-16">
       <header className="mb-8">
-        <p className="mb-2 text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+        <p className="text-muted-foreground mb-2 text-[11px] font-medium tracking-[0.14em] uppercase">
           Order status
         </p>
         <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
@@ -156,7 +156,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
             }
             tone={order.fulfillmentStatus}
           />
-          <span className="text-[13px] text-muted-foreground">
+          <span className="text-muted-foreground text-[13px]">
             Placed {formatDate(order.createdAt)}
           </span>
         </div>
@@ -167,7 +167,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
         <div className="flex flex-col gap-5 lg:col-span-2">
           <Section title="Items">
             {order.items.length > 0 ? (
-              <div className="flex flex-col divide-y divide-border">
+              <div className="divide-border flex flex-col divide-y">
                 {order.items.map((item) => (
                   <div
                     key={item.id}
@@ -176,11 +176,11 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                     <div className="flex flex-col gap-0.5">
                       <p className="text-sm font-medium">{item.productName}</p>
                       {item.variantName && (
-                        <p className="text-[13px] text-muted-foreground">
+                        <p className="text-muted-foreground text-[13px]">
                           {item.variantName}
                         </p>
                       )}
-                      <p className="text-[13px] text-muted-foreground">
+                      <p className="text-muted-foreground text-[13px]">
                         Qty {item.quantity} × {formatPrice(item.price)}
                       </p>
                     </div>
@@ -191,13 +191,13 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 No item details recorded.
               </p>
             )}
 
             {/* Totals */}
-            <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 text-sm">
+            <div className="border-border mt-4 flex flex-col gap-2 border-t pt-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span>{formatPrice(order.subtotal)}</span>
@@ -220,7 +220,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                 <span className="text-muted-foreground">Tax</span>
                 <span>{formatPrice(order.tax)}</span>
               </div>
-              <div className="flex justify-between border-t border-border pt-2 font-medium">
+              <div className="border-border flex justify-between border-t pt-2 font-medium">
                 <span>Total</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
@@ -258,7 +258,7 @@ export default async function OrderStatusTokenPage({ params }: Props) {
                         <span className="sr-only">(opens in new tab)</span>
                       </a>
                     )}
-                    <p className="text-[12px] text-muted-foreground">
+                    <p className="text-muted-foreground text-[12px]">
                       Added {formatDate(shipment.createdAt)}
                     </p>
                   </div>
@@ -293,21 +293,21 @@ export default async function OrderStatusTokenPage({ params }: Props) {
           <Section title="Order Info">
             <dl className="flex flex-col gap-3 text-sm">
               <div>
-                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
+                <dt className="text-muted-foreground mb-0.5 text-[11px] font-medium tracking-[0.1em] uppercase">
                   Email
                 </dt>
                 <dd>{order.customerEmail}</dd>
               </div>
               {order.customerPhone && (
                 <div>
-                  <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
+                  <dt className="text-muted-foreground mb-0.5 text-[11px] font-medium tracking-[0.1em] uppercase">
                     Phone
                   </dt>
                   <dd>{order.customerPhone}</dd>
                 </div>
               )}
               <div>
-                <dt className="mb-0.5 text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
+                <dt className="text-muted-foreground mb-0.5 text-[11px] font-medium tracking-[0.1em] uppercase">
                   Delivery
                 </dt>
                 <dd className="capitalize">

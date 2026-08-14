@@ -41,7 +41,9 @@ export type VideoCreateData = z.infer<typeof videoCreateSchema>;
  * Covered by regression tests in `videos.test.ts`. Do not "simplify" this to
  * `(v) => v || null`.
  */
-function emptyToNull(value: string | null | undefined): string | null | undefined {
+function emptyToNull(
+  value: string | null | undefined,
+): string | null | undefined {
   if (value === undefined) return undefined;
   if (value === null || value === "") return null;
   return value;

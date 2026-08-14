@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 import {
-  POLICY_LAST_UPDATED,
   formatPolicyDate,
+  POLICY_LAST_UPDATED,
 } from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Acceptable Use Policy | SimplePress",
-  description: "Prohibited products, content, and conduct on the SimplePress platform.",
+  description:
+    "Prohibited products, content, and conduct on the SimplePress platform.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/acceptable-use`,
   },

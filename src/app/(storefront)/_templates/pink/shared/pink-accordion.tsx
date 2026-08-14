@@ -21,8 +21,14 @@ type PinkAccordionProps = {
  * (design.md → Shared component inventory). Used by product panels and
  * service FAQs.
  */
-export function PinkAccordion({ items, defaultOpenIndex, className }: PinkAccordionProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex ?? null);
+export function PinkAccordion({
+  items,
+  defaultOpenIndex,
+  className,
+}: PinkAccordionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(
+    defaultOpenIndex ?? null,
+  );
   const baseId = useId();
 
   return (
@@ -33,7 +39,10 @@ export function PinkAccordion({ items, defaultOpenIndex, className }: PinkAccord
         const panelId = item.id ?? `${baseId}-panel-${i}`;
 
         return (
-          <div key={panelId} style={{ borderBottom: "1px solid var(--pink-line)" }}>
+          <div
+            key={panelId}
+            style={{ borderBottom: "1px solid var(--pink-line)" }}
+          >
             <h3 className="m-0">
               <button
                 type="button"
@@ -45,14 +54,22 @@ export function PinkAccordion({ items, defaultOpenIndex, className }: PinkAccord
               >
                 <span
                   className="pink-display"
-                  style={{ fontSize: "17px", fontWeight: 600, color: "var(--pink-ink)" }}
+                  style={{
+                    fontSize: "17px",
+                    fontWeight: 600,
+                    color: "var(--pink-ink)",
+                  }}
                 >
                   {item.title}
                 </span>
                 <span
                   aria-hidden="true"
                   className="pink-display shrink-0"
-                  style={{ fontSize: "20px", fontWeight: 400, color: "var(--pink-rose)" }}
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 400,
+                    color: "var(--pink-rose)",
+                  }}
                 >
                   {isOpen ? "−" : "+"}
                 </span>

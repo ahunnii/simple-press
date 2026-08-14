@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 import {
-  POLICY_LAST_UPDATED,
   formatPolicyDate,
+  POLICY_LAST_UPDATED,
 } from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Seller & Merchant Agreement | SimplePress",
-  description: "Terms governing businesses operating storefronts on SimplePress.",
+  description:
+    "Terms governing businesses operating storefronts on SimplePress.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/seller-merchant`,
   },

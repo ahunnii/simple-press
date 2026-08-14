@@ -109,7 +109,10 @@ describe("videoUpdateSchema — omitted keys must not become null", () => {
 describe("resolveVideoTitle", () => {
   it("uses the override when set", () => {
     expect(
-      resolveVideoTitle({ title: "YouTube title", titleOverride: "Owner's title" }),
+      resolveVideoTitle({
+        title: "YouTube title",
+        titleOverride: "Owner's title",
+      }),
     ).toBe("Owner's title");
   });
 

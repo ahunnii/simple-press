@@ -3,8 +3,8 @@ import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 
 import { DEFAULT_RELOCATION_SERVICES } from ".";
-import { toRelocationIconRows } from "./rows";
 import { RelocationRevealGroup } from "../shared/relocation-reveal";
+import { toRelocationIconRows } from "./rows";
 
 /**
  * Homepage §3 — the illustrated service rows (design.md → Homepage).

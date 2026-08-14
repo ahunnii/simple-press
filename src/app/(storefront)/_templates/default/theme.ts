@@ -23,7 +23,11 @@ export const defaultTemplateTheme: Record<string, TemplateTheme> = {
       {
         id: "slate",
         label: "Slate",
-        swatch: ["oklch(0.32 0.04 250)", "oklch(0.20 0.02 250)", "oklch(0.90 0.01 250)"],
+        swatch: [
+          "oklch(0.32 0.04 250)",
+          "oklch(0.20 0.02 250)",
+          "oklch(0.90 0.01 250)",
+        ],
         cssVars: {
           "--primary": "oklch(0.32 0.04 250)",
           "--primary-foreground": "oklch(0.98 0.005 250)",
@@ -40,7 +44,11 @@ export const defaultTemplateTheme: Record<string, TemplateTheme> = {
       {
         id: "forest",
         label: "Forest",
-        swatch: ["oklch(0.32 0.07 150)", "oklch(0.20 0.03 150)", "oklch(0.90 0.015 150)"],
+        swatch: [
+          "oklch(0.32 0.07 150)",
+          "oklch(0.20 0.03 150)",
+          "oklch(0.90 0.015 150)",
+        ],
         cssVars: {
           "--primary": "oklch(0.32 0.07 150)",
           "--primary-foreground": "oklch(0.98 0.01 150)",
@@ -57,7 +65,11 @@ export const defaultTemplateTheme: Record<string, TemplateTheme> = {
       {
         id: "burgundy",
         label: "Burgundy",
-        swatch: ["oklch(0.32 0.10 20)", "oklch(0.20 0.03 20)", "oklch(0.90 0.015 20)"],
+        swatch: [
+          "oklch(0.32 0.10 20)",
+          "oklch(0.20 0.03 20)",
+          "oklch(0.90 0.015 20)",
+        ],
         cssVars: {
           "--primary": "oklch(0.32 0.10 20)",
           "--primary-foreground": "oklch(0.98 0.01 20)",
@@ -74,7 +86,11 @@ export const defaultTemplateTheme: Record<string, TemplateTheme> = {
       {
         id: "ochre",
         label: "Ochre",
-        swatch: ["oklch(0.42 0.09 75)", "oklch(0.22 0.02 75)", "oklch(0.92 0.02 75)"],
+        swatch: [
+          "oklch(0.42 0.09 75)",
+          "oklch(0.22 0.02 75)",
+          "oklch(0.92 0.02 75)",
+        ],
         cssVars: {
           "--primary": "oklch(0.42 0.09 75)",
           "--primary-foreground": "oklch(0.98 0.01 75)",

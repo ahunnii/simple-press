@@ -43,7 +43,8 @@ const TESTIMONIALS: { customerName: string; text: string }[] = [
 const FAQS: { question: string; answer: string }[] = [
   {
     question: "How long will it take to move my home?",
-    answer: "Each move is unique, but the average move will take between 2 and 4 hours",
+    answer:
+      "Each move is unique, but the average move will take between 2 and 4 hours",
   },
   {
     question: "How far in advance should I schedule my move?",
@@ -126,7 +127,9 @@ async function main() {
       timeZone: "America/Detroit",
     },
   });
-  console.log(`✓ Business ${businessId} — template "relocation", flags merged, LocalBusiness on`);
+  console.log(
+    `✓ Business ${businessId} — template "relocation", flags merged, LocalBusiness on`,
+  );
 
   await db.siteContent.upsert({
     where: { businessId },
@@ -154,7 +157,9 @@ async function main() {
   }
 
   // ── Testimonials (only when none exist for this business) ─────────────────
-  const testimonialCount = await db.testimonial.count({ where: { businessId } });
+  const testimonialCount = await db.testimonial.count({
+    where: { businessId },
+  });
   if (testimonialCount === 0) {
     // Backdated so the newest-first list shows them in the site's original order.
     const base = Date.parse("2025-11-01T12:00:00Z");

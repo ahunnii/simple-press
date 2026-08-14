@@ -3,7 +3,9 @@ export function resolveVariantPrice(
   variantPrice: number | null | undefined,
   productPrice: number,
 ): number {
-  return variantPrice != null && variantPrice !== 0 ? variantPrice : productPrice;
+  return variantPrice != null && variantPrice !== 0
+    ? variantPrice
+    : productPrice;
 }
 
 export function resolveVariantCompareAtPrice(

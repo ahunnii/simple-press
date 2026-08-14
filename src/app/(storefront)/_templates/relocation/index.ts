@@ -2,15 +2,9 @@ import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import { resolveTemplateFields } from "~/lib/resolve-template-fields";
 
 import { relocationAboutData, relocationAboutFieldGroups } from "./about";
-import {
-  relocationContactData,
-  relocationContactFieldGroups,
-} from "./contact";
+import { relocationContactData, relocationContactFieldGroups } from "./contact";
 import { relocationFaqData, relocationFaqFieldGroups } from "./faq";
-import {
-  relocationGenericData,
-  relocationGenericFieldGroups,
-} from "./generic";
+import { relocationGenericData, relocationGenericFieldGroups } from "./generic";
 import {
   relocationHomepageData,
   relocationHomepageFieldGroups,

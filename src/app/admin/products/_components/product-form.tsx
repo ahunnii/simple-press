@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import type { FormProductImage, FormVariant } from "../_validators/schema";
+import type { ImageUploaderHandle } from "./image-uploader";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
@@ -103,7 +104,6 @@ import {
 } from "~/app/admin/_components/form-tab-errors";
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
-import type { ImageUploaderHandle } from "./image-uploader";
 import { ImageUploader } from "./image-uploader";
 import { ProductFeaturesField } from "./product-features-field";
 import { VariantManager } from "./variant-manager";
@@ -672,8 +672,7 @@ export function ProductForm({
             imageUrl: resolveVariantImageUrl(v.imageUrl),
           })),
           additionalFields: {
-            additionalInformation:
-              data.additionalFields?.additionalInformation,
+            additionalInformation: data.additionalFields?.additionalInformation,
             productFeatures: data.additionalFields?.productFeatures ?? [],
             comingSoon: data.additionalFields?.comingSoon ?? false,
             productTagline: data.additionalFields?.productTagline ?? undefined,
@@ -761,8 +760,7 @@ export function ProductForm({
             imageUrl: resolveVariantImageUrl(v.imageUrl),
           })),
           additionalFields: {
-            additionalInformation:
-              data.additionalFields?.additionalInformation,
+            additionalInformation: data.additionalFields?.additionalInformation,
             productFeatures: data.additionalFields?.productFeatures ?? [],
             comingSoon: data.additionalFields?.comingSoon ?? false,
             productTagline: data.additionalFields?.productTagline ?? "",
@@ -820,7 +818,8 @@ export function ProductForm({
           setShowWeightAnyway(false);
           setOgImageFile(null);
           setOgImageRemoved(false);
-          if (ogImageFileInputRef.current) ogImageFileInputRef.current.value = "";
+          if (ogImageFileInputRef.current)
+            ogImageFileInputRef.current.value = "";
           setVariantManagerKey((k) => k + 1);
           setActiveTab("basics");
           window.scrollTo({ top: 0 });
@@ -989,7 +988,7 @@ export function ProductForm({
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="outline" size="sm">
                     <MoreHorizontal className="h-4 w-4" />
-                    <span className="ml-2 sr-only sm:not-sr-only">
+                    <span className="sr-only ml-2 sm:not-sr-only">
                       More Options
                     </span>
                   </Button>
@@ -1036,8 +1035,12 @@ export function ProductForm({
 
                   {product?.id && (
                     <DropdownMenuItem
-                      disabled={isSubmitting || duplicateProductMutation.isPending}
-                      onClick={() => duplicateProductMutation.mutate(product.id)}
+                      disabled={
+                        isSubmitting || duplicateProductMutation.isPending
+                      }
+                      onClick={() =>
+                        duplicateProductMutation.mutate(product.id)
+                      }
                     >
                       <Copy className="mr-2 h-4 w-4" />
                       Duplicate

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import {
   Heart,
   LayoutDashboardIcon,
@@ -17,9 +16,10 @@ import {
 } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
-import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -344,7 +344,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
                 ) : user ? (
                   <UserButton
                     size="icon"
-                    className="w-[34px] h-[34px] rounded-full"
+                    className="h-[34px] w-[34px] rounded-full"
                     avatarClassName="w-[34px] h-[34px]"
                     links={[
                       // Business members reach /admin too, not just platform

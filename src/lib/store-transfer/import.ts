@@ -1222,9 +1222,7 @@ export async function importStoreBundle(args: {
         track("Video", true);
       }
     } catch (err) {
-      result.warnings.push(
-        `Video "${video.youtubeId}" failed: ${String(err)}`,
-      );
+      result.warnings.push(`Video "${video.youtubeId}" failed: ${String(err)}`);
     }
   }
 

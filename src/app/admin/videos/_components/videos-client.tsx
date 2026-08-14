@@ -78,7 +78,6 @@ import {
 
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
-import { AdminThumb } from "../../_components/admin-thumb";
 import {
   TABLE_CARD,
   TABLE_CELL,
@@ -86,6 +85,7 @@ import {
   TABLE_HEAD,
   TABLE_HEAD_TIGHT,
 } from "../../_components/admin-table-style";
+import { AdminThumb } from "../../_components/admin-thumb";
 import {
   dismissLoadingToast,
   loadingToast,

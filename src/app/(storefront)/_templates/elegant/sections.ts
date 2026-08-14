@@ -34,8 +34,7 @@ export const elegantSections: Record<string, TemplateSection[]> = {
       id: "homepage.about",
       page: "homepage",
       title: "About Section",
-      description:
-        "About blurb and image/video shown below the product grid.",
+      description: "About blurb and image/video shown below the product grid.",
       groupIds: ["homepage.about"],
       order: 3,
     },

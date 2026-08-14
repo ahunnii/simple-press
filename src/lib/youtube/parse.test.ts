@@ -23,16 +23,14 @@ describe("parseYouTubeVideoId", () => {
     expect(
       parseYouTubeVideoId(`https://m.youtube.com/watch?v=${VALID_ID}`),
     ).toBe(VALID_ID);
-    expect(
-      parseYouTubeVideoId(`https://youtube.com/watch?v=${VALID_ID}`),
-    ).toBe(VALID_ID);
+    expect(parseYouTubeVideoId(`https://youtube.com/watch?v=${VALID_ID}`)).toBe(
+      VALID_ID,
+    );
   });
 
   it("strips extra query params: ?t=, &list=, si=", () => {
     expect(
-      parseYouTubeVideoId(
-        `https://www.youtube.com/watch?v=${VALID_ID}&t=90`,
-      ),
+      parseYouTubeVideoId(`https://www.youtube.com/watch?v=${VALID_ID}&t=90`),
     ).toBe(VALID_ID);
     expect(
       parseYouTubeVideoId(
@@ -52,9 +50,7 @@ describe("parseYouTubeVideoId", () => {
   });
 
   it("parses youtu.be/ID", () => {
-    expect(parseYouTubeVideoId(`https://youtu.be/${VALID_ID}`)).toBe(
-      VALID_ID,
-    );
+    expect(parseYouTubeVideoId(`https://youtu.be/${VALID_ID}`)).toBe(VALID_ID);
   });
 
   it("parses youtu.be/ID?t=30", () => {
@@ -77,9 +73,7 @@ describe("parseYouTubeVideoId", () => {
 
   it("parses youtube-nocookie.com/embed/ID", () => {
     expect(
-      parseYouTubeVideoId(
-        `https://www.youtube-nocookie.com/embed/${VALID_ID}`,
-      ),
+      parseYouTubeVideoId(`https://www.youtube-nocookie.com/embed/${VALID_ID}`),
     ).toBe(VALID_ID);
   });
 
@@ -94,13 +88,9 @@ describe("parseYouTubeVideoId", () => {
       parseYouTubeVideoId(`https://evilyoutube.com/watch?v=${VALID_ID}`),
     ).toBeNull();
     expect(
-      parseYouTubeVideoId(
-        `https://youtube.com.evil.com/watch?v=${VALID_ID}`,
-      ),
+      parseYouTubeVideoId(`https://youtube.com.evil.com/watch?v=${VALID_ID}`),
     ).toBeNull();
-    expect(
-      parseYouTubeVideoId(`https://notyoutu.be/${VALID_ID}`),
-    ).toBeNull();
+    expect(parseYouTubeVideoId(`https://notyoutu.be/${VALID_ID}`)).toBeNull();
   });
 
   it("rejects malformed video IDs", () => {
@@ -188,9 +178,10 @@ describe("parseChannelRef", () => {
   });
 
   it("parses youtube.com/@SomeHandle, stripping the @", () => {
-    expect(
-      parseChannelRef("https://www.youtube.com/@SomeHandle"),
-    ).toEqual({ kind: "handle", handle: "SomeHandle" });
+    expect(parseChannelRef("https://www.youtube.com/@SomeHandle")).toEqual({
+      kind: "handle",
+      handle: "SomeHandle",
+    });
   });
 
   it("parses legacy youtube.com/c/Name", () => {
@@ -201,9 +192,10 @@ describe("parseChannelRef", () => {
   });
 
   it("parses legacy youtube.com/user/Name", () => {
-    expect(
-      parseChannelRef("https://www.youtube.com/user/SomeName"),
-    ).toEqual({ kind: "handle", handle: "SomeName" });
+    expect(parseChannelRef("https://www.youtube.com/user/SomeName")).toEqual({
+      kind: "handle",
+      handle: "SomeName",
+    });
   });
 
   it("parses a bare UC… channel ID", () => {

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import type {
+  CustomerForExport,
+  DiscountForExport,
+  OrderForExport,
+  ReviewForExport,
+} from "./csv-builders";
+
 import {
   buildCustomerAddressesCsv,
   buildCustomersCsv,
@@ -7,10 +14,6 @@ import {
   buildOrderItemsCsv,
   buildOrdersCsv,
   buildReviewsCsv,
-  type CustomerForExport,
-  type DiscountForExport,
-  type OrderForExport,
-  type ReviewForExport,
 } from "./csv-builders";
 
 // papaparse quotes every field with { quotes: true }, and separates

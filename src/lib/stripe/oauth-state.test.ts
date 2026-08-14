@@ -32,7 +32,10 @@ function signPayload(encodedPayload: string, secret: string): string {
 describe("createSignedOAuthState / verifySignedOAuthState", () => {
   it("round-trips: create then verify returns the exact businessId and returnUrl", () => {
     const state = createSignedOAuthState(
-      { businessId: "biz_123", returnUrl: "https://mystore.example.com/admin/settings/stripe" },
+      {
+        businessId: "biz_123",
+        returnUrl: "https://mystore.example.com/admin/settings/stripe",
+      },
       SECRET,
     );
     expect(verifySignedOAuthState(state, SECRET)).toEqual({
@@ -128,7 +131,10 @@ describe("createSignedOAuthState / verifySignedOAuthState", () => {
       // intact) with a signature computed over that exact dotted string, and
       // confirm the last dot — not the first — is treated as the real
       // separator.
-      const payload = { businessId: "biz_dot", returnUrl: "https://example.com/x" };
+      const payload = {
+        businessId: "biz_dot",
+        returnUrl: "https://example.com/x",
+      };
       const encodedPayload = base64url(JSON.stringify(payload));
       const mid = Math.floor(encodedPayload.length / 2);
       const withEmbeddedDot =

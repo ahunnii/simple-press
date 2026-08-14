@@ -1,11 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { publishedVideoWhere } from "~/lib/youtube/query";
-import { fetchVideoOembed } from "~/lib/youtube/oembed";
-import { parseSourceInput, parseYouTubeVideoId } from "~/lib/youtube/parse";
-import { resolveChannelHandle } from "~/lib/youtube/resolve-channel";
-import { syncOneSource } from "~/lib/youtube/sync";
 import {
   videoCreateSchema,
   videoReorderSchema,
@@ -13,6 +8,11 @@ import {
   videoSourceUpdateSchema,
   videoUpdateSchema,
 } from "~/lib/validators/videos";
+import { fetchVideoOembed } from "~/lib/youtube/oembed";
+import { parseSourceInput, parseYouTubeVideoId } from "~/lib/youtube/parse";
+import { publishedVideoWhere } from "~/lib/youtube/query";
+import { resolveChannelHandle } from "~/lib/youtube/resolve-channel";
+import { syncOneSource } from "~/lib/youtube/sync";
 import {
   createTRPCRouter,
   featureGate,
@@ -66,11 +66,7 @@ export const videosRouter = createTRPCRouter({
           sortOrder: true,
           sourceId: true,
         },
-        orderBy: [
-          { sortOrder: "asc" },
-          { publishedAt: "desc" },
-          { id: "asc" },
-        ],
+        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }, { id: "asc" }],
       });
     }),
 
@@ -382,11 +378,7 @@ export const videosRouter = createTRPCRouter({
 
       return ctx.db.video.findMany({
         where: publishedVideoWhere(businessId),
-        orderBy: [
-          { sortOrder: "asc" },
-          { publishedAt: "desc" },
-          { id: "asc" },
-        ],
+        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }, { id: "asc" }],
         ...(input?.limit ? { take: input.limit } : {}),
       });
     }),

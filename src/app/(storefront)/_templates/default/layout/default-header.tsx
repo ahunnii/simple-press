@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconPackage } from "@tabler/icons-react";
 import { ChevronDown, LayoutDashboardIcon, Menu, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
@@ -119,7 +119,9 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
   const defaultNavLinks: NavLink[] = [
     { href: "/shop", label: "Shop" },
     { href: "/about", label: "About" },
-    ...(isEnabled("services") ? [{ href: "/services", label: "Services" }] : []),
+    ...(isEnabled("services")
+      ? [{ href: "/services", label: "Services" }]
+      : []),
     ...(isEnabled("events") ? [{ href: "/events", label: "Events" }] : []),
     ...(isEnabled("testimonials")
       ? [{ href: "/testimonials", label: "Reviews" }]
@@ -436,8 +438,12 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
                 </li>
               ))}
 
-              {/* Auth row */}
-              {!user && (
+              {/* Auth row — held back until the session resolves. `!user` is
+                  true while pending too, so without the guard a signed-in
+                  shopper is offered "Sign in" for the length of the fetch.
+                  This header has no server-side seed, so that window is real
+                  on every cold load. */}
+              {!isPending && !user && (
                 <li>
                   <Link
                     href="/auth/sign-in"

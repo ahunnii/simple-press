@@ -4,8 +4,8 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
-import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationReveal } from "../shared/relocation-reveal";
 import { RelocationSectionHeading } from "../shared/relocation-section-heading";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
@@ -70,7 +70,9 @@ export function RelocationContactPage({
   const heroImage = f["relocation.contact.hero-image"] ?? "";
   const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
   const ctaLabel =
-    ctaHref === "" ? "" : (f["relocation.global.branding.hero-cta-label"] ?? "");
+    ctaHref === ""
+      ? ""
+      : (f["relocation.global.branding.hero-cta-label"] ?? "");
 
   const address = business?.businessAddress ?? "";
   const hoursLabel = f["relocation.contact.hours-label"] ?? "";
@@ -281,7 +283,9 @@ export function RelocationContactPage({
                     f["relocation.contact.form-email-placeholder"] ?? ""
                   }
                   phoneLabel={f["relocation.contact.form-phone-label"] ?? ""}
-                  messageLabel={f["relocation.contact.form-message-label"] ?? ""}
+                  messageLabel={
+                    f["relocation.contact.form-message-label"] ?? ""
+                  }
                   messagePlaceholder={
                     f["relocation.contact.form-message-placeholder"] ?? ""
                   }

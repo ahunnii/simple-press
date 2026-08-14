@@ -22,16 +22,32 @@ type Props = {
  * Both carry the same `data-sp-group="blog.post-author"` so either instance
  * opens the same field panel. Server-safe.
  */
-export function PinkBlogAuthorCard({ name, role, avatar, bio, ctaLabel, ctaHref }: Props) {
+export function PinkBlogAuthorCard({
+  name,
+  role,
+  avatar,
+  bio,
+  ctaLabel,
+  ctaHref,
+}: Props) {
   return (
     <div
       className="flex flex-col items-start gap-5 p-8 sm:flex-row sm:items-center"
-      style={{ background: "var(--pink-white)", border: "1px solid var(--pink-line)" }}
+      style={{
+        background: "var(--pink-white)",
+        border: "1px solid var(--pink-line)",
+      }}
       {...sectionGroupAttr("blog", "post-author")}
     >
       <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden">
         {hasCustomImage(avatar) ? (
-          <Image src={avatar} alt="" fill className="object-cover" sizes="72px" />
+          <Image
+            src={avatar}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="72px"
+          />
         ) : (
           <PinkImageFallback surface="paper" />
         )}
@@ -39,13 +55,20 @@ export function PinkBlogAuthorCard({ name, role, avatar, bio, ctaLabel, ctaHref 
       <div className="flex flex-col gap-1.5">
         <p
           className="pink-display"
-          style={{ fontSize: "17px", fontWeight: 600, letterSpacing: "-0.01em" }}
+          style={{
+            fontSize: "17px",
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+          }}
           {...fieldAttr("pink.blog.post-author-name")}
         >
           {name}
         </p>
         {role && (
-          <p className="pink-label" {...fieldAttr("pink.blog.post-author-role")}>
+          <p
+            className="pink-label"
+            {...fieldAttr("pink.blog.post-author-role")}
+          >
             {role}
           </p>
         )}

@@ -30,7 +30,11 @@ export default async function InvoicePage({ params }: Props) {
       <AdminPrintStyles />
       <PrintToolbar orderId={order.id} />
       <div className="mx-auto my-8 max-w-3xl bg-white p-10 shadow-sm print:my-0 print:max-w-none print:p-0 print:shadow-none">
-        <OrderPrintDocument order={order} business={business} variant="invoice" />
+        <OrderPrintDocument
+          order={order}
+          business={business}
+          variant="invoice"
+        />
       </div>
     </>
   );

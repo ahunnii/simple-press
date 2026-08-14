@@ -15,7 +15,6 @@ import { getStoredPath } from "~/lib/uploads";
 import { cn } from "~/lib/utils";
 import { ownerTestimonialFormSchema } from "~/lib/validators/testimonials";
 import { api } from "~/trpc/react";
-import { EntityFormDialog } from "~/components/admin/entity-form-dialog";
 import { Button } from "~/components/ui/button";
 import {
   Collapsible,
@@ -31,6 +30,7 @@ import {
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { EntityFormDialog } from "~/components/admin/entity-form-dialog";
 
 import { AdminThumb } from "../../_components/admin-thumb";
 

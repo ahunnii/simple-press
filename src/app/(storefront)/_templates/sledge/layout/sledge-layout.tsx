@@ -5,6 +5,7 @@ import { Amatic_SC, Raleway } from "next/font/google";
 import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
+import { getSession } from "~/server/better-auth/server";
 
 import { SledgeAnnouncementBar } from "./sledge-announcement-bar";
 import { SledgeFooter } from "./sledge-footer";
@@ -26,7 +27,10 @@ export async function SledgeLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const { isEnabled } = await getBusinessFlags();
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
+    getBusinessFlags(),
+  ]);
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
   return (
     <div className={`${fontSans.variable} ${fontHeading.variable} sledge`}>
@@ -37,7 +41,7 @@ export async function SledgeLayout({
         Skip to main content
       </a>
       {banner && <SledgeAnnouncementBar banner={banner} />}
-      <SledgeHeader business={business} />
+      <SledgeHeader business={business} initialSession={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>

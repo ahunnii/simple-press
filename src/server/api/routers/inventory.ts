@@ -203,7 +203,6 @@ export const inventoryRouter = createTRPCRouter({
       return { message: "Inventory updated successfully" };
     }),
 
-
   // Get recent oversell alerts — InventoryHistory rows with reason: "oversell"
   getOversellAlerts: ownerAdminProcedure
     .input(

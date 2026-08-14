@@ -40,8 +40,7 @@ export function TemplatePicker({
   // Only templates this business may use, plus its current one (so an existing
   // assignment always stays visible/active even if it isn't otherwise allowed).
   const selectableTemplates = TEMPLATES.filter(
-    (t) =>
-      availableTemplateIds.includes(t.id) || t.id === currentTemplateId,
+    (t) => availableTemplateIds.includes(t.id) || t.id === currentTemplateId,
   );
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -49,7 +48,9 @@ export function TemplatePicker({
 
   const updateTemplate = api.business.updateTemplate.useMutation({
     onSuccess: () => {
-      toast.success("Template updated. Your storefront now uses the new template.");
+      toast.success(
+        "Template updated. Your storefront now uses the new template.",
+      );
       setConfirmOpen(false);
       setPendingId(null);
       setPickerOpen(false);
@@ -188,10 +189,7 @@ export function TemplatePicker({
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleConfirm}
-              disabled={updateTemplate.isPending}
-            >
+            <Button onClick={handleConfirm} disabled={updateTemplate.isPending}>
               {updateTemplate.isPending ? "Switching…" : "Switch template"}
             </Button>
           </DialogFooter>

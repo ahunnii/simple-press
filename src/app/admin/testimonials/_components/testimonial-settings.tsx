@@ -48,9 +48,9 @@ export function TestimonialSettings({
             Auto-approve testimonials
           </Label>
           <p className="text-muted-foreground mt-0.5 text-sm">
-            When on, customer-submitted testimonials are published
-            immediately. When off (default), they land in a pending state
-            below until approved.
+            When on, customer-submitted testimonials are published immediately.
+            When off (default), they land in a pending state below until
+            approved.
           </p>
         </div>
         <Switch

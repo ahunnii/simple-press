@@ -96,7 +96,9 @@ export function BambooProductActions({
                       disabled={quantity >= remainingStock}
                       aria-label="Increase quantity"
                       aria-describedby={
-                        isInventoryTracked ? "bamboo-actions-stock-msg" : undefined
+                        isInventoryTracked
+                          ? "bamboo-actions-stock-msg"
+                          : undefined
                       }
                     >
                       <Plus className="size-4" aria-hidden="true" />

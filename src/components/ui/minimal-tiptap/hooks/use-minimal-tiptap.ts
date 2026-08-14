@@ -168,7 +168,9 @@ const createExtensions = ({
           // Prefer the configured uploader (S3) so dropped images don't end
           // up base64-encoded in the document. Base64 is a last-resort
           // fallback for when no uploader is configured at all.
-          const src = uploader ? await uploader(file) : await fileToBase64(file);
+          const src = uploader
+            ? await uploader(file)
+            : await fileToBase64(file);
           editor.commands.insertContentAt(pos, {
             type: "image",
             attrs: { src },
@@ -180,7 +182,9 @@ const createExtensions = ({
       void Promise.all(
         files.map(async (file) => {
           // Same rationale as onDrop above — use the real uploader when set.
-          const src = uploader ? await uploader(file) : await fileToBase64(file);
+          const src = uploader
+            ? await uploader(file)
+            : await fileToBase64(file);
           editor.commands.insertContent({
             type: "image",
             attrs: { src },

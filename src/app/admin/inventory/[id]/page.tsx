@@ -154,7 +154,9 @@ export default async function InventoryPoolDetailPage({ params }: Props) {
                   <TableBody>
                     {pool.products.map((product) => (
                       <TableRow key={product.id}>
-                        <TableCell className={`${TABLE_CELL} whitespace-normal`}>
+                        <TableCell
+                          className={`${TABLE_CELL} whitespace-normal`}
+                        >
                           <Link
                             href={`/admin/products/${product.id}`}
                             className="text-foreground font-medium hover:underline"

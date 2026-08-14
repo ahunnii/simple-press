@@ -1,7 +1,4 @@
-import type {
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 /**

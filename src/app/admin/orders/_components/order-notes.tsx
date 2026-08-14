@@ -33,7 +33,9 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const defaultValues: OrderNotesFormData = { internalNote: internalNote ?? "" };
+  const defaultValues: OrderNotesFormData = {
+    internalNote: internalNote ?? "",
+  };
 
   const form = useForm<OrderNotesFormData>({
     resolver: zodResolver(orderNotesFormSchema),
@@ -106,7 +108,10 @@ export function OrderNotes({ orderId, internalNote, customerNote }: Props) {
 
           {isEditing ? (
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-2"
+              >
                 <TextareaFormField
                   form={form}
                   name="internalNote"

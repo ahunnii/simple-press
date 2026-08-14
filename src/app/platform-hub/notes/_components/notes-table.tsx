@@ -7,6 +7,7 @@ import type { RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+
 import { ResolveNoteDialog } from "./resolve-note-dialog";
 
 type NoteRow = RouterOutputs["editorNote"]["platformList"]["notes"][number];

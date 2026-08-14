@@ -23,7 +23,8 @@ import { cn } from "~/lib/utils";
 /** Grid geometry. 2-up at md, 3-up at lg — the same breakpoints the admin
  *  tables use for column hiding, so grid and table pages reflow at the same
  *  widths. Exported separately for consumers that need a different element. */
-export const CARD_GRID = "grid list-none gap-6 p-0 md:grid-cols-2 lg:grid-cols-3";
+export const CARD_GRID =
+  "grid list-none gap-6 p-0 md:grid-cols-2 lg:grid-cols-3";
 
 /** Responsive card-grid container. A <ul> so assistive tech announces
  *  "list, N items" — the row count a table caption gives for free. Children

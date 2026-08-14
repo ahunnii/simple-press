@@ -12,7 +12,18 @@
  * csv-builders expect. `prisma-field-encryption` decrypts `@encrypted` fields
  * transparently on read, so addresses/phones need no special handling here.
  */
-
+import type {
+  CustomerForExport,
+  DiscountForExport,
+  OrderForExport,
+  ReviewForExport,
+} from "~/lib/wordpress/csv-builders";
+import type { ExportSummary } from "~/lib/wordpress/readme";
+import type {
+  GalleryForHtml,
+  GalleryMap,
+} from "~/lib/wordpress/tiptap-to-html";
+import type { WxrChannel, WxrItem } from "~/lib/wordpress/wxr";
 import { getBusinessUrl } from "~/lib/business-url";
 import { isStorageUrl } from "~/lib/s3/url";
 import {
@@ -22,23 +33,11 @@ import {
   buildOrderItemsCsv,
   buildOrdersCsv,
   buildReviewsCsv,
-  type CustomerForExport,
-  type DiscountForExport,
-  type OrderForExport,
-  type ReviewForExport,
 } from "~/lib/wordpress/csv-builders";
 import { exportToWooCommerceCSV } from "~/lib/wordpress/csv-exporter";
-import { buildReadme, type ExportSummary } from "~/lib/wordpress/readme";
-import {
-  tiptapToHtml,
-  type GalleryForHtml,
-  type GalleryMap,
-} from "~/lib/wordpress/tiptap-to-html";
-import {
-  buildWxrDocument,
-  type WxrChannel,
-  type WxrItem,
-} from "~/lib/wordpress/wxr";
+import { buildReadme } from "~/lib/wordpress/readme";
+import { tiptapToHtml } from "~/lib/wordpress/tiptap-to-html";
+import { buildWxrDocument } from "~/lib/wordpress/wxr";
 import { db } from "~/server/db";
 
 // ─── Public API ────────────────────────────────────────────────────────────
@@ -413,10 +412,11 @@ export async function collectWordPressExport(
   const existingSlugs = new Set(pages.map((p) => p.slug));
 
   const pageItems: WxrItem[] = pages.map((page) => {
-    const { html, imageUrls, warnings: pageWarnings } = tiptapToHtml(
-      page.content,
-      galleryMap,
-    );
+    const {
+      html,
+      imageUrls,
+      warnings: pageWarnings,
+    } = tiptapToHtml(page.content, galleryMap);
     for (const w of pageWarnings) {
       warnings.push(`[${page.slug}] ${w}`);
     }

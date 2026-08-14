@@ -397,10 +397,10 @@ export function BrandingEditor({ business, siteContent }: Props) {
                   )}
                 />
 
-                <div className="flex items-center rounded-lg border bg-muted/50 px-4 py-3 text-sm">
+                <div className="bg-muted/50 flex items-center rounded-lg border px-4 py-3 text-sm">
                   <Link
                     href="/editor"
-                    className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
+                    className="text-primary inline-flex items-center gap-1.5 font-medium underline-offset-2 hover:underline"
                   >
                     Edit sections, colors and fonts in the Site Editor
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

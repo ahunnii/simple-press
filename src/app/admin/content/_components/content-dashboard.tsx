@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Badge } from "~/components/ui/badge";
 import {
   Card,
@@ -11,7 +12,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 
 type Props = {
   /** Count of policy pages (`Page.type === "policy"`) — drives the
@@ -79,13 +79,12 @@ export function ContentDashboard({
   return (
     <>
       {/* Explainer: this hub is one-off configuration, not day-to-day authoring. */}
-      <div className="mb-6 rounded-lg border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+      <div className="bg-muted/50 text-muted-foreground mb-6 rounded-lg border px-4 py-3 text-sm">
         Store-wide setup you configure once and rarely revisit — brand,
-        navigation, search listing, and policies. For day-to-day content,
-        use{" "}
-        <span className="font-medium text-foreground">Site Editor</span>
+        navigation, search listing, and policies. For day-to-day content, use{" "}
+        <span className="text-foreground font-medium">Site Editor</span>
         {" or "}
-        <span className="font-medium text-foreground">Pages</span>
+        <span className="text-foreground font-medium">Pages</span>
         {" in the sidebar."}
       </div>
 

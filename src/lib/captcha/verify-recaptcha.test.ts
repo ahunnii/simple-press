@@ -51,9 +51,8 @@ async function loadVerifyRecaptcha(overrides: EnvOverrides = {}) {
   }
 
   const knownHosts = await import("~/lib/captcha/known-hosts");
-  const { verifyRecaptcha, RECAPTCHA_TEST_BYPASS_TOKEN } = await import(
-    "./verify-recaptcha"
-  );
+  const { verifyRecaptcha, RECAPTCHA_TEST_BYPASS_TOKEN } =
+    await import("./verify-recaptcha");
 
   return {
     verifyRecaptcha,
@@ -142,7 +141,10 @@ describe("verifyRecaptcha — siteverify says success:false", () => {
     const { verifyRecaptcha } = await loadVerifyRecaptcha({
       RECAPTCHA_SECRET_KEY: "secret",
     });
-    mockFetchResponse({ success: false, "error-codes": ["invalid-input-response"] });
+    mockFetchResponse({
+      success: false,
+      "error-codes": ["invalid-input-response"],
+    });
 
     const result = await verifyRecaptcha("token", {
       action: ACTION,
@@ -181,7 +183,11 @@ describe("verifyRecaptcha — score below threshold", () => {
       RECAPTCHA_SECRET_KEY: "secret",
       RECAPTCHA_MIN_SCORE: "0.5",
     });
-    mockFetchResponse({ success: true, action: ACTION, hostname: REQUEST_HOST });
+    mockFetchResponse({
+      success: true,
+      action: ACTION,
+      hostname: REQUEST_HOST,
+    });
 
     const result = await verifyRecaptcha("token", {
       action: ACTION,

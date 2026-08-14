@@ -7,7 +7,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ExternalLink, Info, Save, TriangleAlert } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Info,
+  Save,
+  TriangleAlert,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -406,9 +412,10 @@ export function SEOEditor({
 
   // The accordion is controlled now, because the pinned previews follow it.
   const [openRoutes, setOpenRoutes] = useState<string[]>(initiallyOpenRoutes);
-  const [focusedRouteKey, setFocusedRouteKey] = useState<StaticSeoRouteKey | null>(
-    () => asRouteKey(initiallyOpenRoutes[0]),
-  );
+  const [focusedRouteKey, setFocusedRouteKey] =
+    useState<StaticSeoRouteKey | null>(() =>
+      asRouteKey(initiallyOpenRoutes[0]),
+    );
 
   /**
    * Keep one route "in focus" for the previews while still allowing several
@@ -627,7 +634,10 @@ export function SEOEditor({
   const previewDescription =
     previewRoute === undefined
       ? firstFilled([storeDescription], NO_DESCRIPTION)
-      : firstFilled([previewRow?.description, storeDescription], NO_DESCRIPTION);
+      : firstFilled(
+          [previewRow?.description, storeDescription],
+          NO_DESCRIPTION,
+        );
 
   const previewSlug =
     previewRoute === undefined ? "" : previewRoute.path.replace(/^\//, "");
@@ -810,8 +820,8 @@ export function SEOEditor({
                         <CardDescription>
                           The picture that appears when someone pastes a link to
                           your store into Facebook, LinkedIn, Slack, iMessage or
-                          X. Without one, those apps show a plain grey box.
-                          1200 × 630 pixels is the size everything crops to.
+                          X. Without one, those apps show a plain grey box. 1200
+                          × 630 pixels is the size everything crops to.
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -1118,8 +1128,9 @@ export function SEOEditor({
                               <StepLink href={BING_WEBMASTER_URL}>
                                 Bing Webmaster Tools
                               </StepLink>{" "}
-                              and add <Literal>{`https://${storeHost}`}</Literal>{" "}
-                              as a site.
+                              and add{" "}
+                              <Literal>{`https://${storeHost}`}</Literal> as a
+                              site.
                             </li>
                             <li>
                               Choose{" "}

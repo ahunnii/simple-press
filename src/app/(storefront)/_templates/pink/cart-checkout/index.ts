@@ -79,8 +79,7 @@ export const pinkCartCheckoutSections: TemplateSection[] = [
     id: "checkout.success",
     page: "checkout",
     title: "Order Confirmation",
-    description:
-      "The thank-you page shown after a successful Stripe checkout",
+    description: "The thank-you page shown after a successful Stripe checkout",
     groupIds: ["checkout.success"],
     order: 3,
     hideable: false,

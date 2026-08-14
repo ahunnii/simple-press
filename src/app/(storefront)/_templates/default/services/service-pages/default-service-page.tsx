@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { ServiceTemplateProps } from "../../../_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { ServiceAddOn, ServicePriceTier } from "~/lib/validators/services";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { parseTemplateIframeValue } from "~/lib/template-fields";
 import {
   parseServiceAddOns,
@@ -14,12 +16,10 @@ import { EmbedReveal } from "~/components/embed-reveal";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
-import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 
-import type { ServiceTemplateProps } from "../../../_service-pages/registry";
+import { resolveFields } from ".";
 import { ServiceHeroVideo } from "../../../_service-pages/_shared/service-hero-video";
 import { ServiceSectionMedia } from "../../../_service-pages/_shared/service-section-media";
-import { resolveFields } from ".";
 
 type ServiceItem = ServiceTemplateProps["items"][number];
 
@@ -103,7 +103,7 @@ export async function DefaultServicePage({
         <div className="absolute inset-0 bg-black/30" />
         <div className="absolute inset-0 flex items-end pb-12">
           <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-8">
-            <h1 className="font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em] text-white text-balance">
+            <h1 className="font-serif text-[clamp(40px,5vw,72px)] leading-[1.04] font-semibold tracking-[-0.03em] text-balance text-white">
               {service.name}
             </h1>
             {service.description && (
@@ -342,9 +342,7 @@ function DefaultServiceItemCard({
                     </span>
                   )}
                   {addOn.description && (
-                    <p className="mt-0.5 text-[#6b6b6b]">
-                      {addOn.description}
-                    </p>
+                    <p className="mt-0.5 text-[#6b6b6b]">{addOn.description}</p>
                   )}
                 </li>
               ))}

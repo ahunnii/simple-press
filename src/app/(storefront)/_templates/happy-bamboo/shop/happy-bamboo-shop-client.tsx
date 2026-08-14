@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Leaf, Search, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { Leaf, Search, X } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";

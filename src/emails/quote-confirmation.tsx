@@ -66,9 +66,9 @@ export default function QuoteConfirmationEmail({
 
       <Text style={paragraph}>Hi {customerName},</Text>
       <Text style={paragraph}>
-        Thanks for requesting a quote for {calculatorName} from{" "}
-        {businessName}. We&apos;ll get back to you within {responseDays}{" "}
-        business day{responseDays === 1 ? "" : "s"}.
+        Thanks for requesting a quote for {calculatorName} from {businessName}.
+        We&apos;ll get back to you within {responseDays} business day
+        {responseDays === 1 ? "" : "s"}.
       </Text>
 
       {/* Answers summary */}
@@ -98,8 +98,8 @@ export default function QuoteConfirmationEmail({
               : `${formatPrice(estimate.lowCents)} – ${formatPrice(estimate.highCents)}`}
           </Text>
           <Text style={estimateCaveat}>
-            This is an estimate based on the details you provided, not a
-            final price. We&apos;ll confirm exact pricing when we follow up.
+            This is an estimate based on the details you provided, not a final
+            price. We&apos;ll confirm exact pricing when we follow up.
           </Text>
         </Section>
       )}

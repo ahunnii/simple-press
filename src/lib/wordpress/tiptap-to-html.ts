@@ -109,14 +109,8 @@ function sanitizeHtml(html: string): string {
   out = out.replace(/\son\w+\s*=\s*"[^"]*"/gi, "");
   out = out.replace(/\son\w+\s*=\s*'[^']*'/gi, "");
   // Neutralize javascript: in href/src attribute values.
-  out = out.replace(
-    /\b(href|src)\s*=\s*"\s*javascript:[^"]*"/gi,
-    '$1="#"',
-  );
-  out = out.replace(
-    /\b(href|src)\s*=\s*'\s*javascript:[^']*'/gi,
-    "$1='#'",
-  );
+  out = out.replace(/\b(href|src)\s*=\s*"\s*javascript:[^"]*"/gi, '$1="#"');
+  out = out.replace(/\b(href|src)\s*=\s*'\s*javascript:[^']*'/gi, "$1='#'");
   return out;
 }
 
@@ -140,7 +134,9 @@ function isEmbedNode(node: ContentNode): node is ContentNode & {
 
 function isQuoteCalculatorNode(
   node: ContentNode,
-): node is ContentNode & { attrs: { calculatorId?: string; businessId?: string } } {
+): node is ContentNode & {
+  attrs: { calculatorId?: string; businessId?: string };
+} {
   return node.type === "quoteCalculator" && node.attrs != null;
 }
 
@@ -262,7 +258,9 @@ export function tiptapToHtml(
       warnings.push(
         "Skipped quote calculator node (interactive widget has no WordPress equivalent)",
       );
-      fragments.push("<p><em>[Quote calculator: interactive widget not exported]</em></p>");
+      fragments.push(
+        "<p><em>[Quote calculator: interactive widget not exported]</em></p>",
+      );
       continue;
     }
 

@@ -4,7 +4,6 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import {
   ChevronDown,
@@ -18,14 +17,15 @@ import {
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import type { BannerConfig } from "~/lib/validators/site-banner";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
-import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "../index";
 import { ViiAnnouncementBar } from "./vii-announcement-bar";
@@ -42,11 +42,12 @@ const ease = "var(--vii-ease-strong)";
 
 export function ViiHeader({
   business,
+  initialSession,
   banner,
 }: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
-  const { data: session, isPending } = useHydratedSession();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -791,7 +792,7 @@ export function ViiHeader({
                   ) : session?.user ? (
                     <UserButton
                       size="icon"
-                      className="rounded-full w-auto h-auto p-0"
+                      className="h-auto w-auto rounded-full p-0"
                       avatarClassName="size-7 ring-1 ring-[var(--vii-copper)] ring-offset-1 ring-offset-transparent"
                       links={[
                         {
@@ -1058,28 +1059,35 @@ export function ViiHeader({
               </Link>
             </div>
 
-            <Link
-              href={session?.user ? "/account/orders" : "/auth/sign-in"}
-              onClick={() => setMobileOpen(false)}
-              className="mt-4 flex items-center justify-center gap-2"
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "12px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                fontWeight: 400,
-                padding: "14px",
-                background: "transparent",
-                border:
-                  "1px solid color-mix(in srgb, var(--vii-navy) 20%, transparent)",
-                color: "var(--vii-navy)",
-                textDecoration: "none",
-                borderRadius: "var(--radius)",
-              }}
-            >
-              <User className="h-4 w-4" aria-hidden="true" />
-              {session?.user ? "My Account" : "Sign In"}
-            </Link>
+            {/* Same `customerAccounts` gate the desktop cluster uses, plus a
+                pending guard: this row is a single link whose destination IS
+                the session state, so rendering it early points a signed-in
+                shopper at the sign-in page. A row that appears a beat late
+                beats a row that goes to the wrong place. */}
+            {isStorefrontEnabled("customerAccounts") && !isPending && (
+              <Link
+                href={session?.user ? "/account/orders" : "/auth/sign-in"}
+                onClick={() => setMobileOpen(false)}
+                className="mt-4 flex items-center justify-center gap-2"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "12px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  fontWeight: 400,
+                  padding: "14px",
+                  background: "transparent",
+                  border:
+                    "1px solid color-mix(in srgb, var(--vii-navy) 20%, transparent)",
+                  color: "var(--vii-navy)",
+                  textDecoration: "none",
+                  borderRadius: "var(--radius)",
+                }}
+              >
+                <User className="h-4 w-4" aria-hidden="true" />
+                {session?.user ? "My Account" : "Sign In"}
+              </Link>
+            )}
           </div>
         </div>
       ) : null}

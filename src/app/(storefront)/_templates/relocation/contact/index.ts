@@ -281,8 +281,7 @@ const contactFormData: TemplateField[] = [
   {
     key: "relocation.contact.form-success-again-label",
     label: "Send-Another Button Label",
-    description:
-      "Returns the visitor to a blank form after a successful send.",
+    description: "Returns the visitor to a blank form after a successful send.",
     type: "text",
     page: "contact",
     group: "contact.form",

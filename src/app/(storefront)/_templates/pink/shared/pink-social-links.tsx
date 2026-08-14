@@ -35,7 +35,9 @@ export function PinkSocialLinks({
     : "border-[var(--pink-line-button)] text-[var(--pink-ink)] hover:border-[var(--pink-rose)] hover:text-[var(--pink-rose)]";
 
   return (
-    <div className={`flex flex-wrap gap-2.5${className ? ` ${className}` : ""}`}>
+    <div
+      className={`flex flex-wrap gap-2.5${className ? ` ${className}` : ""}`}
+    >
       {links.map(({ key, url, ariaLabel, Icon }) => (
         <a
           key={key}

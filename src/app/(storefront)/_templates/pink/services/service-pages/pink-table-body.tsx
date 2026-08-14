@@ -107,29 +107,35 @@ export function PinkTableBody({
   requestFallbackLabel,
   serviceName,
 }: Props) {
-  const [selectedId, setSelectedId] = useState<string | undefined>(items[0]?.id);
+  const [selectedId, setSelectedId] = useState<string | undefined>(
+    items[0]?.id,
+  );
   const selectedItem = useMemo(
     () => items.find((it) => it.id === selectedId) ?? items[0],
     [items, selectedId],
   );
 
   const itemPriceLabel = selectedItem?.priceLabel?.trim() ?? "";
-  const priceTiers = selectedItem ? parseServicePriceTiers(selectedItem.priceTiers) : [];
+  const priceTiers = selectedItem
+    ? parseServicePriceTiers(selectedItem.priceTiers)
+    : [];
   const addOns = selectedItem ? parseServiceAddOns(selectedItem.addOns) : [];
 
   const showBringsProvides = brings.length > 0 || provides.length > 0;
 
   return (
-    <div
-      className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-[52px] px-5 py-14 md:px-10 md:py-[56px] lg:grid-cols-[minmax(0,1fr)_minmax(0,368px)]"
-    >
+    <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-[52px] px-5 py-14 md:px-10 md:py-[56px] lg:grid-cols-[minmax(0,1fr)_minmax(0,368px)]">
       {/* ── Left column ─────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-16">
         {/* What it actually is */}
         <PinkReveal as="section">
           <h2
             className="pink-display"
-            style={{ fontSize: "28px", fontWeight: 600, letterSpacing: "-0.02em" }}
+            style={{
+              fontSize: "28px",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+            }}
           >
             {bodyHeading}
           </h2>
@@ -141,7 +147,11 @@ export function PinkTableBody({
                 {bodyParagraphs
                   .filter((p) => p.length > 0)
                   .map((p, i) => (
-                    <p key={i} className="text-[17px] leading-[1.8]" style={{ color: "var(--pink-body)" }}>
+                    <p
+                      key={i}
+                      className="text-[17px] leading-[1.8]"
+                      style={{ color: "var(--pink-body)" }}
+                    >
                       {p}
                     </p>
                   ))}
@@ -153,11 +163,17 @@ export function PinkTableBody({
         {/* Project picker */}
         {items.length > 0 && (
           <PinkReveal as="section">
-            <h2 className="pink-display text-[22px]" style={{ fontWeight: 600 }}>
+            <h2
+              className="pink-display text-[22px]"
+              style={{ fontWeight: 600 }}
+            >
               {pickerHeading}
             </h2>
             {pickerIntro && (
-              <p className="mt-1.5 text-[15px]" style={{ color: "var(--pink-muted)" }}>
+              <p
+                className="mt-1.5 text-[15px]"
+                style={{ color: "var(--pink-muted)" }}
+              >
                 {pickerIntro}
               </p>
             )}
@@ -181,12 +197,17 @@ export function PinkTableBody({
                       onClick={() => setSelectedId(item.id)}
                       className="flex flex-1 flex-col text-left transition-colors"
                       style={{
-                        background: isSelected ? "var(--pink-ink)" : "var(--pink-paper)",
+                        background: isSelected
+                          ? "var(--pink-ink)"
+                          : "var(--pink-paper)",
                       }}
                     >
                       <div
                         className="relative w-full"
-                        style={{ aspectRatio: "4 / 3", background: "var(--pink-panel)" }}
+                        style={{
+                          aspectRatio: "4 / 3",
+                          background: "var(--pink-panel)",
+                        }}
                       >
                         <Image
                           src={item.image ?? "/placeholder.svg"}
@@ -201,7 +222,9 @@ export function PinkTableBody({
                           className="pink-display text-[18px]"
                           style={{
                             fontWeight: 600,
-                            color: isSelected ? "var(--pink-paper)" : "var(--pink-ink)",
+                            color: isSelected
+                              ? "var(--pink-paper)"
+                              : "var(--pink-ink)",
                           }}
                         >
                           {item.name}
@@ -209,16 +232,26 @@ export function PinkTableBody({
                         {item.description && (
                           <span
                             className="text-[14px] leading-[1.6]"
-                            style={{ color: isSelected ? "var(--pink-ink-muted)" : "var(--pink-muted)" }}
+                            style={{
+                              color: isSelected
+                                ? "var(--pink-ink-muted)"
+                                : "var(--pink-muted)",
+                            }}
                           >
                             {item.description}
                           </span>
                         )}
                         <span
                           className="mt-auto pt-2 text-[14px] font-medium"
-                          style={{ color: isSelected ? "var(--pink-petal)" : "var(--pink-ink)" }}
+                          style={{
+                            color: isSelected
+                              ? "var(--pink-petal)"
+                              : "var(--pink-ink)",
+                          }}
                         >
-                          {[item.priceLabel, item.category].filter(Boolean).join(" · ")}
+                          {[item.priceLabel, item.category]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </span>
                       </div>
                     </button>
@@ -244,25 +277,40 @@ export function PinkTableBody({
         {/* Timeline */}
         {timeline.length > 0 && (
           <PinkReveal as="section">
-            <h2 className="pink-display text-[22px]" style={{ fontWeight: 600 }}>
+            <h2
+              className="pink-display text-[22px]"
+              style={{ fontWeight: 600 }}
+            >
               {timelineHeading}
             </h2>
-            <div className="mt-4" style={{ borderTop: "1px solid var(--pink-ink)" }}>
+            <div
+              className="mt-4"
+              style={{ borderTop: "1px solid var(--pink-ink)" }}
+            >
               {timeline.map((row, i) => (
                 <div
                   key={row._id ?? i}
                   className="grid grid-cols-[96px_minmax(0,1fr)] gap-4 py-5"
                   style={{ borderBottom: "1px solid var(--pink-line)" }}
                 >
-                  <span className="pink-display text-[15px]" style={{ fontWeight: 600, color: "var(--pink-rose)" }}>
+                  <span
+                    className="pink-display text-[15px]"
+                    style={{ fontWeight: 600, color: "var(--pink-rose)" }}
+                  >
                     {row.time}
                   </span>
                   <div>
-                    <p className="pink-display text-[16px]" style={{ fontWeight: 600 }}>
+                    <p
+                      className="pink-display text-[16px]"
+                      style={{ fontWeight: 600 }}
+                    >
                       {row.title}
                     </p>
                     {row.body && (
-                      <p className="mt-1 text-[15px] leading-[1.7]" style={{ color: "var(--pink-body)" }}>
+                      <p
+                        className="mt-1 text-[15px] leading-[1.7]"
+                        style={{ color: "var(--pink-body)" }}
+                      >
                         {row.body}
                       </p>
                     )}
@@ -275,13 +323,27 @@ export function PinkTableBody({
 
         {/* Brings / provides */}
         {showBringsProvides && (
-          <PinkReveal as="section" className="grid grid-cols-1 gap-[1px] sm:grid-cols-2" style={{ background: "var(--pink-line)", border: "1px solid var(--pink-line)" }}>
+          <PinkReveal
+            as="section"
+            className="grid grid-cols-1 gap-[1px] sm:grid-cols-2"
+            style={{
+              background: "var(--pink-line)",
+              border: "1px solid var(--pink-line)",
+            }}
+          >
             <div className="p-6" style={{ background: "var(--pink-paper)" }}>
               <p className="pink-label">{bringsLabel}</p>
               <ul className="mt-3 flex flex-col gap-2">
                 {brings.map((row, i) => (
-                  <li key={row._id ?? i} className="flex gap-2 text-[15px]" style={{ color: "var(--pink-body)" }}>
-                    <span aria-hidden="true" style={{ color: "var(--pink-rose)" }}>
+                  <li
+                    key={row._id ?? i}
+                    className="flex gap-2 text-[15px]"
+                    style={{ color: "var(--pink-body)" }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{ color: "var(--pink-rose)" }}
+                    >
                       —
                     </span>
                     {row.text}
@@ -293,8 +355,15 @@ export function PinkTableBody({
               <p className="pink-label">{providesLabel}</p>
               <ul className="mt-3 flex flex-col gap-2">
                 {provides.map((row, i) => (
-                  <li key={row._id ?? i} className="flex gap-2 text-[15px]" style={{ color: "var(--pink-body)" }}>
-                    <span aria-hidden="true" style={{ color: "var(--pink-rose)" }}>
+                  <li
+                    key={row._id ?? i}
+                    className="flex gap-2 text-[15px]"
+                    style={{ color: "var(--pink-body)" }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{ color: "var(--pink-rose)" }}
+                    >
                       —
                     </span>
                     {row.text}
@@ -307,12 +376,18 @@ export function PinkTableBody({
 
         {/* Gallery */}
         {gallery.length > 0 && (
-          <PinkReveal as="section" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <PinkReveal
+            as="section"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+          >
             {gallery.map((img, i) => (
               <div
                 key={img._id ?? i}
                 className="relative"
-                style={{ aspectRatio: "4 / 3", background: "var(--pink-panel)" }}
+                style={{
+                  aspectRatio: "4 / 3",
+                  background: "var(--pink-panel)",
+                }}
               >
                 <Image
                   src={img.image || "/placeholder.svg"}
@@ -335,11 +410,17 @@ export function PinkTableBody({
                 paddingLeft: 24,
               }}
             >
-              <p className="pink-display text-[24px]" style={{ fontWeight: 600, lineHeight: 1.4 }}>
+              <p
+                className="pink-display text-[24px]"
+                style={{ fontWeight: 600, lineHeight: 1.4 }}
+              >
                 {quoteText}
               </p>
               {quoteAttribution && (
-                <footer className="mt-3 text-[14px]" style={{ color: "var(--pink-subtle)" }}>
+                <footer
+                  className="mt-3 text-[14px]"
+                  style={{ color: "var(--pink-subtle)" }}
+                >
                   — {quoteAttribution}
                 </footer>
               )}
@@ -350,7 +431,10 @@ export function PinkTableBody({
         {/* FAQ */}
         {faq.length > 0 && (
           <PinkReveal as="section">
-            <h2 className="pink-display text-[22px]" style={{ fontWeight: 600 }}>
+            <h2
+              className="pink-display text-[22px]"
+              style={{ fontWeight: 600 }}
+            >
               {faqHeading}
             </h2>
             <PinkAccordion
@@ -366,8 +450,14 @@ export function PinkTableBody({
       </div>
 
       {/* ── Sticky sidebar ──────────────────────────────────────────────── */}
-      <aside className="flex h-fit flex-col gap-[2px] lg:sticky" style={{ top: "var(--pink-sticky-top)" }}>
-        <div className="flex flex-col gap-4 p-6" style={{ background: "var(--pink-ink)" }}>
+      <aside
+        className="flex h-fit flex-col gap-[2px] lg:sticky"
+        style={{ top: "var(--pink-sticky-top)" }}
+      >
+        <div
+          className="flex flex-col gap-4 p-6"
+          style={{ background: "var(--pink-ink)" }}
+        >
           <p className="pink-label-dark">{priceEyebrow}</p>
           {/* The owner does not sell seats: a make & take is quoted per group on
               enquiry. A price only ever appears here if the owner typed one into
@@ -375,22 +465,34 @@ export function PinkTableBody({
               this stays a contact-for-cost panel. (`?? ` alone was not enough:
               `priceLabel` is a nullable free-text column, so a cleared field
               arrives as "" and used to render a blank 34px line.) */}
-          <p className="pink-display text-[2.125rem]" style={{ fontWeight: 600, color: "var(--pink-paper)" }}>
+          <p
+            className="pink-display text-[2.125rem]"
+            style={{ fontWeight: 600, color: "var(--pink-paper)" }}
+          >
             {itemPriceLabel || priceFallback}
           </p>
           {priceQualifier && (
-            <p className="text-[13px]" style={{ color: "var(--pink-ink-muted)" }}>
+            <p
+              className="text-[13px]"
+              style={{ color: "var(--pink-ink-muted)" }}
+            >
               {priceQualifier}
             </p>
           )}
 
           {(priceTiers.length > 0 || addOns.length > 0) && (
-            <div className="flex flex-col" style={{ borderTop: "1px solid var(--pink-ink-line)" }}>
+            <div
+              className="flex flex-col"
+              style={{ borderTop: "1px solid var(--pink-ink-line)" }}
+            >
               {priceTiers.map((tier, i) => (
                 <div
                   key={`tier-${i}`}
                   className="flex items-baseline justify-between gap-3 py-2.5 text-[13px]"
-                  style={{ borderBottom: "1px solid var(--pink-ink-line)", color: "var(--pink-ink-body)" }}
+                  style={{
+                    borderBottom: "1px solid var(--pink-ink-line)",
+                    color: "var(--pink-ink-body)",
+                  }}
                 >
                   <span>{tier.label}</span>
                   <span style={{ fontWeight: 600 }}>{tier.priceLabel}</span>
@@ -400,16 +502,24 @@ export function PinkTableBody({
                 <div
                   key={`addon-${i}`}
                   className="flex items-baseline justify-between gap-3 py-2.5 text-[13px]"
-                  style={{ borderBottom: "1px solid var(--pink-ink-line)", color: "var(--pink-ink-body)" }}
+                  style={{
+                    borderBottom: "1px solid var(--pink-ink-line)",
+                    color: "var(--pink-ink-body)",
+                  }}
                 >
                   <span>{addon.name}</span>
-                  {addon.priceLabel && <span style={{ fontWeight: 600 }}>{addon.priceLabel}</span>}
+                  {addon.priceLabel && (
+                    <span style={{ fontWeight: 600 }}>{addon.priceLabel}</span>
+                  )}
                 </div>
               ))}
             </div>
           )}
 
-          <a href="#request-form" className="pink-btn pink-btn-solid mt-2 w-full justify-center">
+          <a
+            href="#request-form"
+            className="pink-btn pink-btn-solid mt-2 w-full justify-center"
+          >
             {priceCtaLabel}
           </a>
         </div>
@@ -428,7 +538,10 @@ export function PinkTableBody({
           <Link
             href="/services"
             className="flex items-center justify-between gap-3 p-4 text-[15px] transition-colors hover:opacity-80"
-            style={{ background: "var(--pink-panel)", color: "var(--pink-ink)" }}
+            style={{
+              background: "var(--pink-panel)",
+              color: "var(--pink-ink)",
+            }}
           >
             {quicklink1Label}
             <span aria-hidden="true">→</span>
@@ -437,7 +550,10 @@ export function PinkTableBody({
             <Link
               href={quicklink2Href || "/shop"}
               className="flex items-center justify-between gap-3 p-4 text-[15px] transition-colors hover:opacity-80"
-              style={{ background: "var(--pink-panel)", color: "var(--pink-ink)" }}
+              style={{
+                background: "var(--pink-panel)",
+                color: "var(--pink-ink)",
+              }}
             >
               {quicklink2Label}
               <span aria-hidden="true">→</span>

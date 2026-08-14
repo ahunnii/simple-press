@@ -4,6 +4,7 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import type { z } from "zod";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import {
   closestCenter,
   DndContext,
@@ -22,14 +23,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUploadFile } from "@better-upload/client";
-import {
-  ChevronDown,
-  GripVertical,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { ChevronDown, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -447,7 +441,9 @@ function ServiceItemFormDialog({
   };
 
   const isPending =
-    addMutation.isPending || updateMutation.isPending || imageUploader.isPending;
+    addMutation.isPending ||
+    updateMutation.isPending ||
+    imageUploader.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -481,10 +477,7 @@ function ServiceItemFormDialog({
                         </span>
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="e.g. Signature Facial"
-                          {...field}
-                        />
+                        <Input placeholder="e.g. Signature Facial" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -500,8 +493,8 @@ function ServiceItemFormDialog({
                         <FormItem>
                           <FormLabel>Section</FormLabel>
                           <p className="text-muted-foreground text-sm">
-                            Define sections in the Page content tab first,
-                            then assign items here.
+                            Define sections in the Page content tab first, then
+                            assign items here.
                           </p>
                         </FormItem>
                       ) : (
@@ -995,8 +988,8 @@ function ServiceItemFormDialog({
                     </>
                   ) : (
                     <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
-                      Embeds are disabled for this business. Enable the
-                      Embeds feature in <strong>Settings → Features</strong>.
+                      Embeds are disabled for this business. Enable the Embeds
+                      feature in <strong>Settings → Features</strong>.
                     </div>
                   )}
                 </CollapsibleContent>

@@ -130,8 +130,7 @@ export const pinkBlogData: TemplateField[] = [
     page: "blog",
     group: "blog.grid",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Check back soon — new notes from the studio are on the way.",
+    defaultValue: "Check back soon — new notes from the studio are on the way.",
   },
   {
     key: "pink.blog.grid-empty-cta-label",

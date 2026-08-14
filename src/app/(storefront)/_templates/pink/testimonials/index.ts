@@ -1,7 +1,4 @@
-import type {
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
 
@@ -53,7 +50,8 @@ const testimonialsFeaturedData: TemplateField[] = [
     page: "testimonials",
     group: "testimonials.featured",
     gridColumn: "col-span-1",
-    description: "Link under the featured pull-quote — sources the first testimonial.",
+    description:
+      "Link under the featured pull-quote — sources the first testimonial.",
     defaultValue: "Read more notes →",
   },
 ];
@@ -158,9 +156,19 @@ const testimonialsPressData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 4,
     itemSchema: [
-      { key: "outlet", label: "Outlet", type: "text", placeholder: "Local Makers Weekly" },
+      {
+        key: "outlet",
+        label: "Outlet",
+        type: "text",
+        placeholder: "Local Makers Weekly",
+      },
       { key: "date", label: "Date", type: "text", placeholder: "March 2024" },
-      { key: "quote", label: "Quote", type: "textarea", placeholder: "A short pull-quote from the piece." },
+      {
+        key: "quote",
+        label: "Quote",
+        type: "textarea",
+        placeholder: "A short pull-quote from the piece.",
+      },
       { key: "href", label: "Link", type: "url", placeholder: "https://…" },
     ],
     defaultValue: "",
@@ -188,7 +196,8 @@ const testimonialsCtaData: TemplateField[] = [
     page: "testimonials",
     group: "testimonials.cta",
     gridColumn: "col-span-full",
-    defaultValue: "We read every note. The honest ones are how we know what to keep making.",
+    defaultValue:
+      "We read every note. The honest ones are how we know what to keep making.",
   },
   {
     key: "pink.testimonials.cta-button-label",

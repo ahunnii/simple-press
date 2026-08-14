@@ -1,8 +1,8 @@
 "use client";
 
 import type { AuthErrorInfo } from "~/lib/auth/auth-error-messages";
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import { cn } from "~/lib/utils";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 
 /**
  * Form-level auth failure notice.

@@ -3,9 +3,9 @@ import { TRPCError } from "@trpc/server";
 import Papa from "papaparse";
 import { z } from "zod";
 
+import { getBusinessUrl } from "~/lib/business-url";
 import { sendMarketingBroadcast } from "~/lib/email/templates";
 import { createUnsubscribeToken } from "~/lib/email/unsubscribe-token";
-import { getBusinessUrl } from "~/lib/business-url";
 
 import { createTRPCRouter, featureGate, ownerAdminProcedure } from "../trpc";
 
@@ -123,7 +123,10 @@ export const marketingRouter = createTRPCRouter({
       });
 
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       const baseUrl = getBusinessUrl({
@@ -151,7 +154,11 @@ export const marketingRouter = createTRPCRouter({
           unsubscribeUrl: `${baseUrl}/api/unsubscribe?t=test`,
         });
 
-        return { sent: result.success ? 1 : 0, failed: result.success ? 0 : 1, test: true };
+        return {
+          sent: result.success ? 1 : 0,
+          failed: result.success ? 0 : 1,
+          test: true,
+        };
       }
 
       // ── Real broadcast ───────────────────────────────────────────────────────

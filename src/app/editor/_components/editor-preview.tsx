@@ -3,8 +3,8 @@
 import { ExternalLink, Info, RefreshCw } from "lucide-react";
 
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
-import { PreviewFrame } from "~/components/preview/preview-frame";
 import { Button } from "~/components/ui/button";
+import { PreviewFrame } from "~/components/preview/preview-frame";
 
 /** Device viewport presets — widths match `PreviewPane`'s `DEVICE_WIDTHS`. */
 export type DeviceKind = "desktop" | "tablet" | "mobile";

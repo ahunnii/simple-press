@@ -68,18 +68,18 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
     <div className="coop-surface-page">
       <section
         {...sectionGroupAttr("contact", "main")}
-        className="mx-auto block max-w-425 px-[10.9375rem] py-[7.8125rem] max-coop-md:px-5 max-coop-md:py-15 coop-md:max-coop-lg:px-9 coop-md:max-coop-lg:py-30"
+        className="max-coop-md:px-5 max-coop-md:py-15 coop-md:max-coop-lg:px-9 coop-md:max-coop-lg:py-30 mx-auto block max-w-425 px-[10.9375rem] py-[7.8125rem]"
       >
         {/* Clone data-cid n36 — no-op page wrapper, kept for exact hierarchy */}
         <div className="block">
-          <div className="-mx-[1.0625rem] block h-[29.25rem] before:table before:h-0 before:w-0 before:content-[''] after:table after:h-0 after:w-0 after:content-[''] max-coop-md:h-auto coop-2xl:h-[24.7375rem]">
+          <div className="max-coop-md:h-auto coop-2xl:h-[24.7375rem] -mx-[1.0625rem] block h-[29.25rem] before:table before:h-0 before:w-0 before:content-[''] after:table after:h-0 after:w-0 after:content-['']">
             {/* ── Left column (642.7px) ─────────────────────────────────── */}
-            <div className="float-left block w-[642.7px] max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[486.7px] coop-2xl:w-[922.7px]">
-              <div className="relative block px-[1.0625rem] pb-[1.0625rem] max-coop-md:pt-[1.0625rem]">
+            <div className="max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[486.7px] coop-2xl:w-[922.7px] float-left block w-[642.7px]">
+              <div className="max-coop-md:pt-[1.0625rem] relative block px-[1.0625rem] pb-[1.0625rem]">
                 {/* Clone data-cid n40/n41 — no-op wrapper divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
-                    <h1 className="block h-20 text-[2.4375rem] leading-[2.4375rem] tracking-[-0.78px] whitespace-pre-wrap text-[var(--coop-color-003)] [font-family:var(--font-coop-heading)] max-coop-md:h-auto max-coop-md:text-[1.75rem] max-coop-md:leading-7 max-coop-md:tracking-[-0.01px] coop-2xl:h-10">
+                    <h1 className="max-coop-md:h-auto max-coop-md:text-[1.75rem] max-coop-md:leading-7 max-coop-md:tracking-[-0.01px] coop-2xl:h-10 block h-20 [font-family:var(--font-coop-heading)] text-[2.4375rem] leading-[2.4375rem] tracking-[-0.78px] whitespace-pre-wrap text-[var(--coop-color-003)]">
                       <strong
                         className="inline font-bold [overflow-wrap:break-word]"
                         {...fieldAttr("coop.contact.heading")}
@@ -95,7 +95,7 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
                 {/* Clone data-cid n45/n46 — no-op wrapper divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
-                    <hr className="my-[9.5px] block h-px w-[38.0625rem] overflow-hidden bg-[var(--coop-primary)] text-[var(--coop-primary)] max-coop-md:w-[20.9375rem] coop-md:max-coop-lg:w-[28.3125rem] coop-2xl:w-[55.5625rem]" />
+                    <hr className="max-coop-md:w-[20.9375rem] coop-md:max-coop-lg:w-[28.3125rem] coop-2xl:w-[55.5625rem] my-[9.5px] block h-px w-[38.0625rem] overflow-hidden bg-[var(--coop-primary)] text-[var(--coop-primary)]" />
                   </div>
                 </div>
               </div>
@@ -105,7 +105,7 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
                 <div className="block">
                   <div className="block">
                     <p
-                      className="mb-[1.1875rem] block h-[32.3px] whitespace-pre-wrap [overflow-wrap:break-word] max-coop-md:h-[4.0375rem]"
+                      className="max-coop-md:h-[4.0375rem] mb-[1.1875rem] block h-[32.3px] [overflow-wrap:break-word] whitespace-pre-wrap"
                       {...fieldAttr("coop.contact.intro-line")}
                     >
                       {introLine}
@@ -115,17 +115,17 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
                     {/* Empty paragraph — no field, structural spacing only (clone data-cid n53) */}
                     <p
                       aria-hidden="true"
-                      className="my-[1.1875rem] block whitespace-pre-wrap before:inline-block before:h-0 before:w-0 before:content-[''] [overflow-wrap:break-word]"
+                      className="my-[1.1875rem] block [overflow-wrap:break-word] whitespace-pre-wrap before:inline-block before:h-0 before:w-0 before:content-['']"
                     />
 
                     <p
-                      className="my-[1.1875rem] block whitespace-pre-wrap [overflow-wrap:break-word]"
+                      className="my-[1.1875rem] block [overflow-wrap:break-word] whitespace-pre-wrap"
                       {...fieldAttr("coop.contact.referral-body")}
                     >
                       {referralBody}
                     </p>
 
-                    <p className="mt-[1.1875rem] block h-[4.0375rem] whitespace-pre-wrap [overflow-wrap:break-word]">
+                    <p className="mt-[1.1875rem] block h-[4.0375rem] [overflow-wrap:break-word] whitespace-pre-wrap">
                       <span {...fieldAttr("coop.contact.social-line1")}>
                         {socialLine1}
                       </span>
@@ -140,13 +140,13 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
             </div>
 
             {/* ── Right column (321.3px) ────────────────────────────────── */}
-            <div className="float-left block w-[321.3px] max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[243.3px] coop-2xl:w-[461.3px]">
-              <div className="relative block px-[1.0625rem] pb-[1.0625rem] max-coop-md:pt-[1.0625rem]">
+            <div className="max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[243.3px] coop-2xl:w-[461.3px] float-left block w-[321.3px]">
+              <div className="max-coop-md:pt-[1.0625rem] relative block px-[1.0625rem] pb-[1.0625rem]">
                 {/* Clone data-cid n59/n60 — no-op wrapper divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
                     <h2
-                      className="block text-[2.4375rem] leading-[2.4375rem] tracking-[-0.78px] whitespace-pre-wrap text-[var(--coop-color-003)] [font-family:var(--font-coop-heading)] max-coop-md:text-[1.75rem] max-coop-md:leading-7 max-coop-md:tracking-[-0.01px]"
+                      className="max-coop-md:text-[1.75rem] max-coop-md:leading-7 max-coop-md:tracking-[-0.01px] block [font-family:var(--font-coop-heading)] text-[2.4375rem] leading-[2.4375rem] tracking-[-0.78px] whitespace-pre-wrap text-[var(--coop-color-003)]"
                       {...fieldAttr("coop.contact.right-heading")}
                     >
                       {rightHeading}
@@ -159,7 +159,7 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
                 {/* Clone data-cid n63/n64 — no-op wrapper divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
-                    <hr className="my-[9.5px] block h-px w-[17.9375rem] overflow-hidden bg-[var(--coop-primary)] text-[var(--coop-primary)] max-coop-md:w-[20.9375rem] coop-md:max-coop-lg:w-[13.0625rem] coop-2xl:w-[26.6875rem]" />
+                    <hr className="max-coop-md:w-[20.9375rem] coop-md:max-coop-lg:w-[13.0625rem] coop-2xl:w-[26.6875rem] my-[9.5px] block h-px w-[17.9375rem] overflow-hidden bg-[var(--coop-primary)] text-[var(--coop-primary)]" />
                   </div>
                 </div>
               </div>
@@ -169,25 +169,25 @@ export function CoopContactPage({ business }: DefaultContactPageTemplateProps) {
                 <div className="block">
                   <div className="block">
                     <h3
-                      className="mb-3.5 block text-sm leading-[0.9375rem] tracking-[0.42px] whitespace-pre-wrap uppercase text-[var(--coop-color-002)] [font-family:var(--font-coop-label)]"
+                      className="mb-3.5 block [font-family:var(--font-coop-label)] text-sm leading-[0.9375rem] tracking-[0.42px] whitespace-pre-wrap text-[var(--coop-color-002)] uppercase"
                       {...fieldAttr("coop.contact.address-line1")}
                     >
                       {addressLine1}
                     </h3>
                     <h3
-                      className="mt-[0.9375rem] mb-3.5 block text-sm leading-[0.9375rem] tracking-[0.42px] whitespace-pre-wrap uppercase text-[var(--coop-color-002)] [font-family:var(--font-coop-label)]"
+                      className="mt-[0.9375rem] mb-3.5 block [font-family:var(--font-coop-label)] text-sm leading-[0.9375rem] tracking-[0.42px] whitespace-pre-wrap text-[var(--coop-color-002)] uppercase"
                       {...fieldAttr("coop.contact.address-line2")}
                     >
                       {addressLine2}
                     </h3>
                     <h3
-                      className="mt-[0.9375rem] mb-3.5 block text-sm leading-[0.9375rem] tracking-[0.42px] whitespace-pre-wrap uppercase text-[var(--coop-color-002)] [font-family:var(--font-coop-label)]"
+                      className="mt-[0.9375rem] mb-3.5 block [font-family:var(--font-coop-label)] text-sm leading-[0.9375rem] tracking-[0.42px] whitespace-pre-wrap text-[var(--coop-color-002)] uppercase"
                       {...fieldAttr("coop.contact.address-line3")}
                     >
                       {addressLine3}
                     </h3>
 
-                    <p className="mt-[1.1875rem] block h-[4.0375rem] whitespace-pre-wrap [overflow-wrap:break-word] coop-md:max-coop-lg:h-[8.075rem]">
+                    <p className="coop-md:max-coop-lg:h-[8.075rem] mt-[1.1875rem] block h-[4.0375rem] [overflow-wrap:break-word] whitespace-pre-wrap">
                       <a
                         href={`mailto:${email}`}
                         target="_blank"

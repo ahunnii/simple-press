@@ -73,9 +73,7 @@ export function FinanceBreakdown({ data }: { data: Data }) {
       <div className="admin-header">
         <div>
           <h1>Finances</h1>
-          <p>
-            {range.label} — where every dollar collected actually went
-          </p>
+          <p>{range.label} — where every dollar collected actually went</p>
         </div>
         <RangeSelector current={range.key} basePath="/admin/finances" />
       </div>
@@ -90,7 +88,8 @@ export function FinanceBreakdown({ data }: { data: Data }) {
         <CardHeader>
           <CardTitle>Money in</CardTitle>
           <CardDescription>
-            What customers paid, broken down from your orders for {range.label.toLowerCase()}
+            What customers paid, broken down from your orders for{" "}
+            {range.label.toLowerCase()}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -100,7 +99,10 @@ export function FinanceBreakdown({ data }: { data: Data }) {
             </caption>
             <tbody>
               <tr>
-                <th scope="row" className="py-2 pr-4 text-left align-top font-semibold">
+                <th
+                  scope="row"
+                  className="py-2 pr-4 text-left align-top font-semibold"
+                >
                   <span className="block text-base font-semibold">
                     Product sales
                   </span>
@@ -145,7 +147,10 @@ export function FinanceBreakdown({ data }: { data: Data }) {
                 </td>
               </tr>
               <tr className="border-t">
-                <th scope="row" className="py-2 pr-4 text-left text-base font-semibold">
+                <th
+                  scope="row"
+                  className="py-2 pr-4 text-left text-base font-semibold"
+                >
                   Net collected
                 </th>
                 <td className="py-2 text-right text-base font-semibold">
@@ -168,9 +173,9 @@ export function FinanceBreakdown({ data }: { data: Data }) {
           </div>
 
           <p className="text-muted-foreground mt-4 text-xs">
-            Product sales is your order totals with tax and shipping taken
-            out, after discounts. Refunds are spread across the three lines
-            above in proportion to each order.
+            Product sales is your order totals with tax and shipping taken out,
+            after discounts. Refunds are spread across the three lines above in
+            proportion to each order.
           </p>
         </CardContent>
       </Card>
@@ -219,11 +224,13 @@ export function FinanceBreakdown({ data }: { data: Data }) {
               {stripe.partial && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Some Stripe figures could not be loaded</AlertTitle>
+                  <AlertTitle>
+                    Some Stripe figures could not be loaded
+                  </AlertTitle>
                   <AlertDescription>
-                    Part of this call to Stripe failed. Any figure below
-                    showing $0 may be incomplete rather than genuinely zero.
-                    The Money in card above is unaffected.
+                    Part of this call to Stripe failed. Any figure below showing
+                    $0 may be incomplete rather than genuinely zero. The Money
+                    in card above is unaffected.
                   </AlertDescription>
                 </Alert>
               )}
@@ -274,8 +281,8 @@ export function FinanceBreakdown({ data }: { data: Data }) {
               {stripe.truncated && (
                 <p className="text-muted-foreground mt-4 text-xs">
                   This range has more Stripe transactions than we can fetch in
-                  one pass, so these totals are partial. Try a shorter range
-                  for exact figures.
+                  one pass, so these totals are partial. Try a shorter range for
+                  exact figures.
                 </p>
               )}
             </>
@@ -334,9 +341,12 @@ export function FinanceBreakdown({ data }: { data: Data }) {
               <AlertTitle>Automatic tax is off</AlertTitle>
               <AlertDescription>
                 Without Stripe Tax enabled, checkout may not be collecting the
-                correct amount of sales tax in every jurisdiction you sell
-                to. Review your{" "}
-                <Link href="/admin/finances/tax-guide" className="underline underline-offset-2">
+                correct amount of sales tax in every jurisdiction you sell to.
+                Review your{" "}
+                <Link
+                  href="/admin/finances/tax-guide"
+                  className="underline underline-offset-2"
+                >
                   tax settings
                 </Link>
                 .
@@ -347,7 +357,10 @@ export function FinanceBreakdown({ data }: { data: Data }) {
           <p className="text-muted-foreground text-xs">
             Sales tax isn&apos;t your money — you collect it on the state&apos;s
             behalf and remit it. See the{" "}
-            <Link href="/admin/finances/tax-guide" className="underline underline-offset-2">
+            <Link
+              href="/admin/finances/tax-guide"
+              className="underline underline-offset-2"
+            >
               tax guide
             </Link>{" "}
             for nexus thresholds and remittance steps.
@@ -357,10 +370,10 @@ export function FinanceBreakdown({ data }: { data: Data }) {
 
       <p className="text-muted-foreground text-xs">
         The Money in and Stripe panels will rarely tie out exactly: orders are
-        counted by order date while Stripe counts by settlement date, manual
-        and cash orders never appear on the Stripe side, and disputes or
-        adjustments can land outside the selected range. This page excludes
-        cancelled orders.
+        counted by order date while Stripe counts by settlement date, manual and
+        cash orders never appear on the Stripe side, and disputes or adjustments
+        can land outside the selected range. This page excludes cancelled
+        orders.
       </p>
     </div>
   );

@@ -97,8 +97,8 @@ export function NoiseAboutTeaser({
             ) : (
               <p>
                 Every piece begins in the studio — cut, sewn, and finished by
-                hand, with fabrics chosen to last. Fashion that dances,
-                garments that fly.
+                hand, with fabrics chosen to last. Fashion that dances, garments
+                that fly.
               </p>
             )}
           </div>

@@ -5,11 +5,11 @@ import { ArrowRight, Package, Quote, Star } from "lucide-react";
 import type { Product } from "~/types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { isSectionVisible } from "~/lib/sp-meta";
 import {
   getListFieldValue,
   parseTemplateIconListRows,
 } from "~/lib/template-fields";
-import { isSectionVisible } from "~/lib/sp-meta";
 import { cn } from "~/lib/utils";
 import { api, HydrateClient } from "~/trpc/server";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -154,9 +154,7 @@ export async function BambooHomepage() {
                 <Button variant="outline" size="lg" asChild>
                   <Link
                     href={f["bamboo.homepage.hero-secondary-button-link"]!}
-                    {...fieldAttr(
-                      "bamboo.homepage.hero-secondary-button-text",
-                    )}
+                    {...fieldAttr("bamboo.homepage.hero-secondary-button-text")}
                   >
                     {f["bamboo.homepage.hero-secondary-button-text"]}
                   </Link>

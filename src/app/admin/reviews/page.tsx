@@ -13,7 +13,11 @@ import {
 import { api } from "~/trpc/server";
 
 import { TrailHeader } from "../_components/trail-header";
-import { buildTablePage, matchesAllTokens, pickParam } from "../_lib/table-query";
+import {
+  buildTablePage,
+  matchesAllTokens,
+  pickParam,
+} from "../_lib/table-query";
 import { ReviewsActions } from "./_components/reviews-actions";
 import { ReviewsClient } from "./_components/reviews-client";
 
@@ -132,11 +136,13 @@ export default async function ReviewsPage({ searchParams }: Props) {
             return a.reviewDate.getTime() - b.reviewDate.getTime();
           case "rating-high":
             return (
-              b.rating - a.rating || b.reviewDate.getTime() - a.reviewDate.getTime()
+              b.rating - a.rating ||
+              b.reviewDate.getTime() - a.reviewDate.getTime()
             );
           case "rating-low":
             return (
-              a.rating - b.rating || b.reviewDate.getTime() - a.reviewDate.getTime()
+              a.rating - b.rating ||
+              b.reviewDate.getTime() - a.reviewDate.getTime()
             );
           case "most-helpful":
             return (

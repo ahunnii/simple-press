@@ -59,7 +59,10 @@ export function bucketRevenueByDay(
   const cursor = localDayStart(start);
   const last = localDayStart(end);
   while (cursor.getTime() <= last.getTime()) {
-    days.push({ date: new Date(cursor), revenue: totals.get(localDayKey(cursor)) ?? 0 });
+    days.push({
+      date: new Date(cursor),
+      revenue: totals.get(localDayKey(cursor)) ?? 0,
+    });
     cursor.setDate(cursor.getDate() + 1);
   }
 

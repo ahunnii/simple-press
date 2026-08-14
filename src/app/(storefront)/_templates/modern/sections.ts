@@ -8,7 +8,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "homepage.hero",
       page: "homepage",
       title: "Hero",
-      description: "Full-bleed banner image with headline at the top of the homepage.",
+      description:
+        "Full-bleed banner image with headline at the top of the homepage.",
       groupIds: ["homepage.hero"],
       order: 0,
     },
@@ -121,7 +122,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "contact.questions",
       page: "contact",
       title: "FAQ",
-      description: "Frequently asked questions at the bottom of the Contact page.",
+      description:
+        "Frequently asked questions at the bottom of the Contact page.",
       groupIds: ["contact.questions"],
       order: 3,
       hideable: true,
@@ -163,7 +165,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "testimonials.call-to-action",
       page: "testimonials",
       title: "Share Your Experience CTA",
-      description: "Call-to-action band inviting customers to leave a testimonial.",
+      description:
+        "Call-to-action band inviting customers to leave a testimonial.",
       groupIds: ["testimonials.call-to-action"],
       order: 1,
       hideable: true,

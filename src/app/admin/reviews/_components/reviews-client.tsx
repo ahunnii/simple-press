@@ -64,7 +64,6 @@ import { AdminBulkBar } from "../../_components/admin-bulk-bar";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
 import { AdminPagination } from "../../_components/admin-pagination";
-import { AdminThumb } from "../../_components/admin-thumb";
 import {
   TABLE_CARD,
   TABLE_CELL,
@@ -72,6 +71,7 @@ import {
   TABLE_HEAD,
   TABLE_HEAD_TIGHT,
 } from "../../_components/admin-table-style";
+import { AdminThumb } from "../../_components/admin-thumb";
 import {
   createCapDisabledReason,
   createOverCapGuard,
@@ -218,7 +218,9 @@ export function ReviewsClient({
     onMutate: loadingToast("Updating review…"),
     onSuccess: (_data, variables, context) => {
       dismissLoadingToast(context);
-      toast.success(variables.isApproved ? "Review approved" : "Review unapproved");
+      toast.success(
+        variables.isApproved ? "Review approved" : "Review unapproved",
+      );
       afterWrite();
     },
     onError: (error, _variables, context) => {
@@ -628,7 +630,8 @@ export function ReviewsClient({
                   <TableBody>
                     {reviews.map((review, index) => {
                       const isSelected = selectedIds.has(review.id);
-                      const sourceLabel = SOURCE_LABEL[review.source] ?? "Customer";
+                      const sourceLabel =
+                        SOURCE_LABEL[review.source] ?? "Customer";
                       // One date column, always `reviewDate` — the key the
                       // list actually sorts by. Customer submissions set
                       // `reviewDate` to now() on submit, so nothing meaningful
@@ -667,13 +670,16 @@ export function ReviewsClient({
                                     className={
                                       s <= review.rating
                                         ? "h-3.5 w-3.5 fill-yellow-400 text-yellow-400"
-                                        : "h-3.5 w-3.5 text-muted-foreground/30"
+                                        : "text-muted-foreground/30 h-3.5 w-3.5"
                                     }
                                   />
                                 ))}
                               </div>
                               {review.verifiedPurchase && (
-                                <Badge variant="secondary" className="gap-1 text-xs">
+                                <Badge
+                                  variant="secondary"
+                                  className="gap-1 text-xs"
+                                >
                                   <ShieldCheck className="h-3 w-3" />
                                   Verified
                                 </Badge>
@@ -768,7 +774,9 @@ export function ReviewsClient({
                           </TableCell>
 
                           <TableCell className={`hidden md:table-cell ${TD}`}>
-                            <Badge variant={STATUS_BADGE_VARIANT[review.status]}>
+                            <Badge
+                              variant={STATUS_BADGE_VARIANT[review.status]}
+                            >
                               {STATUS_LABEL[review.status]}
                             </Badge>
                           </TableCell>
@@ -958,7 +966,8 @@ export function ReviewsClient({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              Delete {selectedCount} {selectedCount === 1 ? "review" : "reviews"}?
+              Delete {selectedCount}{" "}
+              {selectedCount === 1 ? "review" : "reviews"}?
             </AlertDialogTitle>
             <AlertDialogDescription>
               This will delete{" "}

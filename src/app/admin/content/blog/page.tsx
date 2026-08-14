@@ -1,3 +1,4 @@
+import type { FilterDefFor } from "../../_components/admin-filters";
 import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import {
@@ -10,14 +11,13 @@ import {
 } from "~/lib/validators/content-pages";
 import { api } from "~/trpc/server";
 
-import type { FilterDefFor } from "../../_components/admin-filters";
+import { PageListClient } from "../_components/page-list-client";
 import { TrailHeader } from "../../_components/trail-header";
 import {
   buildTablePage,
   matchesAllTokens,
   pickParam,
 } from "../../_lib/table-query";
-import { PageListClient } from "../_components/page-list-client";
 
 type Props = {
   searchParams: Promise<{
@@ -135,11 +135,7 @@ export default async function AdminBlogPage({ searchParams }: Props) {
 
   return (
     <>
-      <TrailHeader
-        breadcrumbs={[
-          { label: "Blog" },
-        ]}
-      />
+      <TrailHeader breadcrumbs={[{ label: "Blog" }]} />
       <PageListClient
         kind="blog"
         rows={pageItems}

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconTerminal } from "@tabler/icons-react";
 
 import { authClient } from "~/server/better-auth/client";
 import { Button } from "~/components/ui/button";
+import { UserButton } from "~/components/auth/user/user-button";
 
 export function PlatformHeader() {
   const { data: session, isPending } = authClient.useSession();

@@ -396,7 +396,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                 <DropdownMenuTrigger asChild>
                   <Button type="button" variant="outline" size="sm">
                     <MoreHorizontal className="h-4 w-4" />
-                    <span className="ml-2 sr-only sm:not-sr-only">
+                    <span className="sr-only ml-2 sm:not-sr-only">
                       More Options
                     </span>
                   </Button>

@@ -6,6 +6,7 @@ import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
 import { resolveThemeVars } from "~/lib/template-themes";
+import { getSession } from "~/server/better-auth/server";
 
 import { HappyBambooAnnouncementBar } from "./happy-bamboo-announcement-bar";
 import { HappyBambooFooter } from "./happy-bamboo-footer";
@@ -23,7 +24,8 @@ export async function HappyBambooLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const [{ isEnabled }] = await Promise.all([
+  const [session, { isEnabled }] = await Promise.all([
+    getSession(),
     getBusinessFlags(),
   ]);
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
@@ -44,7 +46,7 @@ export async function HappyBambooLayout({
       </a>
       <HappyBambooRouteAnnouncer />
       {banner && <HappyBambooAnnouncementBar banner={banner} />}
-      <HappyBambooHeader business={business} />
+      <HappyBambooHeader business={business} initialSession={session ?? null} />
       <div id="main-content" tabIndex={-1} className="min-h-[calc(100vh-4rem)]">
         {children}
       </div>

@@ -1,6 +1,9 @@
 "use client";
 
-import { heroRevealStyle, useViiHeroMotion } from "../hooks/use-vii-hero-motion";
+import {
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../hooks/use-vii-hero-motion";
 import { ViiHero } from "../shared/vii-hero";
 
 type AnimatedExcerptProps = {

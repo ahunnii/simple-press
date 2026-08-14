@@ -310,7 +310,8 @@ export const bambooHomepageFieldGroups: TemplateFieldGroup[] = [
   {
     id: "homepage.testimonials",
     title: "Testimonials",
-    description: "Heading for the testimonials section. Testimonials themselves are managed under Admin → Testimonials.",
+    description:
+      "Heading for the testimonials section. Testimonials themselves are managed under Admin → Testimonials.",
     icon: "💬",
     columns: 2,
   },

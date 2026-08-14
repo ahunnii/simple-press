@@ -6,7 +6,10 @@ import { resolveAuthErrorMessage } from "./auth-error-messages";
  * Shapes a `BetterFetchError` the way `@better-fetch/fetch` builds one: the
  * HTTP status on the error, better-auth's `{ message, code }` body on `.error`.
  */
-function fetchError(status: number, body?: { code?: string; message?: string }) {
+function fetchError(
+  status: number,
+  body?: { code?: string; message?: string },
+) {
   return { status, statusText: "", error: body ?? {} };
 }
 
@@ -83,7 +86,9 @@ describe("resolveAuthErrorMessage", () => {
   it("tells a throttled caller to wait", () => {
     expect(
       resolveAuthErrorMessage(
-        fetchError(429, { message: "Too many requests. Please try again later." }),
+        fetchError(429, {
+          message: "Too many requests. Please try again later.",
+        }),
       ),
     ).toEqual({ message: "Too many attempts. Wait a minute and try again." });
   });
@@ -91,9 +96,14 @@ describe("resolveAuthErrorMessage", () => {
   it("owns a server fault rather than repeating its message", () => {
     expect(
       resolveAuthErrorMessage(
-        fetchError(500, { code: "UNKNOWN_ERROR", message: "Something went wrong" }),
+        fetchError(500, {
+          code: "UNKNOWN_ERROR",
+          message: "Something went wrong",
+        }),
       ),
-    ).toEqual({ message: "Something went wrong on our end. Please try again." });
+    ).toEqual({
+      message: "Something went wrong on our end. Please try again.",
+    });
   });
 
   // `betterFetch` does not catch fetch rejections, so a dropped connection
@@ -107,7 +117,10 @@ describe("resolveAuthErrorMessage", () => {
   it("falls back to the server's own message for an unmapped 4xx", () => {
     expect(
       resolveAuthErrorMessage(
-        fetchError(400, { code: "PASSWORD_TOO_SHORT", message: "Password too short" }),
+        fetchError(400, {
+          code: "PASSWORD_TOO_SHORT",
+          message: "Password too short",
+        }),
       ),
     ).toEqual({ message: "Password too short" });
   });

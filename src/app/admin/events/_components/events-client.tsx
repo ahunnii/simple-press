@@ -62,7 +62,6 @@ import { AdminBulkBar } from "../../_components/admin-bulk-bar";
 import { AdminEmpty } from "../../_components/admin-empty";
 import { AdminFilters } from "../../_components/admin-filters";
 import { AdminPagination } from "../../_components/admin-pagination";
-import { AdminThumb } from "../../_components/admin-thumb";
 import {
   TABLE_CARD,
   TABLE_CELL,
@@ -70,6 +69,7 @@ import {
   TABLE_HEAD,
   TABLE_HEAD_TIGHT,
 } from "../../_components/admin-table-style";
+import { AdminThumb } from "../../_components/admin-thumb";
 import {
   createCapDisabledReason,
   createOverCapGuard,

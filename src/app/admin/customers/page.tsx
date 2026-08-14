@@ -155,7 +155,9 @@ export default async function CustomersPage({ searchParams }: Props) {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardDescription>All customers accepting marketing</CardDescription>
+              <CardDescription>
+                All customers accepting marketing
+              </CardDescription>
               <CardTitle className="text-3xl">{stats.marketingCount}</CardTitle>
             </CardHeader>
           </Card>

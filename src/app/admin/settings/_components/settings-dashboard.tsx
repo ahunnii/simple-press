@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import {
   Card,
   CardContent,
@@ -10,7 +11,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 
 const settingsCards = getHubCards("settings");
 

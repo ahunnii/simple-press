@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * True only when running inside the visual editor's preview iframe — i.e. in

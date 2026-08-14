@@ -1,7 +1,4 @@
-import type {
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 /**
@@ -211,7 +208,12 @@ const aboutValuesData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 4,
     itemSchema: [
-      { key: "title", label: "Title", type: "text", placeholder: "One of a kind" },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "One of a kind",
+      },
       {
         key: "body",
         label: "Body",
@@ -258,8 +260,18 @@ const aboutTimelineData: TemplateField[] = [
     maxItems: 8,
     itemSchema: [
       { key: "year", label: "Year", type: "text", placeholder: "2004" },
-      { key: "title", label: "Title", type: "text", placeholder: "First stitches" },
-      { key: "body", label: "Body", type: "textarea", placeholder: "What happened." },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "First stitches",
+      },
+      {
+        key: "body",
+        label: "Body",
+        type: "textarea",
+        placeholder: "What happened.",
+      },
     ],
     defaultValue: "",
   },
@@ -280,8 +292,18 @@ const aboutGalleryData: TemplateField[] = [
     maxItems: 8,
     itemSchema: [
       { key: "image", label: "Image", type: "image" },
-      { key: "colSpan", label: "Column span (1 or 2)", type: "text", placeholder: "1" },
-      { key: "rowSpan", label: "Row span (1 or 2)", type: "text", placeholder: "1" },
+      {
+        key: "colSpan",
+        label: "Column span (1 or 2)",
+        type: "text",
+        placeholder: "1",
+      },
+      {
+        key: "rowSpan",
+        label: "Row span (1 or 2)",
+        type: "text",
+        placeholder: "1",
+      },
     ],
     defaultValue: "",
   },
@@ -366,7 +388,12 @@ const aboutCommissionsData: TemplateField[] = [
     maxItems: 4,
     itemSchema: [
       { key: "label", label: "Label", type: "text", placeholder: "Turnaround" },
-      { key: "value", label: "Value", type: "text", placeholder: "Ask for a quote" },
+      {
+        key: "value",
+        label: "Value",
+        type: "text",
+        placeholder: "Ask for a quote",
+      },
     ],
     defaultValue: "",
   },

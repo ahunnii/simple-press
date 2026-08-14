@@ -62,7 +62,8 @@ const fieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.location",
     title: "Map Location",
-    description: "Coordinates for the map pin shown on the homepage and contact page maps.",
+    description:
+      "Coordinates for the map pin shown on the homepage and contact page maps.",
     icon: "🗺️",
     columns: 2,
   },

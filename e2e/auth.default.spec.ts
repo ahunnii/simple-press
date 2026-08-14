@@ -158,7 +158,9 @@ test("/account/settings renders the account settings UI for the signed-in user",
 
   // App-owned account nav (same file) — confirms the account chrome rendered,
   // not just a bare page.
-  const accountNav = page.getByRole("navigation", { name: "Account navigation" });
+  const accountNav = page.getByRole("navigation", {
+    name: "Account navigation",
+  });
   await expect(accountNav.getByRole("link", { name: "Orders" })).toBeVisible();
   await expect(
     accountNav.getByRole("link", { name: "Security" }),
@@ -254,9 +256,7 @@ test("sign up with valid details lands on the verify-email view", async ({
   // This locator REQUIRES that only one such checkbox exists. A second consent
   // checkbox with the same label used to be declared in providers.tsx, which
   // made this a strict-mode violation on two matches. Don't reintroduce one.
-  await page
-    .getByRole("checkbox", { name: /I agree to SimplePress/i })
-    .check();
+  await page.getByRole("checkbox", { name: /I agree to SimplePress/i }).check();
 
   await page.getByRole("button", { name: /sign\s?up/i }).click();
 

@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
 
-
 export type PinkBreadcrumbItem = { label: string; href?: string };
 
 type PinkPageHeaderProps = {
@@ -55,13 +54,22 @@ export function PinkPageHeader({
         {/* `basis` + `min-w` keep the headline column readable. Without a floor
             a wide `rightSlot` (e.g. the 4-up stat tiles on /services) squeezed
             this column to ~90px and the heading wrapped one word per line. */}
-        <div className="flex min-w-0 flex-col gap-4 md:basis-[52%] md:min-w-[360px]">
+        <div className="flex min-w-0 flex-col gap-4 md:min-w-[360px] md:basis-[52%]">
           {breadcrumb && breadcrumb.length > 0 && (
-            <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5">
+            <nav
+              aria-label="Breadcrumb"
+              className="flex flex-wrap items-center gap-1.5"
+            >
               {breadcrumb.map((crumb, i) => (
-                <span key={crumb.label + i} className="flex items-center gap-1.5">
+                <span
+                  key={crumb.label + i}
+                  className="flex items-center gap-1.5"
+                >
                   {i > 0 && (
-                    <span aria-hidden="true" style={{ color: "var(--pink-subtle)" }}>
+                    <span
+                      aria-hidden="true"
+                      style={{ color: "var(--pink-subtle)" }}
+                    >
                       /
                     </span>
                   )}
@@ -74,7 +82,10 @@ export function PinkPageHeader({
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+                    <span
+                      className="text-[13px]"
+                      style={{ color: "var(--pink-subtle)" }}
+                    >
                       {crumb.label}
                     </span>
                   )}
@@ -82,7 +93,6 @@ export function PinkPageHeader({
               ))}
             </nav>
           )}
-
 
           <h1
             className="pink-display"

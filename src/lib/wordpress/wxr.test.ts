@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildWxrDocument,
-  cdata,
-  escapeXml,
-  formatWpDate,
-  type WxrChannel,
-  type WxrItem,
-} from "./wxr";
+import type { WxrChannel, WxrItem } from "./wxr";
+
+import { buildWxrDocument, cdata, escapeXml, formatWpDate } from "./wxr";
 
 const channel: WxrChannel = {
   title: "Acme Storefront",
@@ -28,9 +23,7 @@ function baseItem(overrides: Partial<WxrItem> = {}): WxrItem {
 
 describe("escapeXml", () => {
   it("escapes all five special characters", () => {
-    expect(escapeXml(`& < > " '`)).toBe(
-      "&amp; &lt; &gt; &quot; &#039;",
-    );
+    expect(escapeXml(`& < > " '`)).toBe("&amp; &lt; &gt; &quot; &#039;");
   });
 
   it("leaves plain text untouched", () => {
@@ -92,9 +85,7 @@ describe("buildWxrDocument", () => {
     const xml = buildWxrDocument(channel, [
       baseItem({ slug: "draft-page", status: "draft" }),
     ]);
-    expect(xml).toContain(
-      "<wp:status><![CDATA[draft]]></wp:status>",
-    );
+    expect(xml).toContain("<wp:status><![CDATA[draft]]></wp:status>");
   });
 
   it("emits a category element with the correct nicename", () => {
@@ -126,7 +117,9 @@ describe("buildWxrDocument", () => {
         xml,
       );
     expect(attachmentBlockMatch).not.toBeNull();
-    expect(attachmentBlockMatch![0]).toContain("<wp:post_parent>100</wp:post_parent>");
+    expect(attachmentBlockMatch![0]).toContain(
+      "<wp:post_parent>100</wp:post_parent>",
+    );
   });
 
   it("dedupes a URL referenced by two items into a single attachment parented to the first item", () => {
@@ -150,7 +143,9 @@ describe("buildWxrDocument", () => {
         xml,
       );
     expect(attachmentBlockMatch).not.toBeNull();
-    expect(attachmentBlockMatch![0]).toContain("<wp:post_parent>100</wp:post_parent>");
+    expect(attachmentBlockMatch![0]).toContain(
+      "<wp:post_parent>100</wp:post_parent>",
+    );
 
     const itemCount = (xml.match(/<item>/g) ?? []).length;
     expect(itemCount).toBe(3); // 2 content items + 1 deduped attachment item
@@ -164,9 +159,7 @@ describe("buildWxrDocument", () => {
       }),
     ]);
     // content item is post id 100, featured image attachment is the next id: 101
-    expect(xml).toContain(
-      "<wp:meta_key>_thumbnail_id</wp:meta_key>",
-    );
+    expect(xml).toContain("<wp:meta_key>_thumbnail_id</wp:meta_key>");
     expect(xml).toContain("<wp:meta_value>101</wp:meta_value>");
     expect(xml).toContain(
       "<wp:attachment_url>https://cdn.example.com/img/featured.jpg</wp:attachment_url>",
@@ -211,9 +204,7 @@ describe("buildWxrDocument", () => {
 
     // The document should start with the XML declaration and end with the
     // closing </rss> tag.
-    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(
-      true,
-    );
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
     expect(xml.trim().endsWith("</rss>")).toBe(true);
 
     // Root element and required namespaces are present.
@@ -224,9 +215,7 @@ describe("buildWxrDocument", () => {
     expect(xml).toContain(
       'xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"',
     );
-    expect(xml).toContain(
-      'xmlns:wfw="http://wellformedweb.org/CommentAPI/"',
-    );
+    expect(xml).toContain('xmlns:wfw="http://wellformedweb.org/CommentAPI/"');
     expect(xml).toContain('xmlns:dc="http://purl.org/dc/elements/1.1/"');
   });
 });

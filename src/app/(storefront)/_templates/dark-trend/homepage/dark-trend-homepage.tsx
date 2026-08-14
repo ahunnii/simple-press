@@ -226,53 +226,55 @@ export async function DarkTrendHomepage() {
               </div>
               <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-end">
                 {firstProduct ? (
-                <>
-                  <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-sm bg-zinc-800">
-                    <Image
-                      src={firstProduct.images?.[0]?.url ?? "/placeholder.svg"}
-                      alt={firstProduct.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, 384px"
-                    />
-                  </div>
-                  <div className="flex flex-1 flex-col gap-3">
-                    <h3 className="text-xl font-semibold">
-                      {firstProduct.name}
-                    </h3>
-                    <p className="text-lg text-white/90">
-                      {formatPrice(firstProduct.price)} USD
-                    </p>
-                    {firstProduct.description && (
-                      <p className="line-clamp-3 max-w-sm text-sm leading-relaxed text-white/70">
-                        {firstProduct.description}
+                  <>
+                    <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-sm bg-zinc-800">
+                      <Image
+                        src={
+                          firstProduct.images?.[0]?.url ?? "/placeholder.svg"
+                        }
+                        alt={firstProduct.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, 384px"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-3">
+                      <h3 className="text-xl font-semibold">
+                        {firstProduct.name}
+                      </h3>
+                      <p className="text-lg text-white/90">
+                        {formatPrice(firstProduct.price)} USD
                       </p>
-                    )}
+                      {firstProduct.description && (
+                        <p className="line-clamp-3 max-w-sm text-sm leading-relaxed text-white/70">
+                          {firstProduct.description}
+                        </p>
+                      )}
 
-                    <Button
-                      asChild
-                      className="mt-2 inline-flex items-center rounded-md bg-violet-600 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-700"
-                    >
-                      <Link
-                        href={`/shop/${firstProduct.slug}`}
-                        aria-label={`Shop ${firstProduct.name}`}
+                      <Button
+                        asChild
+                        className="mt-2 inline-flex items-center rounded-md bg-violet-600 px-6 py-2.5 text-center text-sm font-bold text-white transition-opacity hover:bg-violet-700"
                       >
-                        Shop Now
-                      </Link>
-                    </Button>
+                        <Link
+                          href={`/shop/${firstProduct.slug}`}
+                          aria-label={`Shop ${firstProduct.name}`}
+                        >
+                          Shop Now
+                        </Link>
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex w-full flex-col items-center gap-4 rounded-sm bg-zinc-800/50 py-12 text-center">
+                    <p className="text-white/60">No featured product yet.</p>
+                    <Link
+                      href="/shop"
+                      className="inline-flex rounded-md bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700"
+                    >
+                      Shop Now
+                    </Link>
                   </div>
-                </>
-              ) : (
-                <div className="flex w-full flex-col items-center gap-4 rounded-sm bg-zinc-800/50 py-12 text-center">
-                  <p className="text-white/60">No featured product yet.</p>
-                  <Link
-                    href="/shop"
-                    className="inline-flex rounded-md bg-violet-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-violet-700"
-                  >
-                    Shop Now
-                  </Link>
-                </div>
-              )}
+                )}
               </div>
             </div>
           </DarkTrendMotionSection>

@@ -84,9 +84,9 @@ describe("procedure gate tiers (src/server/api/trpc.ts)", () => {
       await expect(caller.platform.getMaintenance()).rejects.toMatchObject({
         code: "FORBIDDEN",
       });
-      await expect(
-        caller.platform.getDashboardStats(),
-      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+      await expect(caller.platform.getDashboardStats()).rejects.toMatchObject({
+        code: "FORBIDDEN",
+      });
     });
 
     it("lets a PLATFORM_ADMIN caller reach the resolver", async () => {

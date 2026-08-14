@@ -10,7 +10,9 @@ export const generalBusinessFormSchema = z.object({
   slug: z.string().min(1),
   phoneNumber: z.string().optional().nullable().or(z.literal("")),
   sendAbandonedCheckoutEmails: z.boolean(),
-  timeZone: z.string().refine(isValidTimeZone, { message: "Unknown time zone" }),
+  timeZone: z
+    .string()
+    .refine(isValidTimeZone, { message: "Unknown time zone" }),
 });
 
 export type GeneralBusinessFormSchema = z.infer<

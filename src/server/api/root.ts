@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
+import { accountRouter } from "./routers/account";
 import { analyticsRouter } from "./routers/analytics";
 import { backInStockRouter } from "./routers/back-in-stock";
 import { baseInventoryUnitRouter } from "./routers/base-inventory-unit";
@@ -7,7 +8,6 @@ import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
 import { contactRouter } from "./routers/contact";
 import { contentRouter } from "./routers/content";
-import { accountRouter } from "./routers/account";
 import { customerRouter } from "./routers/customer";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
