@@ -77,6 +77,29 @@ export const PUBLIC_TESTIMONIAL_OMIT = {
   customerId: true,
 } as const satisfies Prisma.TestimonialOmit;
 
+// `TestimonialInvite.email` (the invited customer's address) and
+// `customerId` are PII, and `getInvite` is a `publicProcedure` keyed on a
+// guessable-in-principle `code` — so anyone holding or brute-forcing a code
+// used to read the invitee's email straight off the wire. Same bug class as
+// the two constants above, but an allow-list `select` rather than a
+// deny-list `omit`: `TestimonialInvite` is a small model that will grow, and
+// a deny-list re-leaks silently the next time a column is added to it.
+//
+// `used`/`expiresAt` are here because the validity guards below need them;
+// they carry no information on a row that is actually returned (the guards
+// throw unless `used === false` and `expiresAt` is in the future), so
+// selecting them once and returning them beats a second round-trip.
+// `business.subdomain` is retained from the previous projection — it is
+// public by construction (it is the hostname the claim page is served from)
+// even though the current claim form reads only `business.name`.
+// Exported so the shape can be pinned by a unit test without touching the DB.
+export const PUBLIC_INVITE_SELECT = {
+  maxPhotos: true,
+  used: true,
+  expiresAt: true,
+  business: { select: { name: true, subdomain: true } },
+} as const satisfies Prisma.TestimonialInviteSelect;
+
 export const testimonialRouter = createTRPCRouter({
   // ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
@@ -164,11 +187,12 @@ export const testimonialRouter = createTRPCRouter({
   getInvite: publicProcedure
     .input(z.object({ code: z.string() }))
     .query(async ({ ctx, input }) => {
+      // Allow-list projection — see PUBLIC_INVITE_SELECT above. Never widen
+      // this to an `include`/bare row: `email` and `customerId` live on this
+      // model and this procedure is unauthenticated.
       const invite = await ctx.db.testimonialInvite.findUnique({
         where: { code: input.code },
-        include: {
-          business: { select: { name: true, subdomain: true } },
-        },
+        select: PUBLIC_INVITE_SELECT,
       });
 
       if (!invite) {
@@ -440,6 +464,11 @@ export const testimonialRouter = createTRPCRouter({
       });
       const autoApprove = businessSettings?.testimonialsAutoApprove ?? false;
 
+      // Same leak class as `getInvite` above, one step further along: this is
+      // also a `publicProcedure`, and echoing the created row back would hand
+      // whoever redeemed the code the invitee's `customerEmail`/`customerId`.
+      // The only consumer (the unauthenticated claim form) reads `isApproved`
+      // to pick its thank-you copy, so that is all that goes over the wire.
       const testimonial = await ctx.db.testimonial.create({
         data: {
           source: "customer",
@@ -453,6 +482,7 @@ export const testimonialRouter = createTRPCRouter({
           isHidden: false,
           testimonialDate: new Date(),
         },
+        select: { isApproved: true },
       });
 
       await ctx.db.testimonialInvite.update({

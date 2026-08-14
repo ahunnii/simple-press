@@ -33,6 +33,46 @@ export default tseslint.config(
         "error",
         { checksVoidReturn: { attributes: false } },
       ],
+      // ── Formatter-safe conditional classNames ──────────────────────────────
+      //
+      // `prettier-plugin-tailwindcss` (see prettier.config.js) STRIPS the
+      // leading space out of a string interpolated into a `className` template
+      // literal. Verified against this repo's own config:
+      //
+      //   in   className={`vii-reveal-group${on ? " is-visible" : ""}`}
+      //   out  className={`vii-reveal-group${on ? "is-visible" : ""}`}
+      //
+      // The emitted class is then the single token `vii-reveal-groupis-visible`,
+      // which matches NEITHER class. This is silent and survives review, because
+      // the source you wrote was correct — the formatter broke it afterwards, and
+      // re-adding the space just gets stripped again on the next format run.
+      //
+      // It has bitten real commerce code: it killed `.pink-input` on every
+      // invalid field in pink's checkout (the input lost its background, border,
+      // padding and width at the moment the shopper needed guidance), and it
+      // disabled vii's reveal group on the checkout form, leaving the fieldset
+      // holding a `required` phone input at `opacity: 0` — where native
+      // constraint validation cancels submit before React's `onSubmit` ever
+      // runs, so the shopper sees nothing happen at all.
+      //
+      // Use `cn()` from `~/lib/utils` instead — separate arguments can never be
+      // concatenated, and the plugin understands the call:
+      //
+      //   className={cn("vii-reveal-group", on && "is-visible")}
+      //
+      // This rule targets the trap specifically: a space-prefixed string literal
+      // inside a className template literal. That is the shape a developer writes
+      // when they are trying to do the right thing, and the only shape the
+      // formatter silently corrupts.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXAttribute[name.name='className'] TemplateLiteral Literal[value=/^\\s/]",
+          message:
+            'prettier-plugin-tailwindcss strips this leading space, merging the class into the preceding one (e.g. `foo` + ` bar` becomes `foobar`, matching neither). Use cn() from ~/lib/utils: cn("foo", cond && "bar").',
+        },
+      ],
     },
   },
   // ─── Vendored Better Auth UI components ────────────────────────────────────

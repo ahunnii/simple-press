@@ -105,7 +105,11 @@ describe("team router", () => {
     const businessB = await createBusiness({ subdomain: "team-biz-b" });
     const ownerA = await createOwnerUser(businessA.id);
     const userB = await createUser();
-    const membershipB = await createMembership(businessB.id, userB.id, "MANAGER");
+    const membershipB = await createMembership(
+      businessB.id,
+      userB.id,
+      "MANAGER",
+    );
 
     reqHost.value = "team-biz.simplepress.test";
     const callerA = createTestCaller({ userId: ownerA.id });
@@ -158,7 +162,9 @@ describe("team router", () => {
     const { inviteUrl } = sendTeamInviteEmail.mock.calls[0]![0] as {
       inviteUrl: string;
     };
-    expect(inviteUrl).toMatch(/^https:\/\/pinkart\.example\/auth\/accept-invite/);
+    expect(inviteUrl).toMatch(
+      /^https:\/\/pinkart\.example\/auth\/accept-invite/,
+    );
   });
 
   it("revokeInvite marks the invite used so it drops out of the pending list", async () => {
@@ -292,5 +298,47 @@ describe("team router", () => {
       where: { id: invite.id },
     });
     expect(usedInvite.used).toBe(true);
+  });
+
+  it("getInvite returns exactly businessName/email/role — never the raw invite row", async () => {
+    // `getInvite` is a `publicProcedure` keyed on the invite code, so everything
+    // it returns is readable by whoever holds that code.
+    //
+    // `email` IS expected here: AcceptInviteClient renders "Sign in or create an
+    // account with <email>" and compares it against the session to warn when the
+    // wrong account is signed in. The code was mailed to that address, so the
+    // disclosure is acceptable — this test is not trying to remove it.
+    //
+    // What it guards is the projection WIDENING. `testimonial.getInvite` shipped
+    // as `return invite` and handed out the invitee's email plus the row's
+    // internals; this asserts the exact key set so the same refactor here fails
+    // loudly. `code` is the one that matters most — leaking it would let a reader
+    // accept someone else's invitation.
+    const business = await createBusiness({ subdomain: "team-biz" });
+    const owner = await createOwnerUser(business.id);
+    const caller = createTestCaller({ userId: owner.id });
+
+    await caller.team.invite({
+      email: "invitee@leaktest.dev",
+      role: "MANAGER",
+    });
+    const { pendingInvites } = await caller.team.list();
+    const created = await db.teamInvite.findUniqueOrThrow({
+      where: { id: pendingInvites[0]!.id },
+    });
+
+    // Unauthenticated — the state a real invitee is in when they open the link.
+    const anonCaller = createTestCaller({});
+    const result = await anonCaller.team.getInvite({ code: created.code });
+
+    expect(Object.keys(result).sort()).toEqual([
+      "businessName",
+      "email",
+      "role",
+    ]);
+    expect(result.businessName).toBe(business.name);
+    expect(result.email).toBe("invitee@leaktest.dev");
+    // The invite code must never come back out of a code-keyed public lookup.
+    expect(JSON.stringify(result)).not.toContain(created.code);
   });
 });

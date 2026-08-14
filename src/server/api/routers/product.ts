@@ -696,6 +696,21 @@ export const productRouter = createTRPCRouter({
         existingVariants.map((v) => [v.id, v.inventoryQty]),
       );
 
+      // The fetch above is already scoped to this tenant, so a null result
+      // means the id belongs to another business (or nothing at all). Without
+      // this guard the `update` below still refuses to touch the row — the
+      // compound `where` sees zero matches — but it throws a raw Prisma P2025,
+      // which tRPC converts to INTERNAL_SERVER_ERROR. That is wrong twice: the
+      // caller gets a 500 for what is really a 404, and the tRPC error handler
+      // (src/app/api/trpc/[trpc]/route.ts) reports every one of them to Sentry
+      // as a server bug. Same shape as the P2025 handling in faq.ts.
+      if (!currentProduct) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Product not found",
+        });
+      }
+
       const prevQty = currentProduct?.inventoryQty ?? 0;
       const effectiveThreshold =
         lowInventoryThreshold ?? currentProduct?.lowInventoryThreshold ?? null;

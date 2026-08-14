@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { RECAPTCHA_TEST_BYPASS_TOKEN } from "~/lib/captcha/verify-recaptcha";
+
 import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
 import {
@@ -19,10 +21,12 @@ vi.mock("next/headers", () => ({
 }));
 
 /**
- * `ProductReview.customerEmail`/`customerId`/`orderId` and
- * `Testimonial.customerEmail`/`customerId` are admin-only PII/order-linkage
- * columns. `review.listByProduct`, `testimonial.list` (public branch), and
- * `testimonial.listRandom` are all `publicProcedure`s. This is the same bug
+ * `ProductReview.customerEmail`/`customerId`/`orderId`,
+ * `Testimonial.customerEmail`/`customerId` and `TestimonialInvite.email`/
+ * `customerId` are admin-only PII/order-linkage columns.
+ * `review.listByProduct`, `testimonial.list` (public branch),
+ * `testimonial.listRandom`, `testimonial.getInvite` and
+ * `testimonial.submitWithCode` are all `publicProcedure`s. This is the same bug
  * class as unpublished-product-leak.test.ts — a leak found in production,
  * fixed once — so it lives alongside it and exercises the real routers
  * end-to-end against Postgres rather than just the exported select/redact
@@ -144,5 +148,114 @@ describe("review and testimonial PII never leaks to public callers", () => {
     expect(row).not.toHaveProperty("customerEmail");
     expect(row).not.toHaveProperty("customerId");
     expect(JSON.stringify(row)).not.toContain(customer.email);
+  });
+
+  // ─── TestimonialInvite ────────────────────────────────────────────────────
+  //
+  // Same bug class one model over. `TestimonialInvite.email` is the invited
+  // shopper's address and `customerId` links the invite to their Customer row;
+  // `testimonial.getInvite` and `testimonial.submitWithCode` are both
+  // `publicProcedure`s keyed on nothing but a `code` that travels in a URL. A
+  // bare row return therefore handed the invitee's email to anyone holding —
+  // or brute-forcing — a code.
+
+  /** Deliberately different from the seeded customer's address so the
+   *  JSON.stringify checks below prove the *invite's* column is gone, not just
+   *  that the testimonial redaction happened to cover it. */
+  const INVITE_EMAIL = "invitee@leaktest.dev";
+
+  async function seedInvite() {
+    const { business, customer } = await seed();
+    const invite = await db.testimonialInvite.create({
+      data: {
+        businessId: business.id,
+        customerId: customer.id,
+        email: INVITE_EMAIL,
+        code: "invite-code-under-test",
+        maxPhotos: 2,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+    return { business, customer, invite };
+  }
+
+  it("testimonial.getInvite omits the invitee's email and customerId", async () => {
+    const { customer, invite } = await seedInvite();
+    const caller = createTestCaller({});
+
+    const result = await caller.testimonial.getInvite({ code: invite.code });
+    const row = result as unknown as Record<string, unknown>;
+    expect(row).not.toHaveProperty("email");
+    expect(row).not.toHaveProperty("customerId");
+    expect(JSON.stringify(result)).not.toContain(INVITE_EMAIL);
+    expect(JSON.stringify(result)).not.toContain(customer.id);
+
+    // Positive control: everything the claim form actually renders survives
+    // (src/app/(storefront)/testimonials/submit/_components/
+    // testimonial-form-unauthenticated.tsx reads exactly these two).
+    expect(result.maxPhotos).toBe(2);
+    expect(result.business.name).toBe("Test Store");
+  });
+
+  it("testimonial.getInvite still rejects unknown / used / expired codes", async () => {
+    // The narrowed projection has to keep selecting `used` and `expiresAt`:
+    // dropping them from the select would silently turn every invalid invite
+    // into a valid one.
+    const { invite } = await seedInvite();
+    const caller = createTestCaller({});
+
+    await expect(
+      caller.testimonial.getInvite({ code: "no-such-code" }),
+    ).rejects.toMatchObject({ code: "NOT_FOUND", message: "Invite not found" });
+
+    await db.testimonialInvite.update({
+      where: { id: invite.id },
+      data: { used: true },
+    });
+    await expect(
+      caller.testimonial.getInvite({ code: invite.code }),
+    ).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+      message: "This invite has already been used",
+    });
+
+    await db.testimonialInvite.update({
+      where: { id: invite.id },
+      data: { used: false, expiresAt: new Date(Date.now() - 60_000) },
+    });
+    await expect(
+      caller.testimonial.getInvite({ code: invite.code }),
+    ).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+      message: "This invite has expired",
+    });
+  });
+
+  it("testimonial.submitWithCode does not echo the invitee's email back", async () => {
+    const { invite } = await seedInvite();
+    const caller = createTestCaller({});
+
+    const result = await caller.testimonial.submitWithCode({
+      code: invite.code,
+      name: "Ivy Invitee",
+      text: "A perfectly adequate testimonial.",
+      photoUrls: [],
+      // Sentinel accepted by verifyRecaptcha under NODE_ENV !== production +
+      // NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS=1 (both set by tests/helpers/test-env.ts).
+      captchaToken: RECAPTCHA_TEST_BYPASS_TOKEN,
+    });
+
+    const row = result as unknown as Record<string, unknown>;
+    expect(row).not.toHaveProperty("customerEmail");
+    expect(row).not.toHaveProperty("customerId");
+    expect(JSON.stringify(result)).not.toContain(INVITE_EMAIL);
+    // Positive control: the claim form picks its thank-you copy off this.
+    expect(result.isApproved).toBe(false);
+
+    // The row itself must still carry the PII — only the wire payload is narrowed.
+    const stored = await db.testimonial.findFirstOrThrow({
+      where: { customerName: "Ivy Invitee" },
+    });
+    expect(stored.customerEmail).toBe(INVITE_EMAIL);
   });
 });

@@ -111,6 +111,21 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
+      // Explicit projection — three fields, never the row.
+      //
+      // This is a `publicProcedure` keyed on an invite code, so everything it
+      // returns is readable by whoever holds that code. `email` is here
+      // DELIBERATELY: `AcceptInviteClient` renders "Sign in or create an account
+      // with <email>" and compares it against the signed-in session to warn
+      // "this invitation was sent to X, but you're signed in as Y". Removing it
+      // breaks that screen. The disclosure is acceptable because the code itself
+      // was mailed to that address — a code holder is the invitee, or someone
+      // they forwarded it to.
+      //
+      // What must NOT happen is this becoming `return invite`, which would also
+      // hand out `code`, `businessId`, `createdBy` and the raw timestamps. That
+      // is the shape that leaked in `testimonial.getInvite`; a regression test in
+      // tests/integration/team.test.ts pins this projection.
       return {
         businessName: invite.business.name,
         email: invite.email,

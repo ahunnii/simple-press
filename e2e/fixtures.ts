@@ -178,7 +178,14 @@ async function selectState(
   scope: Page | Locator,
   code: string,
 ): Promise<boolean> {
-  const trigger = scope.locator("#state").first();
+  // `[id$="-state"]` picks up templates that namespace their ids — pink's
+  // trigger is `#pink-checkout-state`, which `#state` alone never matched, so
+  // this returned false and the state was left unselected. Checked repo-wide:
+  // the only ids ending in `-state` are `checkout-state` and
+  // `pink-checkout-state`, both genuine state controls, so there is nothing
+  // for `.first()` to pick up by mistake. (The sibling `*-state-label` ids end
+  // in `-label`, so they are not matched.)
+  const trigger = scope.locator('#state, [id$="-state"]').first();
   if ((await trigger.count()) === 0) return false;
 
   const tagName = await trigger.evaluate((el) => el.tagName.toLowerCase());
@@ -202,7 +209,10 @@ async function selectState(
   await trigger.focus();
   await trigger.press("Enter");
   const page = pageOf(scope);
-  const option = page.getByRole("option", { name: US_STATE_NAMES[code] ?? code, exact: true });
+  const option = page.getByRole("option", {
+    name: US_STATE_NAMES[code] ?? code,
+    exact: true,
+  });
   // Fall back to a forced pointer click if the keyboard open didn't surface it.
   if ((await option.count()) === 0) {
     await trigger.click({ force: true });
@@ -235,7 +245,19 @@ export async function fillCheckout(
 ): Promise<void> {
   await fillFirst(scope, ["#email", 'input[autocomplete="email"]'], info.email);
 
-  const filledName = await fillFirst(scope, ["#name"], info.name);
+  // `autocomplete="name"` is the fallback every other field here already has
+  // for its own token, and the one this list was missing. Templates that
+  // namespace their input ids (pink uses `#pink-checkout-name`) match nothing
+  // in the `#name` slot, and the given-/family-name split below doesn't catch
+  // them either because they render ONE combined name field. The result was a
+  // silently-empty `required` input: native constraint validation cancelled
+  // submit before React's onSubmit ran, so the test failed on the URL
+  // assertion with an empty error banner and no clue why.
+  const filledName = await fillFirst(
+    scope,
+    ["#name", 'input[autocomplete="name"]'],
+    info.name,
+  );
   if (!filledName) {
     const [first, ...rest] = info.name.split(" ");
     await fillFirst(

@@ -159,11 +159,21 @@ export const recaptcha = () =>
 
         return;
       } catch (error) {
-        // Pathname only. This used to log `request.url`, which is the FULL url
-        // *including the query string* — and `/verify-email` and
-        // `/reset-password` carry a live, single-use credential as `?token=…`.
-        // Any log sink or error tracker that saw one of those lines held a
-        // working account-takeover token for the rest of its expiry window.
+        // Pathname only — this used to log the FULL `request.url` including the
+        // query string.
+        //
+        // Scope note, so nobody re-rates this: the only URLs that reach here are
+        // the three in GUARDED_ENDPOINTS (`/sign-up/email`, `/sign-in/email`,
+        // `/request-password-reset`), because everything else returns early at
+        // the `isGuarded` check above. Those are POSTs with no query string, so
+        // this was NOT leaking credentials — `/verify-email?token=` and
+        // `/reset-password?token=` never reach this plugin. Narrowing it is
+        // hygiene (a full URL is never the useful part of a log line, and the
+        // guarded set could grow), not an incident.
+        //
+        // The place where this genuinely matters is the isolation-scope tag in
+        // `src/app/api/auth/[...all]/route.ts`, which wraps EVERY auth endpoint
+        // — including the two token-bearing ones.
         let endpointPath = "unknown";
         try {
           endpointPath = new URL(request.url).pathname;

@@ -1,3 +1,4 @@
+import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -171,21 +172,42 @@ export const discountRouter = createTRPCRouter({
         });
       }
 
-      const discount = await ctx.db.discountCode.update({
-        where: { id: input.id, businessId },
-        data: {
-          code: input.code,
-          type: input.type,
-          value: input.value,
-          active: input.active,
-          usageLimit: input.usageLimit ?? null,
-          perCustomerLimit: input.perCustomerLimit ?? null,
-          startsAt: input.startsAt ?? null,
-          expiresAt: input.expiresAt ?? null,
-          minPurchase: input.minPurchase ?? null,
-          maxDiscount: input.maxDiscount ?? null,
-        },
-      });
+      // See the note on `delete` below: an unmatched compound `where` throws a
+      // raw Prisma P2025, which tRPC reports as INTERNAL_SERVER_ERROR and the
+      // error handler forwards to Sentry. Blocked correctly either way — this
+      // just makes a cross-tenant or stale id read as the 404 it is.
+      const discount = await ctx.db.discountCode
+        .update({
+          where: { id: input.id, businessId },
+          data: {
+            code: input.code,
+            type: input.type,
+            value: input.value,
+            active: input.active,
+            usageLimit: input.usageLimit ?? null,
+            perCustomerLimit: input.perCustomerLimit ?? null,
+            startsAt: input.startsAt ?? null,
+            expiresAt: input.expiresAt ?? null,
+            minPurchase: input.minPurchase ?? null,
+            maxDiscount: input.maxDiscount ?? null,
+          },
+        })
+        .catch((error: unknown) => {
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+          ) {
+            return null;
+          }
+          throw error;
+        });
+
+      if (!discount) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Discount code not found",
+        });
+      }
 
       return { data: discount, message: "Discount code updated successfully" };
     }),
@@ -388,9 +410,30 @@ export const discountRouter = createTRPCRouter({
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       const { businessId } = ctx;
-      const discount = await ctx.db.discountCode.delete({
-        where: { id, businessId },
-      });
+      // The compound `where` already prevents touching another tenant's row,
+      // but an unmatched delete throws a raw Prisma P2025 that tRPC turns into
+      // INTERNAL_SERVER_ERROR — a 500 for what is really a 404, and one that
+      // the tRPC error handler reports to Sentry as a server bug on every
+      // stale-id click. Convert it, the same way faq.ts does.
+      const discount = await ctx.db.discountCode
+        .delete({ where: { id, businessId } })
+        .catch((error: unknown) => {
+          if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+          ) {
+            return null;
+          }
+          throw error;
+        });
+
+      if (!discount) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Discount code not found",
+        });
+      }
+
       return { data: discount, message: "Discount code deleted successfully" };
     }),
 });

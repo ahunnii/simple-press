@@ -1,5 +1,6 @@
 "use client";
 
+import type { z } from "zod";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,7 +14,6 @@ import type {
   ZoneWeightFormValues,
 } from "~/lib/validators/shipping";
 import type { RouterOutputs } from "~/trpc/react";
-import type { z } from "zod";
 import { COUNTRY_LABELS } from "~/lib/geo/regions";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { cn } from "~/lib/utils";
@@ -110,8 +110,25 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
             ]),
           ),
         })),
+      // `?? null`, NOT `?? 0` — `centsToDollarsString(null)` renders an empty
+      // input, `centsToDollarsString(0)` renders "0.00".
+      //
+      // This used to be `?? 0`, which quietly manufactured a rate nobody chose:
+      // `shippingFallbackRate` is `Int?` where null means "never set", but an
+      // owner who opened this page to change anything else saw a pre-filled
+      // "0.00", and saving persisted a real 0. At runtime
+      // `shippingFallbackRate ?? LARGE_FALLBACK_CENTS` only replaces null, so a
+      // stored 0 stands — and `calculateZoneWeightShipping` falls back to it for
+      // every destination the matrix cannot price (non-US, unlisted state,
+      // weight outside all tiers, hole in the rate grid). Net effect: free
+      // worldwide shipping, silently, on a store that never asked for it.
+      //
+      // Empty is the honest representation of "not set". The zone-weight schema
+      // requires a value (see validators/shipping.ts), so this now forces an
+      // explicit choice instead of defaulting to the worst one. Matches
+      // `freeShippingThresholdDollars` directly below, which always did this.
       fallbackRateDollars: centsToDollarsString(
-        business.shippingFallbackRate ?? 0,
+        business.shippingFallbackRate ?? null,
       ),
       freeShippingThresholdDollars: centsToDollarsString(
         business.freeShippingThreshold ?? null,
@@ -613,8 +630,8 @@ export function ShippingSettings({ business }: Props) {
                             .join(" and ")}{" "}
                           {salesCountries.length > 1 ? "are" : "is"} enabled
                           from an earlier setting. SimplePress doesn&apos;t
-                          support international shipping yet — these orders
-                          are charged your fallback rate in USD and shipping
+                          support international shipping yet — these orders are
+                          charged your fallback rate in USD and shipping
                           addresses aren&apos;t validated. Contact support if
                           you&apos;d like this turned off.
                         </AlertDescription>
@@ -645,10 +662,10 @@ export function ShippingSettings({ business }: Props) {
                               {COUNTRY_LABELS.CA}
                             </FormLabel>
                             <p className="text-muted-foreground text-sm">
-                              Not available — international shipping
-                              isn&apos;t supported yet. Orders outside the
-                              United States are charged your fallback rate
-                              and shipping addresses aren&apos;t validated.
+                              Not available — international shipping isn&apos;t
+                              supported yet. Orders outside the United States
+                              are charged your fallback rate and shipping
+                              addresses aren&apos;t validated.
                             </p>
                           </div>
                           <FormControl>
@@ -672,10 +689,10 @@ export function ShippingSettings({ business }: Props) {
                               {COUNTRY_LABELS.MX}
                             </FormLabel>
                             <p className="text-muted-foreground text-sm">
-                              Not available — international shipping
-                              isn&apos;t supported yet. Orders outside the
-                              United States are charged your fallback rate
-                              and shipping addresses aren&apos;t validated.
+                              Not available — international shipping isn&apos;t
+                              supported yet. Orders outside the United States
+                              are charged your fallback rate and shipping
+                              addresses aren&apos;t validated.
                             </p>
                           </div>
                           <FormControl>
