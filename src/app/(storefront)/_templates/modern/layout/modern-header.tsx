@@ -10,7 +10,7 @@ import { Heart, Menu, ShoppingBag, X } from "lucide-react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
-import { authClient } from "~/server/better-auth/client";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
@@ -20,7 +20,7 @@ import { useWishlist } from "~/providers/wishlist-context";
 export function ModernHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useStorefrontFlags();
   const { isEnabled: isBusinessFeatureEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},

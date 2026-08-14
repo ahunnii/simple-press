@@ -4,9 +4,15 @@ import type { RefObject } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 
+import { isActiveNavLink } from "~/lib/nav-utils";
+
 import { RelocationPillButton } from "../shared/relocation-pill-button";
 
-export type RelocationNavLink = { href: string; label: string };
+export type RelocationNavLink = {
+  href: string;
+  label: string;
+  external?: boolean;
+};
 
 /**
  * Full-page mobile drawer (<1025px). The clone's hamburger was inert markup;
@@ -14,8 +20,9 @@ export type RelocationNavLink = { href: string; label: string };
  * body scroll lock, `inert` on main/footer, tab focus trap, Escape + overlay
  * close, focus returned to the trigger.
  *
- * The dropdown is flattened here — Backstory / Reviews / FAQ / Services /
- * Contact Us all sit at one level, followed by the terracotta call pill.
+ * Dropdowns are flattened by the header before they get here — with the
+ * shipped nav that is Backstory / Reviews / FAQ / Services / Contact Us at one
+ * level, followed by the terracotta call pill.
  */
 export function RelocationMobileMenu({
   open,
@@ -32,6 +39,12 @@ export function RelocationMobileMenu({
   open: boolean;
   onClose: () => void;
   links: RelocationNavLink[];
+  /**
+   * Composite call-pill text ("CALL US AT (313) 241-0291") and its `tel:`
+   * target. Both come from `Business.phoneNumber` (Settings → General), so
+   * both are `""` on a store that hasn't set one — the pill is then skipped
+   * entirely rather than rendering a dead `href="tel:"`.
+   */
   phoneLabel: string;
   phoneHref: string;
   activePath: string;
@@ -188,20 +201,29 @@ export function RelocationMobileMenu({
       >
         {links.map((link) => (
           <Link
-            key={link.href}
+            key={link.href + link.label}
             href={link.href}
             onClick={onClose}
-            aria-current={link.href === activePath ? "page" : undefined}
+            target={link.external ? "_blank" : undefined}
+            rel={link.external ? "noopener noreferrer" : undefined}
+            aria-current={
+              isActiveNavLink(activePath, link.href) ? "page" : undefined
+            }
             className="relocation-hover-fade block border-b border-solid border-[var(--relocation-border)] py-4 [font-family:var(--font-relocation-display)] text-[1.5rem] leading-8 text-[var(--relocation-ink)]"
           >
             {link.label}
+            {link.external && (
+              <span className="sr-only">(opens in new tab)</span>
+            )}
           </Link>
         ))}
 
         <div className="flex flex-col items-start gap-3 pt-8">
-          <RelocationPillButton href={phoneHref} variant="solid">
-            {phoneLabel}
-          </RelocationPillButton>
+          {phoneHref !== "" && phoneLabel !== "" && (
+            <RelocationPillButton href={phoneHref} variant="solid">
+              {phoneLabel}
+            </RelocationPillButton>
+          )}
 
           {accountHref && accountLabel && (
             <RelocationPillButton

@@ -57,17 +57,6 @@ const servicesHeroData: TemplateField[] = [
       "Here at Handy Relocations, We provide easy, clear pricing and kind, friendly movers for all of your moving needs. We want you to be stress-free during your move with us",
   },
   {
-    key: "relocation.services.hero-cta-label",
-    label: "Hero Button Label",
-    description:
-      "Outlined button on the hero. It dials the header call button's phone link. Leave blank to hide the button.",
-    type: "text",
-    page: "services",
-    group: "services.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "CALL US TODAY",
-  },
-  {
     key: "relocation.services.hero-image",
     label: "Hero Photo",
     description:

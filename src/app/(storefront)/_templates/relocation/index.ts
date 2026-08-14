@@ -29,12 +29,14 @@ import {
  * Field/group registry for the `relocation` template (Handy Relocations — 1:1
  * recreation of handyrelocations.com, fixed brand, no theme presets).
  *
- * Aggregates the global/chrome module (`layout/index.ts` — header nav, footer
- * columns, credentials band) with each page domain's field module, mirroring
- * coop's aggregation shape. Relocation is a service-archetype template with no
- * commerce slots, so it deliberately omits vii's product/authentication global
- * baselines — its shop/cart/account routes are Default fallbacks that never
- * read relocation fields.
+ * Aggregates the global/chrome module (`layout/index.ts` — header/footer
+ * chrome, credentials band, auth-screen branding) with each page domain's
+ * field module, mirroring coop's aggregation shape. Relocation is a
+ * service-archetype template with no commerce slots, so it omits vii's
+ * product global baseline — its shop/cart/account routes are Default
+ * fallbacks that never read relocation fields. (The `global.authentication`
+ * baseline IS declared, since the shared DefaultAuthShell reads those keys
+ * for every template.)
  *
  * Page order mirrors sections.ts: homepage → about → testimonials → services
  * → contact → faq → generic, then the global/chrome module.

@@ -125,7 +125,7 @@ export function sanitizeRedirectTo(
   if (trimmed.length === 0) return fallback;
 
   // Control characters (CR/LF/TAB/NUL and friends) never appear in a real path.
-  // eslint-disable-next-line no-control-regex
+   
   if (/[\u0000-\u001f\u007f]/.test(trimmed)) return fallback;
 
   // Must be a rooted path...

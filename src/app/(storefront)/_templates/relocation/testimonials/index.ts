@@ -37,15 +37,26 @@ const testimonialsHeroData: TemplateField[] = [
     defaultValue: "Hear what our customers have to say about us!",
   },
   {
-    key: "relocation.testimonials.hero-cta-label",
-    label: "Hero Button Label",
+    key: "relocation.testimonials.hero-image",
+    label: "Hero Photo",
     description:
-      "Outlined button on the hero. It dials the same number as the header call button. Leave blank to hide the button.",
+      "Optional round photo beside the hero heading. Leave blank for the text-only hero.",
+    type: "image",
+    page: "testimonials",
+    group: "testimonials.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "relocation.testimonials.hero-image-alt",
+    label: "Hero Photo Alt Text",
+    description:
+      "Read aloud by screen readers. Leave blank if the photo is purely decorative.",
     type: "text",
     page: "testimonials",
     group: "testimonials.hero",
     gridColumn: "col-span-1",
-    defaultValue: "CALL US TODAY",
+    defaultValue: "",
   },
 ];
 

@@ -12,7 +12,7 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
-import { authClient } from "~/server/better-auth/client";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 
 import { DefaultCartBadge } from "../cart-checkout/default-cart-badge";
 import { DefaultWishlistBadge } from "../cart-checkout/default-wishlist-badge";
@@ -110,7 +110,7 @@ export function DefaultHeader({ business }: DefaultHeaderTemplateProps) {
     return () => document.removeEventListener("keydown", onKey);
   }, [openDropdown]);
 
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession();
   const user = session?.user;
   const pathname = usePathname();
 

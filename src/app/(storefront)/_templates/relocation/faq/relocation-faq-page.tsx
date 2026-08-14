@@ -3,6 +3,7 @@ import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationReveal } from "../shared/relocation-reveal";
 import { RelocationSectionHeading } from "../shared/relocation-section-heading";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
@@ -31,27 +32,36 @@ export function RelocationFaqPage({
   const f = resolveFields(customFields, [
     "relocation.faq.hero-heading",
     "relocation.faq.hero-subheading",
-    "relocation.faq.hero-cta-label",
+    "relocation.global.branding.hero-cta-label",
+    "relocation.faq.hero-image",
+    "relocation.faq.hero-image-alt",
     "relocation.faq.list-heading",
     "relocation.faq.empty-message",
-    "relocation.global.branding.phone-href",
   ]);
 
   const listHeading = f["relocation.faq.list-heading"] ?? "";
   const emptyMessage = f["relocation.faq.empty-message"] ?? "";
+  const heroImage = f["relocation.faq.hero-image"] ?? "";
+  const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
+  const ctaLabel =
+    ctaHref === ""
+      ? ""
+      : (f["relocation.global.branding.hero-cta-label"] ?? "");
 
   return (
     <>
       <RelocationWaveHero
         title={f["relocation.faq.hero-heading"] ?? ""}
         subtitle={f["relocation.faq.hero-subheading"] ?? ""}
-        ctaLabel={f["relocation.faq.hero-cta-label"] ?? ""}
-        ctaHref={f["relocation.global.branding.phone-href"] ?? ""}
+        ctaLabel={ctaLabel}
+        ctaHref={ctaHref}
+        photoSrc={heroImage === "" ? undefined : heroImage}
+        photoAlt={f["relocation.faq.hero-image-alt"] ?? ""}
         size="tall"
         sectionAttrs={sectionGroupAttr("faq", "hero")}
         titleFieldAttrs={fieldAttr("relocation.faq.hero-heading")}
         subtitleFieldAttrs={fieldAttr("relocation.faq.hero-subheading")}
-        ctaFieldAttrs={fieldAttr("relocation.faq.hero-cta-label")}
+        ctaFieldAttrs={fieldAttr("relocation.global.branding.hero-cta-label")}
       />
 
       <section

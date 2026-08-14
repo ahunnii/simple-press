@@ -5,6 +5,7 @@ import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationReveal } from "../shared/relocation-reveal";
 import { RelocationSectionHeading } from "../shared/relocation-section-heading";
 import { RelocationTestimonialCarousel } from "../shared/relocation-testimonial-carousel";
@@ -34,8 +35,9 @@ import { RelocationWaveHero } from "../shared/relocation-wave-hero";
 const FIELD_KEYS = [
   "relocation.testimonials.hero-heading",
   "relocation.testimonials.hero-subheading",
-  "relocation.testimonials.hero-cta-label",
-  "relocation.global.branding.phone-href",
+  "relocation.global.branding.hero-cta-label",
+  "relocation.testimonials.hero-image",
+  "relocation.testimonials.hero-image-alt",
   "relocation.testimonials.list-heading",
   "relocation.testimonials.empty-heading",
   "relocation.testimonials.empty-body",
@@ -59,20 +61,29 @@ export async function RelocationTestimonialsPage({
     customerName: t.customerName,
   }));
 
+  const heroImage = f["relocation.testimonials.hero-image"] ?? "";
+  const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
+  const ctaLabel =
+    ctaHref === ""
+      ? ""
+      : (f["relocation.global.branding.hero-cta-label"] ?? "");
+
   return (
     <>
       <RelocationWaveHero
         title={f["relocation.testimonials.hero-heading"] ?? ""}
         subtitle={f["relocation.testimonials.hero-subheading"] ?? ""}
-        ctaLabel={f["relocation.testimonials.hero-cta-label"] ?? ""}
-        ctaHref={f["relocation.global.branding.phone-href"] ?? ""}
+        ctaLabel={ctaLabel}
+        ctaHref={ctaHref}
+        photoSrc={heroImage === "" ? undefined : heroImage}
+        photoAlt={f["relocation.testimonials.hero-image-alt"] ?? ""}
         size="tall"
         sectionAttrs={sectionGroupAttr("testimonials", "hero")}
         titleFieldAttrs={fieldAttr("relocation.testimonials.hero-heading")}
         subtitleFieldAttrs={fieldAttr(
           "relocation.testimonials.hero-subheading",
         )}
-        ctaFieldAttrs={fieldAttr("relocation.testimonials.hero-cta-label")}
+        ctaFieldAttrs={fieldAttr("relocation.global.branding.hero-cta-label")}
       />
 
       {isVisible("testimonials.list") ? (

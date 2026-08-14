@@ -21,6 +21,7 @@ import type { BannerConfig } from "~/lib/validators/site-banner";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -41,11 +42,11 @@ const ease = "var(--vii-ease-strong)";
 
 export function ViiHeader({
   business,
-  session,
   banner,
 }: DefaultHeaderTemplateProps & { banner?: BannerConfig | null }) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
+  const { data: session, isPending } = useHydratedSession();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -778,7 +779,16 @@ export function ViiHeader({
 
               {isStorefrontEnabled("customerAccounts") && (
                 <div className="hidden md:block">
-                  {session?.user ? (
+                  {isPending ? (
+                    <div
+                      className="h-7 w-7 animate-pulse rounded-full"
+                      style={{
+                        background: solid
+                          ? "color-mix(in srgb, var(--vii-navy) 15%, transparent)"
+                          : "color-mix(in srgb, var(--vii-paper) 25%, transparent)",
+                      }}
+                    />
+                  ) : session?.user ? (
                     <UserButton
                       size="icon"
                       className="rounded-full w-auto h-auto p-0"

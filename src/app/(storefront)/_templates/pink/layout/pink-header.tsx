@@ -11,6 +11,7 @@ import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveLogoAlt } from "~/lib/logo-alt";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -18,7 +19,7 @@ import { resolveThemeVars } from "~/lib/template-themes";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
-import { isActiveNavLink } from "./pink-nav-utils";
+import { isActiveNavLink } from "~/lib/nav-utils";
 import { PinkMobileMenu } from "./pink-mobile-menu";
 
 export type PinkNavLink = { href: string; label: string; fieldKey?: string };
@@ -57,8 +58,9 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function PinkHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
+  const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useStorefrontFlags();
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
@@ -243,7 +245,9 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
           <div className="flex items-center gap-3">
             {isEnabled("customerAccounts") && (
               <div className="hidden lg:block">
-                {session?.user ? (
+                {isPending ? (
+                  <div className="h-8 w-8 animate-pulse rounded-full" style={{ background: "var(--pink-line)" }} />
+                ) : session?.user ? (
                   <UserButton
                     size="icon"
                     className="rounded-full w-auto h-auto p-0"
@@ -414,7 +418,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
             : null
         }
         account={
-          isEnabled("customerAccounts")
+          isEnabled("customerAccounts") && !isPending
             ? {
                 href: session?.user ? "/account/orders" : "/auth/sign-in",
                 label: session?.user ? "My account" : "Sign in",

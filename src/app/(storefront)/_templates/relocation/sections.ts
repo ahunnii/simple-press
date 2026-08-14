@@ -11,7 +11,7 @@ import { relocationTestimonialsSections } from "./testimonials";
 /**
  * Curated section registry for the `relocation` template, merged in page order
  * (homepage → about → testimonials → services → contact → faq → generic) with
- * the three global/chrome sections appended (page "global"). Every field group
+ * the four global/chrome sections appended (page "global"). Every field group
  * defined in `index.ts` must be covered by exactly one section here
  * (triple-match invariant, asserted by `src/lib/template-sections.test.ts`).
  *
@@ -33,20 +33,29 @@ export const relocationSections: Record<string, TemplateSection[]> = {
       page: "global",
       title: "Header & Branding",
       description:
-        "Logo, nav labels (About Us dropdown, Services, Contact Us) and the call-us phone pill shown in the header on every page",
+        "Header logo and the call-us phone pill shown on every page. Nav labels live in Content → Navigation; the phone number in Settings → General",
       groupIds: ["global.branding"],
       order: 0,
       hideable: false,
+      links: [
+        { label: "Navigation", href: "/admin/content/navigation" },
+        { label: "Business info", href: "/admin/settings/general" },
+      ],
     },
     {
       id: "global.footer",
       page: "global",
       title: "Footer",
       description:
-        "Dark footer columns — about blurb, services list, areas served, helpful links and contact details — shown on every page",
+        "Dark footer columns — column headings, areas served and helpful links — shown on every page. Contact details, hours and the about blurb are pulled from Settings and Content → Branding",
       groupIds: ["global.footer"],
       order: 1,
       hideable: false,
+      links: [
+        { label: "Branding", href: "/admin/content/branding" },
+        { label: "Business info", href: "/admin/settings/general" },
+        { label: "Hours", href: "/admin/settings/hours" },
+      ],
     },
     {
       id: "global.credentials",
@@ -57,6 +66,14 @@ export const relocationSections: Record<string, TemplateSection[]> = {
       groupIds: ["global.credentials"],
       order: 2,
       hideable: true,
+    },
+    {
+      id: "global.authentication",
+      page: "global",
+      title: "Authentication",
+      description: "Image shown on the sign-in and sign-up pages.",
+      groupIds: ["global.authentication"],
+      order: 3,
     },
   ],
 };

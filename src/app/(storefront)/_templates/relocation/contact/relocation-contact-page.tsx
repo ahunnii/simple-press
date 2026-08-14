@@ -1,29 +1,40 @@
 import type { DefaultContactPageTemplateProps } from "../../types";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
 import { RelocationReveal } from "../shared/relocation-reveal";
 import { RelocationSectionHeading } from "../shared/relocation-section-heading";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
+import { RelocationContactForm } from "./relocation-contact-form";
 import { RelocationContactMap } from "./relocation-contact-map";
 
 /**
  * Handy Relocations — Contact page (`/contact`).
  *
- * Structure follows the reference screenshot exactly
+ * Structure follows the reference screenshot
  * (docs/relocation/"Contact Us _ Handy Relocations.jpeg"):
- *   1. Wave hero, no photo — "CONTACT US" + welcome line + outlined CALL US
- *      TODAY, which dials the header's global phone link.
+ *   1. Wave hero — "CONTACT US" + welcome line + optional round photo +
+ *      outlined CALL US TODAY, which dials the business phone number
+ *      (Settings → General) using the global hero-CTA label.
  *   2. "Visit Us" — address / hours / phone / email column on the left, a real
- *      interactive MapLibre map on the right.
- *   3. Shared credentials band (global fields, rendered by the band itself).
+ *      interactive MapLibre map on the right. The values come straight from
+ *      the Business record (Settings → General / Settings → Hours); only the
+ *      bold labels above them are owner-editable here.
+ *   3. "SEND US A MESSAGE" — a plain name/email/phone/message contact form
+ *      posting through the shared `contact.send` tRPC pipeline, the same
+ *      pipeline every other template's contact form uses.
+ *   4. Shared credentials band (global fields, rendered by the band itself).
  *
- * NO contact form: design.md deviation #5 (user-approved). The homepage quote
- * form is the lead channel, and the screenshot shows no form here. The clone's
- * "MELVYN" reasons / testimonials / gallery sections are dropped for the same
- * reason.
+ * design.md deviation #5 ("no contact form here") was user-approved on
+ * 2026-08-10 but REVERSED on 2026-08-13 for platform consistency — see
+ * contact/index.ts for the full history. The homepage quote form remains the
+ * primary moving-quote lead channel; this form is the standard contact-page
+ * form every other template carries. The clone's "MELVYN" reasons /
+ * testimonials / gallery sections stay dropped, unrelated to that reversal.
  */
 export function RelocationContactPage({
   business,
@@ -33,35 +44,44 @@ export function RelocationContactPage({
   const f = resolveFields(customFields, [
     "relocation.contact.hero-heading",
     "relocation.contact.hero-subheading",
-    "relocation.contact.hero-cta-label",
+    "relocation.contact.hero-image",
+    "relocation.contact.hero-image-alt",
     "relocation.contact.visit-heading",
-    "relocation.contact.address-line-1",
-    "relocation.contact.address-line-2",
     "relocation.contact.hours-label",
-    "relocation.contact.hours-value",
     "relocation.contact.phone-label",
-    "relocation.contact.phone-value",
-    "relocation.contact.phone-href",
     "relocation.contact.email-label",
-    "relocation.contact.email-value",
     "relocation.contact.map-latitude",
     "relocation.contact.map-longitude",
     "relocation.contact.map-zoom",
-    "relocation.global.branding.phone-href",
+    "relocation.contact.form-heading",
+    "relocation.contact.form-name-label",
+    "relocation.contact.form-email-label",
+    "relocation.contact.form-email-placeholder",
+    "relocation.contact.form-phone-label",
+    "relocation.contact.form-message-label",
+    "relocation.contact.form-message-placeholder",
+    "relocation.contact.form-submit-label",
+    "relocation.contact.form-success-heading",
+    "relocation.contact.form-success-body",
+    "relocation.contact.form-success-again-label",
+    "relocation.global.branding.hero-cta-label",
   ]);
 
-  const heroCtaLabel = f["relocation.contact.hero-cta-label"] ?? "";
-  const heroCtaHref = f["relocation.global.branding.phone-href"] ?? "";
+  const heroImage = f["relocation.contact.hero-image"] ?? "";
+  const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
+  const ctaLabel =
+    ctaHref === "" ? "" : (f["relocation.global.branding.hero-cta-label"] ?? "");
 
-  const addressLine1 = f["relocation.contact.address-line-1"] ?? "";
-  const addressLine2 = f["relocation.contact.address-line-2"] ?? "";
+  const address = business?.businessAddress ?? "";
   const hoursLabel = f["relocation.contact.hours-label"] ?? "";
-  const hoursValue = f["relocation.contact.hours-value"] ?? "";
+  const hoursRows = formatBusinessHours(
+    parseBusinessHours(business?.businessHours),
+  );
   const phoneLabel = f["relocation.contact.phone-label"] ?? "";
-  const phoneValue = f["relocation.contact.phone-value"] ?? "";
-  const phoneHref = f["relocation.contact.phone-href"] ?? "";
+  const phoneValue = business?.phoneNumber ?? "";
+  const phoneHref = relocationTelHref(phoneValue);
   const emailLabel = f["relocation.contact.email-label"] ?? "";
-  const emailValue = f["relocation.contact.email-value"] ?? "";
+  const emailValue = business?.supportEmail ?? "";
 
   // Coordinates are owner-entered text; a blank or malformed value hides the
   // map rather than dropping a MapLibre canvas on [NaN, NaN] (bamboo precedent).
@@ -79,13 +99,12 @@ export function RelocationContactPage({
     Math.abs(longitude) <= 180;
   const zoom = Number.isFinite(parsedZoom) ? parsedZoom : 12;
 
-  const mapLabel = [addressLine1, addressLine2].filter(Boolean).join(", ");
+  const mapLabel = business?.businessAddress ?? "";
 
   const visitHeading = f["relocation.contact.visit-heading"] ?? "";
-  const hasAddressLines = addressLine1 !== "" || addressLine2 !== "";
   const hasAddressBlock =
-    hasAddressLines ||
-    hoursValue !== "" ||
+    address !== "" ||
+    hoursRows.length > 0 ||
     phoneValue !== "" ||
     emailValue !== "";
 
@@ -95,18 +114,22 @@ export function RelocationContactPage({
     "contact.visit",
   );
 
+  const showForm = isSectionVisible(customFields, "relocation", "contact.form");
+
   return (
     <>
       <RelocationWaveHero
         title={f["relocation.contact.hero-heading"] ?? ""}
         subtitle={f["relocation.contact.hero-subheading"] ?? ""}
-        ctaLabel={heroCtaLabel}
-        ctaHref={heroCtaHref}
+        ctaLabel={ctaLabel}
+        ctaHref={ctaHref}
+        photoSrc={heroImage === "" ? undefined : heroImage}
+        photoAlt={f["relocation.contact.hero-image-alt"] ?? ""}
         size="tall"
         sectionAttrs={sectionGroupAttr("contact", "hero")}
         titleFieldAttrs={fieldAttr("relocation.contact.hero-heading")}
         subtitleFieldAttrs={fieldAttr("relocation.contact.hero-subheading")}
-        ctaFieldAttrs={fieldAttr("relocation.contact.hero-cta-label")}
+        ctaFieldAttrs={fieldAttr("relocation.global.branding.hero-cta-label")}
       />
 
       {showVisit ? (
@@ -143,29 +166,9 @@ export function RelocationContactPage({
 
                 {hasAddressBlock ? (
                   <address className="mt-9 flex flex-col gap-6 text-[var(--relocation-ink)] not-italic">
-                    {hasAddressLines ? (
-                      <p>
-                        {addressLine1 === "" ? null : (
-                          <span
-                            {...fieldAttr("relocation.contact.address-line-1")}
-                          >
-                            {addressLine1}
-                          </span>
-                        )}
-                        {addressLine1 !== "" && addressLine2 !== "" ? (
-                          <br />
-                        ) : null}
-                        {addressLine2 === "" ? null : (
-                          <span
-                            {...fieldAttr("relocation.contact.address-line-2")}
-                          >
-                            {addressLine2}
-                          </span>
-                        )}
-                      </p>
-                    ) : null}
+                    {address === "" ? null : <p>{address}</p>}
 
-                    {hoursValue === "" ? null : (
+                    {hoursRows.length === 0 ? null : (
                       <p>
                         {hoursLabel === "" ? null : (
                           <>
@@ -178,9 +181,12 @@ export function RelocationContactPage({
                             <br />
                           </>
                         )}
-                        <span {...fieldAttr("relocation.contact.hours-value")}>
-                          {hoursValue}
-                        </span>
+                        {hoursRows.map((row, i) => (
+                          <span key={row.label + row.value}>
+                            {row.label}: {row.value}
+                            {i < hoursRows.length - 1 ? <br /> : null}
+                          </span>
+                        ))}
                       </p>
                     )}
 
@@ -198,14 +204,9 @@ export function RelocationContactPage({
                           </>
                         )}
                         {phoneHref === "" ? (
-                          <span
-                            {...fieldAttr("relocation.contact.phone-value")}
-                          >
-                            {phoneValue}
-                          </span>
+                          <span>{phoneValue}</span>
                         ) : (
                           <a
-                            {...fieldAttr("relocation.contact.phone-value")}
                             href={phoneHref}
                             className="relocation-hover-fade underline underline-offset-4"
                           >
@@ -229,7 +230,6 @@ export function RelocationContactPage({
                           </>
                         )}
                         <a
-                          {...fieldAttr("relocation.contact.email-value")}
                           href={`mailto:${emailValue}`}
                           className="relocation-hover-fade break-words underline underline-offset-4"
                         >
@@ -253,6 +253,73 @@ export function RelocationContactPage({
                 </RelocationReveal>
               ) : null}
             </div>
+          </div>
+        </section>
+      ) : null}
+
+      {showForm ? (
+        <section
+          {...sectionGroupAttr("contact", "form")}
+          aria-labelledby="relocation-contact-form-heading"
+          className="w-full bg-[var(--relocation-paper)] py-16 min-[1025px]:py-24"
+        >
+          <div className="mx-auto w-full max-w-[85rem] px-6 min-[572px]:px-10 min-[1025px]:px-16">
+            <RelocationReveal className="mx-auto w-full max-w-[40rem]">
+              <h2
+                id="relocation-contact-form-heading"
+                {...fieldAttr("relocation.contact.form-heading")}
+                className="text-center [font-family:var(--font-relocation-body)] text-[1.1875rem] leading-[1.875rem] font-medium tracking-[-0.19px] whitespace-pre-line text-[var(--relocation-ink)] min-[1025px]:text-[1.4375rem] min-[1025px]:leading-[2.25rem] min-[1025px]:tracking-[-0.23px]"
+              >
+                {f["relocation.contact.form-heading"] ?? ""}
+              </h2>
+
+              <div className="mt-8">
+                <RelocationContactForm
+                  nameLabel={f["relocation.contact.form-name-label"] ?? ""}
+                  emailLabel={f["relocation.contact.form-email-label"] ?? ""}
+                  emailPlaceholder={
+                    f["relocation.contact.form-email-placeholder"] ?? ""
+                  }
+                  phoneLabel={f["relocation.contact.form-phone-label"] ?? ""}
+                  messageLabel={f["relocation.contact.form-message-label"] ?? ""}
+                  messagePlaceholder={
+                    f["relocation.contact.form-message-placeholder"] ?? ""
+                  }
+                  submitLabel={f["relocation.contact.form-submit-label"] ?? ""}
+                  successHeading={
+                    f["relocation.contact.form-success-heading"] ?? ""
+                  }
+                  successBody={f["relocation.contact.form-success-body"] ?? ""}
+                  successAgainLabel={
+                    f["relocation.contact.form-success-again-label"] ?? ""
+                  }
+                  nameLabelAttrs={fieldAttr(
+                    "relocation.contact.form-name-label",
+                  )}
+                  emailLabelAttrs={fieldAttr(
+                    "relocation.contact.form-email-label",
+                  )}
+                  phoneLabelAttrs={fieldAttr(
+                    "relocation.contact.form-phone-label",
+                  )}
+                  messageLabelAttrs={fieldAttr(
+                    "relocation.contact.form-message-label",
+                  )}
+                  submitLabelAttrs={fieldAttr(
+                    "relocation.contact.form-submit-label",
+                  )}
+                  successHeadingAttrs={fieldAttr(
+                    "relocation.contact.form-success-heading",
+                  )}
+                  successBodyAttrs={fieldAttr(
+                    "relocation.contact.form-success-body",
+                  )}
+                  successAgainLabelAttrs={fieldAttr(
+                    "relocation.contact.form-success-again-label",
+                  )}
+                />
+              </div>
+            </RelocationReveal>
           </div>
         </section>
       ) : null}

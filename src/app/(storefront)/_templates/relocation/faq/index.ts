@@ -43,15 +43,26 @@ const faqHeroData: TemplateField[] = [
       "Here are the most commonly asked questions that we've compiled together. If you have any additional questions, contact us!",
   },
   {
-    key: "relocation.faq.hero-cta-label",
-    label: "Hero Button Label",
+    key: "relocation.faq.hero-image",
+    label: "Hero Photo",
     description:
-      "Outlined button on the hero. It dials the header call button's phone link. Leave blank to hide the button.",
+      "Optional round photo beside the hero heading. Leave blank for the text-only hero.",
+    type: "image",
+    page: "faq",
+    group: "faq.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "relocation.faq.hero-image-alt",
+    label: "Hero Photo Alt Text",
+    description:
+      "Read aloud by screen readers. Leave blank if the photo is purely decorative.",
     type: "text",
     page: "faq",
     group: "faq.hero",
     gridColumn: "col-span-1",
-    defaultValue: "CALL US TODAY",
+    defaultValue: "",
   },
 ];
 

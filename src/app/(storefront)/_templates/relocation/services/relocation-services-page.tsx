@@ -7,6 +7,7 @@ import { resolveFields } from "..";
 import { DEFAULT_RELOCATION_SERVICES } from "../homepage";
 import { toRelocationIconRows } from "../homepage/rows";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationRevealGroup } from "../shared/relocation-reveal";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
 
@@ -87,15 +88,17 @@ export function RelocationServicesPage({ business }: { business: Business }) {
   const f = resolveFields(customFields, [
     "relocation.services.hero-heading",
     "relocation.services.hero-subheading",
-    "relocation.services.hero-cta-label",
+    "relocation.global.branding.hero-cta-label",
     "relocation.services.hero-image",
     "relocation.services.hero-image-alt",
-    "relocation.global.branding.phone-href",
   ]);
 
   const heroImage = f["relocation.services.hero-image"] ?? "";
-  const ctaLabel = f["relocation.services.hero-cta-label"] ?? "";
-  const phoneHref = f["relocation.global.branding.phone-href"] ?? "";
+  const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
+  const ctaLabel =
+    ctaHref === ""
+      ? ""
+      : (f["relocation.global.branding.hero-cta-label"] ?? "");
 
   // Shared with the homepage "Services" section (design.md → homepage §3) —
   // read via the literal key since the field itself is defined in the
@@ -122,14 +125,14 @@ export function RelocationServicesPage({ business }: { business: Business }) {
         title={f["relocation.services.hero-heading"] ?? ""}
         subtitle={f["relocation.services.hero-subheading"] ?? ""}
         ctaLabel={ctaLabel}
-        ctaHref={phoneHref}
+        ctaHref={ctaHref}
         photoSrc={heroImage === "" ? undefined : heroImage}
         photoAlt={f["relocation.services.hero-image-alt"] ?? ""}
         size="tall"
         sectionAttrs={sectionGroupAttr("services", "hero")}
         titleFieldAttrs={fieldAttr("relocation.services.hero-heading")}
         subtitleFieldAttrs={fieldAttr("relocation.services.hero-subheading")}
-        ctaFieldAttrs={fieldAttr("relocation.services.hero-cta-label")}
+        ctaFieldAttrs={fieldAttr("relocation.global.branding.hero-cta-label")}
       />
 
       {/* Service cards — 2-col icon-ring grid (design.md → "Services" §2).

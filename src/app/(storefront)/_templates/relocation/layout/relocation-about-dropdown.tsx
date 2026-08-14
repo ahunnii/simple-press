@@ -3,14 +3,22 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 
+import { isActiveNavLink } from "~/lib/nav-utils";
 import { cn } from "~/lib/utils";
 
-export type RelocationDropdownLink = { href: string; label: string };
+export type RelocationDropdownLink = {
+  href: string;
+  label: string;
+  external?: boolean;
+};
 
 /**
- * The header's "About Us ▾" menu. The clone shipped a `aria-expanded="false"`
- * button with no panel and no handler; per design.md deviation #2 this is a
- * real click-toggled menu (Backstory / Reviews / FAQ).
+ * The header's "About Us ▾" menu — any owner nav item that has children (the
+ * shipped default being About Us → Backstory / Reviews / FAQ). The clone
+ * shipped a `aria-expanded="false"` button with no panel and no handler; per
+ * design.md deviation #2 this is a real click-toggled menu. The parent item's
+ * own `href` is deliberately unused: the trigger only opens the panel, which
+ * is the platform's dropdown convention across headers.
  *
  * Keyboard contract (WAI-ARIA APG menu-button):
  *  - Enter/Space/click toggles; ArrowDown opens and focuses the first item.
@@ -22,13 +30,10 @@ export function RelocationAboutDropdown({
   label,
   links,
   activePath,
-  labelAttrs,
 }: {
   label: string;
   links: RelocationDropdownLink[];
   activePath: string;
-  /** `fieldAttr(...)` for the trigger label. */
-  labelAttrs?: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -36,7 +41,7 @@ export function RelocationAboutDropdown({
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const menuId = useId();
 
-  const isActive = links.some((link) => link.href === activePath);
+  const isActive = links.some((link) => isActiveNavLink(activePath, link.href));
 
   // Click / focus outside closes the panel.
   useEffect(() => {
@@ -131,7 +136,7 @@ export function RelocationAboutDropdown({
           isActive && "relocation-nav-link--active",
         )}
       >
-        <span {...labelAttrs}>{label}</span>
+        <span>{label}</span>
         <svg
           aria-hidden="true"
           viewBox="0 0 12 8"
@@ -157,18 +162,25 @@ export function RelocationAboutDropdown({
         >
           {links.map((link, index) => (
             <Link
-              key={link.href}
+              key={link.href + link.label}
               href={link.href}
               role="menuitem"
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noopener noreferrer" : undefined}
               ref={(node) => {
                 itemRefs.current[index] = node;
               }}
               onClick={() => setOpen(false)}
               onKeyDown={(event) => onItemKeyDown(event, index)}
-              aria-current={link.href === activePath ? "page" : undefined}
+              aria-current={
+                isActiveNavLink(activePath, link.href) ? "page" : undefined
+              }
               className="relocation-hover-fade block px-5 py-2.5 [font-family:var(--font-relocation-display)] text-[1.0625rem] leading-6 text-[var(--relocation-ink)]"
             >
               {link.label}
+              {link.external && (
+                <span className="sr-only">(opens in new tab)</span>
+              )}
             </Link>
           ))}
         </div>

@@ -11,7 +11,7 @@ import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { formatPrice } from "~/lib/prices";
-import { authClient } from "~/server/better-auth/client";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -44,7 +44,7 @@ function LogoTwoLine({ name }: { name: string }) {
 export function DarkTrendHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession();
   const { itemCount, total } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { isEnabled } = useStorefrontFlags();

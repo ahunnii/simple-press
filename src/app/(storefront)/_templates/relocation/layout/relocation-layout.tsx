@@ -6,7 +6,6 @@ import type { DefaultLayoutTemplateProps } from "../../types";
 import { keyToPublicUrl } from "~/lib/s3/url";
 import { resolveThemeVars } from "~/lib/template-themes";
 import { cn } from "~/lib/utils";
-import { getSession } from "~/server/better-auth/server";
 
 import { RelocationFooter } from "./relocation-footer";
 import { RelocationHeader } from "./relocation-header";
@@ -76,8 +75,6 @@ export async function RelocationLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const session = await getSession();
-
   // Fixed brand — no palettes are registered for `relocation`, so this returns
   // null today. Kept so a future preset set works without touching the layout.
   const themeVars = resolveThemeVars(
@@ -131,7 +128,7 @@ export async function RelocationLayout({
       </a>
 
       <div className="relative flex-1">
-        <RelocationHeader business={business} session={session ?? null} />
+        <RelocationHeader business={business} />
         <main id="main-content">{children}</main>
       </div>
 

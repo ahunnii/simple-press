@@ -6,6 +6,7 @@ import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
 import { RelocationBrochureSection } from "./relocation-brochure-section";
 import { RelocationFoundersSection } from "./relocation-founders-section";
@@ -53,16 +54,18 @@ export async function RelocationHomepage({
   const f = resolveFields(customFields, [
     "relocation.homepage.hero-heading",
     "relocation.homepage.hero-subheading",
-    "relocation.homepage.hero-cta-label",
+    "relocation.global.branding.hero-cta-label",
     "relocation.homepage.hero-image",
     "relocation.homepage.hero-image-alt",
-    "relocation.global.branding.phone-href",
     "relocation.global.credentials.heading-home",
   ]);
 
   const heroImage = f["relocation.homepage.hero-image"] ?? "";
-  const ctaLabel = f["relocation.homepage.hero-cta-label"] ?? "";
-  const phoneHref = f["relocation.global.branding.phone-href"] ?? "";
+  const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
+  const ctaLabel =
+    ctaHref === ""
+      ? ""
+      : (f["relocation.global.branding.hero-cta-label"] ?? "");
 
   const isVisible = (sectionId: string) =>
     isSectionVisible(customFields, "relocation", sectionId);
@@ -73,14 +76,14 @@ export async function RelocationHomepage({
         title={f["relocation.homepage.hero-heading"] ?? ""}
         subtitle={f["relocation.homepage.hero-subheading"] ?? ""}
         ctaLabel={ctaLabel}
-        ctaHref={phoneHref}
+        ctaHref={ctaHref}
         photoSrc={heroImage === "" ? undefined : heroImage}
         photoAlt={f["relocation.homepage.hero-image-alt"] ?? ""}
         size="tall"
         sectionAttrs={sectionGroupAttr("homepage", "hero")}
         titleFieldAttrs={fieldAttr("relocation.homepage.hero-heading")}
         subtitleFieldAttrs={fieldAttr("relocation.homepage.hero-subheading")}
-        ctaFieldAttrs={fieldAttr("relocation.homepage.hero-cta-label")}
+        ctaFieldAttrs={fieldAttr("relocation.global.branding.hero-cta-label")}
       />
 
       {/*

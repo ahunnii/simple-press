@@ -6,6 +6,7 @@ import { z } from "zod";
 import { checkBusiness } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import type { TxClient } from "~/server/db";
 import {
   cmsPageDraftSchema,
@@ -178,17 +179,18 @@ export const contentRouter = createTRPCRouter({
       },
     });
 
+    // A cleared draft can come back as `{}` instead of JSON null (see
+    // `isPreviewDraft`) — normalize it to "no draft" so the editor doesn't
+    // hydrate a phantom unpublished-changes state.
+    const draft = siteContent?.previewCustomFields;
     return {
       customFields: (siteContent?.customFields ?? {}) as Record<
         string,
         unknown
       >,
-      previewCustomFields: (siteContent?.previewCustomFields ?? null) as Record<
-        string,
-        unknown
-      > | null,
+      previewCustomFields: isPreviewDraft(draft) ? draft : null,
       previewUpdatedAt: siteContent?.previewUpdatedAt ?? null,
-      hasDraft: siteContent?.previewCustomFields != null,
+      hasDraft: isPreviewDraft(draft),
     };
   }),
 

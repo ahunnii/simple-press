@@ -33,6 +33,7 @@ import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -60,9 +61,10 @@ const MOBILE_ACCOUNT_LINKS = [
 // Mobile nav animation variants are computed inside the component
 // to respond to the user's reduced-motion preference.
 
-export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function NoiseHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
+  const { data: session, isPending } = useHydratedSession();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -620,7 +622,13 @@ export function NoiseHeader({ business, session }: DefaultHeaderTemplateProps) {
 
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:block">
-                {session?.user ? userMenu : authLink}
+                {isPending ? (
+                  <div className="bg-foreground/10 h-7 w-7 animate-pulse rounded-full" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authLink
+                )}
               </div>
             )}
 

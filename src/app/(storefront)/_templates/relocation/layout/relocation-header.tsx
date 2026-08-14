@@ -6,54 +6,81 @@ import { usePathname } from "next/navigation";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
+import { isActiveNavLink } from "~/lib/nav-utils";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { cn } from "~/lib/utils";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { UserButton } from "~/components/auth/user/user-button";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { resolveFields } from "..";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationPillButton } from "../shared/relocation-pill-button";
 import { RelocationAboutDropdown } from "./relocation-about-dropdown";
 import { RelocationMobileMenu } from "./relocation-mobile-menu";
 
+/** Platform nav shape — `Business.siteContent.navigationItems` (one level of
+ *  children), as validated by `navigationItemsSchema` in
+ *  `src/lib/validators/content.ts` and mirrored by every other header. */
+type NavChild = { label: string; href: string; external?: boolean };
+type NavLink = NavChild & { children?: NavChild[] };
+
+/**
+ * The clone's nav, reproduced exactly, used until the owner saves their own
+ * items in /admin/content/navigation. "About Us" is a parent whose `href` is
+ * never navigated to — see the render comment below.
+ */
+const DEFAULT_NAV: NavLink[] = [
+  {
+    label: "About Us",
+    href: "/about",
+    children: [
+      { label: "Backstory", href: "/about" },
+      { label: "Reviews", href: "/testimonials" },
+      { label: "FAQ", href: "/faq" },
+    ],
+  },
+  { label: "Services", href: "/services" },
+  { label: "Contact Us", href: "/contact" },
+];
+
 /**
  * White, tall header (design.md → Chrome): circular Handy badge left, then a
  * right-aligned "About Us ▾" dropdown, Services, Contact Us, and the terracotta
- * "CALL US AT 313-241-0291" pill.
+ * "CALL US AT (313) 241-0291" pill.
+ *
+ * Both of those right-hand clusters read platform data rather than template
+ * fields: the nav comes from `siteContent.navigationItems`
+ * (/admin/content/navigation), the phone number from `Business.phoneNumber`
+ * (Settings → General). The only field left here is the call pill's prefix
+ * ("CALL US AT") plus the shipped fallback logo.
  *
  * Client component because it needs `usePathname()` for the active-link
- * underline and holds the mobile drawer's open state — the same mechanism
- * `CoopHeader` / `ViiHeader` use, since `DefaultLayoutTemplateProps` carries no
- * route info to thread down.
+ * underline, holds the mobile drawer's open state, and reads the live session
+ * through `useHydratedSession()` — a server-rendered `session` prop replays
+ * its signed-out RSC payload after a client-side post-login navigation, so the
+ * header never flips to the avatar without a hard refresh (canonical pattern:
+ * `modern/layout/modern-header.tsx`).
  *
  * Breakpoint: the clone's desktop starts at 1025px, so the hamburger owns
  * everything below that (`max-[1024px]:` / `min-[1025px]:` arbitrary variants —
  * the Tailwind config is never touched).
  */
-export function RelocationHeader({
-  business,
-  session,
-}: DefaultHeaderTemplateProps) {
+export function RelocationHeader({ business }: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const mobileMenuId = useId();
 
   const { isEnabled } = useStorefrontFlags();
+  const { data: session, isPending } = useHydratedSession();
 
   const customFields = business?.siteContent?.customFields;
   const f = resolveFields(customFields, [
     "relocation.global.branding.logo",
-    "relocation.global.branding.logo-alt",
-    "relocation.global.branding.about-label",
-    "relocation.global.branding.backstory-label",
-    "relocation.global.branding.reviews-label",
-    "relocation.global.branding.faq-label",
-    "relocation.global.branding.services-label",
-    "relocation.global.branding.contact-label",
-    "relocation.global.branding.phone-label",
-    "relocation.global.branding.phone-href",
+    "relocation.global.branding.call-cta-prefix",
   ]);
 
   const businessName = business?.name ?? "Handy Relocations";
@@ -63,36 +90,35 @@ export function RelocationHeader({
     business?.siteContent?.logoUrl ??
     f["relocation.global.branding.logo"] ??
     "";
-  const logoAlt = f["relocation.global.branding.logo-alt"] ?? businessName;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
 
-  const aboutLabel = f["relocation.global.branding.about-label"] ?? "";
-  const servicesLabel = f["relocation.global.branding.services-label"] ?? "";
-  const contactLabel = f["relocation.global.branding.contact-label"] ?? "";
-  const phoneLabel = f["relocation.global.branding.phone-label"] ?? "";
-  const phoneHref = f["relocation.global.branding.phone-href"] ?? "";
+  // `??`, never `||`: an owner who saves an empty item list in the Navigation
+  // builder means "no nav links", which `||` would silently overwrite with the
+  // shipped default.
+  const links =
+    (business?.siteContent?.navigationItems as NavLink[] | undefined) ??
+    DEFAULT_NAV;
 
-  const aboutLinks = [
-    {
-      href: "/about",
-      label: f["relocation.global.branding.backstory-label"] ?? "",
-    },
-    {
-      href: "/testimonials",
-      label: f["relocation.global.branding.reviews-label"] ?? "",
-    },
-    { href: "/faq", label: f["relocation.global.branding.faq-label"] ?? "" },
-  ];
+  // The drawer is one flat level (design.md deviation #2), so parents are
+  // replaced by their children — for DEFAULT_NAV that is exactly today's list:
+  // Backstory / Reviews / FAQ / Services / Contact Us.
+  const mobileLinks = links.flatMap((link) =>
+    link.children?.length ? link.children : [link],
+  );
 
-  const mobileLinks = [
-    ...aboutLinks,
-    { href: "/services", label: servicesLabel },
-    { href: "/contact", label: contactLabel },
-  ];
+  const phone = business?.phoneNumber ?? "";
+  const phoneHref = relocationTelHref(phone);
+  const callPrefix = f["relocation.global.branding.call-cta-prefix"] ?? "";
+  // Composite label for the drawer pill, which carries no editor hotspot.
+  const phoneLabel = [callPrefix, phone].filter(Boolean).join(" ");
 
   const navLinkClass = (href: string) =>
     cn(
       "relocation-hover-fade relocation-nav-link py-1 [font-family:var(--font-relocation-display)] text-[1.0625rem] leading-6 text-[var(--relocation-ink)]",
-      pathname === href && "relocation-nav-link--active",
+      isActiveNavLink(pathname, href) && "relocation-nav-link--active",
     );
 
   const authActions = (
@@ -142,20 +168,30 @@ export function RelocationHeader({
   );
 
   // Desktop cluster: full ghost buttons / avatar dropdown, next to the nav.
-  const accountSlot = isEnabled("customerAccounts")
-    ? session?.user
-      ? userMenu
-      : authActions
-    : null;
+  // The pulse placeholder holds the avatar's footprint during the session
+  // fetch so the row doesn't shift when the real state resolves.
+  const accountSlot = isEnabled("customerAccounts") ? (
+    isPending ? (
+      <div className="h-10 w-10 animate-pulse rounded-full bg-[var(--relocation-ink)]/10" />
+    ) : session?.user ? (
+      userMenu
+    ) : (
+      authActions
+    )
+  ) : null;
 
   // Mobile drawer: collapses to one pill link rather than squeezing the
   // above into the drawer's top bar (see RelocationMobileMenu's account
   // props doc comment — mirrors ViiHeader's mobile pattern).
   const mobileAccountHref = isEnabled("customerAccounts")
-    ? (session?.user ? "/account/orders" : "/auth/sign-in")
+    ? session?.user
+      ? "/account/orders"
+      : "/auth/sign-in"
     : undefined;
   const mobileAccountLabel = isEnabled("customerAccounts")
-    ? (session?.user ? "My Account" : "Log In")
+    ? session?.user
+      ? "My Account"
+      : "Log In"
     : undefined;
 
   return (
@@ -197,36 +233,56 @@ export function RelocationHeader({
             aria-label="Primary navigation"
             className="flex items-center gap-7"
           >
-            <RelocationAboutDropdown
-              label={aboutLabel}
-              links={aboutLinks}
-              activePath={pathname}
-              labelAttrs={fieldAttr("relocation.global.branding.about-label")}
-            />
-            <Link
-              href="/services"
-              className={navLinkClass("/services")}
-              aria-current={pathname === "/services" ? "page" : undefined}
-              {...fieldAttr("relocation.global.branding.services-label")}
-            >
-              {servicesLabel}
-            </Link>
-            <Link
-              href="/contact"
-              className={navLinkClass("/contact")}
-              aria-current={pathname === "/contact" ? "page" : undefined}
-              {...fieldAttr("relocation.global.branding.contact-label")}
-            >
-              {contactLabel}
-            </Link>
-            <RelocationPillButton
-              href={phoneHref}
-              variant="solid"
-              className="ml-1"
-              labelAttrs={fieldAttr("relocation.global.branding.phone-label")}
-            >
-              {phoneLabel}
-            </RelocationPillButton>
+            {links.map((item) =>
+              item.children?.length ? (
+                // A parent with children renders as a dropdown TRIGGER and its
+                // own `href` is never navigated to — the platform convention
+                // every other header follows (see `noise-header.tsx`), and what
+                // the clone's inert "About Us ▾" button did.
+                <RelocationAboutDropdown
+                  key={item.href + item.label}
+                  label={item.label}
+                  links={item.children}
+                  activePath={pathname}
+                />
+              ) : (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
+                  className={navLinkClass(item.href)}
+                  aria-current={
+                    isActiveNavLink(pathname, item.href) ? "page" : undefined
+                  }
+                >
+                  {item.label}
+                  {item.external && (
+                    <span className="sr-only">(opens in new tab)</span>
+                  )}
+                </Link>
+              ),
+            )}
+            {/* No phone number on the business record → no pill at all, rather
+                than a dead `href="tel:"`. */}
+            {phoneHref !== "" && (
+              <RelocationPillButton
+                href={phoneHref}
+                variant="solid"
+                className="ml-1"
+              >
+                {/* The pill's text is composite (prefix + platform phone), so
+                    only the prefix carries a `fieldAttr` hotspot — the editor
+                    patches an annotated element's ENTIRE textContent. */}
+                <span
+                  {...fieldAttr("relocation.global.branding.call-cta-prefix")}
+                >
+                  {callPrefix}
+                </span>
+                {callPrefix === "" ? null : " "}
+                {phone}
+              </RelocationPillButton>
+            )}
           </nav>
 
           {accountSlot && (

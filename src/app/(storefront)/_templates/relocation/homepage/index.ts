@@ -1,8 +1,7 @@
+import type { RelocationIconRow, RelocationPhotoRow } from "./rows";
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 import { SECTION_LINKS } from "~/lib/section-links";
-
-import type { RelocationIconRow, RelocationPhotoRow } from "./rows";
 
 // Type-only re-export keeps existing `from "."`/`from "../homepage"` type
 // imports working. The RUNTIME parsers live in ./rows — never import them
@@ -127,17 +126,6 @@ const homepageHeroData: TemplateField[] = [
     gridColumn: "col-span-full",
     defaultValue:
       "Moving to a new place can be stressful, but moving your belongings shouldn’t be! At Handy Relocations, our moving and logistics teams are standing by and ready to take the stress out of your move! Whether it’s across the city or the country, we’re here for you every step of the way!",
-  },
-  {
-    key: "relocation.homepage.hero-cta-label",
-    label: "Hero Button Label",
-    description:
-      "Outlined button on the hero. It dials the header call button's phone link. Leave blank to hide the button.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "CALL US TODAY",
   },
   {
     key: "relocation.homepage.hero-image",

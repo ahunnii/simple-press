@@ -16,7 +16,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { authClient } from "~/server/better-auth/client";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
 import { HamburgerIcon } from "~/components/layout/hamburger-icon";
@@ -43,7 +43,7 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
 export function PollenHeader({ business }: DefaultHeaderTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession();
   const { isEnabled } = useFeatureFlags({
     flags: (business?.featureFlags as Record<string, boolean>) ?? {},
   });

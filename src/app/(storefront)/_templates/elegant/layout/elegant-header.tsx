@@ -18,7 +18,7 @@ import {
 
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
-import { authClient } from "~/server/better-auth/client";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -37,7 +37,7 @@ export function ElegantHeader({ business }: DefaultHeaderTemplateProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { setIsOpen, itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession();
   const user = session?.user;
   const pathname = usePathname();
   const router = useRouter();

@@ -30,6 +30,7 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -60,12 +61,10 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
   ).filter((el) => !el.closest("[inert]"));
 }
 
-export function SledgeHeader({
-  business,
-  session,
-}: DefaultHeaderTemplateProps) {
+export function SledgeHeader({ business }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
+  const { data: session, isPending } = useHydratedSession();
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -571,7 +570,13 @@ export function SledgeHeader({
 
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:block">
-                {session?.user ? userMenu : authLink}
+                {isPending ? (
+                  <div className="h-9 w-9 animate-pulse rounded-full bg-white/10" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authLink
+                )}
               </div>
             )}
 

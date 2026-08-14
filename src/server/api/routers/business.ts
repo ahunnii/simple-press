@@ -10,6 +10,7 @@ import {
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
 import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
@@ -99,7 +100,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = businessData.siteContent;
-    if (sc?.previewCustomFields != null) {
+    if (sc && isPreviewDraft(sc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(
         businessData.id,
       );
@@ -193,7 +194,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = businessData.siteContent;
-    if (sc?.previewCustomFields != null) {
+    if (sc && isPreviewDraft(sc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(
         businessData.id,
       );
@@ -329,7 +330,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const hsc = homepage.siteContent;
-    if (hsc?.previewCustomFields != null) {
+    if (hsc && isPreviewDraft(hsc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
       if (previewBizId) {
         hsc.customFields = hsc.previewCustomFields;
@@ -578,7 +579,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = business.siteContent;
-    if (sc?.previewCustomFields != null) {
+    if (sc && isPreviewDraft(sc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
       if (previewBizId) {
         sc.customFields = sc.previewCustomFields;

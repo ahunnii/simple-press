@@ -4,6 +4,7 @@ import { isSectionVisible } from "~/lib/sp-meta";
 
 import { resolveFields } from "..";
 import { RelocationCredentialsBand } from "../shared/relocation-credentials-band";
+import { relocationTelHref } from "../shared/relocation-phone";
 import { RelocationReveal } from "../shared/relocation-reveal";
 import { RelocationWaveHero } from "../shared/relocation-wave-hero";
 
@@ -28,8 +29,9 @@ import { RelocationWaveHero } from "../shared/relocation-wave-hero";
 const FIELD_KEYS = [
   "relocation.about.hero-heading",
   "relocation.about.hero-subheading",
-  "relocation.about.hero-cta-label",
-  "relocation.global.branding.phone-href",
+  "relocation.global.branding.hero-cta-label",
+  "relocation.about.hero-image",
+  "relocation.about.hero-image-alt",
   "relocation.about.collage-image",
   "relocation.about.collage-image-alt",
   "relocation.about.story-paragraph-1",
@@ -60,19 +62,27 @@ export function RelocationAboutPage({
   const storyPhoto = f["relocation.about.story-photo"] ?? "";
   const linkLabel = f["relocation.about.story-paragraph-2-link-label"] ?? "";
   const linkUrl = f["relocation.about.story-paragraph-2-link-url"] ?? "";
+  const heroImage = f["relocation.about.hero-image"] ?? "";
+  const ctaHref = relocationTelHref(business?.phoneNumber ?? "");
+  const ctaLabel =
+    ctaHref === ""
+      ? ""
+      : (f["relocation.global.branding.hero-cta-label"] ?? "");
 
   return (
     <>
       <RelocationWaveHero
         title={f["relocation.about.hero-heading"] ?? ""}
         subtitle={f["relocation.about.hero-subheading"] ?? ""}
-        ctaLabel={f["relocation.about.hero-cta-label"] ?? ""}
-        ctaHref={f["relocation.global.branding.phone-href"] ?? ""}
+        ctaLabel={ctaLabel}
+        ctaHref={ctaHref}
+        photoSrc={heroImage === "" ? undefined : heroImage}
+        photoAlt={f["relocation.about.hero-image-alt"] ?? ""}
         size="tall"
         sectionAttrs={sectionGroupAttr("about", "hero")}
         titleFieldAttrs={fieldAttr("relocation.about.hero-heading")}
         subtitleFieldAttrs={fieldAttr("relocation.about.hero-subheading")}
-        ctaFieldAttrs={fieldAttr("relocation.about.hero-cta-label")}
+        ctaFieldAttrs={fieldAttr("relocation.global.branding.hero-cta-label")}
       />
 
       {isVisible("about.collage") && collageImage !== "" ? (

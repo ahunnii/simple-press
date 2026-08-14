@@ -4,7 +4,6 @@ import type { DefaultLayoutTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { resolveBanner } from "~/lib/site-banner/resolve";
 import { resolveThemeVars } from "~/lib/template-themes";
-import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 
 import { PinkAnnouncementBar } from "./pink-announcement-bar";
@@ -18,8 +17,7 @@ export async function PinkLayout({
   children,
   business,
 }: DefaultLayoutTemplateProps) {
-  const [session, { isEnabled }, policies] = await Promise.all([
-    getSession(),
+  const [{ isEnabled }, policies] = await Promise.all([
     getBusinessFlags(),
     api.content.getSimplifiedPages({ type: "policy" }),
   ]);
@@ -70,7 +68,7 @@ export async function PinkLayout({
 
       {banner && <PinkAnnouncementBar banner={banner} />}
 
-      <PinkHeader business={business} session={session ?? null} />
+      <PinkHeader business={business} />
 
       <main id="main-content" className="flex-1">
         {children}

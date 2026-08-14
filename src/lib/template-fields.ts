@@ -609,6 +609,15 @@ export const PAGE_METADATA = {
     description: "Video gallery page content",
     icon: "📺",
   },
+  // Not a `TemplatePage` value — no field declares `page: "authentication"`.
+  // The auth fields live on the `global` page; this entry exists so the visual
+  // editor's synthetic "Authentication" preview page (which shows the shared
+  // sign-in/sign-up shell) gets a first-class label and icon.
+  authentication: {
+    title: "Authentication",
+    description: "Sign-in and sign-up screen styling",
+    icon: "🔐",
+  },
 } as const;
 
 export { resolveTemplateFields } from "~/lib/resolve-template-fields";

@@ -1,25 +1,24 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 
 /**
- * Global (chrome) field module for `relocation` — everything the header,
- * footer and the shared credentials band render on every page.
+ * Global (chrome) field module for `relocation` — the header logo and call
+ * button, the footer's chrome (column headings, about blurb, and
+ * helpful-links labels), the sign-in / sign-up branding, and the shared
+ * credentials band rendered on every page.
  *
- * All defaults are transcribed 1:1 from the cloned source (header nav +
- * `page.tsx` footer n563–n649) and the reference screenshots, per brief.md
- * ("all 1:1 copy ships as field `defaultValue`s"), including source quirks:
- *  - "Rights &  Responsibilities" keeps its double space.
- *  - "Furniture & Delivery Pick Up" keeps the source's word order (the
- *    services SECTION calls the same service "Furniture Pick Up & Delivery" —
- *    both spellings are in the source and both are preserved).
- * The two user-approved fixes are applied: the header pill targets
- * `tel:+13132410291` (source had the `tel:++` typo) and the footer phone link
- * targets the number it displays (source linked `tel:+17373674294`). The city
- * line follows design.md's "Detroit, MI" rather than the source's "Detroit,MI".
+ * Header nav labels, phone numbers, and the footer contact block are
+ * deliberately NOT template fields — they read from platform sources of truth
+ * instead: the header nav from Content → Navigation, the phone number from
+ * Settings → General (rendered via `relocationTelHref`), and the footer
+ * contact block from Settings → General/Hours. The footer about blurb is a
+ * template field. See `relocation-header.tsx` / `relocation-footer.tsx` for
+ * the read side. "Rights &  Responsibilities" (`rights-label`) keeps the
+ * source's double space.
  *
- * The five footer service labels and the four credential logos are SCALAR
- * fields rather than one `list` field on purpose: list fields cannot carry a
- * meaningful `defaultValue` (every list in the repo ships `defaultValue: ""`),
- * and a fresh store must render the real 1:1 footer on day one.
+ * The four credential logos are SCALAR fields rather than one `list` field on
+ * purpose: list fields cannot carry a meaningful `defaultValue` (every list
+ * in the repo ships `defaultValue: ""`), and a fresh store must render the
+ * real 1:1 credentials band on day one.
  *
  * Aggregated into `relocationData` / `relocationFieldGroups` by
  * `_templates/relocation/index.ts`.
@@ -40,97 +39,26 @@ const globalBrandingData: TemplateField[] = [
     defaultValue: "/templates/relocation/images/logo.webp",
   },
   {
-    key: "relocation.global.branding.logo-alt",
-    label: "Header Logo Alt Text",
-    description: "Accessible description of the header logo.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Handy Relocations",
-  },
-  {
-    key: "relocation.global.branding.about-label",
-    label: "Nav — About Menu Label",
+    key: "relocation.global.branding.call-cta-prefix",
+    label: "Call Button Prefix",
     description:
-      "Label on the header's dropdown trigger, which opens the Backstory / Reviews / FAQ menu.",
+      "Text before your phone number on the terracotta call pill. The number itself comes from Settings → General. Leave blank to show just the number.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "About Us",
+    defaultValue: "CALL US AT",
   },
   {
-    key: "relocation.global.branding.backstory-label",
-    label: "Nav — Backstory Link Label",
-    description: "First item in the About menu; links to the About page.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Backstory",
-  },
-  {
-    key: "relocation.global.branding.reviews-label",
-    label: "Nav — Reviews Link Label",
-    description: "Second item in the About menu; links to the Reviews page.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Reviews",
-  },
-  {
-    key: "relocation.global.branding.faq-label",
-    label: "Nav — FAQ Link Label",
-    description: "Third item in the About menu; links to the FAQ page.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "FAQ",
-  },
-  {
-    key: "relocation.global.branding.services-label",
-    label: "Nav — Services Link Label",
-    description: "Second top-level header link; goes to the Services page.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Services",
-  },
-  {
-    key: "relocation.global.branding.contact-label",
-    label: "Nav — Contact Link Label",
-    description: "Third top-level header link; goes to the Contact page.",
-    type: "text",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "Contact Us",
-  },
-  {
-    key: "relocation.global.branding.phone-label",
-    label: "Header Call Button Label",
+    key: "relocation.global.branding.hero-cta-label",
+    label: "Hero Call Button Label",
     description:
-      "Text on the terracotta pill at the end of the header nav, and on the same pill inside the mobile menu.",
+      "Outlined button on every page hero. It dials your business phone number (Settings → General). Leave blank to hide the button.",
     type: "text",
     page: "global",
     group: "global.branding",
     gridColumn: "col-span-1",
-    defaultValue: "CALL US AT 313-241-0291",
-  },
-  {
-    key: "relocation.global.branding.phone-href",
-    label: "Header Call Button Link",
-    description:
-      "Where the call pill dials. Use a `tel:` link with the full country code, e.g. tel:+13132410291.",
-    type: "url",
-    page: "global",
-    group: "global.branding",
-    gridColumn: "col-span-1",
-    defaultValue: "tel:+13132410291",
+    defaultValue: "CALL US TODAY",
   },
 ];
 
@@ -150,7 +78,8 @@ const globalFooterData: TemplateField[] = [
   {
     key: "relocation.global.footer.about-blurb",
     label: "Footer — About Blurb",
-    description: "Short promise paragraph in the first footer column.",
+    description:
+      "Short promise paragraph in the first footer column. Leave blank to hide the About column entirely.",
     type: "textarea",
     page: "global",
     group: "global.footer",
@@ -167,61 +96,6 @@ const globalFooterData: TemplateField[] = [
     group: "global.footer",
     gridColumn: "col-span-1",
     defaultValue: "Our Services",
-  },
-  {
-    key: "relocation.global.footer.service-1",
-    label: "Footer — Service 1",
-    description:
-      "First bullet in the footer service list. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Local Moves & Long Distance",
-  },
-  {
-    key: "relocation.global.footer.service-2",
-    label: "Footer — Service 2",
-    description:
-      "Second bullet in the footer service list. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Full Service",
-  },
-  {
-    key: "relocation.global.footer.service-3",
-    label: "Footer — Service 3",
-    description:
-      "Third bullet in the footer service list. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Labor Only",
-  },
-  {
-    key: "relocation.global.footer.service-4",
-    label: "Footer — Service 4",
-    description:
-      "Fourth bullet in the footer service list. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Packing",
-  },
-  {
-    key: "relocation.global.footer.service-5",
-    label: "Footer — Service 5",
-    description:
-      "Fifth bullet in the footer service list. Leave blank to hide.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Furniture & Delivery Pick Up",
   },
   {
     key: "relocation.global.footer.areas-heading",
@@ -297,58 +171,6 @@ const globalFooterData: TemplateField[] = [
     group: "global.footer",
     gridColumn: "col-span-1",
     defaultValue: "CONTACT US",
-  },
-  {
-    key: "relocation.global.footer.contact-name",
-    label: "Footer — Business Name",
-    description: "Business name shown at the top of the footer contact block.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Handy Relocations",
-  },
-  {
-    key: "relocation.global.footer.contact-city",
-    label: "Footer — City",
-    description: "City and state line in the footer contact block.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Detroit, MI",
-  },
-  {
-    key: "relocation.global.footer.contact-phone-label",
-    label: "Footer — Phone Number",
-    description:
-      "Phone number as displayed in the footer. Leave blank to hide the phone line.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "(313)-649-4917",
-  },
-  {
-    key: "relocation.global.footer.contact-phone-href",
-    label: "Footer — Phone Link",
-    description:
-      "Where the footer phone number dials. Use a `tel:` link with the full country code.",
-    type: "url",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "tel:+13136494917",
-  },
-  {
-    key: "relocation.global.footer.contact-hours",
-    label: "Footer — Hours",
-    description: "Opening-hours line at the bottom of the contact block.",
-    type: "text",
-    page: "global",
-    group: "global.footer",
-    gridColumn: "col-span-1",
-    defaultValue: "Open 24/7",
   },
 ];
 
@@ -460,20 +282,58 @@ const globalCredentialsData: TemplateField[] = [
   },
 ];
 
+// ─── Global: Authentication ───────────────────────────────────────────────────
+
+const globalAuthenticationData: TemplateField[] = [
+  {
+    key: "relocation.global.authentication-image",
+    label: "Authentication Image",
+    description: "Image on the side panel of the sign-in and sign-up pages.",
+    type: "image",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-full",
+    defaultValue: "/placeholder.svg",
+  },
+  {
+    key: "relocation.global.logo-size-width",
+    label: "Logo Size Width",
+    description:
+      "Width (in pixels) of the logo on the sign-in and sign-up pages.",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+  },
+  {
+    key: "relocation.global.logo-size-height",
+    label: "Logo Size Height",
+    description:
+      "Height (in pixels) of the logo on the sign-in and sign-up pages.",
+    type: "number",
+    page: "global",
+    group: "global.authentication",
+    gridColumn: "col-span-1",
+    defaultValue: "80",
+  },
+];
+
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
 export const relocationGlobalData: TemplateField[] = [
   ...globalBrandingData,
   ...globalFooterData,
   ...globalCredentialsData,
+  ...globalAuthenticationData,
 ];
 
 export const relocationGlobalFieldGroups: TemplateFieldGroup[] = [
   {
     id: "global.branding",
-    title: "Header & Navigation",
+    title: "Header & Branding",
     description:
-      "Logo, nav labels and the terracotta call button — shown on every page",
+      "Logo and the terracotta call button — shown on every page. Header navigation lives in Content → Navigation; your phone number comes from Settings → General.",
     icon: "🏷️",
     columns: 2,
   },
@@ -481,7 +341,7 @@ export const relocationGlobalFieldGroups: TemplateFieldGroup[] = [
     id: "global.footer",
     title: "Footer",
     description:
-      "The four charcoal footer columns: about blurb, services, areas served and helpful links, contact details",
+      "Footer chrome: column headings, areas served, about blurb and helpful-links labels. Business name, address, phone, hours and social links come from Settings; services mirror the homepage services list.",
     icon: "📋",
     columns: 2,
   },
@@ -491,6 +351,13 @@ export const relocationGlobalFieldGroups: TemplateFieldGroup[] = [
     description:
       "Trust band of association logos that closes every page in the site",
     icon: "🏅",
+    columns: 2,
+  },
+  {
+    id: "global.authentication",
+    title: "Authentication",
+    description: "Image and logo size shown on the sign-in and sign-up pages.",
+    icon: "🔐",
     columns: 2,
   },
 ];

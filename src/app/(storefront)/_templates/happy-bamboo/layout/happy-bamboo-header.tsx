@@ -13,6 +13,7 @@ import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -36,13 +37,12 @@ const NAV_LINKS = [
 
 export function HappyBambooHeader({
   business,
-  session,
 }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
-  // const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession();
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -156,7 +156,15 @@ export function HappyBambooHeader({
 
           <div className="flex items-center gap-4">
             {isEnabled("customerAccounts") && (
-              <>{session?.user ? userMenu : authActions}</>
+              <>
+                {isPending ? (
+                  <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authActions
+                )}
+              </>
             )}
             {isEnabled("wishlist") && (
               <Button

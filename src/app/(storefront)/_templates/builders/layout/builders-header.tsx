@@ -11,6 +11,7 @@ import { ArrowRight, Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 import type { DefaultHeaderTemplateProps } from "../../types";
 import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
@@ -26,11 +27,11 @@ const DEFAULT_NAV: NavLink[] = [
 
 export function BuildersHeader({
   business,
-  session,
 }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
+  const { data: session, isPending } = useHydratedSession();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const mobileDialogRef = useRef<HTMLDivElement>(null);
@@ -285,7 +286,13 @@ export function BuildersHeader({
             {/* Desktop auth */}
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:flex md:items-center md:gap-4">
-                {session?.user ? userMenu : authLink}
+                {isPending ? (
+                  <div className="h-7 w-7 animate-pulse rounded-full border border-gray-200" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authLink
+                )}
               </div>
             )}
 
@@ -539,7 +546,9 @@ export function BuildersHeader({
 
                 {isStorefrontEnabled("customerAccounts") && (
                   <>
-                    {session?.user ? (
+                    {isPending ? (
+                      <div className="h-5 w-5 animate-pulse rounded-full" style={{ background: "var(--builders-rule, #e5e7eb)" }} />
+                    ) : session?.user ? (
                       <div className="flex items-center justify-center">
                         {userMenu}
                       </div>

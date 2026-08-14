@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Heart, ShoppingBag, User, X } from "lucide-react";
 
 import type { PinkNavLink } from "./pink-header";
-import { isActiveNavLink } from "./pink-nav-utils";
+import { isActiveNavLink } from "~/lib/nav-utils";
 
 type PinkAccountLink = { href: string; label: string };
 

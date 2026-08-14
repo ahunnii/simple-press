@@ -62,15 +62,26 @@ const aboutHeroData: TemplateField[] = [
       "Moving to a new place can be stressful, but moving your belongings shouldn’t be! At Handy Relocations, our moving and logistics teams are standing by and ready to take the stress out of your move! Whether it’s across the city or the country, we’re here for you every step of the way!",
   },
   {
-    key: "relocation.about.hero-cta-label",
-    label: "Hero Button Label",
+    key: "relocation.about.hero-image",
+    label: "Hero Photo",
     description:
-      "Outlined button on the hero. It dials the same number as the header call button. Leave blank to hide the button.",
+      "Optional round photo beside the hero heading. Leave blank for the text-only hero.",
+    type: "image",
+    page: "about",
+    group: "about.hero",
+    gridColumn: "col-span-1",
+    defaultValue: "",
+  },
+  {
+    key: "relocation.about.hero-image-alt",
+    label: "Hero Photo Alt Text",
+    description:
+      "Read aloud by screen readers. Leave blank if the photo is purely decorative.",
     type: "text",
     page: "about",
     group: "about.hero",
     gridColumn: "col-span-1",
-    defaultValue: "CALL US TODAY",
+    defaultValue: "",
   },
 ];
 
