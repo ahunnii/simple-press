@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 
 import { getMainDomainUrl } from "~/lib/domain-utils";
 import { api } from "~/trpc/server";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -16,6 +15,7 @@ import { AddMemberButton } from "../../_components/add-member-button";
 import { BusinessMembersTable } from "../../_components/business-members-table";
 import { PlatformTrailHeader } from "../../_components/platform-trail-header";
 import { BusinessFeatureFlags } from "./_components/business-feature-flags";
+import { BusinessStatusControl } from "./_components/business-status-control";
 
 type Props = {
   params: Promise<{ businessId: string }>;
@@ -65,13 +65,11 @@ export default async function PlatformBusinessDetailPage({ params }: Props) {
                     {process.env.NEXT_PUBLIC_PLATFORM_DOMAIN}
                   </CardDescription>
                 </div>
-                <Badge
-                  variant={
-                    business.status === "active" ? "default" : "secondary"
-                  }
-                >
-                  {business.status}
-                </Badge>
+                <BusinessStatusControl
+                  businessId={business.id}
+                  businessName={business.name}
+                  status={business.status}
+                />
               </div>
             </CardHeader>
             <CardContent>

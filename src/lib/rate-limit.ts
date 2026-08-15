@@ -34,10 +34,13 @@ function makeLazy(opts: LimiterOpts): {
     if (env.NODE_ENV === "production") {
       // Production without Redis means per-process limits — alert once via
       // the shared client's connect path; still fall back so the app serves.
-      Sentry.captureMessage("Rate limiter falling back to memory in production", {
-        level: "warning",
-        tags: { service: "redis", component: "rate-limiter" },
-      });
+      Sentry.captureMessage(
+        "Rate limiter falling back to memory in production",
+        {
+          level: "warning",
+          tags: { service: "redis", component: "rate-limiter" },
+        },
+      );
     }
 
     return getMemory();
@@ -201,11 +204,7 @@ function resolveClientIp(headers: Headers): string {
     return "unknown";
   }
 
-  return (
-    xffParts[0] ??
-    headers.get("x-real-ip")?.trim() ??
-    "unknown"
-  );
+  return xffParts[0] ?? headers.get("x-real-ip")?.trim() ?? "unknown";
 }
 
 /**

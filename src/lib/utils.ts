@@ -83,18 +83,6 @@ export function isValidDomain(domain: string): boolean {
 }
 
 /**
- * Extract subdomain from hostname
- * Example: "store.myapp.com" -> "store"
- */
-export function extractSubdomain(hostname: string): string | null {
-  const parts = hostname.split(".");
-  if (parts.length > 2) {
-    return parts[0] ?? null;
-  }
-  return null;
-}
-
-/**
  * Check if subdomain is available (not reserved)
  */
 export function isSubdomainReserved(subdomain: string): boolean {

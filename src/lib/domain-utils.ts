@@ -67,31 +67,6 @@ export function getMainDomain(): string {
 }
 
 /**
- * Build full URL for any domain type
- */
-export function buildDomainUrl(
-  business: {
-    subdomain: string;
-    customDomain: string | null;
-    domainStatus?: string;
-  },
-  path = "/",
-): string {
-  const isDev = process.env.NODE_ENV === "development";
-
-  // Prefer custom domain if active
-  if (business.customDomain && business.domainStatus === "active") {
-    return `https://${business.customDomain}${path}`;
-  }
-
-  // Fall back to subdomain
-  const mainDomain = getMainDomain();
-  const protocol = isDev ? "http" : "https";
-
-  return `${protocol}://${business.subdomain}.${mainDomain}${path}`;
-}
-
-/**
  * Build a full URL to the main platform domain (no subdomain) — e.g. for
  * cross-host links from the platform-admin subdomain into a tenant's
  * `/admin/*` routes, which don't exist under `platform.*`.
@@ -128,32 +103,4 @@ export function getCallbackUrl(): string {
   const protocol = isDev ? "http" : "https";
 
   return `${protocol}://${mainDomain}/api/stripe/connect/callback`;
-}
-
-/**
- * Encode OAuth state with return URL (base64url for URL safety)
- */
-export function encodeOAuthState(data: {
-  businessId: string;
-  returnUrl: string;
-}): string {
-  const json = JSON.stringify(data);
-  const base64 = Buffer.from(json).toString("base64");
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-/**
- * Decode OAuth state
- */
-export function decodeOAuthState(encoded: string): {
-  businessId: string;
-  returnUrl: string;
-} {
-  let base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
-  base64 += "=".repeat((4 - (base64.length % 4)) % 4);
-  const json = Buffer.from(base64, "base64").toString("utf-8");
-  return JSON.parse(json) as {
-    businessId: string;
-    returnUrl: string;
-  };
 }

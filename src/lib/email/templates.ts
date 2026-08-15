@@ -10,6 +10,7 @@ import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import { MarketingBroadcastEmail } from "~/emails/marketing-broadcast";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
 import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
+import NewReviewEmail from "~/emails/new-review";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
@@ -18,12 +19,12 @@ import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OrderStatusLinkEmail from "~/emails/order-status-link";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
+import PaymentsDisabledEmail from "~/emails/payments-disabled";
 import PoolLowInventoryAlertEmail from "~/emails/pool-low-inventory-alert";
 import PoolOutOfStockAlertEmail from "~/emails/pool-out-of-stock-alert";
 import QuoteConfirmationEmail from "~/emails/quote-confirmation";
 import { TeamInviteEmail } from "~/emails/team-invite";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
-import WelcomeEmail from "~/emails/welcome";
 
 import { getBusinessUrl } from "~/lib/business-url";
 import { applySubjectTemplate } from "~/lib/email/customization";
@@ -549,43 +550,6 @@ export async function sendContactFormSubmission(params: {
   });
 }
 
-// Welcome Email
-export async function sendWelcomeEmail(params: {
-  to: string;
-  name: string;
-  business: {
-    name: string;
-    ownerEmail: string;
-    subdomain: string;
-    customDomain?: string | null;
-    domainStatus?: string | null;
-    siteContent?: {
-      logoUrl?: string | null;
-    } | null;
-  };
-}) {
-  const businessUrl = getBusinessUrl(params.business);
-
-  return sendEmail({
-    from: EMAIL_FROM.NOREPLY,
-    fromName: params.business.name,
-    to: params.to,
-    replyTo: params.business.ownerEmail,
-    subject: `Welcome to ${params.business.name}!`,
-    react: WelcomeEmail({
-      name: params.name,
-      businessName: params.business.name,
-      businessUrl,
-      logoUrl: params.business.siteContent?.logoUrl ?? undefined,
-      ownerEmail: params.business.ownerEmail,
-    }),
-    tags: [
-      { name: "category", value: "welcome" },
-      { name: "business", value: params.business.subdomain },
-    ],
-  });
-}
-
 type InventoryAlertBusiness = {
   name: string;
   ownerEmail: string;
@@ -726,6 +690,43 @@ export async function sendPoolOutOfStockAlert(params: {
       { name: "category", value: "pool_out_of_stock_alert" },
       { name: "business", value: params.business.subdomain },
     ],
+  });
+}
+
+/**
+ * Stripe has disabled charges on the owner's connected account (to owner).
+ *
+ * Sent from the `account.updated` Stripe webhook on a true→false transition of
+ * `Business.stripeChargesEnabled` only — see the transition guard there. This
+ * is the store's most severe operational failure: every checkout fails, and
+ * without this email the owner's first signal is an angry customer.
+ */
+export async function sendPaymentsDisabledAlert(params: {
+  adminSettingsUrl?: string;
+  idempotencyKey?: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    subdomain: string;
+    siteContent?: { logoUrl?: string | null } | null;
+  };
+}) {
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `Action required: ${params.business.name} can't accept payments`,
+    react: PaymentsDisabledEmail({
+      businessName: params.business.name,
+      stripeDashboardUrl: "https://dashboard.stripe.com",
+      adminSettingsUrl: params.adminSettingsUrl,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+    }),
+    tags: [
+      { name: "category", value: "payments_disabled" },
+      { name: "business", value: params.business.subdomain },
+    ],
+    idempotencyKey: params.idempotencyKey,
   });
 }
 
@@ -1075,5 +1076,51 @@ export async function sendFinalQuote(params: {
       { name: "business", value: params.business.subdomain },
     ],
     idempotencyKey: params.idempotencyKey,
+  });
+}
+
+// New customer review awaiting moderation (to owner). Only ever sent for
+// customer-submitted reviews — `review.submit` always creates with
+// `isApproved: false`. Owner-created reviews (`review.ownerCreate`, which
+// default `isApproved: true`) go through a separate mutation that never
+// calls this.
+export async function sendNewReviewNotification(params: {
+  reviewerName: string;
+  productName: string;
+  rating: number;
+  reviewTitle?: string;
+  reviewText: string;
+  business: {
+    name: string;
+    ownerEmail: string;
+    siteContent?: {
+      logoUrl?: string | null;
+    } | null;
+    subdomain: string;
+    customDomain?: string | null;
+    domainStatus?: string | null;
+  };
+}) {
+  const adminReviewsUrl = `${getBusinessUrl(params.business)}/admin/reviews`;
+
+  return sendEmail({
+    from: EMAIL_FROM.NOREPLY,
+    fromName: params.business.name,
+    to: params.business.ownerEmail,
+    subject: `New review for ${params.productName}`,
+    react: NewReviewEmail({
+      reviewerName: params.reviewerName,
+      productName: params.productName,
+      rating: params.rating,
+      reviewTitle: params.reviewTitle,
+      reviewText: params.reviewText,
+      businessName: params.business.name,
+      businessLogoUrl: params.business.siteContent?.logoUrl ?? undefined,
+      adminReviewsUrl,
+    }),
+    tags: [
+      { name: "category", value: "new_review" },
+      { name: "business", value: params.business.subdomain },
+    ],
   });
 }

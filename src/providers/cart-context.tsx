@@ -343,6 +343,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Clear entire cart
   const clearCart = useCallback(() => {
     setItems([]);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(CART_STORAGE_KEY);
+      } catch (error) {
+        console.error("Failed to clear cart from localStorage:", error);
+      }
+    }
+
     toast.success("Cart cleared");
   }, []);
 

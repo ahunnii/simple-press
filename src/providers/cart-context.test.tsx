@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -103,6 +104,67 @@ describe("CartProvider", () => {
 
     await user.click(screen.getByText("add"));
     await user.click(screen.getByText("clear"));
+    expect(screen.getByTestId("count").textContent).toBe("0");
+  });
+
+  it("clearCart removes the persisted cart from localStorage", async () => {
+    const user = userEvent.setup();
+    const removeItemSpy = vi.spyOn(window.localStorage, "removeItem");
+    renderCart();
+
+    await user.click(screen.getByText("add"));
+    await waitFor(() => {
+      expect(localStorage.getItem(CART_KEY)).not.toBeNull();
+    });
+
+    await user.click(screen.getByText("clear"));
+
+    // Regression: clearCart must remove the storage key outright (not just
+    // rely on the save effect eventually persisting an empty array) —
+    // otherwise a remounted provider (e.g. a fresh order-confirmation page
+    // load) can read stale data mid-hydration before the save effect ever
+    // runs. The save effect legitimately re-persists "[]" afterwards, so we
+    // assert on the removeItem call itself rather than the final key state.
+    expect(removeItemSpy).toHaveBeenCalledWith(CART_KEY);
+
+    removeItemSpy.mockRestore();
+  });
+
+  it("clearing the cart from a child's mount effect prevents the hydration effect from resurrecting it", async () => {
+    // Reproduces the order-confirmation-page race: a purchased cart is still
+    // in localStorage from before checkout, and on the fresh page load a
+    // *child* component calls clearCart() inside its own mount effect.
+    // Child effects fire before parent effects, so this runs before
+    // CartProvider's hydration effect below. Without removing the storage
+    // key synchronously, the hydration effect would still find the old cart
+    // and resurrect it via setItems(saved).
+    localStorage.setItem(
+      CART_KEY,
+      JSON.stringify([{ ...SAMPLE, quantity: 2 }]),
+    );
+
+    function ClearOnMountHarness() {
+      const cart = useCart();
+      useEffect(() => {
+        cart.clearCart();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+      return <span data-testid="count">{cart.itemCount}</span>;
+    }
+
+    render(
+      <CartProvider>
+        <ClearOnMountHarness />
+      </CartProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("count").textContent).toBe("0");
+    });
+
+    // Let the hydration + save effects fully settle and confirm the cart
+    // stays cleared instead of being resurrected a tick later.
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByTestId("count").textContent).toBe("0");
   });
 

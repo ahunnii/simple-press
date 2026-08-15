@@ -70,11 +70,8 @@ describe("onboarding draft", () => {
   });
 
   it("round-trips a signed draft and consumes it once", async () => {
-    const {
-      saveOnboardingDraft,
-      peekOnboardingDraft,
-      consumeOnboardingDraft,
-    } = await import("./draft");
+    const { saveOnboardingDraft, peekOnboardingDraft, consumeOnboardingDraft } =
+      await import("./draft");
 
     const payload = {
       email: "Owner@Example.com",

@@ -41,10 +41,12 @@ export const domainRouter = createTRPCRouter({
         });
       }
 
-      // Check if domain is already taken
+      // Check if domain is already taken. Case-insensitive: storage is
+      // normalized to lowercase below, but this guards against any
+      // pre-existing mixed-case row too.
       const existingDomain = await ctx.db.business.findFirst({
         where: {
-          customDomain: domain,
+          customDomain: { equals: normalizedDomain, mode: "insensitive" },
           id: { not: businessId },
         },
       });
@@ -77,7 +79,7 @@ export const domainRouter = createTRPCRouter({
       await ctx.db.business.update({
         where: { id: businessId },
         data: {
-          customDomain: domain,
+          customDomain: normalizedDomain,
           domainStatus: "PENDING_DNS",
         },
       });
@@ -85,7 +87,7 @@ export const domainRouter = createTRPCRouter({
       // Add to domain queue for Coolify
       await ctx.db.domainQueue.create({
         data: {
-          domain,
+          domain: normalizedDomain,
           businessId,
           status: "pending",
         },
@@ -94,7 +96,7 @@ export const domainRouter = createTRPCRouter({
       // Notify Discord with full business context
       try {
         await notifyDiscordNewDomain({
-          domain,
+          domain: normalizedDomain,
           businessName: business.name,
           businessId,
           subdomain: business.subdomain,
@@ -108,7 +110,7 @@ export const domainRouter = createTRPCRouter({
 
       return {
         success: true,
-        domain,
+        domain: normalizedDomain,
         status: "PENDING_DNS",
       };
     }),
@@ -127,6 +129,11 @@ export const domainRouter = createTRPCRouter({
         });
       }
 
+      // `customDomain` is stored normalized (see `add` above); normalize the
+      // input the same way so this still matches regardless of the case the
+      // caller passes.
+      const normalizedDomain = domain.trim().toLowerCase();
+
       // Only verify the domain the business actually configured. Without this a
       // caller could pass an arbitrary domain that happens to point at our VPS
       // (e.g. another tenant's) and flip THIS business to ACTIVE.
@@ -135,7 +142,10 @@ export const domainRouter = createTRPCRouter({
         select: { customDomain: true },
       });
 
-      if (!business?.customDomain || business.customDomain !== domain) {
+      if (
+        !business?.customDomain ||
+        business.customDomain !== normalizedDomain
+      ) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Domain does not match the configured custom domain",
@@ -145,7 +155,7 @@ export const domainRouter = createTRPCRouter({
       const dns = await import("dns").then((m) => m.promises);
 
       try {
-        const addresses = await dns.resolve4(domain);
+        const addresses = await dns.resolve4(normalizedDomain);
         const pointsToUs = addresses.includes(vpsIp);
 
         if (pointsToUs) {
@@ -155,7 +165,7 @@ export const domainRouter = createTRPCRouter({
           });
 
           await ctx.db.domainQueue.updateMany({
-            where: { domain, businessId },
+            where: { domain: normalizedDomain, businessId },
             data: { status: "completed" },
           });
 

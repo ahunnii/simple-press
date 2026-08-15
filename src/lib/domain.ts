@@ -12,10 +12,7 @@ export {
   getCurrentDomain,
   extractSubdomain,
   getMainDomain,
-  buildDomainUrl,
   getCallbackUrl,
-  encodeOAuthState,
-  decodeOAuthState,
 } from "./domain-utils";
 
 /**

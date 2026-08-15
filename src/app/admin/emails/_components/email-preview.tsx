@@ -20,7 +20,6 @@ import QuoteConfirmationEmail from "~/emails/quote-confirmation";
 import ResetPasswordEmail from "~/emails/reset-password";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import VerifyEmail from "~/emails/verify-email";
-import WelcomeEmail from "~/emails/welcome";
 import { toast } from "sonner";
 
 import type { EmailOverride } from "~/lib/email/customization";
@@ -369,17 +368,6 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
               { title: "Move type", display: "In State" },
               { title: "From zip", display: "48601 (Saginaw, MI)" },
             ],
-          }),
-      },
-      {
-        key: "welcome",
-        label: "Welcome Email",
-        build: () =>
-          WelcomeEmail({
-            name: "John Doe",
-            businessName: business.name,
-            businessUrl,
-            logoUrl,
           }),
       },
       {

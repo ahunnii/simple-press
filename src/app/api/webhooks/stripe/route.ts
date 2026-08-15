@@ -21,6 +21,7 @@ import {
   sendOrderConfirmation,
   sendOrderRefunded,
   sendOutOfStockAlert,
+  sendPaymentsDisabledAlert,
   sendPoolLowInventoryAlert,
   sendPoolOutOfStockAlert,
 } from "~/lib/email/templates";
@@ -1298,17 +1299,58 @@ export async function POST(req: NextRequest) {
       try {
         const business = await db.business.findUnique({
           where: { stripeAccountId: account.id },
-          select: { id: true, subdomain: true },
+          select: {
+            id: true,
+            subdomain: true,
+            // Read BEFORE the update below so the true→false transition can be
+            // detected exactly once. Everything from here down is only used by
+            // the owner alert; the update itself is unchanged.
+            stripeChargesEnabled: true,
+            name: true,
+            ownerEmail: true,
+            customDomain: true,
+            domainStatus: true,
+            siteContent: { select: { logoUrl: true } },
+          },
         });
 
         if (business) {
+          const chargesEnabled = account.charges_enabled ?? false;
+
           await db.business.update({
             where: { id: business.id },
             data: {
-              stripeChargesEnabled: account.charges_enabled ?? false,
+              stripeChargesEnabled: chargesEnabled,
               stripePayoutsEnabled: account.payouts_enabled ?? false,
             },
           });
+
+          // Stripe just restricted a previously-working account (KYC
+          // re-verification, document request, dispute threshold). Nothing in
+          // checkout reads `stripeChargesEnabled`, so from this moment every
+          // checkout on the store fails opaquely — the owner has no other
+          // signal. Fire once, on the edge only: a repeat `account.updated`
+          // while charges stay disabled reads `prior === false` and is silent,
+          // and a Stripe redelivery of this same event sees the value already
+          // written to false. Deliberately not fired on the false→true
+          // recovery, nor from the Connect callback (onboarding just finished)
+          // or disconnect (deliberate owner action) routes.
+          if (business.stripeChargesEnabled && !chargesEnabled) {
+            try {
+              await sendPaymentsDisabledAlert({
+                business,
+                adminSettingsUrl: `${getBusinessUrl(business)}/admin/settings/integrations`,
+                idempotencyKey: `payments-disabled-${event.id}`,
+              });
+            } catch (emailError) {
+              Sentry.captureException(emailError, {
+                tags: {
+                  "webhook.step": "payments-disabled-email",
+                  businessId: business.id,
+                },
+              });
+            }
+          }
         }
       } catch (error) {
         Sentry.captureException(error, {

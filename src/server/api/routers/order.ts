@@ -1293,6 +1293,12 @@ export const orderRouter = createTRPCRouter({
             "[Order Status] Failed to update customer metrics:",
             error,
           );
+          Sentry.captureException(error, {
+            tags: {
+              "trpc.procedure": "order.updateStatus",
+              businessId,
+            },
+          });
         }
       }
 
@@ -1755,6 +1761,12 @@ export const orderRouter = createTRPCRouter({
             "[Manual Order] Failed to update customer metrics:",
             customerError,
           );
+          Sentry.captureException(customerError, {
+            tags: {
+              "trpc.procedure": "order.createManual",
+              businessId,
+            },
+          });
         }
       }
 

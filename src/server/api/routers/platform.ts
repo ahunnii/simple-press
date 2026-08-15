@@ -536,6 +536,42 @@ export const platformRouter = createTRPCRouter({
       };
     }),
 
+  // Business status (active | suspended | closed). Enforcement lives in
+  // ownerAdminProcedure/staffProcedure/ownerOnlyProcedure/getBusinessProcedure
+  // (`~/server/api/trpc.ts`) and trustedOrigins (`~/server/better-auth/config.tsx`)
+  // — this mutation only ever writes the column; it never touches enforcement.
+  setBusinessStatus: platformAdminProcedure
+    .input(
+      z.object({
+        businessId: z.string(),
+        status: z.enum(["active", "suspended", "closed"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const business = await ctx.db.business.findUnique({
+        where: { id: input.businessId },
+        select: { id: true },
+      });
+
+      if (!business) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
+
+      const updated = await ctx.db.business.update({
+        where: { id: input.businessId },
+        data: { status: input.status },
+        select: {
+          id: true,
+          status: true,
+        },
+      });
+
+      return updated;
+    }),
+
   // Feature Flag Management
   getBusinessFlags: platformAdminProcedure
     .input(z.object({ businessId: z.string() }))

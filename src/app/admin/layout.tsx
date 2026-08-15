@@ -1,5 +1,5 @@
-import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { env } from "~/env";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { resolveOwnerTermsGate } from "~/lib/legal/owner-terms-gate.server";
 import { getPlatformMaintenance } from "~/lib/maintenance";
 import { requireAdminAccess } from "~/lib/require-admin-access";
@@ -11,6 +11,7 @@ import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { NavigationGuardProvider } from "~/providers/navigation-guard-context";
 import { AdminCommandPalette } from "~/app/admin/_components/admin-command-palette";
 import { AppSidebar } from "~/app/admin/_components/app-sidebar";
+import { PaymentsDisabledBanner } from "~/app/admin/_components/payments-disabled-banner";
 
 type Props = {
   children: React.ReactNode;
@@ -67,13 +68,30 @@ export default async function AdminLayout({ children }: Props) {
   // Cheap lookup for the sidebar's "Finish setup" nudge — same shape as the
   // setupComplete check in /admin/page.tsx, minus customDomain (a subdomain
   // store with Stripe + a product is a legitimately finished setup).
-  const welcomeSetupStatus = await db.business.findUnique({
-    where: { id: business.id },
-    select: {
-      stripeAccountId: true,
-      _count: { select: { products: true } },
-    },
-  });
+  //
+  // Runs alongside the pending-review count below — both are single cheap
+  // reads needed on every admin page load, so they fire in parallel rather
+  // than adding a sequential round trip each.
+  const [welcomeSetupStatus, pendingReviewCount] = await Promise.all([
+    db.business.findUnique({
+      where: { id: business.id },
+      select: {
+        stripeAccountId: true,
+        // Rides along on the query the sidebar nudge already runs — the
+        // payments-disabled banner costs no extra round trip.
+        stripeChargesEnabled: true,
+        _count: { select: { products: true } },
+      },
+    }),
+    // ProductReview has no businessId column — scoped through the product
+    // relation, same tenancy rule as review.ts. Counts customer-submitted AND
+    // owner-created rows that are unapproved, but owner-created reviews
+    // default to `isApproved: true` (see review.ownerCreate), so in practice
+    // this is the pending-customer-review queue the sidebar badge is for.
+    db.productReview.count({
+      where: { isApproved: false, product: { businessId: business.id } },
+    }),
+  ]);
 
   return (
     <HydrateClient>
@@ -96,9 +114,24 @@ export default async function AdminLayout({ children }: Props) {
               stripeConnected: Boolean(welcomeSetupStatus?.stripeAccountId),
               hasProducts: (welcomeSetupStatus?._count.products ?? 0) > 0,
             }}
+            pendingReviewCount={pendingReviewCount}
           />
           <SidebarInset>
-            <div className="bg-muted min-h-screen">{children}</div>
+            <div className="bg-muted min-h-screen">
+              {/* Above the page's own TrailHeader on purpose: while charges are
+                  disabled nothing else on the screen is more urgent. Renders
+                  null in the normal case. Hidden from STAFF, who are
+                  fulfillment-only and can reach neither Stripe nor settings. */}
+              {membershipRole !== "STAFF" && (
+                <PaymentsDisabledBanner
+                  stripeAccountId={welcomeSetupStatus?.stripeAccountId ?? null}
+                  stripeChargesEnabled={
+                    welcomeSetupStatus?.stripeChargesEnabled ?? true
+                  }
+                />
+              )}
+              {children}
+            </div>
           </SidebarInset>
           <AdminCommandPalette
             session={session}

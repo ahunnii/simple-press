@@ -220,14 +220,3 @@ export function getServiceTemplateFieldGroups(
   const def = SERVICE_TEMPLATE_DEFS[serviceTemplateId];
   return def?.fieldGroups ?? [];
 }
-
-/**
- * Returns display metadata for all registered service templates in a stable
- * order suitable for a template picker UI.
- *
- * @deprecated Prefer `getServiceTemplatesForStorefront(storefrontTemplateId)`
- * to get only the templates relevant to the current storefront.
- */
-export function getAllServiceTemplateMetas(): ServiceTemplateMeta[] {
-  return Object.values(SERVICE_TEMPLATE_META);
-}
