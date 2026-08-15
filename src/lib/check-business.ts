@@ -42,6 +42,33 @@ export const checkBusiness = async () => {
  *   working and the gate fails OPEN. Locking every owner out of their orders
  *   over a consent prompt would be far worse than a missed prompt.
  */
+/**
+ * Like {@link checkBusiness} but without the `status: "active"` filter.
+ *
+ * ONLY for platform-admin flows: admins temporarily suspend a store to
+ * remediate a policy violation and must still be able to load its /admin and
+ * tenant-scoped procedures while it is suspended. Never use this for
+ * storefront or customer-facing resolution — suspension must stay invisible
+ * to everyone else.
+ */
+export const checkBusinessAnyStatus = async () => {
+  const headersList = await headers();
+
+  const hostname = headersList.get("host") ?? "";
+
+  const business = await db.business.findFirst({
+    where: businessHostFilter(hostname),
+    select: {
+      id: true,
+      name: true,
+      customDomain: true,
+      umamiWebsiteId: true,
+      umamiEnabled: true,
+    },
+  });
+  return business;
+};
+
 export const checkBusinessMembership = async (
   businessId: string,
   userId: string,

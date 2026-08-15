@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import type { QuoteStatusDb } from "~/lib/validators/quote-calculator";
+import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { notifyDiscordQuoteSubmission } from "~/lib/discord/notification";
@@ -95,17 +96,7 @@ export const quoteSubmissionRouter = createTRPCRouter({
       });
 
       if (!captcha.ok) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          // User-facing text stays generic. `reason` rides on `cause` instead
-          // of `message` — the tRPC errorFormatter (src/server/api/trpc.ts)
-          // only ever serializes a ZodError cause to the client, so this never
-          // reaches the browser, but it's inspectable via `error.cause` by
-          // anything holding the raw thrown error (e.g. a server-side test
-          // exercising the cross-tenant-replay / `host-mismatch` path).
-          message: "Captcha verification failed",
-          cause: new Error(`recaptcha verification failed: ${captcha.reason}`),
-        });
+        throw captchaFailureToTrpcError(captcha.reason);
       }
 
       // 3. Tenant ─────────────────────────────────────────────────────────────

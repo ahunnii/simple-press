@@ -3,6 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 
 import { checkBusiness } from "~/lib/check-business";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { importStoreBundle } from "~/lib/store-transfer/import";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
@@ -36,7 +37,7 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "Not logged in" }, { status: 401 });
   }
 
-  if (session.user.platformRole !== "PLATFORM_ADMIN") {
+  if (!(await isPlatformAdmin(session.user.id))) {
     return Response.json(
       { error: "You do not have permission to import into this business." },
       { status: 403 },

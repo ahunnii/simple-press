@@ -22,6 +22,7 @@ import type {
   StoreTransferMediaEntry,
 } from "~/lib/store-transfer/types";
 import { checkBusiness } from "~/lib/check-business";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { s3Client } from "~/lib/s3/client";
 import { listBusinessObjects } from "~/lib/s3/list";
 import { keyToPublicUrl, STORAGE_BASE, STORAGE_BUCKET } from "~/lib/s3/url";
@@ -72,7 +73,7 @@ export async function GET(req: Request): Promise<Response> {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    if (session.user.platformRole !== "PLATFORM_ADMIN") {
+    if (!(await isPlatformAdmin(session.user.id))) {
       return new Response("Forbidden", { status: 403 });
     }
 

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness } from "~/lib/check-business";
 import { FEATURE_REGISTRY } from "~/lib/features/registry";
 import { resolveFlags } from "~/lib/features/resolve-flags";
@@ -71,7 +72,7 @@ export const featuresRouter = createTRPCRouter({
       }
       if (
         !feature.ownerCanToggle &&
-        ctx.session.user.platformRole !== "PLATFORM_ADMIN"
+        !(await isPlatformAdmin(ctx.session.user.id))
       ) {
         throw new TRPCError({
           code: "FORBIDDEN",
@@ -86,7 +87,7 @@ export const featuresRouter = createTRPCRouter({
       // /admin/settings/data.
       if (
         OWNER_ONLY_TOGGLE_KEYS.has(input.key) &&
-        ctx.session.user.platformRole !== "PLATFORM_ADMIN"
+        !(await isPlatformAdmin(ctx.session.user.id))
       ) {
         const membership = await ctx.db.businessMembership.findUnique({
           where: {
@@ -124,7 +125,7 @@ export const featuresRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      if (ctx.session.user.platformRole !== "PLATFORM_ADMIN") {
+      if (!(await isPlatformAdmin(ctx.session.user.id))) {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "This feature can only be set by platform admins",

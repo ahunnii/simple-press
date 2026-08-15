@@ -145,6 +145,16 @@ export const recaptcha = () =>
         });
 
         if (!result.ok) {
+          // Provider outages (Google down, invalid secret) are 503 so operators
+          // and synthetic probes can distinguish them from ordinary bot rejects.
+          if (result.reason === "provider-error") {
+            return middlewareResponse({
+              ...ERRORS.UNKNOWN_ERROR,
+              status: 503,
+              extra: { reason: result.reason },
+            });
+          }
+
           // The failure `reason` is echoed alongside the stable `code` so the
           // cross-tenant-replay check (`host-mismatch`) is observable from the
           // response instead of requiring server logs. It is a coarse enum, not

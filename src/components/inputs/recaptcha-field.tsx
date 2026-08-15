@@ -6,6 +6,7 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
 } from "react";
 
 import { useRecaptchaAutoRefresh } from "~/lib/captcha/use-recaptcha-v3";
@@ -119,10 +120,14 @@ export const RecaptchaField = forwardRef<RecaptchaHandle, RecaptchaFieldProps>(
       onErrorRef.current = onError;
     }, [onVerify, onError]);
 
+    const [mintFailed, setMintFailed] = useState(false);
+
     const handleToken = useCallback((token: string | null) => {
       if (token) {
+        setMintFailed(false);
         onVerifyRef.current(token);
       } else {
+        setMintFailed(true);
         // Surface the failure so the consumer clears its staged token rather
         // than submitting one the server will reject.
         onErrorRef.current?.();
@@ -133,7 +138,13 @@ export const RecaptchaField = forwardRef<RecaptchaHandle, RecaptchaFieldProps>(
 
     useImperativeHandle(ref, () => ({ execute: mint, reset: mint }), [mint]);
 
-    const resolvedErrorId = error
+    const displayError =
+      error ??
+      (mintFailed
+        ? "Verification could not load. Please refresh the page and try again."
+        : undefined);
+
+    const resolvedErrorId = displayError
       ? (errorId ?? (fieldId ? `${fieldId}-error` : undefined))
       : undefined;
 
@@ -145,10 +156,21 @@ export const RecaptchaField = forwardRef<RecaptchaHandle, RecaptchaFieldProps>(
         aria-describedby={resolvedErrorId}
       >
         <RecaptchaDisclosure />
-        {error && resolvedErrorId && (
+        {displayError && resolvedErrorId && (
           <p id={resolvedErrorId} role="alert" className="text-sm text-red-600">
-            {error}
+            {displayError}
           </p>
+        )}
+        {mintFailed && (
+          <button
+            type="button"
+            className="text-sm underline underline-offset-2"
+            onClick={() => {
+              void mint();
+            }}
+          >
+            Retry verification
+          </button>
         )}
       </div>
     );

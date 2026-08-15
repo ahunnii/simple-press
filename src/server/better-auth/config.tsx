@@ -7,10 +7,12 @@ import { isAPIError } from "better-auth/api";
 import { organization } from "better-auth/plugins";
 
 import { env } from "~/env";
+import { allowedHosts, syncAllowedHostsFromDb } from "~/lib/auth/allowed-hosts";
 import { getBusinessUrl } from "~/lib/business-url";
 import { checkBusiness, checkBusinessForEmail } from "~/lib/check-business";
 import { sendResendEmail } from "~/lib/email/resend";
 import { EMAIL_FROM } from "~/lib/email/send";
+import { createRedisSecondaryStorage } from "~/lib/redis";
 import { recaptcha } from "~/server/better-auth/plugins/recaptcha";
 import { resolvePlatformTermsAcceptance } from "~/server/better-auth/terms-acceptance";
 import { db } from "~/server/db";
@@ -37,30 +39,68 @@ async function linkGuestOrdersToUser(user: {
   } catch (err) {
     Sentry.captureException(err, {
       tags: { "auth.hook": "link-guest-orders" },
-      extra: { userId: user.id, email: user.email },
+      // userId only — never put the email in Sentry extras.
+      extra: { userId: user.id, linked: true },
     });
   }
 }
 
+const secondaryStorage = env.REDIS_URL
+  ? createRedisSecondaryStorage()
+  : undefined;
+
+const trustedProxyIps = (env.TRUSTED_PROXY_IPS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 export const auth = betterAuth({
   baseURL: {
-    allowedHosts: [
-      "*.localhost:3000", // custom domains (wildcard)
-      "localhost:3000", // local dev
-      `${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
-      `*.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`,
-      "zairesvisions.org",
-      "detroitpollinatorcompany.com",
-      "happy-bamboo.org",
-      "finallyresults.com",
-    ],
-
+    // Shared mutable array — `trustedOrigins` refreshes ACTIVE custom domains
+    // into this same reference so newly activated domains work without redeploy.
+    allowedHosts,
+    // If a host arrives before the first sync (or DNS flap), fall back to the
+    // platform origin rather than throwing and 500-ing every auth call.
+    fallback: env.BETTER_AUTH_BASE_URL,
     protocol: process.env.NODE_ENV === "development" ? "http" : "https",
   },
 
   database: prismaAdapter(db, {
     provider: "postgresql", // or "sqlite" or "mysql"
   }),
+
+  // Shared Redis when configured — keeps auth rate limits consistent across
+  // Coolify replicas. Without REDIS_URL, Better Auth falls back to memory.
+  ...(secondaryStorage
+    ? {
+        secondaryStorage,
+        rateLimit: {
+          enabled: true,
+          storage: "secondary-storage" as const,
+          window: 60,
+          max: 100,
+        },
+      }
+    : {
+        rateLimit: {
+          enabled: true,
+          window: 60,
+          max: 100,
+        },
+      }),
+
+  advanced: {
+    // Only honour forwarded client IPs from Coolify/Traefik when explicitly
+    // configured. Empty list → better-auth refuses multi-hop XFF chains.
+    ...(trustedProxyIps.length > 0
+      ? {
+          ipAddress: {
+            ipAddressHeaders: ["x-forwarded-for", "x-real-ip"],
+            trustedProxies: trustedProxyIps,
+          },
+        }
+      : {}),
+  },
 
   emailAndPassword: {
     enabled: true,
@@ -87,21 +127,26 @@ export const auth = betterAuth({
           )
         : url;
 
-      sendResendEmail({
-        from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
-        to: user.email,
-        subject: "Reset your SimplePress password",
-        react: ResetPasswordEmail({
-          name: user.name,
-          businessName: business?.name ?? "",
-          resetUrl: updatedResetUrl,
-          logoUrl: business?.siteContent?.logoUrl ?? undefined,
-        }),
-      }).catch((err) => {
+      // Await provider acceptance so short-lived workers cannot exit before
+      // Resend receives the message. Failures are reported but do not throw —
+      // Better Auth has already issued the reset token by this point.
+      try {
+        await sendResendEmail({
+          from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          to: user.email,
+          subject: "Reset your SimplePress password",
+          react: ResetPasswordEmail({
+            name: user.name,
+            businessName: business?.name ?? "",
+            resetUrl: updatedResetUrl,
+            logoUrl: business?.siteContent?.logoUrl ?? undefined,
+          }),
+        });
+      } catch (err) {
         Sentry.captureException(err, {
           tags: { "auth.email": "password-reset" },
         });
-      });
+      }
     },
   },
   emailVerification: {
@@ -128,48 +173,52 @@ export const auth = betterAuth({
             }),
           )
         : url;
-      sendResendEmail({
-        from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
-        to: user.email,
-        subject: "Verify your email",
-        react: VerifyEmail({
-          name: user.name,
-          businessName: business?.name ?? "",
-          verifyUrl: updatedVerifyUrl,
-          logoUrl: business?.siteContent?.logoUrl ?? undefined,
-        }),
-      }).catch((err) => {
+      try {
+        await sendResendEmail({
+          from: `${business?.name ?? "SimplePress"} via SimplePress <${EMAIL_FROM.NOREPLY}>`,
+          to: user.email,
+          subject: "Verify your email",
+          react: VerifyEmail({
+            name: user.name,
+            businessName: business?.name ?? "",
+            verifyUrl: updatedVerifyUrl,
+            logoUrl: business?.siteContent?.logoUrl ?? undefined,
+          }),
+        });
+      } catch (err) {
         Sentry.captureException(err, {
           tags: { "auth.email": "verification" },
         });
-      });
+      }
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     expiresIn: 3600, // 1 hour
   },
 
-  socialProviders: {
-    discord: {
-      clientId: env.BETTER_AUTH_DISCORD_ID,
-      clientSecret: env.BETTER_AUTH_DISCORD_SECRET,
-      redirectURI: `${env.BETTER_AUTH_BASE_URL}/api/auth/callback/discord`,
-    },
-  },
+  // Discord OAuth is intentionally not enabled. Cross-domain OAuth is not
+  // production-safe for multi-tenant hosts yet, and the AuthProvider does not
+  // pass `socialProviders`, so the UI already hides the button. Credentials
+  // remain optional in env for a future re-enable.
 
   user: {
     additionalFields: {
+      // Privileged — clients must NEVER be able to set these via signup or
+      // /update-user. Without `input: false`, Better Auth accepts them.
       platformRole: {
         type: "string",
         defaultValue: "BUSINESS_USER",
+        input: false,
       },
       businessId: {
         type: "string",
         required: false,
+        input: false,
       },
       businessRole: {
         type: "string",
         required: false,
+        input: false,
       },
     },
   },
@@ -252,17 +301,26 @@ export const auth = betterAuth({
   },
 
   trustedOrigins: async () => {
+    // Keep baseURL.allowedHosts in sync with ACTIVE custom domains so auth
+    // works on newly activated domains without a code deploy.
+    await syncAllowedHostsFromDb();
+
     const businesses = await db.business.findMany({
       where: {
+        // Closed tenants must not remain trusted CSRF origins. Suspended
+        // tenants stay trusted: platform admins temporarily suspend a store
+        // to remediate a policy violation and must still be able to SIGN IN
+        // on that tenant host (cookies are host-scoped). Origin trust is not
+        // authorization — the storefront and tenant procedures still 404 a
+        // suspended store for everyone but platform admins.
+        status: { in: ["active", "suspended"] },
         OR: [
-          // Active businesses with a valid custom domain
           {
             domainStatus: "ACTIVE",
             customDomain: {
               not: null,
             },
           },
-          // Inactive businesses with a valid subdomain
           {
             domainStatus: "NONE",
             subdomain: {
@@ -314,8 +372,12 @@ export const auth = betterAuth({
       },
     },
     cookieCache: {
+      // Short cache for performance; privileged authorization still re-reads
+      // platformRole from the DB. Version bump invalidates any pre-existing
+      // 7-day cached payloads that may have carried a forged/stale role.
       enabled: true,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 5 * 60, // 5 minutes
+      version: "2",
     },
   },
 

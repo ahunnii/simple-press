@@ -85,14 +85,18 @@ describe("isKnownCaptchaHost — live tenant subdomain", () => {
 
     expect(findFirst).toHaveBeenCalledTimes(1);
     const call = findFirst.mock.calls[0]?.[0];
-    expect(call?.where).toEqual({ subdomain: "bloom", status: "active" });
+    expect(call?.where).toEqual({
+      subdomain: "bloom",
+      status: { in: ["active", "suspended"] },
+    });
   });
 
-  it("rejects a subdomain whose business is not active", async () => {
-    // The DB wouldn't return a row for `status: "active"` if the real
-    // business is suspended/closed — simulate that by resolving null, and
+  it("rejects a subdomain whose business is closed", async () => {
+    // The DB wouldn't return a row for the active|suspended status filter if
+    // the real business is closed — simulate that by resolving null, and
     // assert the query actually constrains on status so this can't pass by
-    // accident.
+    // accident. Suspended is deliberately NOT rejected here: platform admins
+    // must still sign in on a suspended tenant host to remediate it.
     findFirst.mockResolvedValueOnce(null);
 
     await expect(isKnownCaptchaHost("closed.simplepress.test")).resolves.toBe(
@@ -100,7 +104,10 @@ describe("isKnownCaptchaHost — live tenant subdomain", () => {
     );
 
     const call = findFirst.mock.calls[0]?.[0];
-    expect(call?.where).toEqual({ subdomain: "closed", status: "active" });
+    expect(call?.where).toEqual({
+      subdomain: "closed",
+      status: { in: ["active", "suspended"] },
+    });
   });
 });
 
@@ -114,7 +121,7 @@ describe("isKnownCaptchaHost — custom domain", () => {
     const call = findFirst.mock.calls[0]?.[0];
     expect(call?.where).toEqual({
       customDomain: "bloom.florist.com",
-      status: "active",
+      status: { in: ["active", "suspended"] },
       domainStatus: BusinessDomainStatus.ACTIVE,
     });
   });
@@ -133,7 +140,7 @@ describe("isKnownCaptchaHost — custom domain", () => {
     const call = findFirst.mock.calls[0]?.[0];
     expect(call?.where).toEqual({
       customDomain: "pending.florist.com",
-      status: "active",
+      status: { in: ["active", "suspended"] },
       domainStatus: BusinessDomainStatus.ACTIVE,
     });
   });

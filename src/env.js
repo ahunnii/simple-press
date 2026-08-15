@@ -9,10 +9,12 @@ export const env = createEnv({
   server: {
     BETTER_AUTH_SECRET:
       process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
-    BETTER_AUTH_DISCORD_ID: z.string(),
-    BETTER_AUTH_DISCORD_SECRET: z.string(),
+        ? z.string().min(32)
+        : z.string().min(32).optional(),
+    // Discord OAuth is currently disabled in Better Auth config. Credentials
+    // remain optional so production is not forced to provision unused keys.
+    BETTER_AUTH_DISCORD_ID: z.string().optional(),
+    BETTER_AUTH_DISCORD_SECRET: z.string().optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -48,7 +50,15 @@ export const env = createEnv({
     AF_PARTNER_API_TOKEN: z.string().min(1),
     // Shared HMAC secret for both inbound and outbound partner requests
     AF_SP_WEBHOOK_SECRET: z.string().min(1),
-    REDIS_URL: z.string().url().optional(),
+    // Required in production so auth + application rate limits are shared
+    // across Coolify replicas. Optional in development/test.
+    REDIS_URL:
+      process.env.NODE_ENV === "production"
+        ? z.string().url()
+        : z.string().url().optional(),
+    // Comma-separated proxy IPs that may append X-Forwarded-For (Coolify/Traefik).
+    // When set, rate-limit IP helpers take the rightmost untrusted hop.
+    TRUSTED_PROXY_IPS: z.string().optional(),
 
     // Shared secret for the /api/cron endpoint (Bearer token). Optional: when
     // unset, the cron endpoint refuses all requests.
@@ -161,6 +171,7 @@ export const env = createEnv({
     AF_PARTNER_API_TOKEN: process.env.AF_PARTNER_API_TOKEN,
     AF_SP_WEBHOOK_SECRET: process.env.AF_SP_WEBHOOK_SECRET,
     REDIS_URL: process.env.REDIS_URL,
+    TRUSTED_PROXY_IPS: process.env.TRUSTED_PROXY_IPS,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
     EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,

@@ -2,11 +2,20 @@ import { TRPCError } from "@trpc/server";
 
 import { db } from "~/server/db";
 
-import { checkBusiness } from "../check-business";
+import { checkBusiness, checkBusinessAnyStatus } from "../check-business";
 import { resolveFlags } from "./resolve-flags";
 
-export async function getBusinessFlags() {
-  const business = await checkBusiness();
+export async function getBusinessFlags(opts?: {
+  /**
+   * Resolve the tenant even when it is suspended/closed. ONLY for
+   * platform-admin paths (see `featureGate` in `~/server/api/trpc`) — a
+   * suspended store must stay NOT_FOUND for everyone else.
+   */
+  includeInactive?: boolean;
+}) {
+  const business = opts?.includeInactive
+    ? await checkBusinessAnyStatus()
+    : await checkBusiness();
   if (!business) {
     // A TRPCError, not a bare Error: this runs inside the `featureGate`
     // middleware (`~/server/api/trpc`), and tRPC can only classify an unknown

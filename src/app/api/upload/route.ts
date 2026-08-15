@@ -6,6 +6,7 @@ import { toRouteHandler } from "@better-upload/server/adapters/next";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { keyToPublicUrl } from "~/lib/s3/url";
@@ -62,8 +63,8 @@ async function requireBusinessManager(req: Request) {
   if (!session) throw new RejectUpload("Not logged in!");
   const business = await checkBusiness();
   if (!business) throw new RejectUpload("Business not found!");
-  const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
-  if (!isPlatformAdmin) {
+  const platformAdmin = await isPlatformAdmin(session.user.id);
+  if (!platformAdmin) {
     const membership = await checkBusinessMembership(
       business.id,
       session.user.id,

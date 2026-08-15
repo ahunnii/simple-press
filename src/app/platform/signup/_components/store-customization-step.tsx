@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Loader2, Mail } from "lucide-react";
 
 import type { SignupFormData } from "./wizard-client";
 import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
@@ -48,6 +48,10 @@ export function StoreCustomizationStep({
   // a UI gate — `/api/onboarding` re-checks it and stamps the timestamps itself.
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+  // With requireEmailVerification, signup returns no session. Persist a draft,
+  // send the verification email with callbackURL back to /platform/signup/continue,
+  // and show this phase until they verify.
+  const [phase, setPhase] = useState<"form" | "verify">("form");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,12 +73,16 @@ export function StoreCustomizationStep({
       aboutText,
       primaryColor,
       // Explicit acceptance flag — the server rejects the request without it.
-      acceptedTerms: true,
+      acceptedTerms: true as const,
     };
 
     try {
       if (!formData.email || !formData.password || !formData.name) {
         setError("Please fill in all account details");
+        return;
+      }
+      if (!formData.businessName || !formData.subdomain) {
+        setError("Please fill in all business details");
         return;
       }
 
@@ -85,6 +93,34 @@ export function StoreCustomizationStep({
       const freshCaptchaToken =
         (await captchaRef.current?.execute()) ?? captchaToken;
 
+      // Persist a signed draft BEFORE signup. requireEmailVerification means
+      // signUp.email returns no session, so /api/onboarding cannot run until
+      // the owner verifies and lands on /platform/signup/continue.
+      const draftResponse = await fetch("/api/onboarding/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          businessName: formData.businessName,
+          subdomain: formData.subdomain,
+          customDomain: formData.customDomain,
+          templateId: formData.templateId ?? "modern",
+          heroTitle,
+          heroSubtitle,
+          aboutText,
+          primaryColor,
+          invitationCode: formData.invitationCode,
+          aftoken: formData.aftoken,
+          acceptedTerms: true,
+        }),
+      });
+      if (!draftResponse.ok) {
+        const draftErr = (await draftResponse.json()) as { error?: string };
+        setError(draftErr.error ?? "Failed to save signup progress");
+        return;
+      }
+
       // Terms-of-service acceptance signal. The `acceptedTerms` guard above
       // already refused to submit without the checkbox, so this is that fact
       // carried over the wire — the server now REJECTS /sign-up/email without
@@ -94,11 +130,14 @@ export function StoreCustomizationStep({
       // as `additionalFieldValues` in ~/components/auth/sign-up.tsx.
       const termsSignal: Record<string, unknown> = { termsAccepted: true };
 
+      const continueUrl = `${window.location.origin}/platform/signup/continue`;
+
       const { error: signUpError } = await authClient.signUp.email({
         email: formData.email,
         password: formData.password,
         name: formData.name,
         ...termsSignal,
+        callbackURL: continueUrl,
         fetchOptions: {
           headers: {
             "x-captcha-response": freshCaptchaToken,
@@ -123,30 +162,73 @@ export function StoreCustomizationStep({
         }
       }
 
-      const response = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(completeFormData),
-      });
+      // With requireEmailVerification, sign-up does NOT create a live session —
+      // the owner must verify first. Only proceed to onboarding if a verified
+      // session actually exists; otherwise show the verify state.
+      const { data: sessionData } = await authClient.getSession();
+      if (
+        sessionData?.user?.email?.toLowerCase() ===
+          formData.email.toLowerCase() &&
+        sessionData.user.emailVerified === true
+      ) {
+        const response = await fetch("/api/onboarding", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(completeFormData),
+        });
 
-      const data = (await response.json()) as {
-        error?: string;
-        redirectUrl?: string;
-        businessId?: string;
-      };
+        const data = (await response.json()) as {
+          error?: string;
+          redirectUrl?: string;
+          businessId?: string;
+        };
 
-      if (!response.ok) {
-        setError(data.error ?? "Failed to create your store");
+        if (!response.ok) {
+          setError(data.error ?? "Failed to create your store");
+          return;
+        }
+
+        window.location.href = data.redirectUrl ?? "";
         return;
       }
 
-      window.location.href = data.redirectUrl ?? "";
+      setPhase("verify");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (phase === "verify") {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            We sent a verification link to {formData.email}. Open it to finish
+            creating your store.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <Mail className="h-4 w-4" />
+            <AlertDescription>
+              After you verify, you&apos;ll return here automatically and we
+              will create your store. Keep this browser available — the setup
+              details are saved securely for one hour.
+            </AlertDescription>
+          </Alert>
+          {onBack && (
+            <Button type="button" variant="outline" onClick={onBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

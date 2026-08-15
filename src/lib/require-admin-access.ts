@@ -4,7 +4,12 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import type { AdminRole } from "~/app/admin/_lib/admin-nav";
-import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
+import {
+  checkBusiness,
+  checkBusinessAnyStatus,
+  checkBusinessMembership,
+} from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { isPathAllowedForRole } from "~/app/admin/_lib/admin-nav";
 
@@ -60,18 +65,26 @@ export async function requireAdminAccess(
     redirect("/auth/sign-in?redirectTo=/admin");
   }
 
-  const business = await checkBusiness();
+  // Allow PLATFORM_ADMIN unconditionally — live DB read, never cookie cache.
+  const platformAdmin = await isPlatformAdmin(session.user.id);
+
+  // `checkBusiness()` only resolves ACTIVE stores. Platform admins must still
+  // be able to open a suspended store's /admin to remediate the suspension
+  // (closed platform — admins disable a store, fix it, re-enable it), so fall
+  // back to a status-agnostic lookup for them only. Everyone else keeps 404.
+  const business =
+    (await checkBusiness()) ??
+    (platformAdmin ? await checkBusinessAnyStatus() : null);
 
   if (!business) {
     notFound();
   }
 
-  // Allow PLATFORM_ADMIN unconditionally
   let membershipRole: AdminRole | null = null;
   // Stays `undefined` for PLATFORM_ADMIN — no membership is looked up, so there
   // is nothing to report, and "unknown" is the honest value.
   let merchantTermsAcceptedAt: Date | null | undefined;
-  if (session.user.platformRole !== "PLATFORM_ADMIN") {
+  if (!platformAdmin) {
     // For everyone else, check BusinessMembership
     const membership = await checkBusinessMembership(
       business.id,

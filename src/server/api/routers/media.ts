@@ -18,6 +18,7 @@ import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 
 import type { DbClient } from "~/server/db";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { scrubUrlsFromCustomFields } from "~/lib/media/scrub-custom-fields";
 import { buildUsedMediaIndex, isAlwaysInUseKey } from "~/lib/media/usage";
 import { deleteStoredObjects } from "~/lib/s3/delete";
@@ -41,7 +42,7 @@ import {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type SessionCtx = {
-  session: { user: { platformRole: string } };
+  session: { user: { id: string } };
   businessId: string;
 };
 
@@ -51,8 +52,11 @@ type SessionCtx = {
  * Platform admins may target any business via `inputBusinessId`.
  * All other callers are always scoped to `ctx.businessId`.
  */
-function resolveTarget(ctx: SessionCtx, inputBusinessId?: string): string {
-  if (inputBusinessId && ctx.session.user.platformRole === "PLATFORM_ADMIN") {
+async function resolveTarget(
+  ctx: SessionCtx,
+  inputBusinessId?: string,
+): Promise<string> {
+  if (inputBusinessId && (await isPlatformAdmin(ctx.session.user.id))) {
     return inputBusinessId;
   }
   return ctx.businessId;
@@ -121,7 +125,7 @@ export const mediaRouter = createTRPCRouter({
     .use(featureGate("media"))
     .input(mediaListInput)
     .query(async ({ ctx, input }) => {
-      const target = resolveTarget(ctx, input.businessId);
+      const target = await resolveTarget(ctx, input.businessId);
 
       // Fetch S3 object list and usage index in parallel
       const [objects, usageIndex] = await Promise.all([
@@ -164,7 +168,7 @@ export const mediaRouter = createTRPCRouter({
     .use(featureGate("media"))
     .input(mediaDeleteInput)
     .mutation(async ({ ctx, input }) => {
-      const target = resolveTarget(ctx, input.businessId);
+      const target = await resolveTarget(ctx, input.businessId);
 
       // Cross-tenant guard: key must be scoped to the resolved business
       if (!input.key.startsWith(`${target}/`)) {
@@ -242,7 +246,7 @@ export const mediaRouter = createTRPCRouter({
     .use(featureGate("media"))
     .input(mediaBulkDeleteInput)
     .mutation(async ({ ctx, input }) => {
-      const target = resolveTarget(ctx, input.businessId);
+      const target = await resolveTarget(ctx, input.businessId);
 
       // Cross-tenant guard: every key must be scoped to the resolved
       // business. Unlike the per-key skips below, this is a hard fail for
@@ -318,7 +322,7 @@ export const mediaRouter = createTRPCRouter({
     .use(featureGate("media"))
     .input(mediaDownloadInput)
     .mutation(async ({ ctx, input }) => {
-      const target = resolveTarget(ctx, input.businessId);
+      const target = await resolveTarget(ctx, input.businessId);
 
       // Cross-tenant guard
       if (!input.key.startsWith(`${target}/`)) {

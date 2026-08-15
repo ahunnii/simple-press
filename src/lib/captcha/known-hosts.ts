@@ -53,8 +53,12 @@ function normalizeHost(host: string): string {
  * *different* tenant whose subdomain happens to be `bloom`. The filter keeps the
  * two matching modes strictly separate; we only tighten it further:
  *
- *  - `status: "active"` always (lowercase free-text column, `Business.status`) —
- *    a suspended or closed store must not mint trusted tokens.
+ *  - `status: active | suspended` always (lowercase free-text column,
+ *    `Business.status`) — a closed store must not mint trusted tokens.
+ *    Suspended stays accepted: platform admins temporarily suspend a store to
+ *    remediate it and must still pass the captcha gate to sign in on that
+ *    tenant host. Suspension is enforced by tenant resolution and the tRPC
+ *    procedure tiers, not by the captcha host check.
  *  - `domainStatus: ACTIVE` when matching by custom domain (uppercase
  *    `BusinessDomainStatus` enum) — a `PENDING_DNS` domain has merely been
  *    *claimed* in the admin UI, not DNS-verified. Anyone can claim a string.
@@ -88,14 +92,15 @@ export async function isKnownCaptchaHost(hostname: string): Promise<boolean> {
   }
 
   const filter = businessHostFilter(host);
+  const statusFilter = { in: ["active", "suspended"] };
   const where =
     "customDomain" in filter
       ? {
           customDomain: filter.customDomain,
-          status: "active",
+          status: statusFilter,
           domainStatus: BusinessDomainStatus.ACTIVE,
         }
-      : { subdomain: filter.subdomain, status: "active" };
+      : { subdomain: filter.subdomain, status: statusFilter };
 
   const business = await db.business.findFirst({
     where,

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
+import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { checkBusiness } from "~/lib/check-business";
 import { sendContactFormSubmission } from "~/lib/email/templates";
 import { contactLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
@@ -45,18 +46,7 @@ export const contactRouter = createTRPCRouter({
       });
 
       if (!result.ok) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          // User-facing text stays generic. `reason` rides on `cause`
-          // instead of `message` — the tRPC errorFormatter (src/server/api/
-          // trpc.ts) only ever serializes a ZodError cause to the client, so
-          // this never reaches the browser, but it's inspectable via
-          // `error.cause` by anything holding the raw thrown error (e.g. a
-          // server-side test exercising the cross-tenant-replay /
-          // `host-mismatch` path).
-          message: "Captcha verification failed",
-          cause: new Error(`recaptcha verification failed: ${result.reason}`),
-        });
+        throw captchaFailureToTrpcError(result.reason);
       }
 
       const { name, email, subject, message, phone, preferredContactMethod } =

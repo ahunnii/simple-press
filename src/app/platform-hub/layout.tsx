@@ -10,6 +10,7 @@ import {
   Wrench,
 } from "lucide-react";
 
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { env } from "~/env";
 import { getSession } from "~/server/better-auth/server";
 import { HydrateClient } from "~/trpc/server";
@@ -58,7 +59,7 @@ export default async function PlatformHubLayout({
     redirect("/auth/sign-in?redirectTo=/dashboard");
   }
 
-  if (session.user.platformRole !== "PLATFORM_ADMIN") {
+  if (!(await isPlatformAdmin(session.user.id))) {
     notFound();
   }
 

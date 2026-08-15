@@ -24,7 +24,6 @@ export function DefaultContactForm({
     messageMaxLength,
     isSubmitting,
     error,
-    captchaToken,
     setCaptchaToken,
     captchaRef,
     onSubmit,
@@ -130,11 +129,7 @@ export function DefaultContactForm({
           required
         />
 
-        <Button
-          type="submit"
-          size="lg"
-          disabled={isSubmitting || !captchaToken}
-        >
+        <Button type="submit" size="lg" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="size-4 animate-spin" />

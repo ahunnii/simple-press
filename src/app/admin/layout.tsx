@@ -1,3 +1,4 @@
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { env } from "~/env";
 import { resolveOwnerTermsGate } from "~/lib/legal/owner-terms-gate.server";
 import { getPlatformMaintenance } from "~/lib/maintenance";
@@ -20,10 +21,7 @@ export default async function AdminLayout({ children }: Props) {
     await requireAdminAccess();
 
   const platformMaintenance = await getPlatformMaintenance();
-  if (
-    platformMaintenance.active &&
-    session.user.platformRole !== "PLATFORM_ADMIN"
-  ) {
+  if (platformMaintenance.active && !(await isPlatformAdmin(session.user.id))) {
     return (
       <MaintenanceScreen
         variant="maintenance"

@@ -158,6 +158,24 @@ export async function verifyRecaptcha(
   }
 
   if (data.success !== true) {
+    // Google returns HTTP 200 with success:false for both ordinary token
+    // failures AND configuration errors (invalid-input-secret, etc.). Treat
+    // secret/project misconfiguration as a provider outage so it alerts.
+    const errorCodes = data["error-codes"] ?? [];
+    const isConfigError = errorCodes.some((code) =>
+      [
+        "invalid-input-secret",
+        "invalid-keys",
+        "bad-request",
+        "browser-error",
+      ].includes(code),
+    );
+    if (isConfigError) {
+      reportProviderError(
+        `siteverify success=false with config error-codes: ${errorCodes.join(",")}`,
+      );
+      return { ok: false, reason: "provider-error" };
+    }
     return { ok: false, reason: "failed" };
   }
 

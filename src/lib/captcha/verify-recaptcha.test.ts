@@ -333,6 +333,24 @@ describe("verifyRecaptcha — provider failures fail closed", () => {
 
     expect(result).toEqual({ ok: false, reason: "provider-error" });
   });
+  it("returns provider-error on invalid-input-secret (misconfigured keypair)", async () => {
+    const sentry = await import("@sentry/nextjs");
+    const { verifyRecaptcha } = await loadVerifyRecaptcha({
+      RECAPTCHA_SECRET_KEY: "wrong-secret",
+    });
+    mockFetchResponse({
+      success: false,
+      "error-codes": ["invalid-input-secret"],
+    });
+
+    const result = await verifyRecaptcha("token", {
+      action: ACTION,
+      requestHost: REQUEST_HOST,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "provider-error" });
+    expect(sentry.captureMessage).toHaveBeenCalled();
+  });
 });
 
 describe("verifyRecaptcha — happy path", () => {

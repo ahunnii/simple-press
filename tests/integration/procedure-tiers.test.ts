@@ -109,6 +109,28 @@ describe("procedure gate tiers (src/server/api/trpc.ts)", () => {
       // at least 1 — proves the query actually ran rather than short-circuiting.
       expect(stats.totalUsers).toBeGreaterThanOrEqual(1);
     });
+
+    it("revokes PLATFORM_ADMIN access immediately when the DB role is demoted", async () => {
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        email: admin.email,
+        // Cookie cache still claims PLATFORM_ADMIN — the live DB row must win.
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      await expect(caller.platform.getMaintenance()).resolves.toBeTruthy();
+
+      const { db } = await import("../helpers/db");
+      await db.user.update({
+        where: { id: admin.id },
+        data: { platformRole: "BUSINESS_USER" },
+      });
+
+      await expect(caller.platform.getMaintenance()).rejects.toMatchObject({
+        code: "FORBIDDEN",
+      });
+    });
   });
 
   // ── featureGate(key) (~:334) ────────────────────────────────────────────
@@ -151,6 +173,49 @@ describe("procedure gate tiers (src/server/api/trpc.ts)", () => {
     });
   });
 
+  // ── suspended-store remediation (ownerAdminProcedure + featureGate) ──────
+  // Platform admins suspend a store to fix a policy violation, then work on
+  // it through the tenant host. Both the tier gate and featureGate resolve
+  // the tenant independently, so both must apply the platform-admin
+  // carve-out — a regression in either one turns the admin's whole
+  // remediation session into 404s.
+  describe("suspended store — platform admin remediation", () => {
+    it("locks the store's own OWNER out with NOT_FOUND while suspended", async () => {
+      const business = await createBusiness({
+        subdomain: "gate-susp-owner",
+        status: "suspended",
+        featureFlags: { events: true },
+      });
+      reqHost.value = "gate-susp-owner.simplepress.test";
+      const owner = await createOwnerUser(business.id);
+      const caller = createTestCaller({
+        userId: owner.id,
+        email: owner.email,
+      });
+
+      await expect(caller.events.getAll()).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+
+    it("lets a PLATFORM_ADMIN reach an ownerAdminProcedure + featureGate chain on a suspended store", async () => {
+      await createBusiness({
+        subdomain: "gate-susp-fix",
+        status: "suspended",
+        featureFlags: { events: true },
+      });
+      reqHost.value = "gate-susp-fix.simplepress.test";
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        email: admin.email,
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      await expect(caller.events.getAll()).resolves.toEqual([]);
+    });
+  });
+
   // ── getBusinessProcedure() (~:351) ──────────────────────────────────────
   // Tenant resolver for public storefront procedures. An unresolvable host
   // (no Business matches by subdomain or custom domain) must surface as a
@@ -168,6 +233,41 @@ describe("procedure gate tiers (src/server/api/trpc.ts)", () => {
       await expect(caller.events.getUpcomingPublic()).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
+    });
+
+    it("returns NOT_FOUND when the business exists but is suspended", async () => {
+      await createBusiness({
+        subdomain: "gate-suspended",
+        status: "suspended",
+        featureFlags: { events: true },
+      });
+      reqHost.value = "gate-suspended.simplepress.test";
+      const caller = createTestCaller({});
+
+      await expect(caller.events.getUpcomingPublic()).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+
+    it("lets a PLATFORM_ADMIN through to a suspended business", async () => {
+      // Remediation workflow: an admin suspends a store over a policy
+      // violation, then browses the tenant host to fix it. The suspended
+      // store must stay reachable for them — and ONLY them (the anonymous
+      // NOT_FOUND above is the control for everyone else).
+      await createBusiness({
+        subdomain: "gate-suspended-admin",
+        status: "suspended",
+        featureFlags: { events: true },
+      });
+      reqHost.value = "gate-suspended-admin.simplepress.test";
+      const admin = await createUser({ platformRole: "PLATFORM_ADMIN" });
+      const caller = createTestCaller({
+        userId: admin.id,
+        email: admin.email,
+        platformRole: "PLATFORM_ADMIN",
+      });
+
+      await expect(caller.events.getUpcomingPublic()).resolves.toEqual([]);
     });
 
     it("lets the call through once the host resolves to a business", async () => {

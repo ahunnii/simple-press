@@ -26,6 +26,9 @@ export const RECAPTCHA_TEST_BYPASS_TOKEN = "test-bypass-no-captcha";
 const SCRIPT_SRC = (siteKey: string) =>
   `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`;
 
+/** Bound script-load / execute so a hung Google request cannot stall forever. */
+const RECAPTCHA_CLIENT_TIMEOUT_MS = 15_000;
+
 declare global {
   interface Window {
     grecaptcha?: {
@@ -47,45 +50,72 @@ declare global {
  */
 let scriptPromise: Promise<void> | null = null;
 
+function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  label: string,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(`${label} timed out after ${ms}ms`)),
+      ms,
+    );
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err: unknown) => {
+        clearTimeout(timer);
+        reject(err instanceof Error ? err : new Error(String(err)));
+      },
+    );
+  });
+}
+
 function loadRecaptchaScript(siteKey: string): Promise<void> {
   if (scriptPromise) return scriptPromise;
 
   const src = SCRIPT_SRC(siteKey);
 
-  const promise = new Promise<void>((resolve, reject) => {
-    if (typeof document === "undefined") {
-      reject(new Error("recaptcha: no document"));
-      return;
-    }
-
-    // A previous page render (or a Fast Refresh cycle that cleared the module
-    // cache) may already have injected the tag. Adopt it instead of adding a
-    // second copy — Google's script warns and re-registers on double load.
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${src}"]`,
-    );
-    if (existing) {
-      if (window.grecaptcha) {
-        resolve();
+  const promise = withTimeout(
+    new Promise<void>((resolve, reject) => {
+      if (typeof document === "undefined") {
+        reject(new Error("recaptcha: no document"));
         return;
       }
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () =>
+
+      // A previous page render (or a Fast Refresh cycle that cleared the module
+      // cache) may already have injected the tag. Adopt it instead of adding a
+      // second copy — Google's script warns and re-registers on double load.
+      const existing = document.querySelector<HTMLScriptElement>(
+        `script[src="${src}"]`,
+      );
+      if (existing) {
+        if (window.grecaptcha) {
+          resolve();
+          return;
+        }
+        existing.addEventListener("load", () => resolve());
+        existing.addEventListener("error", () =>
+          reject(new Error("recaptcha: script failed to load")),
+        );
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      script.defer = true;
+      script.addEventListener("load", () => resolve());
+      script.addEventListener("error", () =>
         reject(new Error("recaptcha: script failed to load")),
       );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.defer = true;
-    script.addEventListener("load", () => resolve());
-    script.addEventListener("error", () =>
-      reject(new Error("recaptcha: script failed to load")),
-    );
-    document.head.appendChild(script);
-  }).catch((error) => {
+      document.head.appendChild(script);
+    }),
+    RECAPTCHA_CLIENT_TIMEOUT_MS,
+    "recaptcha script load",
+  ).catch((error) => {
     scriptPromise = null;
     throw error;
   });
@@ -118,13 +148,22 @@ async function mintToken(
     const grecaptcha = window.grecaptcha;
     if (!grecaptcha) return null;
 
-    await new Promise<void>((resolve) => grecaptcha.ready(resolve));
+    await withTimeout(
+      new Promise<void>((resolve) => grecaptcha.ready(resolve)),
+      RECAPTCHA_CLIENT_TIMEOUT_MS,
+      "recaptcha ready",
+    );
 
-    const token = await grecaptcha.execute(siteKey, { action });
+    const token = await withTimeout(
+      grecaptcha.execute(siteKey, { action }),
+      RECAPTCHA_CLIENT_TIMEOUT_MS,
+      "recaptcha execute",
+    );
     return token || null;
-  } catch {
-    // Callers treat `null` as "no token" and clear whatever they had staged;
-    // throwing here would only push the same decision up one level.
+  } catch (error) {
+    // Surface to the console for operators; callers still get `null` and can
+    // show a retryable UI error without crashing the form.
+    console.error("[reCAPTCHA] mint failed", error);
     return null;
   }
 }

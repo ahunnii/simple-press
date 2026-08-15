@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { stripeClient } from "~/lib/stripe/client";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
         role: { in: ["OWNER", "MANAGER"] },
       },
     });
-    if (!membership && session.user.platformRole !== "PLATFORM_ADMIN") {
+    if (!membership && !(await isPlatformAdmin(session.user.id))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

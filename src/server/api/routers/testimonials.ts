@@ -5,6 +5,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
+import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
 import { checkBusiness } from "~/lib/check-business";
 import { splitCustomerName } from "~/lib/customer-name";
@@ -126,7 +128,7 @@ export const testimonialRouter = createTRPCRouter({
       let canSeeAll = false;
       if (!input.publicOnly && ctx.session?.user) {
         const user = ctx.session.user;
-        if (user.platformRole === "PLATFORM_ADMIN") {
+        if (await isPlatformAdmin(user.id)) {
           canSeeAll = true;
         } else {
           const membership = await ctx.db.businessMembership.findUnique({
@@ -279,14 +281,7 @@ export const testimonialRouter = createTRPCRouter({
         remoteIp,
       });
       if (!result.ok) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          // See contact.ts: `reason` rides `cause`, not `message`, so the
-          // generic user-facing text never leaks the rejection reason, but a
-          // server-side test can still assert on it via `error.cause`.
-          message: "Captcha verification failed",
-          cause: new Error(`recaptcha verification failed: ${result.reason}`),
-        });
+        throw captchaFailureToTrpcError(result.reason);
       }
 
       const user = await ctx.db.user.findUnique({
@@ -388,14 +383,7 @@ export const testimonialRouter = createTRPCRouter({
         remoteIp,
       });
       if (!result.ok) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          // See contact.ts: `reason` rides `cause`, not `message`, so the
-          // generic user-facing text never leaks the rejection reason, but a
-          // server-side test can still assert on it via `error.cause`.
-          message: "Captcha verification failed",
-          cause: new Error(`recaptcha verification failed: ${result.reason}`),
-        });
+        throw captchaFailureToTrpcError(result.reason);
       }
 
       const invite = await ctx.db.testimonialInvite.findUnique({
