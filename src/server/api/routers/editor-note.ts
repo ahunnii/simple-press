@@ -103,7 +103,11 @@ export const editorNoteRouter = createTRPCRouter({
       const where = {
         ...(status === "all" ? {} : { status }),
         ...(search
-          ? { business: { name: { contains: search, mode: "insensitive" as const } } }
+          ? {
+              business: {
+                name: { contains: search, mode: "insensitive" as const },
+              },
+            }
           : {}),
       };
 

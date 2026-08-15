@@ -14,6 +14,15 @@ async function assertOk(response: Response, context: string): Promise<void> {
   }
 }
 
+/**
+ * Make an owner-authored string safe to drop inside a `` `…` `` span: a
+ * backtick in a store or calculator name would otherwise close the span early
+ * and let the rest render as Discord markdown.
+ */
+function inlineCode(value: string): string {
+  return value.replace(/`/g, "'");
+}
+
 export async function notifyDiscordDeletionRequest({
   customerId,
   businessName,
@@ -147,8 +156,7 @@ export async function notifyDiscordEditorNote({
   const subdomainUrl = `${subdomain}.${platformDomain}`;
   const adminUrl = `https://platform.${platformDomain}/notes`;
 
-  const truncatedBody =
-    body.length > 950 ? `${body.slice(0, 950)}…` : body;
+  const truncatedBody = body.length > 950 ? `${body.slice(0, 950)}…` : body;
 
   const response = await fetch(webhookUrl, {
     method: "POST",
@@ -195,6 +203,88 @@ export async function notifyDiscordEditorNote({
     }),
   });
   await assertOk(response, "editor-note");
+}
+
+/**
+ * Platform-operator ping that a store received a quote request.
+ *
+ * **Carries no customer data, by design.** This webhook posts into the
+ * platform operator's Discord — a third party to the transaction between a
+ * store and the person filling in its form. That person gave their name, email
+ * and project details to the STORE. Forwarding them onward (as this used to)
+ * copies personal data into a chat log with its own retention, its own member
+ * list and no relationship to the disclosure the visitor actually made.
+ *
+ * So the payload is the shape of the event and nothing else: which store,
+ * which calculator, whether a price came out, and a link to the owner's inbox.
+ * Everything a customer said stays where they said it — in the owner's inbox
+ * and the owner's email. Do not add `contactName`, `contactEmail`, phone, or
+ * answer text back to this function, however convenient a richer ping is.
+ */
+export async function notifyDiscordQuoteSubmission({
+  businessName,
+  subdomain,
+  calculatorName,
+  hasEstimate,
+}: {
+  businessName: string;
+  subdomain: string;
+  calculatorName: string;
+  /** False when the formula could not produce a number for this submission. */
+  hasEstimate: boolean;
+}) {
+  const webhookUrl = env.DISCORD_WEBHOOK_URL;
+
+  if (!webhookUrl) return;
+
+  const platformDomain =
+    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "simplepress.co";
+  const subdomainUrl = `${subdomain}.${platformDomain}`;
+  const inboxUrl = `https://${subdomainUrl}/admin/quotes`;
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      embeds: [
+        {
+          title: "🧮 New quote request",
+          description:
+            "A visitor submitted a quote calculator. Customer details stay in the owner's inbox.",
+          color: 0x5865f2,
+          fields: [
+            {
+              name: "Business",
+              value: `\`${inlineCode(businessName)}\``,
+              inline: true,
+            },
+            {
+              name: "Site",
+              value: `\`${subdomainUrl}\``,
+              inline: true,
+            },
+            {
+              name: "Calculator",
+              value: `\`${inlineCode(calculatorName)}\``,
+              inline: false,
+            },
+            {
+              name: "Estimate",
+              value: hasEstimate
+                ? "Computed"
+                : "Not computed — needs a manual price",
+              inline: false,
+            },
+          ],
+          footer: {
+            text: `Quote inbox → ${inboxUrl}`,
+          },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    }),
+  });
+  await assertOk(response, "quote-submission");
 }
 
 export async function notifyDiscordNewDomain({

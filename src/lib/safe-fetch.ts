@@ -116,7 +116,9 @@ export function assertPublicHttpsUrl(rawUrl: string): URL {
 }
 
 /** Resolve a hostname and throw if any address is private/reserved. */
-export async function assertHostResolvesPublic(hostname: string): Promise<void> {
+export async function assertHostResolvesPublic(
+  hostname: string,
+): Promise<void> {
   // `URL.hostname` keeps the brackets around IPv6 literals (e.g. "[::1]");
   // strip them before checking with `net.isIP`, or a bracketed private
   // literal would fall through to DNS resolution instead of being blocked.
@@ -227,7 +229,10 @@ export async function safeFetch(
         chunks.push(value);
       }
     }
-    return { bytes: Buffer.concat(chunks.map((c) => Buffer.from(c))), contentType };
+    return {
+      bytes: Buffer.concat(chunks.map((c) => Buffer.from(c))),
+      contentType,
+    };
   } catch (err) {
     if (err instanceof SafeFetchError) throw err;
     if (err instanceof Error && err.name === "AbortError") {

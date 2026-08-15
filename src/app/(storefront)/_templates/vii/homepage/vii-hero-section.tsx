@@ -7,8 +7,13 @@ import { Pause, Play } from "lucide-react";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../hooks/use-vii-hero-motion";
 import { ViiOverline } from "../shared/vii-overline";
-import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../hooks/use-vii-hero-motion";
 
 type Props = {
   heroVideo?: string;
@@ -177,7 +182,9 @@ export function ViiHeroSection({
       >
         {/* Overline */}
         {heroOverline && (
-          <div style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 20 }}>
+          <div
+            style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 20 }}
+          >
             <ViiOverline tone="dark" fieldKey="vii.homepage.hero-overline">
               {heroOverline}
             </ViiOverline>

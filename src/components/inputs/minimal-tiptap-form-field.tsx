@@ -39,9 +39,7 @@ export async function uploadRichTextImage(file: File): Promise<string> {
     file,
   });
 
-  const url = result.file.objectInfo.metadata?.pathname as
-    | string
-    | undefined;
+  const url = result.file.objectInfo.metadata?.pathname as string | undefined;
 
   if (!url) {
     throw new Error("Upload succeeded but no file URL was returned.");
@@ -53,7 +51,7 @@ export async function uploadRichTextImage(file: File): Promise<string> {
 type Props<CurrentForm extends FieldValues> = {
   form: UseFormReturn<CurrentForm>;
   name: Path<CurrentForm>;
-  label: string;
+  label?: string;
   description?: string;
   className?: string;
   disabled?: boolean;
@@ -64,6 +62,7 @@ type Props<CurrentForm extends FieldValues> = {
   businessId?: string;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
   required?: boolean;
   /**
    * Image upload function passed to the editor. Defaults to an S3 uploader
@@ -87,6 +86,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
   businessId,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
   required,
   uploader,
 }: Props<CurrentForm>) => {
@@ -105,10 +105,12 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
         const value = (field.value ?? EMPTY_TIPTAP_DOC) as unknown as Content;
         return (
           <FormItem className={cn("col-span-full", className)}>
-            <FormLabel>
-              {label}
-              {required && <span className="text-red-500">*</span>}
-            </FormLabel>
+            {label && (
+              <FormLabel>
+                {label}
+                {required && <span className="text-red-500">*</span>}
+              </FormLabel>
+            )}
             <FormControl>
               <MinimalTiptapEditor
                 value={value}
@@ -122,6 +124,7 @@ export const MinimalTiptapFormField = <CurrentForm extends FieldValues>({
                 businessId={businessId}
                 galleriesEnabled={galleriesEnabled}
                 embedsEnabled={embedsEnabled}
+                quotesEnabled={quotesEnabled}
                 uploader={resolvedUploader}
               />
             </FormControl>

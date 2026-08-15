@@ -16,7 +16,10 @@ type Props = {
   setSelectedVariantId: (variantId: string | null) => void;
 };
 
-export function SledgeVariantSelector({ product, setSelectedVariantId }: Props) {
+export function SledgeVariantSelector({
+  product,
+  setSelectedVariantId,
+}: Props) {
   const { addItem } = useCart();
   const { setVariantImageUrl } = useVariantImage();
 

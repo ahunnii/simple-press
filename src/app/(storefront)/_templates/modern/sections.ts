@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const modernSections: Record<string, TemplateSection[]> = {
   modern: [
@@ -7,7 +8,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "homepage.hero",
       page: "homepage",
       title: "Hero",
-      description: "Full-bleed banner image with headline at the top of the homepage.",
+      description:
+        "Full-bleed banner image with headline at the top of the homepage.",
       groupIds: ["homepage.hero"],
       order: 0,
     },
@@ -27,6 +29,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Featured product grid pulled from your catalog.",
       groupIds: ["homepage.products"],
       order: 2,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.about",
@@ -119,7 +122,8 @@ export const modernSections: Record<string, TemplateSection[]> = {
       id: "contact.questions",
       page: "contact",
       title: "FAQ",
-      description: "Frequently asked questions at the bottom of the Contact page.",
+      description:
+        "Frequently asked questions at the bottom of the Contact page.",
       groupIds: ["contact.questions"],
       order: 3,
       hideable: true,
@@ -133,6 +137,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the collections grid.",
       groupIds: ["collections.main"],
       order: 0,
+      links: [SECTION_LINKS.collections],
     },
 
     // Products / Shop (src/app/(storefront)/_templates/modern/shop/modern-products-page.tsx)
@@ -143,6 +148,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the shop's product grid.",
       groupIds: ["products.main"],
       order: 0,
+      links: [SECTION_LINKS.products],
     },
 
     // Testimonials (src/app/(storefront)/_templates/modern/testimonials/modern-testimonials-page.tsx)
@@ -153,12 +159,14 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the testimonial cards.",
       groupIds: ["testimonials.page"],
       order: 0,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "testimonials.call-to-action",
       page: "testimonials",
       title: "Share Your Experience CTA",
-      description: "Call-to-action band inviting customers to leave a testimonial.",
+      description:
+        "Call-to-action band inviting customers to leave a testimonial.",
       groupIds: ["testimonials.call-to-action"],
       order: 1,
       hideable: true,
@@ -172,6 +180,7 @@ export const modernSections: Record<string, TemplateSection[]> = {
       description: "Page title and intro above the blog listing.",
       groupIds: ["blog.header"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
   ],
 };

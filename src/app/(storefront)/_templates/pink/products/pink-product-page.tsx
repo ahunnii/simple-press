@@ -3,14 +3,14 @@ import Link from "next/link";
 
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TemplateListRow } from "~/lib/template-fields";
-import { parseTemplateListRows } from "~/lib/template-fields";
-import { ANALYTICS_EVENTS } from "~/lib/umami/track";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { isSectionVisible } from "~/lib/sp-meta";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { TrackView } from "~/components/analytics/track-view";
+import { parseTemplateListRows } from "~/lib/template-fields";
+import { ANALYTICS_EVENTS } from "~/lib/umami/track";
 import { db } from "~/server/db";
 import { api } from "~/trpc/server";
+import { TrackView } from "~/components/analytics/track-view";
 
 import { resolveFields } from "../index";
 import { PinkAccordion } from "../shared/pink-accordion";
@@ -69,11 +69,14 @@ function parseProductSpecs(raw: unknown): { label: string; value: string }[] {
  * Product page — design.md → "Per-page section concepts → Product".
  *
  * Gallery + Details are fully DB-driven (no fields, no section — see the
- * "Page key note"). `global.product-panels` / `-story` / `-related` are the
- * only fielded sections, declared `page: "global"` since product pages have
- * no editor tab of their own.
+ * "Page key note"). `product.panels` / `.story` / `.related` are the only
+ * fielded sections, on `page: "product"` — the editor previews them on a
+ * sample product; field keys keep the legacy `pink.global.product-` prefix.
  */
-export async function PinkProductPage({ product, business }: DefaultProductPageTemplateProps) {
+export async function PinkProductPage({
+  product,
+  business,
+}: DefaultProductPageTemplateProps) {
   const customFields = business.siteContent?.customFields as
     | Record<string, string>
     | undefined;
@@ -94,22 +97,36 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
   ]);
   const firstCollection = collectionLink?.collection ?? null;
 
-  const additional = product.additionalFields as
-    | { comingSoon?: boolean; productTagline?: string }
-    | null;
+  const additional = product.additionalFields as {
+    comingSoon?: boolean;
+    productTagline?: string;
+  } | null;
 
   const specs = parseProductSpecs(product.additionalFields);
 
-  const panelsRows = parseTemplateListRows(customFields?.["pink.global.product-panels"]);
+  const panelsRows = parseTemplateListRows(
+    customFields?.["pink.global.product-panels"],
+  );
   const panels = panelsRows.length > 0 ? panelsRows : DEFAULT_PANELS;
 
-  const panelsVisible = isSectionVisible(customFields, "pink", "global.product-panels");
-  const storyVisible = isSectionVisible(customFields, "pink", "global.product-story");
-  const relatedVisible = isSectionVisible(customFields, "pink", "global.product-related");
+  const panelsVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "product.panels",
+  );
+  const storyVisible = isSectionVisible(customFields, "pink", "product.story");
+  const relatedVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "product.related",
+  );
 
   return (
     <>
-      <TrackView event={ANALYTICS_EVENTS.PRODUCT_VIEW} data={{ productId: product.id }} />
+      <TrackView
+        event={ANALYTICS_EVENTS.PRODUCT_VIEW}
+        data={{ productId: product.id }}
+      />
 
       {/* ── Breadcrumb ── */}
       <nav
@@ -128,10 +145,16 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
         </Link>
         {firstCollection && (
           <>
-            <span aria-hidden="true" style={{ color: "var(--pink-line-strong)" }}>
+            <span
+              aria-hidden="true"
+              style={{ color: "var(--pink-line-strong)" }}
+            >
               /
             </span>
-            <Link href={`/collections/${firstCollection.slug}`} style={{ color: "var(--pink-subtle)" }}>
+            <Link
+              href={`/collections/${firstCollection.slug}`}
+              style={{ color: "var(--pink-subtle)" }}
+            >
               {firstCollection.name}
             </Link>
           </>
@@ -139,7 +162,11 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
         <span aria-hidden="true" style={{ color: "var(--pink-line-strong)" }}>
           /
         </span>
-        <span className="max-w-[30ch] truncate" style={{ color: "var(--pink-ink)" }} aria-current="page">
+        <span
+          className="max-w-[30ch] truncate"
+          style={{ color: "var(--pink-ink)" }}
+          aria-current="page"
+        >
           {product.name}
         </span>
       </nav>
@@ -150,11 +177,14 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
           <PinkProductGallery
             images={product.images}
             productName={product.name}
-            badge={additional?.comingSoon ? { label: "Coming soon", tone: "ink" } : undefined}
+            badge={
+              additional?.comingSoon
+                ? { label: "Coming soon", tone: "ink" }
+                : undefined
+            }
           />
 
           <div className="flex flex-col gap-5">
-
             <h1
               className="pink-display"
               style={{
@@ -183,11 +213,24 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
             )}
 
             {specs.length > 0 && (
-              <dl className="grid grid-cols-2 gap-[1px]" style={{ background: "var(--pink-line)", border: "1px solid var(--pink-line)" }}>
+              <dl
+                className="grid grid-cols-2 gap-[1px]"
+                style={{
+                  background: "var(--pink-line)",
+                  border: "1px solid var(--pink-line)",
+                }}
+              >
                 {specs.map((spec, i) => (
-                  <div key={`${spec.label}-${i}`} className="flex flex-col gap-1 px-4 py-3" style={{ background: "var(--pink-paper)" }}>
+                  <div
+                    key={`${spec.label}-${i}`}
+                    className="flex flex-col gap-1 px-4 py-3"
+                    style={{ background: "var(--pink-paper)" }}
+                  >
                     <dt className="pink-label">{spec.label}</dt>
-                    <dd className="text-[14px] font-medium" style={{ color: "var(--pink-ink)" }}>
+                    <dd
+                      className="text-[14px] font-medium"
+                      style={{ color: "var(--pink-ink)" }}
+                    >
                       {spec.value}
                     </dd>
                   </div>
@@ -198,11 +241,18 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
             <PinkProductActions product={product} />
 
             {f["pink.global.product-question"] && (
-              <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+              <p
+                className="text-[13px]"
+                style={{ color: "var(--pink-subtle)" }}
+              >
                 <span {...fieldAttr("pink.global.product-question")}>
                   {f["pink.global.product-question"]}
                 </span>{" "}
-                <Link href="/contact" className="underline" style={{ color: "var(--pink-rose)" }}>
+                <Link
+                  href="/contact"
+                  className="underline"
+                  style={{ color: "var(--pink-rose)" }}
+                >
                   Ask us a question
                 </Link>
               </p>
@@ -211,13 +261,13 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
         </div>
       </section>
 
-      {/* ── global.product-panels ── */}
+      {/* ── product.panels ── */}
       {panelsVisible && (
         <section
           aria-labelledby="pink-product-panels-heading"
           className="border-t px-5 py-2 md:px-10"
           style={{ borderColor: "var(--pink-line)" }}
-          {...sectionGroupAttr("global", "product-panels")}
+          {...sectionGroupAttr("product", "panels")}
         >
           <div className="mx-auto max-w-[760px]">
             {/* `PinkAccordion` triggers are h3; without an h2 the outline went
@@ -238,9 +288,12 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
         </section>
       )}
 
-      {/* ── global.product-story ── */}
+      {/* ── product.story ── */}
       {storyVisible && (
-        <PinkDarkBand ariaLabel="How it's made" sectionAttrs={sectionGroupAttr("global", "product-story")}>
+        <PinkDarkBand
+          ariaLabel="How it's made"
+          sectionAttrs={sectionGroupAttr("product", "story")}
+        >
           <div className="grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-14">
             {/* Unset → a designed dark-surface fallback (review 2026-07-29,
                 P1) rather than an empty ink-tint void. A light placeholder
@@ -261,7 +314,11 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
             <div className="flex flex-col gap-4">
               <h2
                 className="pink-display"
-                style={{ fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)", fontWeight: 600, letterSpacing: "-0.025em" }}
+                style={{
+                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.025em",
+                }}
                 {...fieldAttr("pink.global.product-story-heading")}
               >
                 {f["pink.global.product-story-heading"] ?? ""}
@@ -279,20 +336,27 @@ export async function PinkProductPage({ product, business }: DefaultProductPageT
       )}
 
       {/* ── Reviews — flag-gated, no fields (see pink-product-reviews.tsx) ── */}
-      <PinkProductReviewsSection productId={product.id} productName={product.name} />
+      <PinkProductReviewsSection
+        productId={product.id}
+        productName={product.name}
+      />
 
-      {/* ── global.product-related ── */}
+      {/* ── product.related ── */}
       {relatedVisible && related.length > 0 && (
         <section
           aria-label="Related products"
           className="px-5 py-16 md:px-10"
-          {...sectionGroupAttr("global", "product-related")}
+          {...sectionGroupAttr("product", "related")}
         >
           <div className="mx-auto max-w-[1400px]">
             <div className="mb-8 flex items-end justify-between gap-4">
               <h2
                 className="pink-display"
-                style={{ fontSize: "clamp(1.5rem, 2.6vw, 2rem)", fontWeight: 600, letterSpacing: "-0.02em" }}
+                style={{
+                  fontSize: "clamp(1.5rem, 2.6vw, 2rem)",
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
+                }}
                 {...fieldAttr("pink.global.product-related-heading")}
               >
                 {f["pink.global.product-related-heading"] ?? ""}

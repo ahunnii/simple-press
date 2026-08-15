@@ -124,14 +124,14 @@ export async function HappyBambooHomepage() {
             "happy-bamboo",
             "homepage.testimonials",
           ) && (
-          <HappyBambooTestimonialsSection
-            heading={themeSpecificFields?.[
-              "happy-bamboo.homepage-testimonials-heading"
-            ]?.trim()}
-            testimonials={testimonials}
-            sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
-          />
-        )}
+            <HappyBambooTestimonialsSection
+              heading={themeSpecificFields?.[
+                "happy-bamboo.homepage-testimonials-heading"
+              ]?.trim()}
+              testimonials={testimonials}
+              sectionAttrs={sectionGroupAttr("homepage", "testimonials")}
+            />
+          )}
         {isSectionVisible(
           homepage?.siteContent?.customFields,
           "happy-bamboo",

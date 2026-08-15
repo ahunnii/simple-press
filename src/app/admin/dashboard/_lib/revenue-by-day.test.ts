@@ -1,11 +1,11 @@
+import { describe, expect, it } from "vitest";
+
+import { bucketRevenueByDay } from "./revenue-by-day";
+
 // Pin a non-UTC timezone so the local-vs-UTC bucketing tests below actually
 // discriminate: under TZ=UTC (common CI default) a UTC-slicing regression
 // would pass identically. Node re-reads TZ for subsequent Date calls.
 process.env.TZ = "America/Detroit";
-
-import { describe, expect, it } from "vitest";
-
-import { bucketRevenueByDay } from "./revenue-by-day";
 
 describe("bucketRevenueByDay", () => {
   it("sums multiple orders on the same local day into one bucket", () => {

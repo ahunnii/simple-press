@@ -4,9 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf } from "lucide-react";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
-import { fieldAttr } from "~/lib/preview/section-attrs";
 
 export function HappyBambooHeroSection({
   heroImage,

@@ -9,6 +9,7 @@ import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
   Select,
@@ -18,6 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -33,6 +35,7 @@ const formatPrice = (cents: number) =>
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
   contactOverline: string;
   contactHeading: string;
   deliveryOverline: string;
@@ -48,6 +51,7 @@ type Props = {
 
 export function ViiCheckoutForm({
   business,
+  merchantPolicies,
   contactOverline,
   contactHeading,
   deliveryOverline,
@@ -60,7 +64,7 @@ export function ViiCheckoutForm({
   emptyHeading,
   emptyCta,
 }: Props) {
-  const f = useCheckoutForm(business);
+  const f = useCheckoutForm(business, merchantPolicies);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const { ref, visible } = useViiReveal(0.05);
 
@@ -133,7 +137,10 @@ export function ViiCheckoutForm({
           gridTemplateColumns: "1fr",
           alignItems: "start",
         }}
-        className={`lg:grid-cols-[1fr_360px] vii-reveal-group${visible ? "is-visible" : ""}`}
+        className={cn(
+          "vii-reveal-group lg:grid-cols-[1fr_360px]",
+          visible && "is-visible",
+        )}
       >
         {/* ── Left: fieldsets ─────────────────────────────────────────────── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
@@ -1308,6 +1315,20 @@ export function ViiCheckoutForm({
                   </>
                 )}
               </button>
+
+              <CheckoutTermsNotice
+                disclosure={f.termsDisclosure}
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 11,
+                  color: "var(--vii-ink-soft)",
+                  textAlign: "center",
+                  letterSpacing: "0.04em",
+                  lineHeight: 1.5,
+                  margin: 0,
+                }}
+                linkStyle={{ textDecoration: "underline" }}
+              />
 
               {/* Security note */}
               <p

@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const elegantSections: Record<string, TemplateSection[]> = {
   elegant: [
@@ -27,13 +28,13 @@ export const elegantSections: Record<string, TemplateSection[]> = {
       description: "Product grid pulling from your catalog.",
       groupIds: ["homepage.products"],
       order: 2,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.about",
       page: "homepage",
       title: "About Section",
-      description:
-        "About blurb and image/video shown below the product grid.",
+      description: "About blurb and image/video shown below the product grid.",
       groupIds: ["homepage.about"],
       order: 3,
     },
@@ -55,6 +56,7 @@ export const elegantSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.testimonials"],
       order: 5,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "homepage.cta",
@@ -138,6 +140,7 @@ export const elegantSections: Record<string, TemplateSection[]> = {
       description: "Heading and intro shown at the top of the blog index.",
       groupIds: ["blog.header"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
     {
       id: "blog.newsletter",

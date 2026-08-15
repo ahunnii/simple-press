@@ -16,9 +16,12 @@ import { SledgeCheckoutForm } from "./sledge-checkout-form";
 
 type Props = {
   business: Parameters<typeof SledgeCheckoutForm>[0]["business"];
+  merchantPolicies: Parameters<
+    typeof SledgeCheckoutForm
+  >[0]["merchantPolicies"];
 };
 
-export function SledgeCheckoutContents({ business }: Props) {
+export function SledgeCheckoutContents({ business, merchantPolicies }: Props) {
   const { items } = useCart();
   const itemLabel = `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
@@ -62,7 +65,10 @@ export function SledgeCheckoutContents({ business }: Props) {
         className={cn(SLEDGE_PAGE_CONTAINER, SLEDGE_PAGE_CONTENT_PADDING)}
       >
         <FadeIn delay={0.08}>
-          <SledgeCheckoutForm business={business} />
+          <SledgeCheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </FadeIn>
       </section>
     </PageTransition>

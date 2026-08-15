@@ -1,25 +1,40 @@
 "use client";
 
+import type { FieldErrors, Path } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUploadFile, useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Search, Trash2, Upload, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Copy,
+  ExternalLink,
+  MoreHorizontal,
+  PlusCircle,
+  RotateCcw,
+  Save,
+  Search,
+  Trash2,
+  TriangleAlert,
+  X,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import type { FormProductImage, FormVariant } from "../_validators/schema";
+import type { ImageUploaderHandle } from "./image-uploader";
 import type { ProductFormSchema } from "~/lib/validators/product";
 import type { RouterOutputs } from "~/trpc/react";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
-import { getBusinessUrl } from "~/lib/business-url";
 import { getStoredPath } from "~/lib/uploads";
 import { cn, sanitizeSlugInput, slugify } from "~/lib/utils";
-import { productFormSchema } from "~/lib/validators/product";
+import { productFormSchema, variantSchema } from "~/lib/validators/product";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { useSiteHost } from "~/hooks/use-site-host";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,16 +56,29 @@ import {
 } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import {
   Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { InputGroup, InputGroupAddon } from "~/components/ui/input-group";
 import { Label } from "~/components/ui/label";
-import { NumberInput } from "~/components/ui/number-input";
+import { MoneyInput } from "~/components/ui/money-input";
+import {
+  InputGroupNumberInput,
+  NumberInput,
+} from "~/components/ui/number-input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Select,
@@ -63,8 +91,17 @@ import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
+import { OgImageUploader } from "~/components/inputs/og-image-uploader";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import {
+  SearchResultPreview,
+  SocialPreviewCard,
+} from "~/components/admin/seo-previews";
+import {
+  erroredTabsFor,
+  TabErrorDot,
+} from "~/app/admin/_components/form-tab-errors";
 
 import { getExistingVariantOptions } from "../_utils/existing-variant-options";
 import { ImageUploader } from "./image-uploader";
@@ -80,6 +117,35 @@ type Props = {
 };
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] } as const;
+
+type ProductFormTab = "basics" | "collections" | "seo" | "additional";
+
+const SEO_TAB_FIELDS = new Set<string>([
+  "slug",
+  "metaTitle",
+  "metaDescription",
+  "metaKeywords",
+  "ogImage",
+]);
+
+function tabForField(name: string): ProductFormTab {
+  const root = name.split(".")[0] ?? name;
+  if (SEO_TAB_FIELDS.has(root)) return "seo";
+  if (root === "additionalFields") return "additional";
+  return "basics";
+}
+
+const SHIPPING_MODE_LABELS: Record<string, string> = {
+  free: "free shipping",
+  flat_rate: "flat-rate shipping",
+  flat_rate_with_threshold: "flat-rate shipping",
+};
+
+function optionalTrimmed(value: string | null | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed;
+}
 
 /** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
 function toDatetimeLocalInput(value: Date | string | null | undefined): string {
@@ -102,150 +168,46 @@ function parseStoredAdditionalFields(raw: unknown) {
   };
 }
 
-function OgImageUploader({
-  file,
-  existingUrl,
-  fileInputRef,
-  onFileChange,
-  onRemove,
-  disabled,
-}: {
-  file: File | null;
-  existingUrl?: string;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  onFileChange: (f: File) => void;
-  onRemove: () => void;
-  disabled?: boolean;
-}) {
-  const [objectUrl, setObjectUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!file) {
-      setObjectUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setObjectUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-
-  const previewUrl = objectUrl ?? existingUrl ?? null;
-
-  return (
-    <div className="space-y-2">
-      <input
-        ref={(el) => {
-          (
-            fileInputRef as React.MutableRefObject<HTMLInputElement | null>
-          ).current = el;
-        }}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        disabled={disabled}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFileChange(f);
-          e.target.value = "";
-        }}
-      />
-      {previewUrl && (
-        <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={previewUrl}
-            alt="OG image preview"
-            className="h-16 w-16 shrink-0 rounded-md object-cover"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-muted-foreground text-xs">
-              {file
-                ? "New image selected. Upload on submit."
-                : "Existing image."}
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            disabled={disabled}
-            aria-label="Remove image"
-            className="text-muted-foreground hover:text-destructive shrink-0"
-            onClick={onRemove}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={disabled}
-        onClick={() => fileInputRef.current?.click()}
-        className="w-full"
-      >
-        <Upload className="mr-2 h-4 w-4" />
-        {previewUrl ? "Replace image" : "Choose image"}
-      </Button>
-    </div>
-  );
-}
-
-function SocialPreviewCard({
-  title,
-  description,
-  ogImageFile,
-  existingOgImage,
-  siteHost,
-}: {
-  title: string;
-  description: string;
-  ogImageFile: File | null | undefined;
-  existingOgImage?: string;
-  siteHost: string;
-}) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!(ogImageFile instanceof File)) {
-      setPreviewUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(ogImageFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [ogImageFile]);
-
-  const imageToShow = previewUrl ?? existingOgImage ?? null;
-
-  return (
-    <div className="overflow-hidden rounded-lg border bg-white">
-      {imageToShow ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageToShow}
-          alt="Open Graph preview"
-          className="aspect-[1200/630] w-full object-cover"
-        />
-      ) : (
-        <div className="flex aspect-[1200/630] items-center justify-center bg-gray-100 text-sm text-gray-400">
-          1200 × 630 — no image set
-        </div>
-      )}
-      <div className="border-t p-3">
-        <p className="text-xs tracking-wide text-gray-400 uppercase">
-          {siteHost}
-        </p>
-        <p className="truncate text-sm font-medium text-gray-900">{title}</p>
-        {description && (
-          <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
-            {description}
-          </p>
-        )}
-      </div>
-    </div>
-  );
+/**
+ * Fresh "blank product" form values, used to re-baseline after
+ * "Save & create another". A factory (not a module-level constant) — unlike
+ * collection-form's `NEW_COLLECTION_DEFAULTS`, this shape has nested
+ * arrays/objects (`additionalFields.productFeatures`,
+ * `additionalFields.additionalInformation`) that must NOT be the same
+ * instance across resets, or later mutations on one draft would leak into
+ * the "baseline" for every subsequent one.
+ */
+function getNewProductDefaults(): ProductFormSchema {
+  return {
+    published: true,
+    scheduledPublishAt: "",
+    name: "",
+    slug: "",
+    description: "",
+    price: 0,
+    compareAtPrice: undefined,
+    cost: undefined,
+    featured: false,
+    sku: "",
+    trackInventory: false,
+    inventoryQty: 0,
+    allowBackorders: false,
+    lowInventoryThreshold: undefined,
+    baseInventoryUnitId: null,
+    baseUnitsConsumed: null,
+    additionalFields: {
+      additionalInformation: { ...EMPTY_TIPTAP_DOC },
+      productFeatures: [],
+      comingSoon: false,
+      productTagline: "",
+    },
+    metaTitle: "",
+    metaDescription: "",
+    metaKeywords: "",
+    ogImage: undefined,
+    weight: undefined,
+    weightUnit: "lb",
+  };
 }
 
 export function ProductForm({
@@ -258,21 +220,18 @@ export function ProductForm({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const imageUploaderRef = useRef<ImageUploaderHandle>(null);
   const createAnotherRef = useRef(false);
   const utils = api.useUtils();
 
-  // Resolve the business's real storefront domain for the SEO/social
-  // previews (falls back to a clearly-generic placeholder while loading).
   const { data: businessInfo } = api.business.simplifiedGet.useQuery();
-  const siteHost = businessInfo
-    ? getBusinessUrl({
-        subdomain: businessInfo.subdomain,
-        customDomain: businessInfo.customDomain,
-        domainStatus: businessInfo.domainStatus,
-      }).replace(/^https?:\/\//, "")
-    : "yourstore.com";
+  const siteHost = useSiteHost();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [variantManagerKey, setVariantManagerKey] = useState(0);
+  const [activeTab, setActiveTab] = useState<ProductFormTab>("basics");
+  const [showWeightAnyway, setShowWeightAnyway] = useState(false);
+
+  const slugManuallyEditedRef = useRef(false);
 
   // Images state (kept separate as they're uploaded independently via Better Upload)
   const [images, setImages] = useState<FormProductImage[]>([]);
@@ -296,13 +255,26 @@ export function ProductForm({
   // Stored price/compareAtPrice of 0 (persisted by the old form's `?? priceInCents`
   // fallback) means "inherit the base price" at runtime — normalize to undefined
   // on load so the submit-time $0 guard doesn't block saving legacy products.
-  const [variants, setVariants] = useState<FormVariant[]>(
-    ((product?.variants as FormVariant[]) ?? []).map((v) => ({
-      ...v,
-      price: v.price === 0 ? undefined : v.price,
-      compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
-    })),
+  const initialVariants: FormVariant[] = (
+    (product?.variants as FormVariant[]) ?? []
+  ).map((v) => ({
+    ...v,
+    price: v.price === 0 ? undefined : v.price,
+    compareAtPrice: v.compareAtPrice === 0 ? undefined : v.compareAtPrice,
+  }));
+  const [variants, setVariants] = useState<FormVariant[]>(initialVariants);
+  const initialVariantsRef = useRef<FormVariant[]>(initialVariants);
+  // Row-index -> message, populated from a pre-submit `variantSchema` pass so
+  // a bad variant (e.g. negative price) surfaces per-row instead of as a raw
+  // tRPC 400. Cleared whenever the variants change so a fix doesn't leave a
+  // stale error visible.
+  const [variantErrors, setVariantErrors] = useState<Record<number, string>>(
+    {},
   );
+  const handleVariantsChange = (next: FormVariant[]) => {
+    setVariants(next);
+    setVariantErrors({});
+  };
 
   const storedAdditional = parseStoredAdditionalFields(
     product?.additionalFields ?? null,
@@ -318,11 +290,14 @@ export function ProductForm({
       scheduledPublishAt: toDatetimeLocalInput(product?.scheduledPublishAt),
       name: product?.name ?? "",
       slug: product?.slug ?? "",
-      description: product?.description ?? undefined,
+      description: product?.description ?? "",
       price: product?.price ? product.price / 100 : 0, // Convert cents to dollars
       compareAtPrice: product?.compareAtPrice
         ? product.compareAtPrice / 100
         : undefined,
+      cost: product?.cost != null ? product.cost / 100 : undefined,
+      featured: product?.featured ?? false,
+      sku: product?.sku ?? "",
       trackInventory: product?.trackInventory ?? false,
       inventoryQty: product?.inventoryQty ?? 0,
       allowBackorders: product?.allowBackorders ?? false,
@@ -402,12 +377,27 @@ export function ProductForm({
     },
   });
 
-  // Auto-generate slug from name (only for new products)
+  const slugAutoSyncs = (livePublished: boolean) =>
+    !product || (!product.published && !livePublished);
+
   const handleNameChange = (value: string | null) => {
     if (!value) return;
-    if (!product) {
-      form.setValue("slug", slugify(value), { shouldValidate: true });
-    }
+    if (slugManuallyEditedRef.current) return;
+    if (!slugAutoSyncs(form.getValues("published"))) return;
+    form.setValue("slug", slugify(value), { shouldValidate: true });
+  };
+
+  const handleInvalidSubmit = (errors: FieldErrors<ProductFormSchema>) => {
+    createAnotherRef.current = false;
+    const first = Object.keys(errors)[0];
+    if (first) setActiveTab(tabForField(first));
+  };
+
+  const revealServerErrorTab = () => {
+    const first = Object.keys(form.getValues()).find(
+      (name) => form.getFieldState(name as Path<ProductFormSchema>).invalid,
+    );
+    if (first) setActiveTab(tabForField(first));
   };
 
   // Mutations
@@ -434,6 +424,7 @@ export function ProductForm({
         fieldMap: { slug: "slug" },
         fallbackMessage: "Failed to create product",
       });
+      revealServerErrorTab();
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -452,6 +443,7 @@ export function ProductForm({
         fieldMap: { slug: "slug" },
         fallbackMessage: "Failed to update product",
       });
+      revealServerErrorTab();
     },
     onSuccess: (data) => {
       toast.dismiss();
@@ -480,6 +472,34 @@ export function ProductForm({
     },
   });
 
+  const duplicateProductMutation = api.product.duplicate.useMutation({
+    onSuccess: (data) => {
+      toast.dismiss();
+      toast.success("Product duplicated — draft saved");
+      void utils.product.invalidate();
+      router.push(`/admin/products/${data.productId}`);
+    },
+    onError: (error) => {
+      toast.dismiss();
+      toast.error(error.message ?? "Failed to duplicate product");
+    },
+    onMutate: () => {
+      toast.loading("Duplicating product...");
+    },
+  });
+
+  // Best-effort S3 cleanup for images/OG images uploaded during a submit
+  // whose save mutation then failed — see useDeferredImageUpload's `discard`
+  // for the same pattern. Not user-visible; failures here don't block anything.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (error) => {
+      console.warn(
+        "Failed to discard orphaned upload(s); objects may remain in S3:",
+        error,
+      );
+    },
+  });
+
   const onSubmit = async (data: ProductFormSchema) => {
     const createAnother = createAnotherRef.current;
     createAnotherRef.current = false;
@@ -501,6 +521,49 @@ export function ProductForm({
     const compareAtPriceInCents = data.compareAtPrice
       ? Math.round(data.compareAtPrice * 100)
       : undefined;
+    const costInCents = data.cost != null ? Math.round(data.cost * 100) : null;
+    const skuValue = optionalTrimmed(data.sku);
+
+    // Validate variants against the same `variantSchema` the server uses,
+    // resolved the same way they'll actually be sent (price defaults to the
+    // base price in cents, same as the mutation payloads below) — variants
+    // live in useState rather than RHF, so without this a bad row (e.g. a
+    // negative price) only surfaces as a raw tRPC 400 instead of inline on
+    // the row. This is in addition to, not instead of, the $0 guard above:
+    // variantSchema's `.nonnegative()` allows exactly 0.
+    const variantsForValidation = variants.map((v) => ({
+      id: v.id,
+      name: v.name,
+      sku: v.sku ?? undefined,
+      price: v.price ?? priceInCents,
+      compareAtPrice: v.compareAtPrice ?? undefined,
+      inventoryQty: v.inventoryQty,
+      options: v.options,
+      imageUrl: v.imageUrl,
+    }));
+    const variantValidation = z
+      .array(variantSchema)
+      .safeParse(variantsForValidation);
+    if (!variantValidation.success) {
+      const rowErrors: Record<number, string> = {};
+      for (const issue of variantValidation.error.issues) {
+        const rowIndex = issue.path[0];
+        if (typeof rowIndex === "number" && !(rowIndex in rowErrors)) {
+          rowErrors[rowIndex] = issue.message;
+        }
+      }
+      setVariantErrors(rowErrors);
+      toast.error("Fix the highlighted variant(s) before saving.");
+      return;
+    }
+    setVariantErrors({});
+
+    // Objects freshly uploaded to S3 during THIS submit — if the save
+    // mutation below fails, these have nothing referencing them in the DB
+    // yet, so they're discarded via `upload.discardUploads` to avoid
+    // orphaning them (see useDeferredImageUpload's `discard` for the same
+    // pattern elsewhere).
+    const newlyUploadedUrls: string[] = [];
 
     // Resolve ogImage URL: upload new file, keep existing URL, or clear
     let resolvedOgImage: string | null;
@@ -511,6 +574,7 @@ export function ProductForm({
           (response.file.objectInfo.metadata?.pathname as string | undefined) ??
           "";
         resolvedOgImage = fileLocation || null;
+        if (fileLocation) newlyUploadedUrls.push(fileLocation);
       } catch {
         toast.error("Failed to upload Open Graph image.");
         return;
@@ -547,6 +611,7 @@ export function ProductForm({
       for (const f of galleryResult.files) {
         fileToUrl.set(f.raw, getStoredPath(f));
       }
+      newlyUploadedUrls.push(...fileToUrl.values());
       resolvedImages = images.map((img, idx) => ({
         id: img.id,
         url: img.file ? (fileToUrl.get(img.file) ?? "") : img.url,
@@ -574,47 +639,59 @@ export function ProductForm({
       // Update existing product
       imagesToSyncRef.current = resolvedImages;
 
-      await updateProductMutation.mutateAsync({
-        id: product.id,
-        name: data.name,
-        slug: data.slug,
-        description: data.description ?? undefined,
-        price: priceInCents,
-        compareAtPrice: compareAtPriceInCents,
-        published: data.published,
-        scheduledPublishAt:
-          !data.published && data.scheduledPublishAt
-            ? new Date(data.scheduledPublishAt)
-            : null,
-        trackInventory: data.trackInventory,
-        allowBackorders: data.allowBackorders,
-        inventoryQty: data.inventoryQty ?? 0,
-        lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
-        baseInventoryUnitId: data.baseInventoryUnitId ?? null,
-        baseUnitsConsumed: data.baseUnitsConsumed ?? null,
-        variants: variants?.map((v) => ({
-          id: v.id,
-          name: v.name,
-          sku: v.sku ?? undefined,
-          price: v.price ?? priceInCents,
-          compareAtPrice: v.compareAtPrice ?? undefined,
-          inventoryQty: v.inventoryQty,
-          options: v.options,
-          imageUrl: resolveVariantImageUrl(v.imageUrl),
-        })),
-        additionalFields: {
-          additionalInformation: data.additionalFields?.additionalInformation,
-          productFeatures: data.additionalFields?.productFeatures ?? [],
-          comingSoon: data.additionalFields?.comingSoon ?? false,
-          productTagline: data.additionalFields?.productTagline ?? undefined,
-        },
-        metaTitle: data.metaTitle ?? null,
-        metaDescription: data.metaDescription ?? null,
-        metaKeywords: data.metaKeywords ?? null,
-        ogImage: resolvedOgImage ?? null,
-        weight: data.weight ?? null,
-        weightUnit: data.weightUnit ?? "lb",
-      });
+      try {
+        await updateProductMutation.mutateAsync({
+          id: product.id,
+          name: data.name,
+          slug: data.slug,
+          description: data.description ?? undefined,
+          price: priceInCents,
+          compareAtPrice: compareAtPriceInCents,
+          cost: costInCents,
+          published: data.published,
+          featured: data.featured,
+          scheduledPublishAt:
+            !data.published && data.scheduledPublishAt
+              ? new Date(data.scheduledPublishAt)
+              : null,
+          sku: skuValue,
+          trackInventory: data.trackInventory,
+          allowBackorders: data.allowBackorders,
+          inventoryQty: data.inventoryQty ?? 0,
+          lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
+          baseInventoryUnitId: data.baseInventoryUnitId ?? null,
+          baseUnitsConsumed: data.baseUnitsConsumed ?? null,
+          variants: variants?.map((v) => ({
+            id: v.id,
+            name: v.name,
+            sku: v.sku ?? undefined,
+            price: v.price ?? priceInCents,
+            compareAtPrice: v.compareAtPrice ?? undefined,
+            inventoryQty: v.inventoryQty,
+            options: v.options,
+            imageUrl: resolveVariantImageUrl(v.imageUrl),
+          })),
+          additionalFields: {
+            additionalInformation: data.additionalFields?.additionalInformation,
+            productFeatures: data.additionalFields?.productFeatures ?? [],
+            comingSoon: data.additionalFields?.comingSoon ?? false,
+            productTagline: data.additionalFields?.productTagline ?? undefined,
+          },
+          metaTitle: data.metaTitle ?? null,
+          metaDescription: data.metaDescription ?? null,
+          metaKeywords: data.metaKeywords ?? null,
+          ogImage: resolvedOgImage ?? null,
+          weight: data.weight ?? null,
+          weightUnit: data.weightUnit ?? "lb",
+        });
+      } catch {
+        // onError on the mutation itself already toasted + mapped field
+        // errors; here we only need to clean up orphaned uploads and stop.
+        if (newlyUploadedUrls.length > 0) {
+          discardUploadsMutation.mutate({ urls: newlyUploadedUrls });
+        }
+        return;
+      }
 
       // New default baseline so isDirty clears (RHF only used initial defaultValues otherwise).
       form.reset(data);
@@ -651,45 +728,58 @@ export function ProductForm({
       }
     } else {
       // Create new product
-      const response = await createProductMutation.mutateAsync({
-        name: data.name,
-        slug: data.slug,
-        description: data.description ?? undefined,
-        price: priceInCents,
-        published: data.published,
-        scheduledPublishAt:
-          !data.published && data.scheduledPublishAt
-            ? new Date(data.scheduledPublishAt)
-            : null,
-        trackInventory: data.trackInventory,
-        allowBackorders: data.allowBackorders,
-        inventoryQty: data.inventoryQty ?? 0,
-        lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
-        compareAtPrice: compareAtPriceInCents,
-        baseInventoryUnitId: data.baseInventoryUnitId ?? null,
-        baseUnitsConsumed: data.baseUnitsConsumed ?? null,
-        variants: variants?.map((v) => ({
-          name: v.name,
-          sku: v.sku ?? undefined,
-          price: v.price ?? priceInCents,
-          compareAtPrice: v.compareAtPrice ?? undefined,
-          inventoryQty: v.inventoryQty,
-          options: v.options,
-          imageUrl: resolveVariantImageUrl(v.imageUrl),
-        })),
-        additionalFields: {
-          additionalInformation: data.additionalFields?.additionalInformation,
-          productFeatures: data.additionalFields?.productFeatures ?? [],
-          comingSoon: data.additionalFields?.comingSoon ?? false,
-          productTagline: data.additionalFields?.productTagline ?? "",
-        },
-        metaTitle: data.metaTitle ?? null,
-        metaDescription: data.metaDescription ?? null,
-        metaKeywords: data.metaKeywords ?? null,
-        ogImage: resolvedOgImage ?? null,
-        weight: data.weight ?? null,
-        weightUnit: data.weightUnit ?? "lb",
-      });
+      let response;
+      try {
+        response = await createProductMutation.mutateAsync({
+          name: data.name,
+          slug: data.slug,
+          description: data.description ?? undefined,
+          price: priceInCents,
+          published: data.published,
+          featured: data.featured,
+          scheduledPublishAt:
+            !data.published && data.scheduledPublishAt
+              ? new Date(data.scheduledPublishAt)
+              : null,
+          sku: skuValue,
+          trackInventory: data.trackInventory,
+          allowBackorders: data.allowBackorders,
+          inventoryQty: data.inventoryQty ?? 0,
+          lowInventoryThreshold: data.lowInventoryThreshold ?? undefined,
+          compareAtPrice: compareAtPriceInCents,
+          cost: costInCents,
+          baseInventoryUnitId: data.baseInventoryUnitId ?? null,
+          baseUnitsConsumed: data.baseUnitsConsumed ?? null,
+          variants: variants?.map((v) => ({
+            name: v.name,
+            sku: v.sku ?? undefined,
+            price: v.price ?? priceInCents,
+            compareAtPrice: v.compareAtPrice ?? undefined,
+            inventoryQty: v.inventoryQty,
+            options: v.options,
+            imageUrl: resolveVariantImageUrl(v.imageUrl),
+          })),
+          additionalFields: {
+            additionalInformation: data.additionalFields?.additionalInformation,
+            productFeatures: data.additionalFields?.productFeatures ?? [],
+            comingSoon: data.additionalFields?.comingSoon ?? false,
+            productTagline: data.additionalFields?.productTagline ?? "",
+          },
+          metaTitle: data.metaTitle ?? null,
+          metaDescription: data.metaDescription ?? null,
+          metaKeywords: data.metaKeywords ?? null,
+          ogImage: resolvedOgImage ?? null,
+          weight: data.weight ?? null,
+          weightUnit: data.weightUnit ?? "lb",
+        });
+      } catch {
+        // onError on the mutation itself already toasted + mapped field
+        // errors; here we only need to clean up orphaned uploads and stop.
+        if (newlyUploadedUrls.length > 0) {
+          discardUploadsMutation.mutate({ urls: newlyUploadedUrls });
+        }
+        return;
+      }
 
       if (response.productId && resolvedImages.length > 0) {
         await syncImagesMutation.mutateAsync({
@@ -713,15 +803,31 @@ export function ProductForm({
 
       if (response.productId) {
         if (createAnother) {
-          form.reset();
+          // Revoke pending gallery blob: URLs before dropping them — the
+          // images we just uploaded are gone from `images` too, but those
+          // were already resolved to real S3 URLs above, not blob: ones.
+          imageUploaderRef.current?.reset();
+          form.reset(getNewProductDefaults());
+          slugManuallyEditedRef.current = false;
           setImages([]);
           setVariants([]);
+          setVariantErrors({});
           setCollectionIds([]);
           setBaselineCollectionIds([]);
+          setCollectionSearch("");
+          setShowWeightAnyway(false);
           setOgImageFile(null);
           setOgImageRemoved(false);
+          if (ogImageFileInputRef.current)
+            ogImageFileInputRef.current.value = "";
           setVariantManagerKey((k) => k + 1);
+          setActiveTab("basics");
           window.scrollTo({ top: 0 });
+          // Replace the mutation's generic "Product created" toast (already
+          // shown by createProductMutation's onSuccess) with one that
+          // reflects what actually happens next.
+          toast.dismiss();
+          toast.success("Product created — add another");
         } else {
           router.push(`/admin/products/${response.productId}`);
         }
@@ -758,8 +864,17 @@ export function ProductForm({
     isCollectionsDirty ||
     isOgImageDirty;
 
-  useKeyboardEnter(form, onSubmit);
+  useKeyboardEnter(form, onSubmit, handleInvalidSubmit);
   useDirtyForm(isDirty);
+
+  const { errors: formErrors, isSubmitted: saveAttempted } = form.formState;
+  const erroredTabs = useMemo(
+    () =>
+      saveAttempted
+        ? erroredTabsFor(formErrors, tabForField)
+        : new Set<ProductFormTab>(),
+    [saveAttempted, formErrors],
+  );
 
   // SEO preview values — || is intentional so empty string falls back to the default
   /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
@@ -771,12 +886,50 @@ export function ProductForm({
     "Your product description will appear here in search results.";
   /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
 
+  const watchedName = form.watch("name") ?? "";
+  const watchedSlug = form.watch("slug") ?? "";
+  const nameDerivedSlug = slugify(watchedName);
+  const slugFrozen = !slugAutoSyncs(form.watch("published"));
+  const showBasicsRenameWarning =
+    slugFrozen &&
+    !!product &&
+    watchedName.trim() !== product.name &&
+    nameDerivedSlug !== watchedSlug;
+
+  const metaTitleLength = form.watch("metaTitle")?.length ?? 0;
+  const metaDescriptionLength = form.watch("metaDescription")?.length ?? 0;
+
+  const watchedPrice = form.watch("price");
+  const watchedCost = form.watch("cost");
+  const marginPercent =
+    variants.length === 0 &&
+    typeof watchedCost === "number" &&
+    watchedCost > 0 &&
+    typeof watchedPrice === "number" &&
+    watchedPrice > 0
+      ? Math.round(((watchedPrice - watchedCost) / watchedPrice) * 100)
+      : null;
+
+  const shippingType = businessInfo?.shippingType;
+  const shippingWeightInert = !!shippingType && shippingType !== "zone_weight";
+  const shippingModeLabel =
+    (shippingType ? SHIPPING_MODE_LABELS[shippingType] : undefined) ??
+    "your current shipping mode";
+  const showWeightFields = !shippingWeightInert || showWeightAnyway;
+  const storeDefaultWeightLb = businessInfo?.shippingDefaultItemWeightLb;
+  const weightDescription =
+    typeof storeDefaultWeightLb === "number" && storeDefaultWeightLb > 0
+      ? `Leave blank to use the store default (${storeDefaultWeightLb} lb).`
+      : "Leave blank to use the store default.";
+
   return (
     <>
       <Form {...form}>
         <form
           ref={formRef}
-          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+          onSubmit={(e) =>
+            void form.handleSubmit(onSubmit, handleInvalidSubmit)(e)
+          }
           className="bg-muted min-h-screen"
         >
           <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
@@ -788,19 +941,26 @@ export function ProductForm({
                 </Link>
               </Button>
               <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
-              <div className="hidden min-w-0 items-center gap-2 sm:flex">
-                <h1 className="truncate text-base font-medium">
+              <div className="flex min-w-0 items-center gap-2">
+                <h1 className="hidden truncate text-base font-medium sm:block">
                   {product
                     ? form.watch("name") || "Edit Product"
                     : "New Product"}
                 </h1>
 
                 <span
-                  className={`admin-status-badge ${
-                    isDirty ? "isDirty" : "isPublished"
-                  }`}
+                  className={cn(
+                    `admin-status-badge`,
+                    `${
+                      isDirty ? "isDirty" : "isPublished"
+                    } ${!product?.id ? "isNew" : ""}`,
+                  )}
                 >
-                  {isDirty ? "Unsaved Changes" : "Saved"}
+                  {isDirty
+                    ? "Unsaved Changes"
+                    : !product?.id
+                      ? "Draft"
+                      : "Saved"}
                 </span>
               </div>
             </div>
@@ -823,37 +983,85 @@ export function ProductForm({
                   </div>
                 )}
               />
-              {product && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isSubmitting}
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
-              )}
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isSubmitting || !isDirty}
-                onClick={() => {
-                  form.reset();
-                  setCollectionIds(baselineCollectionIds);
-                  setOgImageFile(null);
-                  setOgImageRemoved(false);
-                  if (ogImageFileInputRef.current)
-                    ogImageFileInputRef.current.value = "";
-                }}
-                className="hidden md:inline-flex"
-              >
-                Reset
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only ml-2 sm:not-sr-only">
+                      More Options
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {product?.id && product.published && (
+                    <DropdownMenuItem asChild>
+                      <a
+                        href={`/shop/${product.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="View on storefront (opens in new tab)"
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View on storefront
+                      </a>
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuItem
+                    disabled={isSubmitting || !isDirty}
+                    onClick={() => {
+                      // Discard any pending (blob:) gallery images and clear
+                      // the file input before reverting `images` — otherwise
+                      // their object URLs leak and re-selecting the same
+                      // file wouldn't fire a change event.
+                      imageUploaderRef.current?.reset();
+                      form.reset();
+                      slugManuallyEditedRef.current = false;
+                      setCollectionIds(baselineCollectionIds);
+                      setImages([...initialImagesRef.current]);
+                      setVariants([...initialVariantsRef.current]);
+                      setVariantErrors({});
+                      setVariantManagerKey((k) => k + 1);
+                      setOgImageFile(null);
+                      setOgImageRemoved(false);
+                      if (ogImageFileInputRef.current)
+                        ogImageFileInputRef.current.value = "";
+                    }}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </DropdownMenuItem>
+
+                  {product?.id && (
+                    <DropdownMenuItem
+                      disabled={
+                        isSubmitting || duplicateProductMutation.isPending
+                      }
+                      onClick={() =>
+                        duplicateProductMutation.mutate(product.id)
+                      }
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Duplicate
+                    </DropdownMenuItem>
+                  )}
+
+                  {product && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        disabled={isSubmitting}
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {!product && (
                 <Button
@@ -872,7 +1080,7 @@ export function ProductForm({
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
+                      <PlusCircle className="mr-2 h-4 w-4" />
                       <span className="hidden sm:inline">
                         Save &amp; create another
                       </span>
@@ -882,7 +1090,14 @@ export function ProductForm({
                 </Button>
               )}
 
-              <Button type="submit" size="sm" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmitting}
+                onClick={() => {
+                  createAnotherRef.current = false;
+                }}
+              >
                 {isSubmitting ? (
                   <>
                     <span className="saving-indicator" />
@@ -900,14 +1115,27 @@ export function ProductForm({
           </div>
 
           <div className="admin-container">
-            <Tabs defaultValue="basics" className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => setActiveTab(value as ProductFormTab)}
+              className="w-full"
+            >
               <TabsList>
-                <TabsTrigger value="basics">Basics</TabsTrigger>
+                <TabsTrigger value="basics">
+                  Basics
+                  {erroredTabs.has("basics") && <TabErrorDot />}
+                </TabsTrigger>
                 {collectionsEnabled && (
                   <TabsTrigger value="collections">Collections</TabsTrigger>
                 )}
-                <TabsTrigger value="seo">SEO</TabsTrigger>
-                <TabsTrigger value="additional">Additional Info</TabsTrigger>
+                <TabsTrigger value="seo">
+                  SEO
+                  {erroredTabs.has("seo") && <TabErrorDot />}
+                </TabsTrigger>
+                <TabsTrigger value="additional">
+                  Product page
+                  {erroredTabs.has("additional") && <TabErrorDot />}
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="basics" className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -931,19 +1159,59 @@ export function ProductForm({
                           autoFocus
                         />
 
-                        <InputFormField
-                          form={form}
-                          name="slug"
-                          label="URL Slug"
-                          placeholder="classic-white-t-shirt"
-                          onChange={(value) =>
-                            form.setValue("slug", sanitizeSlugInput(value), {
-                              shouldValidate: true,
-                            })
-                          }
-                          required
-                          description={`Used in product URL: /products/${form.watch("slug") || "your-product"}`}
-                        />
+                        {showBasicsRenameWarning ? (
+                          <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                            <div className="space-y-0.5">
+                              <p className="font-medium">
+                                Name changed — the URL hasn&apos;t.
+                              </p>
+                              <p className="text-amber-700">
+                                This product is still at{" "}
+                                <span className="font-mono">
+                                  /shop/{watchedSlug}
+                                </span>
+                                . Updating the URL to match will 404 old links,
+                                bookmarks, search results, and saved wishlists.
+                                We don&apos;t create a redirect automatically.
+                              </p>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                                onClick={() => {
+                                  slugManuallyEditedRef.current = true;
+                                  form.setValue("slug", nameDerivedSlug, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                  });
+                                  setActiveTab("seo");
+                                }}
+                              >
+                                Update URL
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground flex flex-wrap items-center gap-x-2 text-xs">
+                            <span>
+                              Storefront URL:{" "}
+                              <span className="font-mono">
+                                /shop/{watchedSlug || "your-product"}
+                              </span>
+                            </span>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-xs"
+                              onClick={() => setActiveTab("seo")}
+                            >
+                              Edit in SEO
+                            </Button>
+                          </div>
+                        )}
 
                         <TextareaFormField
                           form={form}
@@ -990,7 +1258,7 @@ export function ProductForm({
                           Set your product pricing
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-4">
                         {variants.length > 0 ? (
                           <p className="text-muted-foreground text-sm">
                             Pricing is managed per variant. Edit each
@@ -1007,25 +1275,18 @@ export function ProductForm({
                               name="price"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Price (USD)</FormLabel>
+                                  <FormLabel>Price</FormLabel>
                                   <FormControl>
-                                    <div className="relative">
-                                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                        $
-                                      </span>
-                                      <NumberInput
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="19.99"
-                                        className="pl-7"
-                                        {...field}
-                                      />
-                                    </div>
+                                    <MoneyInput
+                                      placeholder="19.99"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormDescription>
                                     Base price in USD (variant prices can
                                     override this)
                                   </FormDescription>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -1034,95 +1295,147 @@ export function ProductForm({
                               name="compareAtPrice"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel>Compare At Price (USD)</FormLabel>
+                                  <FormLabel>Compare at price</FormLabel>
                                   <FormControl>
-                                    <div className="relative">
-                                      <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                        $
-                                      </span>
-                                      <NumberInput
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="24.99"
-                                        className="pl-7"
-                                        {...field}
-                                        value={field.value}
-                                      />
-                                    </div>
+                                    <MoneyInput
+                                      placeholder="24.99"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormDescription>
                                     Original price shown crossed out. Leave
                                     blank to disable the sale display.
                                   </FormDescription>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </div>
                         )}
+
+                        <FormField
+                          control={form.control}
+                          name="cost"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="flex items-center justify-between gap-2">
+                                <FormLabel>Cost per item</FormLabel>
+                                {marginPercent !== null && (
+                                  <span className="text-muted-foreground text-xs tabular-nums">
+                                    {marginPercent}% margin
+                                  </span>
+                                )}
+                              </div>
+                              <FormControl>
+                                <MoneyInput placeholder="0.00" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                What you pay for this item. Never shown to
+                                customers.
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </CardContent>
                     </Card>
                     {/* Shipping weight */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>Shipping</CardTitle>
+                        <CardTitle>Shipping weight</CardTitle>
                         <CardDescription>
                           Used to calculate shipping rates when zone + weight
                           pricing is active
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex gap-3">
+                        {showWeightFields ? (
                           <FormField
                             control={form.control}
                             name="weight"
                             render={({ field }) => (
-                              <FormItem className="flex-1">
-                                <FormLabel>Weight</FormLabel>
-                                <FormControl>
-                                  <NumberInput
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={field.value ?? undefined}
-                                    onChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  Leave blank to use the store default
-                                </FormDescription>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="weightUnit"
-                            render={({ field }) => (
-                              <FormItem className="w-24 shrink-0">
-                                <FormLabel>Unit</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  value={field.value ?? "lb"}
-                                >
+                              <FormItem>
+                                <FormLabel>Package weight</FormLabel>
+                                <InputGroup>
                                   <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
+                                    <InputGroupNumberInput
+                                      step="0.01"
+                                      min="0"
+                                      placeholder="0.00"
+                                      value={field.value ?? undefined}
+                                      onChange={field.onChange}
+                                    />
                                   </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="lb">lb</SelectItem>
-                                    <SelectItem value="kg">kg</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                  <InputGroupAddon
+                                    align="inline-end"
+                                    className="py-0 pr-1"
+                                  >
+                                    <FormField
+                                      control={form.control}
+                                      name="weightUnit"
+                                      render={({ field: unitField }) => (
+                                        <Select
+                                          onValueChange={unitField.onChange}
+                                          value={unitField.value ?? "lb"}
+                                        >
+                                          <SelectTrigger
+                                            size="sm"
+                                            aria-label="Weight unit"
+                                            className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent"
+                                          >
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="lb">
+                                              lb
+                                            </SelectItem>
+                                            <SelectItem value="kg">
+                                              kg
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+                                    />
+                                  </InputGroupAddon>
+                                </InputGroup>
+                                <FormDescription>
+                                  {weightDescription}
+                                </FormDescription>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
-                        </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <p className="text-muted-foreground text-sm">
+                              Your store is on {shippingModeLabel}, so package
+                              weight doesn&apos;t affect what customers are
+                              charged.{" "}
+                              <Link
+                                href="/admin/settings/shipping"
+                                className="text-foreground underline"
+                              >
+                                Shipping settings
+                              </Link>
+                            </p>
+                            <Button
+                              type="button"
+                              variant="link"
+                              size="sm"
+                              className="h-auto p-0 text-sm"
+                              onClick={() => setShowWeightAnyway(true)}
+                            >
+                              Set a weight anyway
+                            </Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </div>
                   <div className="col-span-1 space-y-4">
                     {/* Images */}
                     <ImageUploader
+                      ref={imageUploaderRef}
                       images={images}
                       onImagesChange={setImages}
                       maxImages={10}
@@ -1137,6 +1450,20 @@ export function ProductForm({
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        {variants.length > 0 ? (
+                          <p className="text-muted-foreground text-sm">
+                            SKU is set per variant below.
+                          </p>
+                        ) : (
+                          <InputFormField
+                            form={form}
+                            name="sku"
+                            label="SKU"
+                            placeholder="e.g., TSHIRT-WHT-M"
+                            description="Your own stock-keeping code. Used to match rows when importing inventory."
+                          />
+                        )}
+
                         {/* Base Unit pool selector (shown when pools exist and no variants) */}
                         {pools.length > 0 && variants.length === 0 && (
                           <div className="space-y-3 rounded-lg border p-4">
@@ -1312,7 +1639,7 @@ export function ProductForm({
                 <VariantManager
                   key={variantManagerKey}
                   variants={variants}
-                  onChange={setVariants}
+                  onChange={handleVariantsChange}
                   trackInventory={form.watch("trackInventory")}
                   basePrice={Math.round((form.watch("price") || 0) * 100)}
                   existingVariantOptions={getExistingVariantOptions(
@@ -1321,6 +1648,7 @@ export function ProductForm({
                       | undefined,
                   )}
                   images={images}
+                  errors={variantErrors}
                 />
               </TabsContent>
 
@@ -1486,12 +1814,65 @@ export function ProductForm({
                       <CardContent className="space-y-4">
                         <InputFormField
                           form={form}
+                          name="slug"
+                          label="URL Slug"
+                          placeholder="classic-white-t-shirt"
+                          onChange={(value) => {
+                            slugManuallyEditedRef.current = true;
+                            form.setValue("slug", sanitizeSlugInput(value), {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            });
+                          }}
+                          required
+                          description={`Used in the product URL: /shop/${watchedSlug || "your-product"}`}
+                        />
+
+                        {product?.id && watchedSlug !== product.slug && (
+                          <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                            <div className="space-y-0.5">
+                              <p className="font-medium">
+                                Heads up — this will change the product&apos;s
+                                URL.
+                              </p>
+                              <p className="text-amber-700">
+                                Saving will change the public URL from{" "}
+                                <span className="font-mono">
+                                  /shop/{product.slug}
+                                </span>{" "}
+                                to{" "}
+                                <span className="font-mono">
+                                  /shop/{watchedSlug}
+                                </span>
+                                . Anyone with the old link — including
+                                bookmarks, search engines, and saved wishlists —
+                                will get a 404. We don&apos;t set up a redirect
+                                automatically.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        <InputFormField
+                          form={form}
                           name="metaTitle"
                           label="Meta Title"
                           placeholder={
                             form.watch("name") || "e.g., Classic White T-Shirt"
                           }
-                          description={`${form.watch("metaTitle")?.length ?? 0}/60 characters — leave blank to use product name`}
+                          description={
+                            <span
+                              className={
+                                metaTitleLength > 60
+                                  ? "text-destructive"
+                                  : undefined
+                              }
+                            >
+                              {metaTitleLength}/60 characters — leave blank to
+                              use product name
+                            </span>
+                          }
                           descriptionClassName="text-xs text-muted-foreground"
                         />
 
@@ -1503,7 +1884,18 @@ export function ProductForm({
                             form.watch("description") ??
                             "e.g., Soft, breathable cotton tee perfect for everyday wear."
                           }
-                          description={`${form.watch("metaDescription")?.length ?? 0}/160 characters — leave blank to use product description`}
+                          description={
+                            <span
+                              className={
+                                metaDescriptionLength > 160
+                                  ? "text-destructive"
+                                  : undefined
+                              }
+                            >
+                              {metaDescriptionLength}/160 characters — leave
+                              blank to use product description
+                            </span>
+                          }
                           descriptionClassName="text-xs text-muted-foreground"
                           rows={3}
                         />
@@ -1559,18 +1951,13 @@ export function ProductForm({
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="rounded-lg border bg-white p-4">
-                          <div className="mb-1 truncate text-sm font-medium text-blue-600">
-                            {seoPreviewTitle}
-                          </div>
-                          <div className="mb-1 text-xs text-green-700">
-                            {siteHost}/products/
-                            {form.watch("slug") || "product-slug"}
-                          </div>
-                          <div className="line-clamp-2 text-sm text-gray-600">
-                            {seoPreviewDesc}
-                          </div>
-                        </div>
+                        <SearchResultPreview
+                          host={siteHost}
+                          pathPrefix="/shop"
+                          slug={watchedSlug || "product-slug"}
+                          title={seoPreviewTitle}
+                          description={seoPreviewDesc}
+                        />
                       </CardContent>
                     </Card>
 
@@ -1614,8 +2001,6 @@ export function ProductForm({
                       name="additionalFields.additionalInformation"
                       output="json"
                       editorContentClassName={"p-4 min-h-[400px]"}
-                      label="Additional information"
-                      description='Shown in the "Additional Information" tab on the product page.'
                       galleriesEnabled={galleriesEnabled}
                     />
                   </CardContent>
@@ -1655,6 +2040,13 @@ export function ProductForm({
                         name="additionalFields.comingSoon"
                         label="Coming soon"
                         description="Show a 'Coming Soon' badge on the product page and card"
+                      />
+
+                      <SwitchFormField
+                        form={form}
+                        name="featured"
+                        label="Featured"
+                        description="On templates that support it, featured products sort first and show a badge."
                       />
                     </CardContent>
                   </Card>

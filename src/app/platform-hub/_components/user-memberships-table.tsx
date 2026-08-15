@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Edit, MoreVertical, Trash } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { MERCHANT_TERMS_VERSION } from "~/lib/legal/policy-versions";
+import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -29,6 +31,31 @@ import { EditMembershipDialog } from "./edit-membership-dialog";
 type Props = {
   memberships: RouterOutputs["platform"]["getUser"]["memberships"];
 };
+
+function MerchantTermsCell({
+  merchantTermsAcceptedAt,
+  merchantTermsVersion,
+}: {
+  merchantTermsAcceptedAt: Date | null;
+  merchantTermsVersion: string | null;
+}) {
+  if (!merchantTermsAcceptedAt) {
+    return <Badge variant="destructive">No acceptance on record</Badge>;
+  }
+
+  const isCurrent = merchantTermsVersion === MERCHANT_TERMS_VERSION;
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <Badge variant={isCurrent ? "success" : "warning"}>
+        {isCurrent ? "Accepted" : "Outdated version"}
+      </Badge>
+      <span className="text-muted-foreground text-xs">
+        {formatDate(merchantTermsAcceptedAt)}
+      </span>
+    </div>
+  );
+}
 
 export function UserMembershipsTable({ memberships }: Props) {
   const router = useRouter();
@@ -57,6 +84,7 @@ export function UserMembershipsTable({ memberships }: Props) {
           <TableRow>
             <TableHead>Business</TableHead>
             <TableHead>Role</TableHead>
+            <TableHead>Merchant Terms</TableHead>
             <TableHead>Member Since</TableHead>
             <TableHead className="w-[70px]"></TableHead>
           </TableRow>
@@ -84,8 +112,14 @@ export function UserMembershipsTable({ memberships }: Props) {
                   {membership.role}
                 </Badge>
               </TableCell>
+              <TableCell>
+                <MerchantTermsCell
+                  merchantTermsAcceptedAt={membership.merchantTermsAcceptedAt}
+                  merchantTermsVersion={membership.merchantTermsVersion}
+                />
+              </TableCell>
               <TableCell className="text-muted-foreground">
-                {new Date(membership.createdAt).toLocaleDateString()}
+                {formatDate(membership.createdAt)}
               </TableCell>
               <TableCell>
                 <DropdownMenu>

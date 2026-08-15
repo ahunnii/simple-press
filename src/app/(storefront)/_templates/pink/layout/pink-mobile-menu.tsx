@@ -5,8 +5,8 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Heart, ShoppingBag, User, X } from "lucide-react";
 
-import type { PinkNavLink } from "./pink-header";
-import { isActiveNavLink } from "./pink-nav-utils";
+import type { PinkNavChild } from "./pink-header";
+import { isActiveNavLink } from "~/lib/nav-utils";
 
 type PinkAccountLink = { href: string; label: string };
 
@@ -16,11 +16,10 @@ type PinkWishlistInfo = { count: number; hydrated: boolean } | null;
 type PinkMobileMenuProps = {
   open: boolean;
   onClose: () => void;
-  links: PinkNavLink[];
+  /** Already flattened by `pink-header.tsx` — the drawer has one level only. */
+  links: PinkNavChild[];
   activeHref: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
-  ctaText: string;
-  ctaLink: string;
   basketLabel: string;
   itemCount: number;
   onOpenCart: () => void;
@@ -33,7 +32,7 @@ type PinkMobileMenuProps = {
 
 /**
  * Full-screen ink overlay mobile nav (design.md → Chrome → Header →
- * "Mobile"). Nav items stacked at display 600 24px; secondary CTA + basket
+ * "Mobile"). Nav items stacked at display 600 24px; basket action stack
  * pinned to the bottom. Focus-trapped, closes on Escape, body scroll locked
  * while open — mirrors `coop/layout/coop-mobile-menu.tsx`. Route-change
  * close is handled by the parent (`pink-header.tsx`), which owns `open`.
@@ -44,8 +43,6 @@ export function PinkMobileMenu({
   links,
   activeHref,
   triggerRef,
-  ctaText,
-  ctaLink,
   basketLabel,
   itemCount,
   onOpenCart,
@@ -179,6 +176,8 @@ export function PinkMobileMenu({
             key={link.href + link.label}
             href={link.href}
             onClick={onClose}
+            target={link.external ? "_blank" : undefined}
+            rel={link.external ? "noopener noreferrer" : undefined}
             aria-current={isActive(link.href) ? "page" : undefined}
             // `py-1.5` brings the 24px/1.5-line-height text (36px) up to a
             // 48px hit target without changing the type scale (design.md's
@@ -187,10 +186,15 @@ export function PinkMobileMenu({
             style={{
               fontSize: "24px",
               fontWeight: 600,
-              color: isActive(link.href) ? "var(--pink-blush)" : "var(--pink-paper)",
+              color: isActive(link.href)
+                ? "var(--pink-blush)"
+                : "var(--pink-paper)",
             }}
           >
             {link.label}
+            {link.external && (
+              <span className="sr-only"> (opens in new tab)</span>
+            )}
           </Link>
         ))}
       </nav>
@@ -199,15 +203,6 @@ export function PinkMobileMenu({
         className="pink-dark flex flex-col gap-3 px-8 pt-6 pb-8"
         style={{ borderTop: "1px solid var(--pink-ink-line)" }}
       >
-        {ctaText && (
-          <Link
-            href={ctaLink}
-            onClick={onClose}
-            className="pink-btn pink-btn-ghost w-full justify-center py-3.5"
-          >
-            {ctaText}
-          </Link>
-        )}
         <button
           type="button"
           onClick={onOpenCart}

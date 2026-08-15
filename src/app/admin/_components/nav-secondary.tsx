@@ -13,6 +13,11 @@ import {
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
 
+/** True for absolute http(s) URLs — a different host than the app itself. */
+export function isExternalUrl(url: string) {
+  return /^https?:\/\//i.test(url);
+}
+
 export function NavSecondary({
   items,
   ...props
@@ -25,29 +30,35 @@ export function NavSecondary({
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const pathname = usePathname();
   const isActive = (url: string) =>
-    pathname === url || pathname.startsWith(url + "/");
+    !isExternalUrl(url) && (pathname === url || pathname.startsWith(url + "/"));
 
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <Link
-                  href={item.url}
-                  className={
-                    isActive(item.url)
-                      ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary active:bg-primary/20 font-semibold"
-                      : ""
-                  }
-                >
-                  <item.icon />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const external = isExternalUrl(item.url);
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href={item.url}
+                    {...(external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                    className={
+                      isActive(item.url)
+                        ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary active:bg-primary/20 font-semibold"
+                        : ""
+                    }
+                  >
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

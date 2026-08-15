@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import type { HCaptchaHandle } from "~/components/inputs/hcaptcha-form-field";
+import type { RecaptchaHandle } from "~/components/inputs/recaptcha-field";
 import { isValidEmail } from "~/lib/utils";
 import { authClient } from "~/server/better-auth/client";
 import { Alert, AlertDescription } from "~/components/ui/alert";
@@ -23,7 +23,8 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
+import { OwnerTermsAcceptance } from "~/components/legal/owner-terms-acceptance";
 
 type ClaimClientProps = {
   /** Invite code, forwarded to POST /api/claim. */
@@ -36,6 +37,14 @@ type ClaimClientProps = {
   platformDomain: string;
   /** Whether a User with this email already exists (sign-in vs. sign-up). */
   userExists: boolean;
+  /**
+   * Whether that existing account already has a recorded acceptance of the
+   * platform ToS + Privacy Policy (`User.termsAcceptedAt`). Drives whether the
+   * acceptance checkbox also covers the ACCOUNT documents, or only the merchant
+   * ones. False for a brand-new account, and also for the (currently universal)
+   * case of an older account that predates acceptance tracking.
+   */
+  platformTermsRecorded: boolean;
 };
 
 /**
@@ -49,13 +58,7 @@ type ClaimClientProps = {
  * An in-flight request is tracked separately via `submitting` so the visible
  * phase (and thus which form renders) never changes mid-request.
  */
-type Phase =
-  | "loading"
-  | "mismatch"
-  | "signup"
-  | "signin"
-  | "verify"
-  | "ready";
+type Phase = "loading" | "mismatch" | "signup" | "signin" | "verify" | "ready";
 
 export function ClaimClient({
   code,
@@ -64,8 +67,9 @@ export function ClaimClient({
   subdomain,
   platformDomain,
   userExists,
+  platformTermsRecorded,
 }: ClaimClientProps) {
-  const captchaRef = useRef<HCaptchaHandle>(null);
+  const captchaRef = useRef<RecaptchaHandle>(null);
   const [captchaToken, setCaptchaToken] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -79,8 +83,21 @@ export function ClaimClient({
   // Resend "verification email" cooldown, in seconds (0 = ready to send).
   const [resending, setResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  // Terms acceptance. Every phase that can reach `claim()` shows the checkbox,
+  // because claiming is what creates the OWNER membership — including the
+  // "ready" phase, which is where a brand-new owner actually lands after
+  // clicking the verification link (sign-up itself never yields a live session
+  // under requireEmailVerification).
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   const subdomainPreview = `${subdomain}.${platformDomain}`;
+
+  // Sign-in is the asymmetric path: it does NOT create a User, so the platform
+  // ToS + Privacy Policy are only offered (and only ever stamped) when this
+  // account has no acceptance on file. An owner who already agreed is asked for
+  // the merchant documents alone, and `/api/claim` will not re-stamp them.
+  const includePlatformTerms = !platformTermsRecorded;
 
   // Where the verification link should land the owner AFTER they verify. Better
   // Auth threads this through signUp.email / signIn.email / sendVerificationEmail
@@ -143,9 +160,28 @@ export function ClaimClient({
     return () => clearInterval(id);
   }, [resendCooldown]);
 
-  const resetCaptcha = () => {
-    captchaRef.current?.reset();
-    setCaptchaToken("");
+  // v3 has no widget to clear — "reset" means mint a replacement, since
+  // better-auth burns the previous token at /siteverify even when the
+  // request fails for an unrelated reason (wrong password, email taken).
+  // Await the mint and restage its result explicitly rather than relying on
+  // the field's own onVerify callback to land later.
+  const resetCaptcha = async () => {
+    const token = await captchaRef.current?.reset();
+    setCaptchaToken(token ?? "");
+  };
+
+  /**
+   * Gate every submit path on the checkbox. Returns false (and shows the inline
+   * error) when it hasn't been ticked — the server rejects the request anyway,
+   * this just avoids a pointless round trip.
+   */
+  const requireAcceptance = () => {
+    if (acceptedTerms) {
+      setTermsError(null);
+      return true;
+    }
+    setTermsError("Please accept the terms and policies to claim this site.");
+    return false;
   };
 
   /** Consume the invite once a verified session exists. */
@@ -156,7 +192,13 @@ export function ClaimClient({
       const res = await fetch("/api/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({
+          code,
+          // Merchant terms are accepted on every claim; the account-level ones
+          // only when this account has none recorded (see includePlatformTerms).
+          acceptedTerms: true,
+          acceptedPlatformTerms: includePlatformTerms,
+        }),
       });
       const data = (await res.json()) as {
         error?: string;
@@ -188,6 +230,10 @@ export function ClaimClient({
     e.preventDefault();
     setError(null);
 
+    // Checked before signUp.email so we never create an account for someone who
+    // hasn't agreed to the documents the checkbox names.
+    if (!requireAcceptance()) return;
+
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       return;
@@ -203,15 +249,30 @@ export function ClaimClient({
 
     setSubmitting(true);
     try {
+      // Mint a fresh token right before submitting — better-auth burns the
+      // staged one at /siteverify, and this form can sit open a while (email
+      // verification link, password entry) so it can also just be stale.
+      const freshCaptchaToken =
+        (await captchaRef.current?.execute()) ?? captchaToken;
+
+      // `resolvePlatformTermsAcceptance` rejects any /sign-up/email call that
+      // doesn't carry this flag — the post-hoc stamp in POST /api/claim is no
+      // longer enough on its own. `requireAcceptance()` above guarantees the
+      // box really was checked. Spread from a Record because the client params
+      // type doesn't declare this key and a literal property would fail the
+      // excess-property check; same technique as store-customization-step.tsx.
+      const termsSignal: Record<string, unknown> = { termsAccepted: true };
+
       const { error: signUpError } = await authClient.signUp.email({
         // Email comes from the server-passed invite, NOT a user-editable field.
         email,
         password,
         name: name.trim(),
+        ...termsSignal,
         // Land the verification link back on THIS claim page (verified +
         // auto-signed-in) so the mount check drops into the ready-to-claim state.
         callbackURL,
-        fetchOptions: { headers: { "x-captcha-response": captchaToken } },
+        fetchOptions: { headers: { "x-captcha-response": freshCaptchaToken } },
       });
 
       if (signUpError) {
@@ -221,7 +282,7 @@ export function ClaimClient({
         const signedIn =
           sessionData?.user?.email?.toLowerCase() === email.toLowerCase();
         if (!signedIn) {
-          resetCaptcha();
+          await resetCaptcha();
           setError(signUpError.message ?? "Failed to create account");
           return;
         }
@@ -240,7 +301,7 @@ export function ClaimClient({
       }
       setPhase("verify");
     } catch {
-      resetCaptcha();
+      await resetCaptcha();
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
@@ -250,6 +311,8 @@ export function ClaimClient({
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!requireAcceptance()) return;
 
     if (!isValidEmail(email)) {
       setError("This invitation has an invalid email address.");
@@ -262,6 +325,11 @@ export function ClaimClient({
 
     setSubmitting(true);
     try {
+      // Mint a fresh token right before submitting — same reasoning as
+      // handleSignup: better-auth burns the staged token at /siteverify.
+      const freshCaptchaToken =
+        (await captchaRef.current?.execute()) ?? captchaToken;
+
       const { error: signInError } = await authClient.signIn.email({
         email,
         password,
@@ -269,7 +337,7 @@ export function ClaimClient({
         // auto-resend the verification email using THIS callbackURL — keeping the
         // return path on the claim page even for the sign-in branch.
         callbackURL,
-        fetchOptions: { headers: { "x-captcha-response": captchaToken } },
+        fetchOptions: { headers: { "x-captcha-response": freshCaptchaToken } },
       });
 
       if (signInError) {
@@ -282,14 +350,14 @@ export function ClaimClient({
           setPhase("verify");
           return;
         }
-        resetCaptcha();
+        await resetCaptcha();
         setError(signInError.message ?? "Incorrect email or password");
         return;
       }
 
       await claim();
     } catch {
-      resetCaptcha();
+      await resetCaptcha();
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
@@ -299,6 +367,7 @@ export function ClaimClient({
   // Re-check verification after the owner reports having verified.
   const handleVerifiedContinue = async () => {
     setError(null);
+    if (!requireAcceptance()) return;
     try {
       const { data } = await authClient.getSession();
       if (
@@ -360,6 +429,23 @@ export function ClaimClient({
   };
 
   const busy = submitting;
+
+  // Rendered in every phase that can reach `claim()` — sign-up, sign-in, verify
+  // and ready — so the acceptance is always on screen at the moment it's given.
+  const TermsAcceptance = (
+    <OwnerTermsAcceptance
+      id="claim-terms-acceptance"
+      checked={acceptedTerms}
+      onCheckedChange={(next) => {
+        setAcceptedTerms(next);
+        if (next) setTermsError(null);
+      }}
+      includePlatformTerms={includePlatformTerms}
+      disabled={busy}
+      error={termsError}
+      platformDomain={platformDomain}
+    />
+  );
 
   // ── Site header (shown in every phase) ─────────────────────────────────────
   const SiteHeader = (
@@ -468,6 +554,7 @@ export function ClaimClient({
             </AlertDescription>
           </Alert>
           {ErrorAlert}
+          {TermsAcceptance}
           <Button className="w-full" onClick={handleVerifiedContinue}>
             I&apos;ve verified my email — continue
           </Button>
@@ -504,7 +591,14 @@ export function ClaimClient({
             </AlertDescription>
           </Alert>
           {ErrorAlert}
-          <Button className="w-full" disabled={busy} onClick={() => claim()}>
+          {TermsAcceptance}
+          <Button
+            className="w-full"
+            disabled={busy}
+            onClick={() => {
+              if (requireAcceptance()) void claim();
+            }}
+          >
             {busy ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -544,14 +638,16 @@ export function ClaimClient({
                 autoFocus
               />
             </div>
-            <HCaptchaField
+            <RecaptchaField
               ref={captchaRef}
+              action="auth"
               onVerify={setCaptchaToken}
               onExpire={() => setCaptchaToken("")}
               onError={() => setCaptchaToken("")}
               label="Verification"
               required
             />
+            {TermsAcceptance}
             <Button type="submit" className="w-full" disabled={busy}>
               {busy ? (
                 <>
@@ -625,14 +721,16 @@ export function ClaimClient({
               required
             />
           </div>
-          <HCaptchaField
+          <RecaptchaField
             ref={captchaRef}
+            action="auth"
             onVerify={setCaptchaToken}
             onExpire={() => setCaptchaToken("")}
             onError={() => setCaptchaToken("")}
             label="Verification"
             required
           />
+          {TermsAcceptance}
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? (
               <>

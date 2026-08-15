@@ -18,7 +18,6 @@ type Props<CurrentForm extends FieldValues> = {
   description?: string;
   className?: string;
   disabled?: boolean;
-  placeholder?: string;
 };
 
 export const SwitchFormField = <CurrentForm extends FieldValues>({

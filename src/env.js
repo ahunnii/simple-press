@@ -9,10 +9,12 @@ export const env = createEnv({
   server: {
     BETTER_AUTH_SECRET:
       process.env.NODE_ENV === "production"
-        ? z.string()
-        : z.string().optional(),
-    BETTER_AUTH_DISCORD_ID: z.string(),
-    BETTER_AUTH_DISCORD_SECRET: z.string(),
+        ? z.string().min(32)
+        : z.string().min(32).optional(),
+    // Discord OAuth is currently disabled in Better Auth config. Credentials
+    // remain optional so production is not forced to provision unused keys.
+    BETTER_AUTH_DISCORD_ID: z.string().optional(),
+    BETTER_AUTH_DISCORD_SECRET: z.string().optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -32,7 +34,13 @@ export const env = createEnv({
     DISCORD_WEBHOOK_URL: z.string().url(),
     VPS_IP: z.string(),
 
-    HCAPTCHA_SECRET_KEY: z.string(),
+    RECAPTCHA_SECRET_KEY: z.string().min(1),
+    // reCAPTCHA v3 scores 0.0–1.0 rather than passing/failing, so this is a
+    // policy knob, not a constant. Tune it against real traffic before trusting
+    // the default — too high silently locks out real customers. Set it to 0 in
+    // `.env.local`: scores from localhost are typically 0.1–0.3 because there's
+    // no traffic history for the key.
+    RECAPTCHA_MIN_SCORE: z.coerce.number().min(0).max(1).default(0.5),
 
     SIMPLEPRESS_HASH_SECRET: z.string(),
     ARTISANAL_FUTURES_API_URL: z.string().url(),
@@ -42,7 +50,15 @@ export const env = createEnv({
     AF_PARTNER_API_TOKEN: z.string().min(1),
     // Shared HMAC secret for both inbound and outbound partner requests
     AF_SP_WEBHOOK_SECRET: z.string().min(1),
-    REDIS_URL: z.string().url().optional(),
+    // Required in production so auth + application rate limits are shared
+    // across Coolify replicas. Optional in development/test.
+    REDIS_URL:
+      process.env.NODE_ENV === "production"
+        ? z.string().url()
+        : z.string().url().optional(),
+    // Comma-separated proxy IPs that may append X-Forwarded-For (Coolify/Traefik).
+    // When set, rate-limit IP helpers take the rightmost untrusted hop.
+    TRUSTED_PROXY_IPS: z.string().optional(),
 
     // Shared secret for the /api/cron endpoint (Bearer token). Optional: when
     // unset, the cron endpoint refuses all requests.
@@ -93,7 +109,13 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_NOREPLY: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_ORDERS: z.string(),
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: z.string(),
-    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: z.string(),
+    // Public by design — a reCAPTCHA site key ships in the page source.
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().min(1),
+    // Test-only escape hatch: when "1", the client stages a sentinel token and
+    // the server accepts it without calling Google. Both the client hook and
+    // `verify-recaptcha.ts` additionally require NODE_ENV !== "production", so
+    // setting this on a deployed build does nothing.
+    NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS: z.string().optional(),
     NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL: z
       .string()
       .email()
@@ -134,10 +156,13 @@ export const env = createEnv({
     NEXT_PUBLIC_EMAIL_FROM_SUPPORT: process.env.NEXT_PUBLIC_EMAIL_FROM_SUPPORT,
     DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
     VPS_IP: process.env.VPS_IP,
-    NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+    NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS:
+      process.env.NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS,
     NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL:
       process.env.NEXT_PUBLIC_PLATFORM_CONTACT_EMAIL,
-    HCAPTCHA_SECRET_KEY: process.env.HCAPTCHA_SECRET_KEY,
+    RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
+    RECAPTCHA_MIN_SCORE: process.env.RECAPTCHA_MIN_SCORE,
 
     SIMPLEPRESS_HASH_SECRET: process.env.SIMPLEPRESS_HASH_SECRET,
     CRON_SECRET: process.env.CRON_SECRET,
@@ -146,6 +171,7 @@ export const env = createEnv({
     AF_PARTNER_API_TOKEN: process.env.AF_PARTNER_API_TOKEN,
     AF_SP_WEBHOOK_SECRET: process.env.AF_SP_WEBHOOK_SECRET,
     REDIS_URL: process.env.REDIS_URL,
+    TRUSTED_PROXY_IPS: process.env.TRUSTED_PROXY_IPS,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
     IS_PREVIEW_ENV: process.env.IS_PREVIEW_ENV,
     EMAIL_REDIRECT_TO: process.env.EMAIL_REDIRECT_TO,

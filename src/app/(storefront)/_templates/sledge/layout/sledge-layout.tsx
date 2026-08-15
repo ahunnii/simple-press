@@ -41,7 +41,7 @@ export async function SledgeLayout({
         Skip to main content
       </a>
       {banner && <SledgeAnnouncementBar banner={banner} />}
-      <SledgeHeader business={business} session={session ?? null} />
+      <SledgeHeader business={business} initialSession={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>

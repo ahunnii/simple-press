@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  deductPoolInventory,
+  EMPTY_POOL_SALES,
+  restorePoolInventory,
+} from "~/lib/inventory";
+
 import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
 import {
@@ -9,11 +15,6 @@ import {
   createOwnerUser,
   createProduct,
 } from "../helpers/factories";
-import {
-  deductPoolInventory,
-  EMPTY_POOL_SALES,
-  restorePoolInventory,
-} from "~/lib/inventory";
 
 // Procedures resolve the tenant from the request host via `next/headers` — see
 // tenant-isolation.test.ts for the reference pattern.
@@ -57,7 +58,9 @@ describe("base-inventory-unit pool sales (deductPoolInventory / restorePoolInven
 
   it("deductPoolInventory sums units consumed across two products in the same pool (2 + 6 = 8)", async () => {
     const { business, caller } = await setupBusiness();
-    const pool = await createBaseInventoryUnit(business.id, { inventoryQty: 100 });
+    const pool = await createBaseInventoryUnit(business.id, {
+      inventoryQty: 100,
+    });
     const productA = await makePooledProduct(business.id, pool.id, 2);
     const productB = await makePooledProduct(business.id, pool.id, 6);
     const order = await createOrder(business.id, { total: 1000 });
@@ -161,7 +164,9 @@ describe("base-inventory-unit pool sales (deductPoolInventory / restorePoolInven
 
   it("restorePoolInventory (order-driven restock) reduces netSoldUnits and raises returnedUnits", async () => {
     const { business, caller } = await setupBusiness();
-    const pool = await createBaseInventoryUnit(business.id, { inventoryQty: 50 });
+    const pool = await createBaseInventoryUnit(business.id, {
+      inventoryQty: 50,
+    });
     const product = await makePooledProduct(business.id, pool.id, 1);
     const order = await createOrder(business.id, { total: 500 });
 
@@ -200,7 +205,9 @@ describe("base-inventory-unit pool sales (deductPoolInventory / restorePoolInven
 
   it("disambiguation lock: admin adjustInventory({reason:'return'}) (userId, no orderId) is EXCLUDED from returnedUnits, while an order-driven restock (has orderId) IS included", async () => {
     const { business, caller } = await setupBusiness();
-    const pool = await createBaseInventoryUnit(business.id, { inventoryQty: 50 });
+    const pool = await createBaseInventoryUnit(business.id, {
+      inventoryQty: 50,
+    });
     const product = await makePooledProduct(business.id, pool.id, 1);
     const order = await createOrder(business.id, { total: 500 });
 
@@ -253,9 +260,16 @@ describe("base-inventory-unit pool sales (deductPoolInventory / restorePoolInven
 
   it("other admin adjust reasons (restock, damage, correction, adjustment) never affect the sales figures", async () => {
     const { business, caller } = await setupBusiness();
-    const pool = await createBaseInventoryUnit(business.id, { inventoryQty: 20 });
+    const pool = await createBaseInventoryUnit(business.id, {
+      inventoryQty: 20,
+    });
 
-    for (const reason of ["restock", "damage", "correction", "adjustment"] as const) {
+    for (const reason of [
+      "restock",
+      "damage",
+      "correction",
+      "adjustment",
+    ] as const) {
       const current = await db.baseInventoryUnit.findUniqueOrThrow({
         where: { id: pool.id },
       });
@@ -272,7 +286,9 @@ describe("base-inventory-unit pool sales (deductPoolInventory / restorePoolInven
 
   it("list and getById report identical sales figures for the same pool", async () => {
     const { business, caller } = await setupBusiness();
-    const pool = await createBaseInventoryUnit(business.id, { inventoryQty: 30 });
+    const pool = await createBaseInventoryUnit(business.id, {
+      inventoryQty: 30,
+    });
     const product = await makePooledProduct(business.id, pool.id, 1);
     const order = await createOrder(business.id, { total: 500 });
 
@@ -297,7 +313,9 @@ describe("base-inventory-unit pool sales (deductPoolInventory / restorePoolInven
 
   it("a pool with no movement reports all zeros (not undefined/NaN) from both list and getById", async () => {
     const { business, caller } = await setupBusiness();
-    const pool = await createBaseInventoryUnit(business.id, { inventoryQty: 15 });
+    const pool = await createBaseInventoryUnit(business.id, {
+      inventoryQty: 15,
+    });
 
     const listResult = await caller.baseInventoryUnit.list();
     const fromList = listResult.find((p) => p.id === pool.id);

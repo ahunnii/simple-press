@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const bambooSections: Record<string, TemplateSection[]> = {
   bamboo: [
@@ -17,6 +18,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       title: "Featured Products",
       groupIds: ["homepage.featured"],
       order: 1,
+      links: [SECTION_LINKS.products],
     },
     {
       id: "homepage.sustainability",
@@ -40,10 +42,12 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "homepage.testimonials",
       page: "homepage",
       title: "Testimonials",
-      description: "Three customer testimonials with a link to the testimonials page.",
+      description:
+        "Three customer testimonials with a link to the testimonials page.",
       groupIds: ["homepage.testimonials"],
       order: 4,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "homepage.location",
@@ -135,7 +139,8 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       id: "contact.map",
       page: "contact",
       title: "Location Map",
-      description: "Interactive map with directions, shown below the contact form.",
+      description:
+        "Interactive map with directions, shown below the contact form.",
       groupIds: ["contact.map"],
       order: 1,
       hideable: true,
@@ -148,6 +153,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       title: "Collections Listing",
       groupIds: ["collections.listing"],
       order: 0,
+      links: [SECTION_LINKS.collections],
     },
 
     // Products (shop)
@@ -157,6 +163,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       title: "Shop Listing",
       groupIds: ["products.listing"],
       order: 0,
+      links: [SECTION_LINKS.products],
     },
 
     // Blog
@@ -166,6 +173,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       title: "Blog Listing",
       groupIds: ["blog.listing"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
     {
       id: "blog.post",
@@ -186,6 +194,7 @@ export const bambooSections: Record<string, TemplateSection[]> = {
       description: "Heading and subheading on the testimonials page.",
       groupIds: ["testimonials.page"],
       order: 0,
+      links: [SECTION_LINKS.testimonials],
     },
 
     // Global

@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Curated section registry for the `default` storefront template.
@@ -28,6 +29,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.collections"],
       order: 1,
       hideable: true,
+      links: [SECTION_LINKS.collections],
     },
     {
       id: "homepage.rails",
@@ -37,6 +39,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.rails"],
       order: 2,
       hideable: false,
+      links: [SECTION_LINKS.products, SECTION_LINKS.collections],
     },
     {
       id: "homepage.story",
@@ -55,6 +58,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.testimonial"],
       order: 4,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "homepage.promise",
@@ -166,6 +170,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["events.list"],
       order: 1,
       hideable: false,
+      links: [SECTION_LINKS.events],
     },
     {
       id: "events.cta",
@@ -194,6 +199,7 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["videos.list"],
       order: 1,
       hideable: false,
+      links: [SECTION_LINKS.videos],
     },
 
     // ── Blog ──────────────────────────────────────────────────────────────
@@ -204,6 +210,23 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       groupIds: ["blog.header"],
       order: 0,
       hideable: false,
+      links: [SECTION_LINKS.blog],
+    },
+
+    // ── Product ───────────────────────────────────────────────────────────
+    // Previewed on a representative product; the fields apply to EVERY
+    // product page (their keys keep the legacy `global.product-` prefix —
+    // see the note in ./index.ts).
+    {
+      id: "product.details",
+      page: "product",
+      title: "Product page details",
+      description:
+        "Shipping/question copy and trust badges applied to all products",
+      groupIds: ["product.details"],
+      order: 0,
+      hideable: false,
+      links: [SECTION_LINKS.products],
     },
 
     // ── Global ────────────────────────────────────────────────────────────
@@ -214,16 +237,6 @@ export const defaultTemplateSections: Record<string, TemplateSection[]> = {
       description: "Image and styling shown on sign-in / sign-up pages",
       groupIds: ["global.authentication"],
       order: 0,
-      hideable: false,
-    },
-    {
-      id: "global.product",
-      page: "global",
-      title: "Product Defaults",
-      description:
-        "Shipping/question copy and trust badges applied to all products",
-      groupIds: ["global.product"],
-      order: 1,
       hideable: false,
     },
   ],

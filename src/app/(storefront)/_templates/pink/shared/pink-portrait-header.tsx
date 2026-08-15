@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { PinkBreadcrumbItem } from "./pink-page-header";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { hasCustomImage } from "./pink-image-fallback";
-import type { PinkBreadcrumbItem } from "./pink-page-header";
 import { PinkRule } from "./pink-rule";
 
 type PinkPortraitHeaderProps = {
@@ -67,25 +68,35 @@ export function PinkPortraitHeader({
 
   return (
     <header
-      className={`px-5 py-14 md:px-10 md:py-20${className ? ` ${className}` : ""}`}
+      className={cn("px-5 py-14 md:px-10 md:py-20", className)}
       style={{ background: "var(--pink-panel)", color: "var(--pink-ink)" }}
       {...sectionAttrs}
     >
       <div
-        className={`mx-auto grid max-w-[1400px] gap-10 md:items-center md:gap-14${
-          portrait ? " md:grid-cols-[1fr_0.6fr]" : ""
-        }`}
+        className={cn(
+          "mx-auto grid max-w-[1400px] gap-10 md:items-center md:gap-14",
+          portrait && "md:grid-cols-[1fr_0.6fr]",
+        )}
       >
         {/* `min-w-0` on both tracks: a grid item's default `min-width: auto`
             lets a long unbroken word push the track past the viewport, which is
             how this template's only horizontal-overflow bugs have started. */}
         <div className="flex min-w-0 flex-col gap-4">
           {breadcrumb && breadcrumb.length > 0 && (
-            <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5">
+            <nav
+              aria-label="Breadcrumb"
+              className="flex flex-wrap items-center gap-1.5"
+            >
               {breadcrumb.map((crumb, i) => (
-                <span key={crumb.label + i} className="flex items-center gap-1.5">
+                <span
+                  key={crumb.label + i}
+                  className="flex items-center gap-1.5"
+                >
                   {i > 0 && (
-                    <span aria-hidden="true" style={{ color: "var(--pink-subtle)" }}>
+                    <span
+                      aria-hidden="true"
+                      style={{ color: "var(--pink-subtle)" }}
+                    >
                       /
                     </span>
                   )}
@@ -98,7 +109,10 @@ export function PinkPortraitHeader({
                       {crumb.label}
                     </Link>
                   ) : (
-                    <span className="text-[0.8125rem]" style={{ color: "var(--pink-subtle)" }}>
+                    <span
+                      className="text-[0.8125rem]"
+                      style={{ color: "var(--pink-subtle)" }}
+                    >
                       {crumb.label}
                     </span>
                   )}
@@ -143,8 +157,11 @@ export function PinkPortraitHeader({
           <div
             // Capped and centred below `md`: a full-bleed 4:5 portrait on a
             // 390px phone is ~490px tall and pushes the headline off screen.
-            className="relative mx-auto w-full min-w-0 max-w-[420px] overflow-hidden md:mx-0 md:max-w-none"
-            style={{ aspectRatio: "4 / 5", background: "var(--pink-panel-strong)" }}
+            className="relative mx-auto w-full max-w-[420px] min-w-0 overflow-hidden md:mx-0 md:max-w-none"
+            style={{
+              aspectRatio: "4 / 5",
+              background: "var(--pink-panel-strong)",
+            }}
           >
             <Image
               src={portrait}

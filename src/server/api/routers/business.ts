@@ -11,11 +11,16 @@ import {
   resolveStorefrontMaintenance,
 } from "~/lib/maintenance";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
+import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import { dollarsToCents } from "~/lib/prices";
 import { stripeClient } from "~/lib/stripe/client";
 import { isTemplateAvailableForSubdomain } from "~/lib/template-ownership";
 import { businessHoursSchema } from "~/lib/validators/business-hours";
 import { zoneWeightFormSchema } from "~/lib/validators/shipping";
+import {
+  pageMetaSchema,
+  siteVerificationSchema,
+} from "~/lib/validators/site-seo";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
@@ -77,6 +82,12 @@ export const businessRouter = createTRPCRouter({
             metaDescription: true,
             metaKeywords: true,
             ogImage: true,
+            // Read by `generateMetadata` in the root layout (verification
+            // tokens) and in each static storefront route (per-route title /
+            // description overrides). Both are public-by-design: they end up in
+            // meta tags on every rendered page.
+            pageMeta: true,
+            siteVerification: true,
             bannerConfig: true,
             popupConfig: true,
           },
@@ -90,7 +101,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = businessData.siteContent;
-    if (sc?.previewCustomFields != null) {
+    if (sc && isPreviewDraft(sc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(
         businessData.id,
       );
@@ -159,6 +170,7 @@ export const businessRouter = createTRPCRouter({
           include: {
             images: true,
           },
+          omit: { cost: true },
         },
         siteContent: {
           select: {
@@ -183,7 +195,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = businessData.siteContent;
-    if (sc?.previewCustomFields != null) {
+    if (sc && isPreviewDraft(sc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(
         businessData.id,
       );
@@ -308,7 +320,9 @@ export const businessRouter = createTRPCRouter({
               select: { inventoryQty: true, allowBackorders: true },
             },
           },
-          take: 4,
+          // 8 so templates with two product rails (default, noise) can fill
+          // both; single-rail templates cap with their own slice(0, 4).
+          take: 8,
         },
       },
     });
@@ -317,7 +331,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const hsc = homepage.siteContent;
-    if (hsc?.previewCustomFields != null) {
+    if (hsc && isPreviewDraft(hsc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
       if (previewBizId) {
         hsc.customFields = hsc.previewCustomFields;
@@ -343,6 +357,7 @@ export const businessRouter = createTRPCRouter({
         name: true,
         subdomain: true,
         customDomain: true,
+        sendAbandonedCheckoutEmails: true,
         siteContent: {
           select: {
             logoUrl: true,
@@ -565,7 +580,7 @@ export const businessRouter = createTRPCRouter({
 
     // Swap in the preview draft if the current user is an authorized owner/manager.
     const sc = business.siteContent;
-    if (sc?.previewCustomFields != null) {
+    if (sc && isPreviewDraft(sc.previewCustomFields)) {
       const previewBizId = await getAuthorizedPreviewBusinessId(business.id);
       if (previewBizId) {
         sc.customFields = sc.previewCustomFields;
@@ -606,101 +621,6 @@ export const businessRouter = createTRPCRouter({
     return business;
   }),
 
-  getPaymentsOverview: ownerAdminProcedure.query(async ({ ctx }) => {
-    const { businessId } = ctx;
-
-    const business = await ctx.db.business.findFirst({
-      where: { id: businessId },
-      select: { stripeAccountId: true },
-    });
-
-    // Annual order stats — current calendar year. INFORM Act thresholds
-    // measure transactions conducted, not revenue currently retained: an
-    // order that was paid counts even if it was later refunded or disputed,
-    // while an order that was never paid (pending/unpaid/failed) does not.
-    // This is gross, not net of refunds — deliberately different from the
-    // dashboard's revenue convention (paid-only, net of refunds).
-    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-    const orderStats = await ctx.db.order.aggregate({
-      where: {
-        businessId,
-        createdAt: { gte: startOfYear },
-        paymentStatus: { in: ["paid", "refunded", "disputed"] },
-      },
-      _count: { id: true },
-      _sum: { total: true },
-    });
-
-    const annualTransactions = orderStats._count.id;
-    const annualRevenueCents = orderStats._sum.total ?? 0;
-    // INFORM Act: 200+ transactions OR $5,000+ (500000 cents) annual revenue
-    const informActThresholdReached =
-      annualTransactions >= 200 || annualRevenueCents >= 500000;
-
-    let stripeDetailsSubmitted = false;
-    let stripeBalance: {
-      available: { amount: number; currency: string }[];
-      pending: { amount: number; currency: string }[];
-    } | null = null;
-    let recentPayouts:
-      | {
-          id: string;
-          amount: number;
-          currency: string;
-          status: string;
-          arrival_date: number;
-        }[]
-      | null = null;
-
-    const accountId = business?.stripeAccountId;
-    if (accountId) {
-      try {
-        const [balance, payouts, account] = await Promise.all([
-          stripeClient.balance.retrieve({ stripeAccount: accountId }),
-          stripeClient.payouts.list({ limit: 5 }, { stripeAccount: accountId }),
-          stripeClient.accounts.retrieve(accountId),
-        ]);
-
-        stripeDetailsSubmitted = account.details_submitted ?? false;
-        stripeBalance = {
-          available: balance.available.map((b) => ({
-            amount: b.amount,
-            currency: b.currency,
-          })),
-          pending: balance.pending.map((b) => ({
-            amount: b.amount,
-            currency: b.currency,
-          })),
-        };
-        recentPayouts = payouts.data.map((p) => ({
-          id: p.id,
-          amount: p.amount,
-          currency: p.currency,
-          status: p.status,
-          arrival_date: p.arrival_date,
-        }));
-      } catch (err) {
-        Sentry.captureException(err, {
-          tags: {
-            "trpc.procedure": "business.getPaymentsOverview",
-            service: "stripe",
-          },
-        });
-        // Non-fatal — return partial data
-      }
-    }
-
-    return {
-      annualTransactions,
-      annualRevenueCents,
-      informActThresholdReached,
-      stripeDetailsSubmitted,
-      stripeBalance,
-      recentPayouts,
-      isStripeConnected: !!accountId,
-    };
-  }),
-
   updateStripeSettings: ownerAdminProcedure
     .input(z.object({ stripeAutoTaxEnabled: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -737,6 +657,20 @@ export const businessRouter = createTRPCRouter({
         } catch (err) {
           // Re-throw TRPCErrors as-is; wrap Stripe API errors
           if (err instanceof TRPCError) throw err;
+          // The BAD_REQUEST below is deliberately friendly ("you haven't set
+          // this up yet"), but it's also on the tRPC handler's do-not-capture
+          // list — so without this, a Stripe outage, a revoked key, a 429,
+          // or a network failure looks identical to a merchant who simply
+          // hasn't configured Stripe Tax, and never surfaces anywhere.
+          // Capture the real error here before rewriting it.
+          Sentry.captureException(err, {
+            tags: {
+              service: "stripe",
+              "trpc.procedure": "business.updateStripeSettings",
+              step: "verify-tax-settings",
+              businessId,
+            },
+          });
           throw new TRPCError({
             code: "BAD_REQUEST",
             message:
@@ -815,7 +749,9 @@ export const businessRouter = createTRPCRouter({
 
       const include = {
         ...(input?.includePages
-          ? { pages: { where: { type: "page" }, orderBy: { sortOrder: "asc" } } }
+          ? {
+              pages: { where: { type: "page" }, orderBy: { sortOrder: "asc" } },
+            }
           : {}),
         ...(input?.includeSiteContent
           ? {
@@ -838,6 +774,23 @@ export const businessRouter = createTRPCRouter({
       const business = await ctx.db.business.findFirst({
         where: { id: businessId },
         include: include as Prisma.BusinessInclude,
+        // Prisma can't combine `select` with a dynamic `include`, so narrow
+        // via `omit` instead. Every caller of `business.getWith` was audited
+        // (2026-08-13): none reads these scalars — Stripe identity/settings
+        // are only consumed via `getWithIntegrations` and dedicated
+        // `select`-scoped queries elsewhere. `getWith` is tenant-scoped
+        // (ownerAdminProcedure) so this isn't fixing a live leak, just
+        // narrowing what a careless future prop-spread could ship to a
+        // client bundle. If a caller ever needs Stripe connection status,
+        // prefer a derived `isStripeConnected` boolean over re-exposing
+        // `stripeAccountId` here.
+        omit: {
+          stripeAccountId: true,
+          stripeChargesEnabled: true,
+          stripePayoutsEnabled: true,
+          stripeAutoTaxEnabled: true,
+          afProvisionCode: true,
+        },
       });
 
       if (!business) {
@@ -855,7 +808,7 @@ export const businessRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         ownerEmail: z.string().email(),
-        supportEmail: z.string().email().optional(),
+        supportEmail: z.string().email(),
         businessAddress: z.string().optional(),
         phoneNumber: z.string().optional(),
         sendAbandonedCheckoutEmails: z.boolean().optional(),
@@ -889,6 +842,33 @@ export const businessRouter = createTRPCRouter({
       return {
         message: "General settings updated successfully",
         businessId: updatedBusiness.id,
+        business: updatedBusiness,
+      };
+    }),
+
+  // Narrow mutation used by /admin/emails to flip whether the
+  // abandoned-checkout recovery email sends at all. Deliberately does not
+  // reuse `updateGeneral` — that mutation's input requires the full general
+  // settings payload (name, ownerEmail, supportEmail, ...), and reconstructing
+  // it from this page would risk a partial overwrite of business name,
+  // address, or phone.
+  updateEmailSettings: ownerAdminProcedure
+    .input(
+      z.object({
+        sendAbandonedCheckoutEmails: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const updatedBusiness = await ctx.db.business.update({
+        where: { id: businessId },
+        data: {
+          sendAbandonedCheckoutEmails: input.sendAbandonedCheckoutEmails,
+        },
+      });
+      return {
+        message: "Email settings updated successfully",
         business: updatedBusiness,
       };
     }),
@@ -976,6 +956,17 @@ export const businessRouter = createTRPCRouter({
       });
     }),
 
+  /**
+   * The only writer of `SiteContent.pageMeta` and `SiteContent.siteVerification`.
+   *
+   * Both live here rather than in `siteContentSchema` on purpose:
+   * `content.updateSiteContent` blind-spreads its whole payload into the
+   * upsert, so anything added to that schema also becomes writable by the
+   * branding editor, the navigation builder, the template-fields editor and the
+   * visual editor's Publish transaction. A search-engine ownership token must
+   * not sit in that blast radius — same reasoning that already keeps
+   * `bannerConfig` / `popupConfig` / `emailOverrides` out of it.
+   */
   updateSeo: ownerAdminProcedure
     .input(
       z.object({
@@ -985,6 +976,8 @@ export const businessRouter = createTRPCRouter({
         ogImage: z.string().optional(),
         localBusinessEnabled: z.boolean().optional(),
         allowAiCrawlers: z.boolean().optional(),
+        pageMeta: pageMetaSchema.optional(),
+        siteVerification: siteVerificationSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -996,7 +989,23 @@ export const businessRouter = createTRPCRouter({
         ogImage,
         localBusinessEnabled,
         allowAiCrawlers,
+        pageMeta,
+        siteVerification,
       } = input;
+
+      // The four meta strings above map to nullable `String?` columns, where an
+      // absent key is already a no-op, so they can be passed through unguarded.
+      // These two are Json columns: `undefined` is a no-op but `null` is a type
+      // error (Prisma wants `Prisma.JsonNull`), so they are only spread in when
+      // the caller actually sent them.
+      const jsonPatch = {
+        ...(pageMeta !== undefined && {
+          pageMeta: pageMeta as Prisma.InputJsonValue,
+        }),
+        ...(siteVerification !== undefined && {
+          siteVerification: siteVerification as Prisma.InputJsonValue,
+        }),
+      };
 
       const updatedBusiness = await ctx.db.business.update({
         where: { id: businessId },
@@ -1010,12 +1019,14 @@ export const businessRouter = createTRPCRouter({
                 metaDescription,
                 metaKeywords,
                 ogImage,
+                ...jsonPatch,
               },
               update: {
                 metaTitle,
                 metaDescription,
                 metaKeywords,
                 ogImage,
+                ...jsonPatch,
               },
             },
           },

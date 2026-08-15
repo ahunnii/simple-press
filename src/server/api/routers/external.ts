@@ -3,10 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { env } from "~/env";
-import {
-  externalTokenLimiter,
-  getClientIpFromHeaders,
-} from "~/lib/rate-limit";
+import { externalTokenLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const externalRouter = createTRPCRouter({

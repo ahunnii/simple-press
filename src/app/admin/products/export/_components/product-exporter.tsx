@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -33,6 +32,8 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+
+import { AdminThumb } from "../../../_components/admin-thumb";
 
 export function ProductExporter() {
   const [search, setSearch] = useState("");
@@ -112,7 +113,7 @@ export function ProductExporter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-foreground text-3xl font-bold">
-            Export to WordPress
+            Export products (WooCommerce CSV)
           </h1>
           <p className="text-muted-foreground mt-2">
             Select products to export to WooCommerce
@@ -258,7 +259,7 @@ export function ProductExporter() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             {product.images[0] ? (
-                              <img
+                              <AdminThumb
                                 src={product.images[0].url}
                                 alt={product.name}
                                 loading="lazy"
@@ -307,7 +308,7 @@ export function ProductExporter() {
                         </TableCell>
                         <TableCell>
                           {product.published ? (
-                            <Badge className="bg-green-600">Published</Badge>
+                            <Badge variant="success">Published</Badge>
                           ) : (
                             <Badge variant="secondary">Draft</Badge>
                           )}

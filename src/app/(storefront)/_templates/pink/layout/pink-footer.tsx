@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DefaultFooterTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
-import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
@@ -40,7 +40,6 @@ const FIELD_KEYS = [
   "pink.global.footer-blurb",
   "pink.global.footer-col1-title",
   "pink.global.footer-col2-title",
-  "pink.global.footer-copyright",
 ];
 
 function isLightFooterRoute(pathname: string): boolean {
@@ -50,7 +49,10 @@ function isLightFooterRoute(pathname: string): boolean {
 /** Mirrors the split used in `pink-header.tsx` — see that file for details. */
 function splitAccentWordmark(name: string, accentWord: string) {
   const trimmedAccent = accentWord.trim();
-  if (!trimmedAccent || !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())) {
+  if (
+    !trimmedAccent ||
+    !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())
+  ) {
     return { matches: false as const };
   }
   const splitIndex = name.length - trimmedAccent.length;
@@ -61,7 +63,19 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterProps) {
+/**
+ * Every part of the footer — brand column, link columns, legal strip —
+ * belongs to the single `global.footer` section, so all three wrappers carry
+ * the same `sectionGroupAttr`; the preview overlay dedupes them into one
+ * hotspot and focus lands on the first. The section is not hideable: the
+ * social row and the legal links each disappear on their own once their
+ * source list is empty, so a toggle would have nothing left to do.
+ */
+export function PinkFooter({
+  business,
+  tone,
+  resolvedLegalLinks,
+}: PinkFooterProps) {
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
   const resolvedTone: "dark" | "light" =
@@ -69,6 +83,10 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
   const isLight = resolvedTone === "light";
 
   const businessName = business?.name ?? "PinkArt";
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const rawCustomFields = business?.siteContent?.customFields;
   const customFields = rawCustomFields as Record<string, unknown> | undefined;
   const f = resolveFields(rawCustomFields, FIELD_KEYS);
@@ -115,8 +133,12 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
       ? col1LinksRaw
       : [
           { label: "Shop all", url: "/shop" },
-          ...(isEnabled("collections") ? [{ label: "Collections", url: "/collections" }] : []),
-          ...(isEnabled("services") ? [{ label: "Make & takes", url: "/services" }] : []),
+          ...(isEnabled("collections")
+            ? [{ label: "Collections", url: "/collections" }]
+            : []),
+          ...(isEnabled("services")
+            ? [{ label: "Make & takes", url: "/services" }]
+            : []),
         ];
   const col2Links =
     col2LinksRaw.length > 0
@@ -126,19 +148,18 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           ...(isEnabled("blog") ? [{ label: "Journal", url: "/blog" }] : []),
           ...(isEnabled("events") ? [{ label: "Events", url: "/events" }] : []),
           ...(isEnabled("videos") ? [{ label: "Videos", url: "/videos" }] : []),
-          ...(isEnabled("testimonials") ? [{ label: "Testimonials", url: "/testimonials" }] : []),
+          ...(isEnabled("testimonials")
+            ? [{ label: "Testimonials", url: "/testimonials" }]
+            : []),
           { label: "Contact", url: "/contact" },
         ];
 
-  // Gated on `socialLinks.length` — an owner with no socials set at all must
-  // never see an empty icon row reserving space under the blurb.
-  const showSocial =
-    isSectionVisible(rawCustomFields, "pink", "global.footer-social") &&
-    socialLinks.length > 0;
+  // Gated on `socialLinks.length` alone — an owner with no socials set at all
+  // must never see an empty icon row reserving space under the blurb. There is
+  // no separate hide toggle: the icons are part of the `global.footer` section,
+  // and emptying the list in Content → Branding is what removes them.
+  const showSocial = socialLinks.length > 0;
 
-  // No hardcoded location in the fallback — the field's own defaultValue carries
-  // PinkArt's, and a different owner on this template must not inherit it.
-  const copyrightLine = f["pink.global.footer-copyright"] ?? businessName;
   const ownerLegalLinks = parseTemplateListRows(
     customFields?.["pink.global.footer-legal-links"],
   ) as { _id?: string; label?: string; url?: string }[];
@@ -173,10 +194,10 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           gridTemplateColumns: "minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr)",
         }}
       >
-        {/* ── Col 1: wordmark + blurb + socials (global.branding) ── */}
+        {/* ── Col 1: wordmark + blurb + socials (global.footer) ── */}
         <div
           className="col-span-full flex flex-col gap-4 md:col-span-1"
-          {...sectionGroupAttr("global", "branding")}
+          {...sectionGroupAttr("global", "footer")}
         >
           {useWordmarkSvg ? (
             <PinkWordmarkSvg
@@ -188,7 +209,7 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
           ) : brandLogoUrl ? (
             <Image
               src={brandLogoUrl}
-              alt={businessName}
+              alt={logoAlt}
               width={220}
               height={56}
               // Height-capped rather than width-capped: an owner's logo can be
@@ -223,48 +244,61 @@ export function PinkFooter({ business, tone, resolvedLegalLinks }: PinkFooterPro
             </p>
           )}
 
-          {/* Socials, formerly their own "Follow along" column — folded under
-              the blurb 2026-08-05 per the redesign. Tone must follow the
-              footer's own resolved tone, not a literal: `/about` and
-              `/blog/[slug]` render the LIGHT footer, where the dark ramp's
-              resting icon colour (`--pink-ink-body`, #e8e8e8) lands at
-              ~1.2:1 on white — invisible. Same class of defect as the
+          {/* Socials sit under the blurb rather than in a column of their own.
+              Tone must follow the footer's own resolved tone, not a literal:
+              `/about` and `/blog/[slug]` render the LIGHT footer, where the
+              dark ramp's resting icon colour (`--pink-ink-body`, #e8e8e8)
+              lands at ~1.2:1 on white — invisible. Same class of defect as the
               /collections regression in the 2026-07-31 remediation. */}
           {showSocial && (
-            <div {...sectionGroupAttr("global", "footer-social")}>
-              <PinkSocialLinks
-                socialLinks={business?.siteContent?.socialLinks}
-                tone={resolvedTone}
-              />
-            </div>
+            <PinkSocialLinks
+              socialLinks={business?.siteContent?.socialLinks}
+              tone={resolvedTone}
+            />
           )}
         </div>
 
-        {/* ── Col 2 + 3: link columns (global.footer-links) ── */}
+        {/* ── Col 2 + 3: link columns (global.footer) ── */}
         <div
           className="col-span-full grid grid-cols-2 gap-8 sm:col-span-2 sm:contents"
-          {...sectionGroupAttr("global", "footer-links")}
+          {...sectionGroupAttr("global", "footer")}
         >
-          <FooterCol title={col1Title} links={col1Links} labelClass={labelClass} fg={fg} />
-          <FooterCol title={col2Title} links={col2Links} labelClass={labelClass} fg={fg} />
+          <FooterCol
+            title={col1Title}
+            links={col1Links}
+            labelClass={labelClass}
+            fg={fg}
+          />
+          <FooterCol
+            title={col2Title}
+            links={col2Links}
+            labelClass={labelClass}
+            fg={fg}
+          />
         </div>
       </div>
 
-      {/* ── Legal strip (global.footer-legal) ── */}
+      {/* ── Legal strip (global.footer) ── */}
       <div
         className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-5 py-5 md:px-10"
         style={{ borderTop: `1px solid ${ruleColor}`, color: subtleFg }}
-        {...sectionGroupAttr("global", "footer-legal")}
+        {...sectionGroupAttr("global", "footer")}
       >
         <p className="text-[14px]">
-          <span>{new Date().getFullYear()} </span>
-          <span {...fieldAttr("pink.global.footer-copyright")}>{copyrightLine}</span>
+          &copy; {new Date().getFullYear()} {businessName}
         </p>
         {legalLinks.length > 0 && (
-          <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-2 text-[14px]">
+          <nav
+            aria-label="Legal"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-[14px]"
+          >
             {legalLinks.map((l) =>
               l.url ? (
-                <Link key={l._id ?? l.label} href={l.url} className="transition-colors">
+                <Link
+                  key={l._id ?? l.label}
+                  href={l.url}
+                  className="transition-colors"
+                >
                   {l.label ?? "Link"}
                 </Link>
               ) : null,

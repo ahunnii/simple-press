@@ -1,4 +1,6 @@
+import type { SectionLink } from "~/lib/section-links";
 import type { TemplateField, TemplatePage } from "~/lib/template-fields";
+import { SECTION_LINKS } from "~/lib/section-links";
 import {
   getGroupMetadata,
   groupFieldsByGroup,
@@ -15,8 +17,16 @@ import { modernSections } from "~/app/(storefront)/_templates/modern/sections";
 import { noiseSections } from "~/app/(storefront)/_templates/noise/sections";
 import { pinkSections } from "~/app/(storefront)/_templates/pink/sections";
 import { pollenSections } from "~/app/(storefront)/_templates/pollen/sections";
+import { relocationSections } from "~/app/(storefront)/_templates/relocation/sections";
 import { sledgeSections } from "~/app/(storefront)/_templates/sledge/sections";
 import { viiSections } from "~/app/(storefront)/_templates/vii/sections";
+
+// `SectionLink` / `SECTION_LINKS` live in the leaf module `~/lib/section-links`
+// (every template's `sections.ts` reads the catalog at module-init time, and
+// this module imports those same files — see the note there). Re-exported here
+// so both remain importable from `~/lib/template-sections`.
+export type { SectionLink };
+export { SECTION_LINKS };
 
 /**
  * A "section" is an owner-facing, hideable/orderable unit of a storefront
@@ -44,6 +54,11 @@ export type TemplateSection = {
    * the section's `page`.
    */
   renderContext?: "page" | "blog-post";
+  /**
+   * Admin deep links for the entities this section renders. Curated per
+   * template; filtered by feature flag at render time.
+   */
+  links?: SectionLink[];
 };
 
 /**
@@ -65,6 +80,7 @@ export const TEMPLATE_SECTIONS: Record<string, TemplateSection[]> = {
   ...pollenSections,
   ...sledgeSections,
   ...buildersSections,
+  ...relocationSections,
 };
 
 function humanizeGroupKey(key: string): string {

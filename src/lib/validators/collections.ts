@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  ADMIN_BULK_DELETE_LIMIT,
+  ADMIN_BULK_SELECTION_LIMIT,
+} from "~/lib/validators/admin-table";
+
 export const collectionFormSchema = z.object({
   name: z
     .string()
@@ -11,6 +16,15 @@ export const collectionFormSchema = z.object({
     .max(1000, "Description must be 1000 characters or fewer")
     .optional()
     .nullable(),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Slug is required")
+    .max(255)
+    .regex(
+      /^[a-z0-9._~-]+$/i,
+      "Use letters, numbers, dots, dashes, tildes or underscores",
+    ),
   imageUrl: z.string().url().optional().nullable(),
   published: z.boolean(),
   metaTitle: z
@@ -50,18 +64,16 @@ export const collectionModifyProductSchema = z.object({
   productId: z.string(),
 });
 
-export const collectionSetProductsSchema = z.object({
-  collectionId: z.string(),
-  productIds: z
-    .array(z.string())
-    .max(500, "Too many products in one collection"),
-});
-
+// Caps come from ~/lib/validators/admin-table, shared with Products and
+// Services — delete is far lower than publish on purpose.
 export const collectionBulkPublishSchema = z.object({
   ids: z
     .array(z.string())
     .min(1, "At least one collection id is required")
-    .max(1000, "Too many collections selected"),
+    .max(
+      ADMIN_BULK_SELECTION_LIMIT,
+      `Too many collections selected — publish or unpublish at most ${ADMIN_BULK_SELECTION_LIMIT} at a time`,
+    ),
   published: z.boolean(),
 });
 
@@ -69,5 +81,8 @@ export const collectionBulkDeleteSchema = z.object({
   ids: z
     .array(z.string())
     .min(1, "At least one collection id is required")
-    .max(1000, "Too many collections selected"),
+    .max(
+      ADMIN_BULK_DELETE_LIMIT,
+      `Too many collections selected — delete at most ${ADMIN_BULK_DELETE_LIMIT} at a time`,
+    ),
 });

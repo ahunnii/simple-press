@@ -5,6 +5,7 @@ import type { DefaultTestimonialsPageTemplateProps } from "../../types";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
 import { parseTemplateListRows } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
 
 import { resolveFields } from "..";
@@ -32,7 +33,13 @@ const FIELD_KEYS = [
   "pink.testimonials.cta-button-link",
 ];
 
-type PressItem = { outlet?: string; date?: string; quote?: string; href?: string; _id?: string };
+type PressItem = {
+  outlet?: string;
+  date?: string;
+  quote?: string;
+  href?: string;
+  _id?: string;
+};
 
 // Deliberately empty (2026-07-31, client direction): the shipped defaults
 // invented two outlets and put words in their mouths. The whole band is
@@ -40,7 +47,9 @@ type PressItem = { outlet?: string; date?: string; quote?: string; href?: string
 // fresh store shows nothing here until the owner adds a real clipping.
 const DEFAULT_PRESS: PressItem[] = [];
 
-export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPageTemplateProps) {
+export async function PinkTestimonialsPage({
+  business,
+}: DefaultTestimonialsPageTemplateProps) {
   const testimonials = await api.testimonial.list({ publicOnly: true });
 
   const customFields = business.siteContent?.customFields;
@@ -52,8 +61,16 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
   ) as PressItem[];
   const press = pressRaw.length > 0 ? pressRaw : DEFAULT_PRESS;
 
-  const featuredVisible = isSectionVisible(customFields, "pink", "testimonials.featured");
-  const pressVisible = isSectionVisible(customFields, "pink", "testimonials.press");
+  const featuredVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "testimonials.featured",
+  );
+  const pressVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "testimonials.press",
+  );
   const ctaVisible = isSectionVisible(customFields, "pink", "testimonials.cta");
 
   const featured = testimonials[0];
@@ -81,10 +98,14 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
               was an empty tinted square the size of the quote — so the band
               drops to a single column and the quote takes the full width. */}
           <PinkReveal
-            className={`mx-auto grid max-w-[1400px] gap-8 md:items-center${
-              featuredPhoto ? " md:grid-cols-[0.85fr_1.15fr]" : ""
-            }`}
-            style={{ background: "var(--pink-white)", border: "1px solid var(--pink-line)" }}
+            className={cn(
+              "mx-auto grid max-w-[1400px] gap-8 md:items-center",
+              featuredPhoto && "md:grid-cols-[0.85fr_1.15fr]",
+            )}
+            style={{
+              background: "var(--pink-white)",
+              border: "1px solid var(--pink-line)",
+            }}
           >
             {featuredPhoto && (
               <div
@@ -113,7 +134,10 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
               >
                 &ldquo;{featured.text}&rdquo;
               </p>
-              <p className="text-[14px]" style={{ color: "var(--pink-subtle)" }}>
+              <p
+                className="text-[14px]"
+                style={{ color: "var(--pink-subtle)" }}
+              >
                 {featured.customerName}
                 {(featured.customerTitle ?? featured.customerCompany) && (
                   <> — {featured.customerTitle ?? featured.customerCompany}</>
@@ -151,7 +175,10 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
       {/* `press.length > 0`: with no clippings the band would render a heading
           and note over an empty grid. */}
       {pressVisible && press.length > 0 && (
-        <PinkDarkBand ariaLabel="As seen" sectionAttrs={sectionGroupAttr("testimonials", "press")}>
+        <PinkDarkBand
+          ariaLabel="As seen"
+          sectionAttrs={sectionGroupAttr("testimonials", "press")}
+        >
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <h2
               className="pink-display"
@@ -183,18 +210,31 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
                 style={{ background: "var(--pink-ink-panel)" }}
               >
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="pink-display text-[15px] font-semibold" style={{ color: "var(--pink-paper)" }}>
+                  <span
+                    className="pink-display text-[15px] font-semibold"
+                    style={{ color: "var(--pink-paper)" }}
+                  >
                     {item.outlet ?? ""}
                   </span>
-                  <span className="text-[13px]" style={{ color: "var(--pink-ink-subtle)" }}>
+                  <span
+                    className="text-[13px]"
+                    style={{ color: "var(--pink-ink-subtle)" }}
+                  >
                     {item.date ?? ""}
                   </span>
                 </div>
-                <p className="text-[17px] leading-[1.6]" style={{ color: "var(--pink-ink-body)" }}>
+                <p
+                  className="text-[17px] leading-[1.6]"
+                  style={{ color: "var(--pink-ink-body)" }}
+                >
                   &ldquo;{item.quote ?? ""}&rdquo;
                 </p>
                 {item.href && (
-                  <a href={item.href} className="text-[14px] font-medium" style={{ color: "var(--pink-blush)" }}>
+                  <a
+                    href={item.href}
+                    className="text-[14px] font-medium"
+                    style={{ color: "var(--pink-blush)" }}
+                  >
                     Read the piece →
                   </a>
                 )}
@@ -234,7 +274,10 @@ export async function PinkTestimonialsPage({ business }: DefaultTestimonialsPage
             </p>
             {f["pink.testimonials.cta-button-label"] && (
               <Link
-                href={f["pink.testimonials.cta-button-link"] ?? "/testimonials/submit"}
+                href={
+                  f["pink.testimonials.cta-button-link"] ??
+                  "/testimonials/submit"
+                }
                 className="pink-btn pink-btn-solid mt-2"
                 {...fieldAttr("pink.testimonials.cta-button-label")}
               >

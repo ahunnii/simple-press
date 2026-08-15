@@ -60,7 +60,8 @@ export function SessionSync() {
     // previous state to have transitioned *from*, so there is nothing to clear.
     // Recording it above and bailing here also makes this effect idempotent if
     // it re-runs for an unrelated dependency change.
-    if (previousUserId === undefined || previousUserId === currentUserId) return;
+    if (previousUserId === undefined || previousUserId === currentUserId)
+      return;
 
     // Covers sign-out (id -> null), sign-in (null -> id), and switching
     // accounts in the same tab (id -> different id). Safe in all three: it only

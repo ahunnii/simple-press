@@ -193,9 +193,7 @@ export function buildWxrDocument(
     const postId = itemPostIds[index]!;
     const urls: WxrAttachment[] = [
       ...(item.attachments ?? []),
-      ...(item.featuredImageUrl
-        ? [{ url: item.featuredImageUrl }]
-        : []),
+      ...(item.featuredImageUrl ? [{ url: item.featuredImageUrl }] : []),
     ];
     for (const att of urls) {
       if (!attachmentsByUrl.has(att.url)) {

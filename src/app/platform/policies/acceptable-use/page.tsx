@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
+import {
+  formatPolicyDate,
+  POLICY_LAST_UPDATED,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Acceptable Use Policy | SimplePress",
-  description: "Prohibited products, content, and conduct on the SimplePress platform.",
+  description:
+    "Prohibited products, content, and conduct on the SimplePress platform.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/acceptable-use`,
   },
@@ -19,7 +25,8 @@ export default function AcceptableUsePage() {
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>SimplePress Acceptable Use Policy</h1>
       <p>
-        <strong>Last Updated:</strong> May 29, 2026
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.acceptableUse)}
       </p>
 
       <h2>1. Purpose</h2>

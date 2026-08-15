@@ -8,7 +8,7 @@
  *
  * On network/parse failures the exported functions return safe empty defaults
  * and tag the exception in Sentry rather than throwing, mirroring the
- * partial-data pattern in `business.getPaymentsOverview`.
+ * partial-data pattern in `finance.getBreakdown`.
  */
 
 import * as Sentry from "@sentry/nextjs";

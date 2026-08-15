@@ -1,7 +1,4 @@
-import type {
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 /**
@@ -10,8 +7,9 @@ import type { TemplateSection } from "~/lib/template-sections";
  * Authority: docs/templates/pink/design.md → "Per-page section concepts →
  * Contact". The form uses the shared `useContactForm` hook + hCaptcha (see
  * `pink-contact-form.tsx`) — never reimplemented here. Studio address/
- * email/phone come from business settings and hours from
- * `Business.businessHours`, never from a literal field default.
+ * email/phone come from Settings → General and hours from Settings → Hours
+ * (`Business.businessHours`), never from a literal field default — see the
+ * `contact.studio` section's `links` below.
  */
 
 // ── contact.header ───────────────────────────────────────────────────────────
@@ -41,15 +39,26 @@ const contactHeaderData: TemplateField[] = [
   {
     key: "pink.contact.header-facts",
     label: "Header Facts",
-    description: "Label/value rows on the right of the header. Leave empty to use the defaults.",
+    description:
+      "Label/value rows on the right of the header. Leave empty to use the defaults.",
     type: "list",
     page: "contact",
     group: "contact.header",
     gridColumn: "col-span-full",
     maxItems: 4,
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Response time" },
-      { key: "value", label: "Value", type: "text", placeholder: "1–2 business days" },
+      {
+        key: "label",
+        label: "Label",
+        type: "text",
+        placeholder: "Response time",
+      },
+      {
+        key: "value",
+        label: "Value",
+        type: "text",
+        placeholder: "1–2 business days",
+      },
     ],
     defaultValue: "",
   },
@@ -79,10 +88,31 @@ const contactTopicsData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 6,
     itemSchema: [
-      { key: "name", label: "Name", type: "text", placeholder: "Custom orders" },
-      { key: "blurb", label: "Blurb", type: "textarea", placeholder: "A doll, a piece of jewelry, or something else made just for you." },
-      { key: "messageLabel", label: "Message Field Label", type: "text", placeholder: "Tell me what you have in mind" },
-      { key: "messagePlaceholder", label: "Message Field Placeholder", type: "text", placeholder: "Sizes, colors, timeline — whatever you've got." },
+      {
+        key: "name",
+        label: "Name",
+        type: "text",
+        placeholder: "Custom orders",
+      },
+      {
+        key: "blurb",
+        label: "Blurb",
+        type: "textarea",
+        placeholder:
+          "A doll, a piece of jewelry, or something else made just for you.",
+      },
+      {
+        key: "messageLabel",
+        label: "Message Field Label",
+        type: "text",
+        placeholder: "Tell me what you have in mind",
+      },
+      {
+        key: "messagePlaceholder",
+        label: "Message Field Placeholder",
+        type: "text",
+        placeholder: "Sizes, colors, timeline — whatever you've got.",
+      },
     ],
     defaultValue: "",
   },
@@ -149,7 +179,8 @@ const contactFormData: TemplateField[] = [
     group: "contact.form",
     gridColumn: "col-span-1",
     description: "Used when no topic is selected above.",
-    defaultValue: "Tell me what you're thinking about — a piece, a date, a question.",
+    defaultValue:
+      "Tell me what you're thinking about — a piece, a date, a question.",
   },
   {
     key: "pink.contact.form-submit-label",
@@ -204,7 +235,8 @@ const contactStudioData: TemplateField[] = [
     page: "contact",
     group: "contact.studio",
     gridColumn: "col-span-full",
-    defaultValue: "Visits by appointment. Message ahead and we'll find a time that works.",
+    defaultValue:
+      "Visits by appointment. Message ahead and we'll find a time that works.",
   },
 ];
 
@@ -224,15 +256,26 @@ const contactShortcutsData: TemplateField[] = [
   {
     key: "pink.contact.shortcuts-items",
     label: "Shortcuts",
-    description: "Quick links shown before the form. Leave empty to use the defaults.",
+    description:
+      "Quick links shown before the form. Leave empty to use the defaults.",
     type: "list",
     page: "contact",
     group: "contact.shortcuts",
     gridColumn: "col-span-full",
     maxItems: 6,
     itemSchema: [
-      { key: "label", label: "Label", type: "text", placeholder: "Track an order" },
-      { key: "href", label: "Link", type: "url", placeholder: "/account/orders" },
+      {
+        key: "label",
+        label: "Label",
+        type: "text",
+        placeholder: "Track an order",
+      },
+      {
+        key: "href",
+        label: "Link",
+        type: "url",
+        placeholder: "/account/orders",
+      },
     ],
     defaultValue: "",
   },
@@ -273,7 +316,8 @@ export const pinkContactFieldGroups: TemplateFieldGroup[] = [
   {
     id: "contact.studio",
     title: "Contact — Studio",
-    description: "Photo, label, and access note for the studio aside.",
+    description:
+      "Photo, label, and access note for the studio aside. Address, hours, phone, and email in the card below them pull from Settings → General and Settings → Hours.",
     icon: "🏠",
     columns: 2,
   },
@@ -318,10 +362,15 @@ export const pinkContactSections: TemplateSection[] = [
     id: "contact.studio",
     page: "contact",
     title: "Studio",
-    description: "Studio photo, address, hours, and contact links.",
+    description:
+      "Studio photo and access note — address, hours, phone, and email are pulled from Settings",
     groupIds: ["contact.studio"],
     order: 3,
     hideable: true,
+    links: [
+      { label: "Business info", href: "/admin/settings/general" },
+      { label: "Hours", href: "/admin/settings/hours" },
+    ],
   },
   {
     id: "contact.shortcuts",

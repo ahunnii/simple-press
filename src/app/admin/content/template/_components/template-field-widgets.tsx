@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 /**
  * Shared field-widget components extracted from template-fields-editor.tsx.
  *
@@ -82,6 +81,8 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { EmbedFrame } from "~/components/embed-frame";
 import { MediaPickerDialog } from "~/components/media/media-picker-dialog";
+
+import { AdminThumb } from "../../../_components/admin-thumb";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -1115,7 +1116,7 @@ export function TemplateImageUploadField({
 
         {previewUrl ? (
           <div className="bg-muted flex items-center gap-3 rounded-lg border p-3">
-            <img
+            <AdminThumb
               src={previewUrl}
               alt={hasFile ? localFile.name : "Preview"}
               className="h-16 w-16 shrink-0 rounded-md object-cover"

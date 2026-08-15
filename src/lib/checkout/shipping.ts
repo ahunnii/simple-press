@@ -119,5 +119,7 @@ export function shouldPinPaymentIntentShipping(opts: {
   hasShippingAddress: boolean;
   autoTaxEnabled: boolean;
 }): boolean {
-  return opts.lockShippingAddress && opts.hasShippingAddress && !opts.autoTaxEnabled;
+  return (
+    opts.lockShippingAddress && opts.hasShippingAddress && !opts.autoTaxEnabled
+  );
 }

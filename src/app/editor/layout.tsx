@@ -18,7 +18,5 @@ export default async function EditorLayout({
 }) {
   await requireAdminAccess({ allowedRoles: ["OWNER", "MANAGER"] });
 
-  return (
-    <div className="bg-background h-dvh overflow-hidden">{children}</div>
-  );
+  return <div className="bg-background h-dvh overflow-hidden">{children}</div>;
 }

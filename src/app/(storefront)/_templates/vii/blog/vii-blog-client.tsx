@@ -11,7 +11,7 @@ import {
   buildBlogSearchBlob,
   deriveExcerpt,
 } from "~/lib/blog-search";
-import { formatDate } from "~/lib/utils";
+import { cn, formatDate } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -419,7 +419,7 @@ export function ViiBlogClient({
             {cover && (
               <div
                 ref={coverRef}
-                className={`vii-reveal${coverVisible ? " is-visible" : ""}`}
+                className={cn("vii-reveal", coverVisible && "is-visible")}
                 style={{ marginBottom: "clamp(48px, 7vw, 88px)" }}
               >
                 <CoverStory post={cover} image={coverImage} />
@@ -454,7 +454,10 @@ export function ViiBlogClient({
 
                 <div
                   ref={rowsRef}
-                  className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+                  className={cn(
+                    "vii-reveal-group",
+                    rowsVisible && "is-visible",
+                  )}
                 >
                   {rows.map((post, i) => (
                     <JournalRow

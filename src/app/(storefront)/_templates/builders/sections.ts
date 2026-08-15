@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Curated section registry for the `builders` template (Industrial
@@ -113,6 +114,7 @@ export const buildersSections: Record<string, TemplateSection[]> = {
         "Heading, intro, empty state, and the submit call-to-action band.",
       groupIds: ["testimonials.page"],
       order: 0,
+      links: [SECTION_LINKS.testimonials],
     },
   ],
 };

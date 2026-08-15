@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createTestCaller } from "../helpers/caller";
 import { db, resetDb } from "../helpers/db";
-import { createBusiness, createOrder, createOwnerUser } from "../helpers/factories";
+import {
+  createBusiness,
+  createOrder,
+  createOwnerUser,
+} from "../helpers/factories";
 
 // Procedures resolve the tenant from the request host via `next/headers` — see
 // tenant-isolation.test.ts for the reference pattern.
@@ -18,7 +22,15 @@ vi.mock("next/headers", () => ({
  * against the router's local-midnight-aligned range boundaries.
  */
 function localNoonDaysAgo(n: number, base = new Date()): Date {
-  const d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 12, 0, 0, 0);
+  const d = new Date(
+    base.getFullYear(),
+    base.getMonth(),
+    base.getDate(),
+    12,
+    0,
+    0,
+    0,
+  );
   d.setDate(d.getDate() - n);
   return d;
 }
@@ -39,8 +51,16 @@ describe("finance.getBreakdown — DB half (no Stripe account connected)", () =>
 
   it("two ordinary paid orders: component identities hold, isStripeConnected/stripe pinned to false/null", async () => {
     const { business, caller } = await setupBusiness();
-    const a = await createOrder(business.id, { total: 10000, tax: 500, shipping: 300 });
-    const b = await createOrder(business.id, { total: 5000, tax: 250, shipping: 150 });
+    const a = await createOrder(business.id, {
+      total: 10000,
+      tax: 500,
+      shipping: 300,
+    });
+    const b = await createOrder(business.id, {
+      total: 5000,
+      tax: 250,
+      shipping: 150,
+    });
 
     const result = await caller.finance.getBreakdown({ range: "30d" });
 
@@ -85,7 +105,9 @@ describe("finance.getBreakdown — DB half (no Stripe account connected)", () =>
     expect(result.orders.totalChargedCents).toBe(kept.total);
     expect(result.orders.taxCents).toBe(kept.tax);
     expect(result.orders.shippingCents).toBe(kept.shipping);
-    expect(result.orders.productSalesCents).toBe(kept.total - kept.tax - kept.shipping);
+    expect(result.orders.productSalesCents).toBe(
+      kept.total - kept.tax - kept.shipping,
+    );
   });
 
   it("a fully-refunded order contributes to totalCharged+refunded but 0 to net; sum identity still holds", async () => {
@@ -183,8 +205,16 @@ describe("finance.getBreakdown — DB half (no Stripe account connected)", () =>
     // Default paymentMethod from the schema is "card" — createOrder does not
     // expose paymentMethod, so the manual-order case is patched via a direct
     // db.order.update after creation (not editing tests/helpers/factories.ts).
-    const cardOrder = await createOrder(business.id, { total: 3000, tax: 0, shipping: 0 });
-    const cashOrder = await createOrder(business.id, { total: 1500, tax: 0, shipping: 0 });
+    const cardOrder = await createOrder(business.id, {
+      total: 3000,
+      tax: 0,
+      shipping: 0,
+    });
+    const cashOrder = await createOrder(business.id, {
+      total: 1500,
+      tax: 0,
+      shipping: 0,
+    });
     await db.order.update({
       where: { id: cashOrder.id },
       data: { paymentMethod: "cash" },
@@ -274,7 +304,11 @@ describe("finance.getBreakdown — DB half (no Stripe account connected)", () =>
   it("tenant isolation: another business's orders never appear in this business's breakdown", async () => {
     const { business, caller } = await setupBusiness();
     const other = await createBusiness({});
-    const mine = await createOrder(business.id, { total: 3000, tax: 0, shipping: 0 });
+    const mine = await createOrder(business.id, {
+      total: 3000,
+      tax: 0,
+      shipping: 0,
+    });
     await createOrder(other.id, { total: 999_999, tax: 0, shipping: 0 });
 
     const result = await caller.finance.getBreakdown({ range: "30d" });

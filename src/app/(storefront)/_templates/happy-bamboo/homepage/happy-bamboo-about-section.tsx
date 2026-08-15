@@ -5,9 +5,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { TiptapJSON } from "~/components/tiptap-renderer";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { Button } from "~/components/ui/button";
 import { FadeIn } from "~/components/page-animations";
-import { fieldAttr } from "~/lib/preview/section-attrs";
 import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 type Props = {

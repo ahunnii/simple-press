@@ -4,6 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
 import { notifyArtisanalFuturesClaimed } from "~/lib/artisanal-futures/notify";
+import {
+  MERCHANT_TERMS_VERSION,
+  PLATFORM_TERMS_VERSION,
+} from "~/lib/legal/policy-versions";
+import { consumeOnboardingDraft } from "~/lib/onboarding/draft";
 import { signPartnerRequest } from "~/lib/partner-auth";
 import { authLimiter, getClientIp } from "~/lib/rate-limit";
 import { isSubdomainReserved, isValidDomain, slugify } from "~/lib/utils";
@@ -23,6 +28,15 @@ import { db } from "~/server/db";
  * valid token could claim an arbitrary address. `email` is `null` whenever the
  * token is unverified or the response body can't be parsed.
  */
+/**
+ * Empty-string-aware fallback. Plain `??` is wrong for these wizard fields —
+ * a cleared text input posts `""` and must still fall back to the default.
+ */
+function withFallback(value: string | undefined, fallback: string): string {
+  if (value === undefined || value === "") return fallback;
+  return value;
+}
+
 async function verifyArtisanToken(
   aftoken: string,
 ): Promise<{ verified: boolean; email: string | null }> {
@@ -109,27 +123,66 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const formData = (await req.json()) as {
-      email: string;
-      password: string;
-      name: string;
-      businessName: string;
-      subdomain: string;
-      customDomain: string;
-      templateId: string;
-      heroTitle: string;
-      heroSubtitle: string;
-      aboutText: string;
-      primaryColor: string;
+    const rawBody = (await req.json()) as {
+      resumeFromDraft?: boolean;
+      email?: string;
+      password?: string;
+      name?: string;
+      businessName?: string;
+      subdomain?: string;
+      customDomain?: string;
+      templateId?: string;
+      heroTitle?: string;
+      heroSubtitle?: string;
+      aboutText?: string;
+      primaryColor?: string;
       /** Invitation code — required for the standard (non-artisan) signup flow. */
       invitationCode?: string | null;
       /** Artisanal Futures token — present only for the artisan onboarding flow. */
       aftoken?: string | null;
+      /**
+       * Explicit acceptance of the platform ToS + Privacy Policy (the account)
+       * AND the Seller & Merchant Agreement + Acceptable Use Policy (the store).
+       * Must be literally `true`; a checkbox that only exists in React is not
+       * evidence of anything, so this is required here too. The TIMESTAMP is
+       * never taken from the client — see the transaction below.
+       */
+      acceptedTerms?: unknown;
     };
+
+    // Verify the caller is authenticated up front — draft resume and body
+    // paths both need a verified session.
+    const session = await auth.api.getSession({ headers: req.headers });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!session.user.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before creating a store." },
+        { status: 403 },
+      );
+    }
+
+    // After email verification, the wizard body is gone — resume from the
+    // signed draft saved before signup. The draft is single-use and bound
+    // to the session email.
+    let formData = rawBody;
+    if (rawBody.resumeFromDraft === true) {
+      const draft = await consumeOnboardingDraft(session.user.email);
+      if (!draft) {
+        return NextResponse.json(
+          {
+            error:
+              "No pending store setup was found. Please restart signup with your invitation code.",
+          },
+          { status: 400 },
+        );
+      }
+      formData = { ...draft, resumeFromDraft: undefined };
+    }
 
     const {
       email,
-      password,
       name,
       businessName,
       subdomain: rawSubdomain,
@@ -141,21 +194,43 @@ export async function POST(req: NextRequest) {
       primaryColor,
       invitationCode,
       aftoken,
+      acceptedTerms,
     } = formData;
+    const password = formData.password;
 
-    // Verify the caller is authenticated and owns this email
-    const session = await auth.api.getSession({ headers: req.headers });
-    if (!session?.user) {
+    // `email` may be undefined on a malformed body — the optional chain makes
+    // that compare as `undefined !== <session email>` and 401 like any mismatch.
+    if (
+      session.user.email.trim().toLowerCase() !== email?.trim().toLowerCase()
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (session.user.email !== email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
-    // Validation
-    if (!email || !password || !name || !businessName || !rawSubdomain) {
+    // Validation — password is only required on the direct (pre-verify) body
+    // path; draft resume already proved the account via a verified session.
+    if (!email || !name || !businessName || !rawSubdomain) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+    if (rawBody.resumeFromDraft !== true && !password) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    // Terms acceptance is a hard precondition for creating a store: this is the
+    // only point at which anyone agrees to the documents that let the platform
+    // suspend a merchant. Require the flag explicitly (`true`, not truthy) and
+    // refuse rather than silently creating an unbound store.
+    if (acceptedTerms !== true) {
+      return NextResponse.json(
+        {
+          error:
+            "You must accept the Terms of Service, Privacy Policy, Seller & Merchant Agreement, and Acceptable Use Policy to create a store.",
+        },
         { status: 400 },
       );
     }
@@ -230,7 +305,13 @@ export async function POST(req: NextRequest) {
     // Normalize + validate an optional custom domain, and reject an
     // already-taken one with a clear 400 (rather than letting the unique
     // constraint blow up as a 500 inside the transaction below).
-    const customDomain = rawCustomDomain?.trim().toLowerCase() || null;
+    // An absent or empty field means "no custom domain", never the
+    // empty-string domain.
+    const normalizedCustomDomain = rawCustomDomain?.trim().toLowerCase();
+    const customDomain =
+      normalizedCustomDomain === undefined || normalizedCustomDomain === ""
+        ? null
+        : normalizedCustomDomain;
     if (customDomain) {
       if (!isValidDomain(customDomain)) {
         return NextResponse.json(
@@ -285,6 +366,9 @@ export async function POST(req: NextRequest) {
     // before this route is called (see StoreCustomizationStep) — verified
     // above via getSession(). Create business + site content in a transaction.
     const business = await db.$transaction(async (tx) => {
+      // Server-generated acceptance instant — never read from the request body.
+      const acceptedAt = new Date();
+
       // 1. Create business
       const newBusiness = await tx.business.create({
         data: {
@@ -293,7 +377,7 @@ export async function POST(req: NextRequest) {
           subdomain,
           customDomain,
           domainStatus: customDomain ? "PENDING_DNS" : "NONE",
-          templateId: templateId || "modern",
+          templateId: withFallback(templateId, "modern"),
           ownerEmail: email,
           status: "active",
           onboardingComplete: false,
@@ -304,23 +388,42 @@ export async function POST(req: NextRequest) {
       await tx.siteContent.create({
         data: {
           businessId: newBusiness.id,
-          heroTitle: heroTitle || `Welcome to ${businessName}`,
-          heroSubtitle: heroSubtitle || "",
-          aboutText: aboutText || "",
-          primaryColor: primaryColor || "#3b82f6",
+          heroTitle: withFallback(heroTitle, `Welcome to ${businessName}`),
+          heroSubtitle: heroSubtitle ?? "",
+          aboutText: aboutText ?? "",
+          primaryColor: withFallback(primaryColor, "#3b82f6"),
           secondaryColor: "#ffffff",
           accentColor: "#3b82f6",
         },
       });
 
-      // 3. Create business membership for the owner
+      // 3. Create business membership for the owner, carrying its acceptance of
+      // the Seller & Merchant Agreement + Acceptable Use Policy. Written in the
+      // SAME transaction as the business so a store can never exist without a
+      // recorded acceptance.
       await tx.businessMembership.create({
         data: {
           userId: existingUser.id,
           businessId: newBusiness.id,
           role: "OWNER",
+          merchantTermsAcceptedAt: acceptedAt,
+          merchantTermsVersion: MERCHANT_TERMS_VERSION,
         },
       });
+
+      // 3b. Platform ToS + Privacy attach to the ACCOUNT, which this flow just
+      // created (via better-auth on the client, immediately before this call).
+      // Only stamp when nothing is recorded yet: a retry after a failed store
+      // step must not overwrite the original acceptance instant/version.
+      if (!existingUser.termsAcceptedAt) {
+        await tx.user.update({
+          where: { id: existingUser.id },
+          data: {
+            termsAcceptedAt: acceptedAt,
+            termsVersion: PLATFORM_TERMS_VERSION,
+          },
+        });
+      }
 
       // 4. If custom domain, add to domain queue
       if (customDomain) {

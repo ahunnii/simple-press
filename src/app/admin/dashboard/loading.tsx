@@ -35,8 +35,9 @@ export default function DashboardLoading() {
             ))}
           </div>
 
-          {/* Two-column: recent orders + low stock alerts */}
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Two-column: recent orders + low stock alerts.
+              `items-start` mirrors dashboard-content.tsx — see the note there. */}
+          <div className="mb-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
             {/* Recent orders card */}
             <div className="bg-card rounded-xl border p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
@@ -44,7 +45,8 @@ export default function DashboardLoading() {
                 <Skeleton className="h-8 w-20 rounded-md" />
               </div>
               <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {/* 6 rows — matches `take: 6` in page.tsx's recent-orders query. */}
+                {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between rounded-lg p-3"

@@ -70,19 +70,19 @@ export function CoopAboutPage({ business }: DefaultAboutPageTemplateProps) {
       <section
         aria-label="About"
         {...sectionGroupAttr("about", "main")}
-        className="mx-auto block max-w-425 px-[10.9375rem] py-[7.8125rem] max-coop-md:px-5 max-coop-md:py-15 coop-md:max-coop-lg:px-9 coop-md:max-coop-lg:py-30"
+        className="max-coop-md:px-5 max-coop-md:py-15 coop-md:max-coop-lg:px-9 coop-md:max-coop-lg:py-30 mx-auto block max-w-425 px-[10.9375rem] py-[7.8125rem]"
       >
         <div className="block">
           {/* Clone n37 — three-column row: left spacer / paragraphs 1+2 / right spacer */}
-          <div className="-mx-[1.0625rem] block h-[375.7px] before:table before:h-0 before:w-0 before:content-[''] after:table after:h-0 after:w-0 after:content-[''] max-coop-md:h-auto coop-md:max-coop-lg:h-[419.3px] coop-2xl:h-[303.1px]">
-            <div className="float-left block w-[15.0625rem] max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[182.5px] coop-2xl:w-86.5">
-              <div className="relative clear-both block px-[1.0625rem] max-coop-md:hidden">
-                <div className="invisible block h-8.5 overflow-hidden max-coop-md:hidden" />
+          <div className="max-coop-md:h-auto coop-md:max-coop-lg:h-[419.3px] coop-2xl:h-[303.1px] -mx-[1.0625rem] block h-[375.7px] before:table before:h-0 before:w-0 before:content-[''] after:table after:h-0 after:w-0 after:content-['']">
+            <div className="max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[182.5px] coop-2xl:w-86.5 float-left block w-[15.0625rem]">
+              <div className="max-coop-md:hidden relative clear-both block px-[1.0625rem]">
+                <div className="max-coop-md:hidden invisible block h-8.5 overflow-hidden" />
               </div>
             </div>
 
-            <div className="float-left block w-120.5 max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[22.8125rem] coop-2xl:w-173">
-              <div className="relative block px-[1.0625rem] pb-[1.0625rem] max-coop-md:pt-[1.0625rem]">
+            <div className="max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[22.8125rem] coop-2xl:w-173 float-left block w-120.5">
+              <div className="max-coop-md:pt-[1.0625rem] relative block px-[1.0625rem] pb-[1.0625rem]">
                 {/* Clone n43/n44 — classless CMS-block scaffolding divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
@@ -96,8 +96,8 @@ export function CoopAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 </div>
               </div>
 
-              <div className="relative clear-both block p-[1.0625rem] max-coop-md:hidden">
-                <div className="invisible block h-8.5 overflow-hidden max-coop-md:hidden" />
+              <div className="max-coop-md:hidden relative clear-both block p-[1.0625rem]">
+                <div className="max-coop-md:hidden invisible block h-8.5 overflow-hidden" />
               </div>
 
               <div className="relative block p-[1.0625rem]">
@@ -114,22 +114,22 @@ export function CoopAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 </div>
               </div>
 
-              <div className="relative clear-both block p-[1.0625rem] max-coop-md:hidden">
-                <div className="invisible block h-8.5 overflow-hidden max-coop-md:hidden" />
+              <div className="max-coop-md:hidden relative clear-both block p-[1.0625rem]">
+                <div className="max-coop-md:hidden invisible block h-8.5 overflow-hidden" />
               </div>
             </div>
 
-            <div className="float-left block w-[15.0625rem] max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[182.5px] coop-2xl:w-86.5">
-              <div className="relative clear-both block px-[1.0625rem] max-coop-md:hidden">
-                <div className="invisible block h-8.5 overflow-hidden max-coop-md:hidden" />
+            <div className="max-coop-md:float-none max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:w-[182.5px] coop-2xl:w-86.5 float-left block w-[15.0625rem]">
+              <div className="max-coop-md:hidden relative clear-both block px-[1.0625rem]">
+                <div className="max-coop-md:hidden invisible block h-8.5 overflow-hidden" />
               </div>
             </div>
           </div>
 
           {/* Clone n57 — centered statement, portrait figure, founding/structure text */}
-          <div className="-mx-[1.0625rem] block h-[205.325rem] before:table before:h-0 before:w-0 before:content-[''] after:table after:h-0 after:w-0 after:content-[''] max-coop-md:h-auto coop-md:max-coop-lg:h-[3299.7px]">
-            <div className="float-left block w-full max-coop-md:float-none">
-              <div className="relative mx-[160.7px] block w-[40.1625rem] p-[1.0625rem] max-coop-md:mx-0 max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:mx-[3.8rem] coop-md:max-coop-lg:w-[608.3px] coop-2xl:mx-[230.7px] coop-2xl:w-[57.6625rem]">
+          <div className="max-coop-md:h-auto coop-md:max-coop-lg:h-[3299.7px] -mx-[1.0625rem] block h-[205.325rem] before:table before:h-0 before:w-0 before:content-[''] after:table after:h-0 after:w-0 after:content-['']">
+            <div className="max-coop-md:float-none float-left block w-full">
+              <div className="max-coop-md:mx-0 max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:mx-[3.8rem] coop-md:max-coop-lg:w-[608.3px] coop-2xl:mx-[230.7px] coop-2xl:w-[57.6625rem] relative mx-[160.7px] block w-[40.1625rem] p-[1.0625rem]">
                 {/* Clone n60/n61 — classless CMS-block scaffolding divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
@@ -147,10 +147,10 @@ export function CoopAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 {/* Clone n64/n65 — classless CMS-block scaffolding divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">
-                    <figure className="mx-43.5 block max-w-145.5 max-coop-md:mx-0 coop-md:max-coop-lg:mx-[3.5625rem] coop-2xl:mx-96">
+                    <figure className="max-coop-md:mx-0 coop-md:max-coop-lg:mx-[3.5625rem] coop-2xl:mx-96 mx-43.5 block max-w-145.5">
                       <div className="relative block overflow-hidden text-center leading-0">
                         <div
-                          className="relative block overflow-hidden pb-[192rem] max-coop-md:pb-[110.5125rem]"
+                          className="max-coop-md:pb-[110.5125rem] relative block overflow-hidden pb-[192rem]"
                           style={{
                             maskImage:
                               "-webkit-radial-gradient(center, var(--coop-background), var(--coop-clr-1))",
@@ -189,7 +189,7 @@ export function CoopAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 </div>
               </div>
 
-              <div className="relative mx-[160.7px] block w-[40.1625rem] p-[1.0625rem] max-coop-md:mx-0 max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:mx-[3.8rem] coop-md:max-coop-lg:w-[608.3px] coop-2xl:mx-[230.7px] coop-2xl:w-[57.6625rem]">
+              <div className="max-coop-md:mx-0 max-coop-md:w-[23.0625rem] coop-md:max-coop-lg:mx-[3.8rem] coop-md:max-coop-lg:w-[608.3px] coop-2xl:mx-[230.7px] coop-2xl:w-[57.6625rem] relative mx-[160.7px] block w-[40.1625rem] p-[1.0625rem]">
                 {/* Clone n74/n75 — classless CMS-block scaffolding divs, kept for exact hierarchy */}
                 <div className="block">
                   <div className="block">

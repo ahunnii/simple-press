@@ -15,7 +15,12 @@ function PinkOrderLoadingFallback({ loadingText }: { loadingText: string }) {
       className="flex min-h-[60vh] items-center justify-center px-5 py-24 md:px-10"
       style={{ background: "var(--pink-paper)" }}
     >
-      <p role="status" aria-live="polite" className="text-[16px]" style={{ color: "var(--pink-subtle)" }}>
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-[16px]"
+        style={{ color: "var(--pink-subtle)" }}
+      >
         {loadingText || "Confirming your order…"}
       </p>
     </div>

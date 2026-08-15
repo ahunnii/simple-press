@@ -55,10 +55,7 @@ export function DarkTrendContactPage({
       </div>
 
       {/* Contact Form Section */}
-      <section
-        className="mb-20 py-20"
-        {...sectionGroupAttr("contact", "info")}
-      >
+      <section className="mb-20 py-20" {...sectionGroupAttr("contact", "info")}>
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Image — N-2: decorative owner-configurable image → alt="" */}
           <div className="relative aspect-square max-w-md overflow-hidden rounded-full">

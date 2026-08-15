@@ -12,9 +12,6 @@ export type FeatureFlag = {
 
   // Dependencies — if this feature is off, these are also hidden
   dependsOn?: string[];
-
-  // If this is off, hide these nav items
-  hidesNav?: string[]; // Nav item keys to hide when disabled
 };
 
 export type FeatureCategory =
@@ -33,7 +30,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "ecommerce",
     enabledByDefault: true,
     ownerCanToggle: true,
-    hidesNav: ["products"],
   },
   orders: {
     key: "orders",
@@ -43,7 +39,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: true,
     ownerCanToggle: true,
     dependsOn: ["products"],
-    hidesNav: ["orders"],
   },
   cart: {
     key: "cart",
@@ -62,7 +57,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: true,
     ownerCanToggle: true,
     dependsOn: ["products"],
-    hidesNav: ["inventory"],
   },
   coupons: {
     key: "coupons",
@@ -72,7 +66,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
     dependsOn: ["cart"],
-    hidesNav: ["coupons"],
   },
   collections: {
     key: "collections",
@@ -82,7 +75,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
     dependsOn: ["products"],
-    hidesNav: ["collections"],
   },
   checkout: {
     key: "checkout",
@@ -131,7 +123,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: true,
     ownerCanToggle: false,
-    hidesNav: ["pages"],
   },
   galleries: {
     key: "galleries",
@@ -140,7 +131,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: true,
     ownerCanToggle: true,
-    hidesNav: ["galleries"],
   },
   embeds: {
     key: "embeds",
@@ -158,7 +148,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["blog"],
   },
   services: {
     key: "services",
@@ -167,7 +156,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["services"],
   },
   events: {
     key: "events",
@@ -176,7 +164,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["events"],
   },
   videos: {
     key: "videos",
@@ -186,7 +173,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["videos"],
   },
   media: {
     key: "media",
@@ -195,18 +181,13 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: true,
     ownerCanToggle: true,
-    hidesNav: ["media"],
   },
-  storeTransfer: {
-    key: "storeTransfer",
-    label: "Store Transfer",
-    description:
-      "Export your entire store's content to a file and import it into another store",
-    category: "content",
-    enabledByDefault: false,
-    ownerCanToggle: true,
-    hidesNav: ["store-transfer"],
-  },
+  // NOTE: `storeTransfer` used to live here. Store Transfer is now a
+  // PLATFORM_ADMIN-only tool (staging→prod moves, site duplication) rendered on
+  // /admin/settings/data and gated by platform role, not by a business flag —
+  // so there is deliberately no owner-facing toggle for it. Stored
+  // `storeTransfer` values left over in `Business.featureFlags` are ignored by
+  // `resolveFlags` (unknown keys are dropped).
   wordpressExport: {
     key: "wordpressExport",
     label: "Export to WordPress",
@@ -215,7 +196,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "content",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["wordpress-export"],
   },
 
   // ─── CUSTOMERS ──────────────────────────────────────────────────────────────
@@ -226,7 +206,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "customers",
     enabledByDefault: true,
     ownerCanToggle: false,
-    hidesNav: ["customers"],
   },
 
   // ─── MARKETING ──────────────────────────────────────────────────────────────
@@ -237,7 +216,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "marketing",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["analytics"],
   },
   testimonials: {
     key: "testimonials",
@@ -246,7 +224,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "marketing",
     enabledByDefault: true,
     ownerCanToggle: true,
-    hidesNav: ["testimonials"],
   },
   reviews: {
     key: "reviews",
@@ -256,7 +233,6 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
     dependsOn: ["products", "customerAccounts"],
-    hidesNav: ["reviews"],
   },
   contactForm: {
     key: "contactForm",
@@ -291,7 +267,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     category: "marketing",
     enabledByDefault: false,
     ownerCanToggle: true,
-    hidesNav: ["marketing"],
+  },
+  quoteCalculator: {
+    key: "quoteCalculator",
+    label: "Quote Calculator",
+    description:
+      "Build multi-step quote calculators visitors fill out to request an estimate",
+    category: "marketing",
+    enabledByDefault: false,
+    ownerCanToggle: true,
   },
 };
 

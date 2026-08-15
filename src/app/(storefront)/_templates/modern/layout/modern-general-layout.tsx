@@ -53,7 +53,9 @@ export function ModernGeneralLayout({
                         className={
                           "text-background/90 text-xs font-semibold tracking-widest uppercase"
                         }
-                        {...(subtitleFieldKey ? fieldAttr(subtitleFieldKey) : {})}
+                        {...(subtitleFieldKey
+                          ? fieldAttr(subtitleFieldKey)
+                          : {})}
                       >
                         {subtitle}
                       </p>

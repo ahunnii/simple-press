@@ -211,7 +211,9 @@ export function BusinessHoursSettings({ business }: Props) {
                   search engines can display your hours directly in search
                   results. Each row can cover one or more days, but a day can
                   only belong to one row — rows display on your storefront in
-                  the order listed below.
+                  the order listed below. Structured data appears in search
+                  results only when &ldquo;Show as a local business&rdquo; is
+                  enabled in Content → SEO & Meta.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -312,9 +314,9 @@ export function BusinessHoursSettings({ business }: Props) {
                             </FormControl>
                             <FormDescription>
                               Select the days this row applies to. A day can
-                              only belong to one row — adding it here doesn&apos;t
-                              remove it from another row, so doing so will
-                              flag a conflict below when you save.
+                              only belong to one row — adding it here
+                              doesn&apos;t remove it from another row, so doing
+                              so will flag a conflict below when you save.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -349,12 +351,12 @@ export function BusinessHoursSettings({ business }: Props) {
                               </FormLabel>
                             </div>
                             <FormDescription>
-                              Clears the open/close times for this row.
-                              Closed days are labeled &quot;Closed&quot; in the
-                              storefront preview below, but are left out of
-                              the structured data search engines read — so
-                              they won&apos;t appear as explicitly closed in
-                              search results, just absent.
+                              Clears the open/close times for this row. Closed
+                              days are labeled &quot;Closed&quot; in the
+                              storefront preview below, but are left out of the
+                              structured data search engines read — so they
+                              won&apos;t appear as explicitly closed in search
+                              results, just absent.
                             </FormDescription>
                           </FormItem>
                         )}

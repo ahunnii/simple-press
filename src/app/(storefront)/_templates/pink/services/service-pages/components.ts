@@ -7,6 +7,7 @@ import type { ServiceTemplateComponent } from "~/app/(storefront)/_templates/_se
 
 import { PinkTableServicePage } from "./pink-table-service-page";
 
-export const PINK_SERVICE_COMPONENTS: Record<string, ServiceTemplateComponent> = {
-  "pink-table": PinkTableServicePage,
-};
+export const PINK_SERVICE_COMPONENTS: Record<string, ServiceTemplateComponent> =
+  {
+    "pink-table": PinkTableServicePage,
+  };

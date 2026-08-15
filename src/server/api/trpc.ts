@@ -7,12 +7,14 @@
  * need to use are documented accordingly near the end.
  */
 
+import type { BusinessRole } from "generated/prisma";
 import { headers } from "next/headers";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { businessHostFilter } from "~/lib/domain-utils";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
@@ -138,6 +140,22 @@ export const protectedProcedure = t.procedure
   });
 
 /**
+ * `ctx.membershipRole` — the caller's LIVE `BusinessMembership.role` for the
+ * tenant resolved from the request host, set by `ownerAdminProcedure`,
+ * `staffProcedure` and `ownerOnlyProcedure` below. `null` means PLATFORM_ADMIN:
+ * they have no membership row and bypass the check entirely, so every consumer
+ * must read null as "full access", never as "no access".
+ *
+ * NEVER read `ctx.session.session.membershipRole` for authorization. That field
+ * is a creation-time snapshot stamped once by
+ * `databaseHooks.session.create.before` (`~/server/better-auth/config.tsx`) and
+ * never updated: it is `null` for anyone invited to a business *after* they
+ * signed in, and stale for the whole 7-day cookie-cache lifetime across every
+ * promotion and demotion. The role below costs zero extra queries — the
+ * membership lookup already runs for the tier check.
+ */
+
+/**
  * Business Owner / Admin  procedure
  *
  * If the current business owner or admin needs to make a query or mutation, use this. It verifies
@@ -157,7 +175,7 @@ export const ownerAdminProcedure = t.procedure
 
     const business = await ctx.db.business.findFirst({
       where: businessHostFilter(hostname),
-      select: { id: true },
+      select: { id: true, status: true },
     });
 
     if (!business) {
@@ -166,8 +184,20 @@ export const ownerAdminProcedure = t.procedure
 
     const user = ctx.session.user;
 
-    // PLATFORM_ADMIN bypasses membership check
-    if (user.platformRole !== "PLATFORM_ADMIN") {
+    // PLATFORM_ADMIN bypasses membership check — live DB read, never cookie cache.
+    const platformAdmin = await isPlatformAdmin(user.id);
+
+    // A suspended/closed store is invisible to everyone EXCEPT a platform
+    // admin, who must keep tenant-scoped access to remediate the suspension
+    // (closed platform — admins disable a store, fix it, re-enable it).
+    if (business.status !== "active" && !platformAdmin) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    // Stays null for PLATFORM_ADMIN — see the `ctx.membershipRole` note above.
+    let membershipRole: BusinessRole | null = null;
+
+    if (!platformAdmin) {
       const membership = await ctx.db.businessMembership.findUnique({
         where: {
           userId_businessId: { userId: user.id, businessId: business.id },
@@ -180,6 +210,7 @@ export const ownerAdminProcedure = t.procedure
           message: "Not a business member",
         });
       }
+      membershipRole = membership.role;
     }
 
     return next({
@@ -187,6 +218,7 @@ export const ownerAdminProcedure = t.procedure
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+        membershipRole,
       },
     });
   });
@@ -213,7 +245,7 @@ export const staffProcedure = t.procedure
 
     const business = await ctx.db.business.findFirst({
       where: businessHostFilter(hostname),
-      select: { id: true },
+      select: { id: true, status: true },
     });
 
     if (!business) {
@@ -222,8 +254,20 @@ export const staffProcedure = t.procedure
 
     const user = ctx.session.user;
 
-    // PLATFORM_ADMIN bypasses membership check
-    if (user.platformRole !== "PLATFORM_ADMIN") {
+    // PLATFORM_ADMIN bypasses membership check — live DB read, never cookie cache.
+    const platformAdmin = await isPlatformAdmin(user.id);
+
+    // A suspended/closed store is invisible to everyone EXCEPT a platform
+    // admin, who must keep tenant-scoped access to remediate the suspension
+    // (closed platform — admins disable a store, fix it, re-enable it).
+    if (business.status !== "active" && !platformAdmin) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    // Stays null for PLATFORM_ADMIN — see the `ctx.membershipRole` note above.
+    let membershipRole: BusinessRole | null = null;
+
+    if (!platformAdmin) {
       const membership = await ctx.db.businessMembership.findUnique({
         where: {
           userId_businessId: { userId: user.id, businessId: business.id },
@@ -239,6 +283,7 @@ export const staffProcedure = t.procedure
           message: "Not a business member",
         });
       }
+      membershipRole = membership.role;
     }
 
     return next({
@@ -246,6 +291,7 @@ export const staffProcedure = t.procedure
         // infers the `session` as non-nullable
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+        membershipRole,
       },
     });
   });
@@ -270,7 +316,7 @@ export const ownerOnlyProcedure = t.procedure
 
     const business = await ctx.db.business.findFirst({
       where: businessHostFilter(hostname),
-      select: { id: true },
+      select: { id: true, status: true },
     });
 
     if (!business) {
@@ -279,7 +325,18 @@ export const ownerOnlyProcedure = t.procedure
 
     const user = ctx.session.user;
 
-    if (user.platformRole !== "PLATFORM_ADMIN") {
+    // PLATFORM_ADMIN bypasses membership check — live DB read, never cookie cache.
+    const platformAdmin = await isPlatformAdmin(user.id);
+
+    // Same suspended-store carve-out as ownerAdminProcedure above.
+    if (business.status !== "active" && !platformAdmin) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    // Stays null for PLATFORM_ADMIN — see the `ctx.membershipRole` note above.
+    let membershipRole: BusinessRole | null = null;
+
+    if (!platformAdmin) {
       const membership = await ctx.db.businessMembership.findUnique({
         where: {
           userId_businessId: { userId: user.id, businessId: business.id },
@@ -292,12 +349,15 @@ export const ownerOnlyProcedure = t.procedure
           message: "Owner access required",
         });
       }
+      // Narrowed to non-null by the optional-chain comparison above.
+      membershipRole = membership.role;
     }
 
     return next({
       ctx: {
         session: { ...ctx.session, user: ctx.session.user },
         businessId: business.id,
+        membershipRole,
       },
     });
   });
@@ -312,12 +372,13 @@ export const ownerOnlyProcedure = t.procedure
  */
 export const platformAdminProcedure = t.procedure
   .use(timingMiddleware)
-  .use(({ ctx, next }) => {
+  .use(async ({ ctx, next }) => {
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
-    if (ctx.session.user.platformRole !== "PLATFORM_ADMIN") {
+    // Live DB read — never trust cookie-cached session.user.platformRole.
+    if (!(await isPlatformAdmin(ctx.session.user.id))) {
       throw new TRPCError({
         code: "FORBIDDEN",
         message: "Platform admin access required",
@@ -332,10 +393,32 @@ export const platformAdminProcedure = t.procedure
   });
 
 export const featureGate = (featureKey: string) =>
-  t.middleware(async ({ next }) => {
-    // const businessId = (ctx as unknown as { businessId: string }).businessId;
-    // 1. Get the flags using your existing helper
-    const { isEnabled, disabledByDependency } = await getBusinessFlags();
+  t.middleware(async ({ ctx, next }) => {
+    // 1. Get the flags using your existing helper.
+    //
+    // `getBusinessFlags()` resolves the tenant via `checkBusiness()`, which
+    // only sees ACTIVE stores — so on a suspended store it throws NOT_FOUND
+    // before the flag check even runs. Platform admins must still be able to
+    // reach feature-gated tenant procedures to remediate a suspension, so
+    // retry the lookup without the status filter for them (live DB role read,
+    // never cookie cache). Everyone else keeps the clean 404.
+    let flags: Awaited<ReturnType<typeof getBusinessFlags>>;
+    try {
+      flags = await getBusinessFlags();
+    } catch (err) {
+      const userId = ctx.session?.user?.id;
+      if (
+        err instanceof TRPCError &&
+        err.code === "NOT_FOUND" &&
+        userId &&
+        (await isPlatformAdmin(userId))
+      ) {
+        flags = await getBusinessFlags({ includeInactive: true });
+      } else {
+        throw err;
+      }
+    }
+    const { isEnabled, disabledByDependency } = flags;
 
     // 2. Check if the feature is active
     if (!isEnabled(featureKey) || disabledByDependency.has(featureKey)) {
@@ -355,11 +438,23 @@ export const getBusinessProcedure = () =>
 
     const business = await ctx.db.business.findFirst({
       where: businessHostFilter(hostname),
-      select: { id: true },
+      select: { id: true, status: true },
     });
 
     if (!business) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+    }
+
+    // Public callers must never see a suspended/closed store; a platform
+    // admin browsing the tenant host to remediate a suspension may.
+    if (business.status !== "active") {
+      const userId = ctx.session?.user?.id;
+      if (!userId || !(await isPlatformAdmin(userId))) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
+      }
     }
 
     return next({

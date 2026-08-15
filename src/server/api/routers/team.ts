@@ -2,7 +2,6 @@ import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { env } from "~/env";
 import { getBusinessUrl } from "~/lib/business-url";
 import { sendTeamInviteEmail } from "~/lib/email/templates";
 
@@ -14,11 +13,29 @@ import {
   publicProcedure,
 } from "../trpc";
 
-function buildTeamInviteUrl(code: string): string {
-  if (process.env.NODE_ENV === "development") {
-    return `http://localhost:3000/auth/accept-invite?code=${code}`;
-  }
-  return `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/auth/accept-invite?code=${code}`;
+type InviteBusiness = {
+  subdomain: string | null;
+  customDomain: string | null;
+  domainStatus: string | null;
+};
+
+/**
+ * Invite links point at the *business's own* domain (custom domain when
+ * ACTIVE, else its subdomain) — never the bare platform domain.
+ *
+ * Sessions are per-host (no cross-subdomain cookie is configured), so signing
+ * in on the platform domain would not authenticate the member on the store
+ * they were invited to. Landing them on the store's own host means they sign
+ * in exactly once, on the host where the session is actually needed — and
+ * they never see an unfamiliar platform domain in the process.
+ */
+function buildTeamInviteUrl(code: string, business: InviteBusiness): string {
+  const base = getBusinessUrl({
+    subdomain: business.subdomain ?? "",
+    customDomain: business.customDomain,
+    domainStatus: business.domainStatus,
+  });
+  return `${base}/auth/accept-invite?code=${code}`;
 }
 
 export const teamRouter = createTRPCRouter({
@@ -26,8 +43,13 @@ export const teamRouter = createTRPCRouter({
 
   list: ownerAdminProcedure.query(async ({ ctx }) => {
     const { businessId } = ctx;
+    // Shared instant for both invite queries below, so a request landing
+    // exactly on the expiry boundary can't put the same invite in neither
+    // (or both) of the two lists — `gt`/`lte` on two separate `new Date()`
+    // calls could otherwise disagree by however long the first query took.
+    const now = new Date();
 
-    const [memberships, pendingInvites] = await Promise.all([
+    const [memberships, pendingInvites, expiredInvites] = await Promise.all([
       ctx.db.businessMembership.findMany({
         where: { businessId },
         include: {
@@ -39,13 +61,26 @@ export const teamRouter = createTRPCRouter({
         where: {
           businessId,
           used: false,
-          expiresAt: { gt: new Date() },
+          expiresAt: { gt: now },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      // A third array, not a loosened filter on `pendingInvites` — that
+      // field's meaning ("still usable") must not shift for the test suite
+      // or anything else already reading it. Expired invites can't be
+      // revoked (`revokeInvite` just sets `used: true`, which is meaningless
+      // once an invite is already dead) so the UI only offers Resend here.
+      ctx.db.teamInvite.findMany({
+        where: {
+          businessId,
+          used: false,
+          expiresAt: { lte: now },
         },
         orderBy: { createdAt: "desc" },
       }),
     ]);
 
-    return { memberships, pendingInvites };
+    return { memberships, pendingInvites, expiredInvites };
   }),
 
   // ─── PUBLIC ───────────────────────────────────────────────────────────────
@@ -76,6 +111,21 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
+      // Explicit projection — three fields, never the row.
+      //
+      // This is a `publicProcedure` keyed on an invite code, so everything it
+      // returns is readable by whoever holds that code. `email` is here
+      // DELIBERATELY: `AcceptInviteClient` renders "Sign in or create an account
+      // with <email>" and compares it against the signed-in session to warn
+      // "this invitation was sent to X, but you're signed in as Y". Removing it
+      // breaks that screen. The disclosure is acceptable because the code itself
+      // was mailed to that address — a code holder is the invitee, or someone
+      // they forwarded it to.
+      //
+      // What must NOT happen is this becoming `return invite`, which would also
+      // hand out `code`, `businessId`, `createdBy` and the raw timestamps. That
+      // is the shape that leaked in `testimonial.getInvite`; a regression test in
+      // tests/integration/team.test.ts pins this projection.
       return {
         businessName: invite.business.name,
         email: invite.email,
@@ -116,20 +166,23 @@ export const teamRouter = createTRPCRouter({
         });
       }
 
-      // The invite/accept flow runs on the platform domain, but the member must
-      // land on the *business's* admin (its own subdomain/custom domain) —
-      // /admin on the platform domain has no tenant context. Build that URL so
-      // the client can send them there (they re-sign-in so the new role loads).
+      // The member must land on the *business's* admin (its own subdomain or
+      // custom domain) — /admin on the platform domain has no tenant context.
+      // Invite links now point at that host already, so an accepting member is
+      // signed in there and can go straight to the dashboard: admin role checks
+      // resolve the membership live (see `requireAdminAccess`), so no re-sign-in
+      // is needed for the new role to take effect. A member arriving from a
+      // legacy platform-domain link simply gets bounced to that host's sign-in.
       const business = await ctx.db.business.findUnique({
         where: { id: invite.businessId },
         select: { subdomain: true, customDomain: true, domainStatus: true },
       });
-      const adminSignInUrl = business
+      const adminUrl = business
         ? `${getBusinessUrl({
             subdomain: business.subdomain ?? "",
             customDomain: business.customDomain,
             domainStatus: business.domainStatus,
-          })}/auth/sign-in?redirectTo=${encodeURIComponent("/admin/dashboard")}`
+          })}/admin/dashboard`
         : "/admin/dashboard";
 
       // Guard against duplicate membership
@@ -148,7 +201,7 @@ export const teamRouter = createTRPCRouter({
           where: { id: invite.id },
           data: { used: true, usedAt: new Date() },
         });
-        return { success: true, businessId: invite.businessId, adminSignInUrl };
+        return { success: true, businessId: invite.businessId, adminUrl };
       }
 
       // Create membership + mark invite used in a transaction
@@ -166,7 +219,7 @@ export const teamRouter = createTRPCRouter({
         }),
       ]);
 
-      return { success: true, businessId: invite.businessId, adminSignInUrl };
+      return { success: true, businessId: invite.businessId, adminUrl };
     }),
 
   // ─── OWNER-ONLY MUTATIONS ─────────────────────────────────────────────────
@@ -224,7 +277,10 @@ export const teamRouter = createTRPCRouter({
       });
 
       if (!business) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Business not found" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Business not found",
+        });
       }
 
       const code = crypto.randomBytes(16).toString("hex");
@@ -242,9 +298,14 @@ export const teamRouter = createTRPCRouter({
         },
       });
 
-      const inviteUrl = buildTeamInviteUrl(code);
+      const inviteUrl = buildTeamInviteUrl(code, business);
 
-      await sendTeamInviteEmail({
+      // The invite row above is already committed — `sendEmail` never
+      // throws (see its docblock), so a Resend failure can't roll that back
+      // anyway. Throwing here would report a failed mutation for a write
+      // that actually succeeded, so the outcome is surfaced as a return
+      // field instead and left for the caller to react to.
+      const emailResult = await sendTeamInviteEmail({
         to: input.email,
         businessName: business.name,
         inviteUrl,
@@ -253,7 +314,7 @@ export const teamRouter = createTRPCRouter({
         ownerEmail: business.ownerEmail,
       });
 
-      return invite;
+      return { ...invite, emailSent: emailResult.success };
     }),
 
   changeRole: ownerOnlyProcedure

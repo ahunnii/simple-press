@@ -1,7 +1,16 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, Globe, Package, Palette, Store } from "lucide-react";
+import {
+  ArrowRight,
+  CreditCard,
+  Globe,
+  Package,
+  Palette,
+  Store,
+} from "lucide-react";
 
+import type { ChecklistSummary } from "~/lib/admin/checklist";
 import { env } from "~/env";
+import { isChecklistItemComplete } from "~/lib/admin/checklist";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -29,26 +38,27 @@ type Business = {
 
 type Props = {
   business: Business;
-  setupSteps: {
-    businessCreated: boolean;
-    stripeConnected: boolean;
-    domainConfigured: boolean;
-    firstProductAdded: boolean;
-    storefrontCustomized: boolean;
-  };
-  completedSteps: number;
-  totalSteps: number;
+  /** Built by `computeSetupStatus` — rows are looked up by key below. */
+  status: ChecklistSummary;
   vpsIp: string;
 };
 
-export function SetupChecklist({
-  business,
-  setupSteps,
-  completedSteps,
-  totalSteps,
-  vpsIp,
-}: Props) {
-  const progress = (completedSteps / totalSteps) * 100;
+export function SetupChecklist({ business, status, vpsIp }: Props) {
+  const completedSteps = status.completed;
+  const totalSteps = status.total;
+  const progress = status.percent;
+
+  const businessCreated = isChecklistItemComplete(status, "businessCreated");
+  const stripeConnected = isChecklistItemComplete(status, "stripeConnected");
+  const domainConfigured = isChecklistItemComplete(status, "domainConfigured");
+  const firstProductAdded = isChecklistItemComplete(
+    status,
+    "firstProductAdded",
+  );
+  const storefrontCustomized = isChecklistItemComplete(
+    status,
+    "storefrontCustomized",
+  );
 
   return (
     <Card>
@@ -60,9 +70,7 @@ export function SetupChecklist({
               {completedSteps} of {totalSteps} steps completed
             </CardDescription>
           </div>
-          <div className="text-primary text-2xl font-bold">
-            {Math.round(progress)}%
-          </div>
+          <div className="text-primary text-2xl font-bold">{progress}%</div>
         </div>
         {/* Progress Bar */}
         <div className="bg-muted mt-4 h-2 overflow-hidden rounded-full">
@@ -76,7 +84,7 @@ export function SetupChecklist({
       <CardContent className="space-y-6">
         {/* Step 1: Business Created */}
         <SetupStep
-          completed={setupSteps.businessCreated}
+          completed={businessCreated}
           icon={<Store className="h-5 w-5" />}
           title="Store Created"
           description="Your store has been set up successfully"
@@ -84,16 +92,16 @@ export function SetupChecklist({
 
         {/* Step 2: Connect Stripe */}
         <SetupStep
-          completed={setupSteps.stripeConnected}
+          completed={stripeConnected}
           icon={<CreditCard className="h-5 w-5" />}
           title="Connect Payment Processing"
           description={
-            setupSteps.stripeConnected
+            stripeConnected
               ? "Stripe is connected and ready to accept payments"
               : "Connect Stripe to start accepting payments from customers"
           }
           action={
-            !setupSteps.stripeConnected && (
+            !stripeConnected && (
               <ConnectStripeButton
                 businessId={business.id}
                 stripeAccountId={business?.stripeAccountId ?? null}
@@ -104,11 +112,11 @@ export function SetupChecklist({
 
         {/* Step 3: Configure Domain — required to complete setup */}
         <SetupStep
-          completed={setupSteps.domainConfigured}
+          completed={domainConfigured}
           icon={<Globe className="h-5 w-5" />}
           title="Connect a Custom Domain (Required)"
           description={
-            setupSteps.domainConfigured
+            domainConfigured
               ? `Your store is live at ${business.customDomain}`
               : `A custom domain is required to complete setup. Your subdomain (${business.subdomain}.${env.NEXT_PUBLIC_PLATFORM_DOMAIN}) is temporary.`
           }
@@ -117,16 +125,16 @@ export function SetupChecklist({
 
         {/* Step 4: Add First Product */}
         <SetupStep
-          completed={setupSteps.firstProductAdded}
+          completed={firstProductAdded}
           icon={<Package className="h-5 w-5" />}
           title="Add Your First Product"
           description={
-            setupSteps.firstProductAdded
+            firstProductAdded
               ? `You have ${business._count.products} product${business._count.products !== 1 ? "s" : ""}`
               : "Add products to start selling"
           }
           action={
-            !setupSteps.firstProductAdded && (
+            !firstProductAdded && (
               <Button asChild>
                 <Link href="/admin/products/new">
                   Add Product
@@ -139,16 +147,16 @@ export function SetupChecklist({
 
         {/* Step 5: Customize Storefront */}
         <SetupStep
-          completed={setupSteps.storefrontCustomized}
+          completed={storefrontCustomized}
           icon={<Palette className="h-5 w-5" />}
           title="Customize Your Storefront"
           description={
-            setupSteps.storefrontCustomized
+            storefrontCustomized
               ? "Your storefront has been customized"
               : "Upload a logo and edit your homepage sections to make the store your own"
           }
           action={
-            !setupSteps.storefrontCustomized && (
+            !storefrontCustomized && (
               <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm">
                   <Link href="/admin/content/branding">
@@ -157,8 +165,8 @@ export function SetupChecklist({
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="sm">
-                  <Link href="/admin/content/template">
-                    Template Fields
+                  <Link href="/editor">
+                    Site Editor
                     <ArrowRight className="ml-2 h-3 w-3" />
                   </Link>
                 </Button>

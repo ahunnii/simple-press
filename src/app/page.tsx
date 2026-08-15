@@ -3,7 +3,6 @@ import { permanentRedirect } from "next/navigation";
 
 import { env } from "~/env";
 import { enforceCanonicalHost } from "~/lib/canonical";
-import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
@@ -13,6 +12,7 @@ import { api, HydrateClient } from "~/trpc/server";
 import { JsonLd } from "~/components/json-ld";
 import { MaintenanceScreen } from "~/components/maintenance/maintenance-screen";
 import { PreviewOverlay } from "~/components/preview/preview-overlay";
+import { StorefrontFlagsProvider } from "~/providers/feature-flags-context";
 
 import { PlatformLandingPageComponent } from "./_components/platform-specific/platform-landing-page";
 import { BambooHomepage } from "./(storefront)/_templates/bamboo/homepage/bamboo-homepage";
@@ -37,6 +37,8 @@ import { PinkHomepage } from "./(storefront)/_templates/pink/homepage/pink-homep
 import { PinkLayout } from "./(storefront)/_templates/pink/layout/pink-layout";
 import { PollenHomepage } from "./(storefront)/_templates/pollen/homepage/pollen-homepage";
 import { PollenLayout } from "./(storefront)/_templates/pollen/layout/pollen-layout";
+import { RelocationHomepage } from "./(storefront)/_templates/relocation/homepage/relocation-homepage";
+import { RelocationLayout } from "./(storefront)/_templates/relocation/layout/relocation-layout";
 import { SledgeHomepage } from "./(storefront)/_templates/sledge/homepage/sledge-homepage";
 import { SledgeLayout } from "./(storefront)/_templates/sledge/layout/sledge-layout";
 import { ViiHomepage } from "./(storefront)/_templates/vii/homepage/vii-homepage";
@@ -95,6 +97,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       builders: BuildersHomepage,
       coop: CoopHomepage,
       pink: PinkHomepage,
+      relocation: RelocationHomepage,
       sledge: SledgeHomepage,
       vii: ViiHomepage,
     }[business.templateId] ?? DefaultHomePage;
@@ -112,6 +115,7 @@ export default async function PlatformLandingPage({ searchParams }: Props) {
       builders: BuildersLayout,
       coop: CoopLayout,
       pink: PinkLayout,
+      relocation: RelocationLayout,
       sledge: SledgeLayout,
       vii: ViiLayout,
     }[business.templateId] ?? DefaultLayout;

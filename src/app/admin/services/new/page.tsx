@@ -1,6 +1,6 @@
 import { api } from "~/trpc/server";
 
-import { ServiceForm } from "../_components/service-form";
+import { ServiceEditor } from "../_components/service-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 export default async function NewServicePage() {
@@ -14,7 +14,7 @@ export default async function NewServicePage() {
           { label: "New Service" },
         ]}
       />
-      <ServiceForm storefrontTemplateId={business.templateId} />
+      <ServiceEditor storefrontTemplateId={business.templateId} />
     </>
   );
 }

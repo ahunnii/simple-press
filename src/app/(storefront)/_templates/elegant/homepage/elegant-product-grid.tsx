@@ -55,7 +55,7 @@ export function ElegantProductGrid({
   const { ref: gridRef, visible: gridVisible } = useReveal();
   const reducedMotion = useReducedMotion();
 
-  const products = homepage?.products ?? [];
+  const products = (homepage?.products ?? []).slice(0, 4);
 
   const revealStyle = (delay: number): React.CSSProperties =>
     reducedMotion

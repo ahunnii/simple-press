@@ -11,43 +11,69 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 
+/** Just what the copy needs to name the row and state the consequences. */
+export type DeleteProductTarget = {
+  name: string;
+  slug: string;
+  published: boolean;
+};
+
 type Props = {
   open: boolean;
-  setOpen: (open: boolean) => void;
-  deleteId: string | null;
-  onDelete: () => void;
-  productName: string | null;
+  onOpenChange: (open: boolean) => void;
+  /**
+   * The row being deleted, or null. Kept as a prop rather than an early
+   * `return null` on a missing id: unmounting the dialog is how you lose the
+   * close animation and, with it, the focus restore Radix performs on exit.
+   */
+  product: DeleteProductTarget | null;
+  onConfirm: () => void;
   isPending?: boolean;
 };
 
 export const DeleteProductAlertDialog = ({
-  deleteId,
   open,
-  setOpen,
-  onDelete,
-  productName,
+  onOpenChange,
+  product,
+  onConfirm,
   isPending,
 }: Props) => {
-  if (!deleteId) {
-    return null;
-  }
-
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete product</AlertDialogTitle>
+          {/* Name in the TITLE, consequences in the description — the shape
+              Collections and Inventory use. The title is the line people
+              actually read before clicking through, and "Delete product" told
+              them nothing they hadn't already decided. */}
+          <AlertDialogTitle>
+            {product ? `Delete “${product.name}”?` : "Delete Product?"}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete &quot;{productName}&quot;? This
-            action cannot be undone.
+            Its images will be deleted too.
+            {product?.published
+              ? ` Its storefront page at /shop/${product.slug} will stop working.`
+              : ""}{" "}
+            {/* OrderItem.productId is `onDelete: SetNull` and the item name,
+                price and options are snapshotted at checkout — so order history
+                survives intact, which is the thing an owner is most afraid of
+                breaking here. */}
+            Past orders keep their own record of what was bought. This action
+            cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          {/* `variant`, NOT className. AlertDialogAction wraps a `Button ...
+              asChild`, so a className lands on the inner Radix element while
+              Button still supplies `bg-primary` — and Slot concatenates the two
+              without tailwind-merge, so CSS order decides and primary wins. The
+              `className="bg-destructive …"` this file used to carry rendered
+              BLACK. */}
           <AlertDialogAction
-            onClick={onDelete}
+            variant="destructive"
+            onClick={onConfirm}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isPending ? "Deleting…" : "Delete"}
           </AlertDialogAction>

@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { headers } from "next/headers";
 
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness } from "~/lib/check-business";
 
 import { auth } from ".";
@@ -23,8 +24,8 @@ export const getSessionWithBusinessMembership = cache(async () => {
     return { ...session, businessMembership: null };
   }
 
-  // Platform admins have implicit access
-  if (session.user.platformRole === "PLATFORM_ADMIN") {
+  // Platform admins have implicit access — live DB read, never cookie cache.
+  if (await isPlatformAdmin(session.user.id)) {
     return {
       ...session,
       businessMembership: {

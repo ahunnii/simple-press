@@ -6,7 +6,7 @@ export default async function NewDiscountPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Discount Codes", href: "/admin/discounts" },
+          { label: "Discounts", href: "/admin/discounts" },
           { label: "New Discount Code" },
         ]}
       />

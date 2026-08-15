@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 
 import { env } from "~/env";
+import { computeSetupStatus } from "~/lib/admin/setup-steps";
 import { checkBusiness } from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
 import { db } from "~/server/db";
@@ -32,31 +33,14 @@ export default async function AdminWelcomePage() {
     return notFound();
   }
 
-  // Determine whether the storefront has been customized:
-  // logo set OR any custom template fields saved.
-  const siteContent = business.siteContent;
-  const customFields = siteContent?.customFields;
-  const storefrontCustomized =
-    Boolean(siteContent?.logoUrl) ||
-    (customFields !== null &&
-      customFields !== undefined &&
-      typeof customFields === "object" &&
-      !Array.isArray(customFields) &&
-      Object.keys(customFields as Record<string, unknown>).length > 0);
-
-  // Calculate setup completion.
-  // domainConfigured requires an actual custom domain — the subdomain is temporary.
-  const setupSteps = {
-    businessCreated: true,
-    stripeConnected: !!business.stripeAccountId,
-    domainConfigured: Boolean(business.customDomain),
-    firstProductAdded: business._count.products > 0,
-    storefrontCustomized,
-  };
-
-  const completedSteps = Object.values(setupSteps).filter(Boolean).length;
-  const totalSteps = Object.keys(setupSteps).length;
-  const isComplete = completedSteps === totalSteps;
+  // Setup completion — shared with the dashboard's "Finish setting up" card.
+  // domainConfigured requires an actual custom domain; the subdomain is temporary.
+  const setupStatus = computeSetupStatus({
+    stripeAccountId: business.stripeAccountId,
+    customDomain: business.customDomain,
+    productCount: business._count.products,
+    siteContent: business.siteContent,
+  });
 
   return (
     <>
@@ -65,7 +49,7 @@ export default async function AdminWelcomePage() {
         <WelcomeHeader
           businessName={business.name}
           userName={session?.user.name ?? session?.user.email ?? ""}
-          isComplete={isComplete}
+          isComplete={setupStatus.isComplete}
         />
 
         {/* Escape hatch: let owners operate the store while finishing setup */}
@@ -83,9 +67,7 @@ export default async function AdminWelcomePage() {
           <div className="lg:col-span-2">
             <SetupChecklist
               business={business}
-              setupSteps={setupSteps}
-              completedSteps={completedSteps}
-              totalSteps={totalSteps}
+              status={setupStatus}
               vpsIp={env.VPS_IP}
             />
           </div>

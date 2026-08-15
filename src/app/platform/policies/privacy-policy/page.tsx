@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
+import {
+  formatPolicyDate,
+  POLICY_LAST_UPDATED,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | SimplePress",
-  description: "How SimplePress collects, uses, and protects your personal information.",
+  description:
+    "How SimplePress collects, uses, and protects your personal information.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/privacy-policy`,
   },
@@ -20,7 +26,8 @@ export default function PrivacyPolicyPage() {
       <h1>SimplePress Platform Privacy Policy</h1>
 
       <p>
-        <strong>Last Updated:</strong> May 29, 2026
+        <strong>Last Updated:</strong>{" "}
+        {formatPolicyDate(POLICY_LAST_UPDATED.privacyPolicy)}
       </p>
 
       <h2>1. Introduction</h2>
@@ -143,8 +150,10 @@ export default function PrivacyPolicyPage() {
         <li>technical performance metrics.</li>
       </ul>
       <p>
-        We do not use analytics to sell personal data or build advertising
-        profiles.
+        We do not use these analytics tools to sell personal data or build
+        advertising profiles. Section 15 separately describes third-party
+        providers, including Google reCAPTCHA, which analyze visitor behavior
+        for security and fraud-prevention purposes under their own terms.
       </p>
 
       <h3>F. Communications</h3>
@@ -379,10 +388,33 @@ export default function PrivacyPolicyPage() {
         <li>embedded content providers;</li>
         <li>hosting infrastructure providers;</li>
         <li>
-          error-monitoring and diagnostics providers, such as Sentry, which
-          may receive limited technical and account identifiers (such as
-          email address, when available) solely to help us detect,
-          diagnose, and resolve platform errors.
+          error-monitoring and diagnostics providers, such as Sentry, which may
+          receive limited technical and account identifiers (such as email
+          address, when available) solely to help us detect, diagnose, and
+          resolve platform errors;
+        </li>
+        <li>
+          bot and abuse detection providers, such as Google reCAPTCHA, which
+          analyzes visitor behavior on sign-in, sign-up, password reset, and
+          certain storefront forms to help distinguish human visitors from
+          automated bots. Information it collects is sent to Google and is
+          subject to Google&rsquo;s own{" "}
+          <a
+            href="https://policies.google.com/privacy"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Privacy Policy
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://policies.google.com/terms"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Terms of Service
+          </a>
+          .
         </li>
       </ul>
       <p>

@@ -1,8 +1,8 @@
 import "server-only";
 
+import type { EmailOverride } from "./customization";
 import { db } from "~/server/db";
 
-import type { EmailOverride } from "./customization";
 import { emailOverridesSchema } from "./customization";
 
 /**

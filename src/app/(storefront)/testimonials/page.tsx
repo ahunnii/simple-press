@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { api } from "~/trpc/server";
 
 import { getTemplate } from "../_templates/registry";
@@ -19,10 +19,11 @@ export default async function TestimonialsPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet();
+  const business = await loadSeoBusiness("/testimonials");
   return buildPageMetadata({
     business,
     path: "/testimonials",
+    pageMetaKey: "testimonials",
     title: "Testimonials",
     description: "Customer testimonials",
   });

@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import type { BrowserContext, Locator, Page } from "@playwright/test";
-import { expect } from "@playwright/test";
 
 import type { SeedTenant } from "./global-setup";
 
@@ -179,7 +178,14 @@ async function selectState(
   scope: Page | Locator,
   code: string,
 ): Promise<boolean> {
-  const trigger = scope.locator("#state").first();
+  // `[id$="-state"]` picks up templates that namespace their ids — pink's
+  // trigger is `#pink-checkout-state`, which `#state` alone never matched, so
+  // this returned false and the state was left unselected. Checked repo-wide:
+  // the only ids ending in `-state` are `checkout-state` and
+  // `pink-checkout-state`, both genuine state controls, so there is nothing
+  // for `.first()` to pick up by mistake. (The sibling `*-state-label` ids end
+  // in `-label`, so they are not matched.)
+  const trigger = scope.locator('#state, [id$="-state"]').first();
   if ((await trigger.count()) === 0) return false;
 
   const tagName = await trigger.evaluate((el) => el.tagName.toLowerCase());
@@ -203,7 +209,10 @@ async function selectState(
   await trigger.focus();
   await trigger.press("Enter");
   const page = pageOf(scope);
-  const option = page.getByRole("option", { name: US_STATE_NAMES[code] ?? code, exact: true });
+  const option = page.getByRole("option", {
+    name: US_STATE_NAMES[code] ?? code,
+    exact: true,
+  });
   // Fall back to a forced pointer click if the keyboard open didn't surface it.
   if ((await option.count()) === 0) {
     await trigger.click({ force: true });
@@ -236,7 +245,19 @@ export async function fillCheckout(
 ): Promise<void> {
   await fillFirst(scope, ["#email", 'input[autocomplete="email"]'], info.email);
 
-  const filledName = await fillFirst(scope, ["#name"], info.name);
+  // `autocomplete="name"` is the fallback every other field here already has
+  // for its own token, and the one this list was missing. Templates that
+  // namespace their input ids (pink uses `#pink-checkout-name`) match nothing
+  // in the `#name` slot, and the given-/family-name split below doesn't catch
+  // them either because they render ONE combined name field. The result was a
+  // silently-empty `required` input: native constraint validation cancelled
+  // submit before React's onSubmit ran, so the test failed on the URL
+  // assertion with an empty error banner and no clue why.
+  const filledName = await fillFirst(
+    scope,
+    ["#name", 'input[autocomplete="name"]'],
+    info.name,
+  );
   if (!filledName) {
     const [first, ...rest] = info.name.split(" ");
     await fillFirst(
@@ -340,41 +361,20 @@ export function stubStripe(page: Page, stub: StripeStub) {
 }
 
 /**
- * Solve the hCaptcha widget rendered on the credentials sign-in/sign-up forms.
- * better-auth's `captcha()` plugin (src/server/better-auth/config.tsx) enforces
- * verification unconditionally on `/sign-in/email` — there is no server-side
- * dev bypass — so any spec that submits a real credentialed sign-in must clear
- * this first. The e2e env (tests/helpers/test-env.ts) points
- * NEXT_PUBLIC_HCAPTCHA_SITE_KEY / HCAPTCHA_SECRET_KEY at hCaptcha's own
- * published "always passes" integration-testing keypair, so the checkbox
- * really does render, and the resulting token really is verified over the
- * network against hCaptcha's siteverify endpoint — it just never shows an
- * actual challenge.
- *
- * The click must wait for the checkbox's `aria-checked` state rather than just
- * firing-and-forgetting: hCaptcha's own verification round-trip (browser →
- * hCaptcha → browser, via postMessage) happens asynchronously after the click
- * event, so submitting immediately after the click races it and intermittently
- * submits with no captcha response yet.
- */
-export async function solveHCaptcha(page: Page): Promise<void> {
-  const checkbox = page
-    .frameLocator('iframe[src*="hcaptcha"]')
-    .first()
-    .locator("#checkbox");
-  await checkbox.waitFor({ state: "visible", timeout: 15_000 });
-  await checkbox.click();
-  await expect(checkbox).toHaveAttribute("aria-checked", "true", {
-    timeout: 15_000,
-  });
-}
-
-/**
  * Drive a real credentialed sign-in through the actual UI: fill email/password
- * by their accessible label (stable across any auth-UI-library swap), solve
- * the captcha, and submit. The submit button's accessible name varies by
- * library/localization (currently "Login"), so match loosely rather than on
- * exact copy.
+ * by their accessible label (stable across any auth-UI-library swap) and
+ * submit. No captcha-solving step is needed: better-auth's `captcha()` plugin
+ * (src/server/better-auth/config.tsx) enforces verification unconditionally on
+ * `/sign-in/email`, but the e2e env (tests/helpers/test-env.ts) sets
+ * `NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS=1`, which makes `useRecaptchaV3`
+ * (src/lib/captcha/use-recaptcha-v3.ts) stage the sentinel
+ * `RECAPTCHA_TEST_BYPASS_TOKEN` instead of loading Google's script, and
+ * `verifyRecaptcha` (src/lib/captcha/verify-recaptcha.ts) accept that exact
+ * token without calling Google. The Better Auth UI captcha plugin picks the
+ * staged token up automatically via its `x-captcha-response` header, so there
+ * is nothing for this helper to click or wait on. The submit button's
+ * accessible name varies by library/localization (currently "Login"), so
+ * match loosely rather than on exact copy.
  */
 export async function signIn(
   page: Page,
@@ -388,6 +388,5 @@ export async function signIn(
   await page.goto(url);
   await page.getByLabel(/^email$/i).fill(creds.email);
   await page.getByLabel(/^password$/i).fill(creds.password);
-  await solveHCaptcha(page);
   await page.getByRole("button", { name: /log\s?in|sign\s?in/i }).click();
 }

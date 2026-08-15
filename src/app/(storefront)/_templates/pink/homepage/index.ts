@@ -1,5 +1,6 @@
 import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Homepage fields for the `pink` template.
@@ -121,28 +122,6 @@ const homepageHeroData: TemplateField[] = [
     group: "homepage.hero",
     gridColumn: "col-span-full",
     defaultValue: "/templates/pink/images/hero-family-home.webp",
-  },
-  {
-    key: "pink.homepage.hero-wordmark-accent",
-    label: "Wordmark — First Half",
-    description:
-      "The first half of the giant two-part wordmark that anchors the hero. While both halves are left at their defaults (\"PINK\" / \"ART\") the hero shows the PinkArt logo's actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the accent color.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "PINK",
-  },
-  {
-    key: "pink.homepage.hero-wordmark-ink",
-    label: "Wordmark — Second Half",
-    description:
-      "The second half of the wordmark. While both halves are left at their defaults (\"PINK\" / \"ART\") the hero shows the PinkArt logo's actual traced letterforms; typing anything else switches the wordmark to live text set in the display font, in the ink color.",
-    type: "text",
-    page: "homepage",
-    group: "homepage.hero",
-    gridColumn: "col-span-1",
-    defaultValue: "ART",
   },
   {
     key: "pink.homepage.hero-maker-1",
@@ -297,7 +276,12 @@ const homepagePromisesData: TemplateField[] = [
     gridColumn: "col-span-full",
     maxItems: 6,
     itemSchema: [
-      { key: "title", label: "Title", type: "text", placeholder: "One of a kind" },
+      {
+        key: "title",
+        label: "Title",
+        type: "text",
+        placeholder: "One of a kind",
+      },
       {
         key: "body",
         label: "Body",
@@ -325,7 +309,8 @@ const homepageCollectionData: TemplateField[] = [
   {
     key: "pink.homepage.collection-note",
     label: "Collection Note",
-    description: "Short right-aligned line beside the heading. Leave blank to hide.",
+    description:
+      "Short right-aligned line beside the heading. Leave blank to hide.",
     type: "text",
     page: "homepage",
     group: "homepage.collection",
@@ -518,7 +503,8 @@ const homepageEventsData: TemplateField[] = [
         key: "value",
         label: "Value",
         type: "text",
-        placeholder: "Your space — school, church, library, workplace or back yard",
+        placeholder:
+          "Your space — school, church, library, workplace or back yard",
       },
     ],
     defaultValue: "",
@@ -644,7 +630,8 @@ const homepageStoryData: TemplateField[] = [
   {
     key: "pink.homepage.story-image",
     label: "Story Image",
-    description: "Portrait image beside the pull-quote — a studio or working photo.",
+    description:
+      "Portrait image beside the pull-quote — a studio or working photo.",
     type: "image",
     page: "homepage",
     group: "homepage.story",
@@ -721,7 +708,7 @@ export const pinkHomepageFieldGroups: TemplateFieldGroup[] = [
     id: "homepage.hero",
     title: "Hero",
     description:
-      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners",
+      "Full-bleed hero — kicker, two-line headline, body, and CTAs over the family home photo washed into the background, with a giant wordmark, five makers holding their finished pieces rising over the bottom band (the outer pair on desktop only), and two small doll cutouts pinned in the top corners. The wordmark itself isn't set here — it follows your business name (Settings → General) split on the accent word in the global Branding group, same as the header and footer.",
     icon: "🏰",
     columns: 2,
   } satisfies TemplateFieldGroup,
@@ -800,6 +787,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.collection"],
     order: 2,
     hideable: true,
+    links: [SECTION_LINKS.products],
   },
   // Array position, not just `order`, is what the editor rail renders — this
   // entry sits third so the rail matches the page: the Make & Takes explainer
@@ -822,6 +810,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.upcoming"],
     order: 4,
     hideable: true,
+    links: [SECTION_LINKS.events],
   },
   // Below the Make & Takes and Upcoming bands, not above them: the clips are
   // the evidence for the claims those bands make, so the page argues and then
@@ -834,6 +823,7 @@ export const pinkHomepageSections: TemplateSection[] = [
     groupIds: ["homepage.videos"],
     order: 5,
     hideable: true,
+    links: [SECTION_LINKS.videos],
   },
   {
     id: "homepage.story",

@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { ContactFormValues } from "~/lib/validators/contact";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import {
   Form,
   FormControl,
@@ -17,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
@@ -135,8 +135,12 @@ export function PinkContactForm({
   }, [isSuccess]);
 
   const items = topics.length > 0 ? topics : DEFAULT_TOPICS;
-  const selectedTopic = selectedIndex != null ? items[selectedIndex] : undefined;
-  const messageLabel = trimmedOrFallback(selectedTopic?.messageLabel, defaultMessageLabel);
+  const selectedTopic =
+    selectedIndex != null ? items[selectedIndex] : undefined;
+  const messageLabel = trimmedOrFallback(
+    selectedTopic?.messageLabel,
+    defaultMessageLabel,
+  );
   const messagePlaceholder = trimmedOrFallback(
     selectedTopic?.messagePlaceholder,
     defaultMessagePlaceholder,
@@ -164,20 +168,34 @@ export function PinkContactForm({
       >
         <div
           className="mx-auto flex max-w-[640px] flex-col items-center gap-4 p-12 text-center"
-          style={{ background: "var(--pink-panel)", border: "1px solid var(--pink-line)" }}
+          style={{
+            background: "var(--pink-panel)",
+            border: "1px solid var(--pink-line)",
+          }}
         >
           <h2
             ref={successHeadingRef}
             tabIndex={-1}
             className="pink-display"
-            style={{ fontSize: "24px", fontWeight: 600, letterSpacing: "-0.015em" }}
+            style={{
+              fontSize: "24px",
+              fontWeight: 600,
+              letterSpacing: "-0.015em",
+            }}
           >
             Got it — thank you.
           </h2>
-          <p className="max-w-[42ch] text-[15px] leading-[1.7]" style={{ color: "var(--pink-muted)" }}>
+          <p
+            className="max-w-[42ch] text-[15px] leading-[1.7]"
+            style={{ color: "var(--pink-muted)" }}
+          >
             We read every note and reply as soon as we can.
           </p>
-          <button type="button" onClick={resetSuccess} className="pink-btn pink-btn-ghost mt-2">
+          <button
+            type="button"
+            onClick={resetSuccess}
+            className="pink-btn pink-btn-ghost mt-2"
+          >
             Send another
           </button>
         </div>
@@ -196,7 +214,11 @@ export function PinkContactForm({
           <div className="mx-auto max-w-[1400px]">
             <h2
               className="pink-display mb-6"
-              style={{ fontSize: "22px", fontWeight: 600, letterSpacing: "-0.015em" }}
+              style={{
+                fontSize: "22px",
+                fontWeight: 600,
+                letterSpacing: "-0.015em",
+              }}
               {...fieldAttr("pink.contact.topics-heading")}
             >
               {topicsHeading}
@@ -212,14 +234,22 @@ export function PinkContactForm({
                     onClick={() => setSelectedIndex(selected ? null : i)}
                     className="flex flex-col gap-2 p-6 text-left transition-colors"
                     style={{
-                      background: selected ? "var(--pink-ink)" : "var(--pink-paper)",
+                      background: selected
+                        ? "var(--pink-ink)"
+                        : "var(--pink-paper)",
                       color: selected ? "var(--pink-paper)" : "var(--pink-ink)",
                     }}
                   >
-                    <span className="pink-display text-[17px] font-semibold">{topic.name ?? ""}</span>
+                    <span className="pink-display text-[17px] font-semibold">
+                      {topic.name ?? ""}
+                    </span>
                     <span
                       className="text-[14px] leading-[1.5]"
-                      style={{ color: selected ? "var(--pink-ink-muted)" : "var(--pink-subtle)" }}
+                      style={{
+                        color: selected
+                          ? "var(--pink-ink-muted)"
+                          : "var(--pink-subtle)",
+                      }}
                     >
                       {topic.blurb ?? ""}
                     </span>
@@ -239,7 +269,11 @@ export function PinkContactForm({
         <div className="mx-auto max-w-[1400px]">
           <h2
             className="pink-display mb-8"
-            style={{ fontSize: "22px", fontWeight: 600, letterSpacing: "-0.015em" }}
+            style={{
+              fontSize: "22px",
+              fontWeight: 600,
+              letterSpacing: "-0.015em",
+            }}
             {...fieldAttr("pink.contact.form-heading")}
           >
             {formHeading}
@@ -313,7 +347,9 @@ export function PinkContactForm({
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="pink-label">Phone (optional)</FormLabel>
+                      <FormLabel className="pink-label">
+                        Phone (optional)
+                      </FormLabel>
                       <FormControl>
                         <input
                           {...field}
@@ -327,7 +363,10 @@ export function PinkContactForm({
                   )}
                 />
                 <FormItem>
-                  <FormLabel className="pink-label" {...fieldAttr("pink.contact.form-reference-label")}>
+                  <FormLabel
+                    className="pink-label"
+                    {...fieldAttr("pink.contact.form-reference-label")}
+                  >
                     {referenceLabel}
                   </FormLabel>
                   <FormControl>
@@ -351,7 +390,10 @@ export function PinkContactForm({
                       <FormLabel className="pink-label">
                         {messageLabel} <span aria-hidden="true">*</span>
                       </FormLabel>
-                      <span className="text-[12px]" style={{ color: "var(--pink-subtle)" }}>
+                      <span
+                        className="text-[12px]"
+                        style={{ color: "var(--pink-subtle)" }}
+                      >
                         {messageLength}/{messageMaxLength}
                       </span>
                     </div>
@@ -389,11 +431,14 @@ export function PinkContactForm({
                   className="h-4 w-4"
                   style={{ accentColor: "var(--pink-rose)" }}
                 />
-                <span {...fieldAttr("pink.contact.form-marketing-label")}>{marketingLabel}</span>
+                <span {...fieldAttr("pink.contact.form-marketing-label")}>
+                  {marketingLabel}
+                </span>
               </label>
 
-              <HCaptchaField
+              <RecaptchaField
                 ref={captchaRef}
+                action="contact"
                 onVerify={setCaptchaToken}
                 onExpire={() => setCaptchaToken("")}
                 onError={() => setCaptchaToken("")}
@@ -412,13 +457,26 @@ export function PinkContactForm({
                   style={{ padding: "18px 34px", fontSize: "15px" }}
                   {...fieldAttr("pink.contact.form-submit-label")}
                 >
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+                  {isSubmitting && (
+                    <Loader2
+                      className="h-4 w-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                  )}
                   {isSubmitting ? "Sending…" : submitLabel}
                 </button>
                 {supportEmail && (
-                  <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
-                    <span {...fieldAttr("pink.contact.form-email-note")}>{emailNotePrefix}</span>{" "}
-                    <a href={`mailto:${supportEmail}`} style={{ color: "var(--pink-rose)" }}>
+                  <p
+                    className="text-[13px]"
+                    style={{ color: "var(--pink-subtle)" }}
+                  >
+                    <span {...fieldAttr("pink.contact.form-email-note")}>
+                      {emailNotePrefix}
+                    </span>{" "}
+                    <a
+                      href={`mailto:${supportEmail}`}
+                      style={{ color: "var(--pink-rose)" }}
+                    >
                       {supportEmail}
                     </a>
                   </p>

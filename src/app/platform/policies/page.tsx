@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
 
 export const metadata: Metadata = {
   title: "Legal & Policies | SimplePress",
-  description: "Legal policies and agreements governing use of the SimplePress platform.",
+  description:
+    "Legal policies and agreements governing use of the SimplePress platform.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies`,
   },

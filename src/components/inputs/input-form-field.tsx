@@ -20,7 +20,6 @@ type Props<CurrentForm extends FieldValues> = {
   className?: string;
   disabled?: boolean;
   placeholder?: string;
-  defaultValue?: string;
   onChange?: (value: string) => void;
   onChangeAdditional?: (value: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -51,6 +50,7 @@ export const InputFormField = <CurrentForm extends FieldValues>({
   onBlur,
   inputId,
   inputRef,
+  type,
   required,
   autoFocus,
   labelClassName,
@@ -117,6 +117,11 @@ export const InputFormField = <CurrentForm extends FieldValues>({
                 // `<FormLabel for=…>` pointed at an element that did not exist
                 // and the input counted as unlabeled (axe: `label`, critical).
                 {...(inputId ? { id: inputId } : {})}
+                // Declared in `Props` from the start but never forwarded, so
+                // every `type="email"` / `type="date"` call site was silently a
+                // plain text input — no date picker, no email keyboard, no
+                // browser-side validation.
+                type={type}
                 required={required}
                 autoFocus={autoFocus}
               />

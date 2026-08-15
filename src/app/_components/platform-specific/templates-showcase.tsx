@@ -1,5 +1,7 @@
 import { Check } from "lucide-react";
 
+import { TEMPLATES } from "~/lib/constants";
+import { getFreeTemplateIds } from "~/lib/template-ownership";
 import { Badge } from "~/components/ui/badge";
 import {
   Card,
@@ -8,8 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { TEMPLATES } from "~/lib/constants";
-import { getFreeTemplateIds } from "~/lib/template-ownership";
 
 const SHOWCASE_META: Record<
   string,

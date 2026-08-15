@@ -69,7 +69,9 @@ function StripeRefundDialog({ order }: { order: Order }) {
   const maxDollars = remainingRefundable / 100;
   const amountCents = Math.round(parseFloat(amountDollars) * 100);
   const isValidAmount =
-    !isNaN(amountCents) && amountCents > 0 && amountCents <= remainingRefundable;
+    !isNaN(amountCents) &&
+    amountCents > 0 &&
+    amountCents <= remainingRefundable;
   const isPartial = isValidAmount && amountCents < remainingRefundable;
 
   const validateAmount = (value: string): string | null => {

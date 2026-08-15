@@ -64,7 +64,7 @@ export async function BuildersLayout({
       >
         Skip to main content
       </a>
-      <BuildersHeader business={business} session={session ?? null} />
+      <BuildersHeader business={business} initialSession={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>

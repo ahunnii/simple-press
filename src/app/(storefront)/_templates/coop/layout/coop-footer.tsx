@@ -39,9 +39,9 @@ export function CoopFooter({ business }: DefaultFooterTemplateProps) {
       className="block bg-[var(--coop-color-004)]"
       role="contentinfo"
     >
-      <div className="mx-auto max-w-425 px-[10.9375rem] py-[7.8125rem] max-coop-md:p-5 coop-md:max-coop-lg:p-9">
+      <div className="max-coop-md:p-5 coop-md:max-coop-lg:p-9 mx-auto max-w-425 px-[10.9375rem] py-[7.8125rem]">
         <nav
-          className="-mr-3.5 block py-5 text-center text-sm leading-[1.8125rem] font-bold tracking-[0.7px] uppercase [font-family:var(--font-coop-label)]"
+          className="-mr-3.5 block py-5 text-center [font-family:var(--font-coop-label)] text-sm leading-[1.8125rem] font-bold tracking-[0.7px] uppercase"
           aria-label="Social links"
         >
           <div className="inline">
@@ -72,7 +72,10 @@ export function CoopFooter({ business }: DefaultFooterTemplateProps) {
             footer spacing (data-cid n78/n84); width/centering are irrelevant
             since the block is invisible. */}
         <div className="pt-5">
-          <div aria-hidden="true" className="invisible block h-8.5 overflow-hidden" />
+          <div
+            aria-hidden="true"
+            className="invisible block h-8.5 overflow-hidden"
+          />
         </div>
       </div>
     </footer>

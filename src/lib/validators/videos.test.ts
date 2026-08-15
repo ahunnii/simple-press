@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { videoUpdateSchema } from "./videos";
+import {
+  resolveVideoThumbnail,
+  resolveVideoTitle,
+  videoSourceBadgeText,
+  videoUpdateSchema,
+} from "./videos";
 
 /**
  * `videos.update` destructures `{ id, ...updates }` and hands `updates` straight
@@ -94,5 +99,88 @@ describe("videoUpdateSchema — omitted keys must not become null", () => {
       published: false,
       sortOrder: 7,
     });
+  });
+});
+
+// The "" case is intentionally not tested here — it's impossible by schema.
+// `videoUpdateSchema` collapses "" to null before it ever reaches storage
+// (pinned by the tests above), so a resolver never sees an empty-string
+// override.
+describe("resolveVideoTitle", () => {
+  it("uses the override when set", () => {
+    expect(
+      resolveVideoTitle({
+        title: "YouTube title",
+        titleOverride: "Owner's title",
+      }),
+    ).toBe("Owner's title");
+  });
+
+  it("falls back to the synced title when the override is null", () => {
+    expect(
+      resolveVideoTitle({ title: "YouTube title", titleOverride: null }),
+    ).toBe("YouTube title");
+  });
+});
+
+describe("resolveVideoThumbnail", () => {
+  it("uses the override when set", () => {
+    expect(
+      resolveVideoThumbnail({
+        thumbnailUrl: "https://example.com/synced.jpg",
+        thumbnailOverride: "https://example.com/override.jpg",
+      }),
+    ).toBe("https://example.com/override.jpg");
+  });
+
+  it("falls back to the synced thumbnail when the override is null", () => {
+    expect(
+      resolveVideoThumbnail({
+        thumbnailUrl: "https://example.com/synced.jpg",
+        thumbnailOverride: null,
+      }),
+    ).toBe("https://example.com/synced.jpg");
+  });
+
+  it("returns null when both are null", () => {
+    expect(
+      resolveVideoThumbnail({ thumbnailUrl: null, thumbnailOverride: null }),
+    ).toBeNull();
+  });
+});
+
+describe("videoSourceBadgeText", () => {
+  it("labels manual videos regardless of the source argument", () => {
+    expect(videoSourceBadgeText({ sourceId: null }, undefined)).toBe(
+      "Added manually",
+    );
+  });
+
+  it("uses the source's owner-set label when present", () => {
+    expect(
+      videoSourceBadgeText(
+        { sourceId: "src_1" },
+        { label: "Tutorials", kind: "playlist" },
+      ),
+    ).toBe("Tutorials");
+  });
+
+  it("falls back to the kind when the label is null", () => {
+    expect(
+      videoSourceBadgeText(
+        { sourceId: "src_1" },
+        { label: null, kind: "playlist" },
+      ),
+    ).toBe("Playlist");
+    expect(
+      videoSourceBadgeText(
+        { sourceId: "src_1" },
+        { label: null, kind: "channel" },
+      ),
+    ).toBe("Channel");
+  });
+
+  it("returns null when the claimed source is missing — the badge renders nothing, so search must match nothing", () => {
+    expect(videoSourceBadgeText({ sourceId: "src_1" }, undefined)).toBeNull();
   });
 });

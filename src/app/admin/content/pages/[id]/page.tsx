@@ -23,7 +23,6 @@ export default async function EditPagePage({ params }: Props) {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
           { label: "Pages", href: "/admin/content/pages" },
           { label: page.title },
         ]}
@@ -33,6 +32,7 @@ export default async function EditPagePage({ params }: Props) {
         page={page}
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
       />
     </>
   );

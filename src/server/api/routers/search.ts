@@ -8,32 +8,24 @@ import { createTRPCRouter, staffProcedure } from "~/server/api/trpc";
  * Global admin record search — powers the ⌘K command palette.
  *
  * SECURITY: every lookup below is scoped to `ctx.businessId` (the tenant
- * resolved from the request hostname by `staffProcedure`). Role gating is
- * re-derived from the DB against that same resolved `businessId` so a stale
- * session role can never widen access.
+ * resolved from the request hostname by `staffProcedure`). Role gating reads
+ * `ctx.membershipRole`, which `staffProcedure` re-derives from the DB against
+ * that same resolved `businessId` on every request — so a stale session role
+ * can never widen access.
  */
 export const searchRouter = createTRPCRouter({
   all: staffProcedure
     .input(z.object({ query: z.string().trim().min(2).max(100) }))
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
-      const user = ctx.session.user;
       const q = input.query;
 
       // ── Role gating ──────────────────────────────────────────────────────
       // STAFF may only see orders + customers (mirrors STAFF_ALLOWED_PATH_
-      // PREFIXES in admin-nav). Re-read the membership role for the resolved
-      // business rather than trusting the session copy. PLATFORM_ADMIN has no
-      // membership row but bypasses the check (full access).
-      const isPlatformAdmin = user.platformRole === "PLATFORM_ADMIN";
-      let isStaff = false;
-      if (!isPlatformAdmin) {
-        const membership = await ctx.db.businessMembership.findUnique({
-          where: { userId_businessId: { userId: user.id, businessId } },
-          select: { role: true },
-        });
-        isStaff = membership?.role === "STAFF";
-      }
+      // PREFIXES in admin-nav). `ctx.membershipRole` is resolved live from the
+      // DB by `staffProcedure`; PLATFORM_ADMIN reads null there (no membership
+      // row) and so keeps full access.
+      const isStaff = ctx.membershipRole === "STAFF";
 
       // ── Feature gating ───────────────────────────────────────────────────
       // Skip the products lookup entirely when the products feature is off.

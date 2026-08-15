@@ -36,9 +36,7 @@ export function BuildersCraftServicePage({
       style={{ background: "var(--builders-bg, #F8F9FA)" }}
     >
       {/* ── 1. Hero ─────────────────────────────────────────────────────────── */}
-      <section
-        className="mb-32 grid grid-cols-1 gap-6 md:grid-cols-12"
-      >
+      <section className="mb-32 grid grid-cols-1 gap-6 md:grid-cols-12">
         <div className="flex flex-col justify-end md:col-span-8">
           <h1
             className="mb-6 text-4xl leading-none tracking-wider uppercase md:text-6xl lg:text-7xl"
@@ -69,10 +67,7 @@ export function BuildersCraftServicePage({
 
       {/* ── 2. Sub-Services ─────────────────────────────────────────────────── */}
       {publishedItems.length > 0 && (
-        <section
-          aria-labelledby="sub-services-heading"
-          className="mb-32"
-        >
+        <section aria-labelledby="sub-services-heading" className="mb-32">
           {/* Section label */}
           <h2
             id="sub-services-heading"

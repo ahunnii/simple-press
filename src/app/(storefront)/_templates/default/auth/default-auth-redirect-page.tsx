@@ -1,7 +1,7 @@
 import type { RouterOutputs } from "~/trpc/react";
-import { AuthRedirect } from "~/components/auth/auth-redirect";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { FieldDescription } from "~/components/ui/field";
+import { AuthRedirect } from "~/components/auth/auth-redirect";
 
 import { DefaultAuthShell } from "./default-auth-shell";
 

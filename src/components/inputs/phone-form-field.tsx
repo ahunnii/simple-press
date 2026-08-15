@@ -1,7 +1,6 @@
 "use client";
 
 import type { CountryCode } from "libphonenumber-js";
-import type { InputHTMLAttributes } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import * as React from "react";
 import * as Flags from "country-flag-icons/react/3x2";
@@ -466,7 +465,6 @@ type Props<CurrentForm extends FieldValues> = {
   className?: string;
   disabled?: boolean;
   placeholder?: string;
-  defaultValue?: string;
   onChange?: (value: string) => void;
   onChangeAdditional?: (value: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -474,7 +472,6 @@ type Props<CurrentForm extends FieldValues> = {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   inputId?: string;
   inputRef?: React.RefObject<HTMLInputElement | null>;
-  type?: InputHTMLAttributes<HTMLInputElement>["type"];
   required?: boolean;
   autoFocus?: boolean;
   labelClassName?: string;

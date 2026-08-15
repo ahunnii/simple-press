@@ -2,6 +2,7 @@ import "server-only";
 
 import { cookies, headers } from "next/headers";
 
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { auth } from "~/server/better-auth";
 import { db } from "~/server/db";
 
@@ -42,8 +43,8 @@ export async function getAuthorizedPreviewBusinessId(
 
   const user = session.user;
 
-  // 4. PLATFORM_ADMIN bypasses membership check.
-  if (user.platformRole === "PLATFORM_ADMIN") {
+  // 4. PLATFORM_ADMIN bypasses membership check — live DB read.
+  if (await isPlatformAdmin(user.id)) {
     return resolvedBusinessId;
   }
 
@@ -64,3 +65,4 @@ export async function getAuthorizedPreviewBusinessId(
 
   return null;
 }
+

@@ -94,7 +94,10 @@ export function TemplateSelectionStep({
           {selectedTemplate && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <h4 className="mb-2 text-sm font-semibold">
-                {onboardingTemplates.find((t) => t.id === selectedTemplate)?.name}{" "}
+                {
+                  onboardingTemplates.find((t) => t.id === selectedTemplate)
+                    ?.name
+                }{" "}
                 Template
               </h4>
               <p className="text-sm text-gray-700">

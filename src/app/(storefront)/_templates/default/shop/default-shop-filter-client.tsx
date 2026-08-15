@@ -59,7 +59,7 @@ export function DefaultShopFilterClient({ products }: { products: Product[] }) {
             aria-label="Search products"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 border-[#e8e8e8] pl-9 pr-8 text-sm focus:border-[#0a0a0a] focus:ring-0"
+            className="h-9 border-[#e8e8e8] pr-8 pl-9 text-sm focus:border-[#0a0a0a] focus:ring-0"
           />
           {search && (
             <Button

@@ -8,9 +8,9 @@ import { useContactForm } from "~/hooks/use-contact-form";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
 import { Form } from "~/components/ui/form";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { PhoneFormField } from "~/components/inputs/phone-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
@@ -86,7 +86,10 @@ export function PinkTableRequestForm({
   if (!isEnabled("contactForm")) {
     return (
       <div className="p-5" style={{ background: "var(--pink-panel)" }}>
-        <Link href="/contact" className="pink-btn pink-btn-outline w-full justify-center">
+        <Link
+          href="/contact"
+          className="pink-btn pink-btn-outline w-full justify-center"
+        >
           {fallbackLabel}
         </Link>
       </div>
@@ -98,9 +101,16 @@ export function PinkTableRequestForm({
       <div
         role="status"
         className="flex flex-col items-center gap-4 p-8 text-center"
-        style={{ background: "var(--pink-panel)", border: "1px solid var(--pink-line)" }}
+        style={{
+          background: "var(--pink-panel)",
+          border: "1px solid var(--pink-line)",
+        }}
       >
-        <span aria-hidden="true" className="pink-display text-[28px]" style={{ color: "var(--pink-rose)" }}>
+        <span
+          aria-hidden="true"
+          className="pink-display text-[28px]"
+          style={{ color: "var(--pink-rose)" }}
+        >
           ✓
         </span>
         <h3
@@ -126,13 +136,19 @@ export function PinkTableRequestForm({
   }
 
   return (
-    <div className="flex flex-col gap-4 p-5" style={{ background: "var(--pink-panel)" }}>
+    <div
+      className="flex flex-col gap-4 p-5"
+      style={{ background: "var(--pink-panel)" }}
+    >
       <div>
         <h3 className="pink-display text-[17px]" style={{ fontWeight: 600 }}>
           {heading}
         </h3>
         {intro && (
-          <p className="mt-1 text-[14px] leading-[1.6]" style={{ color: "var(--pink-muted)" }}>
+          <p
+            className="mt-1 text-[14px] leading-[1.6]"
+            style={{ color: "var(--pink-muted)" }}
+          >
             {intro}
           </p>
         )}
@@ -145,7 +161,11 @@ export function PinkTableRequestForm({
           className="flex flex-col gap-4"
         >
           {error && (
-            <p role="alert" className="text-[13px]" style={{ color: "var(--pink-error)" }}>
+            <p
+              role="alert"
+              className="text-[13px]"
+              style={{ color: "var(--pink-error)" }}
+            >
               {error}
             </p>
           )}
@@ -192,8 +212,9 @@ export function PinkTableRequestForm({
             className="flex flex-col gap-1.5"
           />
 
-          <HCaptchaField
+          <RecaptchaField
             ref={captchaRef}
+            action="contact"
             onVerify={setCaptchaToken}
             onExpire={() => setCaptchaToken("")}
             onError={() => setCaptchaToken("")}
@@ -206,7 +227,12 @@ export function PinkTableRequestForm({
             disabled={isSubmitting || !captchaToken}
             className="pink-btn pink-btn-solid w-full justify-center"
           >
-            {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+            {isSubmitting && (
+              <Loader2
+                className="h-3.5 w-3.5 animate-spin"
+                aria-hidden="true"
+              />
+            )}
             {isSubmitting ? "Sending…" : submitLabel}
           </button>
         </form>

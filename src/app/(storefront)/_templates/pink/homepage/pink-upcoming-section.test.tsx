@@ -29,7 +29,7 @@ vi.mock("next/image", () => ({
       alt?: string;
       sizes?: string;
     };
-    // eslint-disable-next-line @next/next/no-img-element
+
     return (
       <img
         src={typeof src === "string" ? src : ""}

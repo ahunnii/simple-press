@@ -15,6 +15,7 @@ import { useUploadFile } from "@better-upload/client";
 import { Search, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import type { MediaItem } from "~/components/media/media-grid";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -26,13 +27,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "~/components/ui/tabs";
-import type { MediaItem } from "~/components/media/media-grid";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { getFilename, MediaGrid } from "~/components/media/media-grid";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -58,7 +53,9 @@ const IMAGE_ITEM_KINDS = new Set([
 ]);
 
 function itemMatchesKind(item: MediaItem, kind: MediaKind): boolean {
-  return kind === "video" ? item.kind === "video" : IMAGE_ITEM_KINDS.has(item.kind);
+  return kind === "video"
+    ? item.kind === "video"
+    : IMAGE_ITEM_KINDS.has(item.kind);
 }
 
 function fileMatchesKind(file: File, kind: MediaKind): boolean {
@@ -132,7 +129,10 @@ function UploadDropzone({
           isUploading && "pointer-events-none opacity-50",
         )}
       >
-        <Upload className="text-muted-foreground mx-auto mb-2 h-6 w-6" aria-hidden="true" />
+        <Upload
+          className="text-muted-foreground mx-auto mb-2 h-6 w-6"
+          aria-hidden="true"
+        />
         Drag and drop {kind === "image" ? "an image" : "a video"} here, or click
         to browse
         <p className="text-muted-foreground mt-1 text-xs">
@@ -219,7 +219,8 @@ export function MediaPickerDialog({
     route: kind,
     onError: (error) => {
       toast.error(
-        error.message ?? `${kind === "image" ? "Image" : "Video"} upload failed`,
+        error.message ??
+          `${kind === "image" ? "Image" : "Video"} upload failed`,
       );
     },
   });

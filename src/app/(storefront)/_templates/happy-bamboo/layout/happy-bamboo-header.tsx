@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Leaf, Menu, ShoppingCart } from "lucide-react";
 import { motion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { shippingConfigFromBusiness } from "~/lib/shipping-utils";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -20,6 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "~/components/ui/sheet";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -35,13 +37,13 @@ const NAV_LINKS = [
 
 export function HappyBambooHeader({
   business,
-  session,
+  initialSession,
 }: DefaultHeaderTemplateProps) {
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
   const { isEnabled } = useStorefrontFlags();
-  // const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = useHydratedSession(initialSession);
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -118,7 +120,10 @@ export function HappyBambooHeader({
               <div className="relative aspect-video h-16 w-full rounded-sm">
                 <Image
                   src={business.siteContent.logoUrl}
-                  alt={business.name}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
                   sizes="(max-width: 768px) 100vw, 55px"
                   fill
                   className="object-contain"
@@ -142,7 +147,9 @@ export function HappyBambooHeader({
                 href={link.href}
                 className={cn(
                   "text-background text-sm font-medium transition-colors hover:text-[var(--hb-gold)]",
-                  pathname === link.href ? "text-[var(--hb-gold)]" : "text-background",
+                  pathname === link.href
+                    ? "text-[var(--hb-gold)]"
+                    : "text-background",
                 )}
               >
                 {link.label}
@@ -152,7 +159,15 @@ export function HappyBambooHeader({
 
           <div className="flex items-center gap-4">
             {isEnabled("customerAccounts") && (
-              <>{session?.user ? userMenu : authActions}</>
+              <>
+                {isPending ? (
+                  <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authActions
+                )}
+              </>
             )}
             {isEnabled("wishlist") && (
               <Button
@@ -216,7 +231,10 @@ export function HappyBambooHeader({
                 <div className="bg-[var(--hb-brand)] pt-12 pr-14 pb-5 pl-4">
                   <SheetTitle className="text-background flex items-center gap-2.5 text-left text-lg font-semibold tracking-tight">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--hb-gold)]/20">
-                      <Leaf className="h-5 w-5 text-[var(--hb-gold)]" aria-hidden />
+                      <Leaf
+                        className="h-5 w-5 text-[var(--hb-gold)]"
+                        aria-hidden
+                      />
                     </span>
                     <span className="flex min-w-0 flex-col gap-0.5">
                       <span className="text-xs font-medium tracking-widest text-[var(--hb-gold)]/90 uppercase">

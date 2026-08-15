@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Play } from "lucide-react";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -90,7 +91,7 @@ export function ViiVideoFeature({
         {/* ── Text column ── */}
         <div
           ref={textRef}
-          className={`vii-reveal${textVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", textVisible && "is-visible")}
         >
           {overline && (
             <ViiOverline
@@ -174,7 +175,7 @@ export function ViiVideoFeature({
         {/* ── Media column ── */}
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", mediaVisible && "is-visible")}
           style={{
             position: "relative",
             width: "100%",

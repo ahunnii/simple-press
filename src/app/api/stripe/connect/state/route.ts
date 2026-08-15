@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { createSignedOAuthState } from "~/lib/stripe/oauth-state";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (!membership && session.user.platformRole !== "PLATFORM_ADMIN") {
+  if (!membership && !(await isPlatformAdmin(session.user.id))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

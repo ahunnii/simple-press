@@ -6,7 +6,19 @@ import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "~/trpc/react";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -45,6 +57,25 @@ export function AvailabilityEditor({
     initialMaintenanceMessage ?? "",
   );
 
+  // Last-saved snapshot. This form is plain `useState` rather than React Hook
+  // Form, so there is no `formState.isDirty` to lean on — the snapshot gives us
+  // the same signal for `useDirtyForm` (and tells us whether a save is about to
+  // take the storefront offline for the first time).
+  const [savedState, setSavedState] = useState({
+    maintenanceMode: initialMaintenanceMode,
+    maintenanceVariant: initialMaintenanceVariant,
+    maintenanceMessage: initialMaintenanceMessage ?? "",
+  });
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const isDirty =
+    maintenanceMode !== savedState.maintenanceMode ||
+    maintenanceVariant !== savedState.maintenanceVariant ||
+    maintenanceMessage !== savedState.maintenanceMessage;
+
+  useDirtyForm(isDirty);
+
   const updateMutation = api.business.updateMaintenanceMode.useMutation({
     onSuccess: () => {
       toast.success("Storefront availability settings saved");
@@ -56,12 +87,32 @@ export function AvailabilityEditor({
   });
 
   function handleSave() {
-    updateMutation.mutate({
+    const nextSaved = {
       maintenanceMode,
       maintenanceVariant,
-      maintenanceMessage: maintenanceMessage.trim() || undefined,
-    });
+      maintenanceMessage,
+    };
+
+    updateMutation.mutate(
+      {
+        maintenanceMode,
+        maintenanceVariant,
+        maintenanceMessage: maintenanceMessage.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setSavedState(nextSaved);
+          setConfirmOpen(false);
+        },
+      },
+    );
   }
+
+  // Only a save that flips the storefront from live → offline needs a
+  // confirmation; turning maintenance off, or editing the copy while it is
+  // already on, does not.
+  const willTakeStorefrontOffline =
+    maintenanceMode && !savedState.maintenanceMode;
 
   const charCount = maintenanceMessage.length;
 
@@ -69,7 +120,7 @@ export function AvailabilityEditor({
     <div className="admin-container space-y-6">
       <div className="admin-header">
         <div>
-          <h1>Storefront Availability</h1>
+          <h1>Maintenance Mode</h1>
           <p>
             Control whether your public storefront is accessible to visitors.
           </p>
@@ -78,16 +129,16 @@ export function AvailabilityEditor({
 
       <Card>
         <CardHeader>
-          <CardTitle>Maintenance Mode</CardTitle>
+          <CardTitle>Status</CardTitle>
           <CardDescription>
             When enabled, every public storefront page — home, shop, product,
             cart, checkout, etc. — is replaced by a single maintenance or
             coming-soon screen for visitors. The page is also marked
             &quot;noindex&quot; so search engines drop it from results while
-            it&apos;s active. Checkout is blocked server-side too, so no
-            orders can be placed even if a customer already has the checkout
-            page open. None of this affects you: your admin dashboard stays
-            fully accessible so you can keep working and turn this off when
+            it&apos;s active. Checkout is blocked server-side too, so no orders
+            can be placed even if a customer already has the checkout page open.
+            None of this affects you: your admin dashboard stays fully
+            accessible so you can keep working and turn this off when
             you&apos;re ready.
           </CardDescription>
         </CardHeader>
@@ -207,9 +258,58 @@ export function AvailabilityEditor({
           )}
 
           <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? "Saving..." : "Save changes"}
-            </Button>
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <AlertDialogTrigger asChild>
+                <Button
+                  disabled={updateMutation.isPending}
+                  onClick={(e) => {
+                    // Only a save that takes the storefront offline opens the
+                    // dialog; every other save goes straight through.
+                    if (!willTakeStorefrontOffline) {
+                      e.preventDefault();
+                      handleSave();
+                    }
+                  }}
+                >
+                  {updateMutation.isPending ? "Saving..." : "Save changes"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Take your storefront offline?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Every public page — home, shop, product, cart, and checkout
+                    — will immediately be replaced by the{" "}
+                    {maintenanceVariant === "coming_soon"
+                      ? "coming soon"
+                      : "maintenance"}{" "}
+                    screen, and no new orders can be placed until you turn it
+                    back off. Your admin dashboard stays fully accessible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={updateMutation.isPending}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={updateMutation.isPending}
+                    onClick={(e) => {
+                      // Keep the dialog open while the mutation runs — the
+                      // `onSuccess` handler closes it.
+                      e.preventDefault();
+                      handleSave();
+                    }}
+                  >
+                    {updateMutation.isPending
+                      ? "Saving..."
+                      : "Take storefront offline"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

@@ -2962,10 +2962,10 @@
     @apply mb-8 flex items-center justify-between;
   }
   .admin-header h1 {
-    @apply text-3xl font-bold text-gray-900;
+    @apply text-3xl font-bold text-foreground;
   }
   .admin-header p {
-    @apply mt-1 text-gray-600;
+    @apply mt-1 text-muted-foreground;
   }
   .admin-container {
     @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
@@ -3015,8 +3015,10 @@
     @apply bg-background/75 sticky top-0 z-10 flex min-h-16 flex-wrap justify-between gap-y-2 border-b px-4 py-2;
   }
 
+  /* Grow and shrink symmetrically to avoid wrapping action buttons when heading is long.
+     flex-1 basis-0 allows toolbar-info to collapse when needed despite max-content content. */
   .admin-form-toolbar .toolbar-info {
-    @apply flex min-w-0 items-center gap-3;
+    @apply flex min-w-0 flex-1 basis-0 items-center gap-3;
   }
 
   .admin-form-toolbar .toolbar-actions {
@@ -5163,4 +5165,283 @@
     background: Highlight;
     color: HighlightText;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RELOCATION — Handy Relocations (relocation)
+   Design tokens + scoped utilities. Everything below is scoped to `.relocation`
+   (or `.relocation-js` for JS-gated motion states) so it can never bleed into
+   another template. Authority: docs/templates/relocation/design.md.
+   Fixed brand — no theme presets; this block is the single source of truth for
+   every colour, font and radius the relocation template renders.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.relocation {
+  /* ── Palette (design.md → Palette; sampled from the reference screenshots) ── */
+  --relocation-paper: #ffffff; /* page background */
+  --relocation-ink: #1a1a1a; /* body text — 16:1 on paper */
+  --relocation-charcoal: #323132; /* footer bg, dark headings */
+  --relocation-red: #cc4a24; /* large section headings on white (3.4:1 — LARGE TEXT ONLY) */
+  --relocation-terracotta: #a5513a; /* buttons/pills — white on it ≥4.5:1 */
+  --relocation-salmon: #c58a78; /* carousel arrow discs */
+  --relocation-card: #e6e6e6; /* testimonial cards, brochure band */
+  --relocation-input: #fafafa; /* form input fill */
+  --relocation-border: rgba(0, 0, 0, 0.12); /* hairlines, FAQ dividers */
+
+  /* Wave-hero gradient stops (135°, dark top-left → light bottom-right). */
+  --relocation-hero-dark: #4a2c2a;
+  --relocation-hero-mid: #6a3b35;
+  --relocation-hero-light: #a45248;
+
+  /* ── Derived ──────────────────────────────────────────────────────────────
+     `--relocation-red` is only 2.8:1 on the charcoal footer, which fails even
+     the 3:1 large-text floor, so the footer column headings use a lightened
+     sibling instead (4.0:1 on charcoal). Computed here rather than hardcoded
+     in the component so both stay in step. */
+  --relocation-red-on-dark: #e56a45;
+  /* Deep terracotta for form submits ("Continue to Free Estimate"). */
+  --relocation-terracotta-deep: color-mix(
+    in srgb,
+    var(--relocation-terracotta) 86%,
+    #000
+  );
+
+  /* ── Shape + motion ─────────────────────────────────────────────────────── */
+  --relocation-radius: 0.75rem; /* the source's 12px pill/panel radius */
+  --relocation-ease: cubic-bezier(0.33, 1, 0.68, 1);
+
+  /* ── Fonts ────────────────────────────────────────────────────────────────
+     omnes-pro is Adobe-licensed and served from MinIO by an @font-face block
+     that `relocation-layout.tsx` emits — the raw family name appears only
+     there and here. The fallback stack keeps pages presentable before the
+     woff2s are uploaded. Roboto arrives via next/font as
+     `--font-relocation-roboto`; the body token maps onto it (house pattern —
+     never redeclare a next/font variable in this block, the two class
+     selectors would tie on specificity). */
+  --font-relocation-display:
+    "omnes-pro", "Poppins", ui-rounded, system-ui, sans-serif;
+  --font-relocation-body:
+    var(--font-relocation-roboto), Roboto, ui-sans-serif, system-ui, sans-serif;
+
+  font-family: var(--font-relocation-body);
+  font-weight: 500;
+  font-size: 1.4375rem;
+  line-height: 2.25rem;
+  letter-spacing: -0.23px;
+  color: var(--relocation-ink);
+  background: var(--relocation-paper);
+}
+
+/* Below the clone's 1025px desktop breakpoint the body scale steps down. */
+@media (max-width: 1024px) {
+  .relocation {
+    font-size: 1.1875rem;
+    line-height: 1.875rem;
+    letter-spacing: -0.19px;
+  }
+}
+
+.relocation h1,
+.relocation h2,
+.relocation h3 {
+  text-wrap: balance;
+}
+
+.relocation p {
+  text-wrap: pretty;
+}
+
+/* Focus ring — terracotta, always visible against both the white page and the
+   charcoal footer. */
+.relocation *:focus-visible {
+  outline: 2px solid var(--relocation-terracotta);
+  outline-offset: 2px;
+}
+
+.relocation footer *:focus-visible {
+  outline-color: var(--relocation-paper);
+}
+
+/* ── Wave hero ─────────────────────────────────────────────────────────────
+   The gradient plate is clipped by the recovered Squarespace divider path,
+   emitted once per page as <clipPath id="relocation-wave"> in
+   relocation-layout.tsx. objectBoundingBox units mean the same edge renders at
+   any hero width or height — which is why the source's five baked wave rasters
+   were dropped (design.md deviation #7). */
+.relocation .relocation-wave-plate {
+  background: linear-gradient(
+    135deg,
+    var(--relocation-hero-dark) 0%,
+    var(--relocation-hero-mid) 45%,
+    var(--relocation-hero-light) 100%
+  );
+  clip-path: url(#relocation-wave);
+}
+
+/* ── Footer typography (clone n576–n643: omnes-pro 0.9375rem/0.9375rem) ──── */
+.relocation .relocation-footer-body {
+  font-family: var(--font-relocation-display);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  letter-spacing: normal;
+  color: var(--relocation-paper);
+}
+
+.relocation .relocation-footer-list {
+  list-style: disc outside;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Micro-interactions (source ditto.css, re-expressed as scoped classes) ─ */
+.relocation .relocation-hover-fade {
+  transition: opacity 0.1s linear;
+}
+
+.relocation .relocation-hover-fade:hover,
+.relocation .relocation-hover-fade:focus-visible {
+  opacity: 0.8;
+}
+
+/* Carousel / gallery arrow discs fade further, and slower (300ms). */
+.relocation .relocation-arrow-disc {
+  transition: opacity 0.3s linear;
+}
+
+.relocation .relocation-arrow-disc:hover,
+.relocation .relocation-arrow-disc:focus-visible {
+  opacity: 0.7;
+}
+
+/* Form inputs: hover tint + a real 2px focus outline. */
+.relocation .relocation-input {
+  background: var(--relocation-input);
+  transition: background 0.15s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.relocation .relocation-input:hover {
+  background: rgba(250, 250, 250, 0.6);
+}
+
+.relocation .relocation-input:focus {
+  outline: 2px solid var(--relocation-terracotta);
+  outline-offset: 2px;
+}
+
+/* ── Header nav ───────────────────────────────────────────────────────────
+   The active page's nav link is underlined (design.md → Chrome). The
+   underline is an ::after rule rather than `text-decoration` so it sits clear
+   of the descenders and can animate in on hover. */
+.relocation .relocation-nav-link {
+  position: relative;
+}
+
+.relocation .relocation-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.125rem;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--relocation-ease);
+}
+
+.relocation .relocation-nav-link:hover::after,
+.relocation .relocation-nav-link:focus-visible::after,
+.relocation .relocation-nav-link--active::after {
+  transform: scaleX(1);
+}
+
+/* Dropdown chevron rotates when the About menu is open. */
+.relocation .relocation-dropdown-chevron {
+  transition: transform 0.2s var(--relocation-ease);
+}
+
+.relocation .relocation-dropdown-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+/* Mobile drawer fade (the clone's hamburger was inert — deviation #2). */
+.relocation .relocation-mobile-menu-panel {
+  transition: opacity 0.25s linear;
+}
+
+/* ── Scroll reveal ────────────────────────────────────────────────────────
+   Armed only once `useRelocationReveal` adds `.relocation-js` to the scope
+   root. Without JS the class is never set, so revealed content stays fully
+   visible and no section ever ships blank (design.md → Motion). Character:
+   gentle rise (24px) + fade, ~600ms, ease-out. */
+.relocation-js .relocation-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s var(--relocation-ease),
+    transform 0.6s var(--relocation-ease);
+}
+
+.relocation-js .relocation-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Staggered group — one observer on the container; descendant
+   `.relocation-reveal-item` elements cascade in via a per-item `--i` index
+   (~60ms steps). Don't nest items. */
+.relocation-js .relocation-reveal-group .relocation-reveal-item {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s var(--relocation-ease),
+    transform 0.6s var(--relocation-ease);
+}
+
+.relocation-js .relocation-reveal-group.is-visible .relocation-reveal-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────
+   The hook already short-circuits to visible, but the CSS override is the
+   belt-and-braces half of the contract: no transform, no transition, nothing
+   animates, everything is on screen. */
+@media (prefers-reduced-motion: reduce) {
+  .relocation .relocation-reveal,
+  .relocation .relocation-reveal-group .relocation-reveal-item,
+  .relocation-js .relocation-reveal,
+  .relocation-js .relocation-reveal-group .relocation-reveal-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .relocation .relocation-hover-fade,
+  .relocation .relocation-arrow-disc,
+  .relocation .relocation-input,
+  .relocation .relocation-nav-link::after,
+  .relocation .relocation-dropdown-chevron,
+  .relocation .relocation-mobile-menu-panel {
+    transition: none;
+  }
+}
+
+/* ══ reCAPTCHA v3 badge (platform-wide) ═══════════════════════════════════
+   Google's api.js appends a fixed badge to <body> the moment it loads, and
+   never removes it — so after any captcha form mounts, the badge follows the
+   visitor through every client-side navigation. Hidden here instead, which
+   Google's FAQ permits only because every token-minting form renders the
+   inline attribution (`RecaptchaDisclosure` in
+   src/components/inputs/recaptcha-field.tsx) in its place. If a new form
+   ever mints tokens WITHOUT rendering that disclosure, this rule makes it
+   non-compliant — add the disclosure, don't unhide the badge.
+   `visibility: hidden` rather than `display: none`, per Google's own
+   snippet: the element stays in the layout tree, so token minting is
+   provably unaffected. */
+.grecaptcha-badge {
+  visibility: hidden;
 }

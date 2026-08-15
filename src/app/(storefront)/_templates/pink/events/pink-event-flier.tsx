@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { cn } from "~/lib/utils";
 import { EventFlierLightbox } from "~/app/(storefront)/_components/events/event-flier-lightbox";
 
 import { PINK_SCOPE_CLASS } from "../layout/pink-scope";
@@ -60,9 +61,7 @@ export function PinkEventFlier({
   priority = false,
   className,
 }: Props) {
-  const frameClassName = `relative w-full overflow-hidden${
-    className ? ` ${className}` : ""
-  }`;
+  const frameClassName = cn("relative w-full overflow-hidden", className);
   const frameStyle = {
     aspectRatio: aspect,
     background: "var(--pink-panel)",

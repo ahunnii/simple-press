@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { api } from "~/trpc/server";
 import { canonicalRedirectUrl } from "~/lib/auth-paths";
+import { api } from "~/trpc/server";
 import { DefaultResetPasswordPage } from "~/app/(storefront)/_templates/default/auth/default-reset-password-page";
 
 type Props = {

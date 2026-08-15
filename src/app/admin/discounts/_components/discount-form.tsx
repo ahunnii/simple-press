@@ -5,17 +5,24 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  MoreHorizontal,
+  RotateCcw,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { DiscountFormSchema } from "~/lib/validators/discounts";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
-import { cn } from "~/lib/utils";
+import { cn, roundToCents } from "~/lib/utils";
 import {
   DISCOUNT_DATE_RANGE_ERROR,
   discountFormSchema,
   validateDiscountDateRange,
+  validateDiscountValue,
 } from "~/lib/validators/discounts";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
@@ -39,6 +46,13 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -48,16 +62,39 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { MoneyInput } from "~/components/ui/money-input";
 import { NumberInput } from "~/components/ui/number-input";
 import { Switch } from "~/components/ui/switch";
 import { DateTimeFormField } from "~/components/inputs/date-time-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
-import { SwitchFormField } from "~/components/inputs/switch-form-field";
 
 type Props = {
   initialDiscount?: DiscountCode;
 };
+
+type DiscountType = DiscountFormSchema["type"];
+
+/**
+ * `DiscountCode.minPurchase`, `maxDiscount` and — for `type === "fixed"` only —
+ * `value` are stored in CENTS; this form collects DOLLARS. A stored `0` is a
+ * real, meaningful value, so the guard has to be an explicit null check: the
+ * truthiness test this replaced (`stored ? stored / 100 : undefined`) read a
+ * saved `0` back as a blank field.
+ */
+function centsToDollars(cents: number | null | undefined): number | undefined {
+  return cents == null ? undefined : cents / 100;
+}
+
+/**
+ * Dollars → whole cents for the wire. `roundToCents` runs first because a
+ * plain `Math.round(dollars * 100)` is wrong for values like 12.555 — binary
+ * float error puts `12.555 * 100` at 1255.4999999999998, which rounds down to
+ * $12.55 instead of $12.56.
+ */
+function dollarsToCents(dollars: number | null | undefined): number | null {
+  return dollars == null ? null : Math.round(roundToCents(dollars) * 100);
+}
 
 export function DiscountForm({ initialDiscount }: Props) {
   const router = useRouter();
@@ -66,23 +103,29 @@ export function DiscountForm({ initialDiscount }: Props) {
 
   const defaultValues: DiscountFormSchema = {
     code: initialDiscount?.code ?? "",
-    type: (initialDiscount?.type as DiscountFormSchema["type"]) ?? "percentage",
+    type: (initialDiscount?.type as DiscountType) ?? "percentage",
     value:
       initialDiscount?.type === "fixed"
-        ? (initialDiscount.value ?? 0) / 100
+        ? (centsToDollars(initialDiscount.value) ?? 0)
         : (initialDiscount?.value ?? 0),
     active: initialDiscount?.active ?? true,
     usageLimit: initialDiscount?.usageLimit ?? undefined,
     perCustomerLimit: initialDiscount?.perCustomerLimit ?? undefined,
     startsAt: initialDiscount?.startsAt ?? undefined,
     expiresAt: initialDiscount?.expiresAt ?? undefined,
-    minPurchase: initialDiscount?.minPurchase
-      ? initialDiscount?.minPurchase / 100
-      : undefined,
-    maxDiscount: initialDiscount?.maxDiscount
-      ? initialDiscount?.maxDiscount / 100
-      : undefined,
+    minPurchase: centsToDollars(initialDiscount?.minPurchase),
+    maxDiscount: centsToDollars(initialDiscount?.maxDiscount),
   };
+
+  // Per-type drafts for the unit-overloaded `value` field. `DiscountCode.value`
+  // means whole percent points for "percentage" but CENTS for "fixed", so
+  // carrying one number across a type switch silently reinterprets it — typing
+  // `50` under Percentage and switching to Fixed used to save $50.00 off with
+  // no warning. Each type keeps its own draft instead: switching away parks the
+  // current number, switching back restores it, and a type the owner hasn't
+  // filled in yet starts blank.
+  const valueDrafts = useRef<Partial<Record<DiscountType, number | null>>>({});
+  const prevType = useRef<DiscountType>(defaultValues.type);
 
   const form = useForm<DiscountFormSchema>({
     resolver: zodResolver(discountFormSchema),
@@ -98,17 +141,52 @@ export function DiscountForm({ initialDiscount }: Props) {
             ...data,
             value:
               data.type === "fixed"
-                ? (data.value ?? 0) / 100
-                : (data?.value ?? 0),
-            minPurchase: data?.minPurchase
-              ? data?.minPurchase / 100
-              : undefined,
-            maxDiscount: data?.maxDiscount
-              ? data?.maxDiscount / 100
-              : undefined,
+                ? (centsToDollars(data.value) ?? 0)
+                : (data.value ?? 0),
+            minPurchase: centsToDollars(data.minPurchase),
+            maxDiscount: centsToDollars(data.maxDiscount),
           }
         : defaultValues,
     );
+
+    // Drafts describe unsaved keystrokes; once the form is reset to a
+    // persisted (or pristine) state they're stale and must not resurrect.
+    valueDrafts.current = {};
+    prevType.current = data?.type ?? defaultValues.type;
+  };
+
+  /**
+   * `RadioFormField` calls `field.onChange(next)` FIRST and this callback
+   * second, so by the time we run the form already holds the NEW type while
+   * `form.getValues("value")` still holds the number typed under the OLD one.
+   * Park that number under the outgoing type, then swap in the incoming type's
+   * draft (or blank).
+   */
+  const handleTypeChange = (nextValue: string) => {
+    const nextType = nextValue as DiscountType;
+    const previousType = prevType.current;
+    if (previousType === nextType) return;
+
+    valueDrafts.current[previousType] = form.getValues("value") ?? null;
+
+    // `null` (a blank field) is deliberate here even though the schema types
+    // `value` as a plain `number` — that's the same shape `NumberInput` /
+    // `MoneyInput` write when the owner clears the input, so the non-null
+    // assertion only quiets the types, it does not change what's stored.
+    const restored = valueDrafts.current[nextType] ?? null;
+    form.setValue("value", restored!, { shouldDirty: true });
+    // A "can't exceed 100%" error from the old type must not linger over the
+    // new type's (possibly empty) field.
+    form.clearErrors("value");
+
+    // `maxDiscount` is unmounted for free shipping but is still submitted, so
+    // a cap left over from a percentage/fixed code would silently persist on
+    // the saved free-shipping code.
+    if (nextType === "free_shipping") {
+      form.setValue("maxDiscount", null, { shouldDirty: true });
+    }
+
+    prevType.current = nextType;
   };
 
   const createDiscountMutation = api.discount.create.useMutation({
@@ -166,16 +244,41 @@ export function DiscountForm({ initialDiscount }: Props) {
   });
 
   const onSubmit = async (data: DiscountFormSchema) => {
-    let discountValue = data.value;
     const type = data.type;
-    const minPurchase = data.minPurchase;
-    const maxDiscount = data.maxDiscount;
 
-    if (type === "percentage" && discountValue > 100) {
+    // A blank amount must not save as a dead 0% / $0.00 code. `value` is
+    // `z.coerce.number()`, and `Number(null)` is 0, so an empty field parses to
+    // a valid-looking 0 rather than failing validation. The input's `required`
+    // attribute only guards the native submit path — `useKeyboardEnter` calls
+    // `form.handleSubmit` directly, bypassing it. Switching discount type now
+    // deliberately blanks this field (see `handleTypeChange`), so an empty
+    // amount is reachable on every switch and has to be caught here.
+    if (type !== "free_shipping" && form.getValues("value") == null) {
       form.setError("value", {
         type: "manual",
-        message: "Percentage discount cannot exceed 100%",
+        message: "Amount is required",
       });
+      return;
+    }
+
+    // Convert to the wire units `DiscountCode.value` is overloaded into before
+    // validating: whole percent points for "percentage", CENTS for "fixed",
+    // and 0 for "free_shipping" (the discount equals the shipping cost, which
+    // is computed at checkout time). `validateDiscountValue` checks the wire
+    // value, so it has to run after the dollars→cents conversion, not before.
+    const discountValue =
+      type === "fixed"
+        ? (dollarsToCents(data.value) ?? 0)
+        : type === "free_shipping"
+          ? 0
+          : data.value;
+
+    // Same authoritative check the router runs (discount.create/update) —
+    // catch it here so the owner gets an inline field error instead of a
+    // round-trip BAD_REQUEST.
+    const valueCheck = validateDiscountValue(type, discountValue);
+    if (!valueCheck.ok) {
+      form.setError("value", { type: "manual", message: valueCheck.message });
       return;
     }
 
@@ -195,22 +298,15 @@ export function DiscountForm({ initialDiscount }: Props) {
       return;
     }
 
-    if (type === "fixed") {
-      discountValue = Math.round(discountValue * 100);
-    }
-
-    // Free shipping codes have no numeric value — the discount equals the
-    // shipping cost, computed at checkout time.
-    if (type === "free_shipping") {
-      discountValue = 0;
-    }
-
-    const minPurchaseCents = minPurchase
-      ? Math.round(minPurchase * 100)
-      : undefined;
-    const maxDiscountCents = maxDiscount
-      ? Math.round(maxDiscount * 100)
-      : undefined;
+    const minPurchaseCents = dollarsToCents(data.minPurchase);
+    // A free-shipping code has no cap to apply — the discount equals the
+    // shipping cost. `handleTypeChange` clears the field when the owner
+    // switches TO free_shipping, but that does not cover opening an existing
+    // free-shipping code that already carries a stale cap in the DB: the field
+    // is unmounted, yet its loaded value still rides along in form state. Zero
+    // it here so neither path can persist one.
+    const maxDiscountCents =
+      type === "free_shipping" ? null : dollarsToCents(data.maxDiscount);
 
     if (initialDiscount) {
       updateDiscountMutation.mutate({
@@ -219,8 +315,8 @@ export function DiscountForm({ initialDiscount }: Props) {
         code: data.code.toUpperCase().trim(),
         type,
         value: discountValue,
-        minPurchase: minPurchaseCents ?? null,
-        maxDiscount: maxDiscountCents ?? null,
+        minPurchase: minPurchaseCents,
+        maxDiscount: maxDiscountCents,
       });
     } else {
       createDiscountMutation.mutate({
@@ -228,8 +324,8 @@ export function DiscountForm({ initialDiscount }: Props) {
         code: data.code.toUpperCase().trim(),
         type,
         value: discountValue,
-        minPurchase: minPurchaseCents ?? null,
-        maxDiscount: maxDiscountCents ?? null,
+        minPurchase: minPurchaseCents,
+        maxDiscount: maxDiscountCents,
       });
     }
   };
@@ -296,30 +392,43 @@ export function DiscountForm({ initialDiscount }: Props) {
                   </div>
                 )}
               />
-              {initialDiscount && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={isSubmitting}
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Delete</span>
-                </Button>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only ml-2 sm:not-sr-only">
+                      More Options
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={isSubmitting || !isDirty}
+                    onClick={() => {
+                      form.reset();
+                      valueDrafts.current = {};
+                      prevType.current = form.getValues("type");
+                    }}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </DropdownMenuItem>
 
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isSubmitting || !isDirty}
-                onClick={() => form.reset()}
-                className="hidden md:inline-flex"
-              >
-                Reset
-              </Button>
+                  {initialDiscount && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        disabled={isSubmitting}
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <Button type="submit" size="sm" disabled={isSubmitting}>
                 {isSubmitting ? (
@@ -385,6 +494,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                         { label: "Fixed Amount ($)", value: "fixed" },
                         { label: "Free shipping", value: "free_shipping" },
                       ]}
+                      onChange={handleTypeChange}
                     />
 
                     {type === "free_shipping" && (
@@ -406,35 +516,41 @@ export function DiscountForm({ initialDiscount }: Props) {
                                 : "Amount (USD)"}{" "}
                               <span className="text-destructive">*</span>
                             </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                {type === "fixed" && (
-                                  <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                    $
-                                  </span>
-                                )}
-
-                                <NumberInput
-                                  step={type === "percentage" ? "1" : "0.01"}
-                                  min="0"
-                                  max={
-                                    type === "percentage" ? "100" : undefined
-                                  }
-                                  placeholder={
-                                    type === "percentage" ? "20" : "10.00"
-                                  }
-                                  className={type === "fixed" ? "pl-7" : ""}
+                            {type === "fixed" ? (
+                              <FormControl>
+                                <MoneyInput
+                                  placeholder="10.00"
                                   required
                                   {...field}
                                 />
-                                {type === "percentage" && (
-                                  <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
-                                    %
-                                  </span>
-                                )}
+                              </FormControl>
+                            ) : (
+                              // Percent, not money: whole numbers only (the DB
+                              // column is an Int), so no `$` and no cent step.
+                              // A non-integer that slips past `step="1"` is
+                              // caught by `validateDiscountValue` on submit.
+                              <div className="relative">
+                                <FormControl>
+                                  <NumberInput
+                                    step="1"
+                                    min="0"
+                                    max="100"
+                                    placeholder="20"
+                                    className="pr-7"
+                                    required
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
+                                  %
+                                </span>
                               </div>
-                            </FormControl>
-                            <FormDescription>Base price in USD</FormDescription>
+                            )}
+                            <FormDescription>
+                              {type === "percentage"
+                                ? "Whole percent off the cart subtotal — enter 20 for 20% off."
+                                : "Flat amount in USD taken off the cart subtotal."}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -442,7 +558,8 @@ export function DiscountForm({ initialDiscount }: Props) {
                     )}
                   </CardContent>
                 </Card>
-
+              </div>
+              <div className="col-span-1 space-y-4">
                 {/* Usage & Expiry + min/max */}
                 <Card>
                   <CardHeader>
@@ -451,12 +568,26 @@ export function DiscountForm({ initialDiscount }: Props) {
                       Set limits on how the discount can be used
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  {/* Row 1: Usage Limit (full width). Row 2: per-customer
+                      limit (full width). Row 3: Start/Expiration dates
+                      (paired). Row 4: min/max purchase (paired). The raw
+                      `FormField` blocks below render a bare `FormItem`, so
+                      they occupy one track each by default; `DateTimeFormField`
+                      hard-codes `col-span-full` on its `FormItem`, so it needs
+                      the explicit `sm:col-span-1` override to sit in a single
+                      track instead of spanning the row. `items-start` keeps
+                      each cell sized to its own content — without it, grid
+                      cells stretch to the tallest cell in the row, and because
+                      `FormItem` is itself `grid gap-2` with auto rows that
+                      absorb the extra height, a field with no description gets
+                      its label and input pushed apart and misaligned against
+                      its neighbour. */}
+                  <CardContent className="grid items-start gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="usageLimit"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="sm:col-span-2">
                           <FormLabel>Usage Limit</FormLabel>
                           <FormControl>
                             <NumberInput
@@ -469,6 +600,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormDescription>
                             Leave blank for unlimited uses
                           </FormDescription>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -477,7 +609,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                       control={form.control}
                       name="perCustomerLimit"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="sm:col-span-2">
                           <FormLabel>Limit uses per customer</FormLabel>
                           <FormControl>
                             <NumberInput
@@ -490,6 +622,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                           <FormDescription>
                             Leave blank for unlimited uses per customer
                           </FormDescription>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -502,6 +635,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                       timeLabel="Start Time"
                       includeTime={false}
                       description="Leave blank to start immediately"
+                      className="sm:col-span-1"
                     />
 
                     <DateTimeFormField
@@ -512,6 +646,7 @@ export function DiscountForm({ initialDiscount }: Props) {
                       timeLabel="Expiration Time"
                       includeTime={false}
                       description="Leave blank for no expiration"
+                      className="sm:col-span-1"
                     />
 
                     <FormField
@@ -519,25 +654,15 @@ export function DiscountForm({ initialDiscount }: Props) {
                       name="minPurchase"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel> Minimum purchase (USD)</FormLabel>
+                          <FormLabel>Minimum purchase (USD)</FormLabel>
                           <FormControl>
-                            <div className="relative">
-                              <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                $
-                              </span>
-                              <NumberInput
-                                step="0.01"
-                                min="0"
-                                placeholder="No minimum"
-                                className="pl-7"
-                                {...field}
-                              />
-                            </div>
+                            <MoneyInput placeholder="No minimum" {...field} />
                           </FormControl>
                           <FormDescription>
                             Cart subtotal must meet this amount before the code
                             applies
                           </FormDescription>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -548,48 +673,19 @@ export function DiscountForm({ initialDiscount }: Props) {
                         name="maxDiscount"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel> Maximum discount (USD)</FormLabel>
+                            <FormLabel>Maximum discount (USD)</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-                                  $
-                                </span>
-                                <NumberInput
-                                  step="0.01"
-                                  min="0"
-                                  placeholder="No cap"
-                                  className="pl-7"
-                                  {...field}
-                                />
-                              </div>
+                              <MoneyInput placeholder="No cap" {...field} />
                             </FormControl>
                             <FormDescription>
                               Caps the discount amount (especially useful for
                               percentage codes)
                             </FormDescription>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
                     )}
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="col-span-1 space-y-4">
-                {/* Active Status */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Status</CardTitle>
-                    <CardDescription>
-                      Control whether this discount is currently active
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <SwitchFormField
-                      form={form}
-                      name="active"
-                      label="Active"
-                      description="Customers can use this discount code"
-                    />
                   </CardContent>
                 </Card>
               </div>

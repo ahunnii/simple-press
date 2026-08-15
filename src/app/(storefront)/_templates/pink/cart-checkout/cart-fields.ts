@@ -55,7 +55,8 @@ export const pinkCartData: TemplateField[] = [
   {
     key: "pink.cart.continue-shopping-label",
     label: "Continue Shopping Label",
-    description: "Quiet link label back to the shop, under the checkout button.",
+    description:
+      "Quiet link label back to the shop, under the checkout button.",
     type: "text",
     page: "cart",
     group: "cart.main",

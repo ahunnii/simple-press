@@ -35,32 +35,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     eventCount,
     videoCount,
   ] = await Promise.all([
-      db.product.findMany({
-        where: { businessId: business.id, published: true },
-        select: { slug: true, updatedAt: true },
-      }),
-      db.collection.findMany({
-        where: { businessId: business.id, published: true },
-        select: { slug: true, updatedAt: true },
-      }),
-      db.page.findMany({
-        where: { businessId: business.id, published: true },
-        select: { slug: true, updatedAt: true, type: true },
-      }),
-      db.service.findMany({
-        where: { businessId: business.id, published: true },
-        select: { slug: true, updatedAt: true },
-      }),
-      db.faqItem.count({
-        where: { businessId: business.id, published: true },
-      }),
-      db.event.count({
-        where: { businessId: business.id, published: true, isArchived: false },
-      }),
-      db.video.count({
-        where: { businessId: business.id, published: true },
-      }),
-    ]);
+    db.product.findMany({
+      where: { businessId: business.id, published: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.collection.findMany({
+      where: { businessId: business.id, published: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.page.findMany({
+      where: { businessId: business.id, published: true },
+      select: { slug: true, updatedAt: true, type: true },
+    }),
+    db.service.findMany({
+      where: { businessId: business.id, published: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    db.faqItem.count({
+      where: { businessId: business.id, published: true },
+    }),
+    db.event.count({
+      where: { businessId: business.id, published: true, isArchived: false },
+    }),
+    db.video.count({
+      where: { businessId: business.id, published: true },
+    }),
+  ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: "daily", priority: 1 },

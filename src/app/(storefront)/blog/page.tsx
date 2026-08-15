@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 
-import { JsonLd } from "~/components/json-ld";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { buildItemListSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
+import { JsonLd } from "~/components/json-ld";
 
 import { getTemplate } from "../_templates/registry";
 
@@ -37,14 +37,21 @@ export default async function BlogPage() {
   return (
     <>
       <JsonLd data={buildItemListSchema(business, items)} />
-      <t.BlogPage pages={pages} customFields={customFields} business={business} />
+      <t.BlogPage
+        pages={pages}
+        customFields={customFields}
+        business={business}
+      />
     </>
   );
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet().catch(() => null);
-  return buildPageMetadata({ business, path: "/blog", title: "Blog" });
+  const business = await loadSeoBusiness("/blog");
+  return buildPageMetadata({
+    business,
+    path: "/blog",
+    pageMetaKey: "blog",
+    title: "Blog",
+  });
 }
-
-//TODO: Metadata for the blog listing page 'should' allow for the business owner to edit them

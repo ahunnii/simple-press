@@ -6,8 +6,8 @@ import { ArrowUpDown, Search } from "lucide-react";
 
 import type { DefaultProductsPageTemplateProps } from "../../types";
 import type { SortOption } from "~/hooks/use-shop-filters";
-import { useShopFilters } from "~/hooks/use-shop-filters";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
+import { useShopFilters } from "~/hooks/use-shop-filters";
 
 import { ElegantProductCard } from "../shared/elegant-product-card";
 

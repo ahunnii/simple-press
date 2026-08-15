@@ -202,7 +202,9 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
     <Card>
       <CardHeader>
         <CardTitle>
-          {isPartiallyFulfilled ? "Fulfill Remaining Items" : "Mark as Fulfilled"}
+          {isPartiallyFulfilled
+            ? "Fulfill Remaining Items"
+            : "Mark as Fulfilled"}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -267,7 +269,12 @@ export function FulfillmentForm({ orderId, customerEmail, items }: Props) {
                 <p className="text-muted-foreground text-sm">
                   Need a shipping label? Buy discounted postage on PirateShip.
                 </p>
-                <Button size="sm" variant="outline" asChild className="shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="shrink-0"
+                >
                   <a
                     href="https://www.pirateship.com"
                     target="_blank"

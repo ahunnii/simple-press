@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -30,6 +31,7 @@ import { NoiseOrderSummary } from "./noise-order-summary";
 
 type CheckoutFormProps = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
 /* Shared label style */
@@ -54,7 +56,10 @@ function SectionHead({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
+export function NoiseCheckoutForm({
+  business,
+  merchantPolicies,
+}: CheckoutFormProps) {
   const {
     email,
     setEmail,
@@ -93,7 +98,8 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
     items,
     shipping,
     shippingPending,
-  } = useCheckoutForm(business);
+    termsDisclosure,
+  } = useCheckoutForm(business, merchantPolicies);
 
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
@@ -579,6 +585,13 @@ export function NoiseCheckoutForm({ business }: CheckoutFormProps) {
             </span>
             <span>→</span>
           </button>
+
+          <CheckoutTermsNotice
+            disclosure={termsDisclosure}
+            className="font-mono text-[9.5px] leading-relaxed tracking-[0.1em] uppercase"
+            style={{ color: "var(--vn-steel-mist)" }}
+            linkClassName="underline"
+          />
 
           {/* Reassurance */}
           <div className="flex flex-col gap-2.5">

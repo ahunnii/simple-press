@@ -46,7 +46,7 @@ export async function HappyBambooLayout({
       </a>
       <HappyBambooRouteAnnouncer />
       {banner && <HappyBambooAnnouncementBar banner={banner} />}
-      <HappyBambooHeader business={business} session={session ?? null} />
+      <HappyBambooHeader business={business} initialSession={session ?? null} />
       <div id="main-content" tabIndex={-1} className="min-h-[calc(100vh-4rem)]">
         {children}
       </div>

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import type { GalleryImage } from "generated/prisma";
@@ -7,6 +6,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+
+import { AdminThumb } from "../../_components/admin-thumb";
 
 type Props = {
   image: GalleryImage;
@@ -37,7 +38,7 @@ export function SortableImage({ image, onDelete, onEdit }: Props) {
       style={style}
       className="group bg-muted relative aspect-square overflow-hidden rounded-lg"
     >
-      <img
+      <AdminThumb
         src={image.url}
         alt={image.altText ?? ""}
         loading="lazy"

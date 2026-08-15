@@ -1,21 +1,23 @@
-"use client"
+"use client";
 
+import type { MultiSessionAuthClient } from "@better-auth-ui/react";
+import type { ReactElement, ReactNode } from "react";
+import { isValidElement } from "react";
 import {
-  type MultiSessionAuthClient,
   useAuth,
   useSession,
-  useSetActiveSession
-} from "@better-auth-ui/react"
+  useSetActiveSession,
+} from "@better-auth-ui/react";
 import {
   ChevronsUpDown,
   LogIn,
   LogOut,
   Settings,
-  UserPlus2
-} from "lucide-react"
-import { isValidElement, type ReactElement, type ReactNode } from "react"
+  UserPlus2,
+} from "lucide-react";
 
-import { buttonVariants } from "~/components/ui/button"
+import { cn } from "~/lib/utils";
+import { buttonVariants } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,51 +25,51 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "~/components/ui/dropdown-menu"
-import { cn } from "~/lib/utils"
-import { UserAvatar } from "./user-avatar"
-import { UserView } from "./user-view"
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+
+import { UserAvatar } from "./user-avatar";
+import { UserView } from "./user-view";
 
 /** Auth states a `UserButton` link can be visible in. */
 export type UserButtonLinkVisibility =
   | "authenticated"
   | "unauthenticated"
-  | "always"
+  | "always";
 
 /** A simple link entry rendered as a `DropdownMenuItem` in the `UserButton` menu. */
 export type UserButtonLink = {
   /** Visible label. */
-  label: ReactNode
+  label: ReactNode;
   /** Destination URL. */
-  href: string
+  href: string;
   /** Optional leading icon. Sized/coloured to match built-in items. */
-  icon?: ReactNode
+  icon?: ReactNode;
   /** Forwarded to the underlying `DropdownMenuItem`. */
-  variant?: "default" | "destructive"
+  variant?: "default" | "destructive";
   /**
    * When this link is visible based on auth state.
    * @default "always"
    */
-  visibility?: UserButtonLinkVisibility
-}
+  visibility?: UserButtonLinkVisibility;
+};
 
 export type UserButtonProps = {
-  className?: string
-  align?: "center" | "end" | "start" | undefined
-  sideOffset?: number
-  size?: "default" | "icon"
+  className?: string;
+  align?: "center" | "end" | "start" | undefined;
+  sideOffset?: number;
+  size?: "default" | "icon";
   variant?:
     | "default"
     | "destructive"
     | "ghost"
     | "link"
     | "outline"
-    | "secondary"
+    | "secondary";
   /** Additional menu entries rendered above the built-in items. */
-  links?: (UserButtonLink | ReactElement)[]
+  links?: (UserButtonLink | ReactElement)[];
   /** Hide the built-in "Settings" link. Useful when replacing it via `links`. */
-  hideSettings?: boolean
+  hideSettings?: boolean;
   /**
    * SIMPLEPRESS LOCAL ADDITION — re-apply after re-fetching this file from the
    * Better Auth UI registry.
@@ -84,17 +86,17 @@ export type UserButtonProps = {
    * object: it's the only piece with no upstream home, and a flat prop is far
    * easier to re-apply on upgrade.
    */
-  avatarClassName?: string
-}
+  avatarClassName?: string;
+};
 
 function renderUserLink(
   link: UserButtonLink | ReactElement,
   navigate: (options: { to: string; replace?: boolean }) => void,
-  fallbackKey: string
+  fallbackKey: string,
 ): ReactNode {
-  if (isValidElement(link)) return link
+  if (isValidElement(link)) return link;
 
-  const { label, href, icon, variant } = link
+  const { label, href, icon, variant } = link;
   return (
     <DropdownMenuItem
       key={fallbackKey}
@@ -104,7 +106,7 @@ function renderUserLink(
       {icon}
       {label}
     </DropdownMenuItem>
-  )
+  );
 }
 
 /**
@@ -131,26 +133,26 @@ export function UserButton({
   links,
   hideSettings = false,
   // SIMPLEPRESS LOCAL ADDITION — see UserButtonProps.
-  avatarClassName
+  avatarClassName,
 }: UserButtonProps) {
   const { authClient, basePaths, viewPaths, localization, plugins, navigate } =
-    useAuth()
+    useAuth();
 
   const { isPending: settingActiveSession } = useSetActiveSession(
-    authClient as MultiSessionAuthClient
-  )
-  const { data: session, isPending: sessionPending } = useSession(authClient)
+    authClient as MultiSessionAuthClient,
+  );
+  const { data: session, isPending: sessionPending } = useSession(authClient);
 
   const userLinks = links?.flatMap((link, index) => {
     if (!isValidElement(link)) {
-      const visibility = link.visibility ?? "always"
-      if (visibility === "authenticated" && !session) return []
-      if (visibility === "unauthenticated" && session) return []
+      const visibility = link.visibility ?? "always";
+      if (visibility === "authenticated" && !session) return [];
+      if (visibility === "unauthenticated" && session) return [];
     }
     return [
-      renderUserLink(link, navigate, `user-button-link-${index.toString()}`)
-    ]
-  })
+      renderUserLink(link, navigate, `user-button-link-${index.toString()}`),
+    ];
+  });
 
   // Whether anything renders between the user info label and the
   // sign-out item, so the leading separator isn't shown with nothing
@@ -158,7 +160,7 @@ export function UserButton({
   const hasSessionMenuItems =
     (userLinks?.length ?? 0) > 0 ||
     !hideSettings ||
-    plugins.some((plugin) => (plugin.userMenuItems?.length ?? 0) > 0)
+    plugins.some((plugin) => (plugin.userMenuItems?.length ?? 0) > 0);
 
   return (
     <DropdownMenu>
@@ -169,8 +171,8 @@ export function UserButton({
             ? cn("rounded-full", className)
             : cn(
                 buttonVariants({ variant, size: "lg" }),
-                "py-2.5 h-auto font-normal",
-                className
+                "h-auto py-2.5 font-normal",
+                className,
               )
         }
       >
@@ -196,7 +198,7 @@ export function UserButton({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        className="min-w-40 md:min-w-56 max-w-[48svw]"
+        className="max-w-[48svw] min-w-40 md:min-w-56"
         sideOffset={sideOffset}
         align={align}
       >
@@ -220,7 +222,7 @@ export function UserButton({
               <DropdownMenuItem
                 onClick={() =>
                   navigate({
-                    to: `${basePaths.settings}/${viewPaths.settings.account}`
+                    to: `${basePaths.settings}/${viewPaths.settings.account}`,
                   })
                 }
               >
@@ -233,7 +235,7 @@ export function UserButton({
             {plugins.flatMap((plugin) =>
               plugin.userMenuItems?.map((Item, index) => (
                 <Item key={`${plugin.id}-${index.toString()}`} />
-              ))
+              )),
             )}
 
             <DropdownMenuSeparator />
@@ -241,7 +243,7 @@ export function UserButton({
             <DropdownMenuItem
               onClick={() =>
                 navigate({
-                  to: `${basePaths.auth}/${viewPaths.auth.signOut}`
+                  to: `${basePaths.auth}/${viewPaths.auth.signOut}`,
                 })
               }
             >
@@ -257,7 +259,7 @@ export function UserButton({
             <DropdownMenuItem
               onClick={() =>
                 navigate({
-                  to: `${basePaths.auth}/${viewPaths.auth.signIn}`
+                  to: `${basePaths.auth}/${viewPaths.auth.signIn}`,
                 })
               }
             >
@@ -269,7 +271,7 @@ export function UserButton({
             <DropdownMenuItem
               onClick={() =>
                 navigate({
-                  to: `${basePaths.auth}/${viewPaths.auth.signUp}`
+                  to: `${basePaths.auth}/${viewPaths.auth.signUp}`,
                 })
               }
             >
@@ -281,11 +283,11 @@ export function UserButton({
             {plugins.flatMap((plugin) =>
               plugin.userMenuItems?.map((Item, index) => (
                 <Item key={`${plugin.id}-${index.toString()}`} />
-              ))
+              )),
             )}
           </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

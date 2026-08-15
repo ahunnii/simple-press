@@ -12,7 +12,15 @@ export type DefaultLayoutTemplateProps = {
 
 export type DefaultHeaderTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
-  session?: Session | null;
+  /**
+   * The session as the layout's server-side `getSession()` saw it — an SSR
+   * seed, never live state. Headers hand it to `useHydratedSession(seed)`,
+   * which renders it on the server and on the first client render (so the
+   * signed-in header is correct in the initial HTML) and then defers to the
+   * client store once that settles. Optional: a layout that doesn't fetch a
+   * session omits it and its header falls back to the unseeded hook.
+   */
+  initialSession?: Session | null;
 };
 
 export type DefaultFooterTemplateProps = {
@@ -62,12 +70,31 @@ export type DefaultVideosPageTemplateProps = {
   videos: RouterOutputs["videos"]["getPublic"];
 };
 
+export type DefaultFaqPageTemplateProps = {
+  business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  items: RouterOutputs["faq"]["list"];
+};
+
 export type DefaultCartPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGetWithProducts"]>;
 };
 
+/**
+ * Whether the merchant has published (non-empty, published) `Page` rows for
+ * the optional terms-of-service / refund-policy slugs. Resolved server-side
+ * in `checkout/page.tsx` the same way `DefaultFooter` resolves its policy
+ * links (`content.getSimplifiedPages`) — never fetched client-side. Checkout
+ * forms use this to decide which merchant policy links are safe to render;
+ * a slug with no published Page must never become a link (dead link).
+ */
+export type CheckoutMerchantPolicies = {
+  hasTermsOfService: boolean;
+  hasRefundPolicy: boolean;
+};
+
 export type DefaultCheckoutPageTemplateProps = {
   business: NonNullable<RouterOutputs["business"]["simplifiedGet"]>;
+  merchantPolicies: CheckoutMerchantPolicies;
 };
 
 export type DefaultBlogPostPageTemplateProps = {

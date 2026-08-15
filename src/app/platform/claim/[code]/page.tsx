@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { env } from "~/env";
+import { db } from "~/server/db";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { db } from "~/server/db";
 
 import { ClaimClient } from "./_components/claim-client";
 
@@ -60,8 +60,8 @@ export default async function ClaimPage({ params }: Props) {
           <CardHeader>
             <CardTitle>Invalid or expired link</CardTitle>
             <CardDescription>
-              This claim link isn&apos;t valid. It may have been mistyped, or the
-              site it pointed to is no longer available.
+              This claim link isn&apos;t valid. It may have been mistyped, or
+              the site it pointed to is no longer available.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -138,7 +138,7 @@ export default async function ClaimPage({ params }: Props) {
   // with the invited email already exists so the client shows sign-in vs. sign-up.
   const existingUser = await db.user.findFirst({
     where: { email: { equals: invite.email, mode: "insensitive" } },
-    select: { id: true },
+    select: { id: true, termsAcceptedAt: true },
   });
 
   return (
@@ -151,6 +151,7 @@ export default async function ClaimPage({ params }: Props) {
           subdomain={business.subdomain}
           platformDomain={env.NEXT_PUBLIC_PLATFORM_DOMAIN}
           userExists={Boolean(existingUser)}
+          platformTermsRecorded={Boolean(existingUser?.termsAcceptedAt)}
         />
       </Card>
     </ClaimFrame>

@@ -128,7 +128,7 @@ export function ModernProductCard({ product }: Props) {
               className={cn(
                 "border-border text-foreground flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
                 productStatus.disableCart
-                  ? "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-foreground"
+                  ? "hover:text-foreground cursor-not-allowed opacity-40 hover:bg-transparent"
                   : "hover:bg-primary hover:text-primary-foreground",
               )}
               onClick={handleAddToCart}

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
+
 type PinkEmptyStateProps = {
   heading: string;
   body?: string;
@@ -22,8 +24,14 @@ export function PinkEmptyState({
 }: PinkEmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center gap-4 px-8 py-16 text-center${className ? ` ${className}` : ""}`}
-      style={{ background: "var(--pink-panel)", border: "1px solid var(--pink-line)" }}
+      className={cn(
+        "flex flex-col items-center gap-4 px-8 py-16 text-center",
+        className,
+      )}
+      style={{
+        background: "var(--pink-panel)",
+        border: "1px solid var(--pink-line)",
+      }}
     >
       <h2
         className="pink-display"
@@ -32,7 +40,10 @@ export function PinkEmptyState({
         {heading}
       </h2>
       {body && (
-        <p className="max-w-[42ch] text-[15px] leading-[1.7]" style={{ color: "var(--pink-muted)" }}>
+        <p
+          className="max-w-[42ch] text-[15px] leading-[1.7]"
+          style={{ color: "var(--pink-muted)" }}
+        >
           {body}
         </p>
       )}

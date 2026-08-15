@@ -1,16 +1,20 @@
 import type { Icon as TablerIcon } from "@tabler/icons-react";
 import type { LucideIcon } from "lucide-react";
 import {
-  IconBrandWordpress,
+  IconAdjustments,
+  IconArticle,
+  IconBraces,
   IconBrandYoutube,
+  IconBrush,
+  IconCalculator,
   IconCalendarEvent,
   IconChartBar,
-  IconCreditCard,
   IconDashboard,
+  IconDatabaseExport,
   IconDiscount,
+  IconFileText,
   IconFolder,
   IconImageInPicture,
-  IconLanguage,
   IconMail,
   IconMailFast,
   IconMessageStar,
@@ -22,7 +26,6 @@ import {
   IconShoppingCart,
   IconSparkles,
   IconStar,
-  IconTransfer,
   IconUsers,
 } from "@tabler/icons-react";
 import {
@@ -33,6 +36,7 @@ import {
   Megaphone,
   Menu,
   Package,
+  Plug,
   Plus,
   PowerOff,
   Search,
@@ -133,6 +137,14 @@ export interface HubCard {
   /** Feature flag key — when set and disabled, the card is hidden from its hub. */
   featureKey?: string;
   /**
+   * When set, the card is visible if ANY of these flags is enabled — for
+   * cards gated behind more than one independent flag (e.g. Banner & Popup,
+   * which is `banners` OR `popups`). Takes precedence over `featureKey` when
+   * both are present; use `isHubCardEnabled` rather than checking either
+   * field directly.
+   */
+  featureKeysAny?: string[];
+  /**
    * True when the card links to a platform-admin-only surface (e.g. the
    * legacy Template Fields editor). Hidden from owners/managers everywhere;
    * consumers must opt in via `getHubCards(hub, { includePlatformOnly })`.
@@ -196,15 +208,6 @@ export const NAV_ITEMS: NavItem[] = [
     featureKey: "customerAccounts",
     roles: ["OWNER", "MANAGER", "STAFF"],
     keywords: ["buyers", "shoppers"],
-  },
-  {
-    key: "payments",
-    title: "Payments",
-    href: "/admin/payments",
-    icon: IconCreditCard,
-    section: "sell",
-    featureKey: "payments",
-    keywords: ["stripe", "payouts", "balance"],
   },
 
   // Catalog
@@ -285,14 +288,62 @@ export const NAV_ITEMS: NavItem[] = [
     featureKey: "emailMarketing",
     keywords: ["newsletter", "broadcast", "campaign", "email blast"],
   },
+  {
+    key: "quotes",
+    title: "Quotes",
+    href: "/admin/quotes",
+    icon: IconCalculator,
+    section: "marketing",
+    featureKey: "quoteCalculator",
+    keywords: ["estimate", "calculator", "lead", "moving", "request", "quote"],
+  },
 
   // Content
   {
-    key: "content",
-    title: "Site content",
-    href: "/admin/content",
-    icon: IconLanguage,
+    key: "site-editor",
+    title: "Site Editor",
+    href: "/editor",
+    icon: IconBrush,
     section: "content",
+    keywords: ["editor", "visual", "design", "theme", "sections", "customize"],
+  },
+  {
+    key: "content",
+    title: "Site Setup",
+    href: "/admin/content",
+    icon: IconAdjustments,
+    section: "content",
+    keywords: [
+      "brand",
+      "logo",
+      "navigation",
+      "menu",
+      "seo",
+      "meta",
+      "policies",
+      "faq",
+      "banner",
+      "popup",
+      "setup",
+    ],
+  },
+  {
+    key: "pages",
+    title: "Pages",
+    href: "/admin/content/pages",
+    icon: IconFileText,
+    section: "content",
+    featureKey: "pages",
+    keywords: ["about", "contact", "cms", "standalone"],
+  },
+  {
+    key: "blog",
+    title: "Blog",
+    href: "/admin/content/blog",
+    icon: IconArticle,
+    section: "content",
+    featureKey: "blog",
+    keywords: ["posts", "articles", "news"],
   },
   {
     key: "media",
@@ -347,7 +398,19 @@ export const NAV_ITEMS: NavItem[] = [
     icon: IconReportMoney,
     section: "insights",
     featureKey: "payments",
-    keywords: ["revenue", "tax", "fees", "stripe", "profit", "breakdown", "money"],
+    keywords: [
+      "revenue",
+      "tax",
+      "fees",
+      "stripe",
+      "profit",
+      "breakdown",
+      "money",
+      "payouts",
+      "balance",
+      "payments",
+      "inform",
+    ],
   },
 
   // Platform (PLATFORM_ADMIN only — gated in sidebar rendering). Points at
@@ -393,21 +456,11 @@ export const HUB_CARDS: HubCard[] = [
     key: "settings-hours",
     title: "Business Hours",
     description: "Opening hours by day",
-    body: "Publish your opening hours for your storefront footer and contact page",
+    body: "Publish your opening hours on your storefront contact page",
     href: "/admin/settings/hours",
     hub: "settings",
     color: "cyan",
     icon: Clock,
-  },
-  {
-    key: "settings-tax",
-    title: "Tax",
-    description: "Sales tax, Stripe Tax, nexus guide",
-    body: "Set up and understand your tax obligations",
-    href: "/admin/settings/tax",
-    hub: "settings",
-    color: "yellow",
-    icon: IconReceiptTax,
   },
   {
     key: "settings-domain",
@@ -417,7 +470,7 @@ export const HUB_CARDS: HubCard[] = [
     href: "/admin/settings/domain",
     hub: "settings",
     color: "orange",
-    icon: Shield,
+    icon: Globe,
     keywords: ["url", "website address", "dns"],
   },
   {
@@ -433,45 +486,43 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "settings-integrations",
     title: "Integrations",
-    description: "Payment gateways, email marketing, analytics, and more.",
+    description: "Stripe payments and Umami analytics",
     body: "Connect your business to third-party services",
     href: "/admin/settings/integrations",
     hub: "settings",
     color: "purple",
-    icon: FileText,
+    icon: Plug,
   },
   {
     key: "settings-availability",
-    title: "Storefront Availability",
-    description: "Maintenance mode and coming soon",
-    body: "Temporarily take your storefront offline for maintenance or launch preparation",
+    title: "Maintenance Mode",
+    description: "Take your storefront offline or show a coming-soon page",
+    body: "Show a maintenance or coming-soon screen while you prepare your launch",
     href: "/admin/settings/availability",
     hub: "settings",
     color: "red",
     icon: PowerOff,
   },
   {
-    key: "settings-store-transfer",
-    title: "Store Transfer",
-    description: "Export and import store content",
-    body: "Export your store's content to a ZIP file and import it into another store",
-    href: "/admin/settings/store-transfer",
-    hub: "settings",
-    color: "emerald",
-    icon: IconTransfer,
-    featureKey: "storeTransfer",
-  },
-  {
-    key: "settings-wordpress-export",
-    title: "Export to WordPress",
+    key: "settings-data",
+    title: "Data & Export",
     description: "Move your store to WordPress/WooCommerce",
     body: "Download your content, products, and records in WordPress/WooCommerce import formats",
-    href: "/admin/settings/wordpress-export",
+    href: "/admin/settings/data",
     hub: "settings",
     color: "blue",
-    icon: IconBrandWordpress,
+    icon: IconDatabaseExport,
     featureKey: "wordpressExport",
-    keywords: ["woocommerce", "offboard", "migrate", "leave", "cancel"],
+    keywords: [
+      "woocommerce",
+      "wordpress",
+      "offboard",
+      "migrate",
+      "leave",
+      "cancel",
+      "export",
+      "data",
+    ],
   },
   {
     key: "settings-team",
@@ -485,72 +536,18 @@ export const HUB_CARDS: HubCard[] = [
     keywords: ["staff", "members", "invite", "roles", "permissions"],
   },
 
-  // Content hub — Site Editor and Brand Identity first
-  {
-    key: "content-site-editor",
-    title: "Site Editor",
-    description: "Edit your site visually",
-    body: "Click any section of your live site to change its text, images, and visibility — then publish when you're happy",
-    href: "/editor",
-    hub: "content",
-    color: "indigo",
-    icon: Globe,
-    keywords: ["editor", "visual", "sections", "theme", "design", "preview"],
-  },
+  // Content hub — one-off configuration surfaces. Site Editor, Pages, and
+  // Blog moved to the sidebar (see NAV_ITEMS above) since owners visit those
+  // constantly rather than once.
   {
     key: "content-branding",
-    title: "Brand Identity",
+    title: "Brand & Appearance",
     description: "Personality of your site",
-    body: "Edit your logo, template selection, socials, and more",
+    body: "Template, logo, favicon, footer tagline, and social links",
     href: "/admin/content/branding",
     hub: "content",
     color: "blue",
     icon: Home,
-  },
-  {
-    key: "content-pages",
-    title: "Pages",
-    description: "Standalone pages (About, Contact, FAQ)",
-    body: "About, Contact, FAQ, and custom pages",
-    href: "/admin/content/pages",
-    hub: "content",
-    color: "green",
-    icon: FileText,
-    featureKey: "pages",
-  },
-  {
-    key: "content-blog",
-    title: "Blog",
-    description: "Blog posts",
-    body: "Blog posts for your site",
-    href: "/admin/content/blog",
-    hub: "content",
-    color: "purple",
-    icon: FileText,
-  },
-  {
-    key: "content-events",
-    title: "Events",
-    description: "Upcoming workshops, classes, and markets",
-    body: "Post upcoming markets, classes, and workshops with a flier, date, and location",
-    href: "/admin/events",
-    hub: "content",
-    color: "cyan",
-    icon: IconCalendarEvent,
-    featureKey: "events",
-    keywords: ["calendar", "dates", "workshop", "class", "market"],
-  },
-  {
-    key: "content-videos",
-    title: "Videos",
-    description: "YouTube videos, synced automatically",
-    body: "Follow your YouTube channels and playlists — new uploads appear on your site on their own, and you choose which ones show.",
-    href: "/admin/videos",
-    hub: "content",
-    color: "rose",
-    icon: IconBrandYoutube,
-    featureKey: "videos",
-    keywords: ["youtube", "video", "gallery", "channel", "playlist"],
   },
   {
     key: "content-policies",
@@ -576,7 +573,7 @@ export const HUB_CARDS: HubCard[] = [
     key: "content-seo",
     title: "SEO & Meta",
     description: "Search optimization",
-    body: "Meta tags, favicons, social media preview images",
+    body: "Meta tags, social media preview images",
     href: "/admin/content/seo",
     hub: "content",
     color: "pink",
@@ -595,19 +592,29 @@ export const HUB_CARDS: HubCard[] = [
   {
     key: "content-announcements",
     title: "Banner & Popup",
-    description: "Site-wide announcements",
+    description: "Announcement banner and homepage popup",
     body: "Manage your announcement banner and homepage popup",
     href: "/admin/content/announcements",
     hub: "content",
     color: "amber",
     icon: Megaphone,
+    // Two independent flags, both `enabledByDefault: false` — either being on
+    // is enough to make this card useful. See `isHubCardEnabled`.
+    featureKeysAny: ["banners", "popups"],
+    keywords: ["announcement", "banner", "popup"],
+  },
+  {
+    key: "content-template",
+    title: "Template Fields",
+    description: "Platform-admin field editor",
+    body: "Raw template field editor with JSON import/export — owners use the Site Editor instead",
+    href: "/admin/content/template",
+    hub: "content",
+    color: "slate",
+    icon: IconBraces,
+    platformOnly: true,
   },
 ];
-
-/** Return all nav items belonging to a section. */
-export function getNavItemsBySection(section: NavSection): NavItem[] {
-  return NAV_ITEMS.filter((item) => item.section === section);
-}
 
 /**
  * Whether a nav item is visible to the given membership role.
@@ -627,7 +634,7 @@ const STAFF_ALLOWED_PATH_PREFIXES = ["/admin/orders", "/admin/customers"];
 /**
  * Whether an /admin pathname is accessible to the given role.
  * OWNER and MANAGER can visit everything; STAFF is limited to fulfillment
- * pages (orders + customers). Used by the admin layout as a UX guard —
+ * pages (orders + customers). Consumed by src/lib/require-admin-access.ts —
  * hard enforcement lives in the tRPC procedure roles.
  */
 export function isPathAllowedForRole(
@@ -652,6 +659,26 @@ export function getHubCards(
     (card) =>
       card.hub === hub && (!card.platformOnly || opts?.includePlatformOnly),
   );
+}
+
+/**
+ * Whether a hub card should be shown given the business's enabled feature
+ * flags. Cards gated on a single `featureKey` need that flag on; cards gated
+ * on `featureKeysAny` (e.g. Banner & Popup, which is `banners` OR `popups`)
+ * need at least one of those on. A card with neither is always shown.
+ *
+ * Use this everywhere a hub card list is filtered by flags rather than
+ * re-deriving the `!card.featureKey || isEnabled(card.featureKey)` check —
+ * that check silently ignores `featureKeysAny`.
+ */
+export function isHubCardEnabled(
+  card: HubCard,
+  isEnabled: (key: string) => boolean,
+): boolean {
+  if (card.featureKeysAny?.length) {
+    return card.featureKeysAny.some((k) => isEnabled(k));
+  }
+  return !card.featureKey || isEnabled(card.featureKey);
 }
 
 // ─── Palette actions ────────────────────────────────────────────────────────
@@ -723,6 +750,14 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     keywords: ["broadcast", "newsletter", "campaign"],
   },
   {
+    key: "add-quote-calculator",
+    title: "New quote calculator",
+    href: "/admin/quotes/calculators/new",
+    icon: IconCalculator,
+    featureKey: "quoteCalculator",
+    keywords: ["estimate", "calculator", "lead", "quote"],
+  },
+  {
     key: "setup-guide",
     title: "View setup guide",
     href: "/admin/welcome",
@@ -735,5 +770,13 @@ export const PALETTE_ACTIONS: PaletteAction[] = [
     href: "/admin/settings/general",
     icon: Wrench,
     keywords: ["general", "info", "business"],
+  },
+  {
+    key: "tax-guide",
+    title: "Tax Guide",
+    href: "/admin/finances/tax-guide",
+    icon: IconReceiptTax,
+    featureKey: "payments",
+    keywords: ["tax", "nexus", "stripe tax", "sales tax", "inform"],
   },
 ];

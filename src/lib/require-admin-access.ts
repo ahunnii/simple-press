@@ -4,15 +4,32 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import type { AdminRole } from "~/app/admin/_lib/admin-nav";
-import { isPathAllowedForRole } from "~/app/admin/_lib/admin-nav";
-import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
+import {
+  checkBusiness,
+  checkBusinessAnyStatus,
+  checkBusinessMembership,
+} from "~/lib/check-business";
 import { getSession } from "~/server/better-auth/server";
+import { isPathAllowedForRole } from "~/app/admin/_lib/admin-nav";
 
 export type RequireAdminAccessResult = {
   session: NonNullable<Awaited<ReturnType<typeof getSession>>>;
   business: NonNullable<Awaited<ReturnType<typeof checkBusiness>>>;
   /** Resolved BusinessMembership role, or null for PLATFORM_ADMIN (implicit access). */
   membershipRole: AdminRole | null;
+  /**
+   * `BusinessMembership.merchantTermsAcceptedAt` for THIS membership, piggybacked
+   * on the membership lookup for the `/admin` retroactive-terms gate.
+   *
+   * Three-state, and only meaningful alongside `membershipRole === "OWNER"`:
+   * `Date` = on file, `null` = nothing on file, `undefined` = not determined
+   * (PLATFORM_ADMIN, who never runs a membership lookup at all, or a database
+   * that does not have the column yet). Read it through
+   * `shouldPromptOwnerTerms` in `~/lib/legal/owner-terms-gate` rather than
+   * testing it directly — `undefined` must never be treated as "not accepted".
+   */
+  merchantTermsAcceptedAt?: Date | null;
 };
 
 type Options = {
@@ -48,27 +65,36 @@ export async function requireAdminAccess(
     redirect("/auth/sign-in?redirectTo=/admin");
   }
 
-  const business = await checkBusiness();
+  // Allow PLATFORM_ADMIN unconditionally — live DB read, never cookie cache.
+  const platformAdmin = await isPlatformAdmin(session.user.id);
+
+  // `checkBusiness()` only resolves ACTIVE stores. Platform admins must still
+  // be able to open a suspended store's /admin to remediate the suspension
+  // (closed platform — admins disable a store, fix it, re-enable it), so fall
+  // back to a status-agnostic lookup for them only. Everyone else keeps 404.
+  const business =
+    (await checkBusiness()) ??
+    (platformAdmin ? await checkBusinessAnyStatus() : null);
 
   if (!business) {
     notFound();
   }
 
-  // Allow PLATFORM_ADMIN unconditionally
   let membershipRole: AdminRole | null = null;
-  if (session.user.platformRole !== "PLATFORM_ADMIN") {
+  // Stays `undefined` for PLATFORM_ADMIN — no membership is looked up, so there
+  // is nothing to report, and "unknown" is the honest value.
+  let merchantTermsAcceptedAt: Date | null | undefined;
+  if (!platformAdmin) {
     // For everyone else, check BusinessMembership
     const membership = await checkBusinessMembership(
       business.id,
       session.user.id,
     );
-    if (
-      !membership ||
-      !allowedRoles.includes(membership.role as AdminRole)
-    ) {
+    if (!membership || !allowedRoles.includes(membership.role as AdminRole)) {
       redirect("/not-permitted");
     }
     membershipRole = membership.role as AdminRole;
+    merchantTermsAcceptedAt = membership.merchantTermsAcceptedAt;
 
     // STAFF is fulfillment-only: orders + customers. Middleware exposes the
     // requested path via x-pathname; anything outside the allowed pages sends
@@ -85,5 +111,5 @@ export async function requireAdminAccess(
     }
   }
 
-  return { session, business, membershipRole };
+  return { session, business, membershipRole, merchantTermsAcceptedAt };
 }

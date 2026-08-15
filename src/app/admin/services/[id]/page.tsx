@@ -4,7 +4,7 @@ import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
-import { ServiceEditTabs } from "../_components/service-edit-tabs";
+import { ServiceEditor } from "../_components/service-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 type PageProps = {
@@ -32,7 +32,7 @@ export default async function EditServicePage({ params }: PageProps) {
           { label: service.name },
         ]}
       />
-      <ServiceEditTabs
+      <ServiceEditor
         service={service}
         embedsEnabled={embedsEnabled}
         storefrontTemplateId={business.templateId}

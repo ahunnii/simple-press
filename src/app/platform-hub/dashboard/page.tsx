@@ -90,6 +90,48 @@ export default async function PlatformDashboardPage() {
           </Card>
         </div>
 
+        {/*
+          Headline risk metric: the Seller & Merchant Agreement is the only
+          document giving the platform grounds to suspend a store, so a
+          business with no accepting OWNER is a real gap, not a data quirk.
+          Nothing was backfilled when the terms columns shipped, so this will
+          read high on day one — that size *is* the re-papering job. Kept as
+          its own row (not squeezed into the 4-up grid above) so it reads as
+          a distinct signal rather than one more incidental tile.
+        */}
+        <div className="mb-8">
+          <Card
+            className={
+              stats.businessesWithoutAcceptedOwner > 0
+                ? "border-amber-200 bg-amber-50"
+                : undefined
+            }
+          >
+            <CardHeader className="pb-3">
+              <CardDescription>
+                Businesses Without a Signed Merchant Agreement
+              </CardDescription>
+              <CardTitle className="text-3xl">
+                {stats.businessesWithoutAcceptedOwner}
+              </CardTitle>
+              {stats.businessesWithoutAcceptedOwner > 0 ? (
+                <Link
+                  href="/businesses"
+                  className="text-xs text-amber-700 hover:underline"
+                >
+                  No OWNER membership has accepted the Seller & Merchant
+                  Agreement — review businesses →
+                </Link>
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  Every business has at least one owner who has accepted the
+                  merchant agreement.
+                </p>
+              )}
+            </CardHeader>
+          </Card>
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>

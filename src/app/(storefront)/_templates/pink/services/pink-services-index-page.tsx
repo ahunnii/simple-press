@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { PinkServiceCard } from "./pink-services-grid";
+import type { TemplateListRow } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
-import type { TemplateListRow } from "~/lib/template-fields";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
@@ -12,10 +13,10 @@ import { PinkBadge } from "../shared/pink-badge";
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkDarkBand } from "../shared/pink-dark-band";
 import { PinkHairlineGrid } from "../shared/pink-hairline-grid";
+import { hasCustomImage } from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
-import type { PinkServiceCard } from "./pink-services-grid";
 import { PinkServicesGrid } from "./pink-services-grid";
 
 type Props = {
@@ -91,19 +92,22 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
     "pink.services.cta-image-2",
   ]);
 
-  const rawCustomFields = customFields as Record<string, unknown> | null | undefined;
+  const rawCustomFields = customFields as
+    | Record<string, unknown>
+    | null
+    | undefined;
 
   const parsedStepsRows = parseTemplateListRows(
     rawCustomFields?.["pink.services.steps-list"],
   );
-  const stepsRows = (parsedStepsRows.length > 0 ? parsedStepsRows : DEFAULT_STEPS).map(
-    (row) => ({
-      ordinal: typeof row.ordinal === "string" ? row.ordinal : "",
-      title: typeof row.title === "string" ? row.title : "",
-      body: typeof row.body === "string" ? row.body : "",
-      _id: row._id,
-    }),
-  );
+  const stepsRows = (
+    parsedStepsRows.length > 0 ? parsedStepsRows : DEFAULT_STEPS
+  ).map((row) => ({
+    ordinal: typeof row.ordinal === "string" ? row.ordinal : "",
+    title: typeof row.title === "string" ? row.title : "",
+    body: typeof row.body === "string" ? row.body : "",
+    _id: row._id,
+  }));
 
   // ── Flatten every published ServiceItem across every published Service ──
   const cards: PinkServiceCard[] = services.flatMap((service) =>
@@ -123,6 +127,11 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
   const signatureItem = services
     .flatMap((service) => service.items.map((item) => ({ item, service })))
     .find(({ item }) => item.isSignature);
+
+  const ctaImages = [
+    f["pink.services.cta-image-1"] ?? "",
+    f["pink.services.cta-image-2"] ?? "",
+  ].filter(hasCustomImage);
 
   return (
     <div className="flex flex-col">
@@ -145,11 +154,17 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                 <Link
                   href={`/services/${signatureItem.service.slug}`}
                   className="grid gap-0 md:grid-cols-[1.05fr_0.95fr]"
-                  style={{ border: "1px solid var(--pink-line)", background: "var(--pink-white)" }}
+                  style={{
+                    border: "1px solid var(--pink-line)",
+                    background: "var(--pink-white)",
+                  }}
                 >
                   <div
                     className="relative"
-                    style={{ aspectRatio: "16 / 10", background: "var(--pink-panel)" }}
+                    style={{
+                      aspectRatio: "16 / 10",
+                      background: "var(--pink-panel)",
+                    }}
                   >
                     <Image
                       src={signatureItem.item.image ?? "/placeholder.svg"}
@@ -162,7 +177,9 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                       className="absolute top-3 left-3"
                       {...fieldAttr("pink.services.featured-badge")}
                     >
-                      <PinkBadge tone="rose">{f["pink.services.featured-badge"] ?? ""}</PinkBadge>
+                      <PinkBadge tone="rose">
+                        {f["pink.services.featured-badge"] ?? ""}
+                      </PinkBadge>
                     </span>
                   </div>
 
@@ -187,7 +204,10 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                       </p>
                     )}
                     <p className="pink-label">
-                      {[signatureItem.item.priceLabel, signatureItem.item.category]
+                      {[
+                        signatureItem.item.priceLabel,
+                        signatureItem.item.category,
+                      ]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
@@ -255,20 +275,35 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
             columnsClassName="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
           >
             {stepsRows.map((step, i) => (
-              <PinkReveal key={step._id ?? i} index={i} className="flex flex-col gap-3 px-5 py-6">
+              <PinkReveal
+                key={step._id ?? i}
+                index={i}
+                className="flex flex-col gap-3 px-5 py-6"
+              >
                 <span
                   className="pink-display"
-                  style={{ fontSize: "20px", fontWeight: 700, color: "var(--pink-blush)" }}
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 700,
+                    color: "var(--pink-blush)",
+                  }}
                 >
                   {step.ordinal}
                 </span>
                 <span
                   className="pink-display"
-                  style={{ fontSize: "19px", fontWeight: 600, color: "var(--pink-paper)" }}
+                  style={{
+                    fontSize: "19px",
+                    fontWeight: 600,
+                    color: "var(--pink-paper)",
+                  }}
                 >
                   {step.title}
                 </span>
-                <p className="text-[15px] leading-[1.7]" style={{ color: "var(--pink-ink-body)" }}>
+                <p
+                  className="text-[15px] leading-[1.7]"
+                  style={{ color: "var(--pink-ink-body)" }}
+                >
                   {step.body}
                 </p>
               </PinkReveal>
@@ -303,10 +338,14 @@ export async function PinkServicesIndexPage({ business, services }: Props) {
                     }
                   : undefined
               }
-              images={[
-                { src: f["pink.services.cta-image-1"] ?? "", alt: "" },
-                { src: f["pink.services.cta-image-2"] ?? "", alt: "" },
-              ]}
+              // Only pass images once the owner has supplied a real one: the
+              // panel runs copy-only with none set (mirrors the events page's
+              // closing CTA, audit 2026-07-31, P2-7).
+              images={
+                ctaImages.length > 0
+                  ? ctaImages.map((src) => ({ src, alt: "" }))
+                  : undefined
+              }
             />
           </PinkReveal>
         </div>

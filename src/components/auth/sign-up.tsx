@@ -1,63 +1,80 @@
-"use client"
+"use client";
 
+import type { SyntheticEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   authMutationKeys,
   getAuthLinkURL,
-  parseAdditionalFieldValue
-} from "@better-auth-ui/core"
+  parseAdditionalFieldValue,
+} from "@better-auth-ui/core";
 import {
   AuthPrompts,
   useAuth,
   useFetchOptions,
-  useSignUpEmail
-} from "@better-auth-ui/react"
-import { useIsMutating } from "@tanstack/react-query"
-import { Eye, EyeOff } from "lucide-react"
-import { type SyntheticEvent, useState } from "react"
-import { toast } from "sonner"
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+  useSignUpEmail,
+} from "@better-auth-ui/react";
+import { useIsMutating } from "@tanstack/react-query";
+import { Eye, EyeOff } from "lucide-react";
+// END SIMPLEPRESS LOCAL ADDITION (imports)
+import { toast } from "sonner";
+
+import type { SocialLayout } from "./provider-buttons";
+import type { AuthErrorInfo } from "~/lib/auth/auth-error-messages";
+// END SIMPLEPRESS LOCAL ADDITION (imports)
+// SIMPLEPRESS LOCAL ADDITION (imports) — absolute links for the terms
+// checkbox: this form renders on tenant subdomains/custom domains, so a
+// relative `/platform/policies/...` link would resolve to the merchant's
+// site instead of the platform's.
+import { env } from "~/env";
+import { resolveAuthErrorMessage } from "~/lib/auth/auth-error-messages";
+import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+// SIMPLEPRESS LOCAL ADDITION (imports) — `Checkbox` + `FieldContent` are used
+// by the terms-acceptance checkbox below.
+import { Checkbox } from "~/components/ui/checkbox";
+// END SIMPLEPRESS LOCAL ADDITION (imports)
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-  // SIMPLEPRESS LOCAL ADDITION — labels the captcha group.
-  FieldTitle
-} from "~/components/ui/field"
-import { Input } from "~/components/ui/input"
+} from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupInput
-} from "~/components/ui/input-group"
-import { Spinner } from "~/components/ui/spinner"
-import { cn } from "~/lib/utils"
-import { AdditionalField } from "./additional-field"
-import { ProviderButtons, type SocialLayout } from "./provider-buttons"
+  InputGroupInput,
+} from "~/components/ui/input-group";
+import { Spinner } from "~/components/ui/spinner";
+
+import { AdditionalField } from "./additional-field";
+import { AuthErrorAlert } from "./auth-error-alert";
+import { ProviderButtons } from "./provider-buttons";
+
+// SIMPLEPRESS LOCAL ADDITION (imports) — `useEffect`/`useRef` are used by the
+// terms-acceptance checkbox below.
+
 // SIMPLEPRESS LOCAL ADDITION (imports) — inline auth error reporting.
 // Re-apply after re-fetching this file from the Better Auth UI registry.
-import {
-  type AuthErrorInfo,
-  resolveAuthErrorMessage
-} from "~/lib/auth/auth-error-messages"
-import { AuthErrorAlert } from "./auth-error-alert"
+
 // END SIMPLEPRESS LOCAL ADDITION (imports)
 
 export type SignUpProps = {
-  className?: string
-  socialLayout?: SocialLayout
-  socialPosition?: "top" | "bottom"
+  className?: string;
+  socialLayout?: SocialLayout;
+  socialPosition?: "top" | "bottom";
   /**
    * Runs instead of the post-sign-up redirect, but only when the sign-up
    * created an immediately usable session. Email verification still takes
    * priority, and social sign-ups are unaffected.
    */
-  onSignUpSuccess?: () => void
-}
+  onSignUpSuccess?: () => void;
+};
 
 /**
  * Renders a sign-up form with name, email, and password fields, optional social provider buttons, and submission handling.
@@ -78,7 +95,7 @@ export function SignUp({
   className,
   socialLayout,
   socialPosition = "bottom",
-  onSignUpSuccess
+  onSignUpSuccess,
 }: SignUpProps) {
   const {
     additionalFields,
@@ -91,113 +108,174 @@ export function SignUp({
     socialProviders,
     viewPaths,
     navigate,
-    Link
-  } = useAuth()
+    Link,
+  } = useAuth();
 
-  const { fetchOptions, resetFetchOptions } = useFetchOptions()
+  const { fetchOptions, resetFetchOptions } = useFetchOptions();
 
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // SIMPLEPRESS LOCAL ADDITION — inline auth error, rendered in the form
   // instead of only as a toast. Re-apply after a registry re-fetch.
-  const [authError, setAuthError] = useState<AuthErrorInfo | null>(null)
+  const [authError, setAuthError] = useState<AuthErrorInfo | null>(null);
   // END SIMPLEPRESS LOCAL ADDITION
 
   const { mutate: signUpEmail, isPending: signUpEmailPending } = useSignUpEmail(
     authClient,
     {
       onError: (error) => {
-        setPassword("")
-        setConfirmPassword("")
-        resetFetchOptions()
+        setPassword("");
+        setConfirmPassword("");
+        resetFetchOptions();
 
         // SIMPLEPRESS LOCAL ADDITION — additive; everything above is upstream.
-        setAuthError(resolveAuthErrorMessage(error))
+        setAuthError(resolveAuthErrorMessage(error));
         // END SIMPLEPRESS LOCAL ADDITION
       },
       onSuccess: (_data, { email }) => {
         if (emailAndPassword?.requireEmailVerification) {
-          sessionStorage.setItem("better-auth-ui.verify-email", email)
+          sessionStorage.setItem("better-auth-ui.verify-email", email);
           navigate({
             to: getAuthLinkURL(
               `${basePaths.auth}/${viewPaths.auth.verifyEmail}`,
-              redirectTo
-            )
-          })
+              redirectTo,
+            ),
+          });
         } else if (onSignUpSuccess) {
-          onSignUpSuccess()
+          onSignUpSuccess();
         } else {
-          navigate({ to: redirectTo })
+          navigate({ to: redirectTo });
         }
-      }
-    }
-  )
+      },
+    },
+  );
 
   const signInMutating = useIsMutating({
-    mutationKey: authMutationKeys.signIn.all
-  })
+    mutationKey: authMutationKeys.signIn.all,
+  });
   const signUpMutating = useIsMutating({
-    mutationKey: authMutationKeys.signUp.all
-  })
-  const isPending = signInMutating + signUpMutating > 0
+    mutationKey: authMutationKeys.signUp.all,
+  });
+  const isPending = signInMutating + signUpMutating > 0;
 
   const Captcha = plugins.find(
-    (plugin) => plugin.captchaComponent
-  )?.captchaComponent
+    (plugin) => plugin.captchaComponent,
+  )?.captchaComponent;
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false)
+    useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<{
-    name?: string
-    email?: string
-    password?: string
-    confirmPassword?: string
-  }>({})
+    name?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
+
+  // SIMPLEPRESS LOCAL ADDITION — platform terms-of-service acceptance.
+  //
+  // This account is portable across every storefront on the platform, so it
+  // can only carry acceptance of SimplePress's own Terms of Service +
+  // Privacy Policy here — never an individual merchant's terms (those are
+  // captured per-order at checkout, see `Order.termsAcceptedAt`). The
+  // checkbox below only *signals* that the box was checked; the actual
+  // timestamp and policy version are stamped server-side in
+  // `src/server/better-auth/config.tsx`, which is the only place allowed to
+  // decide "when" and "which version" — the client cannot supply either.
+  //
+  // Wired the same way `CheckboxField` in `additional-field.tsx` documents:
+  // Radix's `CheckboxPrimitive.Root` renders a `<button role="checkbox">`
+  // plus its own hidden bubble `<input type="checkbox" required>`, and that
+  // bubble input's `invalid` event does not bubble — so a parent
+  // `onInvalid` prop never fires. A capture-phase listener on the wrapping
+  // `Field` reaches it on the way down instead, suppresses the native
+  // balloon, and renders the message through `<FieldError>` like every
+  // sibling field.
+  //
+  // Re-apply after a registry re-fetch.
+  const termsFieldRef = useRef<HTMLDivElement>(null);
+  const [termsError, setTermsError] = useState<string>();
+
+  useEffect(() => {
+    const node = termsFieldRef.current;
+    if (!node) return;
+
+    const handleInvalid = (event: Event) => {
+      event.preventDefault();
+
+      if (event.target instanceof HTMLInputElement) {
+        setTermsError(event.target.validationMessage);
+      }
+    };
+
+    node.addEventListener("invalid", handleInvalid, true);
+    return () => node.removeEventListener("invalid", handleInvalid, true);
+  }, []);
+
+  const platformOrigin = `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}`;
+  const platformTermsUrl = `${platformOrigin}/platform/policies/terms-of-service`;
+  const platformPrivacyUrl = `${platformOrigin}/platform/policies/privacy-policy`;
+  // END SIMPLEPRESS LOCAL ADDITION
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // SIMPLEPRESS LOCAL ADDITION — drop the previous failure before retrying.
-    setAuthError(null)
+    setAuthError(null);
     // END SIMPLEPRESS LOCAL ADDITION
 
-    const formData = new FormData(e.currentTarget)
+    const formData = new FormData(e.currentTarget);
     // `emailAndPassword.name === false` hides the name field and submits "".
-    const name = (formData.get("name") as string | null) ?? ""
-    const email = formData.get("email") as string
+    const name = (formData.get("name") as string | null) ?? "";
+    const email = formData.get("email") as string;
 
     if (emailAndPassword?.confirmPassword && password !== confirmPassword) {
-      toast.error(localization.auth.passwordsDoNotMatch)
-      setPassword("")
-      setConfirmPassword("")
-      return
+      toast.error(localization.auth.passwordsDoNotMatch);
+      setPassword("");
+      setConfirmPassword("");
+      return;
     }
 
-    const additionalFieldValues: Record<string, unknown> = {}
+    const additionalFieldValues: Record<string, unknown> = {};
 
     for (const field of additionalFields ?? []) {
-      if (!field.signUp || field.readOnly) continue
+      if (!field.signUp || field.readOnly) continue;
       const value = parseAdditionalFieldValue(
         field,
-        formData.get(field.name) as string | null
-      )
+        formData.get(field.name) as string | null,
+      );
 
       if (field.validate) {
         try {
-          await field.validate(value)
+          await field.validate(value);
         } catch (error) {
-          toast.error(error instanceof Error ? error.message : String(error))
-          return
+          toast.error(error instanceof Error ? error.message : String(error));
+          return;
         }
       }
 
       if (value !== undefined) {
-        additionalFieldValues[field.name] = value
+        additionalFieldValues[field.name] = value;
       }
     }
+
+    // SIMPLEPRESS LOCAL ADDITION — terms-of-service acceptance signal.
+    //
+    // The terms checkbox is `required`, so native validation already
+    // refused to dispatch this `submit` event unless it was checked; this
+    // is just that fact carried over the wire as an explicit boolean.
+    // `config.tsx` reads it to decide *whether* to stamp
+    // `termsAcceptedAt`, but computes the timestamp and version itself —
+    // the client never gets to supply either. Folded into
+    // `additionalFieldValues` (typed `Record<string, unknown>`) rather than
+    // passed as its own literal property below, since `useSignUpEmail`'s
+    // params type doesn't declare this key and a literal property would
+    // fail TypeScript's excess-property check; a spread does not.
+    // Re-apply after a registry re-fetch.
+    additionalFieldValues.termsAccepted = true;
+    // END SIMPLEPRESS LOCAL ADDITION
 
     // SIMPLEPRESS LOCAL ADDITION — refuse to submit an unsolved captcha.
     //
@@ -210,9 +288,9 @@ export function SignUp({
     // Re-apply after a registry re-fetch.
     if (Captcha && !fetchOptions?.headers?.["x-captcha-response"]) {
       setAuthError(
-        resolveAuthErrorMessage({ error: { code: "MISSING_RESPONSE" } })
-      )
-      return
+        resolveAuthErrorMessage({ error: { code: "MISSING_RESPONSE" } }),
+      );
+      return;
     }
     // END SIMPLEPRESS LOCAL ADDITION
 
@@ -221,12 +299,12 @@ export function SignUp({
       email,
       password,
       ...additionalFieldValues,
-      fetchOptions
-    })
-  }
+      fetchOptions,
+    });
+  };
 
   const showSeparator =
-    emailAndPassword?.enabled && socialProviders && socialProviders.length > 0
+    emailAndPassword?.enabled && socialProviders && socialProviders.length > 0;
 
   return (
     <Card className={cn("w-full max-w-sm", className)}>
@@ -246,7 +324,7 @@ export function SignUp({
               )}
 
               {showSeparator && (
-                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card text-xs flex items-center">
+                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card flex items-center text-xs">
                   {localization.auth.or}
                 </FieldSeparator>
               )}
@@ -273,16 +351,16 @@ export function SignUp({
                       onChange={() => {
                         setFieldErrors((prev) => ({
                           ...prev,
-                          name: undefined
-                        }))
+                          name: undefined,
+                        }));
                       }}
                       onInvalid={(e) => {
-                        e.preventDefault()
+                        e.preventDefault();
 
                         setFieldErrors((prev) => ({
                           ...prev,
-                          name: localization.auth.fieldRequired
-                        }))
+                          name: localization.auth.fieldRequired,
+                        }));
                       }}
                       aria-invalid={!!fieldErrors.name}
                     />
@@ -307,20 +385,20 @@ export function SignUp({
                     onChange={() => {
                       setFieldErrors((prev) => ({
                         ...prev,
-                        email: undefined
-                      }))
+                        email: undefined,
+                      }));
                     }}
                     onInvalid={(e) => {
-                      e.preventDefault()
-                      const el = e.target as HTMLInputElement
+                      e.preventDefault();
+                      const el = e.target as HTMLInputElement;
                       const msg = el.validity.valueMissing
                         ? localization.auth.fieldRequired
-                        : localization.auth.invalidEmail
+                        : localization.auth.invalidEmail;
 
                       setFieldErrors((prev) => ({
                         ...prev,
-                        email: msg
-                      }))
+                        email: msg,
+                      }));
                     }}
                     aria-invalid={!!fieldErrors.email}
                   />
@@ -338,7 +416,7 @@ export function SignUp({
                         isPending={isPending}
                         optionalLabel={localization.auth.optional}
                       />
-                    )
+                    ),
                 )}
 
                 <Field data-invalid={!!fieldErrors.password}>
@@ -354,11 +432,11 @@ export function SignUp({
                       autoComplete="new-password"
                       value={password}
                       onChange={(e) => {
-                        setPassword(e.target.value)
+                        setPassword(e.target.value);
                         setFieldErrors((prev) => ({
                           ...prev,
-                          password: undefined
-                        }))
+                          password: undefined,
+                        }));
                       }}
                       placeholder={localization.auth.passwordPlaceholder}
                       required
@@ -366,26 +444,26 @@ export function SignUp({
                       maxLength={emailAndPassword?.maxPasswordLength}
                       disabled={isPending}
                       onInvalid={(e) => {
-                        e.preventDefault()
-                        const el = e.target as HTMLInputElement
-                        const min = emailAndPassword?.minPasswordLength
-                        const max = emailAndPassword?.maxPasswordLength
+                        e.preventDefault();
+                        const el = e.target as HTMLInputElement;
+                        const min = emailAndPassword?.minPasswordLength;
+                        const max = emailAndPassword?.maxPasswordLength;
                         const msg = el.validity.valueMissing
                           ? localization.auth.fieldRequired
                           : el.validity.tooShort
                             ? localization.auth.tooShort.replace(
                                 "{{min}}",
-                                String(min)
+                                String(min),
                               )
                             : localization.auth.tooLong.replace(
                                 "{{max}}",
-                                String(max)
-                              )
+                                String(max),
+                              );
 
                         setFieldErrors((prev) => ({
                           ...prev,
-                          password: msg
-                        }))
+                          password: msg,
+                        }));
                       }}
                       aria-invalid={!!fieldErrors.password}
                     />
@@ -404,7 +482,7 @@ export function SignUp({
                             : localization.auth.showPassword
                         }
                         onClick={() => {
-                          setIsPasswordVisible((visible) => !visible)
+                          setIsPasswordVisible((visible) => !visible);
                         }}
                       >
                         {isPasswordVisible ? <EyeOff /> : <Eye />}
@@ -429,12 +507,12 @@ export function SignUp({
                         autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(e) => {
-                          setConfirmPassword(e.target.value)
+                          setConfirmPassword(e.target.value);
 
                           setFieldErrors((prev) => ({
                             ...prev,
-                            confirmPassword: undefined
-                          }))
+                            confirmPassword: undefined,
+                          }));
                         }}
                         placeholder={
                           localization.auth.confirmPasswordPlaceholder
@@ -444,26 +522,26 @@ export function SignUp({
                         maxLength={emailAndPassword?.maxPasswordLength}
                         disabled={isPending}
                         onInvalid={(e) => {
-                          e.preventDefault()
-                          const el = e.target as HTMLInputElement
-                          const min = emailAndPassword?.minPasswordLength
-                          const max = emailAndPassword?.maxPasswordLength
+                          e.preventDefault();
+                          const el = e.target as HTMLInputElement;
+                          const min = emailAndPassword?.minPasswordLength;
+                          const max = emailAndPassword?.maxPasswordLength;
                           const msg = el.validity.valueMissing
                             ? localization.auth.fieldRequired
                             : el.validity.tooShort
                               ? localization.auth.tooShort.replace(
                                   "{{min}}",
-                                  String(min)
+                                  String(min),
                                 )
                               : localization.auth.tooLong.replace(
                                   "{{max}}",
-                                  String(max)
-                                )
+                                  String(max),
+                                );
 
                           setFieldErrors((prev) => ({
                             ...prev,
-                            confirmPassword: msg
-                          }))
+                            confirmPassword: msg,
+                          }));
                         }}
                         aria-invalid={!!fieldErrors.confirmPassword}
                       />
@@ -505,36 +583,73 @@ export function SignUp({
                         isPending={isPending}
                         optionalLabel={localization.auth.optional}
                       />
-                    )
+                    ),
                 )}
 
-                {/* SIMPLEPRESS LOCAL ADDITION — the captcha was an unlabelled
-                    floating widget; it is now a labelled required control with
-                    its own error slot. Re-apply after a registry re-fetch. */}
-                {Captcha && (
-                  <Field
-                    aria-labelledby="captcha-label"
-                    data-invalid={authError?.field === "captcha"}
-                  >
-                    <FieldTitle id="captcha-label">
+                {/* SIMPLEPRESS LOCAL ADDITION — platform terms-of-service
+                    checkbox. See the state/refs declared above for why this
+                    needs its own capture-phase listener instead of the
+                    `onInvalid` prop the fields above use.
+                    Re-apply after a registry re-fetch. */}
+                <Field
+                  ref={termsFieldRef}
+                  orientation="horizontal"
+                  data-invalid={!!termsError}
+                >
+                  <Checkbox
+                    id="termsAccepted"
+                    name="termsAccepted"
+                    required
+                    disabled={isPending}
+                    onCheckedChange={() => setTermsError(undefined)}
+                    aria-invalid={!!termsError}
+                  />
+
+                  <FieldContent>
+                    <FieldLabel htmlFor="termsAccepted" className="font-normal">
+                      {/* Single <span> on purpose: `Label` is a flex
+                          container, so bare text + anchors would each become
+                          their own flex item and the sentence breaks apart. */}
                       <span>
-                        Verify you&apos;re human
-                        <span aria-hidden="true" className="text-destructive">
-                          {" *"}
-                        </span>
+                        I agree to SimplePress&apos;s{" "}
+                        <a
+                          href={platformTermsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href={platformPrivacyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          Privacy Policy
+                        </a>
                       </span>
-                      <span className="sr-only">(required)</span>
-                    </FieldTitle>
+                    </FieldLabel>
 
-                    <div className="flex justify-center">{Captcha}</div>
+                    <FieldError>{termsError}</FieldError>
+                  </FieldContent>
+                </Field>
+                {/* END SIMPLEPRESS LOCAL ADDITION */}
 
-                    <FieldError>
-                      {authError?.field === "captcha"
-                        ? authError.message
-                        : undefined}
-                    </FieldError>
-                  </Field>
-                )}
+                {/* SIMPLEPRESS LOCAL ADDITION — reCAPTCHA v3 is invisible, so
+                    this slot renders only Google's required disclosure text,
+                    as fine print above the submit button.
+
+                    Deliberately NOT a labelled/required Field. It was one back
+                    when this was a visible hCaptcha checkbox that needed a
+                    label; with nothing to interact with, that markup announced
+                    "Verify you're human, required" to screen readers over an
+                    empty field, and told sighted users to complete a step that
+                    does not exist. Captcha errors now surface through
+                    `AuthErrorAlert` below — the only place left to put them.
+                    Re-apply after a registry re-fetch. */}
+                {Captcha}
                 {/* END SIMPLEPRESS LOCAL ADDITION */}
 
                 {/* SIMPLEPRESS LOCAL ADDITION — form-level failure notice. */}
@@ -554,7 +669,7 @@ export function SignUp({
                         key={`${plugin.id}-${index.toString()}`}
                         view="signUp"
                       />
-                    ))
+                    )),
                   )}
                 </div>
               </FieldGroup>
@@ -564,7 +679,7 @@ export function SignUp({
           {socialPosition === "bottom" && (
             <>
               {showSeparator && (
-                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card text-xs flex items-center">
+                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card flex items-center text-xs">
                   {localization.auth.or}
                 </FieldSeparator>
               )}
@@ -577,13 +692,13 @@ export function SignUp({
         </div>
 
         {emailAndPassword?.enabled && (
-          <div className="flex flex-col gap-3 items-center w-full mt-4">
+          <div className="mt-4 flex w-full flex-col items-center gap-3">
             <FieldDescription className="text-center">
               {localization.auth.alreadyHaveAnAccount}{" "}
               <Link
                 href={getAuthLinkURL(
                   `${basePaths.auth}/${viewPaths.auth.signIn}`,
-                  redirectTo
+                  redirectTo,
                 )}
                 className="underline underline-offset-4"
               >
@@ -594,5 +709,5 @@ export function SignUp({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

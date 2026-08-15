@@ -7,6 +7,7 @@ import { PollenCheckoutForm } from "./pollen-checkout-form";
 
 export async function PollenCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   if (!business.isStripeConnected) {
     return (
@@ -43,7 +44,10 @@ export async function PollenCheckoutPage({
       showCTA={false}
     >
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <PollenCheckoutForm business={business} />
+        <PollenCheckoutForm
+          business={business}
+          merchantPolicies={merchantPolicies}
+        />
       </section>
     </PollenGeneralLayout>
   );

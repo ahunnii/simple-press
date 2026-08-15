@@ -2,9 +2,10 @@ import type Stripe from "stripe";
 import { Prisma } from "generated/prisma";
 import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
+import { carrierLabel } from "~/data/fulfillment-constants";
 import { z } from "zod";
 
-import { carrierLabel } from "~/data/fulfillment-constants";
+import type { OrderSortValue } from "~/lib/validators/order";
 import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import {
   sendOrderCancelled,
@@ -17,9 +18,12 @@ import {
 import { deductPoolInventory, restorePoolInventory } from "~/lib/inventory";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
+import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
 import {
   addShipmentSchema,
-  manualOrderFormSchema,
+  buildOrderListWhere,
+  computeManualOrderTotals,
+  manualOrderInputSchema,
   markAsFulfilledSchema,
   markAsRefundedSchema,
   orderFiltersSchema,
@@ -37,11 +41,61 @@ import {
   staffProcedure,
 } from "~/server/api/trpc";
 
+/**
+ * What the admin Orders TABLE needs per row, and nothing else. It renders an
+ * item count and an oversell badge, so both are counts — `include: { items:
+ * true }` was shipping every column of every OrderItem for a whole page of
+ * orders into the RSC payload to be reduced to `items.length`.
+ */
+const LIST_INCLUDE = {
+  _count: {
+    select: {
+      items: true,
+      inventoryHistory: { where: { reason: "oversell" } },
+    },
+  },
+} satisfies Prisma.OrderInclude;
+
 const STRIPE_REFUND_REASON_LABEL: Record<string, string> = {
   requested_by_customer: "Customer requested refund",
   duplicate: "Duplicate order",
   fraudulent: "Fraudulent order",
 };
+
+/**
+ * D2 — what a STAFF (fulfillment-only) caller may not see on an order row.
+ *
+ * `staffProcedure`'s own docblock (`~/server/api/trpc`) draws the line at
+ * "anything touching money, prices, refunds, products, or settings must stay on
+ * ownerAdminProcedure". Money TOTALS are the deliberate exception (user
+ * decision): subtotal/tax/shipping/discount/total stay visible to STAFF because
+ * a fulfillment worker needs them for packing slips and order context. Two
+ * fields do not survive:
+ *
+ * - `internalNote` — owner-to-owner notes, may contain anything.
+ * - `stripePaymentIntentId` — a raw Stripe identifier, not fulfillment-relevant.
+ *
+ * OWNER/MANAGER keep full rows, and so does PLATFORM_ADMIN — they have no
+ * membership row, so `ctx.membershipRole` reads null and `isStaff` is false.
+ *
+ * Applied at every staff-reachable site that returns a full Order row:
+ * `getAll`, `getById`, `markAsFulfilled`, `markReadyForPickup`,
+ * `updateFulfillment`. `addShipment`/`updateShipment` return `OrderShipment`
+ * rows (no order columns) and need no redaction; every other order mutation is
+ * `ownerAdminProcedure` and therefore unreachable by STAFF. `updateNote` — the
+ * write half of `internalNote` — is `ownerAdminProcedure` for the same reason.
+ *
+ * Both columns are nullable, so the router's output types are unchanged.
+ */
+function redactOrderForStaff<
+  T extends {
+    internalNote: string | null;
+    stripePaymentIntentId: string | null;
+  },
+>(order: T, isStaff: boolean): T {
+  if (!isStaff) return order;
+  return { ...order, internalNote: null, stripePaymentIntentId: null };
+}
 
 type ShipmentItemRequest = { orderItemId: string; quantity: number };
 
@@ -255,7 +309,8 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      return updatedOrder;
+      // D2 redaction — see `redactOrderForStaff`.
+      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
     }),
 
   markReadyForPickup: staffProcedure
@@ -330,7 +385,8 @@ export const orderRouter = createTRPCRouter({
         });
       }
 
-      return updatedOrder;
+      // D2 redaction — see `redactOrderForStaff`.
+      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
     }),
 
   addShipment: staffProcedure
@@ -538,9 +594,25 @@ export const orderRouter = createTRPCRouter({
 
       const { business } = order;
 
+      // Unlike every other email call site in this file (markAsFulfilled,
+      // addShipment, the refund/cancellation sends), this procedure's ENTIRE
+      // purpose is to send an email — there is no order-state side effect to
+      // protect. Those other sites intentionally swallow send failures
+      // because the order mutation they're attached to already succeeded and
+      // must not be rolled back or reported as failed just because the
+      // follow-up email didn't go out. Here there's nothing to strand: if
+      // the send fails, the "resend" did nothing, so the mutation must throw
+      // rather than return `{ success: true }` — otherwise the admin who
+      // clicked "Resend confirmation" believes the customer received it.
+      //
+      // `sendEmail` (src/lib/email/send.ts) never throws — it resolves to
+      // `{ success, ... }` — so each branch's result must be captured and
+      // checked explicitly.
+      let result: { success: boolean };
+
       switch (input.type) {
         case "confirmation": {
-          await sendOrderConfirmation({
+          result = await sendOrderConfirmation({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -579,7 +651,7 @@ export const orderRouter = createTRPCRouter({
               message: "Shipment not found",
             });
           }
-          await sendOrderShipped({
+          result = await sendOrderShipped({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -599,7 +671,7 @@ export const orderRouter = createTRPCRouter({
           break;
         }
         case "fulfilled": {
-          await sendOrderFulfilled({
+          result = await sendOrderFulfilled({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -617,7 +689,7 @@ export const orderRouter = createTRPCRouter({
         case "refunded": {
           const storedRefund = order.refundAmountCents ?? order.total;
           const isFullRefundResend = storedRefund >= order.total;
-          await sendOrderRefunded({
+          result = await sendOrderRefunded({
             to: order.customerEmail,
             orderNumber: order.orderNumber,
             customerName: order.customerName ?? "Guest",
@@ -638,6 +710,21 @@ export const orderRouter = createTRPCRouter({
         }
       }
 
+      if (!result.success) {
+        // No DB write happened in this procedure, so throwing here rolls
+        // back nothing — it just reports the truth. `sendEmail` already
+        // captured the underlying Resend failure (tagged `service: resend`)
+        // before returning `{ success: false }`; this INTERNAL_SERVER_ERROR
+        // is a second, separate Sentry event from the global tRPC error
+        // handler (the one tRPC code it captures) tagged with
+        // `trpc.path: order.resendEmail`. Two events for one failed resend
+        // is intentional here, not a duplicate-reporting bug.
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `The '${input.type}' email could not be sent. Please try again.`,
+        });
+      }
+
       console.log(
         `[Orders] Resent '${input.type}' email for order #${order.orderNumber}`,
       );
@@ -650,98 +737,147 @@ export const orderRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const statusFilter = input?.status;
-      const searchQuery = input?.search;
-      const fulfillmentFilter = input?.fulfillment;
-      const paymentStatusFilter = input?.paymentStatus;
-
-      const where: Prisma.OrderWhereInput = {
+      // Shared with `export.exportOrders` so "Export CSV" always exports what
+      // the table shows — see ~/lib/validators/order.
+      const where = buildOrderListWhere({
         businessId,
-      };
+        status: input.status,
+        fulfillment: input.fulfillment,
+        paymentStatus: input.paymentStatus,
+        search: input.search,
+      });
 
-      if (statusFilter && statusFilter !== "all") {
-        where.status = statusFilter;
-      }
+      // Sort. Each entry is the PRIMARY ordering only — `id` is appended below
+      // as a mandatory tie-break, mirroring product.secureList / customer.list
+      // and the guarantee `buildTablePage` makes for the in-memory admin tables
+      // (~/app/admin/_lib/table-query). Without it, orders sharing a `createdAt`
+      // (routine — a webhook burst writes several within the same millisecond)
+      // or a `total` have no defined relative order, Postgres is free to return
+      // them differently between executions, and with pagination that renders
+      // one order on two pages and another on none.
+      //
+      // `total` is unindexed, unlike `createdAt`; at small-business scale (tens
+      // to low thousands of orders) that sort is a trivial in-memory sort in
+      // Postgres and does not warrant an index.
+      type OrderOrderBy = Prisma.OrderOrderByWithRelationInput;
+      const orderByMap = {
+        newest: [{ createdAt: "desc" }],
+        oldest: [{ createdAt: "asc" }],
+        total_desc: [{ total: "desc" }],
+        total_asc: [{ total: "asc" }],
+      } satisfies Record<OrderSortValue, OrderOrderBy[]>;
+      const orderBy: OrderOrderBy[] = [
+        ...orderByMap[input.sort],
+        { id: "asc" },
+      ];
 
-      if (fulfillmentFilter && fulfillmentFilter !== "all") {
-        where.fulfillmentStatus = fulfillmentFilter;
-      }
-
-      if (paymentStatusFilter && paymentStatusFilter !== "all") {
-        where.paymentStatus = paymentStatusFilter;
-      }
-
-      if (searchQuery) {
-        const or: Prisma.OrderWhereInput[] = [
-          { customerEmail: { contains: searchQuery, mode: "insensitive" } },
-          { customerName: { contains: searchQuery, mode: "insensitive" } },
-          { id: { contains: searchQuery, mode: "insensitive" } },
-        ];
-        // Customers quote the human order number (e.g. "#1042"), not the UUID.
-        // Match it whenever the query is numeric (tolerating a leading "#").
-        const numericQuery = Number.parseInt(
-          searchQuery.trim().replace(/^#/, ""),
-          10,
-        );
-        if (Number.isInteger(numericQuery)) {
-          or.push({ orderNumber: numericQuery });
-        }
-        where.OR = or;
-      }
-
-      // Pagination — mirrors product.secureList
-      const pageSize = 50;
-      const page = input?.page ?? 1;
+      // Pagination — 25, the one page size every admin list uses, so "page 3"
+      // means the same amount of scrolling everywhere.
+      const pageSize = 25;
+      // Bounded BEFORE it becomes an offset. The clamp further down handles
+      // "past the end", but it needs `totalCount` first, so the opening query
+      // still runs with whatever `skip` this produces — and an unbounded page
+      // number overflows Postgres' OFFSET rather than paging past the end. See
+      // MAX_REQUESTED_PAGE.
+      const page = Math.min(input.page ?? 1, MAX_REQUESTED_PAGE);
       const skip = (page - 1) * pageSize;
 
-      // Stats are computed over the FULL filtered set (not just the page).
-      // Revenue counts paid orders only and subtracts refunds.
-      const [orders, totalCount, paidOrders, revenueAgg] =
-        await ctx.db.$transaction([
-          ctx.db.order.findMany({
-            where,
-            include: {
-              items: true,
-              _count: {
-                select: {
-                  inventoryHistory: { where: { reason: "oversell" } },
-                },
-              },
-            },
-            orderBy: { createdAt: "desc" },
-            skip,
-            take: pageSize,
-          }),
-          ctx.db.order.count({ where }),
-          ctx.db.order.count({
-            where: { AND: [where, { paymentStatus: "paid" }] },
-          }),
-          ctx.db.order.aggregate({
-            where: { AND: [where, { paymentStatus: "paid" }] },
-            _sum: { total: true, refundAmountCents: true },
-          }),
-        ]);
+      // The three queue counts below are DELIBERATELY unconditional on the
+      // current filters — `businessId` only. Each one backs a card that's a
+      // filter shortcut linking to exactly that filter combo (e.g. "Needs
+      // fulfillment" -> ?status=open&fulfillment=unfulfilled), so its number
+      // has to be what the table will show right after the click. Scoping
+      // them to `where` would make the cards lie the moment any filter is
+      // active — the same bug class the old all-time stat cards had, just
+      // inverted. Kept in the same $transaction as the page query and count
+      // for a consistent snapshot, not because they're expensive.
+      const [
+        firstPassOrders,
+        totalCount,
+        openCount,
+        needsFulfillmentCount,
+        awaitingPaymentCount,
+      ] = await ctx.db.$transaction([
+        ctx.db.order.findMany({
+          where,
+          include: LIST_INCLUDE,
+          orderBy,
+          skip,
+          take: pageSize,
+        }),
+        ctx.db.order.count({ where }),
+        ctx.db.order.count({ where: { businessId, status: "open" } }),
+        // Deliberately NOT including partially_fulfilled: this count must
+        // match the ?status=open&fulfillment=unfulfilled filter exactly.
+        // Partial fulfillment gets its own row badge instead.
+        ctx.db.order.count({
+          where: {
+            businessId,
+            status: "open",
+            fulfillmentStatus: "unfulfilled",
+          },
+        }),
+        ctx.db.order.count({
+          where: { businessId, status: "open", paymentStatus: "pending" },
+        }),
+      ]);
 
-      const totalRevenue =
-        (revenueAgg._sum.total ?? 0) - (revenueAgg._sum.refundAmountCents ?? 0);
-      const totalPages = Math.ceil(totalCount / pageSize);
+      // `Math.max(1, …)` so an empty result set reports one page rather than
+      // zero, matching `buildTablePage`.
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+      // Clamp an out-of-range page HERE rather than leaving it to callers. An
+      // unclamped `?page=900` against a 3-page list echoes `page: 900` back with
+      // an empty slice, and a paginator faithfully renders "Showing
+      // 22,476–75 of 75" above a no-matches empty state. The re-query only
+      // fires on that path — in-app navigation never produces it — so the
+      // common case stays a single round trip.
+      const clampedPage = Math.min(page, totalPages);
+      const pageOrders =
+        clampedPage === page
+          ? firstPassOrders
+          : await ctx.db.order.findMany({
+              where,
+              include: LIST_INCLUDE,
+              orderBy,
+              skip: (clampedPage - 1) * pageSize,
+              take: pageSize,
+            });
+
+      // D2 redaction — see `redactOrderForStaff` for the rationale. The role is
+      // read from `ctx.membershipRole`, resolved live from the DB by
+      // `staffProcedure` on every request; the session's own `membershipRole`
+      // is a creation-time snapshot and must never be used for this.
+      const isStaff = ctx.membershipRole === "STAFF";
 
       return {
-        orders: orders.map((order) => ({
-          ...order,
-          hasOversell: order._count.inventoryHistory > 0,
+        orders: pageOrders.map(({ _count, ...order }) => ({
+          ...redactOrderForStaff(order, isStaff),
+          itemCount: _count.items,
+          hasOversell: _count.inventoryHistory > 0,
         })),
         totalCount,
-        page,
+        page: clampedPage,
         pageSize,
         totalPages,
         stats: {
-          totalRevenue,
-          totalOrders: totalCount,
-          paidOrders,
+          openCount,
+          needsFulfillmentCount,
+          awaitingPaymentCount,
         },
       };
     }),
+
+  // Cheap existence check for the admin empty state — distinguishes "no orders
+  // yet" (explain that orders arrive from the storefront) from "no matches for
+  // the current filters" (offer Clear filters). A single COUNT(*), and only
+  // issued when the filtered query came back empty, so the common page load
+  // never pays for it.
+  hasAny: staffProcedure.use(featureGate("orders")).query(async ({ ctx }) => {
+    const { businessId } = ctx;
+    const count = await ctx.db.order.count({ where: { businessId } });
+    return { hasAny: count > 0 };
+  }),
 
   getById: staffProcedure
     .use(featureGate("orders"))
@@ -769,8 +905,11 @@ export const orderRouter = createTRPCRouter({
 
       if (!order) return order;
 
+      // D2 redaction — see `redactOrderForStaff`.
+      const isStaff = ctx.membershipRole === "STAFF";
+
       return {
-        ...order,
+        ...redactOrderForStaff(order, isStaff),
         hasOversell: order.inventoryHistory.length > 0,
         oversellItems: order.inventoryHistory.map((h) => ({
           productId: h.productId,
@@ -876,8 +1015,33 @@ export const orderRouter = createTRPCRouter({
             stripeAccount: order.business.stripeAccountId!,
           });
           newTotalRefunded = charge.amount_refunded;
-        } catch {
-          // fall back to the locally computed total
+        } catch (chargeError) {
+          // Fall back to the locally computed total. That's correct for a
+          // single refund, but if a second refund lands concurrently on the
+          // same order, this locally computed number can undercount it — we
+          // never see the charge's authoritative cumulative total, so
+          // `refundAmountCents` below is written from a second-hand figure.
+          // The refund itself still succeeds, so this is a warning (visible
+          // for reconciliation) rather than an error.
+          console.error(
+            "[Orders] charges.retrieve failed; using locally computed refund total:",
+            chargeError,
+          );
+          Sentry.captureException(chargeError, {
+            level: "warning",
+            tags: {
+              service: "stripe",
+              "trpc.procedure": "order.refund",
+              "inventory.step": "refund-total-fallback",
+              businessId,
+            },
+            extra: {
+              orderId: order.id,
+              chargeId,
+              fallbackTotalCents: newTotalRefunded,
+              orderTotalCents: order.total,
+            },
+          });
         }
       }
       const isFullRefund = newTotalRefunded >= order.total;
@@ -1010,6 +1174,17 @@ export const orderRouter = createTRPCRouter({
           });
         } catch (invError) {
           console.error("Failed to restore inventory:", invError);
+          Sentry.captureException(invError, {
+            tags: {
+              "trpc.procedure": "order.refund",
+              "inventory.step": "restore-after-refund",
+              businessId,
+            },
+            extra: {
+              orderId: updatedOrder.id,
+              orderNumber: updatedOrder.orderNumber,
+            },
+          });
         }
       }
 
@@ -1231,6 +1406,14 @@ export const orderRouter = createTRPCRouter({
               "[Order Status] Failed to restock inventory on cancellation:",
               invError,
             );
+            Sentry.captureException(invError, {
+              tags: {
+                "trpc.procedure": "order.updateStatus",
+                "inventory.step": "restock-on-cancel",
+                businessId,
+              },
+              extra: { orderId: order.id, orderNumber: order.orderNumber },
+            });
           }
         }
 
@@ -1304,9 +1487,15 @@ export const orderRouter = createTRPCRouter({
 
   createManual: ownerAdminProcedure
     .use(featureGate("orders"))
-    .input(manualOrderFormSchema)
+    .input(manualOrderInputSchema)
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
+
+      // Authoritative money. The client sends items and charges, never the
+      // resulting subtotal/total — those used to come straight off the request
+      // and be written verbatim, so a crafted payload could record a $500 order
+      // as `total: 0` and silently skew the Finances page.
+      const totals = computeManualOrderTotals(input);
 
       const business = await ctx.db.business.findUnique({
         where: { id: businessId },
@@ -1339,16 +1528,25 @@ export const orderRouter = createTRPCRouter({
         ),
       ];
 
-      if (lineItemProductIds.length > 0) {
-        const ownedCount = await ctx.db.product.count({
-          where: { id: { in: lineItemProductIds }, businessId },
+      // Fetched rather than counted so the same round-trip can also answer
+      // "does this product have variants?" below.
+      const ownedProducts =
+        lineItemProductIds.length > 0
+          ? await ctx.db.product.findMany({
+              where: { id: { in: lineItemProductIds }, businessId },
+              select: {
+                id: true,
+                name: true,
+                _count: { select: { variants: true } },
+              },
+            })
+          : [];
+
+      if (ownedProducts.length !== lineItemProductIds.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "One or more products do not belong to this business",
         });
-        if (ownedCount !== lineItemProductIds.length) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "One or more products do not belong to this business",
-          });
-        }
       }
 
       if (lineItemVariantIds.length > 0) {
@@ -1362,6 +1560,28 @@ export const orderRouter = createTRPCRouter({
               "One or more product variants do not belong to this business",
           });
         }
+      }
+
+      // A product that HAS variants must have one chosen. The form checks this
+      // too, but only against the catalog it was rendered with — a product that
+      // gained variants after the page loaded would slip past it and be stored
+      // variant-less at the base price, which then reads as a bare product name
+      // everywhere downstream and cannot be fulfilled against a specific SKU.
+      const variantfulProductIds = new Set(
+        ownedProducts.filter((p) => p._count.variants > 0).map((p) => p.id),
+      );
+      const missingVariant = input.items.find(
+        (item) =>
+          variantfulProductIds.has(item.productId) && !item.productVariantId,
+      );
+      if (missingVariant) {
+        const name =
+          ownedProducts.find((p) => p.id === missingVariant.productId)?.name ??
+          missingVariant.productName;
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Choose a variant for "${name}".`,
+        });
       }
 
       const nameParts = input.customerName.trim().split(" ");
@@ -1393,8 +1613,15 @@ export const orderRouter = createTRPCRouter({
       );
 
       let shippingAddressId: string | undefined;
-      if (input.shippingAddress) {
-        const shippingName = input.shippingName?.trim() ?? input.customerName;
+      // A pickup order has nothing to ship, so no address is recorded even if
+      // one came along in the payload.
+      if (input.shippingAddress && input.deliveryMethod !== "pickup") {
+        // Emptiness-checked, not `??`: an empty-string shippingName is not
+        // nullish, so `??` let it through and produced an address with a blank
+        // first name.
+        const trimmedShippingName = input.shippingName?.trim() ?? "";
+        const shippingName =
+          trimmedShippingName === "" ? input.customerName : trimmedShippingName;
         const shippingNameParts = shippingName.split(" ");
         const shippingFirstName = shippingNameParts[0] ?? firstName;
         const shippingLastName =
@@ -1405,10 +1632,14 @@ export const orderRouter = createTRPCRouter({
           firstName: shippingFirstName,
           lastName: shippingLastName,
           address1: input.shippingAddress.line1,
+          address2: input.shippingAddress.line2 ?? null,
           city: input.shippingAddress.city,
-          province: input.shippingAddress.state,
+          // `ShippingAddress.province` is nullable and plenty of countries have
+          // no subdivision, but the helper takes a plain string.
+          province: input.shippingAddress.state ?? "",
           zip: input.shippingAddress.postal_code,
           country: input.shippingAddress.country,
+          phone: input.shippingAddress.phone ?? null,
         });
       }
 
@@ -1443,15 +1674,21 @@ export const orderRouter = createTRPCRouter({
                 customerEmail: normalizedCustomerEmail,
                 customerName: input.customerName,
 
-                subtotal: input.subtotal,
-                tax: input.tax ?? 0,
-                shipping: input.shipping ?? 0,
-                total: input.total,
+                subtotal: totals.subtotal,
+                tax: totals.tax,
+                shipping: totals.shipping,
+                discount: totals.discount,
+                total: totals.total,
 
                 status: input.status,
                 paymentStatus: input.paymentStatus,
                 paymentMethod,
                 fulfillmentStatus: input.fulfillmentStatus,
+                deliveryMethod: input.deliveryMethod,
+
+                // Backdating for sales recorded after the fact. Omitted =
+                // Prisma's `@default(now())`.
+                ...(input.orderDate ? { createdAt: input.orderDate } : {}),
 
                 shippingAddressId,
                 internalNote,
@@ -1459,11 +1696,17 @@ export const orderRouter = createTRPCRouter({
                 items: {
                   create: input.items.map((item) => ({
                     productId: item.productId,
-                    productName: item.productName ?? "Unknown Product",
+                    productName: item.productName,
                     productVariantId: item.productVariantId,
+                    // Snapshot fields. `variantName` in particular was being
+                    // computed on the client and then dropped, so every manual
+                    // order with a variant rendered as a bare product name on
+                    // the detail page, packing slip and invoice.
+                    variantName: item.variantName ?? null,
+                    sku: item.sku ?? null,
                     quantity: item.quantity,
                     price: item.price,
-                    total: item.total,
+                    total: Math.round(item.price * item.quantity),
                   })),
                 },
               },
@@ -1710,10 +1953,19 @@ export const orderRouter = createTRPCRouter({
             }
           });
         } catch (invError) {
-          console.error(
-            "[Manual Order] Failed to deduct inventory:",
-            invError,
-          );
+          console.error("[Manual Order] Failed to deduct inventory:", invError);
+          // Oversell risk: unlike the other four catches here, this one guards
+          // a DEDUCTION, not a restore — a swallowed failure leaves the order
+          // marked paid with stock never decremented, so it's worth flagging
+          // even though the order itself was already created successfully.
+          Sentry.captureException(invError, {
+            tags: {
+              "trpc.procedure": "order.createManual",
+              "inventory.step": "deduct-manual-order",
+              businessId,
+            },
+            extra: { orderId: order.id, orderNumber: order.orderNumber },
+          });
         }
       }
 
@@ -1813,10 +2065,16 @@ export const orderRouter = createTRPCRouter({
         });
       });
 
-      return updatedOrder;
+      // D2 redaction — see `redactOrderForStaff`.
+      return redactOrderForStaff(updatedOrder, ctx.membershipRole === "STAFF");
     }),
 
-  updateNote: staffProcedure
+  // D2: the WRITE half of `internalNote`. STAFF cannot read the field (see
+  // `redactOrderForStaff`), so they must not be able to overwrite it either —
+  // a blind write from a caller who can't see the current value is exactly the
+  // way an owner-to-owner note gets silently destroyed. `ownerAdminProcedure`,
+  // not `staffProcedure`.
+  updateNote: ownerAdminProcedure
     .use(featureGate("orders"))
     .input(
       z.object({
@@ -1989,6 +2247,14 @@ export const orderRouter = createTRPCRouter({
             "[Orders] Failed to restore inventory on manual refund:",
             invError,
           );
+          Sentry.captureException(invError, {
+            tags: {
+              "trpc.procedure": "order.markAsRefunded",
+              "inventory.step": "restore-manual-refund",
+              businessId,
+            },
+            extra: { orderId: order.id, orderNumber: order.orderNumber },
+          });
         }
       }
 

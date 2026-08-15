@@ -1,5 +1,6 @@
 "use client";
 
+import type { z } from "zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +10,6 @@ import { toast } from "sonner";
 
 import type { SupportedCountry } from "~/lib/geo/regions";
 import type { updateShippingAddressSchema } from "~/lib/validators/order";
-import type { z } from "zod";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
 import { updateShippingAddressSchema as shippingAddressFormSchema } from "~/lib/validators/order";
@@ -148,12 +148,14 @@ export function EditShippingAddressDialog({
                 name="firstName"
                 label="First Name"
                 required
+                className="col-span-1"
               />
               <InputFormField
                 form={form}
                 name="lastName"
                 label="Last Name"
                 required
+                className="col-span-1"
               />
             </div>
 
@@ -193,7 +195,13 @@ export function EditShippingAddressDialog({
             />
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <InputFormField form={form} name="city" label="City" required />
+              <InputFormField
+                form={form}
+                name="city"
+                label="City"
+                required
+                className="col-span-1"
+              />
               <SelectFormField
                 form={form}
                 name="province"
@@ -203,6 +211,7 @@ export function EditShippingAddressDialog({
                   value: opt.code,
                   label: opt.name,
                 }))}
+                className="col-span-1"
               />
             </div>
 

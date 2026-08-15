@@ -1,25 +1,22 @@
-"use client"
+"use client";
 
-import {
-  type UsernameAuthClient,
-  useAuth,
-  useSession
-} from "@better-auth-ui/react"
-import type { User } from "better-auth"
-import { User2 } from "lucide-react"
-import type { ReactNode } from "react"
+import type { UsernameAuthClient } from "@better-auth-ui/react";
+import type { User } from "better-auth";
+import type { ReactNode } from "react";
+import { useAuth, useSession } from "@better-auth-ui/react";
+import { User2 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import { Skeleton } from "~/components/ui/skeleton"
-import { cn } from "~/lib/utils"
+import { cn } from "~/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export type UserAvatarProps = {
-  className?: string
-  fallback?: ReactNode
-  isPending?: boolean
+  className?: string;
+  fallback?: ReactNode;
+  isPending?: boolean;
   /** @remarks `User` */
-  user?: User & { username?: string | null; displayUsername?: string | null }
-}
+  user?: User & { username?: string | null; displayUsername?: string | null };
+};
 
 /**
  * Display a user's avatar using session information or an explicit user prop.
@@ -36,19 +33,19 @@ export function UserAvatar({
   className,
   user,
   isPending,
-  fallback
+  fallback,
 }: UserAvatarProps) {
-  const { authClient } = useAuth()
+  const { authClient } = useAuth();
   const { data: session, isPending: sessionPending } = useSession(
     authClient as UsernameAuthClient,
-    { enabled: !user && !isPending }
-  )
+    { enabled: !user && !isPending },
+  );
 
   if ((isPending || sessionPending) && !user) {
-    return <Skeleton className={cn("size-8 rounded-full", className)} />
+    return <Skeleton className={cn("size-8 rounded-full", className)} />;
   }
 
-  const resolvedUser = user ?? session?.user
+  const resolvedUser = user ?? session?.user;
 
   const initials = (
     resolvedUser?.username ||
@@ -56,13 +53,13 @@ export function UserAvatar({
     resolvedUser?.email
   )
     ?.slice(0, 2)
-    .toUpperCase()
+    .toUpperCase();
 
   return (
     <Avatar
       className={cn(
-        "size-8 bg-muted text-foreground text-sm rounded-full",
-        className
+        "bg-muted text-foreground size-8 rounded-full text-sm",
+        className,
       )}
     >
       <AvatarImage
@@ -78,5 +75,5 @@ export function UserAvatar({
         {fallback || initials || <User2 className="size-4" />}
       </AvatarFallback>
     </Avatar>
-  )
+  );
 }

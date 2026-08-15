@@ -69,7 +69,11 @@ export function CoopParallaxBackground({
       aria-hidden="true"
       className="absolute inset-x-0 top-[-15%] z-0 h-[130%] will-change-transform"
     >
-      <img src={src} alt={alt} className="h-full w-full object-cover object-center" />
+      <img
+        src={src}
+        alt={alt}
+        className="h-full w-full object-cover object-center"
+      />
       <div className={`absolute inset-0 ${overlayClassName}`} />
     </div>
   );

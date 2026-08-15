@@ -9,9 +9,10 @@ import {
   Tablet,
 } from "lucide-react";
 
+import type { PreviewFrameHandle } from "./preview-frame";
 import { Button } from "~/components/ui/button";
 
-import { PreviewFrame, type PreviewFrameHandle } from "./preview-frame";
+import { PreviewFrame } from "./preview-frame";
 
 export type PreviewPaneHandle = {
   /** Reload the storefront iframe to pick up the latest preview draft. */

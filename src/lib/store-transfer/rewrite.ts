@@ -47,6 +47,7 @@ export function rewriteUrl(url: string, urlMap: Map<string, string>): string {
  *   image nodes   → attrs.src rewritten via urlMap
  *   gallery nodes → attrs.galleryId rewritten via galleryIdMap
  *   embed nodes   → left intact (external iframe)
+ *   quoteCalculator nodes → left intact (calculators are not part of the transfer manifest; v1 tradeoff — a dangling calculatorId renders a graceful placeholder on the storefront)
  *   all others    → recursed
  *
  * Returns a new object — the input is never mutated.
@@ -84,6 +85,7 @@ export function rewriteTiptapDoc(
     }
   }
   // "embed" → intentionally left intact (mirrors usage.ts)
+  // "quoteCalculator" → intentionally left intact (calculators are not part of the transfer manifest)
 
   // Recurse into content array
   const content = n.content;

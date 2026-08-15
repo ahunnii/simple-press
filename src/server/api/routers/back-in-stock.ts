@@ -1,5 +1,5 @@
-import { TRPCError } from "@trpc/server";
 import { Prisma } from "generated/prisma";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { checkBusiness } from "~/lib/check-business";

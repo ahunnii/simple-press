@@ -10,7 +10,6 @@ export default async function NewPagePage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
           { label: "Pages", href: "/admin/content/pages" },
           { label: "New Page" },
         ]}
@@ -18,6 +17,7 @@ export default async function NewPagePage() {
       <PageEditor
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
       />
     </>
   );

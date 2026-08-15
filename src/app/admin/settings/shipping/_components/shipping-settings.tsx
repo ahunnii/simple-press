@@ -1,10 +1,11 @@
 "use client";
 
+import type { z } from "zod";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Save } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -13,7 +14,6 @@ import type {
   ZoneWeightFormValues,
 } from "~/lib/validators/shipping";
 import type { RouterOutputs } from "~/trpc/react";
-import type { z } from "zod";
 import { COUNTRY_LABELS } from "~/lib/geo/regions";
 import { centsToDollarsString, dollarsToCents } from "~/lib/prices";
 import { cn } from "~/lib/utils";
@@ -24,6 +24,7 @@ import {
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { useKeyboardEnter } from "~/hooks/use-keyboard-enter";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -109,8 +110,25 @@ function hydrateZoneWeightDefaults(business: Business): ZoneWeightFormValues {
             ]),
           ),
         })),
+      // `?? null`, NOT `?? 0` — `centsToDollarsString(null)` renders an empty
+      // input, `centsToDollarsString(0)` renders "0.00".
+      //
+      // This used to be `?? 0`, which quietly manufactured a rate nobody chose:
+      // `shippingFallbackRate` is `Int?` where null means "never set", but an
+      // owner who opened this page to change anything else saw a pre-filled
+      // "0.00", and saving persisted a real 0. At runtime
+      // `shippingFallbackRate ?? LARGE_FALLBACK_CENTS` only replaces null, so a
+      // stored 0 stands — and `calculateZoneWeightShipping` falls back to it for
+      // every destination the matrix cannot price (non-US, unlisted state,
+      // weight outside all tiers, hole in the rate grid). Net effect: free
+      // worldwide shipping, silently, on a store that never asked for it.
+      //
+      // Empty is the honest representation of "not set". The zone-weight schema
+      // requires a value (see validators/shipping.ts), so this now forces an
+      // explicit choice instead of defaulting to the worst one. Matches
+      // `freeShippingThresholdDollars` directly below, which always did this.
       fallbackRateDollars: centsToDollarsString(
-        business.shippingFallbackRate ?? 0,
+        business.shippingFallbackRate ?? null,
       ),
       freeShippingThresholdDollars: centsToDollarsString(
         business.freeShippingThreshold ?? null,
@@ -173,6 +191,10 @@ export function ShippingSettings({ business }: Props) {
 
   const shippingType = form.watch("shippingType");
   const pickupEnabled = form.watch("offersInStorePickup");
+  // Read live so the "already enabled" alert appears/disappears without a
+  // save round-trip. See the Phase 6 note below the country toggles — CA/MX
+  // switches are disabled but the underlying value must keep round-tripping.
+  const salesCountries = form.watch("salesCountries");
 
   // ── Zone + weight form ────────────────────────────────────────────────────
   const zoneForm = useForm<
@@ -580,6 +602,42 @@ export function ShippingSettings({ business }: Props) {
                       </p>
                     </div>
 
+                    {/*
+                      Phase 6: Canada and Mexico are frozen off. There is no
+                      real international support — shipping-utils.ts hard-
+                      returns the fallback rate for any non-US destination,
+                      the zone+weight editor only has US states, Stripe
+                      Checkout is hardcoded to "usd", and there's no postal
+                      validation. The switches below are display-only.
+                      `checked` must keep reading field.value.includes(...)
+                      and the value must NOT be stripped from defaultValues
+                      or filtered on submit — updateShipping and
+                      saveZoneWeightShipping both write salesCountries on
+                      every save (reading form.getValues("salesCountries")),
+                      so a store that already has CA/MX on must keep seeing
+                      it on, or the next unrelated shipping save would
+                      silently clear a live sales channel.
+                    */}
+                    {salesCountries.length > 0 && (
+                      <Alert variant="warning">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>
+                          International shipping is already on for this store
+                        </AlertTitle>
+                        <AlertDescription>
+                          {salesCountries
+                            .map((c) => COUNTRY_LABELS[c])
+                            .join(" and ")}{" "}
+                          {salesCountries.length > 1 ? "are" : "is"} enabled
+                          from an earlier setting. SimplePress doesn&apos;t
+                          support international shipping yet — these orders are
+                          charged your fallback rate in USD and shipping
+                          addresses aren&apos;t validated. Contact support if
+                          you&apos;d like this turned off.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     {/* USA — always enabled */}
                     <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
@@ -593,7 +651,7 @@ export function ShippingSettings({ business }: Props) {
                       <Switch checked disabled />
                     </div>
 
-                    {/* Canada */}
+                    {/* Canada — disabled; see Phase 6 note above. */}
                     <FormField
                       control={form.control}
                       name="salesCountries"
@@ -604,26 +662,23 @@ export function ShippingSettings({ business }: Props) {
                               {COUNTRY_LABELS.CA}
                             </FormLabel>
                             <p className="text-muted-foreground text-sm">
-                              Show this country as a shipping option at
-                              checkout.
+                              Not available — international shipping isn&apos;t
+                              supported yet. Orders outside the United States
+                              are charged your fallback rate and shipping
+                              addresses aren&apos;t validated.
                             </p>
                           </div>
                           <FormControl>
                             <Switch
                               checked={field.value.includes("CA")}
-                              onCheckedChange={(checked) => {
-                                const next = checked
-                                  ? [...field.value, "CA" as const]
-                                  : field.value.filter((c) => c !== "CA");
-                                field.onChange(next);
-                              }}
+                              disabled
                             />
                           </FormControl>
                         </FormItem>
                       )}
                     />
 
-                    {/* Mexico */}
+                    {/* Mexico — disabled; see Phase 6 note above. */}
                     <FormField
                       control={form.control}
                       name="salesCountries"
@@ -634,19 +689,16 @@ export function ShippingSettings({ business }: Props) {
                               {COUNTRY_LABELS.MX}
                             </FormLabel>
                             <p className="text-muted-foreground text-sm">
-                              Show this country as a shipping option at
-                              checkout.
+                              Not available — international shipping isn&apos;t
+                              supported yet. Orders outside the United States
+                              are charged your fallback rate and shipping
+                              addresses aren&apos;t validated.
                             </p>
                           </div>
                           <FormControl>
                             <Switch
                               checked={field.value.includes("MX")}
-                              onCheckedChange={(checked) => {
-                                const next = checked
-                                  ? [...field.value, "MX" as const]
-                                  : field.value.filter((c) => c !== "MX");
-                                field.onChange(next);
-                              }}
+                              disabled
                             />
                           </FormControl>
                         </FormItem>

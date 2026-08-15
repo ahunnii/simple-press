@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
+import { cn } from "~/lib/utils";
+
 const TONE_BG: Record<"cream" | "paper" | "navy", string> = {
   cream: "var(--vii-cream)",
   paper: "var(--vii-paper)",
@@ -71,7 +73,7 @@ export function ViiSection({
         ref={hasReveal ? revealRef : undefined}
         className={
           hasReveal
-            ? `vii-reveal-group${revealVisible ? " is-visible" : ""}`
+            ? cn("vii-reveal-group", revealVisible && "is-visible")
             : undefined
         }
         style={{ maxWidth, margin: "0 auto" }}

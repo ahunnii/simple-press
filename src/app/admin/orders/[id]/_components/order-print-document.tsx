@@ -85,9 +85,7 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
           <h1 className="text-2xl font-bold tracking-tight uppercase">
             {title}
           </h1>
-          <p className="mt-1 text-sm font-medium">
-            Order #{order.orderNumber}
-          </p>
+          <p className="mt-1 text-sm font-medium">Order #{order.orderNumber}</p>
           <p className="text-sm">{formatDate(order.createdAt)}</p>
           {isInvoice && (
             <p className="mt-2 text-sm font-semibold capitalize">
@@ -242,10 +240,7 @@ export function OrderPrintDocument({ order, business, variant }: Props) {
                   <span>Amount Due</span>
                   <span className="tabular-nums">
                     {formatPrice(
-                      Math.max(
-                        0,
-                        order.total - (order.refundAmountCents ?? 0),
-                      ),
+                      Math.max(0, order.total - (order.refundAmountCents ?? 0)),
                     )}
                   </span>
                 </div>

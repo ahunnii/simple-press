@@ -5,8 +5,10 @@ import { useEffect, useMemo, useState } from "react";
 import AbandonedCheckoutEmail from "~/emails/abandoned-checkout";
 import BackorderAlertEmail from "~/emails/backorder-alert";
 import ContactFormEmail from "~/emails/contact-form";
+import FinalQuoteEmail from "~/emails/final-quote";
 import LowInventoryAlertEmail from "~/emails/low-inventory-alert";
 import NewOrderNotificationEmail from "~/emails/new-order-notification";
+import NewQuoteNotificationEmail from "~/emails/new-quote-notification";
 import OrderCancelledEmail from "~/emails/order-cancelled";
 import OrderConfirmationEmail from "~/emails/order-confirmation";
 import OrderFulfilledEmail from "~/emails/order-fulfilled";
@@ -14,6 +16,7 @@ import OrderReadyForPickupEmail from "~/emails/order-ready-for-pickup";
 import OrderRefundedEmail from "~/emails/order-refunded";
 import OrderShippedEmail from "~/emails/order-shipped";
 import OutOfStockAlertEmail from "~/emails/out-of-stock-alert";
+import QuoteConfirmationEmail from "~/emails/quote-confirmation";
 import ResetPasswordEmail from "~/emails/reset-password";
 import { TestimonialInviteEmail } from "~/emails/testimonial-invite";
 import VerifyEmail from "~/emails/verify-email";
@@ -28,12 +31,13 @@ import {
   CUSTOMIZABLE_EMAILS,
 } from "~/lib/email/customization";
 import { renderEmail } from "~/lib/email/render";
+import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { api } from "~/trpc/react";
 
 type Props = {
   business: NonNullable<
@@ -74,6 +78,8 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
     useState<Record<string, EmailOverride>>(savedOverrides);
   const [savedState, setSavedState] =
     useState<Record<string, EmailOverride>>(savedOverrides);
+  const [sendAbandonedCheckoutEmails, setSendAbandonedCheckoutEmails] =
+    useState(business.sendAbandonedCheckoutEmails);
 
   const updateOverrides = api.business.updateEmailOverrides.useMutation({
     onSuccess: (data) => {
@@ -85,6 +91,27 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
       toast.error(error.message || "Failed to save email customizations");
     },
   });
+
+  const updateEmailSettings = api.business.updateEmailSettings.useMutation({
+    onSuccess: (data) => {
+      setSendAbandonedCheckoutEmails(data.business.sendAbandonedCheckoutEmails);
+      toast.success(
+        data.business.sendAbandonedCheckoutEmails
+          ? "Abandoned checkout emails are now sending"
+          : "Abandoned checkout emails are now off",
+      );
+    },
+    onError: (error) => {
+      // Roll the switch back — the mutation didn't take.
+      setSendAbandonedCheckoutEmails((prev) => !prev);
+      toast.error(error.message || "Failed to update email settings");
+    },
+  });
+
+  const handleToggleAbandonedCheckout = (checked: boolean) => {
+    setSendAbandonedCheckoutEmails(checked);
+    updateEmailSettings.mutate({ sendAbandonedCheckoutEmails: checked });
+  };
 
   const previews = useMemo<PreviewDef[]>(() => {
     // business.getForEmailPreview only selects subdomain/customDomain (no
@@ -294,6 +321,57 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
           }),
       },
       {
+        key: "quote-confirmation",
+        label: "Quote Request Received",
+        overrideId: "quote-confirmation",
+        build: (introText) =>
+          QuoteConfirmationEmail({
+            customerName: "Jane Smith",
+            introText,
+            calculatorName: "Moving Quote Calculator",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            ownerEmail: `owner@${business.subdomain}.example.com`,
+            responseDays: 2,
+            answers: [
+              {
+                title: "How many bedrooms are you moving?",
+                display: "3-4 bedrooms",
+              },
+              { title: "Move type", display: "In State" },
+              { title: "From zip", display: "48601 (Saginaw, MI)" },
+            ],
+            estimate: { lowCents: 144000, highCents: 176000 },
+          }),
+      },
+      {
+        key: "final-quote",
+        label: "Final Quote",
+        overrideId: "final-quote",
+        // supportsIntro is false for this template — the message body is
+        // written per-send on the submission detail page, so the preview
+        // ignores introText and shows a sample message instead.
+        build: () =>
+          FinalQuoteEmail({
+            customerName: "Jane Smith",
+            calculatorName: "Moving Quote Calculator",
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            ownerEmail: `owner@${business.subdomain}.example.com`,
+            message:
+              "Thanks for the details! I reviewed your move and added the piano handling you mentioned.\n\nThis price is good for 30 days — reply here and we can lock in a date.",
+            finalQuoteCents: 168000,
+            answers: [
+              {
+                title: "How many bedrooms are you moving?",
+                display: "3-4 bedrooms",
+              },
+              { title: "Move type", display: "In State" },
+              { title: "From zip", display: "48601 (Saginaw, MI)" },
+            ],
+          }),
+      },
+      {
         key: "welcome",
         label: "Welcome Email",
         build: () =>
@@ -387,6 +465,41 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
             businessLogoUrl: logoUrl,
           }),
       },
+      {
+        key: "new-quote-owner",
+        label: "New Quote Request (owner)",
+        build: () =>
+          NewQuoteNotificationEmail({
+            calculatorName: "Moving Quote Calculator",
+            contactName: "Jane Smith",
+            contactEmail: "jane@example.com",
+            contactPhone: "(555) 123-4567",
+            estimateCents: 162000,
+            answers: [
+              {
+                title: "How many bedrooms are you moving?",
+                display: "3-4 bedrooms",
+                hidden: false,
+              },
+              { title: "Move type", display: "In State", hidden: false },
+              {
+                title: "From zip",
+                display: "48601 (Saginaw, MI)",
+                hidden: false,
+              },
+              {
+                title: "To zip",
+                display: "48201 (Detroit, MI)",
+                hidden: false,
+              },
+            ],
+            formula: "round((bedrooms * 400 + distance * 2) * 1.1)",
+            variables: { bedrooms: 4, distance: 90 },
+            businessName: business.name,
+            businessLogoUrl: logoUrl,
+            adminQuoteUrl: `${businessUrl}/admin/quotes/sample`,
+          }),
+      },
     ];
   }, [business, sampleOrder]);
 
@@ -394,9 +507,7 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
   const customizable = selected?.overrideId
     ? CUSTOMIZABLE_EMAILS.find((e) => e.id === selected.overrideId)
     : undefined;
-  const draft = selected?.overrideId
-    ? (drafts[selected.overrideId] ?? {})
-    : {};
+  const draft = selected?.overrideId ? (drafts[selected.overrideId] ?? {}) : {};
 
   const draftIntro = draft.introText ?? "";
   const draftSubject = draft.subject ?? "";
@@ -458,8 +569,8 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
         <div>
           <h1>Notification Emails</h1>
           <p>
-            Preview your transactional emails and customize the subject line
-            and intro text of customer-facing ones
+            Preview your transactional emails and customize the subject line and
+            intro text of customer-facing ones
           </p>
         </div>
       </div>
@@ -493,6 +604,27 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
+                {selected.key === "abandoned-checkout" && (
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <div className="pr-4">
+                      <Label htmlFor="send-abandoned-checkout-emails">
+                        Send this email
+                      </Label>
+                      <p className="text-muted-foreground text-sm">
+                        Controls whether this email sends at all — not just how
+                        it looks. When off, shoppers who abandon checkout never
+                        receive a recovery email, regardless of the subject and
+                        intro text below.
+                      </p>
+                    </div>
+                    <Switch
+                      id="send-abandoned-checkout-emails"
+                      checked={sendAbandonedCheckoutEmails}
+                      disabled={updateEmailSettings.isPending}
+                      onCheckedChange={handleToggleAbandonedCheckout}
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email-override-subject">Subject</Label>
                   <Input
@@ -507,17 +639,23 @@ export function EmailPreview({ business, sampleOrder, savedOverrides }: Props) {
                     placeholders. Leave blank to use the default subject.
                   </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email-override-intro">Intro text</Label>
-                  <Textarea
-                    id="email-override-intro"
-                    value={draftIntro}
-                    maxLength={1000}
-                    rows={3}
-                    placeholder="Optional message shown at the top of the email, under the heading"
-                    onChange={(e) => setDraftField("introText", e.target.value)}
-                  />
-                </div>
+                {/* Templates whose body is written elsewhere (e.g. the final
+                    quote's per-send message) opt out of the intro paragraph. */}
+                {customizable.supportsIntro && (
+                  <div className="space-y-2">
+                    <Label htmlFor="email-override-intro">Intro text</Label>
+                    <Textarea
+                      id="email-override-intro"
+                      value={draftIntro}
+                      maxLength={1000}
+                      rows={3}
+                      placeholder="Optional message shown at the top of the email, under the heading"
+                      onChange={(e) =>
+                        setDraftField("introText", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
                     onClick={saveOverrides}

@@ -1,5 +1,6 @@
 "use client";
 
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { getListFieldValue } from "~/lib/template-fields";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
@@ -7,7 +8,6 @@ import {
   StaggerContainer,
   StaggerItem,
 } from "~/components/page-animations";
-import { fieldAttr } from "~/lib/preview/section-attrs";
 
 import { parseHappyBambooBenefitsList } from "./happy-bamboo-benefits-data";
 

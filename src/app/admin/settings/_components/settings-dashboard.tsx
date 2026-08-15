@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import {
   Card,
   CardContent,
@@ -9,8 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { getHubCards } from "~/app/admin/_lib/admin-nav";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
 
 const settingsCards = getHubCards("settings");
 
@@ -60,8 +60,8 @@ export function SettingsDashboard({
   flags: Record<string, boolean>;
 }) {
   const { isEnabled } = useFeatureFlags({ flags });
-  const visibleCards = settingsCards.filter(
-    (card) => !card.featureKey || isEnabled(card.featureKey),
+  const visibleCards = settingsCards.filter((card) =>
+    isHubCardEnabled(card, isEnabled),
   );
 
   return (

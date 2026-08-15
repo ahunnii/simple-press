@@ -1,9 +1,10 @@
 import Link from "next/link";
 
+import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 
-import { PinkFilterChips, type PinkFilterChipItem } from "../shared/pink-filter-chips";
+import { PinkFilterChips } from "../shared/pink-filter-chips";
 import { PinkProductCard } from "../shared/pink-product-card";
 import { PinkReveal } from "../shared/pink-reveal";
 
@@ -75,7 +76,10 @@ export function PinkCollectionSection({
 
         {collectionChips.length > 0 && (
           <div className="mt-8">
-            <PinkFilterChips items={collectionChips} aria-label="Shop by collection" />
+            <PinkFilterChips
+              items={collectionChips}
+              aria-label="Shop by collection"
+            />
           </div>
         )}
 
@@ -106,7 +110,8 @@ export function PinkCollectionSection({
                   }}
                   price={formatPrice(product.price)}
                   compareAtPrice={
-                    product.compareAtPrice && product.compareAtPrice > product.price
+                    product.compareAtPrice &&
+                    product.compareAtPrice > product.price
                       ? formatPrice(product.compareAtPrice)
                       : undefined
                   }

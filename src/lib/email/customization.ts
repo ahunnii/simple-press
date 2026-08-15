@@ -32,7 +32,7 @@ export type CustomizableEmail = {
    */
   defaultSubject: string;
   /** Whether the template renders an owner-provided intro paragraph. */
-  supportsIntro: true;
+  supportsIntro: boolean;
 };
 
 export const CUSTOMIZABLE_EMAILS = [
@@ -63,8 +63,7 @@ export const CUSTOMIZABLE_EMAILS = [
   {
     id: "order-refunded",
     label: "Order Refunded",
-    description:
-      "Sent when you issue a full or partial refund for an order.",
+    description: "Sent when you issue a full or partial refund for an order.",
     defaultSubject: "Refund for order #{orderNumber}",
     supportsIntro: true,
   },
@@ -90,6 +89,22 @@ export const CUSTOMIZABLE_EMAILS = [
       "Sent to shoppers who started checkout but did not finish (when enabled).",
     defaultSubject: "You left items in your cart at {businessName}",
     supportsIntro: true,
+  },
+  {
+    id: "quote-confirmation",
+    label: "Quote Request Received",
+    description:
+      "Sent to a visitor right after they submit a quote calculator.",
+    defaultSubject: "We received your quote request — {businessName}",
+    supportsIntro: true,
+  },
+  {
+    id: "final-quote",
+    label: "Final Quote",
+    description:
+      "Sent when you share a final quote from a submission's detail page. The message body is written per-send; only the subject is customizable here.",
+    defaultSubject: "Your quote from {businessName}",
+    supportsIntro: false,
   },
 ] as const satisfies readonly CustomizableEmail[];
 

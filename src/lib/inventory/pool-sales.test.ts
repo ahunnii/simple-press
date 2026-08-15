@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import type { PoolLedgerGroupRow } from "./pool-sales";
+
 import {
   EMPTY_POOL_SALES,
   poolSalesWhere,
   summarizePoolSales,
-  type PoolLedgerGroupRow,
 } from "./pool-sales";
 
 describe("summarizePoolSales", () => {

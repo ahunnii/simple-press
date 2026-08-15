@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { api } from "~/trpc/server";
 import { EmailIcon } from "~/components/icons/email-icon";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
@@ -51,7 +52,10 @@ export async function DefaultFooter({ business }: DefaultFooterTemplateProps) {
               {business.siteContent?.logoUrl ? (
                 <Image
                   src={business.siteContent.logoUrl}
-                  alt={business.name}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
                   width={36}
                   height={36}
                   className="rounded-full object-cover"

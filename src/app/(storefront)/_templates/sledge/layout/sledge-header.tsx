@@ -4,7 +4,6 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import {
   IconLayoutDashboard,
   IconLogout,
@@ -27,9 +26,12 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { Button } from "~/components/ui/button";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -61,10 +63,11 @@ function getFocusables(container: HTMLElement): HTMLElement[] {
 
 export function SledgeHeader({
   business,
-  session,
+  initialSession,
 }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount } = useWishlist();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -259,6 +262,10 @@ export function SledgeHeader({
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
 
   const isLinkActive = (href: string) =>
     href === "/"
@@ -275,7 +282,7 @@ export function SledgeHeader({
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      className="rounded-full w-auto h-auto p-0 border border-white/30"
+      className="h-auto w-auto rounded-full border border-white/30 p-0"
       avatarClassName="size-9"
       links={[
         {
@@ -309,7 +316,7 @@ export function SledgeHeader({
     <div className="sl-brand-logo">
       <Image
         src={logoUrl}
-        alt={businessName}
+        alt={logoAlt}
         fill
         sizes="(max-width: 768px) 161px, 207px"
         className="object-contain object-center md:object-left"
@@ -566,7 +573,13 @@ export function SledgeHeader({
 
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:block">
-                {session?.user ? userMenu : authLink}
+                {isPending ? (
+                  <div className="h-9 w-9 animate-pulse rounded-full bg-white/10" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authLink
+                )}
               </div>
             )}
 
@@ -810,42 +823,48 @@ export function SledgeHeader({
                     </Link>
                   )}
 
-                  {session?.user ? (
-                    <button
-                      type="button"
-                      id={`${accountMenuId}-trigger`}
-                      /* S-5: changed aria-haspopup from "menu" to "true" */
-                      aria-haspopup="true"
-                      aria-expanded={accountMenuOpen}
-                      aria-controls={accountMenuId}
-                      onClick={() => setAccountMenuOpen((open) => !open)}
-                      className={cn(
-                        "flex items-center justify-center gap-2 rounded-sm border px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-opacity hover:opacity-80",
-                        accountMenuOpen
-                          ? "border-[var(--sl-coral)] text-[var(--sl-coral)]"
-                          : "border-white/20 text-white/85",
-                      )}
-                    >
-                      <User className="h-4 w-4" aria-hidden="true" />
-                      Account
-                      <ChevronUp
+                  {/* Same `customerAccounts` gate as the desktop cluster, plus
+                      a pending guard — this row is either the account menu or
+                      a "Login" link, so rendering it before the session lands
+                      shows a signed-in shopper the wrong one. */}
+                  {isStorefrontEnabled("customerAccounts") &&
+                    !isPending &&
+                    (session?.user ? (
+                      <button
+                        type="button"
+                        id={`${accountMenuId}-trigger`}
+                        /* S-5: changed aria-haspopup from "menu" to "true" */
+                        aria-haspopup="true"
+                        aria-expanded={accountMenuOpen}
+                        aria-controls={accountMenuId}
+                        onClick={() => setAccountMenuOpen((open) => !open)}
                         className={cn(
-                          "h-3.5 w-3.5 transition-transform duration-200",
-                          accountMenuOpen ? "rotate-180" : "",
+                          "flex items-center justify-center gap-2 rounded-sm border px-4 py-3 font-sans text-xs tracking-[0.14em] uppercase transition-opacity hover:opacity-80",
+                          accountMenuOpen
+                            ? "border-[var(--sl-coral)] text-[var(--sl-coral)]"
+                            : "border-white/20 text-white/85",
                         )}
-                        aria-hidden="true"
-                      />
-                    </button>
-                  ) : (
-                    <Link
-                      href="/auth/sign-in"
-                      onClick={closeMobileMenu}
-                      className="flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
-                    >
-                      <User className="h-4 w-4" aria-hidden="true" />
-                      Login
-                    </Link>
-                  )}
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                        Account
+                        <ChevronUp
+                          className={cn(
+                            "h-3.5 w-3.5 transition-transform duration-200",
+                            accountMenuOpen ? "rotate-180" : "",
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    ) : (
+                      <Link
+                        href="/auth/sign-in"
+                        onClick={closeMobileMenu}
+                        className="flex items-center justify-center gap-2 rounded-sm border border-white/20 px-4 py-3 font-sans text-xs tracking-[0.14em] text-white/85 uppercase transition-opacity hover:opacity-80"
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                        Login
+                      </Link>
+                    ))}
                 </div>
               </div>
             </motion.div>

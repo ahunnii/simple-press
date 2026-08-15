@@ -32,6 +32,7 @@ import {
   parseTemplateListRows,
   parseTemplateRichtext,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { parseServicePriceTiers } from "~/lib/validators/services";
 import { PageTransition } from "~/components/page-animations";
 import { ServiceBookingDialog } from "~/components/service-booking-dialog";
@@ -99,7 +100,7 @@ function CollectionListHeader({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-ledger-list-row${visible ? " is-visible" : ""}`}
+      className={cn("vii-reveal vii-ledger-list-row", visible && "is-visible")}
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1.4fr",
@@ -364,7 +365,10 @@ function SignatureFeature({
   return (
     <div
       ref={ref}
-      className={`vii-reveal vii-signature-feature-grid${visible ? " is-visible" : ""}`}
+      className={cn(
+        "vii-reveal vii-signature-feature-grid",
+        visible && "is-visible",
+      )}
       style={{
         maxWidth: 1100,
         margin: "0 auto",
@@ -615,7 +619,7 @@ function Chapter({
       {(label || hasDescription || hasMedia) && (
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", headVisible && "is-visible")}
           style={{
             marginBottom: "clamp(20px, 3vw, 32px)",
             paddingBottom: "clamp(16px, 2vw, 28px)",
@@ -720,7 +724,7 @@ function Chapter({
       {items.length > 0 && (
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal-group", rowsVisible && "is-visible")}
         >
           {items.map((item, i) => (
             <TreatmentListRow
@@ -795,7 +799,7 @@ function SlateRoom({
         {/* Chapter header */}
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", headVisible && "is-visible")}
           style={{
             marginBottom: "clamp(20px, 3vw, 32px)",
             paddingBottom: "clamp(16px, 2vw, 28px)",
@@ -921,7 +925,7 @@ function SlateRoom({
         {items.length > 0 && (
           <div
             ref={rowsRef}
-            className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+            className={cn("vii-reveal-group", rowsVisible && "is-visible")}
           >
             {items.map((item, i) => (
               <TreatmentListRow
@@ -1140,7 +1144,10 @@ function CollectionList({
             >
               <div
                 ref={fallbackRef}
-                className={`vii-reveal-group${fallbackVisible ? " is-visible" : ""}`}
+                className={cn(
+                  "vii-reveal-group",
+                  fallbackVisible && "is-visible",
+                )}
               >
                 {flatRowItems.map((item, i) => (
                   <TreatmentListRow

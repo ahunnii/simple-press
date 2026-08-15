@@ -65,10 +65,7 @@ export function FulfillmentTracker({ order }: Props) {
               Fulfilled
             </Badge>
           ) : isPartiallyFulfilled ? (
-            <Badge
-              variant="outline"
-              className="gap-1 border-amber-300 bg-amber-50 text-amber-700"
-            >
+            <Badge variant="warning" className="gap-1">
               <Package className="h-3 w-3" />
               Partially fulfilled
             </Badge>

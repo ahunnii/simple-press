@@ -3,9 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import type { TemplateField } from "~/lib/template-fields";
 import type { RouterOutputs } from "~/trpc/react";
+import { resolveLogoAlt } from "~/lib/logo-alt";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveTemplateFields, TEMPLATE_FIELDS } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
+import { PreviewOverlay } from "~/components/preview/preview-overlay";
 
+import { AuthPreviewGuard } from "./auth-preview-guard";
 import { DefaultPlatformBadge } from "./default-platform-badge";
 
 const LEGAL_LEAD_IN = {
@@ -13,6 +19,93 @@ const LEGAL_LEAD_IN = {
   "sign-up": "By signing up, you agree to our",
   generic: "By utilizing this service, you agree to our",
 } as const;
+
+/**
+ * The three owner-editable fields this shell reads, as `global`-page key
+ * suffixes, mapped to the value used when NOTHING supplies one.
+ *
+ * Nine templates declare these under `group: "global.authentication"`, but not
+ * identically: `sledge` and `noise` declare the image with no `defaultValue`,
+ * and four templates (`sledge`, `noise`, `pink`, `vii`) don't declare the
+ * logo-size fields at all. These fallbacks are the values this shell hardcoded
+ * before it went through `resolveTemplateFields`, so those templates render
+ * exactly as they did.
+ */
+const AUTH_FIELD_FALLBACKS = {
+  "authentication-image": "/placeholder.svg",
+  "logo-size-width": "80",
+  "logo-size-height": "80",
+} as const;
+
+type ResolvedAuthFields = {
+  /** Background image for the desktop-only left panel; "" hides it. */
+  authImageUrl: string;
+  logoSizeWidth: string;
+  logoSizeHeight: string;
+  /**
+   * Whether this template declares the auth fields at all — drives the
+   * click-to-edit hotspot, since the visual editor only registers a
+   * `global.authentication` section for templates that do.
+   */
+  declaresAuthFields: boolean;
+};
+
+/**
+ * Resolves the auth fields for `templateId` through the normal template-field
+ * pipeline: owner-saved value → the template's declared `defaultValue` →
+ * `AUTH_FIELD_FALLBACKS`.
+ *
+ * The fallback is threaded in as a synthetic `defaultValue` rather than as a
+ * `||` on the result so the resolution keeps its exact prior semantics: an
+ * ABSENT key falls back, while a key the owner explicitly cleared resolves to
+ * `""` (which hides the side image instead of resurrecting the placeholder).
+ * Only `defaultValue` is read off the map, so the synthetic entries below need
+ * no accurate `type`/`label`.
+ */
+function resolveAuthFields(
+  templateId: string | undefined,
+  customFields: unknown,
+): ResolvedAuthFields {
+  const prefix = `${templateId ?? ""}.global.`;
+  const declared = new Map(
+    (templateId ? (TEMPLATE_FIELDS[templateId] ?? []) : []).map(
+      (field) => [field.key, field] as const,
+    ),
+  );
+
+  const fieldMap = new Map<string, TemplateField>();
+  for (const [suffix, fallback] of Object.entries(AUTH_FIELD_FALLBACKS)) {
+    const key = `${prefix}${suffix}`;
+    const declaredField = declared.get(key);
+    fieldMap.set(key, {
+      key,
+      label: declaredField?.label ?? suffix,
+      description: declaredField?.description ?? "",
+      page: "global",
+      type: "text",
+      defaultValue: declaredField?.defaultValue ?? fallback,
+    });
+  }
+
+  const resolved = resolveTemplateFields(
+    customFields,
+    Array.from(fieldMap.keys()),
+    fieldMap,
+  );
+
+  return {
+    authImageUrl: resolved[`${prefix}authentication-image`] ?? "",
+    logoSizeWidth: resolved[`${prefix}logo-size-width`] ?? "",
+    logoSizeHeight: resolved[`${prefix}logo-size-height`] ?? "",
+    declaresAuthFields: declared.has(`${prefix}authentication-image`),
+  };
+}
+
+/** Pixel size for `next/image`, guarding against a cleared/garbage value. */
+function parseLogoSize(value: string, fallback: number): number {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
 
 type Props = {
   /** `null` => platform root (e.g. platform admins / invited team members). */
@@ -57,36 +150,37 @@ export function DefaultAuthShell({
   children,
 }: Props) {
   const isPlatformRoot = !business;
-  const themeSpecificFields = business?.siteContent?.customFields as
-    | Record<string, string>
-    | undefined;
 
-  const authImageUrl =
-    themeSpecificFields?.[
-      `${business?.templateId}.global.authentication-image`
-    ]?.trim() ?? "/placeholder.svg";
+  // Owner-editable fields, resolved through the template registry so each
+  // template's declared `defaultValue`s apply (they were previously ignored in
+  // favour of hardcoded values). In the visual editor's preview iframe these
+  // read from the DRAFT — `business.simplifiedGet` swaps
+  // `customFields ← previewCustomFields` under the preview guard.
+  const { authImageUrl, logoSizeWidth, logoSizeHeight, declaresAuthFields } =
+    resolveAuthFields(
+      business?.templateId,
+      business?.siteContent?.customFields,
+    );
 
-  const logoSizeWidth =
-    themeSpecificFields?.[
-      `${business?.templateId}.global.logo-size-width`
-    ]?.trim() ?? "80";
-
-  const logoSizeHeight =
-    themeSpecificFields?.[
-      `${business?.templateId}.global.logo-size-height`
-    ]?.trim() ?? "80";
-
-  // const imageOverlayColor =
-  //   themeSpecificFields?.[
-  //     `${business?.templateId}.global.image-overlay-color`
-  //   ]?.trim() ?? "#000000";
+  // Several templates also declare a `global.image-overlay-color` field; the
+  // overlay it drives is still commented out below. To wire it up, add
+  // `"image-overlay-color": "#000000"` to AUTH_FIELD_FALLBACKS above and read
+  // it off the resolved record.
 
   const brandName = isPlatformRoot ? "SimplePress" : business.name;
 
   return (
     <div className="bg-background flex min-h-screen">
-      {/* ── Left panel (desktop only) ── */}
-      <div className="bg-primary relative hidden overflow-hidden lg:flex lg:w-1/2">
+      {/* ── Left panel (desktop only) ──
+          Click-to-edit hotspot for the visual editor's "Authentication" page.
+          Only emitted for templates that declare the fields — otherwise there
+          is no matching editor section for the overlay to open. */}
+      <div
+        {...(declaresAuthFields
+          ? sectionGroupAttr("global", "authentication")
+          : {})}
+        className="bg-primary relative hidden overflow-hidden lg:flex lg:w-1/2"
+      >
         {authImageUrl && (
           <div
             className={cn(
@@ -109,9 +203,12 @@ export function DefaultAuthShell({
             {business?.siteContent?.logoUrl ? (
               <Image
                 src={business.siteContent.logoUrl}
-                alt={business.name}
-                width={parseInt(logoSizeWidth)}
-                height={parseInt(logoSizeHeight)}
+                alt={resolveLogoAlt(
+                  business.siteContent?.logoAltText,
+                  business.name,
+                )}
+                width={parseLogoSize(logoSizeWidth, 80)}
+                height={parseLogoSize(logoSizeHeight, 80)}
                 className="rounded-full"
               />
             ) : (
@@ -207,7 +304,11 @@ export function DefaultAuthShell({
               />
             )}
 
-            {children}
+            {/* Live auth form. Neutralised (only) inside the editor preview
+                iframe — see AuthPreviewGuard: the iframe's nav guard blocks
+                link clicks but not form submissions, so an owner poking at
+                the preview would really sign in and navigate it away. */}
+            <AuthPreviewGuard>{children}</AuthPreviewGuard>
 
             <div className="mt-4 hidden text-left lg:block">
               <Link
@@ -240,6 +341,20 @@ export function DefaultAuthShell({
           </div>
         )}
       </div>
+
+      {/*
+        Auth routes never enter `(storefront)/layout.tsx`, which is where the
+        overlay is normally mounted, so the hotspot above would be dead here
+        without this. Mounted unconditionally — the overlay self-disables
+        outside a preview iframe (see `preview-overlay.tsx`), the same pattern
+        the storefront layout uses.
+
+        `PreviewFieldPatcher` is deliberately NOT mounted: it only patches
+        `[data-sp-field]` text nodes for text/textarea fields, and all three
+        auth fields are image/number types, which always take the
+        draft-save + iframe-reload path anyway.
+      */}
+      <PreviewOverlay />
     </div>
   );
 }

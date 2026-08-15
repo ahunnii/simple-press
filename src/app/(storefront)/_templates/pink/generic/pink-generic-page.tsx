@@ -34,11 +34,18 @@ const FIELD_KEYS = [
  * rows) → optional 16:7 lead image → a TOC/article grid (client component,
  * see `pink-generic-body.tsx`) → `PlatformPolicyNotice`.
  */
-export function PinkGenericPage({ business, page }: { business: Business; page: Page }) {
+export function PinkGenericPage({
+  business,
+  page,
+}: {
+  business: Business;
+  page: Page;
+}) {
   const customFields = business?.siteContent?.customFields;
   const f = resolveFields(customFields, FIELD_KEYS);
 
-  const rawFactRows = getListFieldValue(customFields, "pink.global.page-facts") ?? [];
+  const rawFactRows =
+    getListFieldValue(customFields, "pink.global.page-facts") ?? [];
   const factRows = rawFactRows
     .filter((r): r is Record<string, unknown> => !!r && typeof r === "object")
     .map((r, i) => ({
@@ -48,7 +55,8 @@ export function PinkGenericPage({ business, page }: { business: Business; page: 
     }))
     .filter((r) => r.label && r.value);
   const showFacts =
-    isSectionVisible(customFields, "pink", "global.page-facts") && factRows.length > 0;
+    isSectionVisible(customFields, "pink", "global.page-facts") &&
+    factRows.length > 0;
 
   const ctaHeading = (f["pink.global.page-cta-heading"] ?? "").trim();
   const ctaBody = f["pink.global.page-cta-body"] ?? "";
@@ -79,7 +87,14 @@ export function PinkGenericPage({ business, page }: { business: Business; page: 
           className="relative w-full overflow-hidden"
           style={{ aspectRatio: "16/7", background: "var(--pink-panel)" }}
         >
-          <Image src={page.image} alt="" fill priority className="object-cover" sizes="100vw" />
+          <Image
+            src={page.image}
+            alt=""
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
         </div>
       )}
 

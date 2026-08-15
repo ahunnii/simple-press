@@ -41,7 +41,9 @@ export type VideoCreateData = z.infer<typeof videoCreateSchema>;
  * Covered by regression tests in `videos.test.ts`. Do not "simplify" this to
  * `(v) => v || null`.
  */
-function emptyToNull(value: string | null | undefined): string | null | undefined {
+function emptyToNull(
+  value: string | null | undefined,
+): string | null | undefined {
   if (value === undefined) return undefined;
   if (value === null || value === "") return null;
   return value;
@@ -81,6 +83,64 @@ export const videoUpdateSchema = z.object({
 });
 
 export type VideoUpdateData = z.infer<typeof videoUpdateSchema>;
+
+/**
+ * Resolves the title a video should render with. This is the single
+ * derivation shared by the admin list page's search predicate and the
+ * client's row render — the platform rule is "search what the row renders",
+ * and if the two derive the resolved title independently they can drift
+ * (e.g. the search box matching against YouTube's title while the row shows
+ * the owner's override, or vice versa).
+ *
+ * `??` is safe here rather than `||`: `videoUpdateSchema` collapses `""` to
+ * `null` (the `emptyToNull` invariant documented above), so `titleOverride`
+ * is either meaningful text or `null` — never `""` — and there is no empty
+ * string that could accidentally win over `title`.
+ */
+export function resolveVideoTitle(v: {
+  title: string;
+  titleOverride: string | null;
+}): string {
+  return v.titleOverride ?? v.title;
+}
+
+/**
+ * Resolves the thumbnail URL a video should render with. Same rationale as
+ * `resolveVideoTitle`: one shared derivation for the admin list's search
+ * predicate and its row render, so they can't drift by deriving the
+ * resolved value independently.
+ *
+ * `??` is safe here too: `videoUpdateSchema` collapses `""` to `null` for
+ * `thumbnailOverride` (the `emptyToNull` invariant above), so the override
+ * column is either a valid URL or `null`, never `""`.
+ */
+export function resolveVideoThumbnail(v: {
+  thumbnailUrl: string | null;
+  thumbnailOverride: string | null;
+}): string | null {
+  return v.thumbnailOverride ?? v.thumbnailUrl;
+}
+
+/**
+ * The text a video's source badge renders — "Added manually" for hand-added
+ * videos, otherwise the source's owner-set label falling back to its kind.
+ * Returns `null` when the video claims a source that wasn't found (the badge
+ * renders nothing in that state, so search must match nothing for it too).
+ *
+ * Same single-derivation rationale as `resolveVideoTitle`: the admin list
+ * searches this field BECAUSE the row renders it ("search what the row
+ * renders") — an owner sees the "Tutorials" badge and types "Tutorials", so
+ * the search predicate and the badge must be the same string or the search
+ * becomes a dead end.
+ */
+export function videoSourceBadgeText(
+  video: { sourceId: string | null },
+  source: { label: string | null; kind: string } | undefined,
+): string | null {
+  if (video.sourceId === null) return "Added manually";
+  if (!source) return null;
+  return source.label ?? (source.kind === "playlist" ? "Playlist" : "Channel");
+}
 
 // ─── Reorder ──────────────────────────────────────────────────────────────
 

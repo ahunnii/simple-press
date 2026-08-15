@@ -4,6 +4,7 @@ import { TwitterLogoIcon } from "@radix-ui/react-icons";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
@@ -19,6 +20,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
   const address = business?.businessAddress;
   const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(business?.siteContent?.logoAltText, name);
 
   const { isEnabled } = await getBusinessFlags();
 
@@ -96,7 +98,7 @@ export async function NoiseFooter({ business }: DefaultFooterTemplateProps) {
                   <div className="relative mb-3 h-14 w-28">
                     <Image
                       src={logoUrl}
-                      alt={name}
+                      alt={logoAlt}
                       fill
                       sizes="112px"
                       className="object-contain object-left"

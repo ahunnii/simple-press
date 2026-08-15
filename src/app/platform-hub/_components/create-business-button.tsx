@@ -38,6 +38,7 @@ const TEMPLATES = [
   { id: "coop", label: "Coop" },
   { id: "vii", label: "Skinbar VII" },
   { id: "pink", label: "PinkArt" },
+  { id: "relocation", label: "Handy Relocations" },
 ];
 
 const defaultValues: CreateBusinessFormData = {

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
-import { buildPageMetadata } from "~/lib/seo";
+import { buildPageMetadata, loadSeoBusiness } from "~/lib/seo";
 import { buildVideoObjectSchema } from "~/lib/structured-data";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
@@ -52,6 +52,11 @@ export default async function VideosPage() {
 }
 
 export async function generateMetadata() {
-  const business = await api.business.simplifiedGet().catch(() => null);
-  return buildPageMetadata({ business, path: "/videos", title: "Videos" });
+  const business = await loadSeoBusiness("/videos");
+  return buildPageMetadata({
+    business,
+    path: "/videos",
+    pageMetaKey: "videos",
+    title: "Videos",
+  });
 }

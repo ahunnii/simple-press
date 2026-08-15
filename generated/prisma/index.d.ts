@@ -274,6 +274,16 @@ export type ShippingRate = $Result.DefaultSelection<Prisma.$ShippingRatePayload>
  * 
  */
 export type BackInStockRequest = $Result.DefaultSelection<Prisma.$BackInStockRequestPayload>
+/**
+ * Model QuoteCalculator
+ * 
+ */
+export type QuoteCalculator = $Result.DefaultSelection<Prisma.$QuoteCalculatorPayload>
+/**
+ * Model QuoteSubmission
+ * 
+ */
+export type QuoteSubmission = $Result.DefaultSelection<Prisma.$QuoteSubmissionPayload>
 
 /**
  * Enums
@@ -865,6 +875,26 @@ export class PrismaClient<
     * ```
     */
   get backInStockRequest(): Prisma.BackInStockRequestDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.quoteCalculator`: Exposes CRUD operations for the **QuoteCalculator** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more QuoteCalculators
+    * const quoteCalculators = await prisma.quoteCalculator.findMany()
+    * ```
+    */
+  get quoteCalculator(): Prisma.QuoteCalculatorDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.quoteSubmission`: Exposes CRUD operations for the **QuoteSubmission** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more QuoteSubmissions
+    * const quoteSubmissions = await prisma.quoteSubmission.findMany()
+    * ```
+    */
+  get quoteSubmission(): Prisma.QuoteSubmissionDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1348,7 +1378,9 @@ export namespace Prisma {
     PlatformConfig: 'PlatformConfig',
     ShippingZone: 'ShippingZone',
     ShippingRate: 'ShippingRate',
-    BackInStockRequest: 'BackInStockRequest'
+    BackInStockRequest: 'BackInStockRequest',
+    QuoteCalculator: 'QuoteCalculator',
+    QuoteSubmission: 'QuoteSubmission'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1367,7 +1399,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest"
+      modelProps: "user" | "businessMembership" | "session" | "account" | "verification" | "business" | "siteContent" | "faqItem" | "product" | "productVariant" | "collection" | "collectionProduct" | "service" | "serviceItem" | "event" | "videoSource" | "video" | "image" | "customer" | "shippingAddress" | "order" | "orderShipment" | "orderItem" | "domainQueue" | "discountCode" | "inventoryHistory" | "baseInventoryUnit" | "inventoryReservation" | "page" | "editorNote" | "productImport" | "gallery" | "galleryImage" | "testimonial" | "testimonialInvite" | "productReview" | "reviewVote" | "platformInvite" | "teamInvite" | "platformConfig" | "shippingZone" | "shippingRate" | "backInStockRequest" | "quoteCalculator" | "quoteSubmission"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -4553,6 +4585,154 @@ export namespace Prisma {
           }
         }
       }
+      QuoteCalculator: {
+        payload: Prisma.$QuoteCalculatorPayload<ExtArgs>
+        fields: Prisma.QuoteCalculatorFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.QuoteCalculatorFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.QuoteCalculatorFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>
+          }
+          findFirst: {
+            args: Prisma.QuoteCalculatorFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.QuoteCalculatorFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>
+          }
+          findMany: {
+            args: Prisma.QuoteCalculatorFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>[]
+          }
+          create: {
+            args: Prisma.QuoteCalculatorCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>
+          }
+          createMany: {
+            args: Prisma.QuoteCalculatorCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.QuoteCalculatorCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>[]
+          }
+          delete: {
+            args: Prisma.QuoteCalculatorDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>
+          }
+          update: {
+            args: Prisma.QuoteCalculatorUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>
+          }
+          deleteMany: {
+            args: Prisma.QuoteCalculatorDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.QuoteCalculatorUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.QuoteCalculatorUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>[]
+          }
+          upsert: {
+            args: Prisma.QuoteCalculatorUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteCalculatorPayload>
+          }
+          aggregate: {
+            args: Prisma.QuoteCalculatorAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuoteCalculator>
+          }
+          groupBy: {
+            args: Prisma.QuoteCalculatorGroupByArgs<ExtArgs>
+            result: $Utils.Optional<QuoteCalculatorGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.QuoteCalculatorCountArgs<ExtArgs>
+            result: $Utils.Optional<QuoteCalculatorCountAggregateOutputType> | number
+          }
+        }
+      }
+      QuoteSubmission: {
+        payload: Prisma.$QuoteSubmissionPayload<ExtArgs>
+        fields: Prisma.QuoteSubmissionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.QuoteSubmissionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.QuoteSubmissionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>
+          }
+          findFirst: {
+            args: Prisma.QuoteSubmissionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.QuoteSubmissionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>
+          }
+          findMany: {
+            args: Prisma.QuoteSubmissionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>[]
+          }
+          create: {
+            args: Prisma.QuoteSubmissionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>
+          }
+          createMany: {
+            args: Prisma.QuoteSubmissionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.QuoteSubmissionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>[]
+          }
+          delete: {
+            args: Prisma.QuoteSubmissionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>
+          }
+          update: {
+            args: Prisma.QuoteSubmissionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>
+          }
+          deleteMany: {
+            args: Prisma.QuoteSubmissionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.QuoteSubmissionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.QuoteSubmissionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>[]
+          }
+          upsert: {
+            args: Prisma.QuoteSubmissionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$QuoteSubmissionPayload>
+          }
+          aggregate: {
+            args: Prisma.QuoteSubmissionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateQuoteSubmission>
+          }
+          groupBy: {
+            args: Prisma.QuoteSubmissionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<QuoteSubmissionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.QuoteSubmissionCountArgs<ExtArgs>
+            result: $Utils.Optional<QuoteSubmissionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -4692,6 +4872,8 @@ export namespace Prisma {
     shippingZone?: ShippingZoneOmit
     shippingRate?: ShippingRateOmit
     backInStockRequest?: BackInStockRequestOmit
+    quoteCalculator?: QuoteCalculatorOmit
+    quoteSubmission?: QuoteSubmissionOmit
   }
 
   /* Types for Logging */
@@ -4882,6 +5064,8 @@ export namespace Prisma {
     videos: number
     videoSources: number
     backInStockRequests: number
+    quoteCalculators: number
+    quoteSubmissions: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4910,6 +5094,8 @@ export namespace Prisma {
     videos?: boolean | BusinessCountOutputTypeCountVideosArgs
     videoSources?: boolean | BusinessCountOutputTypeCountVideoSourcesArgs
     backInStockRequests?: boolean | BusinessCountOutputTypeCountBackInStockRequestsArgs
+    quoteCalculators?: boolean | BusinessCountOutputTypeCountQuoteCalculatorsArgs
+    quoteSubmissions?: boolean | BusinessCountOutputTypeCountQuoteSubmissionsArgs
   }
 
   // Custom InputTypes
@@ -5096,6 +5282,20 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountBackInStockRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BackInStockRequestWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountQuoteCalculatorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteCalculatorWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountQuoteSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteSubmissionWhereInput
   }
 
 
@@ -5638,6 +5838,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type QuoteCalculatorCountOutputType
+   */
+
+  export type QuoteCalculatorCountOutputType = {
+    submissions: number
+  }
+
+  export type QuoteCalculatorCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    submissions?: boolean | QuoteCalculatorCountOutputTypeCountSubmissionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * QuoteCalculatorCountOutputType without action
+   */
+  export type QuoteCalculatorCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculatorCountOutputType
+     */
+    select?: QuoteCalculatorCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * QuoteCalculatorCountOutputType without action
+   */
+  export type QuoteCalculatorCountOutputTypeCountSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteSubmissionWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -5660,6 +5891,8 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     platformRole: $Enums.PlatformRole | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -5671,6 +5904,8 @@ export namespace Prisma {
     createdAt: Date | null
     updatedAt: Date | null
     platformRole: $Enums.PlatformRole | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -5682,6 +5917,8 @@ export namespace Prisma {
     createdAt: number
     updatedAt: number
     platformRole: number
+    termsAcceptedAt: number
+    termsVersion: number
     _all: number
   }
 
@@ -5695,6 +5932,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     platformRole?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -5706,6 +5945,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     platformRole?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -5717,6 +5958,8 @@ export namespace Prisma {
     createdAt?: true
     updatedAt?: true
     platformRole?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
     _all?: true
   }
 
@@ -5801,6 +6044,8 @@ export namespace Prisma {
     createdAt: Date
     updatedAt: Date
     platformRole: $Enums.PlatformRole
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -5829,6 +6074,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
     memberships?: boolean | User$membershipsArgs<ExtArgs>
@@ -5848,6 +6095,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5859,6 +6108,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -5870,9 +6121,11 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     platformRole?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "platformRole", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "platformRole" | "termsAcceptedAt" | "termsVersion", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | User$sessionsArgs<ExtArgs>
     accounts?: boolean | User$accountsArgs<ExtArgs>
@@ -5906,6 +6159,8 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       platformRole: $Enums.PlatformRole
+      termsAcceptedAt: Date | null
+      termsVersion: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -6344,6 +6599,8 @@ export namespace Prisma {
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly platformRole: FieldRef<"User", 'PlatformRole'>
+    readonly termsAcceptedAt: FieldRef<"User", 'DateTime'>
+    readonly termsVersion: FieldRef<"User", 'String'>
   }
     
 
@@ -6934,6 +7191,8 @@ export namespace Prisma {
     userId: string | null
     businessId: string | null
     role: $Enums.BusinessRole | null
+    merchantTermsAcceptedAt: Date | null
+    merchantTermsVersion: string | null
   }
 
   export type BusinessMembershipMaxAggregateOutputType = {
@@ -6942,6 +7201,8 @@ export namespace Prisma {
     userId: string | null
     businessId: string | null
     role: $Enums.BusinessRole | null
+    merchantTermsAcceptedAt: Date | null
+    merchantTermsVersion: string | null
   }
 
   export type BusinessMembershipCountAggregateOutputType = {
@@ -6950,6 +7211,8 @@ export namespace Prisma {
     userId: number
     businessId: number
     role: number
+    merchantTermsAcceptedAt: number
+    merchantTermsVersion: number
     _all: number
   }
 
@@ -6960,6 +7223,8 @@ export namespace Prisma {
     userId?: true
     businessId?: true
     role?: true
+    merchantTermsAcceptedAt?: true
+    merchantTermsVersion?: true
   }
 
   export type BusinessMembershipMaxAggregateInputType = {
@@ -6968,6 +7233,8 @@ export namespace Prisma {
     userId?: true
     businessId?: true
     role?: true
+    merchantTermsAcceptedAt?: true
+    merchantTermsVersion?: true
   }
 
   export type BusinessMembershipCountAggregateInputType = {
@@ -6976,6 +7243,8 @@ export namespace Prisma {
     userId?: true
     businessId?: true
     role?: true
+    merchantTermsAcceptedAt?: true
+    merchantTermsVersion?: true
     _all?: true
   }
 
@@ -7057,6 +7326,8 @@ export namespace Prisma {
     userId: string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt: Date | null
+    merchantTermsVersion: string | null
     _count: BusinessMembershipCountAggregateOutputType | null
     _min: BusinessMembershipMinAggregateOutputType | null
     _max: BusinessMembershipMaxAggregateOutputType | null
@@ -7082,6 +7353,8 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -7092,6 +7365,8 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -7102,6 +7377,8 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["businessMembership"]>
@@ -7112,9 +7389,11 @@ export namespace Prisma {
     userId?: boolean
     businessId?: boolean
     role?: boolean
+    merchantTermsAcceptedAt?: boolean
+    merchantTermsVersion?: boolean
   }
 
-  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role", ExtArgs["result"]["businessMembership"]>
+  export type BusinessMembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "userId" | "businessId" | "role" | "merchantTermsAcceptedAt" | "merchantTermsVersion", ExtArgs["result"]["businessMembership"]>
   export type BusinessMembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -7140,6 +7419,8 @@ export namespace Prisma {
       userId: string
       businessId: string
       role: $Enums.BusinessRole
+      merchantTermsAcceptedAt: Date | null
+      merchantTermsVersion: string | null
     }, ExtArgs["result"]["businessMembership"]>
     composites: {}
   }
@@ -7570,6 +7851,8 @@ export namespace Prisma {
     readonly userId: FieldRef<"BusinessMembership", 'String'>
     readonly businessId: FieldRef<"BusinessMembership", 'String'>
     readonly role: FieldRef<"BusinessMembership", 'BusinessRole'>
+    readonly merchantTermsAcceptedAt: FieldRef<"BusinessMembership", 'DateTime'>
+    readonly merchantTermsVersion: FieldRef<"BusinessMembership", 'String'>
   }
     
 
@@ -11827,6 +12110,8 @@ export namespace Prisma {
     videos?: boolean | Business$videosArgs<ExtArgs>
     videoSources?: boolean | Business$videoSourcesArgs<ExtArgs>
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
+    quoteCalculators?: boolean | Business$quoteCalculatorsArgs<ExtArgs>
+    quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -11996,6 +12281,8 @@ export namespace Prisma {
     videos?: boolean | Business$videosArgs<ExtArgs>
     videoSources?: boolean | Business$videoSourcesArgs<ExtArgs>
     backInStockRequests?: boolean | Business$backInStockRequestsArgs<ExtArgs>
+    quoteCalculators?: boolean | Business$quoteCalculatorsArgs<ExtArgs>
+    quoteSubmissions?: boolean | Business$quoteSubmissionsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -12030,6 +12317,8 @@ export namespace Prisma {
       videos: Prisma.$VideoPayload<ExtArgs>[]
       videoSources: Prisma.$VideoSourcePayload<ExtArgs>[]
       backInStockRequests: Prisma.$BackInStockRequestPayload<ExtArgs>[]
+      quoteCalculators: Prisma.$QuoteCalculatorPayload<ExtArgs>[]
+      quoteSubmissions: Prisma.$QuoteSubmissionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -12495,6 +12784,8 @@ export namespace Prisma {
     videos<T extends Business$videosArgs<ExtArgs> = {}>(args?: Subset<T, Business$videosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     videoSources<T extends Business$videoSourcesArgs<ExtArgs> = {}>(args?: Subset<T, Business$videoSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VideoSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     backInStockRequests<T extends Business$backInStockRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Business$backInStockRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackInStockRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    quoteCalculators<T extends Business$quoteCalculatorsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteCalculatorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    quoteSubmissions<T extends Business$quoteSubmissionsArgs<ExtArgs> = {}>(args?: Subset<T, Business$quoteSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13574,6 +13865,54 @@ export namespace Prisma {
   }
 
   /**
+   * Business.quoteCalculators
+   */
+  export type Business$quoteCalculatorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    where?: QuoteCalculatorWhereInput
+    orderBy?: QuoteCalculatorOrderByWithRelationInput | QuoteCalculatorOrderByWithRelationInput[]
+    cursor?: QuoteCalculatorWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuoteCalculatorScalarFieldEnum | QuoteCalculatorScalarFieldEnum[]
+  }
+
+  /**
+   * Business.quoteSubmissions
+   */
+  export type Business$quoteSubmissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    where?: QuoteSubmissionWhereInput
+    orderBy?: QuoteSubmissionOrderByWithRelationInput | QuoteSubmissionOrderByWithRelationInput[]
+    cursor?: QuoteSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
    * Business without action
    */
   export type BusinessDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13673,6 +14012,8 @@ export namespace Prisma {
     metaKeywords: number
     ogImage: number
     faviconUrl: number
+    pageMeta: number
+    siteVerification: number
     logoUrl: number
     logoAltText: number
     primaryColor: number
@@ -13761,6 +14102,8 @@ export namespace Prisma {
     metaKeywords?: true
     ogImage?: true
     faviconUrl?: true
+    pageMeta?: true
+    siteVerification?: true
     logoUrl?: true
     logoAltText?: true
     primaryColor?: true
@@ -13868,6 +14211,8 @@ export namespace Prisma {
     metaKeywords: string | null
     ogImage: string | null
     faviconUrl: string | null
+    pageMeta: JsonValue | null
+    siteVerification: JsonValue | null
     logoUrl: string | null
     logoAltText: string | null
     primaryColor: string | null
@@ -13919,6 +14264,8 @@ export namespace Prisma {
     metaKeywords?: boolean
     ogImage?: boolean
     faviconUrl?: boolean
+    pageMeta?: boolean
+    siteVerification?: boolean
     logoUrl?: boolean
     logoAltText?: boolean
     primaryColor?: boolean
@@ -13954,6 +14301,8 @@ export namespace Prisma {
     metaKeywords?: boolean
     ogImage?: boolean
     faviconUrl?: boolean
+    pageMeta?: boolean
+    siteVerification?: boolean
     logoUrl?: boolean
     logoAltText?: boolean
     primaryColor?: boolean
@@ -13989,6 +14338,8 @@ export namespace Prisma {
     metaKeywords?: boolean
     ogImage?: boolean
     faviconUrl?: boolean
+    pageMeta?: boolean
+    siteVerification?: boolean
     logoUrl?: boolean
     logoAltText?: boolean
     primaryColor?: boolean
@@ -14024,6 +14375,8 @@ export namespace Prisma {
     metaKeywords?: boolean
     ogImage?: boolean
     faviconUrl?: boolean
+    pageMeta?: boolean
+    siteVerification?: boolean
     logoUrl?: boolean
     logoAltText?: boolean
     primaryColor?: boolean
@@ -14039,7 +14392,7 @@ export namespace Prisma {
     businessId?: boolean
   }
 
-  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
+  export type SiteContentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "updatedAt" | "heroTitle" | "heroSubtitle" | "heroImageUrl" | "heroButtonText" | "heroButtonLink" | "aboutTitle" | "aboutText" | "aboutImageUrl" | "features" | "footerText" | "socialLinks" | "metaTitle" | "metaDescription" | "metaKeywords" | "ogImage" | "faviconUrl" | "pageMeta" | "siteVerification" | "logoUrl" | "logoAltText" | "primaryColor" | "secondaryColor" | "accentColor" | "navigationItems" | "customFields" | "bannerConfig" | "popupConfig" | "emailOverrides" | "previewCustomFields" | "previewUpdatedAt" | "businessId", ExtArgs["result"]["siteContent"]>
   export type SiteContentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }
@@ -14074,6 +14427,8 @@ export namespace Prisma {
       metaKeywords: string | null
       ogImage: string | null
       faviconUrl: string | null
+      pageMeta: Prisma.JsonValue | null
+      siteVerification: Prisma.JsonValue | null
       logoUrl: string | null
       logoAltText: string | null
       primaryColor: string | null
@@ -14529,6 +14884,8 @@ export namespace Prisma {
     readonly metaKeywords: FieldRef<"SiteContent", 'String'>
     readonly ogImage: FieldRef<"SiteContent", 'String'>
     readonly faviconUrl: FieldRef<"SiteContent", 'String'>
+    readonly pageMeta: FieldRef<"SiteContent", 'Json'>
+    readonly siteVerification: FieldRef<"SiteContent", 'Json'>
     readonly logoUrl: FieldRef<"SiteContent", 'String'>
     readonly logoAltText: FieldRef<"SiteContent", 'String'>
     readonly primaryColor: FieldRef<"SiteContent", 'String'>
@@ -29220,6 +29577,9 @@ export namespace Prisma {
       orderCount: number
       deletionRequestedAt: Date | null
       anonymizedAt: Date | null
+      /**
+       * @encrypted
+       */
       notes: string | null
       userId: string | null
       businessId: string
@@ -30549,7 +30909,13 @@ export namespace Prisma {
       id: string
       createdAt: Date
       updatedAt: Date
+      /**
+       * @encrypted
+       */
       firstName: string
+      /**
+       * @encrypted
+       */
       lastName: string
       /**
        * @encrypted
@@ -31496,6 +31862,9 @@ export namespace Prisma {
     id: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
     orderNumber: number | null
     status: string | null
     paymentStatus: string | null
@@ -31528,6 +31897,9 @@ export namespace Prisma {
     id: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
     orderNumber: number | null
     status: string | null
     paymentStatus: string | null
@@ -31560,6 +31932,9 @@ export namespace Prisma {
     id: number
     createdAt: number
     updatedAt: number
+    termsAcceptedAt: number
+    termsVersion: number
+    merchantTermsUpdatedAt: number
     orderNumber: number
     status: number
     paymentStatus: number
@@ -31614,6 +31989,9 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
     orderNumber?: true
     status?: true
     paymentStatus?: true
@@ -31646,6 +32024,9 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
     orderNumber?: true
     status?: true
     paymentStatus?: true
@@ -31678,6 +32059,9 @@ export namespace Prisma {
     id?: true
     createdAt?: true
     updatedAt?: true
+    termsAcceptedAt?: true
+    termsVersion?: true
+    merchantTermsUpdatedAt?: true
     orderNumber?: true
     status?: true
     paymentStatus?: true
@@ -31797,6 +32181,9 @@ export namespace Prisma {
     id: string
     createdAt: Date
     updatedAt: Date
+    termsAcceptedAt: Date | null
+    termsVersion: string | null
+    merchantTermsUpdatedAt: Date | null
     orderNumber: number
     status: string
     paymentStatus: string
@@ -31848,6 +32235,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31889,6 +32279,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31925,6 +32318,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31961,6 +32357,9 @@ export namespace Prisma {
     id?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    termsAcceptedAt?: boolean
+    termsVersion?: boolean
+    merchantTermsUpdatedAt?: boolean
     orderNumber?: boolean
     status?: boolean
     paymentStatus?: boolean
@@ -31989,7 +32388,7 @@ export namespace Prisma {
     discountCodeId?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "termsAcceptedAt" | "termsVersion" | "merchantTermsUpdatedAt" | "orderNumber" | "status" | "paymentStatus" | "fulfillmentStatus" | "stripeSessionId" | "stripePaymentIntentId" | "subtotal" | "tax" | "shipping" | "discount" | "total" | "customerEmail" | "customerName" | "customerFirstName" | "customerLastName" | "customerPhone" | "paymentMethod" | "deliveryMethod" | "refundReason" | "refundAmountCents" | "customerNote" | "internalNote" | "businessId" | "customerId" | "shippingAddressId" | "discountCodeId", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | Order$customerArgs<ExtArgs>
@@ -32030,6 +32429,9 @@ export namespace Prisma {
       id: string
       createdAt: Date
       updatedAt: Date
+      termsAcceptedAt: Date | null
+      termsVersion: string | null
+      merchantTermsUpdatedAt: Date | null
       orderNumber: number
       status: string
       paymentStatus: string
@@ -32053,7 +32455,13 @@ export namespace Prisma {
       deliveryMethod: string
       refundReason: string | null
       refundAmountCents: number | null
+      /**
+       * @encrypted
+       */
       customerNote: string | null
+      /**
+       * @encrypted
+       */
       internalNote: string | null
       businessId: string
       customerId: string | null
@@ -32493,6 +32901,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Order", 'String'>
     readonly createdAt: FieldRef<"Order", 'DateTime'>
     readonly updatedAt: FieldRef<"Order", 'DateTime'>
+    readonly termsAcceptedAt: FieldRef<"Order", 'DateTime'>
+    readonly termsVersion: FieldRef<"Order", 'String'>
+    readonly merchantTermsUpdatedAt: FieldRef<"Order", 'DateTime'>
     readonly orderNumber: FieldRef<"Order", 'Int'>
     readonly status: FieldRef<"Order", 'String'>
     readonly paymentStatus: FieldRef<"Order", 'String'>
@@ -58930,6 +59341,2416 @@ export namespace Prisma {
 
 
   /**
+   * Model QuoteCalculator
+   */
+
+  export type AggregateQuoteCalculator = {
+    _count: QuoteCalculatorCountAggregateOutputType | null
+    _min: QuoteCalculatorMinAggregateOutputType | null
+    _max: QuoteCalculatorMaxAggregateOutputType | null
+  }
+
+  export type QuoteCalculatorMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    published: boolean | null
+    businessId: string | null
+  }
+
+  export type QuoteCalculatorMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    name: string | null
+    published: boolean | null
+    businessId: string | null
+  }
+
+  export type QuoteCalculatorCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    name: number
+    definition: number
+    published: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type QuoteCalculatorMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    published?: true
+    businessId?: true
+  }
+
+  export type QuoteCalculatorMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    published?: true
+    businessId?: true
+  }
+
+  export type QuoteCalculatorCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    name?: true
+    definition?: true
+    published?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type QuoteCalculatorAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuoteCalculator to aggregate.
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteCalculators to fetch.
+     */
+    orderBy?: QuoteCalculatorOrderByWithRelationInput | QuoteCalculatorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: QuoteCalculatorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteCalculators from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteCalculators.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned QuoteCalculators
+    **/
+    _count?: true | QuoteCalculatorCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: QuoteCalculatorMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: QuoteCalculatorMaxAggregateInputType
+  }
+
+  export type GetQuoteCalculatorAggregateType<T extends QuoteCalculatorAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuoteCalculator]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuoteCalculator[P]>
+      : GetScalarType<T[P], AggregateQuoteCalculator[P]>
+  }
+
+
+
+
+  export type QuoteCalculatorGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteCalculatorWhereInput
+    orderBy?: QuoteCalculatorOrderByWithAggregationInput | QuoteCalculatorOrderByWithAggregationInput[]
+    by: QuoteCalculatorScalarFieldEnum[] | QuoteCalculatorScalarFieldEnum
+    having?: QuoteCalculatorScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: QuoteCalculatorCountAggregateInputType | true
+    _min?: QuoteCalculatorMinAggregateInputType
+    _max?: QuoteCalculatorMaxAggregateInputType
+  }
+
+  export type QuoteCalculatorGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    name: string
+    definition: JsonValue
+    published: boolean
+    businessId: string
+    _count: QuoteCalculatorCountAggregateOutputType | null
+    _min: QuoteCalculatorMinAggregateOutputType | null
+    _max: QuoteCalculatorMaxAggregateOutputType | null
+  }
+
+  type GetQuoteCalculatorGroupByPayload<T extends QuoteCalculatorGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<QuoteCalculatorGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof QuoteCalculatorGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], QuoteCalculatorGroupByOutputType[P]>
+            : GetScalarType<T[P], QuoteCalculatorGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type QuoteCalculatorSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    submissions?: boolean | QuoteCalculator$submissionsArgs<ExtArgs>
+    _count?: boolean | QuoteCalculatorCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quoteCalculator"]>
+
+  export type QuoteCalculatorSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quoteCalculator"]>
+
+  export type QuoteCalculatorSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quoteCalculator"]>
+
+  export type QuoteCalculatorSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    name?: boolean
+    definition?: boolean
+    published?: boolean
+    businessId?: boolean
+  }
+
+  export type QuoteCalculatorOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "name" | "definition" | "published" | "businessId", ExtArgs["result"]["quoteCalculator"]>
+  export type QuoteCalculatorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    submissions?: boolean | QuoteCalculator$submissionsArgs<ExtArgs>
+    _count?: boolean | QuoteCalculatorCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type QuoteCalculatorIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type QuoteCalculatorIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $QuoteCalculatorPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "QuoteCalculator"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      submissions: Prisma.$QuoteSubmissionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      name: string
+      definition: Prisma.JsonValue
+      published: boolean
+      businessId: string
+    }, ExtArgs["result"]["quoteCalculator"]>
+    composites: {}
+  }
+
+  type QuoteCalculatorGetPayload<S extends boolean | null | undefined | QuoteCalculatorDefaultArgs> = $Result.GetResult<Prisma.$QuoteCalculatorPayload, S>
+
+  type QuoteCalculatorCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<QuoteCalculatorFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: QuoteCalculatorCountAggregateInputType | true
+    }
+
+  export interface QuoteCalculatorDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['QuoteCalculator'], meta: { name: 'QuoteCalculator' } }
+    /**
+     * Find zero or one QuoteCalculator that matches the filter.
+     * @param {QuoteCalculatorFindUniqueArgs} args - Arguments to find a QuoteCalculator
+     * @example
+     * // Get one QuoteCalculator
+     * const quoteCalculator = await prisma.quoteCalculator.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends QuoteCalculatorFindUniqueArgs>(args: SelectSubset<T, QuoteCalculatorFindUniqueArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one QuoteCalculator that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {QuoteCalculatorFindUniqueOrThrowArgs} args - Arguments to find a QuoteCalculator
+     * @example
+     * // Get one QuoteCalculator
+     * const quoteCalculator = await prisma.quoteCalculator.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends QuoteCalculatorFindUniqueOrThrowArgs>(args: SelectSubset<T, QuoteCalculatorFindUniqueOrThrowArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuoteCalculator that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorFindFirstArgs} args - Arguments to find a QuoteCalculator
+     * @example
+     * // Get one QuoteCalculator
+     * const quoteCalculator = await prisma.quoteCalculator.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends QuoteCalculatorFindFirstArgs>(args?: SelectSubset<T, QuoteCalculatorFindFirstArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuoteCalculator that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorFindFirstOrThrowArgs} args - Arguments to find a QuoteCalculator
+     * @example
+     * // Get one QuoteCalculator
+     * const quoteCalculator = await prisma.quoteCalculator.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends QuoteCalculatorFindFirstOrThrowArgs>(args?: SelectSubset<T, QuoteCalculatorFindFirstOrThrowArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more QuoteCalculators that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all QuoteCalculators
+     * const quoteCalculators = await prisma.quoteCalculator.findMany()
+     * 
+     * // Get first 10 QuoteCalculators
+     * const quoteCalculators = await prisma.quoteCalculator.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const quoteCalculatorWithIdOnly = await prisma.quoteCalculator.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends QuoteCalculatorFindManyArgs>(args?: SelectSubset<T, QuoteCalculatorFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a QuoteCalculator.
+     * @param {QuoteCalculatorCreateArgs} args - Arguments to create a QuoteCalculator.
+     * @example
+     * // Create one QuoteCalculator
+     * const QuoteCalculator = await prisma.quoteCalculator.create({
+     *   data: {
+     *     // ... data to create a QuoteCalculator
+     *   }
+     * })
+     * 
+     */
+    create<T extends QuoteCalculatorCreateArgs>(args: SelectSubset<T, QuoteCalculatorCreateArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many QuoteCalculators.
+     * @param {QuoteCalculatorCreateManyArgs} args - Arguments to create many QuoteCalculators.
+     * @example
+     * // Create many QuoteCalculators
+     * const quoteCalculator = await prisma.quoteCalculator.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends QuoteCalculatorCreateManyArgs>(args?: SelectSubset<T, QuoteCalculatorCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many QuoteCalculators and returns the data saved in the database.
+     * @param {QuoteCalculatorCreateManyAndReturnArgs} args - Arguments to create many QuoteCalculators.
+     * @example
+     * // Create many QuoteCalculators
+     * const quoteCalculator = await prisma.quoteCalculator.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many QuoteCalculators and only return the `id`
+     * const quoteCalculatorWithIdOnly = await prisma.quoteCalculator.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends QuoteCalculatorCreateManyAndReturnArgs>(args?: SelectSubset<T, QuoteCalculatorCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a QuoteCalculator.
+     * @param {QuoteCalculatorDeleteArgs} args - Arguments to delete one QuoteCalculator.
+     * @example
+     * // Delete one QuoteCalculator
+     * const QuoteCalculator = await prisma.quoteCalculator.delete({
+     *   where: {
+     *     // ... filter to delete one QuoteCalculator
+     *   }
+     * })
+     * 
+     */
+    delete<T extends QuoteCalculatorDeleteArgs>(args: SelectSubset<T, QuoteCalculatorDeleteArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one QuoteCalculator.
+     * @param {QuoteCalculatorUpdateArgs} args - Arguments to update one QuoteCalculator.
+     * @example
+     * // Update one QuoteCalculator
+     * const quoteCalculator = await prisma.quoteCalculator.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends QuoteCalculatorUpdateArgs>(args: SelectSubset<T, QuoteCalculatorUpdateArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more QuoteCalculators.
+     * @param {QuoteCalculatorDeleteManyArgs} args - Arguments to filter QuoteCalculators to delete.
+     * @example
+     * // Delete a few QuoteCalculators
+     * const { count } = await prisma.quoteCalculator.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends QuoteCalculatorDeleteManyArgs>(args?: SelectSubset<T, QuoteCalculatorDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuoteCalculators.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many QuoteCalculators
+     * const quoteCalculator = await prisma.quoteCalculator.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends QuoteCalculatorUpdateManyArgs>(args: SelectSubset<T, QuoteCalculatorUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuoteCalculators and returns the data updated in the database.
+     * @param {QuoteCalculatorUpdateManyAndReturnArgs} args - Arguments to update many QuoteCalculators.
+     * @example
+     * // Update many QuoteCalculators
+     * const quoteCalculator = await prisma.quoteCalculator.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more QuoteCalculators and only return the `id`
+     * const quoteCalculatorWithIdOnly = await prisma.quoteCalculator.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends QuoteCalculatorUpdateManyAndReturnArgs>(args: SelectSubset<T, QuoteCalculatorUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one QuoteCalculator.
+     * @param {QuoteCalculatorUpsertArgs} args - Arguments to update or create a QuoteCalculator.
+     * @example
+     * // Update or create a QuoteCalculator
+     * const quoteCalculator = await prisma.quoteCalculator.upsert({
+     *   create: {
+     *     // ... data to create a QuoteCalculator
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the QuoteCalculator we want to update
+     *   }
+     * })
+     */
+    upsert<T extends QuoteCalculatorUpsertArgs>(args: SelectSubset<T, QuoteCalculatorUpsertArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of QuoteCalculators.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorCountArgs} args - Arguments to filter QuoteCalculators to count.
+     * @example
+     * // Count the number of QuoteCalculators
+     * const count = await prisma.quoteCalculator.count({
+     *   where: {
+     *     // ... the filter for the QuoteCalculators we want to count
+     *   }
+     * })
+    **/
+    count<T extends QuoteCalculatorCountArgs>(
+      args?: Subset<T, QuoteCalculatorCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], QuoteCalculatorCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a QuoteCalculator.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends QuoteCalculatorAggregateArgs>(args: Subset<T, QuoteCalculatorAggregateArgs>): Prisma.PrismaPromise<GetQuoteCalculatorAggregateType<T>>
+
+    /**
+     * Group by QuoteCalculator.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteCalculatorGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends QuoteCalculatorGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: QuoteCalculatorGroupByArgs['orderBy'] }
+        : { orderBy?: QuoteCalculatorGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, QuoteCalculatorGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuoteCalculatorGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the QuoteCalculator model
+   */
+  readonly fields: QuoteCalculatorFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for QuoteCalculator.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__QuoteCalculatorClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    submissions<T extends QuoteCalculator$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, QuoteCalculator$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the QuoteCalculator model
+   */
+  interface QuoteCalculatorFieldRefs {
+    readonly id: FieldRef<"QuoteCalculator", 'String'>
+    readonly createdAt: FieldRef<"QuoteCalculator", 'DateTime'>
+    readonly updatedAt: FieldRef<"QuoteCalculator", 'DateTime'>
+    readonly name: FieldRef<"QuoteCalculator", 'String'>
+    readonly definition: FieldRef<"QuoteCalculator", 'Json'>
+    readonly published: FieldRef<"QuoteCalculator", 'Boolean'>
+    readonly businessId: FieldRef<"QuoteCalculator", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * QuoteCalculator findUnique
+   */
+  export type QuoteCalculatorFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteCalculator to fetch.
+     */
+    where: QuoteCalculatorWhereUniqueInput
+  }
+
+  /**
+   * QuoteCalculator findUniqueOrThrow
+   */
+  export type QuoteCalculatorFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteCalculator to fetch.
+     */
+    where: QuoteCalculatorWhereUniqueInput
+  }
+
+  /**
+   * QuoteCalculator findFirst
+   */
+  export type QuoteCalculatorFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteCalculator to fetch.
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteCalculators to fetch.
+     */
+    orderBy?: QuoteCalculatorOrderByWithRelationInput | QuoteCalculatorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuoteCalculators.
+     */
+    cursor?: QuoteCalculatorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteCalculators from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteCalculators.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuoteCalculators.
+     */
+    distinct?: QuoteCalculatorScalarFieldEnum | QuoteCalculatorScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteCalculator findFirstOrThrow
+   */
+  export type QuoteCalculatorFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteCalculator to fetch.
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteCalculators to fetch.
+     */
+    orderBy?: QuoteCalculatorOrderByWithRelationInput | QuoteCalculatorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuoteCalculators.
+     */
+    cursor?: QuoteCalculatorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteCalculators from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteCalculators.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuoteCalculators.
+     */
+    distinct?: QuoteCalculatorScalarFieldEnum | QuoteCalculatorScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteCalculator findMany
+   */
+  export type QuoteCalculatorFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteCalculators to fetch.
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteCalculators to fetch.
+     */
+    orderBy?: QuoteCalculatorOrderByWithRelationInput | QuoteCalculatorOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing QuoteCalculators.
+     */
+    cursor?: QuoteCalculatorWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteCalculators from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteCalculators.
+     */
+    skip?: number
+    distinct?: QuoteCalculatorScalarFieldEnum | QuoteCalculatorScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteCalculator create
+   */
+  export type QuoteCalculatorCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * The data needed to create a QuoteCalculator.
+     */
+    data: XOR<QuoteCalculatorCreateInput, QuoteCalculatorUncheckedCreateInput>
+  }
+
+  /**
+   * QuoteCalculator createMany
+   */
+  export type QuoteCalculatorCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many QuoteCalculators.
+     */
+    data: QuoteCalculatorCreateManyInput | QuoteCalculatorCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * QuoteCalculator createManyAndReturn
+   */
+  export type QuoteCalculatorCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * The data used to create many QuoteCalculators.
+     */
+    data: QuoteCalculatorCreateManyInput | QuoteCalculatorCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuoteCalculator update
+   */
+  export type QuoteCalculatorUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * The data needed to update a QuoteCalculator.
+     */
+    data: XOR<QuoteCalculatorUpdateInput, QuoteCalculatorUncheckedUpdateInput>
+    /**
+     * Choose, which QuoteCalculator to update.
+     */
+    where: QuoteCalculatorWhereUniqueInput
+  }
+
+  /**
+   * QuoteCalculator updateMany
+   */
+  export type QuoteCalculatorUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update QuoteCalculators.
+     */
+    data: XOR<QuoteCalculatorUpdateManyMutationInput, QuoteCalculatorUncheckedUpdateManyInput>
+    /**
+     * Filter which QuoteCalculators to update
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * Limit how many QuoteCalculators to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuoteCalculator updateManyAndReturn
+   */
+  export type QuoteCalculatorUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * The data used to update QuoteCalculators.
+     */
+    data: XOR<QuoteCalculatorUpdateManyMutationInput, QuoteCalculatorUncheckedUpdateManyInput>
+    /**
+     * Filter which QuoteCalculators to update
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * Limit how many QuoteCalculators to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuoteCalculator upsert
+   */
+  export type QuoteCalculatorUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * The filter to search for the QuoteCalculator to update in case it exists.
+     */
+    where: QuoteCalculatorWhereUniqueInput
+    /**
+     * In case the QuoteCalculator found by the `where` argument doesn't exist, create a new QuoteCalculator with this data.
+     */
+    create: XOR<QuoteCalculatorCreateInput, QuoteCalculatorUncheckedCreateInput>
+    /**
+     * In case the QuoteCalculator was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<QuoteCalculatorUpdateInput, QuoteCalculatorUncheckedUpdateInput>
+  }
+
+  /**
+   * QuoteCalculator delete
+   */
+  export type QuoteCalculatorDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    /**
+     * Filter which QuoteCalculator to delete.
+     */
+    where: QuoteCalculatorWhereUniqueInput
+  }
+
+  /**
+   * QuoteCalculator deleteMany
+   */
+  export type QuoteCalculatorDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuoteCalculators to delete
+     */
+    where?: QuoteCalculatorWhereInput
+    /**
+     * Limit how many QuoteCalculators to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuoteCalculator.submissions
+   */
+  export type QuoteCalculator$submissionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    where?: QuoteSubmissionWhereInput
+    orderBy?: QuoteSubmissionOrderByWithRelationInput | QuoteSubmissionOrderByWithRelationInput[]
+    cursor?: QuoteSubmissionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteCalculator without action
+   */
+  export type QuoteCalculatorDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model QuoteSubmission
+   */
+
+  export type AggregateQuoteSubmission = {
+    _count: QuoteSubmissionCountAggregateOutputType | null
+    _avg: QuoteSubmissionAvgAggregateOutputType | null
+    _sum: QuoteSubmissionSumAggregateOutputType | null
+    _min: QuoteSubmissionMinAggregateOutputType | null
+    _max: QuoteSubmissionMaxAggregateOutputType | null
+  }
+
+  export type QuoteSubmissionAvgAggregateOutputType = {
+    estimateCents: number | null
+    finalQuoteCents: number | null
+    sentQuoteCents: number | null
+  }
+
+  export type QuoteSubmissionSumAggregateOutputType = {
+    estimateCents: number | null
+    finalQuoteCents: number | null
+    sentQuoteCents: number | null
+  }
+
+  export type QuoteSubmissionMinAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    status: string | null
+    contactName: string | null
+    contactEmail: string | null
+    contactPhone: string | null
+    estimateCents: number | null
+    finalQuoteCents: number | null
+    quoteSentAt: Date | null
+    sentQuoteCents: number | null
+    sentMessage: string | null
+    calculatorName: string | null
+    showEstimateToCustomer: boolean | null
+    calculatorId: string | null
+    businessId: string | null
+  }
+
+  export type QuoteSubmissionMaxAggregateOutputType = {
+    id: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    status: string | null
+    contactName: string | null
+    contactEmail: string | null
+    contactPhone: string | null
+    estimateCents: number | null
+    finalQuoteCents: number | null
+    quoteSentAt: Date | null
+    sentQuoteCents: number | null
+    sentMessage: string | null
+    calculatorName: string | null
+    showEstimateToCustomer: boolean | null
+    calculatorId: string | null
+    businessId: string | null
+  }
+
+  export type QuoteSubmissionCountAggregateOutputType = {
+    id: number
+    createdAt: number
+    updatedAt: number
+    status: number
+    contactName: number
+    contactEmail: number
+    contactPhone: number
+    answers: number
+    estimateCents: number
+    formulaSnapshot: number
+    finalQuoteCents: number
+    quoteSentAt: number
+    sentQuoteCents: number
+    sentMessage: number
+    calculatorName: number
+    showEstimateToCustomer: number
+    calculatorId: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type QuoteSubmissionAvgAggregateInputType = {
+    estimateCents?: true
+    finalQuoteCents?: true
+    sentQuoteCents?: true
+  }
+
+  export type QuoteSubmissionSumAggregateInputType = {
+    estimateCents?: true
+    finalQuoteCents?: true
+    sentQuoteCents?: true
+  }
+
+  export type QuoteSubmissionMinAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    status?: true
+    contactName?: true
+    contactEmail?: true
+    contactPhone?: true
+    estimateCents?: true
+    finalQuoteCents?: true
+    quoteSentAt?: true
+    sentQuoteCents?: true
+    sentMessage?: true
+    calculatorName?: true
+    showEstimateToCustomer?: true
+    calculatorId?: true
+    businessId?: true
+  }
+
+  export type QuoteSubmissionMaxAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    status?: true
+    contactName?: true
+    contactEmail?: true
+    contactPhone?: true
+    estimateCents?: true
+    finalQuoteCents?: true
+    quoteSentAt?: true
+    sentQuoteCents?: true
+    sentMessage?: true
+    calculatorName?: true
+    showEstimateToCustomer?: true
+    calculatorId?: true
+    businessId?: true
+  }
+
+  export type QuoteSubmissionCountAggregateInputType = {
+    id?: true
+    createdAt?: true
+    updatedAt?: true
+    status?: true
+    contactName?: true
+    contactEmail?: true
+    contactPhone?: true
+    answers?: true
+    estimateCents?: true
+    formulaSnapshot?: true
+    finalQuoteCents?: true
+    quoteSentAt?: true
+    sentQuoteCents?: true
+    sentMessage?: true
+    calculatorName?: true
+    showEstimateToCustomer?: true
+    calculatorId?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type QuoteSubmissionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuoteSubmission to aggregate.
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteSubmissions to fetch.
+     */
+    orderBy?: QuoteSubmissionOrderByWithRelationInput | QuoteSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: QuoteSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned QuoteSubmissions
+    **/
+    _count?: true | QuoteSubmissionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: QuoteSubmissionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: QuoteSubmissionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: QuoteSubmissionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: QuoteSubmissionMaxAggregateInputType
+  }
+
+  export type GetQuoteSubmissionAggregateType<T extends QuoteSubmissionAggregateArgs> = {
+        [P in keyof T & keyof AggregateQuoteSubmission]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateQuoteSubmission[P]>
+      : GetScalarType<T[P], AggregateQuoteSubmission[P]>
+  }
+
+
+
+
+  export type QuoteSubmissionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteSubmissionWhereInput
+    orderBy?: QuoteSubmissionOrderByWithAggregationInput | QuoteSubmissionOrderByWithAggregationInput[]
+    by: QuoteSubmissionScalarFieldEnum[] | QuoteSubmissionScalarFieldEnum
+    having?: QuoteSubmissionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: QuoteSubmissionCountAggregateInputType | true
+    _avg?: QuoteSubmissionAvgAggregateInputType
+    _sum?: QuoteSubmissionSumAggregateInputType
+    _min?: QuoteSubmissionMinAggregateInputType
+    _max?: QuoteSubmissionMaxAggregateInputType
+  }
+
+  export type QuoteSubmissionGroupByOutputType = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    status: string
+    contactName: string
+    contactEmail: string
+    contactPhone: string | null
+    answers: JsonValue
+    estimateCents: number | null
+    formulaSnapshot: JsonValue
+    finalQuoteCents: number | null
+    quoteSentAt: Date | null
+    sentQuoteCents: number | null
+    sentMessage: string | null
+    calculatorName: string
+    showEstimateToCustomer: boolean
+    calculatorId: string | null
+    businessId: string
+    _count: QuoteSubmissionCountAggregateOutputType | null
+    _avg: QuoteSubmissionAvgAggregateOutputType | null
+    _sum: QuoteSubmissionSumAggregateOutputType | null
+    _min: QuoteSubmissionMinAggregateOutputType | null
+    _max: QuoteSubmissionMaxAggregateOutputType | null
+  }
+
+  type GetQuoteSubmissionGroupByPayload<T extends QuoteSubmissionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<QuoteSubmissionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof QuoteSubmissionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], QuoteSubmissionGroupByOutputType[P]>
+            : GetScalarType<T[P], QuoteSubmissionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type QuoteSubmissionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    status?: boolean
+    contactName?: boolean
+    contactEmail?: boolean
+    contactPhone?: boolean
+    answers?: boolean
+    estimateCents?: boolean
+    formulaSnapshot?: boolean
+    finalQuoteCents?: boolean
+    quoteSentAt?: boolean
+    sentQuoteCents?: boolean
+    sentMessage?: boolean
+    calculatorName?: boolean
+    showEstimateToCustomer?: boolean
+    calculatorId?: boolean
+    businessId?: boolean
+    calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quoteSubmission"]>
+
+  export type QuoteSubmissionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    status?: boolean
+    contactName?: boolean
+    contactEmail?: boolean
+    contactPhone?: boolean
+    answers?: boolean
+    estimateCents?: boolean
+    formulaSnapshot?: boolean
+    finalQuoteCents?: boolean
+    quoteSentAt?: boolean
+    sentQuoteCents?: boolean
+    sentMessage?: boolean
+    calculatorName?: boolean
+    showEstimateToCustomer?: boolean
+    calculatorId?: boolean
+    businessId?: boolean
+    calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quoteSubmission"]>
+
+  export type QuoteSubmissionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    status?: boolean
+    contactName?: boolean
+    contactEmail?: boolean
+    contactPhone?: boolean
+    answers?: boolean
+    estimateCents?: boolean
+    formulaSnapshot?: boolean
+    finalQuoteCents?: boolean
+    quoteSentAt?: boolean
+    sentQuoteCents?: boolean
+    sentMessage?: boolean
+    calculatorName?: boolean
+    showEstimateToCustomer?: boolean
+    calculatorId?: boolean
+    businessId?: boolean
+    calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["quoteSubmission"]>
+
+  export type QuoteSubmissionSelectScalar = {
+    id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    status?: boolean
+    contactName?: boolean
+    contactEmail?: boolean
+    contactPhone?: boolean
+    answers?: boolean
+    estimateCents?: boolean
+    formulaSnapshot?: boolean
+    finalQuoteCents?: boolean
+    quoteSentAt?: boolean
+    sentQuoteCents?: boolean
+    sentMessage?: boolean
+    calculatorName?: boolean
+    showEstimateToCustomer?: boolean
+    calculatorId?: boolean
+    businessId?: boolean
+  }
+
+  export type QuoteSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "status" | "contactName" | "contactEmail" | "contactPhone" | "answers" | "estimateCents" | "formulaSnapshot" | "finalQuoteCents" | "quoteSentAt" | "sentQuoteCents" | "sentMessage" | "calculatorName" | "showEstimateToCustomer" | "calculatorId" | "businessId", ExtArgs["result"]["quoteSubmission"]>
+  export type QuoteSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type QuoteSubmissionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type QuoteSubmissionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    calculator?: boolean | QuoteSubmission$calculatorArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $QuoteSubmissionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "QuoteSubmission"
+    objects: {
+      calculator: Prisma.$QuoteCalculatorPayload<ExtArgs> | null
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      createdAt: Date
+      updatedAt: Date
+      status: string
+      /**
+       * @encrypted
+       */
+      contactName: string
+      /**
+       * @encrypted
+       */
+      contactEmail: string
+      /**
+       * @encrypted
+       */
+      contactPhone: string | null
+      answers: Prisma.JsonValue
+      estimateCents: number | null
+      formulaSnapshot: Prisma.JsonValue
+      finalQuoteCents: number | null
+      quoteSentAt: Date | null
+      sentQuoteCents: number | null
+      /**
+       * @encrypted
+       */
+      sentMessage: string | null
+      calculatorName: string
+      showEstimateToCustomer: boolean
+      calculatorId: string | null
+      businessId: string
+    }, ExtArgs["result"]["quoteSubmission"]>
+    composites: {}
+  }
+
+  type QuoteSubmissionGetPayload<S extends boolean | null | undefined | QuoteSubmissionDefaultArgs> = $Result.GetResult<Prisma.$QuoteSubmissionPayload, S>
+
+  type QuoteSubmissionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<QuoteSubmissionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: QuoteSubmissionCountAggregateInputType | true
+    }
+
+  export interface QuoteSubmissionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['QuoteSubmission'], meta: { name: 'QuoteSubmission' } }
+    /**
+     * Find zero or one QuoteSubmission that matches the filter.
+     * @param {QuoteSubmissionFindUniqueArgs} args - Arguments to find a QuoteSubmission
+     * @example
+     * // Get one QuoteSubmission
+     * const quoteSubmission = await prisma.quoteSubmission.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends QuoteSubmissionFindUniqueArgs>(args: SelectSubset<T, QuoteSubmissionFindUniqueArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one QuoteSubmission that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {QuoteSubmissionFindUniqueOrThrowArgs} args - Arguments to find a QuoteSubmission
+     * @example
+     * // Get one QuoteSubmission
+     * const quoteSubmission = await prisma.quoteSubmission.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends QuoteSubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, QuoteSubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuoteSubmission that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionFindFirstArgs} args - Arguments to find a QuoteSubmission
+     * @example
+     * // Get one QuoteSubmission
+     * const quoteSubmission = await prisma.quoteSubmission.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends QuoteSubmissionFindFirstArgs>(args?: SelectSubset<T, QuoteSubmissionFindFirstArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first QuoteSubmission that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionFindFirstOrThrowArgs} args - Arguments to find a QuoteSubmission
+     * @example
+     * // Get one QuoteSubmission
+     * const quoteSubmission = await prisma.quoteSubmission.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends QuoteSubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, QuoteSubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more QuoteSubmissions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all QuoteSubmissions
+     * const quoteSubmissions = await prisma.quoteSubmission.findMany()
+     * 
+     * // Get first 10 QuoteSubmissions
+     * const quoteSubmissions = await prisma.quoteSubmission.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const quoteSubmissionWithIdOnly = await prisma.quoteSubmission.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends QuoteSubmissionFindManyArgs>(args?: SelectSubset<T, QuoteSubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a QuoteSubmission.
+     * @param {QuoteSubmissionCreateArgs} args - Arguments to create a QuoteSubmission.
+     * @example
+     * // Create one QuoteSubmission
+     * const QuoteSubmission = await prisma.quoteSubmission.create({
+     *   data: {
+     *     // ... data to create a QuoteSubmission
+     *   }
+     * })
+     * 
+     */
+    create<T extends QuoteSubmissionCreateArgs>(args: SelectSubset<T, QuoteSubmissionCreateArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many QuoteSubmissions.
+     * @param {QuoteSubmissionCreateManyArgs} args - Arguments to create many QuoteSubmissions.
+     * @example
+     * // Create many QuoteSubmissions
+     * const quoteSubmission = await prisma.quoteSubmission.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends QuoteSubmissionCreateManyArgs>(args?: SelectSubset<T, QuoteSubmissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many QuoteSubmissions and returns the data saved in the database.
+     * @param {QuoteSubmissionCreateManyAndReturnArgs} args - Arguments to create many QuoteSubmissions.
+     * @example
+     * // Create many QuoteSubmissions
+     * const quoteSubmission = await prisma.quoteSubmission.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many QuoteSubmissions and only return the `id`
+     * const quoteSubmissionWithIdOnly = await prisma.quoteSubmission.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends QuoteSubmissionCreateManyAndReturnArgs>(args?: SelectSubset<T, QuoteSubmissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a QuoteSubmission.
+     * @param {QuoteSubmissionDeleteArgs} args - Arguments to delete one QuoteSubmission.
+     * @example
+     * // Delete one QuoteSubmission
+     * const QuoteSubmission = await prisma.quoteSubmission.delete({
+     *   where: {
+     *     // ... filter to delete one QuoteSubmission
+     *   }
+     * })
+     * 
+     */
+    delete<T extends QuoteSubmissionDeleteArgs>(args: SelectSubset<T, QuoteSubmissionDeleteArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one QuoteSubmission.
+     * @param {QuoteSubmissionUpdateArgs} args - Arguments to update one QuoteSubmission.
+     * @example
+     * // Update one QuoteSubmission
+     * const quoteSubmission = await prisma.quoteSubmission.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends QuoteSubmissionUpdateArgs>(args: SelectSubset<T, QuoteSubmissionUpdateArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more QuoteSubmissions.
+     * @param {QuoteSubmissionDeleteManyArgs} args - Arguments to filter QuoteSubmissions to delete.
+     * @example
+     * // Delete a few QuoteSubmissions
+     * const { count } = await prisma.quoteSubmission.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends QuoteSubmissionDeleteManyArgs>(args?: SelectSubset<T, QuoteSubmissionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuoteSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many QuoteSubmissions
+     * const quoteSubmission = await prisma.quoteSubmission.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends QuoteSubmissionUpdateManyArgs>(args: SelectSubset<T, QuoteSubmissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more QuoteSubmissions and returns the data updated in the database.
+     * @param {QuoteSubmissionUpdateManyAndReturnArgs} args - Arguments to update many QuoteSubmissions.
+     * @example
+     * // Update many QuoteSubmissions
+     * const quoteSubmission = await prisma.quoteSubmission.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more QuoteSubmissions and only return the `id`
+     * const quoteSubmissionWithIdOnly = await prisma.quoteSubmission.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends QuoteSubmissionUpdateManyAndReturnArgs>(args: SelectSubset<T, QuoteSubmissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one QuoteSubmission.
+     * @param {QuoteSubmissionUpsertArgs} args - Arguments to update or create a QuoteSubmission.
+     * @example
+     * // Update or create a QuoteSubmission
+     * const quoteSubmission = await prisma.quoteSubmission.upsert({
+     *   create: {
+     *     // ... data to create a QuoteSubmission
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the QuoteSubmission we want to update
+     *   }
+     * })
+     */
+    upsert<T extends QuoteSubmissionUpsertArgs>(args: SelectSubset<T, QuoteSubmissionUpsertArgs<ExtArgs>>): Prisma__QuoteSubmissionClient<$Result.GetResult<Prisma.$QuoteSubmissionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of QuoteSubmissions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionCountArgs} args - Arguments to filter QuoteSubmissions to count.
+     * @example
+     * // Count the number of QuoteSubmissions
+     * const count = await prisma.quoteSubmission.count({
+     *   where: {
+     *     // ... the filter for the QuoteSubmissions we want to count
+     *   }
+     * })
+    **/
+    count<T extends QuoteSubmissionCountArgs>(
+      args?: Subset<T, QuoteSubmissionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], QuoteSubmissionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a QuoteSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends QuoteSubmissionAggregateArgs>(args: Subset<T, QuoteSubmissionAggregateArgs>): Prisma.PrismaPromise<GetQuoteSubmissionAggregateType<T>>
+
+    /**
+     * Group by QuoteSubmission.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {QuoteSubmissionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends QuoteSubmissionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: QuoteSubmissionGroupByArgs['orderBy'] }
+        : { orderBy?: QuoteSubmissionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, QuoteSubmissionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetQuoteSubmissionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the QuoteSubmission model
+   */
+  readonly fields: QuoteSubmissionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for QuoteSubmission.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__QuoteSubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    calculator<T extends QuoteSubmission$calculatorArgs<ExtArgs> = {}>(args?: Subset<T, QuoteSubmission$calculatorArgs<ExtArgs>>): Prisma__QuoteCalculatorClient<$Result.GetResult<Prisma.$QuoteCalculatorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the QuoteSubmission model
+   */
+  interface QuoteSubmissionFieldRefs {
+    readonly id: FieldRef<"QuoteSubmission", 'String'>
+    readonly createdAt: FieldRef<"QuoteSubmission", 'DateTime'>
+    readonly updatedAt: FieldRef<"QuoteSubmission", 'DateTime'>
+    readonly status: FieldRef<"QuoteSubmission", 'String'>
+    readonly contactName: FieldRef<"QuoteSubmission", 'String'>
+    readonly contactEmail: FieldRef<"QuoteSubmission", 'String'>
+    readonly contactPhone: FieldRef<"QuoteSubmission", 'String'>
+    readonly answers: FieldRef<"QuoteSubmission", 'Json'>
+    readonly estimateCents: FieldRef<"QuoteSubmission", 'Int'>
+    readonly formulaSnapshot: FieldRef<"QuoteSubmission", 'Json'>
+    readonly finalQuoteCents: FieldRef<"QuoteSubmission", 'Int'>
+    readonly quoteSentAt: FieldRef<"QuoteSubmission", 'DateTime'>
+    readonly sentQuoteCents: FieldRef<"QuoteSubmission", 'Int'>
+    readonly sentMessage: FieldRef<"QuoteSubmission", 'String'>
+    readonly calculatorName: FieldRef<"QuoteSubmission", 'String'>
+    readonly showEstimateToCustomer: FieldRef<"QuoteSubmission", 'Boolean'>
+    readonly calculatorId: FieldRef<"QuoteSubmission", 'String'>
+    readonly businessId: FieldRef<"QuoteSubmission", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * QuoteSubmission findUnique
+   */
+  export type QuoteSubmissionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteSubmission to fetch.
+     */
+    where: QuoteSubmissionWhereUniqueInput
+  }
+
+  /**
+   * QuoteSubmission findUniqueOrThrow
+   */
+  export type QuoteSubmissionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteSubmission to fetch.
+     */
+    where: QuoteSubmissionWhereUniqueInput
+  }
+
+  /**
+   * QuoteSubmission findFirst
+   */
+  export type QuoteSubmissionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteSubmission to fetch.
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteSubmissions to fetch.
+     */
+    orderBy?: QuoteSubmissionOrderByWithRelationInput | QuoteSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuoteSubmissions.
+     */
+    cursor?: QuoteSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuoteSubmissions.
+     */
+    distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteSubmission findFirstOrThrow
+   */
+  export type QuoteSubmissionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteSubmission to fetch.
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteSubmissions to fetch.
+     */
+    orderBy?: QuoteSubmissionOrderByWithRelationInput | QuoteSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for QuoteSubmissions.
+     */
+    cursor?: QuoteSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteSubmissions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of QuoteSubmissions.
+     */
+    distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteSubmission findMany
+   */
+  export type QuoteSubmissionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter, which QuoteSubmissions to fetch.
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of QuoteSubmissions to fetch.
+     */
+    orderBy?: QuoteSubmissionOrderByWithRelationInput | QuoteSubmissionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing QuoteSubmissions.
+     */
+    cursor?: QuoteSubmissionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` QuoteSubmissions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` QuoteSubmissions.
+     */
+    skip?: number
+    distinct?: QuoteSubmissionScalarFieldEnum | QuoteSubmissionScalarFieldEnum[]
+  }
+
+  /**
+   * QuoteSubmission create
+   */
+  export type QuoteSubmissionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a QuoteSubmission.
+     */
+    data: XOR<QuoteSubmissionCreateInput, QuoteSubmissionUncheckedCreateInput>
+  }
+
+  /**
+   * QuoteSubmission createMany
+   */
+  export type QuoteSubmissionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many QuoteSubmissions.
+     */
+    data: QuoteSubmissionCreateManyInput | QuoteSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * QuoteSubmission createManyAndReturn
+   */
+  export type QuoteSubmissionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to create many QuoteSubmissions.
+     */
+    data: QuoteSubmissionCreateManyInput | QuoteSubmissionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuoteSubmission update
+   */
+  export type QuoteSubmissionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a QuoteSubmission.
+     */
+    data: XOR<QuoteSubmissionUpdateInput, QuoteSubmissionUncheckedUpdateInput>
+    /**
+     * Choose, which QuoteSubmission to update.
+     */
+    where: QuoteSubmissionWhereUniqueInput
+  }
+
+  /**
+   * QuoteSubmission updateMany
+   */
+  export type QuoteSubmissionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update QuoteSubmissions.
+     */
+    data: XOR<QuoteSubmissionUpdateManyMutationInput, QuoteSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which QuoteSubmissions to update
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * Limit how many QuoteSubmissions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuoteSubmission updateManyAndReturn
+   */
+  export type QuoteSubmissionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * The data used to update QuoteSubmissions.
+     */
+    data: XOR<QuoteSubmissionUpdateManyMutationInput, QuoteSubmissionUncheckedUpdateManyInput>
+    /**
+     * Filter which QuoteSubmissions to update
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * Limit how many QuoteSubmissions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * QuoteSubmission upsert
+   */
+  export type QuoteSubmissionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the QuoteSubmission to update in case it exists.
+     */
+    where: QuoteSubmissionWhereUniqueInput
+    /**
+     * In case the QuoteSubmission found by the `where` argument doesn't exist, create a new QuoteSubmission with this data.
+     */
+    create: XOR<QuoteSubmissionCreateInput, QuoteSubmissionUncheckedCreateInput>
+    /**
+     * In case the QuoteSubmission was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<QuoteSubmissionUpdateInput, QuoteSubmissionUncheckedUpdateInput>
+  }
+
+  /**
+   * QuoteSubmission delete
+   */
+  export type QuoteSubmissionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+    /**
+     * Filter which QuoteSubmission to delete.
+     */
+    where: QuoteSubmissionWhereUniqueInput
+  }
+
+  /**
+   * QuoteSubmission deleteMany
+   */
+  export type QuoteSubmissionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which QuoteSubmissions to delete
+     */
+    where?: QuoteSubmissionWhereInput
+    /**
+     * Limit how many QuoteSubmissions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * QuoteSubmission.calculator
+   */
+  export type QuoteSubmission$calculatorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCalculator
+     */
+    select?: QuoteCalculatorSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteCalculator
+     */
+    omit?: QuoteCalculatorOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteCalculatorInclude<ExtArgs> | null
+    where?: QuoteCalculatorWhereInput
+  }
+
+  /**
+   * QuoteSubmission without action
+   */
+  export type QuoteSubmissionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteSubmission
+     */
+    select?: QuoteSubmissionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the QuoteSubmission
+     */
+    omit?: QuoteSubmissionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteSubmissionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -58951,7 +61772,9 @@ export namespace Prisma {
     image: 'image',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    platformRole: 'platformRole'
+    platformRole: 'platformRole',
+    termsAcceptedAt: 'termsAcceptedAt',
+    termsVersion: 'termsVersion'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -58962,7 +61785,9 @@ export namespace Prisma {
     createdAt: 'createdAt',
     userId: 'userId',
     businessId: 'businessId',
-    role: 'role'
+    role: 'role',
+    merchantTermsAcceptedAt: 'merchantTermsAcceptedAt',
+    merchantTermsVersion: 'merchantTermsVersion'
   };
 
   export type BusinessMembershipScalarFieldEnum = (typeof BusinessMembershipScalarFieldEnum)[keyof typeof BusinessMembershipScalarFieldEnum]
@@ -59085,6 +61910,8 @@ export namespace Prisma {
     metaKeywords: 'metaKeywords',
     ogImage: 'ogImage',
     faviconUrl: 'faviconUrl',
+    pageMeta: 'pageMeta',
+    siteVerification: 'siteVerification',
     logoUrl: 'logoUrl',
     logoAltText: 'logoAltText',
     primaryColor: 'primaryColor',
@@ -59377,6 +62204,9 @@ export namespace Prisma {
     id: 'id',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    termsAcceptedAt: 'termsAcceptedAt',
+    termsVersion: 'termsVersion',
+    merchantTermsUpdatedAt: 'merchantTermsUpdatedAt',
     orderNumber: 'orderNumber',
     status: 'status',
     paymentStatus: 'paymentStatus',
@@ -59777,6 +62607,43 @@ export namespace Prisma {
   export type BackInStockRequestScalarFieldEnum = (typeof BackInStockRequestScalarFieldEnum)[keyof typeof BackInStockRequestScalarFieldEnum]
 
 
+  export const QuoteCalculatorScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    name: 'name',
+    definition: 'definition',
+    published: 'published',
+    businessId: 'businessId'
+  };
+
+  export type QuoteCalculatorScalarFieldEnum = (typeof QuoteCalculatorScalarFieldEnum)[keyof typeof QuoteCalculatorScalarFieldEnum]
+
+
+  export const QuoteSubmissionScalarFieldEnum: {
+    id: 'id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    status: 'status',
+    contactName: 'contactName',
+    contactEmail: 'contactEmail',
+    contactPhone: 'contactPhone',
+    answers: 'answers',
+    estimateCents: 'estimateCents',
+    formulaSnapshot: 'formulaSnapshot',
+    finalQuoteCents: 'finalQuoteCents',
+    quoteSentAt: 'quoteSentAt',
+    sentQuoteCents: 'sentQuoteCents',
+    sentMessage: 'sentMessage',
+    calculatorName: 'calculatorName',
+    showEstimateToCustomer: 'showEstimateToCustomer',
+    calculatorId: 'calculatorId',
+    businessId: 'businessId'
+  };
+
+  export type QuoteSubmissionScalarFieldEnum = (typeof QuoteSubmissionScalarFieldEnum)[keyof typeof QuoteSubmissionScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -59964,6 +62831,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     platformRole?: EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+    termsAcceptedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    termsVersion?: StringNullableFilter<"User"> | string | null
     sessions?: SessionListRelationFilter
     accounts?: AccountListRelationFilter
     memberships?: BusinessMembershipListRelationFilter
@@ -59982,6 +62851,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
     sessions?: SessionOrderByRelationAggregateInput
     accounts?: AccountOrderByRelationAggregateInput
     memberships?: BusinessMembershipOrderByRelationAggregateInput
@@ -60003,6 +62874,8 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     platformRole?: EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+    termsAcceptedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    termsVersion?: StringNullableFilter<"User"> | string | null
     sessions?: SessionListRelationFilter
     accounts?: AccountListRelationFilter
     memberships?: BusinessMembershipListRelationFilter
@@ -60021,6 +62894,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -60038,6 +62913,8 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     platformRole?: EnumPlatformRoleWithAggregatesFilter<"User"> | $Enums.PlatformRole
+    termsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    termsVersion?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type BusinessMembershipWhereInput = {
@@ -60049,6 +62926,8 @@ export namespace Prisma {
     userId?: StringFilter<"BusinessMembership"> | string
     businessId?: StringFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
@@ -60059,6 +62938,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrderInput | SortOrder
+    merchantTermsVersion?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
   }
@@ -60073,6 +62954,8 @@ export namespace Prisma {
     userId?: StringFilter<"BusinessMembership"> | string
     businessId?: StringFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "userId_businessId">
@@ -60083,6 +62966,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrderInput | SortOrder
+    merchantTermsVersion?: SortOrderInput | SortOrder
     _count?: BusinessMembershipCountOrderByAggregateInput
     _max?: BusinessMembershipMaxOrderByAggregateInput
     _min?: BusinessMembershipMinOrderByAggregateInput
@@ -60097,6 +62982,8 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"BusinessMembership"> | string
     businessId?: StringWithAggregatesFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleWithAggregatesFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableWithAggregatesFilter<"BusinessMembership"> | string | null
   }
 
   export type SessionWhereInput = {
@@ -60414,6 +63301,8 @@ export namespace Prisma {
     videos?: VideoListRelationFilter
     videoSources?: VideoSourceListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
+    quoteCalculators?: QuoteCalculatorListRelationFilter
+    quoteSubmissions?: QuoteSubmissionListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -60486,6 +63375,8 @@ export namespace Prisma {
     videos?: VideoOrderByRelationAggregateInput
     videoSources?: VideoSourceOrderByRelationAggregateInput
     backInStockRequests?: BackInStockRequestOrderByRelationAggregateInput
+    quoteCalculators?: QuoteCalculatorOrderByRelationAggregateInput
+    quoteSubmissions?: QuoteSubmissionOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -60561,6 +63452,8 @@ export namespace Prisma {
     videos?: VideoListRelationFilter
     videoSources?: VideoSourceListRelationFilter
     backInStockRequests?: BackInStockRequestListRelationFilter
+    quoteCalculators?: QuoteCalculatorListRelationFilter
+    quoteSubmissions?: QuoteSubmissionListRelationFilter
   }, "id" | "slug" | "subdomain" | "customDomain" | "afProvisionCode" | "stripeAccountId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -60685,6 +63578,8 @@ export namespace Prisma {
     metaKeywords?: StringNullableFilter<"SiteContent"> | string | null
     ogImage?: StringNullableFilter<"SiteContent"> | string | null
     faviconUrl?: StringNullableFilter<"SiteContent"> | string | null
+    pageMeta?: JsonNullableFilter<"SiteContent">
+    siteVerification?: JsonNullableFilter<"SiteContent">
     logoUrl?: StringNullableFilter<"SiteContent"> | string | null
     logoAltText?: StringNullableFilter<"SiteContent"> | string | null
     primaryColor?: StringNullableFilter<"SiteContent"> | string | null
@@ -60720,6 +63615,8 @@ export namespace Prisma {
     metaKeywords?: SortOrderInput | SortOrder
     ogImage?: SortOrderInput | SortOrder
     faviconUrl?: SortOrderInput | SortOrder
+    pageMeta?: SortOrderInput | SortOrder
+    siteVerification?: SortOrderInput | SortOrder
     logoUrl?: SortOrderInput | SortOrder
     logoAltText?: SortOrderInput | SortOrder
     primaryColor?: SortOrderInput | SortOrder
@@ -60759,6 +63656,8 @@ export namespace Prisma {
     metaKeywords?: StringNullableFilter<"SiteContent"> | string | null
     ogImage?: StringNullableFilter<"SiteContent"> | string | null
     faviconUrl?: StringNullableFilter<"SiteContent"> | string | null
+    pageMeta?: JsonNullableFilter<"SiteContent">
+    siteVerification?: JsonNullableFilter<"SiteContent">
     logoUrl?: StringNullableFilter<"SiteContent"> | string | null
     logoAltText?: StringNullableFilter<"SiteContent"> | string | null
     primaryColor?: StringNullableFilter<"SiteContent"> | string | null
@@ -60793,6 +63692,8 @@ export namespace Prisma {
     metaKeywords?: SortOrderInput | SortOrder
     ogImage?: SortOrderInput | SortOrder
     faviconUrl?: SortOrderInput | SortOrder
+    pageMeta?: SortOrderInput | SortOrder
+    siteVerification?: SortOrderInput | SortOrder
     logoUrl?: SortOrderInput | SortOrder
     logoAltText?: SortOrderInput | SortOrder
     primaryColor?: SortOrderInput | SortOrder
@@ -60833,6 +63734,8 @@ export namespace Prisma {
     metaKeywords?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     ogImage?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     faviconUrl?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
+    pageMeta?: JsonNullableWithAggregatesFilter<"SiteContent">
+    siteVerification?: JsonNullableWithAggregatesFilter<"SiteContent">
     logoUrl?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     logoAltText?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
     primaryColor?: StringNullableWithAggregatesFilter<"SiteContent"> | string | null
@@ -62303,6 +65206,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     orderNumber?: IntFilter<"Order"> | number
     status?: StringFilter<"Order"> | string
     paymentStatus?: StringFilter<"Order"> | string
@@ -62343,6 +65249,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
+    merchantTermsUpdatedAt?: SortOrderInput | SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -62388,6 +65297,9 @@ export namespace Prisma {
     NOT?: OrderWhereInput | OrderWhereInput[]
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     orderNumber?: IntFilter<"Order"> | number
     status?: StringFilter<"Order"> | string
     paymentStatus?: StringFilter<"Order"> | string
@@ -62427,6 +65339,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrderInput | SortOrder
+    termsVersion?: SortOrderInput | SortOrder
+    merchantTermsUpdatedAt?: SortOrderInput | SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -62467,6 +65382,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Order"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
     orderNumber?: IntWithAggregatesFilter<"Order"> | number
     status?: StringWithAggregatesFilter<"Order"> | string
     paymentStatus?: StringWithAggregatesFilter<"Order"> | string
@@ -64425,6 +67343,199 @@ export namespace Prisma {
     businessId?: StringWithAggregatesFilter<"BackInStockRequest"> | string
   }
 
+  export type QuoteCalculatorWhereInput = {
+    AND?: QuoteCalculatorWhereInput | QuoteCalculatorWhereInput[]
+    OR?: QuoteCalculatorWhereInput[]
+    NOT?: QuoteCalculatorWhereInput | QuoteCalculatorWhereInput[]
+    id?: StringFilter<"QuoteCalculator"> | string
+    createdAt?: DateTimeFilter<"QuoteCalculator"> | Date | string
+    updatedAt?: DateTimeFilter<"QuoteCalculator"> | Date | string
+    name?: StringFilter<"QuoteCalculator"> | string
+    definition?: JsonFilter<"QuoteCalculator">
+    published?: BoolFilter<"QuoteCalculator"> | boolean
+    businessId?: StringFilter<"QuoteCalculator"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    submissions?: QuoteSubmissionListRelationFilter
+  }
+
+  export type QuoteCalculatorOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    definition?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    submissions?: QuoteSubmissionOrderByRelationAggregateInput
+  }
+
+  export type QuoteCalculatorWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: QuoteCalculatorWhereInput | QuoteCalculatorWhereInput[]
+    OR?: QuoteCalculatorWhereInput[]
+    NOT?: QuoteCalculatorWhereInput | QuoteCalculatorWhereInput[]
+    createdAt?: DateTimeFilter<"QuoteCalculator"> | Date | string
+    updatedAt?: DateTimeFilter<"QuoteCalculator"> | Date | string
+    name?: StringFilter<"QuoteCalculator"> | string
+    definition?: JsonFilter<"QuoteCalculator">
+    published?: BoolFilter<"QuoteCalculator"> | boolean
+    businessId?: StringFilter<"QuoteCalculator"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    submissions?: QuoteSubmissionListRelationFilter
+  }, "id">
+
+  export type QuoteCalculatorOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    definition?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+    _count?: QuoteCalculatorCountOrderByAggregateInput
+    _max?: QuoteCalculatorMaxOrderByAggregateInput
+    _min?: QuoteCalculatorMinOrderByAggregateInput
+  }
+
+  export type QuoteCalculatorScalarWhereWithAggregatesInput = {
+    AND?: QuoteCalculatorScalarWhereWithAggregatesInput | QuoteCalculatorScalarWhereWithAggregatesInput[]
+    OR?: QuoteCalculatorScalarWhereWithAggregatesInput[]
+    NOT?: QuoteCalculatorScalarWhereWithAggregatesInput | QuoteCalculatorScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"QuoteCalculator"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"QuoteCalculator"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"QuoteCalculator"> | Date | string
+    name?: StringWithAggregatesFilter<"QuoteCalculator"> | string
+    definition?: JsonWithAggregatesFilter<"QuoteCalculator">
+    published?: BoolWithAggregatesFilter<"QuoteCalculator"> | boolean
+    businessId?: StringWithAggregatesFilter<"QuoteCalculator"> | string
+  }
+
+  export type QuoteSubmissionWhereInput = {
+    AND?: QuoteSubmissionWhereInput | QuoteSubmissionWhereInput[]
+    OR?: QuoteSubmissionWhereInput[]
+    NOT?: QuoteSubmissionWhereInput | QuoteSubmissionWhereInput[]
+    id?: StringFilter<"QuoteSubmission"> | string
+    createdAt?: DateTimeFilter<"QuoteSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"QuoteSubmission"> | Date | string
+    status?: StringFilter<"QuoteSubmission"> | string
+    contactName?: StringFilter<"QuoteSubmission"> | string
+    contactEmail?: StringFilter<"QuoteSubmission"> | string
+    contactPhone?: StringNullableFilter<"QuoteSubmission"> | string | null
+    answers?: JsonFilter<"QuoteSubmission">
+    estimateCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    formulaSnapshot?: JsonFilter<"QuoteSubmission">
+    finalQuoteCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    quoteSentAt?: DateTimeNullableFilter<"QuoteSubmission"> | Date | string | null
+    sentQuoteCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    sentMessage?: StringNullableFilter<"QuoteSubmission"> | string | null
+    calculatorName?: StringFilter<"QuoteSubmission"> | string
+    showEstimateToCustomer?: BoolFilter<"QuoteSubmission"> | boolean
+    calculatorId?: StringNullableFilter<"QuoteSubmission"> | string | null
+    businessId?: StringFilter<"QuoteSubmission"> | string
+    calculator?: XOR<QuoteCalculatorNullableScalarRelationFilter, QuoteCalculatorWhereInput> | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type QuoteSubmissionOrderByWithRelationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    status?: SortOrder
+    contactName?: SortOrder
+    contactEmail?: SortOrder
+    contactPhone?: SortOrderInput | SortOrder
+    answers?: SortOrder
+    estimateCents?: SortOrderInput | SortOrder
+    formulaSnapshot?: SortOrder
+    finalQuoteCents?: SortOrderInput | SortOrder
+    quoteSentAt?: SortOrderInput | SortOrder
+    sentQuoteCents?: SortOrderInput | SortOrder
+    sentMessage?: SortOrderInput | SortOrder
+    calculatorName?: SortOrder
+    showEstimateToCustomer?: SortOrder
+    calculatorId?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    calculator?: QuoteCalculatorOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type QuoteSubmissionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: QuoteSubmissionWhereInput | QuoteSubmissionWhereInput[]
+    OR?: QuoteSubmissionWhereInput[]
+    NOT?: QuoteSubmissionWhereInput | QuoteSubmissionWhereInput[]
+    createdAt?: DateTimeFilter<"QuoteSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"QuoteSubmission"> | Date | string
+    status?: StringFilter<"QuoteSubmission"> | string
+    contactName?: StringFilter<"QuoteSubmission"> | string
+    contactEmail?: StringFilter<"QuoteSubmission"> | string
+    contactPhone?: StringNullableFilter<"QuoteSubmission"> | string | null
+    answers?: JsonFilter<"QuoteSubmission">
+    estimateCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    formulaSnapshot?: JsonFilter<"QuoteSubmission">
+    finalQuoteCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    quoteSentAt?: DateTimeNullableFilter<"QuoteSubmission"> | Date | string | null
+    sentQuoteCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    sentMessage?: StringNullableFilter<"QuoteSubmission"> | string | null
+    calculatorName?: StringFilter<"QuoteSubmission"> | string
+    showEstimateToCustomer?: BoolFilter<"QuoteSubmission"> | boolean
+    calculatorId?: StringNullableFilter<"QuoteSubmission"> | string | null
+    businessId?: StringFilter<"QuoteSubmission"> | string
+    calculator?: XOR<QuoteCalculatorNullableScalarRelationFilter, QuoteCalculatorWhereInput> | null
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id">
+
+  export type QuoteSubmissionOrderByWithAggregationInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    status?: SortOrder
+    contactName?: SortOrder
+    contactEmail?: SortOrder
+    contactPhone?: SortOrderInput | SortOrder
+    answers?: SortOrder
+    estimateCents?: SortOrderInput | SortOrder
+    formulaSnapshot?: SortOrder
+    finalQuoteCents?: SortOrderInput | SortOrder
+    quoteSentAt?: SortOrderInput | SortOrder
+    sentQuoteCents?: SortOrderInput | SortOrder
+    sentMessage?: SortOrderInput | SortOrder
+    calculatorName?: SortOrder
+    showEstimateToCustomer?: SortOrder
+    calculatorId?: SortOrderInput | SortOrder
+    businessId?: SortOrder
+    _count?: QuoteSubmissionCountOrderByAggregateInput
+    _avg?: QuoteSubmissionAvgOrderByAggregateInput
+    _max?: QuoteSubmissionMaxOrderByAggregateInput
+    _min?: QuoteSubmissionMinOrderByAggregateInput
+    _sum?: QuoteSubmissionSumOrderByAggregateInput
+  }
+
+  export type QuoteSubmissionScalarWhereWithAggregatesInput = {
+    AND?: QuoteSubmissionScalarWhereWithAggregatesInput | QuoteSubmissionScalarWhereWithAggregatesInput[]
+    OR?: QuoteSubmissionScalarWhereWithAggregatesInput[]
+    NOT?: QuoteSubmissionScalarWhereWithAggregatesInput | QuoteSubmissionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"QuoteSubmission"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"QuoteSubmission"> | Date | string
+    status?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+    contactName?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+    contactEmail?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+    contactPhone?: StringNullableWithAggregatesFilter<"QuoteSubmission"> | string | null
+    answers?: JsonWithAggregatesFilter<"QuoteSubmission">
+    estimateCents?: IntNullableWithAggregatesFilter<"QuoteSubmission"> | number | null
+    formulaSnapshot?: JsonWithAggregatesFilter<"QuoteSubmission">
+    finalQuoteCents?: IntNullableWithAggregatesFilter<"QuoteSubmission"> | number | null
+    quoteSentAt?: DateTimeNullableWithAggregatesFilter<"QuoteSubmission"> | Date | string | null
+    sentQuoteCents?: IntNullableWithAggregatesFilter<"QuoteSubmission"> | number | null
+    sentMessage?: StringNullableWithAggregatesFilter<"QuoteSubmission"> | string | null
+    calculatorName?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+    showEstimateToCustomer?: BoolWithAggregatesFilter<"QuoteSubmission"> | boolean
+    calculatorId?: StringNullableWithAggregatesFilter<"QuoteSubmission"> | string | null
+    businessId?: StringWithAggregatesFilter<"QuoteSubmission"> | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -64434,6 +67545,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -64452,6 +67565,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -64470,6 +67585,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -64488,6 +67605,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -64506,6 +67625,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -64517,6 +67638,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -64528,12 +67651,16 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipCreateInput = {
     id?: string
     createdAt?: Date | string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
     user: UserCreateNestedOneWithoutMembershipsInput
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
@@ -64544,12 +67671,16 @@ export namespace Prisma {
     userId: string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
@@ -64560,6 +67691,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipCreateManyInput = {
@@ -64568,12 +67701,16 @@ export namespace Prisma {
     userId: string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipUncheckedUpdateManyInput = {
@@ -64582,6 +67719,8 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SessionCreateInput = {
@@ -64932,6 +68071,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -65004,6 +68145,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -65076,6 +68219,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -65148,6 +68293,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -65307,6 +68454,8 @@ export namespace Prisma {
     metaKeywords?: string | null
     ogImage?: string | null
     faviconUrl?: string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: string | null
     logoAltText?: string | null
     primaryColor?: string | null
@@ -65341,6 +68490,8 @@ export namespace Prisma {
     metaKeywords?: string | null
     ogImage?: string | null
     faviconUrl?: string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: string | null
     logoAltText?: string | null
     primaryColor?: string | null
@@ -65375,6 +68526,8 @@ export namespace Prisma {
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoAltText?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65409,6 +68562,8 @@ export namespace Prisma {
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoAltText?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65443,6 +68598,8 @@ export namespace Prisma {
     metaKeywords?: string | null
     ogImage?: string | null
     faviconUrl?: string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: string | null
     logoAltText?: string | null
     primaryColor?: string | null
@@ -65477,6 +68634,8 @@ export namespace Prisma {
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoAltText?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65510,6 +68669,8 @@ export namespace Prisma {
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoAltText?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67200,6 +70361,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -67236,6 +70400,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -67272,6 +70439,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -67308,6 +70478,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -67344,6 +70517,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -67376,6 +70552,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -67404,6 +70583,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -69543,6 +72725,224 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type QuoteCalculatorCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    business: BusinessCreateNestedOneWithoutQuoteCalculatorsInput
+    submissions?: QuoteSubmissionCreateNestedManyWithoutCalculatorInput
+  }
+
+  export type QuoteCalculatorUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    businessId: string
+    submissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutCalculatorInput
+  }
+
+  export type QuoteCalculatorUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutQuoteCalculatorsNestedInput
+    submissions?: QuoteSubmissionUpdateManyWithoutCalculatorNestedInput
+  }
+
+  export type QuoteCalculatorUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+    submissions?: QuoteSubmissionUncheckedUpdateManyWithoutCalculatorNestedInput
+  }
+
+  export type QuoteCalculatorCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    businessId: string
+  }
+
+  export type QuoteCalculatorUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type QuoteCalculatorUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type QuoteSubmissionCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculator?: QuoteCalculatorCreateNestedOneWithoutSubmissionsInput
+    business: BusinessCreateNestedOneWithoutQuoteSubmissionsInput
+  }
+
+  export type QuoteSubmissionUncheckedCreateInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculatorId?: string | null
+    businessId: string
+  }
+
+  export type QuoteSubmissionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculator?: QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput
+  }
+
+  export type QuoteSubmissionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type QuoteSubmissionCreateManyInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculatorId?: string | null
+    businessId: string
+  }
+
+  export type QuoteSubmissionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type QuoteSubmissionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -69594,6 +72994,17 @@ export namespace Prisma {
     in?: $Enums.PlatformRole[] | ListEnumPlatformRoleFieldRefInput<$PrismaModel>
     notIn?: $Enums.PlatformRole[] | ListEnumPlatformRoleFieldRefInput<$PrismaModel>
     not?: NestedEnumPlatformRoleFilter<$PrismaModel> | $Enums.PlatformRole
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type SessionListRelationFilter = {
@@ -69680,6 +73091,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -69691,6 +73104,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -69702,6 +73117,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     platformRole?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -69772,6 +73189,20 @@ export namespace Prisma {
     _max?: NestedEnumPlatformRoleFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type EnumBusinessRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.BusinessRole | EnumBusinessRoleFieldRefInput<$PrismaModel>
     in?: $Enums.BusinessRole[] | ListEnumBusinessRoleFieldRefInput<$PrismaModel>
@@ -69800,6 +73231,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrder
+    merchantTermsVersion?: SortOrder
   }
 
   export type BusinessMembershipMaxOrderByAggregateInput = {
@@ -69808,6 +73241,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrder
+    merchantTermsVersion?: SortOrder
   }
 
   export type BusinessMembershipMinOrderByAggregateInput = {
@@ -69816,6 +73251,8 @@ export namespace Prisma {
     userId?: SortOrder
     businessId?: SortOrder
     role?: SortOrder
+    merchantTermsAcceptedAt?: SortOrder
+    merchantTermsVersion?: SortOrder
   }
 
   export type EnumBusinessRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -69873,17 +73310,6 @@ export namespace Prisma {
     membershipRole?: SortOrder
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
   export type AccountCountOrderByAggregateInput = {
     id?: SortOrder
     accountId?: SortOrder
@@ -69930,20 +73356,6 @@ export namespace Prisma {
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type VerificationCountOrderByAggregateInput = {
@@ -70181,6 +73593,18 @@ export namespace Prisma {
     none?: BackInStockRequestWhereInput
   }
 
+  export type QuoteCalculatorListRelationFilter = {
+    every?: QuoteCalculatorWhereInput
+    some?: QuoteCalculatorWhereInput
+    none?: QuoteCalculatorWhereInput
+  }
+
+  export type QuoteSubmissionListRelationFilter = {
+    every?: QuoteSubmissionWhereInput
+    some?: QuoteSubmissionWhereInput
+    none?: QuoteSubmissionWhereInput
+  }
+
   export type ProductOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -70258,6 +73682,14 @@ export namespace Prisma {
   }
 
   export type BackInStockRequestOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type QuoteCalculatorOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type QuoteSubmissionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -70518,6 +73950,8 @@ export namespace Prisma {
     metaKeywords?: SortOrder
     ogImage?: SortOrder
     faviconUrl?: SortOrder
+    pageMeta?: SortOrder
+    siteVerification?: SortOrder
     logoUrl?: SortOrder
     logoAltText?: SortOrder
     primaryColor?: SortOrder
@@ -71619,6 +75053,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -71661,6 +75098,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -71693,6 +75133,9 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    termsAcceptedAt?: SortOrder
+    termsVersion?: SortOrder
+    merchantTermsUpdatedAt?: SortOrder
     orderNumber?: SortOrder
     status?: SortOrder
     paymentStatus?: SortOrder
@@ -72851,6 +76294,110 @@ export namespace Prisma {
     businessId?: SortOrder
   }
 
+  export type QuoteCalculatorCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    definition?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type QuoteCalculatorMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type QuoteCalculatorMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    name?: SortOrder
+    published?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type QuoteCalculatorNullableScalarRelationFilter = {
+    is?: QuoteCalculatorWhereInput | null
+    isNot?: QuoteCalculatorWhereInput | null
+  }
+
+  export type QuoteSubmissionCountOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    status?: SortOrder
+    contactName?: SortOrder
+    contactEmail?: SortOrder
+    contactPhone?: SortOrder
+    answers?: SortOrder
+    estimateCents?: SortOrder
+    formulaSnapshot?: SortOrder
+    finalQuoteCents?: SortOrder
+    quoteSentAt?: SortOrder
+    sentQuoteCents?: SortOrder
+    sentMessage?: SortOrder
+    calculatorName?: SortOrder
+    showEstimateToCustomer?: SortOrder
+    calculatorId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type QuoteSubmissionAvgOrderByAggregateInput = {
+    estimateCents?: SortOrder
+    finalQuoteCents?: SortOrder
+    sentQuoteCents?: SortOrder
+  }
+
+  export type QuoteSubmissionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    status?: SortOrder
+    contactName?: SortOrder
+    contactEmail?: SortOrder
+    contactPhone?: SortOrder
+    estimateCents?: SortOrder
+    finalQuoteCents?: SortOrder
+    quoteSentAt?: SortOrder
+    sentQuoteCents?: SortOrder
+    sentMessage?: SortOrder
+    calculatorName?: SortOrder
+    showEstimateToCustomer?: SortOrder
+    calculatorId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type QuoteSubmissionMinOrderByAggregateInput = {
+    id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    status?: SortOrder
+    contactName?: SortOrder
+    contactEmail?: SortOrder
+    contactPhone?: SortOrder
+    estimateCents?: SortOrder
+    finalQuoteCents?: SortOrder
+    quoteSentAt?: SortOrder
+    sentQuoteCents?: SortOrder
+    sentMessage?: SortOrder
+    calculatorName?: SortOrder
+    showEstimateToCustomer?: SortOrder
+    calculatorId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type QuoteSubmissionSumOrderByAggregateInput = {
+    estimateCents?: SortOrder
+    finalQuoteCents?: SortOrder
+    sentQuoteCents?: SortOrder
+  }
+
   export type SessionCreateNestedManyWithoutUserInput = {
     create?: XOR<SessionCreateWithoutUserInput, SessionUncheckedCreateWithoutUserInput> | SessionCreateWithoutUserInput[] | SessionUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SessionCreateOrConnectWithoutUserInput | SessionCreateOrConnectWithoutUserInput[]
@@ -72967,6 +76514,10 @@ export namespace Prisma {
 
   export type EnumPlatformRoleFieldUpdateOperationsInput = {
     set?: $Enums.PlatformRole
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type SessionUpdateManyWithoutUserNestedInput = {
@@ -73217,10 +76768,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
-  }
-
   export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
     create?: XOR<UserCreateWithoutAccountsInput, UserUncheckedCreateWithoutAccountsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAccountsInput
@@ -73414,6 +76961,20 @@ export namespace Prisma {
     connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
   }
 
+  export type QuoteCalculatorCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuoteCalculatorCreateWithoutBusinessInput, QuoteCalculatorUncheckedCreateWithoutBusinessInput> | QuoteCalculatorCreateWithoutBusinessInput[] | QuoteCalculatorUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCalculatorCreateOrConnectWithoutBusinessInput | QuoteCalculatorCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuoteCalculatorCreateManyBusinessInputEnvelope
+    connect?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+  }
+
+  export type QuoteSubmissionCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutBusinessInput, QuoteSubmissionUncheckedCreateWithoutBusinessInput> | QuoteSubmissionCreateWithoutBusinessInput[] | QuoteSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutBusinessInput | QuoteSubmissionCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuoteSubmissionCreateManyBusinessInputEnvelope
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+  }
+
   export type ProductUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -73593,6 +77154,20 @@ export namespace Prisma {
     connectOrCreate?: BackInStockRequestCreateOrConnectWithoutBusinessInput | BackInStockRequestCreateOrConnectWithoutBusinessInput[]
     createMany?: BackInStockRequestCreateManyBusinessInputEnvelope
     connect?: BackInStockRequestWhereUniqueInput | BackInStockRequestWhereUniqueInput[]
+  }
+
+  export type QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuoteCalculatorCreateWithoutBusinessInput, QuoteCalculatorUncheckedCreateWithoutBusinessInput> | QuoteCalculatorCreateWithoutBusinessInput[] | QuoteCalculatorUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCalculatorCreateOrConnectWithoutBusinessInput | QuoteCalculatorCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuoteCalculatorCreateManyBusinessInputEnvelope
+    connect?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+  }
+
+  export type QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutBusinessInput, QuoteSubmissionUncheckedCreateWithoutBusinessInput> | QuoteSubmissionCreateWithoutBusinessInput[] | QuoteSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutBusinessInput | QuoteSubmissionCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuoteSubmissionCreateManyBusinessInputEnvelope
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
   }
 
   export type EnumBusinessDomainStatusFieldUpdateOperationsInput = {
@@ -73980,6 +77555,34 @@ export namespace Prisma {
     deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
   }
 
+  export type QuoteCalculatorUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuoteCalculatorCreateWithoutBusinessInput, QuoteCalculatorUncheckedCreateWithoutBusinessInput> | QuoteCalculatorCreateWithoutBusinessInput[] | QuoteCalculatorUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCalculatorCreateOrConnectWithoutBusinessInput | QuoteCalculatorCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuoteCalculatorUpsertWithWhereUniqueWithoutBusinessInput | QuoteCalculatorUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuoteCalculatorCreateManyBusinessInputEnvelope
+    set?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    disconnect?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    delete?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    connect?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    update?: QuoteCalculatorUpdateWithWhereUniqueWithoutBusinessInput | QuoteCalculatorUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuoteCalculatorUpdateManyWithWhereWithoutBusinessInput | QuoteCalculatorUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuoteCalculatorScalarWhereInput | QuoteCalculatorScalarWhereInput[]
+  }
+
+  export type QuoteSubmissionUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutBusinessInput, QuoteSubmissionUncheckedCreateWithoutBusinessInput> | QuoteSubmissionCreateWithoutBusinessInput[] | QuoteSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutBusinessInput | QuoteSubmissionCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuoteSubmissionUpsertWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuoteSubmissionCreateManyBusinessInputEnvelope
+    set?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    disconnect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    delete?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    update?: QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput | QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+  }
+
   export type ProductUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<ProductCreateWithoutBusinessInput, ProductUncheckedCreateWithoutBusinessInput> | ProductCreateWithoutBusinessInput[] | ProductUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: ProductCreateOrConnectWithoutBusinessInput | ProductCreateOrConnectWithoutBusinessInput[]
@@ -74338,6 +77941,34 @@ export namespace Prisma {
     update?: BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput | BackInStockRequestUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: BackInStockRequestUpdateManyWithWhereWithoutBusinessInput | BackInStockRequestUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: BackInStockRequestScalarWhereInput | BackInStockRequestScalarWhereInput[]
+  }
+
+  export type QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuoteCalculatorCreateWithoutBusinessInput, QuoteCalculatorUncheckedCreateWithoutBusinessInput> | QuoteCalculatorCreateWithoutBusinessInput[] | QuoteCalculatorUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCalculatorCreateOrConnectWithoutBusinessInput | QuoteCalculatorCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuoteCalculatorUpsertWithWhereUniqueWithoutBusinessInput | QuoteCalculatorUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuoteCalculatorCreateManyBusinessInputEnvelope
+    set?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    disconnect?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    delete?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    connect?: QuoteCalculatorWhereUniqueInput | QuoteCalculatorWhereUniqueInput[]
+    update?: QuoteCalculatorUpdateWithWhereUniqueWithoutBusinessInput | QuoteCalculatorUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuoteCalculatorUpdateManyWithWhereWithoutBusinessInput | QuoteCalculatorUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuoteCalculatorScalarWhereInput | QuoteCalculatorScalarWhereInput[]
+  }
+
+  export type QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutBusinessInput, QuoteSubmissionUncheckedCreateWithoutBusinessInput> | QuoteSubmissionCreateWithoutBusinessInput[] | QuoteSubmissionUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutBusinessInput | QuoteSubmissionCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuoteSubmissionUpsertWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuoteSubmissionCreateManyBusinessInputEnvelope
+    set?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    disconnect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    delete?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    update?: QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput | QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput | QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutSiteContentInput = {
@@ -76401,6 +80032,92 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutBackInStockRequestsInput, BusinessUpdateWithoutBackInStockRequestsInput>, BusinessUncheckedUpdateWithoutBackInStockRequestsInput>
   }
 
+  export type BusinessCreateNestedOneWithoutQuoteCalculatorsInput = {
+    create?: XOR<BusinessCreateWithoutQuoteCalculatorsInput, BusinessUncheckedCreateWithoutQuoteCalculatorsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuoteCalculatorsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type QuoteSubmissionCreateNestedManyWithoutCalculatorInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutCalculatorInput, QuoteSubmissionUncheckedCreateWithoutCalculatorInput> | QuoteSubmissionCreateWithoutCalculatorInput[] | QuoteSubmissionUncheckedCreateWithoutCalculatorInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutCalculatorInput | QuoteSubmissionCreateOrConnectWithoutCalculatorInput[]
+    createMany?: QuoteSubmissionCreateManyCalculatorInputEnvelope
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+  }
+
+  export type QuoteSubmissionUncheckedCreateNestedManyWithoutCalculatorInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutCalculatorInput, QuoteSubmissionUncheckedCreateWithoutCalculatorInput> | QuoteSubmissionCreateWithoutCalculatorInput[] | QuoteSubmissionUncheckedCreateWithoutCalculatorInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutCalculatorInput | QuoteSubmissionCreateOrConnectWithoutCalculatorInput[]
+    createMany?: QuoteSubmissionCreateManyCalculatorInputEnvelope
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutQuoteCalculatorsNestedInput = {
+    create?: XOR<BusinessCreateWithoutQuoteCalculatorsInput, BusinessUncheckedCreateWithoutQuoteCalculatorsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuoteCalculatorsInput
+    upsert?: BusinessUpsertWithoutQuoteCalculatorsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutQuoteCalculatorsInput, BusinessUpdateWithoutQuoteCalculatorsInput>, BusinessUncheckedUpdateWithoutQuoteCalculatorsInput>
+  }
+
+  export type QuoteSubmissionUpdateManyWithoutCalculatorNestedInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutCalculatorInput, QuoteSubmissionUncheckedCreateWithoutCalculatorInput> | QuoteSubmissionCreateWithoutCalculatorInput[] | QuoteSubmissionUncheckedCreateWithoutCalculatorInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutCalculatorInput | QuoteSubmissionCreateOrConnectWithoutCalculatorInput[]
+    upsert?: QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput | QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput[]
+    createMany?: QuoteSubmissionCreateManyCalculatorInputEnvelope
+    set?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    disconnect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    delete?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    update?: QuoteSubmissionUpdateWithWhereUniqueWithoutCalculatorInput | QuoteSubmissionUpdateWithWhereUniqueWithoutCalculatorInput[]
+    updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutCalculatorInput | QuoteSubmissionUpdateManyWithWhereWithoutCalculatorInput[]
+    deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+  }
+
+  export type QuoteSubmissionUncheckedUpdateManyWithoutCalculatorNestedInput = {
+    create?: XOR<QuoteSubmissionCreateWithoutCalculatorInput, QuoteSubmissionUncheckedCreateWithoutCalculatorInput> | QuoteSubmissionCreateWithoutCalculatorInput[] | QuoteSubmissionUncheckedCreateWithoutCalculatorInput[]
+    connectOrCreate?: QuoteSubmissionCreateOrConnectWithoutCalculatorInput | QuoteSubmissionCreateOrConnectWithoutCalculatorInput[]
+    upsert?: QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput | QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput[]
+    createMany?: QuoteSubmissionCreateManyCalculatorInputEnvelope
+    set?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    disconnect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    delete?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    connect?: QuoteSubmissionWhereUniqueInput | QuoteSubmissionWhereUniqueInput[]
+    update?: QuoteSubmissionUpdateWithWhereUniqueWithoutCalculatorInput | QuoteSubmissionUpdateWithWhereUniqueWithoutCalculatorInput[]
+    updateMany?: QuoteSubmissionUpdateManyWithWhereWithoutCalculatorInput | QuoteSubmissionUpdateManyWithWhereWithoutCalculatorInput[]
+    deleteMany?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+  }
+
+  export type QuoteCalculatorCreateNestedOneWithoutSubmissionsInput = {
+    create?: XOR<QuoteCalculatorCreateWithoutSubmissionsInput, QuoteCalculatorUncheckedCreateWithoutSubmissionsInput>
+    connectOrCreate?: QuoteCalculatorCreateOrConnectWithoutSubmissionsInput
+    connect?: QuoteCalculatorWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutQuoteSubmissionsInput = {
+    create?: XOR<BusinessCreateWithoutQuoteSubmissionsInput, BusinessUncheckedCreateWithoutQuoteSubmissionsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuoteSubmissionsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput = {
+    create?: XOR<QuoteCalculatorCreateWithoutSubmissionsInput, QuoteCalculatorUncheckedCreateWithoutSubmissionsInput>
+    connectOrCreate?: QuoteCalculatorCreateOrConnectWithoutSubmissionsInput
+    upsert?: QuoteCalculatorUpsertWithoutSubmissionsInput
+    disconnect?: QuoteCalculatorWhereInput | boolean
+    delete?: QuoteCalculatorWhereInput | boolean
+    connect?: QuoteCalculatorWhereUniqueInput
+    update?: XOR<XOR<QuoteCalculatorUpdateToOneWithWhereWithoutSubmissionsInput, QuoteCalculatorUpdateWithoutSubmissionsInput>, QuoteCalculatorUncheckedUpdateWithoutSubmissionsInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput = {
+    create?: XOR<BusinessCreateWithoutQuoteSubmissionsInput, BusinessUncheckedCreateWithoutQuoteSubmissionsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutQuoteSubmissionsInput
+    upsert?: BusinessUpsertWithoutQuoteSubmissionsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutQuoteSubmissionsInput, BusinessUpdateWithoutQuoteSubmissionsInput>, BusinessUncheckedUpdateWithoutQuoteSubmissionsInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -76450,6 +80167,17 @@ export namespace Prisma {
     in?: $Enums.PlatformRole[] | ListEnumPlatformRoleFieldRefInput<$PrismaModel>
     notIn?: $Enums.PlatformRole[] | ListEnumPlatformRoleFieldRefInput<$PrismaModel>
     not?: NestedEnumPlatformRoleFilter<$PrismaModel> | $Enums.PlatformRole
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -76540,6 +80268,20 @@ export namespace Prisma {
     _max?: NestedEnumPlatformRoleFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumBusinessRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.BusinessRole | EnumBusinessRoleFieldRefInput<$PrismaModel>
     in?: $Enums.BusinessRole[] | ListEnumBusinessRoleFieldRefInput<$PrismaModel>
@@ -76555,31 +80297,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumBusinessRoleFilter<$PrismaModel>
     _max?: NestedEnumBusinessRoleFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumBusinessDomainStatusFilter<$PrismaModel = never> = {
@@ -76813,6 +80530,8 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
     business: BusinessCreateNestedOneWithoutMembershipsInput
   }
 
@@ -76821,6 +80540,8 @@ export namespace Prisma {
     createdAt?: Date | string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipCreateOrConnectWithoutUserInput = {
@@ -77093,6 +80814,8 @@ export namespace Prisma {
     userId?: StringFilter<"BusinessMembership"> | string
     businessId?: StringFilter<"BusinessMembership"> | string
     role?: EnumBusinessRoleFilter<"BusinessMembership"> | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: DateTimeNullableFilter<"BusinessMembership"> | Date | string | null
+    merchantTermsVersion?: StringNullableFilter<"BusinessMembership"> | string | null
   }
 
   export type CustomerUpsertWithWhereUniqueWithoutUserInput = {
@@ -77242,6 +80965,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
@@ -77259,6 +80984,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -77341,6 +81068,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutMembershipsInput = {
@@ -77412,6 +81141,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutMembershipsInput = {
@@ -77439,6 +81170,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
@@ -77456,6 +81189,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -77544,6 +81279,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutMembershipsInput = {
@@ -77615,6 +81352,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -77626,6 +81365,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
@@ -77643,6 +81384,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -77676,6 +81419,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
@@ -77693,6 +81438,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -77710,6 +81457,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
     customers?: CustomerCreateNestedManyWithoutUserInput
@@ -77727,6 +81476,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
     customers?: CustomerUncheckedCreateNestedManyWithoutUserInput
@@ -77760,6 +81511,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
     customers?: CustomerUpdateManyWithoutUserNestedInput
@@ -77777,6 +81530,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutUserNestedInput
@@ -77979,6 +81734,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -78014,6 +81772,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -78128,6 +81889,8 @@ export namespace Prisma {
     metaKeywords?: string | null
     ogImage?: string | null
     faviconUrl?: string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: string | null
     logoAltText?: string | null
     primaryColor?: string | null
@@ -78161,6 +81924,8 @@ export namespace Prisma {
     metaKeywords?: string | null
     ogImage?: string | null
     faviconUrl?: string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: string | null
     logoAltText?: string | null
     primaryColor?: string | null
@@ -78702,6 +82467,8 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
     user: UserCreateNestedOneWithoutMembershipsInput
   }
 
@@ -78710,6 +82477,8 @@ export namespace Prisma {
     createdAt?: Date | string
     userId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type BusinessMembershipCreateOrConnectWithoutBusinessInput = {
@@ -78938,6 +82707,86 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type QuoteCalculatorCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    submissions?: QuoteSubmissionCreateNestedManyWithoutCalculatorInput
+  }
+
+  export type QuoteCalculatorUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    submissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutCalculatorInput
+  }
+
+  export type QuoteCalculatorCreateOrConnectWithoutBusinessInput = {
+    where: QuoteCalculatorWhereUniqueInput
+    create: XOR<QuoteCalculatorCreateWithoutBusinessInput, QuoteCalculatorUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuoteCalculatorCreateManyBusinessInputEnvelope = {
+    data: QuoteCalculatorCreateManyBusinessInput | QuoteCalculatorCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type QuoteSubmissionCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculator?: QuoteCalculatorCreateNestedOneWithoutSubmissionsInput
+  }
+
+  export type QuoteSubmissionUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculatorId?: string | null
+  }
+
+  export type QuoteSubmissionCreateOrConnectWithoutBusinessInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    create: XOR<QuoteSubmissionCreateWithoutBusinessInput, QuoteSubmissionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuoteSubmissionCreateManyBusinessInputEnvelope = {
+    data: QuoteSubmissionCreateManyBusinessInput | QuoteSubmissionCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ProductUpsertWithWhereUniqueWithoutBusinessInput = {
     where: ProductWhereUniqueInput
     update: XOR<ProductUpdateWithoutBusinessInput, ProductUncheckedUpdateWithoutBusinessInput>
@@ -79092,6 +82941,9 @@ export namespace Prisma {
     id?: StringFilter<"Order"> | string
     createdAt?: DateTimeFilter<"Order"> | Date | string
     updatedAt?: DateTimeFilter<"Order"> | Date | string
+    termsAcceptedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
+    termsVersion?: StringNullableFilter<"Order"> | string | null
+    merchantTermsUpdatedAt?: DateTimeNullableFilter<"Order"> | Date | string | null
     orderNumber?: IntFilter<"Order"> | number
     status?: StringFilter<"Order"> | string
     paymentStatus?: StringFilter<"Order"> | string
@@ -79166,6 +83018,8 @@ export namespace Prisma {
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoAltText?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79199,6 +83053,8 @@ export namespace Prisma {
     metaKeywords?: NullableStringFieldUpdateOperationsInput | string | null
     ogImage?: NullableStringFieldUpdateOperationsInput | string | null
     faviconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pageMeta?: NullableJsonNullValueInput | InputJsonValue
+    siteVerification?: NullableJsonNullValueInput | InputJsonValue
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     logoAltText?: NullableStringFieldUpdateOperationsInput | string | null
     primaryColor?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79822,6 +83678,75 @@ export namespace Prisma {
     businessId?: StringFilter<"BackInStockRequest"> | string
   }
 
+  export type QuoteCalculatorUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: QuoteCalculatorWhereUniqueInput
+    update: XOR<QuoteCalculatorUpdateWithoutBusinessInput, QuoteCalculatorUncheckedUpdateWithoutBusinessInput>
+    create: XOR<QuoteCalculatorCreateWithoutBusinessInput, QuoteCalculatorUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuoteCalculatorUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: QuoteCalculatorWhereUniqueInput
+    data: XOR<QuoteCalculatorUpdateWithoutBusinessInput, QuoteCalculatorUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type QuoteCalculatorUpdateManyWithWhereWithoutBusinessInput = {
+    where: QuoteCalculatorScalarWhereInput
+    data: XOR<QuoteCalculatorUpdateManyMutationInput, QuoteCalculatorUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type QuoteCalculatorScalarWhereInput = {
+    AND?: QuoteCalculatorScalarWhereInput | QuoteCalculatorScalarWhereInput[]
+    OR?: QuoteCalculatorScalarWhereInput[]
+    NOT?: QuoteCalculatorScalarWhereInput | QuoteCalculatorScalarWhereInput[]
+    id?: StringFilter<"QuoteCalculator"> | string
+    createdAt?: DateTimeFilter<"QuoteCalculator"> | Date | string
+    updatedAt?: DateTimeFilter<"QuoteCalculator"> | Date | string
+    name?: StringFilter<"QuoteCalculator"> | string
+    definition?: JsonFilter<"QuoteCalculator">
+    published?: BoolFilter<"QuoteCalculator"> | boolean
+    businessId?: StringFilter<"QuoteCalculator"> | string
+  }
+
+  export type QuoteSubmissionUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    update: XOR<QuoteSubmissionUpdateWithoutBusinessInput, QuoteSubmissionUncheckedUpdateWithoutBusinessInput>
+    create: XOR<QuoteSubmissionCreateWithoutBusinessInput, QuoteSubmissionUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type QuoteSubmissionUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    data: XOR<QuoteSubmissionUpdateWithoutBusinessInput, QuoteSubmissionUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type QuoteSubmissionUpdateManyWithWhereWithoutBusinessInput = {
+    where: QuoteSubmissionScalarWhereInput
+    data: XOR<QuoteSubmissionUpdateManyMutationInput, QuoteSubmissionUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type QuoteSubmissionScalarWhereInput = {
+    AND?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+    OR?: QuoteSubmissionScalarWhereInput[]
+    NOT?: QuoteSubmissionScalarWhereInput | QuoteSubmissionScalarWhereInput[]
+    id?: StringFilter<"QuoteSubmission"> | string
+    createdAt?: DateTimeFilter<"QuoteSubmission"> | Date | string
+    updatedAt?: DateTimeFilter<"QuoteSubmission"> | Date | string
+    status?: StringFilter<"QuoteSubmission"> | string
+    contactName?: StringFilter<"QuoteSubmission"> | string
+    contactEmail?: StringFilter<"QuoteSubmission"> | string
+    contactPhone?: StringNullableFilter<"QuoteSubmission"> | string | null
+    answers?: JsonFilter<"QuoteSubmission">
+    estimateCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    formulaSnapshot?: JsonFilter<"QuoteSubmission">
+    finalQuoteCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    quoteSentAt?: DateTimeNullableFilter<"QuoteSubmission"> | Date | string | null
+    sentQuoteCents?: IntNullableFilter<"QuoteSubmission"> | number | null
+    sentMessage?: StringNullableFilter<"QuoteSubmission"> | string | null
+    calculatorName?: StringFilter<"QuoteSubmission"> | string
+    showEstimateToCustomer?: BoolFilter<"QuoteSubmission"> | boolean
+    calculatorId?: StringNullableFilter<"QuoteSubmission"> | string | null
+    businessId?: StringFilter<"QuoteSubmission"> | string
+  }
+
   export type BusinessCreateWithoutSiteContentInput = {
     id?: string
     createdAt?: Date | string
@@ -79891,6 +83816,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSiteContentInput = {
@@ -79962,6 +83889,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSiteContentInput = {
@@ -80049,6 +83978,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSiteContentInput = {
@@ -80120,6 +84051,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutFaqItemsInput = {
@@ -80191,6 +84124,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutFaqItemsInput = {
@@ -80262,6 +84197,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutFaqItemsInput = {
@@ -80349,6 +84286,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutFaqItemsInput = {
@@ -80420,6 +84359,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BaseInventoryUnitCreateWithoutProductsInput = {
@@ -80528,6 +84469,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductsInput = {
@@ -80599,6 +84542,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductsInput = {
@@ -80989,6 +84934,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductsInput = {
@@ -81060,6 +85007,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ImageUpsertWithWhereUniqueWithoutProductInput = {
@@ -81616,6 +85565,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCollectionsInput = {
@@ -81687,6 +85638,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCollectionsInput = {
@@ -81796,6 +85749,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCollectionsInput = {
@@ -81867,6 +85822,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CollectionProductUpsertWithWhereUniqueWithoutCollectionInput = {
@@ -82230,6 +86187,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -82301,6 +86260,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -82440,6 +86401,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -82511,6 +86474,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ServiceItemUpsertWithWhereUniqueWithoutServiceInput = {
@@ -82715,6 +86680,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEventsInput = {
@@ -82786,6 +86753,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEventsInput = {
@@ -82873,6 +86842,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEventsInput = {
@@ -82944,6 +86915,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutVideoSourcesInput = {
@@ -83015,6 +86988,8 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutBusinessInput
     videos?: VideoCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideoSourcesInput = {
@@ -83086,6 +87061,8 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideoSourcesInput = {
@@ -83219,6 +87196,8 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutBusinessNestedInput
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideoSourcesInput = {
@@ -83290,6 +87269,8 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type VideoUpsertWithWhereUniqueWithoutSourceInput = {
@@ -83410,6 +87391,8 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutVideosInput = {
@@ -83481,6 +87464,8 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutVideosInput = {
@@ -83607,6 +87592,8 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutVideosInput = {
@@ -83678,6 +87665,8 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductCreateWithoutImagesInput = {
@@ -83842,6 +87831,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutImagesInput = {
@@ -83913,6 +87904,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutImagesInput = {
@@ -84099,6 +88092,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutImagesInput = {
@@ -84170,6 +88165,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserCreateWithoutCustomersInput = {
@@ -84181,6 +88178,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -84198,6 +88197,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -84280,6 +88281,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -84351,6 +88354,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -84362,6 +88367,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -84397,6 +88405,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -84642,6 +88653,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -84659,6 +88672,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -84747,6 +88762,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -84818,6 +88835,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -84974,6 +88993,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -85009,6 +89031,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -85190,6 +89215,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrdersInput = {
@@ -85261,6 +89288,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrdersInput = {
@@ -85643,6 +89672,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrdersInput = {
@@ -85714,6 +89745,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutOrdersInput = {
@@ -85947,6 +89980,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -85982,6 +90018,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86033,6 +90072,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86068,6 +90110,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86235,6 +90280,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86270,6 +90318,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86465,6 +90516,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86500,6 +90554,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -86600,6 +90657,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutDiscountCodesInput = {
@@ -86671,6 +90730,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutDiscountCodesInput = {
@@ -86682,6 +90743,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86717,6 +90781,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -86838,6 +90905,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutDiscountCodesInput = {
@@ -86909,6 +90978,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithWhereUniqueWithoutDiscountCodeInput = {
@@ -87165,6 +91236,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryHistoryInput = {
@@ -87236,6 +91309,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryHistoryInput = {
@@ -87247,6 +91322,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -87282,6 +91360,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -87327,6 +91408,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -87344,6 +91427,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -87624,6 +91709,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryHistoryInput = {
@@ -87695,6 +91782,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type OrderUpsertWithoutInventoryHistoryInput = {
@@ -87712,6 +91801,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -87747,6 +91839,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -87798,6 +91893,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -87815,6 +91912,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -87892,6 +91991,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBaseInventoryUnitsInput = {
@@ -87963,6 +92064,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBaseInventoryUnitsInput = {
@@ -88188,6 +92291,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBaseInventoryUnitsInput = {
@@ -88259,6 +92364,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ProductUpsertWithWhereUniqueWithoutBaseInventoryUnitInput = {
@@ -88362,6 +92469,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryReservationsInput = {
@@ -88433,6 +92542,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryReservationsInput = {
@@ -88520,6 +92631,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -88591,6 +92704,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutPagesInput = {
@@ -88662,6 +92777,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPagesInput = {
@@ -88733,6 +92850,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPagesInput = {
@@ -88820,6 +92939,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPagesInput = {
@@ -88891,6 +93012,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutEditorNotesInput = {
@@ -88962,6 +93085,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutEditorNotesInput = {
@@ -89033,6 +93158,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutEditorNotesInput = {
@@ -89049,6 +93176,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -89066,6 +93195,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -89159,6 +93290,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutEditorNotesInput = {
@@ -89230,6 +93363,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutEditorNotesInput = {
@@ -89252,6 +93387,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -89269,6 +93406,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -89346,6 +93485,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutProductImportsInput = {
@@ -89417,6 +93558,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutProductImportsInput = {
@@ -89504,6 +93647,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutProductImportsInput = {
@@ -89575,6 +93720,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutGalleriesInput = {
@@ -89646,6 +93793,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutGalleriesInput = {
@@ -89717,6 +93866,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutGalleriesInput = {
@@ -89836,6 +93987,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutGalleriesInput = {
@@ -89907,6 +94060,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type GalleryImageUpsertWithWhereUniqueWithoutGalleryInput = {
@@ -90093,6 +94248,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialsInput = {
@@ -90164,6 +94321,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialsInput = {
@@ -90300,6 +94459,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialsInput = {
@@ -90371,6 +94532,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialsInput = {
@@ -90497,6 +94660,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTestimonialInvitesInput = {
@@ -90568,6 +94733,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTestimonialInvitesInput = {
@@ -90704,6 +94871,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTestimonialInvitesInput = {
@@ -90775,6 +94944,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutTestimonialInvitesInput = {
@@ -90978,6 +95149,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -91013,6 +95187,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -91244,6 +95421,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -91279,6 +95459,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -91519,6 +95702,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPlatformInvitesInput = {
@@ -91590,6 +95775,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPlatformInvitesInput = {
@@ -91606,6 +95793,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionCreateNestedManyWithoutUserInput
     accounts?: AccountCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipCreateNestedManyWithoutUserInput
@@ -91623,6 +95812,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     platformRole?: $Enums.PlatformRole
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutUserInput
@@ -91716,6 +95907,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPlatformInvitesInput = {
@@ -91787,6 +95980,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type UserUpsertWithoutCreatedInvitesInput = {
@@ -91809,6 +96004,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUpdateManyWithoutUserNestedInput
     accounts?: AccountUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUpdateManyWithoutUserNestedInput
@@ -91826,6 +96023,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     platformRole?: EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     memberships?: BusinessMembershipUncheckedUpdateManyWithoutUserNestedInput
@@ -91903,6 +96102,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutTeamInvitesInput = {
@@ -91974,6 +96175,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutTeamInvitesInput = {
@@ -92061,6 +96264,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutTeamInvitesInput = {
@@ -92132,6 +96337,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutZonesInput = {
@@ -92203,6 +96410,8 @@ export namespace Prisma {
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutZonesInput = {
@@ -92274,6 +96483,8 @@ export namespace Prisma {
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
     backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutZonesInput = {
@@ -92383,6 +96594,8 @@ export namespace Prisma {
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutZonesInput = {
@@ -92454,6 +96667,8 @@ export namespace Prisma {
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
     backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ShippingRateUpsertWithWhereUniqueWithoutZoneInput = {
@@ -92692,6 +96907,8 @@ export namespace Prisma {
     events?: EventCreateNestedManyWithoutBusinessInput
     videos?: VideoCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBackInStockRequestsInput = {
@@ -92763,6 +96980,8 @@ export namespace Prisma {
     events?: EventUncheckedCreateNestedManyWithoutBusinessInput
     videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
     videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBackInStockRequestsInput = {
@@ -92949,6 +97168,8 @@ export namespace Prisma {
     events?: EventUpdateManyWithoutBusinessNestedInput
     videos?: VideoUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBackInStockRequestsInput = {
@@ -93020,6 +97241,746 @@ export namespace Prisma {
     events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
     videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
     videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutQuoteCalculatorsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutQuoteCalculatorsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteSubmissions?: QuoteSubmissionUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutQuoteCalculatorsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutQuoteCalculatorsInput, BusinessUncheckedCreateWithoutQuoteCalculatorsInput>
+  }
+
+  export type QuoteSubmissionCreateWithoutCalculatorInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    business: BusinessCreateNestedOneWithoutQuoteSubmissionsInput
+  }
+
+  export type QuoteSubmissionUncheckedCreateWithoutCalculatorInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    businessId: string
+  }
+
+  export type QuoteSubmissionCreateOrConnectWithoutCalculatorInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    create: XOR<QuoteSubmissionCreateWithoutCalculatorInput, QuoteSubmissionUncheckedCreateWithoutCalculatorInput>
+  }
+
+  export type QuoteSubmissionCreateManyCalculatorInputEnvelope = {
+    data: QuoteSubmissionCreateManyCalculatorInput | QuoteSubmissionCreateManyCalculatorInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutQuoteCalculatorsInput = {
+    update: XOR<BusinessUpdateWithoutQuoteCalculatorsInput, BusinessUncheckedUpdateWithoutQuoteCalculatorsInput>
+    create: XOR<BusinessCreateWithoutQuoteCalculatorsInput, BusinessUncheckedCreateWithoutQuoteCalculatorsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutQuoteCalculatorsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutQuoteCalculatorsInput, BusinessUncheckedUpdateWithoutQuoteCalculatorsInput>
+  }
+
+  export type BusinessUpdateWithoutQuoteCalculatorsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutQuoteCalculatorsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteSubmissions?: QuoteSubmissionUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type QuoteSubmissionUpsertWithWhereUniqueWithoutCalculatorInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    update: XOR<QuoteSubmissionUpdateWithoutCalculatorInput, QuoteSubmissionUncheckedUpdateWithoutCalculatorInput>
+    create: XOR<QuoteSubmissionCreateWithoutCalculatorInput, QuoteSubmissionUncheckedCreateWithoutCalculatorInput>
+  }
+
+  export type QuoteSubmissionUpdateWithWhereUniqueWithoutCalculatorInput = {
+    where: QuoteSubmissionWhereUniqueInput
+    data: XOR<QuoteSubmissionUpdateWithoutCalculatorInput, QuoteSubmissionUncheckedUpdateWithoutCalculatorInput>
+  }
+
+  export type QuoteSubmissionUpdateManyWithWhereWithoutCalculatorInput = {
+    where: QuoteSubmissionScalarWhereInput
+    data: XOR<QuoteSubmissionUpdateManyMutationInput, QuoteSubmissionUncheckedUpdateManyWithoutCalculatorInput>
+  }
+
+  export type QuoteCalculatorCreateWithoutSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    business: BusinessCreateNestedOneWithoutQuoteCalculatorsInput
+  }
+
+  export type QuoteCalculatorUncheckedCreateWithoutSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+    businessId: string
+  }
+
+  export type QuoteCalculatorCreateOrConnectWithoutSubmissionsInput = {
+    where: QuoteCalculatorWhereUniqueInput
+    create: XOR<QuoteCalculatorCreateWithoutSubmissionsInput, QuoteCalculatorUncheckedCreateWithoutSubmissionsInput>
+  }
+
+  export type BusinessCreateWithoutQuoteSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductCreateNestedManyWithoutBusinessInput
+    collections?: CollectionCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    orders?: OrderCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentCreateNestedOneWithoutBusinessInput
+    images?: ImageCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationCreateNestedManyWithoutBusinessInput
+    pages?: PageCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemCreateNestedManyWithoutBusinessInput
+    events?: EventCreateNestedManyWithoutBusinessInput
+    videos?: VideoCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutQuoteSubmissionsInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    slug: string
+    subdomain: string
+    customDomain?: string | null
+    domainStatus?: $Enums.BusinessDomainStatus
+    afProvisionCode?: string | null
+    templateId?: string
+    timeZone?: string
+    ownerEmail: string
+    supportEmail?: string | null
+    phoneNumber?: string | null
+    businessAddress?: string | null
+    stripeAccountId?: string | null
+    stripeAutoTaxEnabled?: boolean
+    stripeChargesEnabled?: boolean
+    stripePayoutsEnabled?: boolean
+    testimonialsAutoApprove?: boolean
+    maintenanceMode?: boolean
+    maintenanceVariant?: string
+    maintenanceMessage?: string | null
+    umamiWebsiteId?: string | null
+    umamiEnabled?: boolean
+    status?: string
+    onboardingComplete?: boolean
+    localBusinessEnabled?: boolean
+    allowAiCrawlers?: boolean
+    sendAbandonedCheckoutEmails?: boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: string
+    shippingFlatRate?: number | null
+    freeShippingThreshold?: number | null
+    offersInStorePickup?: boolean
+    pickupLocation?: string | null
+    pickupInstructions?: string | null
+    originState?: string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: number | null
+    shippingDefaultItemWeightLb?: number | null
+    salesCountries?: BusinessCreatesalesCountriesInput | string[]
+    products?: ProductUncheckedCreateNestedManyWithoutBusinessInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    orders?: OrderUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    siteContent?: SiteContentUncheckedCreateNestedOneWithoutBusinessInput
+    images?: ImageUncheckedCreateNestedManyWithoutBusinessInput
+    discountCodes?: DiscountCodeUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryHistory?: InventoryHistoryUncheckedCreateNestedManyWithoutBusinessInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedCreateNestedManyWithoutBusinessInput
+    inventoryReservations?: InventoryReservationUncheckedCreateNestedManyWithoutBusinessInput
+    pages?: PageUncheckedCreateNestedManyWithoutBusinessInput
+    editorNotes?: EditorNoteUncheckedCreateNestedManyWithoutBusinessInput
+    productImports?: ProductImportUncheckedCreateNestedManyWithoutBusinessInput
+    galleries?: GalleryUncheckedCreateNestedManyWithoutBusinessInput
+    testimonials?: TestimonialUncheckedCreateNestedManyWithoutBusinessInput
+    testimonialInvites?: TestimonialInviteUncheckedCreateNestedManyWithoutBusinessInput
+    platformInvites?: PlatformInviteUncheckedCreateNestedManyWithoutBusinessInput
+    teamInvites?: TeamInviteUncheckedCreateNestedManyWithoutBusinessInput
+    memberships?: BusinessMembershipUncheckedCreateNestedManyWithoutBusinessInput
+    zones?: ShippingZoneUncheckedCreateNestedManyWithoutBusinessInput
+    faqItems?: FaqItemUncheckedCreateNestedManyWithoutBusinessInput
+    events?: EventUncheckedCreateNestedManyWithoutBusinessInput
+    videos?: VideoUncheckedCreateNestedManyWithoutBusinessInput
+    videoSources?: VideoSourceUncheckedCreateNestedManyWithoutBusinessInput
+    backInStockRequests?: BackInStockRequestUncheckedCreateNestedManyWithoutBusinessInput
+    quoteCalculators?: QuoteCalculatorUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutQuoteSubmissionsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutQuoteSubmissionsInput, BusinessUncheckedCreateWithoutQuoteSubmissionsInput>
+  }
+
+  export type QuoteCalculatorUpsertWithoutSubmissionsInput = {
+    update: XOR<QuoteCalculatorUpdateWithoutSubmissionsInput, QuoteCalculatorUncheckedUpdateWithoutSubmissionsInput>
+    create: XOR<QuoteCalculatorCreateWithoutSubmissionsInput, QuoteCalculatorUncheckedCreateWithoutSubmissionsInput>
+    where?: QuoteCalculatorWhereInput
+  }
+
+  export type QuoteCalculatorUpdateToOneWithWhereWithoutSubmissionsInput = {
+    where?: QuoteCalculatorWhereInput
+    data: XOR<QuoteCalculatorUpdateWithoutSubmissionsInput, QuoteCalculatorUncheckedUpdateWithoutSubmissionsInput>
+  }
+
+  export type QuoteCalculatorUpdateWithoutSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutQuoteCalculatorsNestedInput
+  }
+
+  export type QuoteCalculatorUncheckedUpdateWithoutSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BusinessUpsertWithoutQuoteSubmissionsInput = {
+    update: XOR<BusinessUpdateWithoutQuoteSubmissionsInput, BusinessUncheckedUpdateWithoutQuoteSubmissionsInput>
+    create: XOR<BusinessCreateWithoutQuoteSubmissionsInput, BusinessUncheckedCreateWithoutQuoteSubmissionsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutQuoteSubmissionsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutQuoteSubmissionsInput, BusinessUncheckedUpdateWithoutQuoteSubmissionsInput>
+  }
+
+  export type BusinessUpdateWithoutQuoteSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUpdateOneWithoutBusinessNestedInput
+    images?: ImageUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUpdateManyWithoutBusinessNestedInput
+    pages?: PageUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUpdateManyWithoutBusinessNestedInput
+    events?: EventUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutQuoteSubmissionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    subdomain?: StringFieldUpdateOperationsInput | string
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    domainStatus?: EnumBusinessDomainStatusFieldUpdateOperationsInput | $Enums.BusinessDomainStatus
+    afProvisionCode?: NullableStringFieldUpdateOperationsInput | string | null
+    templateId?: StringFieldUpdateOperationsInput | string
+    timeZone?: StringFieldUpdateOperationsInput | string
+    ownerEmail?: StringFieldUpdateOperationsInput | string
+    supportEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    businessAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeAutoTaxEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripeChargesEnabled?: BoolFieldUpdateOperationsInput | boolean
+    stripePayoutsEnabled?: BoolFieldUpdateOperationsInput | boolean
+    testimonialsAutoApprove?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceMode?: BoolFieldUpdateOperationsInput | boolean
+    maintenanceVariant?: StringFieldUpdateOperationsInput | string
+    maintenanceMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiWebsiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    umamiEnabled?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    onboardingComplete?: BoolFieldUpdateOperationsInput | boolean
+    localBusinessEnabled?: BoolFieldUpdateOperationsInput | boolean
+    allowAiCrawlers?: BoolFieldUpdateOperationsInput | boolean
+    sendAbandonedCheckoutEmails?: BoolFieldUpdateOperationsInput | boolean
+    featureFlags?: JsonNullValueInput | InputJsonValue
+    shippingType?: StringFieldUpdateOperationsInput | string
+    shippingFlatRate?: NullableIntFieldUpdateOperationsInput | number | null
+    freeShippingThreshold?: NullableIntFieldUpdateOperationsInput | number | null
+    offersInStorePickup?: BoolFieldUpdateOperationsInput | boolean
+    pickupLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    pickupInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    originState?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingWeightTiers?: NullableJsonNullValueInput | InputJsonValue
+    businessHours?: NullableJsonNullValueInput | InputJsonValue
+    shippingFallbackRate?: NullableIntFieldUpdateOperationsInput | number | null
+    shippingDefaultItemWeightLb?: NullableFloatFieldUpdateOperationsInput | number | null
+    salesCountries?: BusinessUpdatesalesCountriesInput | string[]
+    products?: ProductUncheckedUpdateManyWithoutBusinessNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    orders?: OrderUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    siteContent?: SiteContentUncheckedUpdateOneWithoutBusinessNestedInput
+    images?: ImageUncheckedUpdateManyWithoutBusinessNestedInput
+    discountCodes?: DiscountCodeUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryHistory?: InventoryHistoryUncheckedUpdateManyWithoutBusinessNestedInput
+    baseInventoryUnits?: BaseInventoryUnitUncheckedUpdateManyWithoutBusinessNestedInput
+    inventoryReservations?: InventoryReservationUncheckedUpdateManyWithoutBusinessNestedInput
+    pages?: PageUncheckedUpdateManyWithoutBusinessNestedInput
+    editorNotes?: EditorNoteUncheckedUpdateManyWithoutBusinessNestedInput
+    productImports?: ProductImportUncheckedUpdateManyWithoutBusinessNestedInput
+    galleries?: GalleryUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonials?: TestimonialUncheckedUpdateManyWithoutBusinessNestedInput
+    testimonialInvites?: TestimonialInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    platformInvites?: PlatformInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    teamInvites?: TeamInviteUncheckedUpdateManyWithoutBusinessNestedInput
+    memberships?: BusinessMembershipUncheckedUpdateManyWithoutBusinessNestedInput
+    zones?: ShippingZoneUncheckedUpdateManyWithoutBusinessNestedInput
+    faqItems?: FaqItemUncheckedUpdateManyWithoutBusinessNestedInput
+    events?: EventUncheckedUpdateManyWithoutBusinessNestedInput
+    videos?: VideoUncheckedUpdateManyWithoutBusinessNestedInput
+    videoSources?: VideoSourceUncheckedUpdateManyWithoutBusinessNestedInput
+    backInStockRequests?: BackInStockRequestUncheckedUpdateManyWithoutBusinessNestedInput
+    quoteCalculators?: QuoteCalculatorUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type SessionCreateManyUserInput = {
@@ -93056,6 +98017,8 @@ export namespace Prisma {
     createdAt?: Date | string
     businessId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type CustomerCreateManyUserInput = {
@@ -93207,6 +98170,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -93215,6 +98180,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutUserInput = {
@@ -93222,6 +98189,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CustomerUpdateWithoutUserInput = {
@@ -93483,6 +98452,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -93722,6 +98694,8 @@ export namespace Prisma {
     createdAt?: Date | string
     userId: string
     role: $Enums.BusinessRole
+    merchantTermsAcceptedAt?: Date | string | null
+    merchantTermsVersion?: string | null
   }
 
   export type ShippingZoneCreateManyBusinessInput = {
@@ -93798,6 +98772,35 @@ export namespace Prisma {
     productId: string
     variantId?: string | null
     notifiedAt?: Date | string | null
+  }
+
+  export type QuoteCalculatorCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    name: string
+    definition: JsonNullValueInput | InputJsonValue
+    published?: boolean
+  }
+
+  export type QuoteSubmissionCreateManyBusinessInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    calculatorId?: string | null
   }
 
   export type ProductUpdateWithoutBusinessInput = {
@@ -94035,6 +99038,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -94070,6 +99076,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -94105,6 +99114,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -94775,6 +99787,8 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -94783,6 +99797,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessMembershipUncheckedUpdateManyWithoutBusinessInput = {
@@ -94790,6 +99806,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    merchantTermsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    merchantTermsVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ShippingZoneUpdateWithoutBusinessInput = {
@@ -95022,6 +100040,95 @@ export namespace Prisma {
     productId?: StringFieldUpdateOperationsInput | string
     variantId?: NullableStringFieldUpdateOperationsInput | string | null
     notifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type QuoteCalculatorUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    submissions?: QuoteSubmissionUpdateManyWithoutCalculatorNestedInput
+  }
+
+  export type QuoteCalculatorUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+    submissions?: QuoteSubmissionUncheckedUpdateManyWithoutCalculatorNestedInput
+  }
+
+  export type QuoteCalculatorUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    name?: StringFieldUpdateOperationsInput | string
+    definition?: JsonNullValueInput | InputJsonValue
+    published?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type QuoteSubmissionUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculator?: QuoteCalculatorUpdateOneWithoutSubmissionsNestedInput
+  }
+
+  export type QuoteSubmissionUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type QuoteSubmissionUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    calculatorId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ImageCreateManyProductInput = {
@@ -95694,6 +100801,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -95795,6 +100905,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -95830,6 +100943,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -95865,6 +100981,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96110,6 +101229,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -96141,6 +101263,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96176,6 +101301,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96211,6 +101339,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96488,6 +101619,9 @@ export namespace Prisma {
     id?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    termsAcceptedAt?: Date | string | null
+    termsVersion?: string | null
+    merchantTermsUpdatedAt?: Date | string | null
     orderNumber: number
     status?: string
     paymentStatus?: string
@@ -96519,6 +101653,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96554,6 +101691,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96589,6 +101729,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    termsAcceptedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    termsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    merchantTermsUpdatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     orderNumber?: IntFieldUpdateOperationsInput | number
     status?: StringFieldUpdateOperationsInput | string
     paymentStatus?: StringFieldUpdateOperationsInput | string
@@ -96936,6 +102079,86 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     tierIndex?: IntFieldUpdateOperationsInput | number
     priceCents?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type QuoteSubmissionCreateManyCalculatorInput = {
+    id?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    status?: string
+    contactName: string
+    contactEmail: string
+    contactPhone?: string | null
+    answers: JsonNullValueInput | InputJsonValue
+    estimateCents?: number | null
+    formulaSnapshot: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: number | null
+    quoteSentAt?: Date | string | null
+    sentQuoteCents?: number | null
+    sentMessage?: string | null
+    calculatorName: string
+    showEstimateToCustomer?: boolean
+    businessId: string
+  }
+
+  export type QuoteSubmissionUpdateWithoutCalculatorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    business?: BusinessUpdateOneRequiredWithoutQuoteSubmissionsNestedInput
+  }
+
+  export type QuoteSubmissionUncheckedUpdateWithoutCalculatorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type QuoteSubmissionUncheckedUpdateManyWithoutCalculatorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    contactName?: StringFieldUpdateOperationsInput | string
+    contactEmail?: StringFieldUpdateOperationsInput | string
+    contactPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    answers?: JsonNullValueInput | InputJsonValue
+    estimateCents?: NullableIntFieldUpdateOperationsInput | number | null
+    formulaSnapshot?: JsonNullValueInput | InputJsonValue
+    finalQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    quoteSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentQuoteCents?: NullableIntFieldUpdateOperationsInput | number | null
+    sentMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    calculatorName?: StringFieldUpdateOperationsInput | string
+    showEstimateToCustomer?: BoolFieldUpdateOperationsInput | boolean
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
 

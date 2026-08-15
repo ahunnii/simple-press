@@ -7,7 +7,7 @@ import { TrailHeader } from "../../_components/trail-header";
 import { ShippingSettings } from "./_components/shipping-settings";
 
 export default async function ShippingSettingsPage() {
-  const business = await api.business.getWith({ includeSiteContent: true });
+  const business = await api.business.getWith({});
 
   if (!business) notFound();
 

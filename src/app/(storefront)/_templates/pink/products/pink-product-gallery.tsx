@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 
+import { cn } from "~/lib/utils";
 import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { useVariantImage } from "~/app/(storefront)/_components/product-page/variant-image-context";
 
@@ -50,7 +51,10 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
     if (idx >= 0) setActive(idx);
   }, [variantImageUrl, images]);
 
-  const list = images.length > 0 ? images : [{ id: "placeholder", url: "/placeholder.svg", altText: productName }];
+  const list =
+    images.length > 0
+      ? images
+      : [{ id: "placeholder", url: "/placeholder.svg", altText: productName }];
   // The thumbnail column only renders for multi-image products. Keeping the
   // `74px _ 1fr` track list in the single-image case put the MAIN frame in the
   // 74px column — a thumbnail-sized hero beside an empty half-page.
@@ -90,13 +94,18 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
   return (
     <>
       <div
-        className={`grid gap-3 sm:sticky sm:top-[var(--pink-sticky-top)] sm:items-start sm:self-start${
-          hasThumbs ? " sm:grid-cols-[74px_minmax(0,1fr)]" : ""
-        }`}
+        className={cn(
+          "grid gap-3 sm:sticky sm:top-[var(--pink-sticky-top)] sm:items-start sm:self-start",
+          hasThumbs && "sm:grid-cols-[74px_minmax(0,1fr)]",
+        )}
       >
         {/* ── Vertical thumbnail column (desktop) ── */}
         {list.length > 1 && (
-          <div role="group" aria-label="Product image thumbnails" className="hidden flex-col gap-2.5 sm:flex">
+          <div
+            role="group"
+            aria-label="Product image thumbnails"
+            className="hidden flex-col gap-2.5 sm:flex"
+          >
             {list.map((img, i) => (
               <button
                 key={img.id}
@@ -108,10 +117,19 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 style={{
                   aspectRatio: "1 / 1",
                   background: "var(--pink-ink-tint)",
-                  border: active === i ? "1px solid var(--pink-rose)" : "1px solid var(--pink-line)",
+                  border:
+                    active === i
+                      ? "1px solid var(--pink-rose)"
+                      : "1px solid var(--pink-line)",
                 }}
               >
-                <Image src={img.url} alt="" fill className="object-cover" sizes="74px" />
+                <Image
+                  src={img.url}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="74px"
+                />
               </button>
             ))}
           </div>
@@ -125,7 +143,11 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
           aria-label="Enlarge image"
           aria-haspopup="dialog"
           className="relative block w-full cursor-zoom-in overflow-hidden border-0 p-0 text-left"
-          style={{ aspectRatio: "4 / 5", background: "var(--pink-panel)", font: "inherit" }}
+          style={{
+            aspectRatio: "4 / 5",
+            background: "var(--pink-panel)",
+            font: "inherit",
+          }}
         >
           {list.map((img, i) => (
             <Image
@@ -148,7 +170,11 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
 
         {/* ── Horizontal thumbnail strip (mobile) ── */}
         {list.length > 1 && (
-          <div role="group" aria-label="Product image thumbnails" className="grid grid-cols-4 gap-2 sm:hidden">
+          <div
+            role="group"
+            aria-label="Product image thumbnails"
+            className="grid grid-cols-4 gap-2 sm:hidden"
+          >
             {list.slice(0, 4).map((img, i) => (
               <button
                 key={img.id}
@@ -160,10 +186,19 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 style={{
                   aspectRatio: "1 / 1",
                   background: "var(--pink-ink-tint)",
-                  border: active === i ? "1px solid var(--pink-rose)" : "1px solid var(--pink-line)",
+                  border:
+                    active === i
+                      ? "1px solid var(--pink-rose)"
+                      : "1px solid var(--pink-line)",
                 }}
               >
-                <Image src={img.url} alt="" fill className="object-cover" sizes="25vw" />
+                <Image
+                  src={img.url}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="25vw"
+                />
               </button>
             ))}
           </div>
@@ -176,7 +211,9 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{
             background: "var(--pink-scrim)",
-            animation: shouldReduce ? undefined : "pink-lightbox-scrim-in .2s var(--pink-ease)",
+            animation: shouldReduce
+              ? undefined
+              : "pink-lightbox-scrim-in .2s var(--pink-ease)",
           }}
           onClick={closeLightbox}
         >
@@ -186,7 +223,9 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
             aria-label={`${productName} — enlarged image`}
             className="relative max-h-[90vh] max-w-[90vw]"
             style={{
-              animation: shouldReduce ? undefined : "pink-lightbox-panel-in .2s var(--pink-ease)",
+              animation: shouldReduce
+                ? undefined
+                : "pink-lightbox-panel-in .2s var(--pink-ease)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -210,7 +249,11 @@ export function PinkProductGallery({ images, productName, badge }: Props) {
                 border: "1px solid var(--pink-line)",
               }}
             >
-              <X className="h-4 w-4" style={{ color: "var(--pink-ink)" }} aria-hidden="true" />
+              <X
+                className="h-4 w-4"
+                style={{ color: "var(--pink-ink)" }}
+                aria-hidden="true"
+              />
             </button>
           </div>
           {/* Keyframes declared inline (rather than in globals.css, which

@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 
+import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
@@ -17,7 +18,6 @@ import {
 } from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
-import { api } from "~/trpc/react";
 
 /** Sentinel scope value meaning "not scoped to a specific page". */
 const SITE_SCOPE_VALUE = "__site__";
@@ -114,8 +114,8 @@ export function NotesPanel({
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold">Notes</h2>
           <p className="text-muted-foreground mt-0.5 text-xs">
-            Leave a note about anything you&apos;d like changed — we&apos;ll
-            get back to you.
+            Leave a note about anything you&apos;d like changed — we&apos;ll get
+            back to you.
           </p>
         </div>
         <Button

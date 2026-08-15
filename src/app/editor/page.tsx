@@ -16,16 +16,26 @@ export default async function EditorPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const [business, editorState, flags, session, cmsPages] = await Promise.all([
-    api.business.getWith({}),
-    api.content.getEditorState(),
-    getBusinessFlags(),
-    getSession(),
-    api.content.getEditorPages(),
-  ]);
+  const [business, editorState, flags, session, cmsPages, productPreview] =
+    await Promise.all([
+      api.business.getWith({}),
+      api.content.getEditorState(),
+      getBusinessFlags(),
+      getSession(),
+      api.content.getEditorPages(),
+      api.content.getEditorProductPreview(),
+    ]);
 
   const sections = getSectionsForTemplate(business.templateId);
   const isPlatformAdmin = session?.user.platformRole === "PLATFORM_ADMIN";
+
+  // Feature keys the business actually has on — `flags.flags` alone would
+  // include features switched off by a disabled dependency, so filter through
+  // `isEnabled`. Consumed by the field panel to hide links to admin surfaces
+  // the owner cannot use.
+  const enabledFeatures = Object.keys(flags.flags).filter((key) =>
+    flags.isEnabled(key),
+  );
 
   // Deep-link support: ?page=homepage&section=homepage.hero, or ?page=cms:<id>
   const sp = await searchParams;
@@ -48,9 +58,11 @@ export default async function EditorPage({
       previewCustomFields={editorState.previewCustomFields}
       hasDraft={editorState.hasDraft}
       cmsPages={cmsPages}
+      productPreview={productPreview}
       sections={sections}
       embedsEnabled={flags.isEnabled("embeds")}
       mediaEnabled={flags.isEnabled("media")}
+      enabledFeatures={enabledFeatures}
       initialPage={initialPage}
       initialSection={initialSection}
       isPlatformAdmin={isPlatformAdmin}

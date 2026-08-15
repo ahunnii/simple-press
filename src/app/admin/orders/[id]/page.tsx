@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowLeft, Package, ReceiptText } from "lucide-react";
 import { formatDate } from "~/lib/format-date";
 import { getAllowedCountries } from "~/lib/geo/regions";
 import { formatPrice } from "~/lib/prices";
+import { requireAdminAccess } from "~/lib/require-admin-access";
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/server";
@@ -30,14 +31,21 @@ type Props = {
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const [order, business] = await Promise.all([
+  // Same guard `/admin/layout.tsx` already ran, called again for its resolved
+  // `membershipRole` — which is what decides whether this page may show the
+  // internal note and the refund controls at all. Matches
+  // /admin/products/page.tsx's use of it.
+  const [order, business, { membershipRole }] = await Promise.all([
     api.order.getById(id).catch(rethrowTrpcForErrorBoundary),
     api.business.simplifiedGet(),
+    requireAdminAccess(),
   ]);
 
   if (!order) {
     notFound();
   }
+
+  const isStaffViewer = membershipRole === "STAFF";
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -121,25 +129,15 @@ export default async function OrderDetailPage({ params }: Props) {
                 order.fulfillmentStatus === "fulfilled"
                   ? "default"
                   : isPartiallyFulfilled
-                    ? "outline"
+                    ? "warning"
                     : "secondary"
-              }
-              className={
-                isPartiallyFulfilled
-                  ? "border-amber-300 bg-amber-50 text-amber-700"
-                  : undefined
               }
             >
               Fulfillment: {fulfillmentLabel(order.fulfillmentStatus)}
             </Badge>
 
             {order.deliveryMethod === "pickup" && (
-              <Badge
-                variant="outline"
-                className="border-amber-300 bg-amber-50 text-amber-700"
-              >
-                Pickup
-              </Badge>
+              <Badge variant="warning">Pickup</Badge>
             )}
 
             {order.hasOversell && <Badge variant="destructive">Oversold</Badge>}
@@ -199,17 +197,11 @@ export default async function OrderDetailPage({ params }: Props) {
                           </p>
                           {isPartiallyFulfilled &&
                             (item.fulfilledQuantity >= item.quantity ? (
-                              <Badge
-                                variant="outline"
-                                className="mt-2 border-green-300 bg-green-50 text-green-700"
-                              >
+                              <Badge variant="success" className="mt-2">
                                 Shipped
                               </Badge>
                             ) : item.fulfilledQuantity > 0 ? (
-                              <Badge
-                                variant="outline"
-                                className="mt-2 border-amber-300 bg-amber-50 text-amber-700"
-                              >
+                              <Badge variant="warning" className="mt-2">
                                 {item.fulfilledQuantity} of {item.quantity}{" "}
                                 shipped
                               </Badge>
@@ -493,11 +485,15 @@ export default async function OrderDetailPage({ params }: Props) {
               </Card>
             )}
 
-            {/* Notes — always visible and editable */}
+            {/* Notes — the customer's note is always visible; the internal
+                note is owner/manager-only (D2), matching the server-side
+                redaction in `order.getById` and the `ownerAdminProcedure` tier
+                on `order.updateNote`. */}
             <OrderNotes
               orderId={order.id}
               internalNote={order.internalNote}
               customerNote={order.customerNote}
+              canViewInternalNote={!isStaffViewer}
             />
 
             {/* Payment Info */}
@@ -535,9 +531,16 @@ export default async function OrderDetailPage({ params }: Props) {
                   </div>
                 )}
 
-                <div className="border-t pt-2">
-                  <RefundHandler order={order} />
-                </div>
+                {/* Refunds are ownerAdmin-only server-side. This gate is
+                    REQUIRED, not cosmetic: RefundHandler picks the manual-refund
+                    dialog when `stripePaymentIntentId` is falsy, and D2 nulls
+                    that field for STAFF — so without it a staff member would be
+                    offered a refund button whose mutation throws FORBIDDEN. */}
+                {!isStaffViewer && (
+                  <div className="border-t pt-2">
+                    <RefundHandler order={order} />
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

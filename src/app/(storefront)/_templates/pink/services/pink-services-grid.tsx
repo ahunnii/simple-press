@@ -119,7 +119,10 @@ export function PinkServicesGrid({
               <Link href={card.href} className="group flex flex-col">
                 <div
                   className="pink-lift relative block overflow-hidden"
-                  style={{ aspectRatio: "4 / 3", background: "var(--pink-panel)" }}
+                  style={{
+                    aspectRatio: "4 / 3",
+                    background: "var(--pink-panel)",
+                  }}
                 >
                   <Image
                     src={card.imageUrl ?? "/placeholder.svg"}
@@ -166,7 +169,9 @@ export function PinkServicesGrid({
 
                 {(card.durationLabel ?? card.category) && (
                   <p className="pink-label mt-2">
-                    {[card.durationLabel, card.category].filter(Boolean).join(" · ")}
+                    {[card.durationLabel, card.category]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                 )}
               </Link>

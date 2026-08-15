@@ -38,6 +38,20 @@ model User {
   updatedAt     DateTime     @updatedAt
   platformRole  PlatformRole @default(BUSINESS_USER)
 
+  // Acceptance of the PLATFORM's Terms of Service + Privacy Policy, recorded at
+  // account creation. Scoped to SimplePress only, never to an individual store:
+  // this account is portable across every storefront on the platform, so it
+  // cannot meaningfully carry consent to any one merchant's terms. Merchant
+  // terms are agreed per-transaction (see `Order`) and per-store for owners
+  // (see `BusinessMembership`).
+  //
+  // Nullable because every account that existed before this shipped has no
+  // recorded acceptance — do NOT backfill with a timestamp, which would assert
+  // an agreement that never happened. `null` honestly means "unknown".
+  // Version format is the ISO date from `~/lib/legal/policy-versions`.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+
   sessions Session[]
   accounts Account[]
 
@@ -62,6 +76,18 @@ model BusinessMembership {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   role BusinessRole // ← typed enum, not a raw string
+
+  // Acceptance of the Seller & Merchant Agreement + Acceptable Use Policy,
+  // recorded when a store is created or an owner invite is claimed. These are
+  // the documents that give the platform grounds to suspend a store, and on a
+  // free platform they are the ONLY contract with the merchant — so this is
+  // recorded per membership, not per user: one person can own two stores and
+  // accepts separately for each.
+  //
+  // Nullable for memberships that predate this. `null` = never accepted, which
+  // is exactly what it looks like; do not backfill.
+  merchantTermsAcceptedAt DateTime?
+  merchantTermsVersion    String?
 
   @@unique([userId, businessId])
   // NOTE: no @@index([userId]) — covered by the @@unique([userId, businessId]) prefix.
@@ -230,6 +256,8 @@ model Business {
   videos                Video[]
   videoSources          VideoSource[]
   backInStockRequests   BackInStockRequest[]
+  quoteCalculators      QuoteCalculator[]
+  quoteSubmissions      QuoteSubmission[]
 
   // NOTE: no @@index on subdomain/customDomain — each is already @unique (own index).
 }
@@ -263,6 +291,21 @@ model SiteContent {
   metaKeywords    String?
   ogImage         String?
   faviconUrl      String?
+
+  // Per-route meta overrides for storefront pages that have no DB row of their
+  // own (/about, /contact, /shop, /blog, /collections, /services, /testimonials,
+  // /faq, /events, /videos). Keyed by route:
+  //   { "about": { title, description, ogImage }, ... }
+  // Shape + parser: src/lib/validators/site-seo.ts. A map rather than a column
+  // per route so shipping a new storefront route needs no migration.
+  pageMeta Json?
+
+  // Search-engine ownership tokens, e.g. { google, bing }. Emitted from the
+  // root layout as Next's `verification` metadata. Written only by
+  // business.updateSeo — deliberately kept OUT of siteContentSchema so the
+  // branding editor, navigation builder and visual-editor publish transaction
+  // cannot reach it (same protection as bannerConfig/popupConfig).
+  siteVerification Json?
 
   // Logo
   logoUrl     String?
@@ -749,6 +792,9 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // email/firstName/lastName stay PLAINTEXT: DB-side @@unique([businessId, email])
+  // lookups/upserts, admin contains-search, and customer.list's name orderBy all
+  // require it. Encrypted PII expansion is deliberate (scripts/encrypt-existing-pii.ts).
   email     String
   firstName String?
   lastName  String?
@@ -766,7 +812,7 @@ model Customer {
   anonymizedAt        DateTime?
 
   // Owner-facing CRM notes (never shown to the customer)
-  notes String? @db.Text
+  notes String? @db.Text /// @encrypted
 
   // Link to authenticated user (if they've signed in)
   userId String?
@@ -792,8 +838,8 @@ model ShippingAddress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  firstName String
-  lastName  String
+  firstName String /// @encrypted
+  lastName  String /// @encrypted
   company   String? /// @encrypted
   address1  String /// @encrypted
   address2  String? /// @encrypted
@@ -818,6 +864,20 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Acceptance of the MERCHANT's terms, captured at checkout. This lives on the
+  // Order rather than in a consent table on purpose: the buyer↔merchant
+  // relationship is formed per-transaction, and an order is already an
+  // immutable record of one. It also covers guest buyers, who never create an
+  // account and so are never reached by `User.termsAcceptedAt`.
+  //
+  // `merchantTermsUpdatedAt` snapshots the `updatedAt` of the merchant's
+  // terms-of-service Page at time of purchase — merchants can edit their
+  // policies freely, so without this there is no way to tell which wording was
+  // actually shown. Null when the merchant published no terms page at all.
+  termsAcceptedAt        DateTime?
+  termsVersion           String?
+  merchantTermsUpdatedAt DateTime?
+
   // Order number (human-readable, e.g., #1001)
   orderNumber Int
 
@@ -838,6 +898,8 @@ model Order {
   total    Int
 
   // Customer info (denormalized for historical record)
+  // customerEmail/customerName/customerFirstName/customerLastName stay PLAINTEXT —
+  // admin orders search, CSV-export filter, and global admin search run contains-filters on them.
   customerEmail     String
   customerName      String? // For simpler storage (combines first+last)
   customerFirstName String?
@@ -855,8 +917,8 @@ model Order {
   refundAmountCents Int? // cumulative refunded amount in cents (partial or full)
 
   // Notes
-  customerNote String? @db.Text
-  internalNote String? @db.Text
+  customerNote String? @db.Text /// @encrypted
+  internalNote String? @db.Text /// @encrypted
 
   // Multi-tenancy
   businessId String
@@ -1522,4 +1584,79 @@ model BackInStockRequest {
   @@index([businessId, productId])
   @@index([notifiedAt, productId])
   @@index([productId])
+}
+
+// ============================================
+// QUOTE CALCULATOR
+// ============================================
+
+model QuoteCalculator {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name       String
+  // Versioned definition blob: questions, options, show-if conditions, distance
+  // variables, formula, and display settings. Shape + refinements:
+  // `quoteCalculatorDefinitionSchema` in src/lib/validators/quote-calculator.ts
+  definition Json
+  published  Boolean @default(false)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  submissions QuoteSubmission[]
+
+  @@index([businessId]) // admin list + tiptap picker
+}
+
+model QuoteSubmission {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // NEW | CONTACTED | WON | LOST — QUOTE_STATUS_VALUES_DB in
+  // src/lib/validators/quote-calculator.ts
+  status String @default("NEW")
+
+  contactName  String /// @encrypted
+  contactEmail String /// @encrypted
+  contactPhone String? /// @encrypted
+
+  // Self-contained answer snapshot: [{questionId, type, title, variableName?,
+  // hidden, ...answer fields, display}] — `quoteSubmissionAnswerSchema`.
+  // Labels are denormalized so the inbox renders after the calculator is
+  // edited or deleted.
+  answers                Json
+  // Exact server-computed estimate in cents; always owner-visible. IMMUTABLE —
+  // owner adjustments go on `finalQuoteCents` so the computed record survives.
+  estimateCents          Int?
+  // { formula, variables } captured at submit time — `quoteFormulaSnapshotSchema`.
+  // Lets the owner audit how the number was produced.
+  formulaSnapshot        Json
+  // Owner-adjusted authoritative amount in cents (null = not adjusted yet).
+  // This — not estimateCents — is what a future invoice/deposit bills against.
+  finalQuoteCents        Int?
+  // Last final-quote email sent to the customer: when, for how much, with what
+  // message. Audit snapshot — finalQuoteCents may be edited again afterwards.
+  quoteSentAt            DateTime?
+  sentQuoteCents         Int?
+  sentMessage            String? /// @encrypted
+  // Calculator identity/settings snapshotted at submit time (survive deletion).
+  calculatorName         String
+  showEstimateToCustomer Boolean   @default(false)
+
+  // SetNull, not Cascade: submissions are business records (a lead pipeline)
+  // and must outlive the calculator that produced them; everything the inbox
+  // renders is snapshotted onto this row.
+  calculatorId String?
+  calculator   QuoteCalculator? @relation(fields: [calculatorId], references: [id], onDelete: SetNull)
+
+  // Denormalized for join-free inbox listing (Testimonial precedent).
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, status, createdAt]) // inbox: status filter + newest-first
+  @@index([businessId, createdAt]) // inbox: unfiltered listing
+  @@index([calculatorId]) // SetNull fan-out on calculator delete
 }

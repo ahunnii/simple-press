@@ -1,7 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
-import { db } from "~/server/db";
 import { verifyUnsubscribeToken } from "~/lib/email/unsubscribe-token";
+import { db } from "~/server/db";
 
 function htmlPage(title: string, message: string, success: boolean): Response {
   const color = success ? "#16a34a" : "#dc2626";
@@ -99,14 +101,33 @@ async function unsubscribeByToken(
     };
   }
 
-  // Idempotent update — safe to call even if already unsubscribed
-  await db.customer.updateMany({
-    where: {
-      id: payload.customerId,
-      businessId: payload.businessId,
-    },
-    data: { acceptsMarketing: false },
-  });
+  // Idempotent update — safe to call even if already unsubscribed. This is a
+  // CAN-SPAM-mandated flow, so a DB failure here must render the same
+  // styled failure card the caller already uses for an invalid token,
+  // rather than an unhandled Next.js error page.
+  try {
+    await db.customer.updateMany({
+      where: {
+        id: payload.customerId,
+        businessId: payload.businessId,
+      },
+      data: { acceptsMarketing: false },
+    });
+  } catch (error) {
+    console.error("Error processing unsubscribe request:", error);
+    Sentry.captureException(error, {
+      tags: { route: "unsubscribe" },
+      // customerId/businessId are opaque internal IDs, not PII — never the
+      // token or email address.
+      extra: { customerId: payload.customerId, businessId: payload.businessId },
+    });
+    return {
+      success: false,
+      title: "Something went wrong",
+      message:
+        "We couldn't process your unsubscribe request right now. Please try again in a few minutes, or contact support if the problem persists.",
+    };
+  }
 
   return {
     success: true,

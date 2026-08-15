@@ -177,7 +177,9 @@ export function ProductReviews({
           <Select
             value={sortBy}
             onValueChange={(v) => {
-              setSortBy(v as "recent" | "helpful" | "rating_high" | "rating_low");
+              setSortBy(
+                v as "recent" | "helpful" | "rating_high" | "rating_low",
+              );
               setVisibleCount(INITIAL_REVIEW_COUNT);
             }}
           >
@@ -235,9 +237,7 @@ export function ProductReviews({
         <div className="flex justify-center">
           <Button
             variant="outline"
-            onClick={() =>
-              setVisibleCount((count) => count + REVIEW_PAGE_SIZE)
-            }
+            onClick={() => setVisibleCount((count) => count + REVIEW_PAGE_SIZE)}
           >
             Load more reviews ({reviews.length - visibleCount} remaining)
           </Button>

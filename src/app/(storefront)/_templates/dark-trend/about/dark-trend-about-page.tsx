@@ -118,10 +118,7 @@ export function DarkTrendAboutPage({
         "dark-trend",
         "about.cta",
       ) && (
-        <section
-          className="mb-20 py-20"
-          {...sectionGroupAttr("about", "cta")}
-        >
+        <section className="mb-20 py-20" {...sectionGroupAttr("about", "cta")}>
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             {/* Content */}
             <div className="space-y-6">

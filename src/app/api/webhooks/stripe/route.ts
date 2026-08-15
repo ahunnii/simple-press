@@ -11,6 +11,7 @@ import { findOrCreateShippingAddress } from "~/lib/address-utils";
 import { getBusinessUrl } from "~/lib/business-url";
 import { createOrderFromCheckout } from "~/lib/checkout/create-order";
 import { resolveCheckoutShipping } from "~/lib/checkout/shipping";
+import { splitCustomerName } from "~/lib/customer-name";
 import {
   sendAbandonedCheckoutEmail,
   sendBackorderAlert,
@@ -25,6 +26,7 @@ import {
 } from "~/lib/email/templates";
 import { deductPoolInventory } from "~/lib/inventory";
 import { releaseReservation } from "~/lib/inventory/reservation";
+import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
 import { stripeClient } from "~/lib/stripe/client";
 import { normalizeEmail } from "~/lib/utils";
 import { db } from "~/server/db";
@@ -195,10 +197,23 @@ export async function POST(req: NextRequest) {
 
         if (customerEmail !== "unknown@example.com") {
           // Parse customer name from Stripe (use 'name' field, not 'individual_name')
-          const customerName = fullSession.customer_details?.name?.trim() ?? "";
-          const nameParts = customerName.split(" ").filter((p) => p.length > 0);
-          const firstName = nameParts[0] ?? "Guest";
-          const lastName = nameParts.slice(1).join(" ") || "";
+          // BOTH names land as NULL rather than "" or a placeholder when Stripe
+          // sent nothing — `lastName` for a mononym ("Cher"), `firstName` for a
+          // checkout that carried no name at all. See splitCustomerName: the
+          // admin customer list sorts names `nulls: "last"`, so a real null
+          // sinks a nameless customer to the end of the list, while the old
+          // "Guest" fallback sorted as an ordinary G-name and — worse — read as
+          // if the shopper were actually called Guest. The admin table already
+          // falls back to the email address for display.
+          //
+          // The shipping-address block below deliberately does NOT use this
+          // helper: those columns are non-nullable and get printed on a label,
+          // so "" is the correct empty there.
+          const parsedName = splitCustomerName(
+            fullSession.customer_details?.name,
+          );
+          const firstName = parsedName.firstName;
+          const lastName = parsedName.lastName;
 
           // Check if there's a user with this email in the business
           const existingUser = await db.user.findFirst({
@@ -277,6 +292,34 @@ export async function POST(req: NextRequest) {
         const deliveryMethod =
           session.metadata?.deliveryMethod === "pickup" ? "pickup" : "ship";
 
+        // Merchant-terms acceptance is agreed at checkout (see the Order
+        // model docblock) — `merchantTermsUpdatedAt` snapshots the
+        // terms-of-service Page's `updatedAt` so we can later tell which
+        // wording was actually in force. Isolated in its own try/catch, same
+        // convention as the other non-critical steps in this handler (e.g.
+        // customer-metrics below): a lookup failure must never block order
+        // creation, it just means this order records no `merchantTermsUpdatedAt`.
+        let merchantTermsUpdatedAt: Date | null = null;
+        try {
+          const merchantTermsPage = await db.page.findUnique({
+            where: {
+              businessId_slug: {
+                businessId: business.id,
+                slug: "terms-of-service",
+              },
+              published: true,
+            },
+            select: { updatedAt: true },
+          });
+          merchantTermsUpdatedAt = merchantTermsPage?.updatedAt ?? null;
+        } catch (termsLookupError) {
+          Sentry.withScope((scope) => {
+            scope.setTag("webhook.step", "merchant-terms-lookup");
+            scope.setTag("businessId", businessId);
+            Sentry.captureException(termsLookupError);
+          });
+        }
+
         const order = await createOrderFromCheckout(db, {
           business,
           customer,
@@ -287,6 +330,9 @@ export async function POST(req: NextRequest) {
           verifiedDiscountCodeId,
           discountAmount,
           deliveryMethod,
+          termsAcceptedAt: new Date(),
+          termsVersion: PLATFORM_TERMS_VERSION,
+          merchantTermsUpdatedAt,
         });
 
         // orderNumber is used by the inventory-deduction block below for log

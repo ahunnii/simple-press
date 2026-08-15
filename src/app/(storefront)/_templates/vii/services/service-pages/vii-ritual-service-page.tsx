@@ -20,7 +20,6 @@
  * 4. Full-bleed navy closing CTA with background image, optional button, and
  *    optional booking embed.
  */
-import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../../hooks/use-vii-hero-motion";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -29,6 +28,7 @@ import {
   parseTemplateIframeValue,
   parseTemplateRichtext,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -40,6 +40,12 @@ import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
 import { ViiOverline } from "../../shared/vii-overline";
 import { resolveRitualFields } from "./fields";
@@ -102,7 +108,11 @@ function RitualHero({
             fill
             priority
             sizes="100vw"
-            style={{ objectFit: "cover", opacity: 0.35, ...heroMediaStyle(shown, reduced) }}
+            style={{
+              objectFit: "cover",
+              opacity: 0.35,
+              ...heroMediaStyle(shown, reduced),
+            }}
           />
         ) : (
           <div
@@ -243,7 +253,7 @@ function RitualPhilosophy({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}
       >
         {overline && (
@@ -304,7 +314,7 @@ function RitualPhilosophy({
       {(Boolean(philosophyImageSrc) || Boolean(philosophyVideoSrc)) && (
         <div
           ref={mediaRef}
-          className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", mediaVisible && "is-visible")}
         >
           <ServiceSectionMedia
             imageSrc={philosophyImageSrc}
@@ -327,7 +337,7 @@ function RitualPhilosophy({
 function StepsGroup({ children }: { children: React.ReactNode }) {
   const { ref, visible } = useViiReveal(0.05);
   return (
-    <div ref={ref} className={`vii-reveal-group${visible ? " is-visible" : ""}`}>
+    <div ref={ref} className={cn("vii-reveal-group", visible && "is-visible")}>
       {children}
     </div>
   );
@@ -350,7 +360,10 @@ function RitualStep({
 
   return (
     <div
-      className={`vii-reveal-item vii-ritual-step${isReversed ? "is-reversed" : ""}`}
+      className={cn(
+        "vii-reveal-item vii-ritual-step",
+        isReversed && "is-reversed",
+      )}
       style={
         {
           "--i": Math.min(index, 7),

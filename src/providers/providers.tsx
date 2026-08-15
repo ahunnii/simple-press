@@ -1,6 +1,5 @@
 "use client";
 
-import type { AdditionalFields } from "@better-auth-ui/core";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import Link from "next/link";
@@ -18,65 +17,33 @@ import { authClient } from "~/server/better-auth/client";
 import { Toaster } from "~/components/ui/sonner";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { AuthProvider } from "~/components/auth/auth-provider";
-import { HCaptchaWidget } from "~/components/auth/captcha/hcaptcha-widget";
+import { RecaptchaWidget } from "~/components/auth/captcha/recaptcha-widget";
 import { CartProvider } from "~/providers/cart-context";
 import { WishlistProvider } from "~/providers/wishlist-context";
 
 /**
- * Terms-of-service consent gate shown on sign-up.
+ * No `additionalFields` are passed to `<AuthProvider>` on purpose.
  *
- * `profile: false` matters — the field defaults to also rendering on the user
- * profile, but this is a one-time consent checkbox, not an editable attribute.
+ * This used to declare a `terms` consent checkbox here. It was removed because
+ * it duplicated the `termsAccepted` checkbox that `src/components/auth/sign-up.tsx`
+ * renders directly — same sentence, same screen, stacked one above the other.
  *
- * There is deliberately no `terms` column on `User` and no matching
- * `user.additionalFields.terms` in `src/server/better-auth/config.tsx`; this is
- * a client-side gate only. better-auth's `parseInputData` iterates the declared
- * schema, so the undeclared `terms` key is silently dropped rather than 400ing.
+ * The one in `sign-up.tsx` is the real one, and the only one worth keeping:
+ *   - it persists. `databaseHooks.user.create.before` stamps
+ *     `User.termsAcceptedAt` / `termsVersion` via `resolvePlatformTermsAcceptance`
+ *     (`src/server/better-auth/terms-acceptance.ts`). The `terms` field here wrote
+ *     nothing at all — there is no `terms` column and no matching
+ *     `user.additionalFields.terms` in the better-auth config, so
+ *     `parseInputData` silently dropped the key.
+ *   - its policy links are absolute (built from the platform origin), so they
+ *     resolve to the platform host from a tenant subdomain. The links here were
+ *     relative and pointed at the tenant.
+ *   - it renders a real `FieldError` on invalid submit.
+ *
+ * If you need a genuinely new sign-up field, add it back here — but declare a
+ * matching column and `user.additionalFields` entry in the better-auth config,
+ * or it will be dropped the same silent way.
  */
-const ADDITIONAL_FIELDS: AdditionalFields = [
-  {
-    name: "terms",
-    type: "boolean",
-    // A `boolean` field renders as a toggle SWITCH by default. That's wrong for
-    // a consent gate — agreeing to terms is a checkbox. Caught by
-    // e2e/auth.default.spec.ts's sign-up test.
-    inputType: "checkbox",
-    required: true,
-    // Rendered on sign-up, below the password block.
-    signUp: true,
-    profile: false,
-    // The label is a ReactNode in this package, so the policies are reachable
-    // from the form itself. `stopPropagation` keeps a link click from toggling
-    // the checkbox the label is bound to.
-    //
-    // Wrapped in a single `<span>` element: `FieldLabel` is `flex w-fit gap-2`,
-    // so a fragment's children become separate flex items that wrap into
-    // individual columns. A single span makes the label one flex child, allowing
-    // the text to flow normally across lines.
-    label: (
-      <span className="text-sm leading-snug font-normal">
-        I agree to SimplePress&apos;s{" "}
-        <Link
-          href="/platform/policies/terms-of-service"
-          target="_blank"
-          className="underline underline-offset-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Terms of Service
-        </Link>{" "}
-        and{" "}
-        <Link
-          href="/platform/policies/privacy-policy"
-          target="_blank"
-          className="underline underline-offset-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          Privacy Policy
-        </Link>
-      </span>
-    ),
-  },
-];
 
 export function Providers({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -126,12 +93,18 @@ export function Providers({ children }: { children: ReactNode }) {
               name: true,
               requireEmailVerification: true,
             }}
-            additionalFields={ADDITIONAL_FIELDS}
-            // Renders the hCaptcha widget on sign-in, sign-up, and
-            // forgot-password, and attaches `x-captcha-response` — matching
-            // the endpoints better-auth's server-side `captcha()` plugin
-            // protects. Without this, every credentialed auth request 400s.
-            plugins={[captchaPlugin({ render: HCaptchaWidget })]}
+            // Stages a reCAPTCHA v3 token on sign-in, sign-up, and
+            // forgot-password and attaches `x-captcha-response` — matching the
+            // endpoints our server-side `recaptcha()` plugin protects
+            // (`~/server/better-auth/plugins/recaptcha`). Without this, every
+            // credentialed auth request 400s.
+            //
+            // v3 renders no widget, so the token is minted on mount and
+            // refreshed on a timer rather than collected from a user
+            // interaction — `captchaPlugin` exposes no pre-submit hook, so a
+            // live token has to be staged ahead of submit. See
+            // `recaptcha-widget.tsx` for that lifecycle.
+            plugins={[captchaPlugin({ render: RecaptchaWidget })]}
             // `upload` is not optional in practice: without it the library
             // encodes the image as a base64 data URL and writes that into
             // `user.image`, which then rides in the 7-day

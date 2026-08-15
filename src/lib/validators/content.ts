@@ -32,76 +32,83 @@ const navigationItemsSchema = z
 /** Max payload size for `customFields` on any content save (~1MB of JSON). */
 const CUSTOM_FIELDS_MAX_BYTES = 1_000_000;
 
-export const siteContentSchema = z.object({
-  templateId: z.string().optional(),
-  // Hero Section
-  heroTitle: z.string().max(255).optional(),
-  heroSubtitle: z.string().max(500).optional(),
-  heroImageUrl: z.string().url().optional().or(z.literal("")),
-  heroButtonText: z.string().max(100).optional(),
-  heroButtonLink: z.string().max(500).optional(),
+export const siteContentSchema = z
+  .object({
+    // NOTE: `templateId` is deliberately NOT accepted here. Commercial templates
+    // are ownership-gated per subdomain (`isTemplateAvailableForSubdomain`), and
+    // this procedure never validated that — any OWNER/MANAGER could hand itself a
+    // paid template by posting one through a content save. Template changes go
+    // through `business.updateTemplate`, which re-checks ownership server-side.
 
-  // About Section
-  aboutTitle: z.string().max(255).optional(),
-  aboutText: z.string().max(10000).optional(),
-  aboutImageUrl: z.string().url().optional().or(z.literal("")),
+    // Hero Section
+    heroTitle: z.string().max(255).optional(),
+    heroSubtitle: z.string().max(500).optional(),
+    heroImageUrl: z.string().url().optional().or(z.literal("")),
+    heroButtonText: z.string().max(100).optional(),
+    heroButtonLink: z.string().max(500).optional(),
 
-  // Features
-  features: z.any().optional(), // JSON array — shape varies per template
+    // About Section
+    aboutTitle: z.string().max(255).optional(),
+    aboutText: z.string().max(10000).optional(),
+    aboutImageUrl: z.string().url().optional().or(z.literal("")),
 
-  // Footer
-  footerText: z.string().max(500).optional(),
-  socialLinks: socialLinksSchema,
+    // Features
+    features: z.any().optional(), // JSON array — shape varies per template
 
-  // SEO
-  metaTitle: z.string().max(255).optional(),
-  metaDescription: z.string().max(500).optional(),
-  metaKeywords: z.string().max(255).optional(),
-  ogImage: z.string().url().optional().or(z.literal("")),
-  faviconUrl: z.string().url().optional().or(z.literal("")),
+    // Footer
+    footerText: z.string().max(500).optional(),
+    socialLinks: socialLinksSchema,
 
-  // Logo
-  logoUrl: z.string().url().optional().or(z.literal("")),
-  logoAltText: z.string().max(255).optional(),
+    // SEO
+    metaTitle: z.string().max(255).optional(),
+    metaDescription: z.string().max(500).optional(),
+    metaKeywords: z.string().max(255).optional(),
+    ogImage: z.string().url().optional().or(z.literal("")),
+    faviconUrl: z.string().url().optional().or(z.literal("")),
 
-  // Colors
-  primaryColor: z.string().optional(),
-  secondaryColor: z.string().optional(),
-  accentColor: z.string().optional(),
+    // Logo
+    logoUrl: z.string().url().optional().or(z.literal("")),
+    logoAltText: z.string().max(255).optional(),
 
-  // Navigation
-  navigationItems: navigationItemsSchema,
+    // Colors
+    primaryColor: z.string().optional(),
+    secondaryColor: z.string().optional(),
+    accentColor: z.string().optional(),
 
-  // Template-specific — shape varies per template, validated at consumption time
-  customFields: z.any().optional(),
+    // Navigation
+    navigationItems: navigationItemsSchema,
 
-  // Set by the visual editor's Publish action only — tells the server the
-  // owner's durable draft (SiteContent.previewCustomFields) has just been
-  // superseded by this save and should be cleared. Every other caller
-  // (Branding, Navigation, legacy Template Fields editor) must omit this /
-  // leave it false so an unrelated save never silently destroys an
-  // in-progress /editor draft.
-  clearPreviewDraft: z.boolean().optional(),
+    // Template-specific — shape varies per template, validated at consumption time
+    customFields: z.any().optional(),
 
-  // Set only by the visual editor's Publish — promotes every CMS page's
-  // stored preview draft (Page.previewDraft) to its live columns in the same
-  // transaction as this save. Omitted / false for all other callers.
-  publishCmsPageDrafts: z.boolean().optional(),
-}).superRefine((val, ctx) => {
-  // Same cap `previewDraftSchema` enforces below — publish (updateSiteContent)
-  // must not accept an unbounded customFields payload either. `customFields`
-  // is `z.any()` above (shape varies per template), so this is the only place
-  // that can catch an oversized publish.
-  if (val.customFields === undefined) return;
-  const size = JSON.stringify(val.customFields).length;
-  if (size > CUSTOM_FIELDS_MAX_BYTES) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `Custom fields exceed ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
-      path: ["customFields"],
-    });
-  }
-});
+    // Set by the visual editor's Publish action only — tells the server the
+    // owner's durable draft (SiteContent.previewCustomFields) has just been
+    // superseded by this save and should be cleared. Every other caller
+    // (Branding, Navigation, legacy Template Fields editor) must omit this /
+    // leave it false so an unrelated save never silently destroys an
+    // in-progress /editor draft.
+    clearPreviewDraft: z.boolean().optional(),
+
+    // Set only by the visual editor's Publish — promotes every CMS page's
+    // stored preview draft (Page.previewDraft) to its live columns in the same
+    // transaction as this save. Omitted / false for all other callers.
+    publishCmsPageDrafts: z.boolean().optional(),
+  })
+  .superRefine((val, ctx) => {
+    // Same cap `previewDraftSchema` enforces below — publish (updateSiteContent)
+    // must not accept an unbounded customFields payload either. `customFields`
+    // is `z.any()` above (shape varies per template), so this is the only place
+    // that can catch an oversized publish.
+    if (val.customFields === undefined) return;
+    const size = JSON.stringify(val.customFields).length;
+    if (size > CUSTOM_FIELDS_MAX_BYTES) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Custom fields exceed ${CUSTOM_FIELDS_MAX_BYTES.toLocaleString()} characters`,
+        path: ["customFields"],
+      });
+    }
+  });
 
 export const previewDraftSchema = z
   .object({

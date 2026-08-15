@@ -1,18 +1,24 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import type { z } from "zod";
+import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Save } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import type { BannerConfig, PopupConfig } from "~/lib/validators/site-banner";
+import { cn } from "~/lib/utils";
 import {
   updateBannerConfigSchema,
   updatePopupConfigSchema,
 } from "~/lib/validators/site-banner";
 import { api } from "~/trpc/react";
+import { useDirtyForm } from "~/hooks/use-dirty-form";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -32,63 +38,68 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
+import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
 import { SwitchFormField } from "~/components/inputs/switch-form-field";
-import { TemplateImageUploadField } from "~/app/admin/content/template/_components/template-fields-editor";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type BannerFormValues = z.infer<typeof updateBannerConfigSchema>;
-type PopupFormValues = z.infer<typeof updatePopupConfigSchema>;
+
+/**
+ * `imageFile` is form-local and never goes on the wire — it holds the picked
+ * `File` until Save, so abandoning the page can't orphan an S3 object. The
+ * persisted value stays `imagePath` (a string), which is what the mutation
+ * takes and what the storefront reads.
+ */
+const popupFormSchema = updatePopupConfigSchema.extend({
+  imageFile: z.instanceof(File).nullable().optional(),
+});
+
+type PopupFormValues = z.infer<typeof popupFormSchema>;
 
 type Props = {
   banner: BannerConfig | null;
   popup: PopupConfig | null;
   bannersEnabled: boolean;
   popupsEnabled: boolean;
+  /** Mirrors the `media` feature flag — gates the media-library picker. */
+  mediaEnabled: boolean;
 };
 
-// ─── Banner Form ──────────────────────────────────────────────────────────────
+// ─── Default values ───────────────────────────────────────────────────────────
 
-function BannerForm({ banner }: { banner: BannerConfig | null }) {
-  const router = useRouter();
+// Declared once so `defaultValues` and the toolbar's Reset can't drift apart.
+function bannerDefaults(banner: BannerConfig | null): BannerFormValues {
+  return {
+    enabled: banner?.enabled ?? false,
+    content: banner?.content ?? null,
+    linkUrl: banner?.linkUrl ?? "",
+    linkLabel: banner?.linkLabel ?? "",
+    bgColor: banner?.bgColor ?? "#000000",
+    textColor: banner?.textColor ?? "#ffffff",
+  };
+}
 
-  // `as any` on resolver matches the codebase pattern (shipping-settings.tsx)
-  // to avoid the third TFieldValues generic mismatch from zodResolver.
-  const form: UseFormReturn<BannerFormValues> = useForm<BannerFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    resolver: zodResolver(updateBannerConfigSchema) as any,
-    mode: "onTouched",
-    reValidateMode: "onChange",
-    defaultValues: {
-      enabled: banner?.enabled ?? false,
-      content: banner?.content ?? null,
-      linkUrl: banner?.linkUrl ?? "",
-      linkLabel: banner?.linkLabel ?? "",
-      bgColor: banner?.bgColor ?? "#000000",
-      textColor: banner?.textColor ?? "#ffffff",
-    },
-  });
+function popupDefaults(popup: PopupConfig | null): PopupFormValues {
+  return {
+    enabled: popup?.enabled ?? false,
+    mode: popup?.mode ?? "image",
+    heading: popup?.heading ?? "",
+    imagePath: popup?.imagePath ?? "",
+    imageAlt: popup?.imageAlt ?? "",
+    content: popup?.content ?? null,
+    ctaUrl: popup?.ctaUrl ?? "",
+    ctaLabel: popup?.ctaLabel ?? "",
+    imageFile: null,
+  };
+}
 
-  const updateBanner = api.content.updateBannerConfig.useMutation({
-    onMutate: () => toast.loading("Saving banner…"),
-    onSuccess: () => {
-      toast.dismiss();
-      toast.success("Banner saved");
-      router.refresh();
-    },
-    onError: (err) => {
-      toast.dismiss();
-      toast.error(err.message ?? "Failed to save banner");
-    },
-  });
+// ─── Banner card (presentational) ─────────────────────────────────────────────
 
-  function onSubmit(values: BannerFormValues) {
-    updateBanner.mutate(values);
-  }
-
+function BannerForm({ form }: { form: UseFormReturn<BannerFormValues> }) {
   return (
     <Card>
       <CardHeader>
@@ -100,7 +111,7 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Enable toggle */}
             <SwitchFormField
               form={form}
@@ -122,8 +133,13 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
               editorContentClassName="min-h-[100px] p-4"
             />
 
-            {/* Link */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Link — `col-span-1` on both fields is load-bearing:
+                `InputFormField` defaults its `FormItem` to `col-span-full`, so
+                without it these two stack full-width and the 2-col grid does
+                nothing. `items-start` because only `linkUrl` can raise a
+                validation error, and a `FormMessage` under one cell would
+                otherwise stretch the other and sink its label. */}
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <InputFormField
                 form={form}
                 name="linkUrl"
@@ -131,6 +147,7 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                 description="Optional. Where the link in the banner goes."
                 placeholder="https://example.com/sale"
                 type="url"
+                className="col-span-1"
               />
               <InputFormField
                 form={form}
@@ -138,13 +155,14 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                 label="Link label"
                 description="Text shown for the link."
                 placeholder="Shop the sale"
+                className="col-span-1"
               />
             </div>
 
             <Separator />
 
             {/* Colors */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="bgColor"
@@ -198,59 +216,25 @@ function BannerForm({ banner }: { banner: BannerConfig | null }) {
                 )}
               />
             </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={updateBanner.isPending}>
-                {updateBanner.isPending ? "Saving…" : "Save banner"}
-              </Button>
-            </div>
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>
   );
 }
 
-// ─── Popup Form ───────────────────────────────────────────────────────────────
+// ─── Popup card (presentational) ──────────────────────────────────────────────
 
-function PopupForm({ popup }: { popup: PopupConfig | null }) {
-  const router = useRouter();
-
-  const form: UseFormReturn<PopupFormValues> = useForm<PopupFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-    resolver: zodResolver(updatePopupConfigSchema) as any,
-    mode: "onTouched",
-    reValidateMode: "onChange",
-    defaultValues: {
-      enabled: popup?.enabled ?? false,
-      mode: popup?.mode ?? "image",
-      heading: popup?.heading ?? "",
-      imagePath: popup?.imagePath ?? "",
-      imageAlt: popup?.imageAlt ?? "",
-      content: popup?.content ?? null,
-      ctaUrl: popup?.ctaUrl ?? "",
-      ctaLabel: popup?.ctaLabel ?? "",
-    },
-  });
-
+function PopupForm({
+  form,
+  existingImageUrl,
+  mediaEnabled,
+}: {
+  form: UseFormReturn<PopupFormValues>;
+  existingImageUrl: string | undefined;
+  mediaEnabled: boolean;
+}) {
   const mode = useWatch({ control: form.control, name: "mode" });
-
-  const updatePopup = api.content.updatePopupConfig.useMutation({
-    onMutate: () => toast.loading("Saving popup…"),
-    onSuccess: () => {
-      toast.dismiss();
-      toast.success("Popup saved");
-      router.refresh();
-    },
-    onError: (err) => {
-      toast.dismiss();
-      toast.error(err.message ?? "Failed to save popup");
-    },
-  });
-
-  function onSubmit(values: PopupFormValues) {
-    updatePopup.mutate(values);
-  }
 
   return (
     <Card>
@@ -263,7 +247,7 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             {/* Enable toggle */}
             <SwitchFormField
               form={form}
@@ -297,25 +281,19 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
 
             <Separator />
 
-            {/* Image mode fields */}
+            {/* Image mode fields — the picked file is held in `imageFile` and
+                only uploaded on Save, so leaving without saving writes nothing
+                to S3. `imagePath` is the persisted companion field. */}
             {mode === "image" && (
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="imagePath"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Popup image</FormLabel>
-                      <FormControl>
-                        <TemplateImageUploadField
-                          value={field.value ?? ""}
-                          onChange={field.onChange}
-                          description="Recommended: 800×600 px or wider. Supports JPG, PNG, WebP."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <ImageUploadFormField
+                  form={form}
+                  name="imageFile"
+                  urlFieldName="imagePath"
+                  mediaLibraryEnabled={mediaEnabled}
+                  label="Popup image"
+                  description="Recommended: 800×600 px or wider. Supports JPG, PNG, WebP."
+                  existingPreviewUrl={existingImageUrl}
                 />
                 <InputFormField
                   form={form}
@@ -342,8 +320,9 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
 
             <Separator />
 
-            {/* CTA */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* CTA — same `col-span-1` / `items-start` reasoning as the
+                banner's Link row above. */}
+            <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
               <InputFormField
                 form={form}
                 name="ctaUrl"
@@ -351,6 +330,7 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
                 description="Optional. Where the call-to-action button goes."
                 placeholder="https://example.com/sale"
                 type="url"
+                className="col-span-1"
               />
               <InputFormField
                 form={form}
@@ -358,15 +338,10 @@ function PopupForm({ popup }: { popup: PopupConfig | null }) {
                 label="CTA label"
                 description="Text shown on the button."
                 placeholder="Shop the sale"
+                className="col-span-1"
               />
             </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={updatePopup.isPending}>
-                {updatePopup.isPending ? "Saving…" : "Save popup"}
-              </Button>
-            </div>
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>
@@ -380,11 +355,224 @@ export function AnnouncementsEditor({
   popup,
   bannersEnabled,
   popupsEnabled,
+  mediaEnabled,
 }: Props) {
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+
+  // `as any` on resolver matches the codebase pattern (shipping-settings.tsx)
+  // to avoid the third TFieldValues generic mismatch from zodResolver.
+  const bannerForm: UseFormReturn<BannerFormValues> = useForm<BannerFormValues>(
+    {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+      resolver: zodResolver(updateBannerConfigSchema) as any,
+      mode: "onTouched",
+      reValidateMode: "onChange",
+      defaultValues: bannerDefaults(banner),
+    },
+  );
+
+  const popupForm: UseFormReturn<PopupFormValues> = useForm<PopupFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    resolver: zodResolver(popupFormSchema) as any,
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: popupDefaults(popup),
+  });
+
+  const imageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "Popup image upload failed.");
+    },
+  });
+
+  // No toasts on the mutations themselves — `handleSaveAll` orchestrates both
+  // and owns the single success/failure message.
+  const updateBanner = api.content.updateBannerConfig.useMutation();
+  const updatePopup = api.content.updatePopupConfig.useMutation();
+
+  // Best-effort S3 cleanup when the popup image uploaded during THIS save but
+  // the mutation then failed — nothing in the DB references it yet. Same
+  // pattern as product-form.tsx. `discardUploads` filters to this business.
+  const discardUploads = api.upload.discardUploads.useMutation({
+    onError: (error) => {
+      console.warn(
+        "Failed to discard orphaned upload(s); objects may remain in S3:",
+        error,
+      );
+    },
+  });
+
+  const bannerDirty = bannersEnabled && bannerForm.formState.isDirty;
+  const popupDirty = popupsEnabled && popupForm.formState.isDirty;
+  const isDirty = bannerDirty || popupDirty;
+
+  useDirtyForm(isDirty);
+
+  const handleReset = () => {
+    bannerForm.reset(bannerDefaults(banner));
+    popupForm.reset(popupDefaults(popup));
+  };
+
+  const handleSaveAll = async () => {
+    // Validate BOTH forms before writing anything, so a bad popup URL can't
+    // leave the banner saved and the popup not.
+    const [bannerValid, popupValid] = await Promise.all([
+      bannersEnabled ? bannerForm.trigger() : Promise.resolve(true),
+      popupsEnabled ? popupForm.trigger() : Promise.resolve(true),
+    ]);
+
+    if (!bannerValid || !popupValid) {
+      toast.error("Fix the highlighted fields before saving.");
+      return;
+    }
+
+    if (!bannerDirty && !popupDirty) {
+      toast.info("No changes to save");
+      return;
+    }
+
+    setIsSaving(true);
+    toast.loading("Saving…");
+
+    // Uploaded in this save but not yet referenced by any row — discarded if a
+    // mutation below fails.
+    const newlyUploadedUrls: string[] = [];
+
+    // Upload before either mutation runs so an upload failure aborts cleanly
+    // rather than leaving the banner saved and the popup half-written.
+    let uploadedImagePath: string | null = null;
+    if (popupDirty) {
+      const file = popupForm.getValues("imageFile");
+      if (file instanceof File) {
+        try {
+          const response = await imageUploader.upload(file);
+          const fileLocation =
+            (response.file.objectInfo.metadata?.pathname as
+              | string
+              | undefined) ?? "";
+          if (fileLocation) {
+            uploadedImagePath = fileLocation;
+            newlyUploadedUrls.push(fileLocation);
+          }
+        } catch {
+          toast.dismiss();
+          toast.error("Failed to upload the popup image.");
+          setIsSaving(false);
+          return;
+        }
+      }
+    }
+
+    try {
+      if (bannerDirty) {
+        const values = bannerForm.getValues();
+        await updateBanner.mutateAsync(values);
+        // New baseline so the badge returns to "Saved".
+        bannerForm.reset(values);
+      }
+
+      if (popupDirty) {
+        // `imageFile` is form-local — strip it before it reaches the wire.
+        const { imageFile: _imageFile, ...rest } = popupForm.getValues();
+        const payload = {
+          ...rest,
+          imagePath: uploadedImagePath ?? rest.imagePath,
+        };
+        await updatePopup.mutateAsync(payload);
+        popupForm.reset({ ...payload, imageFile: null });
+      }
+
+      toast.dismiss();
+      toast.success("Changes saved");
+      router.refresh();
+    } catch (error) {
+      if (newlyUploadedUrls.length > 0) {
+        discardUploads.mutate({ urls: newlyUploadedUrls });
+      }
+      toast.dismiss();
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save changes",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const saving = isSaving || imageUploader.isPending;
+
   return (
-    <div className="space-y-8">
-      {bannersEnabled && <BannerForm banner={banner} />}
-      {popupsEnabled && <PopupForm popup={popup} />}
+    <div className="bg-muted/40 min-h-screen">
+      <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
+        <div className="toolbar-info">
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link href="/admin/content">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+          <div className="bg-border hidden h-6 w-px shrink-0 sm:block" />
+          <div className="hidden min-w-0 items-center gap-2 sm:flex">
+            <h1 className="text-base font-medium">Banner &amp; Popup</h1>
+
+            <span
+              className={`admin-status-badge ${
+                isDirty ? "isDirty" : "isPublished"
+              }`}
+            >
+              {isDirty ? "Unsaved Changes" : "Saved"}
+            </span>
+          </div>
+        </div>
+
+        <div className="toolbar-actions">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={saving || !isDirty}
+            onClick={handleReset}
+            className="hidden md:inline-flex"
+          >
+            Reset
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            disabled={saving}
+            onClick={() => void handleSaveAll()}
+          >
+            {saving ? (
+              <>
+                <span className="saving-indicator" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Save changes</span>
+                <span className="sm:hidden">Save</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <div className="admin-container">
+        <div className="space-y-8">
+          {bannersEnabled && <BannerForm form={bannerForm} />}
+          {popupsEnabled && (
+            <PopupForm
+              form={popupForm}
+              existingImageUrl={popup?.imagePath ?? undefined}
+              mediaEnabled={mediaEnabled}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

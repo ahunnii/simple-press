@@ -54,7 +54,7 @@ export async function NoiseLayout({
       </a>
       <NoiseRouteAnnouncer />
       {banner && <NoiseAnnouncementBar banner={banner} />}
-      <NoiseHeader business={business} session={session ?? null} />
+      <NoiseHeader business={business} initialSession={session ?? null} />
       <main id="main-content" className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>

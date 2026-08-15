@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { DefaultFooterTemplateProps } from "../../types";
 import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { api } from "~/trpc/server";
 import { FacebookIcon } from "~/components/icons/facebook-icon";
@@ -23,6 +24,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
   );
   const name = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(business?.siteContent?.logoAltText, name);
 
   const { isEnabled } = await getBusinessFlags();
 
@@ -92,7 +94,7 @@ export async function ViiFooter({ business }: DefaultFooterTemplateProps) {
               <div className="relative h-12 w-28">
                 <Image
                   src={logoUrl}
-                  alt={name}
+                  alt={logoAlt}
                   fill
                   sizes="112px"
                   className="object-contain object-left"

@@ -131,11 +131,11 @@ export function ElegantBlogPage({ pages, customFields }: Props) {
             >
               <span style={{ display: "block", overflow: "hidden" }}>
                 <span
-                style={maskStyle(0.08)}
-                {...fieldAttr("elegant.blog.listing-title")}
-              >
-                {listingTitle}
-              </span>
+                  style={maskStyle(0.08)}
+                  {...fieldAttr("elegant.blog.listing-title")}
+                >
+                  {listingTitle}
+                </span>
               </span>
             </h1>
             <p

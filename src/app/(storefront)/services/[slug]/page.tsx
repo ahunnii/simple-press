@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getCanonicalUrl } from "~/lib/canonical";
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { loadSeoBusiness } from "~/lib/seo";
 import {
   buildBreadcrumbSchema,
   buildServiceSchema,
@@ -64,9 +65,11 @@ export default async function ServiceDetailPage({ params }: Props) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
+  // Static route label, not the interpolated slug — keeps the throttle key
+  // and Sentry `route` tag low-cardinality (one bucket for every service).
   const [service, business] = await Promise.all([
     api.services.getBySlug(slug).catch(() => null),
-    api.business.simplifiedGet(),
+    loadSeoBusiness("/services/[slug]"),
   ]);
 
   if (!service) return { title: "Service Not Found" };

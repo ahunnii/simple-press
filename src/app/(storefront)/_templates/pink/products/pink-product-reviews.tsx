@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import type { CSSProperties } from "react";
+import { useState } from "react";
 
 import { ProductReviews } from "~/components/product-reviews";
 import { WriteReviewDialog } from "~/components/write-review-dialog";
@@ -74,7 +74,11 @@ export function PinkProductReviewsSection({ productId, productName }: Props) {
         <div className="mb-8">
           <h2
             className="pink-display mt-2"
-            style={{ fontSize: "clamp(1.5rem, 2.6vw, 2rem)", fontWeight: 600, letterSpacing: "-0.02em" }}
+            style={{
+              fontSize: "clamp(1.5rem, 2.6vw, 2rem)",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+            }}
           >
             What people are saying
           </h2>

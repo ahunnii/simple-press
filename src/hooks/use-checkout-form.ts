@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import * as Sentry from "@sentry/nextjs";
 
-import type { DefaultCheckoutPageTemplateProps } from "~/app/(storefront)/_templates/types";
+import type { CheckoutTermsDisclosure } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
+import type {
+  CheckoutMerchantPolicies,
+  DefaultCheckoutPageTemplateProps,
+} from "~/app/(storefront)/_templates/types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import {
   getAllowedCountries, // used at runtime inside useCheckoutForm
@@ -72,6 +77,9 @@ type UseCheckoutFormReturn = {
   // Zone+weight quote state (only populated when shippingType === "zone_weight")
   isQuotingShipping: boolean;
   shippingPending: boolean;
+  // The passive terms-of-service / refund-policy disclosure line rendered
+  // above the place-order button — see `CheckoutTermsNotice`.
+  termsDisclosure: CheckoutTermsDisclosure;
 };
 
 // Debounce delay (ms) for the zone+weight shipping quote.
@@ -82,8 +90,214 @@ const noopApplyDiscount = () => {
   // Intentionally empty — coupons are disabled for this business.
 };
 
+// The JSON body `/api/stripe/create-session` returns on both success and
+// failure. Parsed defensively — see `readSessionResponse` below.
+type CreateSessionResponse = {
+  error?: string;
+  unavailableItems?: string[];
+  unavailableItemIds?: { productId: string; variantId: string | null }[];
+  sessionUrl?: string;
+  sessionId?: string;
+};
+
+// Shown to the shopper when the checkout endpoint answers with something that
+// is not JSON (a 502 HTML page, a WAF challenge, a proxy interstitial). Before
+// this existed the raw parser output — "Unexpected token '<'..." — was rendered
+// into the checkout error banner.
+const NON_JSON_RESPONSE_MESSAGE =
+  "We couldn't reach the payment service. Please try again in a moment.";
+
+/**
+ * Thrown when the create-session response body could not be read as JSON.
+ * Carries the transport details so the outer catch can report them to Sentry
+ * while the shopper only ever sees `NON_JSON_RESPONSE_MESSAGE`.
+ */
+class CheckoutResponseFormatError extends Error {
+  readonly status: number;
+  readonly contentType: string;
+
+  constructor(status: number, contentType: string) {
+    super(NON_JSON_RESPONSE_MESSAGE);
+    this.name = "CheckoutResponseFormatError";
+    this.status = status;
+    this.contentType = contentType;
+  }
+}
+
+/**
+ * Reads the create-session body as JSON, defensively.
+ *
+ * `create-session` always answers with JSON, but a 502 HTML error page, a WAF
+ * challenge or a proxy interstitial never reaches the route at all — and a bare
+ * `response.json()` would throw a SyntaxError whose raw text ("Unexpected token
+ * '<'...") was rendered straight into the shopper's checkout error banner.
+ */
+async function readSessionResponse(
+  response: Response,
+): Promise<CreateSessionResponse> {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.toLowerCase().includes("application/json")) {
+    throw new CheckoutResponseFormatError(response.status, contentType);
+  }
+
+  try {
+    return (await response.json()) as CreateSessionResponse;
+  } catch {
+    // Correct content-type but an unreadable body (truncated/aborted stream).
+    throw new CheckoutResponseFormatError(response.status, contentType);
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Silent-submit diagnostics
+//
+// Every template renders its checkout `<form>` WITHOUT `noValidate` and marks
+// its contact/shipping inputs `required`. If a template ever hides a control
+// that still carries `required` — `display:none`, a collapsed section, a
+// reveal animation that never fired and left `opacity:0` — the browser's
+// constraint-validation pass cancels the submit before React's `onSubmit` runs.
+// `handleSubmit` is never called, so no state flips, no banner renders, no
+// request is made, and nothing is reported. Chrome logs "An invalid form
+// control with name='' is not focusable" to the console; other browsers say
+// nothing at all.
+//
+// The only hook into that pass is the `invalid` event, which fires on each
+// failing control. It does NOT bubble, so it can only be observed from an
+// ancestor during the CAPTURE phase — hence the capture-phase listener on
+// `document` below.
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Controls that only ever appear on a checkout form. Used to tell the checkout
+ * form apart from any other form on the page (a footer newsletter box, a search
+ * field) without requiring a single template file to pass a ref down — the hook
+ * has no DOM handle of its own, and adding one would mean editing all 14
+ * template checkout forms.
+ *
+ * Verified present across every template's checkout form: `type="email"` on the
+ * email input, `type="tel"` + `autocomplete="tel"` from `PhoneInput`, and the
+ * `autocomplete="shipping ..."` tokens on the address block.
+ */
+const CHECKOUT_CONTROL_SELECTOR = [
+  'input[type="email"]',
+  'input[type="tel"]',
+  "[autocomplete~='tel']",
+  "[autocomplete~='name']",
+  "[autocomplete~='given-name']",
+  "[autocomplete~='family-name']",
+  "[autocomplete~='address-line1']",
+  "[autocomplete~='address-level2']",
+  "[autocomplete~='postal-code']",
+].join(", ");
+
+// Two distinct matches, so a single-field newsletter/sign-in form can never
+// qualify. Even a pickup-only checkout (no shipping block) still has an email
+// input plus a phone input.
+const CHECKOUT_FORM_MIN_CONTROLS = 2;
+
+/** Controls that participate in native constraint validation and matter here. */
+type ValidatableControl =
+  | HTMLInputElement
+  | HTMLSelectElement
+  | HTMLTextAreaElement;
+
+function asValidatableControl(
+  target: EventTarget | null,
+): ValidatableControl | null {
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLSelectElement ||
+    target instanceof HTMLTextAreaElement
+  ) {
+    return target;
+  }
+  return null;
+}
+
+/** True when this form looks like the checkout form (see selector comment). */
+function isCheckoutForm(form: HTMLFormElement): boolean {
+  return (
+    form.querySelectorAll(CHECKOUT_CONTROL_SELECTOR).length >=
+    CHECKOUT_FORM_MIN_CONTROLS
+  );
+}
+
+// Anything at or under this computed opacity is treated as invisible — covers
+// a reveal animation whose starting frame is 0 and never advanced.
+const MIN_VISIBLE_OPACITY = 0.05;
+
+function computedOpacity(style: CSSStyleDeclaration): number {
+  const parsed = Number.parseFloat(style.opacity);
+  return Number.isNaN(parsed) ? 1 : parsed;
+}
+
+/**
+ * Returns the NAME of the first visibility test the control fails, or `null`
+ * when it is genuinely on screen.
+ *
+ * Order matters: the most specific/explanatory causes come first so the Sentry
+ * event names the actual CSS problem, and the vaguest test (`offsetParent`)
+ * comes last. `visibility` is inherited so the element's own computed value
+ * already reflects a hidden ancestor; `display` and `opacity` are not, which is
+ * why the ancestor walk exists — a hidden PARENT is the common real-world case.
+ */
+function findHiddenReason(el: HTMLElement): string | null {
+  const style = window.getComputedStyle(el);
+
+  if (style.display === "none") return "display-none";
+  if (style.visibility === "hidden" || style.visibility === "collapse") {
+    return "visibility-hidden";
+  }
+  if (computedOpacity(style) <= MIN_VISIBLE_OPACITY) return "opacity-0";
+  if (style.getPropertyValue("content-visibility") === "hidden") {
+    return "content-visibility-hidden";
+  }
+
+  for (
+    let parent = el.parentElement;
+    parent !== null;
+    parent = parent.parentElement
+  ) {
+    const parentStyle = window.getComputedStyle(parent);
+    if (parentStyle.display === "none") return "parent-display-none";
+    if (computedOpacity(parentStyle) <= MIN_VISIBLE_OPACITY) {
+      return "parent-opacity-0";
+    }
+    if (parentStyle.getPropertyValue("content-visibility") === "hidden") {
+      return "parent-content-visibility-hidden";
+    }
+    if (parent.hasAttribute("hidden")) return "parent-hidden-attr";
+  }
+
+  const rect = el.getBoundingClientRect();
+  if (rect.height === 0) return "zero-height";
+  if (rect.width === 0) return "zero-width";
+
+  // Last resort, and deliberately guarded: `offsetParent` is also null for a
+  // `position: fixed` element that is perfectly visible, so only trust it when
+  // the control isn't fixed.
+  if (el.offsetParent === null && style.position !== "fixed") {
+    return "offsetParent-null";
+  }
+
+  return null;
+}
+
+/**
+ * Chrome embeds the typed value in some constraint messages ("Please include
+ * an '@' in the email address. 'jane' is missing an '@'."), and the shopper's
+ * email is PII we must never send (`sendDefaultPii: false`). Every value Chrome
+ * interpolates is quoted, so redacting quoted runs keeps the diagnostic half of
+ * the message and drops the shopper's half.
+ */
+function redactValidationMessage(message: string): string {
+  return message.replace(/'[^']*'/g, "'…'").replace(/"[^"]*"/g, '"…"');
+}
+
 export function useCheckoutForm(
   business: CheckoutFormBusiness,
+  merchantPolicies: CheckoutMerchantPolicies,
 ): UseCheckoutFormReturn {
   const { isEnabled } = useStorefrontFlags();
   const couponsEnabled = isEnabled("coupons");
@@ -234,27 +448,177 @@ export function useCheckoutForm(
 
   const finalTotal = subtotal - effectiveDiscountAmount + shipping;
 
+  // Only reference merchant policies that actually exist (a Page row is only
+  // ever created once the owner saves non-empty content, so most stores have
+  // none) — never assemble a link to a slug with no published Page.
+  const termsDisclosure: CheckoutTermsDisclosure = {
+    merchantName: business.name,
+    merchantLinks: [
+      ...(merchantPolicies.hasTermsOfService
+        ? [{ label: "Terms of Service", href: "/terms-of-service" }]
+        : []),
+      ...(merchantPolicies.hasRefundPolicy
+        ? [{ label: "Refund Policy", href: "/refund-policy" }]
+        : []),
+    ],
+    platformHref: "/platform/policies/terms-of-service",
+  };
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Silent-submit watchdog — see the block comment above `isCheckoutForm`.
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const templateId = business.templateId;
+
+  useEffect(() => {
+    // The hook is only ever mounted by a template's checkout form, so the
+    // listener's lifetime is already the checkout page. `document` is guarded
+    // anyway because client components are also rendered on the server —
+    // effects don't run there, but the guard costs nothing and documents it.
+    if (typeof document === "undefined") return;
+
+    // A template bug is deterministic and fires on every submit attempt; one
+    // event per (field, cause) per mount is plenty.
+    const reported = new Set<string>();
+
+    const handleInvalid = (event: Event) => {
+      const control = asValidatableControl(event.target);
+      if (control === null) return;
+
+      const form = control.form;
+      if (form === null || !isCheckoutForm(form)) return;
+
+      // Most templates give their inputs an `id` but no `name` — which is
+      // exactly why Chrome's console warning reads `name=''`.
+      const field = control.name || control.id || "<unnamed>";
+      const validationMessage = redactValidationMessage(
+        control.validationMessage,
+      );
+      const hiddenBy = findHiddenReason(control);
+
+      if (hiddenBy === null) {
+        // A visible field the shopper simply hasn't filled in. The browser
+        // focuses it and shows its own bubble — normal, not a bug. Leave a
+        // trail only, so a later captured event carries the context.
+        Sentry.addBreadcrumb({
+          category: "checkout",
+          level: "info",
+          message: `Checkout blocked by a visible invalid field: ${field}`,
+          data: { field, type: control.type, validationMessage, templateId },
+        });
+        return;
+      }
+
+      // Invalid AND invisible: the shopper cannot possibly fix this, the
+      // browser cannot focus it, and the submit is cancelled before any of our
+      // code runs. Always a template bug.
+      const key = `${field}:${hiddenBy}`;
+      if (reported.has(key)) return;
+      reported.add(key);
+
+      Sentry.captureMessage(
+        `Checkout blocked by a hidden required field: ${field}`,
+        {
+          level: "error",
+          tags: {
+            route: "checkout",
+            "checkout.step": "hidden-required-field",
+            templateId,
+          },
+          // Never `control.value` — that is the shopper's PII.
+          extra: { field, type: control.type, validationMessage, hiddenBy },
+        },
+      );
+    };
+
+    const handleSubmitEvent = (event: Event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || !isCheckoutForm(form)) return;
+
+      // The browser only fires `submit` AFTER constraint validation passes, so
+      // the presence of this crumb proves the handler was reached and its
+      // absence (next to an `invalid` crumb) proves it never was.
+      Sentry.addBreadcrumb({
+        category: "checkout",
+        level: "info",
+        message: "Checkout form submit event fired",
+        data: { templateId },
+      });
+    };
+
+    // `invalid` does not bubble, so a capture-phase listener on `document` is
+    // the only way to observe it without touching template files. Capture-phase
+    // listeners on ancestors still run for non-bubbling events.
+    document.addEventListener("invalid", handleInvalid, true);
+    document.addEventListener("submit", handleSubmitEvent, true);
+
+    return () => {
+      document.removeEventListener("invalid", handleInvalid, true);
+      document.removeEventListener("submit", handleSubmitEvent, true);
+    };
+  }, [templateId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsProcessing(true);
 
+    // Only failures from the request itself are worth a Sentry event — the
+    // local pre-checks below are shopper mistakes and leave breadcrumbs only.
+    let requestAttempted = false;
+
     try {
-      if (!email || !name || !phone.trim()) {
+      const missingContactFields = [
+        email ? null : "email",
+        name ? null : "name",
+        phone.trim() ? null : "phone",
+      ].filter((f): f is string => f !== null);
+
+      if (missingContactFields.length > 0) {
+        Sentry.addBreadcrumb({
+          category: "checkout",
+          level: "info",
+          message: "Checkout pre-check failed: required contact fields",
+          // Field NAMES only — never the values the shopper typed.
+          data: {
+            rule: "required-contact-fields",
+            missingFields: missingContactFields,
+            templateId,
+          },
+        });
         throw new Error("Please fill in all required contact fields");
       }
 
-      if (
-        deliveryMethod === "ship" &&
-        (!addressLine1.trim() ||
-          !city.trim() ||
-          !state.trim() ||
-          !postalCode.trim())
-      ) {
-        throw new Error("Please fill in all required shipping fields");
+      if (deliveryMethod === "ship") {
+        const missingShippingFields = [
+          addressLine1.trim() ? null : "addressLine1",
+          city.trim() ? null : "city",
+          state.trim() ? null : "state",
+          postalCode.trim() ? null : "postalCode",
+        ].filter((f): f is string => f !== null);
+
+        if (missingShippingFields.length > 0) {
+          Sentry.addBreadcrumb({
+            category: "checkout",
+            level: "info",
+            message: "Checkout pre-check failed: required shipping fields",
+            data: {
+              rule: "required-shipping-fields",
+              missingFields: missingShippingFields,
+              templateId,
+            },
+          });
+          throw new Error("Please fill in all required shipping fields");
+        }
       }
 
       if (items.length === 0) {
+        Sentry.addBreadcrumb({
+          category: "checkout",
+          level: "info",
+          message: "Checkout pre-check failed: empty cart",
+          data: { rule: "empty-cart", templateId },
+        });
         throw new Error("Your cart is empty");
       }
 
@@ -262,6 +626,8 @@ export function useCheckoutForm(
       track(ANALYTICS_EVENTS.BEGIN_CHECKOUT, {
         value: Math.round(finalTotal) / 100,
       });
+
+      requestAttempted = true;
 
       const response = await fetch("/api/stripe/create-session", {
         method: "POST",
@@ -290,15 +656,28 @@ export function useCheckoutForm(
         }),
       });
 
-      const data = (await response.json()) as {
-        error?: string;
-        unavailableItems?: string[];
-        unavailableItemIds?: { productId: string; variantId: string | null }[];
-        sessionUrl?: string;
-        sessionId?: string;
-      };
+      // Parsed BEFORE the `response.ok` check, as it always was — but now
+      // guarded, so a non-JSON body raises a shopper-readable error instead of
+      // a raw SyntaxError. See `readSessionResponse`.
+      const data = await readSessionResponse(response);
 
       if (!response.ok) {
+        // Breadcrumb only. Every 4xx/5xx rejection is captured server-side in
+        // `create-session` with far more context (businessId, feature flags,
+        // Stripe config) — capturing here too would only double-count.
+        Sentry.addBreadcrumb({
+          category: "checkout",
+          level: "warning",
+          message: `create-session rejected the checkout (${response.status})`,
+          data: {
+            status: response.status,
+            // Server-authored copy, never shopper input.
+            serverError: data.error ?? null,
+            unavailableItemCount: data.unavailableItems?.length ?? 0,
+            templateId,
+          },
+        });
+
         if (data.unavailableItemIds && data.unavailableItemIds.length > 0) {
           for (const row of data.unavailableItemIds) {
             removeItem(row.productId, row.variantId);
@@ -319,6 +698,23 @@ export function useCheckoutForm(
 
       const sessionUrl = data.sessionUrl;
       if (!sessionUrl) {
+        // A 2xx with no URL means the server believes it succeeded, so nothing
+        // is reported on its side — this is the one success-path failure only
+        // the client can see.
+        Sentry.captureMessage("Checkout succeeded but returned no sessionUrl", {
+          level: "error",
+          tags: {
+            route: "checkout",
+            "checkout.step": "missing-session-url",
+            templateId,
+          },
+          extra: {
+            status: response.status,
+            hasSessionId: Boolean(data.sessionId),
+            itemCount: items.length,
+            deliveryMethod,
+          },
+        });
         setError("Failed to create checkout session");
         setIsProcessing(false);
         return;
@@ -326,6 +722,29 @@ export function useCheckoutForm(
 
       window.location.href = sessionUrl;
     } catch (err: unknown) {
+      // Only report once the request was actually attempted: a network failure
+      // ("Failed to fetch") or a non-JSON response. The pre-check throws above
+      // are shopper mistakes and already left breadcrumbs. Fetches aborted by
+      // navigation are filtered by `ignoreErrors` in instrumentation-client.ts.
+      if (requestAttempted) {
+        Sentry.captureException(err, {
+          tags: {
+            route: "checkout",
+            "checkout.step": "request-failed",
+            templateId,
+          },
+          extra: {
+            itemCount: items.length,
+            deliveryMethod,
+            ...(err instanceof CheckoutResponseFormatError
+              ? {
+                  responseStatus: err.status,
+                  responseContentType: err.contentType,
+                }
+              : {}),
+          },
+        });
+      }
       setError((err as Error).message ?? "Failed to create checkout session");
       setIsProcessing(false);
     }
@@ -374,5 +793,6 @@ export function useCheckoutForm(
     finalTotal,
     isQuotingShipping,
     shippingPending,
+    termsDisclosure,
   };
 }

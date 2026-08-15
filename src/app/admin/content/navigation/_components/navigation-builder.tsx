@@ -3,18 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ChevronDown,
-  GripVertical,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, ChevronDown, Info, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -43,6 +37,12 @@ type Props = {
   };
   servicesEnabled?: boolean;
   services?: Array<{ name: string; slug: string }>;
+  /** Gates the Quick Add "Blog" shortcut. */
+  blogEnabled?: boolean;
+  /** Gates the Quick Add "Shop" shortcut. */
+  productsEnabled?: boolean;
+  /** Gates the Quick Add "Collections" shortcut. */
+  collectionsEnabled?: boolean;
 };
 
 export function NavigationBuilder({
@@ -50,6 +50,9 @@ export function NavigationBuilder({
   siteContent,
   servicesEnabled,
   services,
+  blogEnabled,
+  productsEnabled,
+  collectionsEnabled,
 }: Props) {
   const router = useRouter();
 
@@ -252,6 +255,18 @@ export function NavigationBuilder({
       </div>
 
       <div className="admin-container">
+        <Alert className="mb-6">
+          <Info className="h-4 w-4" />
+          <AlertTitle>
+            Custom items replace your template&apos;s menu
+          </AlertTitle>
+          <AlertDescription>
+            Once you add an item here, it replaces your template&apos;s built-in
+            navigation entirely — including the &quot;Nav Label&quot; fields in
+            the Site Editor. On some templates, it also replaces the
+            footer&apos;s link columns.
+          </AlertDescription>
+        </Alert>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Menu Items */}
           <div className="lg:col-span-2">
@@ -285,7 +300,6 @@ export function NavigationBuilder({
                             >
                               ▲
                             </button>
-                            <GripVertical className="text-muted-foreground h-4 w-4" />
                             <button
                               onClick={() => moveItem(index, "down")}
                               disabled={index === navItems.length - 1}
@@ -443,30 +457,38 @@ export function NavigationBuilder({
                 <div>
                   <h4 className="mb-2 text-sm font-medium">Common Pages</h4>
                   <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => quickAddPage("collections", "Collections")}
-                    >
-                      Collections
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => quickAddPage("shop", "Shop")}
-                    >
-                      Shop
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                      onClick={() => quickAddPage("blog", "Blog")}
-                    >
-                      Blog
-                    </Button>
+                    {collectionsEnabled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() =>
+                          quickAddPage("collections", "Collections")
+                        }
+                      >
+                        Collections
+                      </Button>
+                    )}
+                    {productsEnabled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => quickAddPage("shop", "Shop")}
+                      >
+                        Shop
+                      </Button>
+                    )}
+                    {blogEnabled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => quickAddPage("blog", "Blog")}
+                      >
+                        Blog
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

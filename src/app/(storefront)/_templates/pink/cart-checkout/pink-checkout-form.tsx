@@ -8,10 +8,11 @@ import { CreditCard, Loader2, Tag } from "lucide-react";
 import type { DefaultCheckoutPageTemplateProps } from "../../types";
 import type { SupportedCountry } from "~/lib/geo/regions";
 import { COUNTRY_LABELS, getRegionOptions } from "~/lib/geo/regions";
-import { formatPrice } from "~/lib/prices";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { isSectionVisible } from "~/lib/sp-meta";
+import { formatPrice } from "~/lib/prices";
 import { SHIPPING_TYPES } from "~/lib/shipping-utils";
+import { isSectionVisible } from "~/lib/sp-meta";
+import { cn } from "~/lib/utils";
 import { useCheckoutForm } from "~/hooks/use-checkout-form";
 import {
   Select,
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -32,6 +34,7 @@ import { PinkEmptyState } from "../shared/pink-empty-state";
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
 const selectTriggerStyle: React.CSSProperties = {
@@ -76,7 +79,7 @@ function FieldLabel({
  * the aside), so hiding the summary panel never removes the ability to pay —
  * a compact fallback total appears above submit when the panel is hidden.
  */
-export function PinkCheckoutForm({ business }: Props) {
+export function PinkCheckoutForm({ business, merchantPolicies }: Props) {
   const customFields = business?.siteContent?.customFields as
     | Record<string, unknown>
     | undefined;
@@ -98,9 +101,13 @@ export function PinkCheckoutForm({ business }: Props) {
     "pink.checkout.summary-note",
   ]);
 
-  const showSummary = isSectionVisible(customFields, "pink", "checkout.summary");
+  const showSummary = isSectionVisible(
+    customFields,
+    "pink",
+    "checkout.summary",
+  );
 
-  const form = useCheckoutForm(business);
+  const form = useCheckoutForm(business, merchantPolicies);
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const shippingCalculating =
@@ -118,7 +125,8 @@ export function PinkCheckoutForm({ business }: Props) {
     email: submitAttempted && !form.email,
     name: submitAttempted && !form.name.trim(),
     phone: submitAttempted && !form.phone.trim(),
-    addressLine1: submitAttempted && shippingRequired && !form.addressLine1.trim(),
+    addressLine1:
+      submitAttempted && shippingRequired && !form.addressLine1.trim(),
     city: submitAttempted && shippingRequired && !form.city.trim(),
     state: submitAttempted && shippingRequired && !form.state.trim(),
     postalCode: submitAttempted && shippingRequired && !form.postalCode.trim(),
@@ -196,13 +204,16 @@ export function PinkCheckoutForm({ business }: Props) {
       {showSummary && (
         <aside
           aria-label="Basket summary"
-          className="order-first lg:order-2 lg:sticky"
+          className="order-first lg:sticky lg:order-2"
           style={{ top: "var(--pink-sticky-top)" }}
           {...sectionGroupAttr("checkout", "summary")}
         >
           <div
             className="pink-dark flex flex-col gap-6 p-7 md:p-8"
-            style={{ background: "var(--pink-ink)", color: "var(--pink-paper)" }}
+            style={{
+              background: "var(--pink-ink)",
+              color: "var(--pink-paper)",
+            }}
           >
             <div
               className="flex items-baseline justify-between pb-4"
@@ -230,7 +241,11 @@ export function PinkCheckoutForm({ business }: Props) {
                 >
                   <div
                     className="relative shrink-0 overflow-hidden"
-                    style={{ width: 56, aspectRatio: "4 / 5", background: "var(--pink-ink-tint)" }}
+                    style={{
+                      width: 56,
+                      aspectRatio: "4 / 5",
+                      background: "var(--pink-ink-tint)",
+                    }}
                   >
                     <Image
                       src={item.imageUrl ?? "/placeholder.svg"}
@@ -241,13 +256,21 @@ export function PinkCheckoutForm({ business }: Props) {
                     />
                   </div>
                   <div className="flex min-w-0 flex-col gap-0.5">
-                    <p className="truncate text-[13px] font-medium">{item.productName}</p>
+                    <p className="truncate text-[13px] font-medium">
+                      {item.productName}
+                    </p>
                     {item.variantName && (
-                      <p className="text-[11px]" style={{ color: "var(--pink-ink-subtle)" }}>
+                      <p
+                        className="text-[11px]"
+                        style={{ color: "var(--pink-ink-subtle)" }}
+                      >
                         {item.variantName}
                       </p>
                     )}
-                    <p className="text-[11px]" style={{ color: "var(--pink-ink-subtle)" }}>
+                    <p
+                      className="text-[11px]"
+                      style={{ color: "var(--pink-ink-subtle)" }}
+                    >
                       Qty: {item.quantity}
                     </p>
                   </div>
@@ -296,7 +319,9 @@ export function PinkCheckoutForm({ business }: Props) {
                       autoComplete="off"
                       aria-invalid={!!form.discountFieldError}
                       aria-describedby={
-                        form.discountFieldError ? "pink-discount-error" : undefined
+                        form.discountFieldError
+                          ? "pink-discount-error"
+                          : undefined
                       }
                       className="pink-input"
                       style={{ paddingLeft: 34 }}
@@ -305,7 +330,10 @@ export function PinkCheckoutForm({ business }: Props) {
                   <button
                     type="button"
                     onClick={form.handleApplyDiscount}
-                    disabled={form.isValidatingDiscount || !form.discountCodeInput.trim()}
+                    disabled={
+                      form.isValidatingDiscount ||
+                      !form.discountCodeInput.trim()
+                    }
                     className="pink-btn pink-btn-ghost shrink-0"
                     aria-label={
                       form.isValidatingDiscount
@@ -314,7 +342,10 @@ export function PinkCheckoutForm({ business }: Props) {
                     }
                   >
                     {form.isValidatingDiscount ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                      <Loader2
+                        className="h-3.5 w-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
                     ) : (
                       (f["pink.checkout.summary-apply-label"] ?? "Apply")
                     )}
@@ -333,9 +364,13 @@ export function PinkCheckoutForm({ business }: Props) {
                 )}
 
                 {form.discountCodeLabel && form.discountAmount > 0 && (
-                  <p role="status" className="text-[12px]" style={{ color: "var(--pink-success)" }}>
-                    Code <strong>{form.discountCodeLabel}</strong> applied — you saved{" "}
-                    {formatPrice(form.discountAmount)}
+                  <p
+                    role="status"
+                    className="text-[12px]"
+                    style={{ color: "var(--pink-success)" }}
+                  >
+                    Code <strong>{form.discountCodeLabel}</strong> applied — you
+                    saved {formatPrice(form.discountAmount)}
                   </p>
                 )}
               </div>
@@ -348,13 +383,18 @@ export function PinkCheckoutForm({ business }: Props) {
             >
               <div className="flex items-baseline justify-between">
                 <span className="pink-label-dark">Subtotal</span>
-                <span className="text-[14px]">{formatPrice(form.subtotal)}</span>
+                <span className="text-[14px]">
+                  {formatPrice(form.subtotal)}
+                </span>
               </div>
 
               {form.discountAmount > 0 && form.discountCodeLabel && (
                 <div className="flex items-baseline justify-between">
                   <span className="pink-label-dark">Discount</span>
-                  <span className="text-[14px]" style={{ color: "var(--pink-success)" }}>
+                  <span
+                    className="text-[14px]"
+                    style={{ color: "var(--pink-success)" }}
+                  >
                     -{formatPrice(form.discountAmount)}
                   </span>
                 </div>
@@ -366,8 +406,14 @@ export function PinkCheckoutForm({ business }: Props) {
                   {form.deliveryMethod === "pickup" ? (
                     "Free — pickup"
                   ) : shippingCalculating ? (
-                    <span className="inline-flex items-center gap-1.5" aria-live="polite">
-                      <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    <span
+                      className="inline-flex items-center gap-1.5"
+                      aria-live="polite"
+                    >
+                      <Loader2
+                        className="size-3.5 animate-spin"
+                        aria-hidden="true"
+                      />
                       Calculating…
                     </span>
                   ) : form.shippingPending ? (
@@ -384,10 +430,16 @@ export function PinkCheckoutForm({ business }: Props) {
                 className="flex items-baseline justify-between pt-2.5"
                 style={{ borderTop: "1px solid var(--pink-ink-line)" }}
               >
-                <span className="pink-display" style={{ fontSize: 20, fontWeight: 600 }}>
+                <span
+                  className="pink-display"
+                  style={{ fontSize: 20, fontWeight: 600 }}
+                >
                   Total
                 </span>
-                <span className="pink-display" style={{ fontSize: 20, fontWeight: 600 }}>
+                <span
+                  className="pink-display"
+                  style={{ fontSize: 20, fontWeight: 600 }}
+                >
                   {formatPrice(form.finalTotal)}
                 </span>
               </div>
@@ -440,7 +492,9 @@ export function PinkCheckoutForm({ business }: Props) {
           // overrides `--destructive` (only `.pink-account` does). Scoping the
           // override here lets that existing utility read the right color
           // without touching the shared component.
-          style={{ "--destructive": "var(--pink-error)" } as React.CSSProperties}
+          style={
+            { "--destructive": "var(--pink-error)" } as React.CSSProperties
+          }
         >
           <h2
             id="pink-co-contact-heading"
@@ -470,7 +524,10 @@ export function PinkCheckoutForm({ business }: Props) {
                 required
                 aria-required="true"
                 aria-invalid={invalid.email ? true : undefined}
-                className={`pink-input${invalid.email ? " pink-input-invalid" : ""}`}
+                className={cn(
+                  "pink-input",
+                  invalid.email && "pink-input-invalid",
+                )}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -487,7 +544,10 @@ export function PinkCheckoutForm({ business }: Props) {
                 required
                 aria-required="true"
                 aria-invalid={invalid.name ? true : undefined}
-                className={`pink-input${invalid.name ? " pink-input-invalid" : ""}`}
+                className={cn(
+                  "pink-input",
+                  invalid.name && "pink-input-invalid",
+                )}
               />
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
@@ -509,7 +569,10 @@ export function PinkCheckoutForm({ business }: Props) {
         </fieldset>
 
         {/* Where it's going */}
-        <fieldset aria-labelledby="pink-co-shipping-heading" className="flex flex-col gap-6">
+        <fieldset
+          aria-labelledby="pink-co-shipping-heading"
+          className="flex flex-col gap-6"
+        >
           <h2
             id="pink-co-shipping-heading"
             className="pink-display pb-3"
@@ -524,7 +587,11 @@ export function PinkCheckoutForm({ business }: Props) {
           </h2>
 
           {form.shippingConfig.offersInStorePickup && (
-            <div role="group" aria-label="Delivery method" className="flex flex-col gap-3">
+            <div
+              role="group"
+              aria-label="Delivery method"
+              className="flex flex-col gap-3"
+            >
               <div className="flex flex-wrap gap-3">
                 {(["ship", "pickup"] as const).map((method) => (
                   <button
@@ -537,15 +604,26 @@ export function PinkCheckoutForm({ business }: Props) {
                       flex: "1 1 160px",
                       padding: "12px 18px",
                       border: `1px solid ${form.deliveryMethod === method ? "var(--pink-ink)" : "var(--pink-line-button)"}`,
-                      background: form.deliveryMethod === method ? "var(--pink-ink)" : "transparent",
-                      color: form.deliveryMethod === method ? "var(--pink-paper)" : "var(--pink-ink)",
+                      background:
+                        form.deliveryMethod === method
+                          ? "var(--pink-ink)"
+                          : "transparent",
+                      color:
+                        form.deliveryMethod === method
+                          ? "var(--pink-paper)"
+                          : "var(--pink-ink)",
                     }}
                   >
-                    {method === "ship" ? "Ship to address" : "Pick up in Detroit"}
+                    {method === "ship"
+                      ? "Ship to address"
+                      : "Pick up in Detroit"}
                   </button>
                 ))}
               </div>
-              <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+              <p
+                className="text-[13px]"
+                style={{ color: "var(--pink-subtle)" }}
+              >
                 {form.deliveryMethod === "pickup"
                   ? "No shipping charge. We'll confirm pickup details by email."
                   : "Shipping cost is based on your basket."}
@@ -556,7 +634,10 @@ export function PinkCheckoutForm({ business }: Props) {
                   style={{ background: "var(--pink-panel)" }}
                 >
                   <p className="pink-label">Pickup location</p>
-                  <p className="text-[14px]" style={{ color: "var(--pink-body)" }}>
+                  <p
+                    className="text-[14px]"
+                    style={{ color: "var(--pink-body)" }}
+                  >
                     {form.shippingConfig.pickupLocation ??
                       business.businessAddress ??
                       "Pickup details will be confirmed by the studio."}
@@ -576,7 +657,10 @@ export function PinkCheckoutForm({ business }: Props) {
 
           {form.deliveryMethod === "ship" && (
             <div className="flex flex-col gap-5">
-              <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+              <p
+                className="text-[13px]"
+                style={{ color: "var(--pink-subtle)" }}
+              >
                 {form.shippingConfig.shippingType === SHIPPING_TYPES.ZONE_WEIGHT
                   ? "We price shipping from this address. Make changes here before continuing to payment."
                   : "This is sent to Stripe prefilled so you can confirm or edit it before you pay."}
@@ -603,11 +687,16 @@ export function PinkCheckoutForm({ business }: Props) {
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={invalid.addressLine1 ? true : undefined}
-                    className={`pink-input${invalid.addressLine1 ? " pink-input-invalid" : ""}`}
+                    className={cn(
+                      "pink-input",
+                      invalid.addressLine1 && "pink-input-invalid",
+                    )}
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:col-span-2">
-                  <FieldLabel htmlFor="pink-checkout-address2">Apt / suite</FieldLabel>
+                  <FieldLabel htmlFor="pink-checkout-address2">
+                    Apt / suite
+                  </FieldLabel>
                   <input
                     id="pink-checkout-address2"
                     type="text"
@@ -632,14 +721,24 @@ export function PinkCheckoutForm({ business }: Props) {
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={invalid.city ? true : undefined}
-                    className={`pink-input${invalid.city ? " pink-input-invalid" : ""}`}
+                    className={cn(
+                      "pink-input",
+                      invalid.city && "pink-input-invalid",
+                    )}
                   />
                 </div>
                 <div className="flex flex-col gap-2 sm:col-span-1">
-                  <FieldLabel htmlFor="pink-checkout-state" id="pink-checkout-state-label" required>
+                  <FieldLabel
+                    htmlFor="pink-checkout-state"
+                    id="pink-checkout-state-label"
+                    required
+                  >
                     State
                   </FieldLabel>
-                  <Select value={form.state} onValueChange={(v) => form.setState(v)}>
+                  <Select
+                    value={form.state}
+                    onValueChange={(v) => form.setState(v)}
+                  >
                     <SelectTrigger
                       id="pink-checkout-state"
                       aria-labelledby="pink-checkout-state-label"
@@ -647,13 +746,18 @@ export function PinkCheckoutForm({ business }: Props) {
                       aria-invalid={invalid.state ? true : undefined}
                       style={
                         invalid.state
-                          ? { ...selectTriggerStyle, borderColor: "var(--pink-error)" }
+                          ? {
+                              ...selectTriggerStyle,
+                              borderColor: "var(--pink-error)",
+                            }
                           : selectTriggerStyle
                       }
                     >
                       <SelectValue placeholder="—" />
                     </SelectTrigger>
-                    <SelectContent className={`${PINK_SCOPE_CLASS} rounded-none`}>
+                    <SelectContent
+                      className={`${PINK_SCOPE_CLASS} rounded-none`}
+                    >
                       {getRegionOptions(form.country).map((opt) => (
                         <SelectItem key={opt.code} value={opt.code}>
                           {opt.name}
@@ -675,17 +779,26 @@ export function PinkCheckoutForm({ business }: Props) {
                     required={form.deliveryMethod === "ship"}
                     aria-required="true"
                     aria-invalid={invalid.postalCode ? true : undefined}
-                    className={`pink-input${invalid.postalCode ? " pink-input-invalid" : ""}`}
+                    className={cn(
+                      "pink-input",
+                      invalid.postalCode && "pink-input-invalid",
+                    )}
                   />
                 </div>
 
                 <div className="flex flex-col gap-2 sm:col-span-3">
-                  <FieldLabel htmlFor="pink-checkout-country" id="pink-checkout-country-label" required>
+                  <FieldLabel
+                    htmlFor="pink-checkout-country"
+                    id="pink-checkout-country-label"
+                    required
+                  >
                     Country
                   </FieldLabel>
                   <Select
                     value={form.country}
-                    onValueChange={(v) => form.setCountry(v as SupportedCountry)}
+                    onValueChange={(v) =>
+                      form.setCountry(v as SupportedCountry)
+                    }
                   >
                     <SelectTrigger
                       id="pink-checkout-country"
@@ -694,7 +807,9 @@ export function PinkCheckoutForm({ business }: Props) {
                     >
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className={`${PINK_SCOPE_CLASS} rounded-none`}>
+                    <SelectContent
+                      className={`${PINK_SCOPE_CLASS} rounded-none`}
+                    >
                       {form.allowedCountries.map((c) => (
                         <SelectItem key={c} value={c}>
                           {COUNTRY_LABELS[c]}
@@ -715,10 +830,16 @@ export function PinkCheckoutForm({ business }: Props) {
             className="flex items-baseline justify-between pt-4"
             style={{ borderTop: "1px solid var(--pink-line)" }}
           >
-            <span className="pink-display" style={{ fontSize: 18, fontWeight: 600 }}>
+            <span
+              className="pink-display"
+              style={{ fontSize: 18, fontWeight: 600 }}
+            >
               Total
             </span>
-            <span className="pink-display" style={{ fontSize: 18, fontWeight: 600 }}>
+            <span
+              className="pink-display"
+              style={{ fontSize: 18, fontWeight: 600 }}
+            >
               {formatPrice(form.finalTotal)}
             </span>
           </div>
@@ -740,6 +861,13 @@ export function PinkCheckoutForm({ business }: Props) {
             </p>
           )}
         </div>
+
+        <CheckoutTermsNotice
+          disclosure={form.termsDisclosure}
+          className="text-[13px]"
+          style={{ color: "var(--pink-subtle)" }}
+          linkClassName="underline underline-offset-2"
+        />
 
         {/* Submit row */}
         <div className="flex flex-wrap items-center gap-6">

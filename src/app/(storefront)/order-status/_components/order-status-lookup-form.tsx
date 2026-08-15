@@ -16,9 +16,7 @@ export function OrderStatusLookupForm() {
       setError(null);
     },
     onError: (err) => {
-      setError(
-        err.message || "Something went wrong. Please try again later.",
-      );
+      setError(err.message || "Something went wrong. Please try again later.");
     },
   });
 

@@ -3,12 +3,47 @@
 import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { PLATFORM_TERMS_VERSION } from "~/lib/legal/policy-versions";
+import { formatDate } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
 import { Card } from "~/components/ui/card";
 
 type Props = {
   users: RouterOutputs["platform"]["listUsers"]["users"];
 };
+
+function PlatformTermsCell({
+  termsAcceptedAt,
+  termsVersion,
+}: {
+  termsAcceptedAt: Date | null;
+  termsVersion: string | null;
+}) {
+  if (!termsAcceptedAt) {
+    // Accounts created via Discord OAuth never see a terms checkbox, so they
+    // are indistinguishable in the data from accounts that predate this
+    // feature entirely. Either way, "not recorded" is the honest label —
+    // never "declined", which this data cannot support.
+    return <span className="text-muted-foreground text-sm">Not recorded</span>;
+  }
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      <Badge
+        variant={
+          termsVersion === PLATFORM_TERMS_VERSION ? "success" : "warning"
+        }
+      >
+        {termsVersion === PLATFORM_TERMS_VERSION
+          ? "Accepted"
+          : "Outdated version"}
+      </Badge>
+      <span className="text-muted-foreground text-xs">
+        {formatDate(termsAcceptedAt)}
+      </span>
+    </div>
+  );
+}
 
 export function UsersTable({ users }: Props) {
   return (
@@ -35,6 +70,12 @@ export function UsersTable({ users }: Props) {
                 className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
               >
                 Memberships
+              </th>
+              <th
+                scope="col"
+                className="text-muted-foreground px-6 py-3 text-left text-xs font-medium tracking-wider uppercase"
+              >
+                Platform Terms
               </th>
               <th
                 scope="col"
@@ -75,8 +116,14 @@ export function UsersTable({ users }: Props) {
                     {user._count.memberships}
                   </span>
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <PlatformTermsCell
+                    termsAcceptedAt={user.termsAcceptedAt}
+                    termsVersion={user.termsVersion}
+                  />
+                </td>
                 <td className="text-muted-foreground px-6 py-4 text-sm whitespace-nowrap">
-                  {new Date(user.createdAt).toLocaleDateString()}
+                  {formatDate(user.createdAt)}
                 </td>
               </tr>
             ))}

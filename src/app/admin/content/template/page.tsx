@@ -7,8 +7,8 @@ import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
 import { TrailHeader } from "../../_components/trail-header";
-import { TemplatePicker } from "./_components/template-picker";
 import { TemplateFieldsEditor } from "./_components/template-fields-editor";
+import { TemplatePicker } from "./_components/template-picker";
 
 export default async function TemplateFieldsPage() {
   // The raw field editor (JSON import/export, custom keys) is a platform-
@@ -35,7 +35,7 @@ export default async function TemplateFieldsPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Setup", href: "/admin/content" },
           { label: "Template Fields" },
         ]}
       />

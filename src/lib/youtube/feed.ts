@@ -1,7 +1,7 @@
 import "server-only";
 
-import { XMLParser } from "fast-xml-parser";
 import * as Sentry from "@sentry/nextjs";
+import { XMLParser } from "fast-xml-parser";
 
 import {
   parseChannelRef,
@@ -102,13 +102,20 @@ function parseEntry(entry: RawEntry): ParsedFeedEntry | null {
       : null;
   const thumbnailUrl =
     typeof mediaGroup?.["media:thumbnail"]?.["@_url"] === "string"
-      ? (mediaGroup["media:thumbnail"]["@_url"])
+      ? mediaGroup["media:thumbnail"]["@_url"]
       : null;
 
   const channelTitle =
     typeof entry.author?.name === "string" ? entry.author.name : null;
 
-  return { youtubeId, title, description, thumbnailUrl, channelTitle, publishedAt };
+  return {
+    youtubeId,
+    title,
+    description,
+    thumbnailUrl,
+    channelTitle,
+    publishedAt,
+  };
 }
 
 /**

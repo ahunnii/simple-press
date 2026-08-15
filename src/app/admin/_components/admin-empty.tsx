@@ -15,7 +15,6 @@ export interface AdminEmptyProps {
   description?: string;
   action?: React.ReactNode;
   filtered?: boolean;
-  className?: string;
 }
 
 export function AdminEmpty({
@@ -24,24 +23,22 @@ export function AdminEmpty({
   description,
   action,
   filtered,
-  className,
 }: AdminEmptyProps) {
   return (
-    <Empty className={className}>
+    <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Icon />
         </EmptyMedia>
         <EmptyTitle>{title}</EmptyTitle>
         {description && <EmptyDescription>{description}</EmptyDescription>}
+        {filtered && (
+          <div className="text-muted-foreground text-xs">
+            Try adjusting your search or filters.
+          </div>
+        )}
       </EmptyHeader>
-      {filtered ? (
-        <div className="text-muted-foreground text-xs">
-          Try adjusting your search or filters.
-        </div>
-      ) : (
-        action && <EmptyContent>{action}</EmptyContent>
-      )}
+      {action && <EmptyContent>{action}</EmptyContent>}
     </Empty>
   );
 }

@@ -2,7 +2,10 @@ import Image from "next/image";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
-import { hasCustomImage, PinkImageFallback } from "../shared/pink-image-fallback";
+import {
+  hasCustomImage,
+  PinkImageFallback,
+} from "../shared/pink-image-fallback";
 import { PinkReveal } from "../shared/pink-reveal";
 
 type Props = {
@@ -53,14 +56,15 @@ export function PinkStorySection({
         </PinkReveal>
 
         <PinkReveal index={1} className="flex flex-col gap-5">
-
           <h2
             id="pink-story-heading"
             className="pink-display text-[clamp(1.5rem,2.6vw,2.125rem)] leading-[1.2] font-semibold tracking-[-0.015em]"
             style={{ color: "var(--pink-ink)" }}
           >
             {quoteBefore && (
-              <span {...fieldAttr("pink.homepage.story-quote-before")}>{quoteBefore} </span>
+              <span {...fieldAttr("pink.homepage.story-quote-before")}>
+                {quoteBefore}{" "}
+              </span>
             )}
             {quoteAccent && (
               <span
@@ -71,7 +75,10 @@ export function PinkStorySection({
               </span>
             )}
             {quoteAfter && (
-              <span {...fieldAttr("pink.homepage.story-quote-after")}> {quoteAfter}</span>
+              <span {...fieldAttr("pink.homepage.story-quote-after")}>
+                {" "}
+                {quoteAfter}
+              </span>
             )}
           </h2>
 
@@ -84,7 +91,6 @@ export function PinkStorySection({
               {body}
             </p>
           )}
-
         </PinkReveal>
       </div>
     </section>

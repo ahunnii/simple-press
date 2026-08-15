@@ -56,6 +56,10 @@ import {
   pollenFieldGroups,
 } from "~/app/(storefront)/_templates/pollen";
 import {
+  relocationData,
+  relocationFieldGroups,
+} from "~/app/(storefront)/_templates/relocation";
+import {
   sledgeData,
   sledgeFieldGroups,
 } from "~/app/(storefront)/_templates/sledge";
@@ -73,6 +77,7 @@ export type TemplatePage =
   | "services"
   | "events"
   | "videos"
+  | "faq"
   | "cart"
   | "checkout"
   | "global"
@@ -443,6 +448,7 @@ export const TEMPLATE_FIELD_GROUPS: Record<string, TemplateFieldGroup[]> = {
   ...viiFieldGroups,
   ...coopFieldGroups,
   ...pinkFieldGroups,
+  ...relocationFieldGroups,
 
   ...defaultTemplateFieldGroups,
 };
@@ -460,6 +466,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateField[]> = {
   ...viiData,
   ...coopData,
   ...pinkData,
+  ...relocationData,
 
   ...defaultTemplateData,
 };
@@ -601,6 +608,15 @@ export const PAGE_METADATA = {
     title: "Videos",
     description: "Video gallery page content",
     icon: "📺",
+  },
+  // Not a `TemplatePage` value — no field declares `page: "authentication"`.
+  // The auth fields live on the `global` page; this entry exists so the visual
+  // editor's synthetic "Authentication" preview page (which shows the shared
+  // sign-in/sign-up shell) gets a first-class label and icon.
+  authentication: {
+    title: "Authentication",
+    description: "Sign-in and sign-up screen styling",
+    icon: "🔐",
   },
 } as const;
 

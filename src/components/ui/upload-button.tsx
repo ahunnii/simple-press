@@ -29,7 +29,7 @@ export function UploadButton({
     <Button disabled={isPending} className="relative" type="button">
       <label
         htmlFor={_id ?? id}
-        className="absolute inset-0 cursor-pointer has-[:focus-visible]:ring-ring/50 has-[:focus-visible]:ring-[3px] has-[:focus-visible]:outline-none"
+        className="has-[:focus-visible]:ring-ring/50 absolute inset-0 cursor-pointer has-[:focus-visible]:ring-[3px] has-[:focus-visible]:outline-none"
       >
         <input
           id={_id ?? id}

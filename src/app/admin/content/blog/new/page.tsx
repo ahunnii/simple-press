@@ -10,7 +10,6 @@ export default async function NewBlogPostPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
           { label: "Blog", href: "/admin/content/blog" },
           { label: "New Blog Post" },
         ]}
@@ -18,6 +17,7 @@ export default async function NewBlogPostPage() {
       <BlogPostEditor
         galleriesEnabled={flags.isEnabled("galleries")}
         embedsEnabled={flags.isEnabled("embeds")}
+        quotesEnabled={flags.isEnabled("quoteCalculator")}
       />
     </>
   );

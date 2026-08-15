@@ -29,8 +29,7 @@ const defaultFrequentlyAsked = (): HappyBambooFrequentlyAskedItem[] => [
       "Our toilet tissue is designed to be soft and gentle, making it a great choice for sensitive skin.",
   },
   {
-    question:
-      "How does bamboo toilet tissue compare to regular toilet paper?",
+    question: "How does bamboo toilet tissue compare to regular toilet paper?",
     answer:
       "Our multi-ply design is crafted to deliver softness and durability comparable to traditional brands.",
   },

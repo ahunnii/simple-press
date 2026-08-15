@@ -19,8 +19,8 @@
  */
 import type { Prisma } from "generated/prisma";
 
-import { defaultTemplateData } from "~/app/(storefront)/_templates/default";
 import { db } from "~/server/db";
+import { defaultTemplateData } from "~/app/(storefront)/_templates/default";
 
 const SUBDOMAIN = "demo";
 
@@ -45,11 +45,13 @@ const DEMO_FAQ: { question: string; answer: string }[] = [
   },
   {
     question: "Are your products cruelty-free?",
-    answer: "Yes — all of our demo skincare products are cruelty-free and never tested on animals.",
+    answer:
+      "Yes — all of our demo skincare products are cruelty-free and never tested on animals.",
   },
   {
     question: "Do you offer in-store pickup?",
-    answer: "Local pickup is available at checkout for customers near our Detroit location.",
+    answer:
+      "Local pickup is available at checkout for customers near our Detroit location.",
   },
   {
     question: "How do I book a consultation?",
@@ -120,7 +122,11 @@ function buildDefaultCustomFields(): Record<string, string> {
       continue;
     }
     // Skip complex/media types (list, gallery, video) — they fall back safely.
-    if (field.type === "list" || field.type === "gallery" || field.type === "video") {
+    if (
+      field.type === "list" ||
+      field.type === "gallery" ||
+      field.type === "video"
+    ) {
       continue;
     }
     if (typeof field.defaultValue === "string" && field.defaultValue !== "") {
@@ -131,7 +137,9 @@ function buildDefaultCustomFields(): Record<string, string> {
 }
 
 async function main() {
-  console.log(`\n🌱 Enriching demo store (subdomain: "${SUBDOMAIN}") — additive\n`);
+  console.log(
+    `\n🌱 Enriching demo store (subdomain: "${SUBDOMAIN}") — additive\n`,
+  );
 
   // ───────────────────────────────────────────────────────────────────────────
   // 1. Resolve the demo business + merge in needed feature flags (NON-destructive)
@@ -201,7 +209,9 @@ async function main() {
       businessAddress: "123 Market Street, Detroit, MI 48201",
     },
   });
-  console.log(`✓ Business ${businessId} — template "default", flags merged, LocalBusiness enabled`);
+  console.log(
+    `✓ Business ${businessId} — template "default", flags merged, LocalBusiness enabled`,
+  );
 
   // Fill out the default template's content fields (images → local placeholder).
   // Merge into any existing customFields so other-template keys are preserved.
@@ -218,23 +228,36 @@ async function main() {
     metaDescription:
       "Shop demo skincare, haircare, and self-care essentials. A sample storefront " +
       "showcasing products, collections, services, and reviews on SimplePress.",
-    metaKeywords: "demo store, skincare, haircare, self-care, beauty, sample storefront",
+    metaKeywords:
+      "demo store, skincare, haircare, self-care, beauty, sample storefront",
     ogImage: img("home-og"),
     logoUrl: img("logo"),
   };
   await db.siteContent.upsert({
     where: { businessId },
     update: { customFields: mergedCustomFields, ...siteSeo },
-    create: { businessId, customFields: mergedCustomFields, primaryColor: "#0f172a", ...siteSeo },
+    create: {
+      businessId,
+      customFields: mergedCustomFields,
+      primaryColor: "#0f172a",
+      ...siteSeo,
+    },
   });
-  console.log("✓ Default template fields + homepage SEO populated (images → Unsplash CDN)");
+  console.log(
+    "✓ Default template fields + homepage SEO populated (images → Unsplash CDN)",
+  );
 
   // ───────────────────────────────────────────────────────────────────────────
   // 2. Idempotent cleanup — removes ONLY this seed's namespaced rows
   // ───────────────────────────────────────────────────────────────────────────
-  await db.inventoryHistory.deleteMany({ where: { businessId, note: SEED_TAG } });
+  await db.inventoryHistory.deleteMany({
+    where: { businessId, note: SEED_TAG },
+  });
   await db.order.deleteMany({
-    where: { businessId, stripeSessionId: { startsWith: ORDER_SESSION_PREFIX } },
+    where: {
+      businessId,
+      stripeSessionId: { startsWith: ORDER_SESSION_PREFIX },
+    },
   }); // cascades orderItems + shipments
   await db.product.deleteMany({
     where: { businessId, slug: { startsWith: SLUG_PREFIX } },
@@ -284,7 +307,10 @@ async function main() {
       imageUrl: img("col-best"),
       published: true,
       sortOrder: 10,
-      ...collectionSeo("Bestsellers", "Shop our most-loved, top-rated skincare picks."),
+      ...collectionSeo(
+        "Bestsellers",
+        "Shop our most-loved, top-rated skincare picks.",
+      ),
     },
   });
   const newArrivals = await db.collection.create({
@@ -296,7 +322,10 @@ async function main() {
       imageUrl: img("col-new"),
       published: true,
       sortOrder: 11,
-      ...collectionSeo("New Arrivals", "Discover the latest additions to our skincare shelf."),
+      ...collectionSeo(
+        "New Arrivals",
+        "Discover the latest additions to our skincare shelf.",
+      ),
     },
   });
   const sale = await db.collection.create({
@@ -308,7 +337,10 @@ async function main() {
       imageUrl: img("col-sale"),
       published: true,
       sortOrder: 12,
-      ...collectionSeo("Sale", "Limited-time markdowns on select skincare favorites."),
+      ...collectionSeo(
+        "Sale",
+        "Limited-time markdowns on select skincare favorites.",
+      ),
     },
   });
   console.log("✓ Collections: 3");
@@ -364,7 +396,8 @@ async function main() {
       slugSuffix: "hydrating-daily-moisturizer",
       price: 3200,
       excerpt: "Lightweight all-day hydration.",
-      description: "A featherlight moisturizer for everyday hydration. In stock and tracked.",
+      description:
+        "A featherlight moisturizer for everyday hydration. In stock and tracked.",
       featured: true,
       orderable: true,
       trackInventory: true,
@@ -388,7 +421,8 @@ async function main() {
       slugSuffix: "overnight-repair-mask",
       price: 4200,
       excerpt: "Wake up to renewed skin.",
-      description: "An overnight treatment mask. Currently sold out with no backorders.",
+      description:
+        "An overnight treatment mask. Currently sold out with no backorders.",
       trackInventory: true,
       inventoryQty: 0,
       allowBackorders: false,
@@ -399,7 +433,8 @@ async function main() {
       slugSuffix: "gentle-foaming-cleanser",
       price: 2600,
       excerpt: "pH-balanced daily cleanser.",
-      description: "A gentle cleanser. Out of stock but available on backorder.",
+      description:
+        "A gentle cleanser. Out of stock but available on backorder.",
       orderable: true,
       trackInventory: true,
       inventoryQty: 0,
@@ -411,7 +446,8 @@ async function main() {
       slugSuffix: "spf-30-mineral-sunscreen",
       price: 2900,
       excerpt: "Daily broad-spectrum protection.",
-      description: "Mineral SPF 30. Some units are reserved for pending orders.",
+      description:
+        "Mineral SPF 30. Some units are reserved for pending orders.",
       orderable: true,
       trackInventory: true,
       inventoryQty: 25,
@@ -423,7 +459,8 @@ async function main() {
       slugSuffix: "digital-gift-card",
       price: 5000,
       excerpt: "Delivered by email.",
-      description: "A digital gift card — untracked inventory, always available.",
+      description:
+        "A digital gift card — untracked inventory, always available.",
       orderable: true,
       trackInventory: false,
       collections: ["bestsellers"],
@@ -457,7 +494,8 @@ async function main() {
       slugSuffix: "prototype-night-cream",
       price: 5200,
       excerpt: "Not yet launched.",
-      description: "An unpublished product — visible in admin, hidden from the storefront.",
+      description:
+        "An unpublished product — visible in admin, hidden from the storefront.",
       published: false,
       trackInventory: true,
       inventoryQty: 12,
@@ -467,14 +505,20 @@ async function main() {
       slugSuffix: "botanical-shampoo",
       price: 2800,
       excerpt: "Sulfate-free, three sizes.",
-      description: "Botanical shampoo with size variants — all currently in stock.",
+      description:
+        "Botanical shampoo with size variants — all currently in stock.",
       orderable: true,
       trackInventory: true,
       inventoryQty: 0, // variant-managed
       collections: ["new-arrivals", "bestsellers"],
       variants: [
         { name: "250ml", options: { size: "250ml" }, inventoryQty: 14 },
-        { name: "500ml", options: { size: "500ml" }, inventoryQty: 9, price: 3800 },
+        {
+          name: "500ml",
+          options: { size: "500ml" },
+          inventoryQty: 9,
+          price: 3800,
+        },
         { name: "1L", options: { size: "1L" }, inventoryQty: 6, price: 6200 },
       ],
     },
@@ -483,7 +527,8 @@ async function main() {
       slugSuffix: "silk-pillowcase",
       price: 5500,
       excerpt: "Gentle on skin and hair.",
-      description: "Mulberry silk pillowcase with color variants — one color is sold out.",
+      description:
+        "Mulberry silk pillowcase with color variants — one color is sold out.",
       orderable: true,
       trackInventory: true,
       inventoryQty: 0, // variant-managed
@@ -499,7 +544,8 @@ async function main() {
       slugSuffix: "signature-candle-lavender",
       price: 3000,
       excerpt: "Drawn from the shared candle pool.",
-      description: "A signature candle that consumes stock from the shared candle pool.",
+      description:
+        "A signature candle that consumes stock from the shared candle pool.",
       orderable: true,
       trackInventory: false,
       baseInventoryUnitId: candlePool.id,
@@ -511,7 +557,8 @@ async function main() {
       slugSuffix: "signature-candle-citrus",
       price: 3000,
       excerpt: "Drawn from the shared candle pool.",
-      description: "Another signature scent sharing the same candle inventory pool.",
+      description:
+        "Another signature scent sharing the same candle inventory pool.",
       orderable: true,
       trackInventory: false,
       baseInventoryUnitId: candlePool.id,
@@ -537,7 +584,12 @@ async function main() {
   for (const [i, p] of productSeeds.entries()) {
     const slug = `${SLUG_PREFIX}${p.slugSuffix}`;
     const keywordList = Array.from(
-      new Set(p.name.toLowerCase().split(/\s+/).filter((w) => w.length > 2)),
+      new Set(
+        p.name
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 2),
+      ),
     ).join(", ");
     const created = await db.product.create({
       data: {
@@ -568,8 +620,18 @@ async function main() {
         weightUnit: "lb",
         images: {
           create: [
-            { url: img(`${slug}-1`), altText: p.name, sortOrder: 0, businessId },
-            { url: img(`${slug}-2`), altText: `${p.name} alt`, sortOrder: 1, businessId },
+            {
+              url: img(`${slug}-1`),
+              altText: p.name,
+              sortOrder: 0,
+              businessId,
+            },
+            {
+              url: img(`${slug}-2`),
+              altText: `${p.name} alt`,
+              sortOrder: 1,
+              businessId,
+            },
           ],
         },
         ...(p.variants
@@ -605,7 +667,9 @@ async function main() {
       orderable: p.orderable ?? false,
     });
   }
-  console.log(`✓ Products: ${products.length} (full inventory matrix + variants)`);
+  console.log(
+    `✓ Products: ${products.length} (full inventory matrix + variants)`,
+  );
 
   // ───────────────────────────────────────────────────────────────────────────
   // 6. Services (display-only) + items
@@ -615,7 +679,8 @@ async function main() {
       businessId,
       name: "Personal Skincare Consultation",
       slug: `${SLUG_PREFIX}skincare-consultation`,
-      description: "One-on-one guidance to build a routine that works for your skin.",
+      description:
+        "One-on-one guidance to build a routine that works for your skin.",
       image: img("svc-consult"),
       serviceTemplateId: "service-one",
       published: true,
@@ -658,7 +723,8 @@ async function main() {
       businessId,
       name: "Gift Wrapping & Engraving",
       slug: `${SLUG_PREFIX}gift-wrapping`,
-      description: "Make any order gift-ready with premium wrapping and engraving.",
+      description:
+        "Make any order gift-ready with premium wrapping and engraving.",
       image: img("svc-gift"),
       serviceTemplateId: "service-one",
       published: true,
@@ -679,7 +745,11 @@ async function main() {
       priceLabel: "$12",
       durationLabel: "Add-on",
       addOns: [
-        { name: "Engraving", priceLabel: "$8", description: "Up to 20 characters" },
+        {
+          name: "Engraving",
+          priceLabel: "$8",
+          description: "Up to 20 characters",
+        },
       ] as Prisma.InputJsonValue,
       published: true,
       sortOrder: 0,
@@ -709,7 +779,8 @@ async function main() {
     if (!s.metaTitle?.trim()) data.metaTitle = `${s.name} | Demo Store`;
     if (!s.metaDescription?.trim()) {
       const desc = s.description?.trim() ?? "";
-      data.metaDescription = desc.length > 0 ? desc : `Book ${s.name} at Demo Store.`;
+      data.metaDescription =
+        desc.length > 0 ? desc : `Book ${s.name} at Demo Store.`;
     }
     if (!s.metaKeywords?.trim()) {
       data.metaKeywords = `${s.name.toLowerCase()}, services, demo store`;
@@ -728,13 +799,55 @@ async function main() {
   // 7. Customers + shipping addresses (namespaced emails)
   // ───────────────────────────────────────────────────────────────────────────
   const customerSeeds = [
-    { firstName: "Ava", lastName: "Bennett", city: "Detroit", province: "MI", zip: "48201" },
-    { firstName: "Marcus", lastName: "Lee", city: "Chicago", province: "IL", zip: "60601" },
-    { firstName: "Priya", lastName: "Shah", city: "Austin", province: "TX", zip: "78701" },
-    { firstName: "Diego", lastName: "Torres", city: "Denver", province: "CO", zip: "80202" },
-    { firstName: "Hannah", lastName: "Kim", city: "Seattle", province: "WA", zip: "98101" },
-    { firstName: "Noah", lastName: "Walker", city: "Portland", province: "OR", zip: "97201" },
-    { firstName: "Sofia", lastName: "Rossi", city: "Brooklyn", province: "NY", zip: "11201" },
+    {
+      firstName: "Ava",
+      lastName: "Bennett",
+      city: "Detroit",
+      province: "MI",
+      zip: "48201",
+    },
+    {
+      firstName: "Marcus",
+      lastName: "Lee",
+      city: "Chicago",
+      province: "IL",
+      zip: "60601",
+    },
+    {
+      firstName: "Priya",
+      lastName: "Shah",
+      city: "Austin",
+      province: "TX",
+      zip: "78701",
+    },
+    {
+      firstName: "Diego",
+      lastName: "Torres",
+      city: "Denver",
+      province: "CO",
+      zip: "80202",
+    },
+    {
+      firstName: "Hannah",
+      lastName: "Kim",
+      city: "Seattle",
+      province: "WA",
+      zip: "98101",
+    },
+    {
+      firstName: "Noah",
+      lastName: "Walker",
+      city: "Portland",
+      province: "OR",
+      zip: "97201",
+    },
+    {
+      firstName: "Sofia",
+      lastName: "Rossi",
+      city: "Brooklyn",
+      province: "NY",
+      zip: "11201",
+    },
   ];
 
   const customers: {
@@ -784,21 +897,96 @@ async function main() {
   const sellable = products.filter((p) => p.orderable);
 
   const orderPlans = [
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 58 },
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 51 },
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 47 },
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 40 },
-    { status: "open", paymentStatus: "paid", fulfillmentStatus: "unfulfilled", days: 33 },
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 29 },
-    { status: "refunded", paymentStatus: "refunded", fulfillmentStatus: "fulfilled", days: 26 },
-    { status: "open", paymentStatus: "paid", fulfillmentStatus: "partially_fulfilled", days: 21 },
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 18 },
-    { status: "cancelled", paymentStatus: "refunded", fulfillmentStatus: "unfulfilled", days: 15 },
-    { status: "open", paymentStatus: "paid", fulfillmentStatus: "unfulfilled", days: 11 },
-    { status: "completed", paymentStatus: "paid", fulfillmentStatus: "fulfilled", days: 8 },
-    { status: "open", paymentStatus: "paid", fulfillmentStatus: "unfulfilled", days: 5 },
-    { status: "open", paymentStatus: "paid", fulfillmentStatus: "unfulfilled", days: 3 },
-    { status: "open", paymentStatus: "pending", fulfillmentStatus: "unfulfilled", days: 1 },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 58,
+    },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 51,
+    },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 47,
+    },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 40,
+    },
+    {
+      status: "open",
+      paymentStatus: "paid",
+      fulfillmentStatus: "unfulfilled",
+      days: 33,
+    },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 29,
+    },
+    {
+      status: "refunded",
+      paymentStatus: "refunded",
+      fulfillmentStatus: "fulfilled",
+      days: 26,
+    },
+    {
+      status: "open",
+      paymentStatus: "paid",
+      fulfillmentStatus: "partially_fulfilled",
+      days: 21,
+    },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 18,
+    },
+    {
+      status: "cancelled",
+      paymentStatus: "refunded",
+      fulfillmentStatus: "unfulfilled",
+      days: 15,
+    },
+    {
+      status: "open",
+      paymentStatus: "paid",
+      fulfillmentStatus: "unfulfilled",
+      days: 11,
+    },
+    {
+      status: "completed",
+      paymentStatus: "paid",
+      fulfillmentStatus: "fulfilled",
+      days: 8,
+    },
+    {
+      status: "open",
+      paymentStatus: "paid",
+      fulfillmentStatus: "unfulfilled",
+      days: 5,
+    },
+    {
+      status: "open",
+      paymentStatus: "paid",
+      fulfillmentStatus: "unfulfilled",
+      days: 3,
+    },
+    {
+      status: "open",
+      paymentStatus: "pending",
+      fulfillmentStatus: "unfulfilled",
+      days: 1,
+    },
   ];
 
   const customerTotals = new Map<string, { spent: number; count: number }>();
@@ -899,14 +1087,32 @@ async function main() {
   // 9. Product reviews → recompute averageRating / reviewCount (seed products only)
   // ───────────────────────────────────────────────────────────────────────────
   const reviewBlurbs = [
-    { rating: 5, title: "Love it", comment: "Exactly as described — my skin feels great." },
-    { rating: 4, title: "Solid buy", comment: "Happy with it overall, would recommend." },
-    { rating: 5, title: "Repeat customer", comment: "Second one I've bought. Works beautifully." },
-    { rating: 3, title: "Decent", comment: "Good, though the scent is stronger than I expected." },
+    {
+      rating: 5,
+      title: "Love it",
+      comment: "Exactly as described — my skin feels great.",
+    },
+    {
+      rating: 4,
+      title: "Solid buy",
+      comment: "Happy with it overall, would recommend.",
+    },
+    {
+      rating: 5,
+      title: "Repeat customer",
+      comment: "Second one I've bought. Works beautifully.",
+    },
+    {
+      rating: 3,
+      title: "Decent",
+      comment: "Good, though the scent is stronger than I expected.",
+    },
   ];
 
   let reviewCount = 0;
-  const reviewable = products.filter((p) => !p.slug.endsWith("prototype-night-cream")).slice(0, 8);
+  const reviewable = products
+    .filter((p) => !p.slug.endsWith("prototype-night-cream"))
+    .slice(0, 8);
   for (const [i, p] of reviewable.entries()) {
     const n = (i % 3) + 1; // 1–3 reviews each
     for (let r = 0; r < n; r++) {
@@ -941,7 +1147,9 @@ async function main() {
       data: { averageRating: agg._avg.rating ?? null, reviewCount: agg._count },
     });
   }
-  console.log(`✓ Reviews: ${reviewCount} (across ${reviewable.length} products)`);
+  console.log(
+    `✓ Reviews: ${reviewCount} (across ${reviewable.length} products)`,
+  );
 
   // ───────────────────────────────────────────────────────────────────────────
   // 10. Testimonials (namespaced customerEmail for clean idempotent removal)
@@ -997,8 +1205,22 @@ async function main() {
   // ───────────────────────────────────────────────────────────────────────────
   await db.discountCode.createMany({
     data: [
-      { businessId, code: "WELCOME10", type: "percentage", value: 10, active: true, usageLimit: 1000 },
-      { businessId, code: "SAVE5", type: "fixed", value: 500, active: true, minPurchase: 3000 },
+      {
+        businessId,
+        code: "WELCOME10",
+        type: "percentage",
+        value: 10,
+        active: true,
+        usageLimit: 1000,
+      },
+      {
+        businessId,
+        code: "SAVE5",
+        type: "fixed",
+        value: 500,
+        active: true,
+        minPurchase: 3000,
+      },
       {
         businessId,
         code: "SUMMER25",
@@ -1033,7 +1255,8 @@ async function main() {
       ),
       image: img("blog-routine"),
       metaTitle: "Building Your Skincare Routine | Demo Store",
-      metaDescription: "A quick guide to layering skincare products in the right order.",
+      metaDescription:
+        "A quick guide to layering skincare products in the right order.",
       metaKeywords: "skincare routine, guide, demo store, blog",
       ogImage: img("blog-routine"),
       published: true,
@@ -1054,7 +1277,8 @@ async function main() {
       ),
       image: img("page-story"),
       metaTitle: "Our Story | Demo Store",
-      metaDescription: "Learn more about Demo Store — a sample SimplePress storefront.",
+      metaDescription:
+        "Learn more about Demo Store — a sample SimplePress storefront.",
       metaKeywords: "about, our story, demo store",
       ogImage: img("page-story"),
       published: true,
@@ -1081,7 +1305,11 @@ async function main() {
   // 13. Inventory history — sample sale rows for the audit view (tagged with note)
   // ───────────────────────────────────────────────────────────────────────────
   const trackedSample = await db.product.findMany({
-    where: { businessId, slug: { startsWith: SLUG_PREFIX }, trackInventory: true },
+    where: {
+      businessId,
+      slug: { startsWith: SLUG_PREFIX },
+      trackInventory: true,
+    },
     select: { id: true, inventoryQty: true },
     take: 4,
   });

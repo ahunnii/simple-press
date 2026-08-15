@@ -1,8 +1,8 @@
 "use client";
 
 import type { AccountPreferencesPageProps } from "../../types";
-import { PreferencesContent } from "~/app/(storefront)/_components/account/address-components";
 import { PageTransition } from "~/components/page-animations";
+import { PreferencesContent } from "~/app/(storefront)/_components/account/address-components";
 
 import { PinkAccountLayout } from "./pink-account-layout";
 

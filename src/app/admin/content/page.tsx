@@ -1,3 +1,4 @@
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { getSession } from "~/server/better-auth/server";
 import { api } from "~/trpc/server";
 import { ContentDashboard } from "~/app/admin/content/_components/content-dashboard";
@@ -5,29 +6,34 @@ import { ContentDashboard } from "~/app/admin/content/_components/content-dashbo
 import { TrailHeader } from "../_components/trail-header";
 
 export default async function ContentPage() {
-  const [pages, session] = await Promise.all([
-    api.content.getPages(),
+  const [policyPages, session, { flags }] = await Promise.all([
+    api.content.getPages({ type: "policy" }),
     getSession(),
+    getBusinessFlags(),
   ]);
   const isPlatformAdmin = session?.user.platformRole === "PLATFORM_ADMIN";
 
   return (
     <>
-      <TrailHeader breadcrumbs={[{ label: "Content" }]} />
+      <TrailHeader breadcrumbs={[{ label: "Site Setup" }]} />
       <div className="admin-container">
         <div className="admin-header">
           <div>
-            <h1>Site Content</h1>
-            <p>Manage your website content, pages, and navigation</p>
+            <h1>Site Setup</h1>
+            <p>Brand, navigation, search listing, and policies.</p>
           </div>
         </div>
 
-        <ContentDashboard pages={pages} isPlatformAdmin={isPlatformAdmin} />
+        <ContentDashboard
+          policyCount={policyPages.length}
+          isPlatformAdmin={isPlatformAdmin}
+          flags={flags}
+        />
       </div>
     </>
   );
 }
 
 export const metadata = {
-  title: "Content",
+  title: "Site Setup",
 };

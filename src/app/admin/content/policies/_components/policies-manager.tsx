@@ -7,12 +7,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, FileText, Save } from "lucide-react";
+import { ArrowLeft, FileText, Info, Save, ShieldAlert } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { SupportedCountry } from "~/lib/geo/regions";
+import { COUNTRY_LABELS, getAllowedCountries } from "~/lib/geo/regions";
+import { formatPrice } from "~/lib/prices";
+import { isContentEmpty } from "~/lib/template-fields";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -27,6 +32,32 @@ import { MinimalTiptapFormField } from "~/components/inputs/minimal-tiptap-form-
 
 const EMPTY_TIPTAP_DOC = { type: "doc", content: [] };
 
+// Splits text on bracketed placeholders like "[X] days" or
+// "[your jurisdiction]" and marks each bracketed span with a `code` mark, so
+// leftover owner-specific placeholders render as a visually distinct
+// `<code>` span instead of reading like finished copy. `code` ships in
+// StarterKit, which is registered in both the editor
+// (use-minimal-tiptap.ts) and the storefront renderer
+// (tiptap-renderer.tsx), so the mark round-trips and actually renders
+// rather than silently vanishing. There is no Highlight extension
+// installed — don't reach for one.
+const splitBracketed = (
+  text: string,
+): Array<{ type: "text"; text: string; marks?: Array<{ type: "code" }> }> => {
+  return text
+    .split(/(\[[^\]]+\])/)
+    .filter((part) => part.length > 0)
+    .map((part) =>
+      part.startsWith("[") && part.endsWith("]")
+        ? {
+            type: "text" as const,
+            text: part,
+            marks: [{ type: "code" as const }],
+          }
+        : { type: "text" as const, text: part },
+    );
+};
+
 // Helper to convert markdown to TipTap JSON
 const markdownToTiptap = (markdown: string) => {
   // Simple conversion - you might want to use a proper markdown parser
@@ -40,21 +71,21 @@ const markdownToTiptap = (markdown: string) => {
         return {
           type: "heading",
           attrs: { level: 1 },
-          content: [{ type: "text", text: para.replace("# ", "") }],
+          content: splitBracketed(para.replace("# ", "")),
         };
       }
       if (para.startsWith("## ")) {
         return {
           type: "heading",
           attrs: { level: 2 },
-          content: [{ type: "text", text: para.replace("## ", "") }],
+          content: splitBracketed(para.replace("## ", "")),
         };
       }
       if (para.startsWith("### ")) {
         return {
           type: "heading",
           attrs: { level: 3 },
-          content: [{ type: "text", text: para.replace("### ", "") }],
+          content: splitBracketed(para.replace("### ", "")),
         };
       }
       // Check if bullet list
@@ -67,7 +98,7 @@ const markdownToTiptap = (markdown: string) => {
             content: [
               {
                 type: "paragraph",
-                content: [{ type: "text", text: item.replace("- ", "") }],
+                content: splitBracketed(item.replace("- ", "")),
               },
             ],
           })),
@@ -76,21 +107,114 @@ const markdownToTiptap = (markdown: string) => {
       // Regular paragraph
       return {
         type: "paragraph",
-        content: [{ type: "text", text: para }],
+        content: splitBracketed(para),
       };
     }),
   };
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Policy autofill: derives prose from the same Business scalars checkout and
+// the shipping settings page use, so the template starts closer to accurate
+// instead of leaving every store-specific fact as a placeholder.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type PolicyVars = {
+  businessName: string;
+  email: string;
+  address: string | null;
+  phone: string | null;
+  shipsTo: string;
+  shippingRates: string;
+  pickup: string;
+};
+
+type PolicyBusiness = {
+  salesCountries: string[];
+  businessAddress: string | null;
+  phoneNumber: string | null;
+  shippingType: string;
+  shippingFlatRate: number | null;
+  freeShippingThreshold: number | null;
+  offersInStorePickup: boolean;
+  pickupLocation: string | null;
+};
+
+// NOTE: this generates a static TipTap document, not a live binding. It's
+// built once from getAllowedCountries(business.salesCountries) — the same
+// helper checkout uses — so the sentence can't drift *at generation time*.
+// But if salesCountries changes later (an owner turns Canada off, or a
+// platform admin clears it per the Phase 6 note in shipping-settings.tsx),
+// any policy page already generated from this template will not update and
+// will silently read as inaccurate until the owner regenerates it.
+function formatShipsTo(countries: SupportedCountry[]): string {
+  const labels = countries.map((c) =>
+    c === "US" ? "the United States" : COUNTRY_LABELS[c],
+  );
+  if (labels.length <= 2) return labels.join(" and ");
+  const last = labels[labels.length - 1] ?? "";
+  return `${labels.slice(0, -1).join(", ")}, and ${last}`;
+}
+
+function formatShippingRates(business: PolicyBusiness): string {
+  switch (business.shippingType) {
+    case "free":
+      return "Shipping is free on every order.";
+    case "flat_rate":
+      return `Shipping is a flat rate of ${formatPrice(business.shippingFlatRate ?? 0)} per order.`;
+    case "flat_rate_with_threshold":
+      return `Shipping is a flat rate of ${formatPrice(
+        business.shippingFlatRate ?? 0,
+      )} per order, and free once your order subtotal reaches ${formatPrice(
+        business.freeShippingThreshold ?? 0,
+      )}.`;
+    case "zone_weight":
+      return "Shipping costs vary by delivery destination and package weight, calculated at checkout.";
+    default:
+      return "";
+  }
+}
+
+/**
+ * Trim a nullable free-text field, treating blank as absent. `??` is wrong here:
+ * these columns hold `""` once an owner clears them, and an empty string must
+ * fall through to the next fallback rather than win it.
+ */
+function blankToNull(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  if (trimmed === undefined || trimmed.length === 0) return null;
+  return trimmed;
+}
+
+function formatPickupSection(business: PolicyBusiness): string {
+  if (!business.offersInStorePickup) return "";
+  const location =
+    blankToNull(business.pickupLocation) ??
+    blankToNull(business.businessAddress);
+  const locationText = location ? ` at ${location}` : "";
+  return `## In-Store Pickup
+
+We also offer free in-store pickup${locationText}. Look for pickup details at checkout and in your order confirmation email.
+
+`;
+}
+
+function contactDetailsSuffix(v: PolicyVars): string {
+  const parts: string[] = [];
+  if (v.address) parts.push(`Our mailing address is ${v.address}.`);
+  if (v.phone) parts.push(`You can also reach us by phone at ${v.phone}.`);
+  return parts.length > 0 ? ` ${parts.join(" ")}` : "";
+}
 
 // Policy templates as TipTap JSON
 const POLICY_TEMPLATES = {
   privacy: {
     title: "Privacy Policy",
     slug: "privacy-policy",
-    getContent: (email: string) =>
+    getContent: (v: PolicyVars) =>
       markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
-[Your Business Name] ("we," "our," or "this store") is committed to protecting your privacy. This policy explains what information we collect when you shop with us, how we use it, and the choices you have.
+${v.businessName} ("we," "our," or "this store") is committed to protecting your privacy. This policy explains what information we collect when you shop with us, how we use it, and the choices you have.
 
 ## Information We Collect
 
@@ -154,12 +278,12 @@ We may update this privacy policy from time to time. When we do, we will update 
 
 ## Contact Us
 
-If you have questions about this policy or how we handle your data, contact us at ${email}.`),
+If you have questions about this policy or how we handle your data, contact us at ${v.email}.${contactDetailsSuffix(v)}`),
   },
   terms: {
     title: "Terms of Service",
     slug: "terms-of-service",
-    getContent: (email: string) =>
+    getContent: (v: PolicyVars) =>
       markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
 Please read these Terms of Service carefully before placing an order or using our store. By purchasing from us or using this website, you agree to these terms.
@@ -194,7 +318,7 @@ We make every effort to accurately display products, including colors, dimension
 
 ## Intellectual Property
 
-All content on this store — including product photos, copy, logos, and branding — is owned by [Your Business Name] or its licensors. You may not reproduce, distribute, or use any content without our written permission.
+All content on this store — including product photos, copy, logos, and branding — is owned by ${v.businessName} or its licensors. You may not reproduce, distribute, or use any content without our written permission.
 
 ## Acceptable Use
 
@@ -206,7 +330,7 @@ Products and this website are provided "as is" without warranties of any kind, e
 
 ## Limitation of Liability
 
-To the maximum extent permitted by law, [Your Business Name] shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of this store or any products purchased from us. Our total liability for any claim related to an order shall not exceed the amount you paid for that order.
+To the maximum extent permitted by law, ${v.businessName} shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of this store or any products purchased from us. Our total liability for any claim related to an order shall not exceed the amount you paid for that order.
 
 ## Governing Law
 
@@ -218,21 +342,21 @@ We may update these terms from time to time. The updated version will be posted 
 
 ## Contact Us
 
-Questions about these terms? Reach us at ${email}.`),
+Questions about these terms? Reach us at ${v.email}.${contactDetailsSuffix(v)}`),
   },
   refund: {
     title: "Returns & Refunds",
     slug: "refund-policy",
-    getContent: (email: string) =>
+    getContent: (v: PolicyVars) =>
       markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
 ## Our Commitment
 
-Every item from [Your Business Name] is [handmade with care / carefully sourced], and we want you to love what you receive. Please read this policy before purchasing so you know exactly what to expect.
+Every item from ${v.businessName} is [handmade with care / carefully sourced], and we want you to love what you receive. Please read this policy before purchasing so you know exactly what to expect.
 
 ## Return Window
 
-We accept returns within [X] days of delivery. To start a return, contact us at ${email} before sending anything back — we'll walk you through the process.
+We accept returns within [X] days of delivery. To start a return, contact us at ${v.email} before sending anything back — we'll walk you through the process.
 
 ## Eligible Items
 
@@ -274,12 +398,12 @@ Once we receive and inspect your return:
 
 ## Contact Us
 
-Questions about a return or refund? Reach us at ${email} or through our contact page.`),
+Questions about a return or refund? Reach us at ${v.email} or through our contact page.${contactDetailsSuffix(v)}`),
   },
   shipping: {
     title: "Shipping Policy",
     slug: "shipping-policy",
-    getContent: (email: string) =>
+    getContent: (v: PolicyVars) =>
       markdownToTiptap(`Last updated: ${new Date().toLocaleDateString()}
 
 Thank you for your order. This policy explains how we process and ship orders, estimated delivery windows, and what to do if something goes wrong.
@@ -290,9 +414,11 @@ Orders are processed within 1–3 business days (Monday–Friday, excluding holi
 
 ## Shipping Destinations
 
-We currently ship to [List the countries/regions you ship to]. If your location is not listed at checkout, feel free to contact us and we'll do our best to help.
+We currently ship to ${v.shipsTo}. If your location is not listed at checkout, feel free to contact us and we'll do our best to help.
 
 ## Shipping Rates
+
+${v.shippingRates}
 
 Shipping costs are calculated at checkout based on:
 
@@ -320,14 +446,18 @@ Once your order ships, you will receive a confirmation email with your tracking 
 
 If your tracking shows your package has been delivered but you have not received it, please check with neighbors and your local post office first. If the package is confirmed lost, contact us within [X] days of the expected delivery date and we will work with the carrier to investigate and make it right.
 
-## Contact Us
+${v.pickup}## Contact Us
 
-Shipping questions? We're happy to help — reach us at ${email}.`),
+Shipping questions? We're happy to help — reach us at ${v.email}.`),
   },
 };
 
 type Props = {
-  business: {
+  // Widened from just { id, name, supportEmail, ownerEmail, pages } — these
+  // scalars were already coming over the wire (business.getWithPolicies is a
+  // plain findFirst with no `select`, so it returns every Business column),
+  // they just weren't declared here. No server change needed.
+  business: PolicyBusiness & {
     id: string;
     name: string;
     supportEmail: string | null;
@@ -345,9 +475,23 @@ type Props = {
 export function PoliciesManager({ business }: Props) {
   const router = useRouter();
   const [activePolicy, setActivePolicy] = useState<string>("privacy");
+  const [templateUsed, setTemplateUsed] = useState(false);
 
   const supportEmail =
     business.supportEmail ?? business.ownerEmail ?? "[your email]";
+
+  // Vars fed into POLICY_TEMPLATES[key].getContent — see the shipsTo comment
+  // above formatShipsTo() for the "static document, not a live binding"
+  // caveat.
+  const policyVars: PolicyVars = {
+    businessName: business.name,
+    email: supportEmail,
+    address: blankToNull(business.businessAddress),
+    phone: blankToNull(business.phoneNumber),
+    shipsTo: formatShipsTo(getAllowedCountries(business.salesCountries)),
+    shippingRates: formatShippingRates(business),
+    pickup: formatPickupSection(business),
+  };
 
   // Get existing policies
   const existingPolicies = new Map(business.pages.map((p) => [p.slug, p]));
@@ -414,7 +558,8 @@ export function PoliciesManager({ business }: Props) {
   const handleUseTemplate = (policyKey: keyof typeof POLICY_TEMPLATES) => {
     const template = POLICY_TEMPLATES[policyKey];
     const form = forms[policyKey];
-    form.setValue("content", template.getContent(supportEmail));
+    form.setValue("content", template.getContent(policyVars));
+    setTemplateUsed(true);
 
     toast.success("Template loaded");
   };
@@ -422,6 +567,9 @@ export function PoliciesManager({ business }: Props) {
   const handleSaveAll = async () => {
     toast.promise(
       async () => {
+        const skipped: string[] = [];
+        let savedCount = 0;
+
         for (const [key, form] of Object.entries(forms)) {
           const content = form.getValues().content;
 
@@ -431,6 +579,9 @@ export function PoliciesManager({ business }: Props) {
             (content.type === "doc" &&
               (!content.content || content.content.length === 0))
           ) {
+            const template =
+              POLICY_TEMPLATES[key as keyof typeof POLICY_TEMPLATES];
+            skipped.push(template.title);
             continue;
           }
 
@@ -455,12 +606,25 @@ export function PoliciesManager({ business }: Props) {
             await createPage.mutateAsync({ data });
             form.reset({ content: data.content });
           }
+          savedCount++;
         }
         router.refresh();
+
+        // Return the message details for the toast
+        return { savedCount, skipped };
       },
       {
         loading: "Saving policies...",
-        success: "All policies saved successfully",
+        success: (data: { savedCount: number; skipped: string[] }) => {
+          if (data.savedCount === 0) {
+            return "No policies to save (all were empty)";
+          }
+          const message = `Saved ${data.savedCount} polic${data.savedCount === 1 ? "y" : "ies"}`;
+          if (data.skipped.length > 0) {
+            return `${message}. Skipped (empty): ${data.skipped.join(", ")}`;
+          }
+          return message;
+        },
         error: "Failed to save policies",
       },
     );
@@ -484,6 +648,16 @@ export function PoliciesManager({ business }: Props) {
 
   const isDirty = allForms.some((form) => form.formState.isDirty);
 
+  // A checkout will soon tell buyers "you agree to this store's Terms of
+  // Service" — hollow if these two pages aren't actually live. Published +
+  // non-empty is the same bar the dashboard nudge uses.
+  const isPolicyLive = (slug: string) => {
+    const page = existingPolicies.get(slug);
+    return !!page && page.published && !isContentEmpty(page.content);
+  };
+  const missingRequiredPolicies =
+    !isPolicyLive("terms-of-service") || !isPolicyLive("refund-policy");
+
   return (
     <div className="bg-muted/40 min-h-screen">
       <div className={cn("admin-form-toolbar", isDirty ? "dirty" : "")}>
@@ -499,9 +673,10 @@ export function PoliciesManager({ business }: Props) {
             <h1 className="text-base font-medium">Update Policies</h1>
 
             <span
-              className={`admin-status-badge ${
-                isDirty ? "isDirty" : "isPublished"
-              }`}
+              className={cn(
+                "admin-status-badge",
+                isDirty ? "isDirty" : "isPublished",
+              )}
             >
               {isDirty ? "Unsaved Changes" : "Saved"}
             </span>
@@ -538,10 +713,34 @@ export function PoliciesManager({ business }: Props) {
       </div>
 
       <div className="admin-container">
+        {missingRequiredPolicies && (
+          <Alert className="mb-4">
+            <ShieldAlert className="h-4 w-4" />
+            <AlertTitle>
+              No published Terms of Service or Refund Policy
+            </AlertTitle>
+            <AlertDescription>
+              Checkout tells buyers they&apos;re agreeing to this store&apos;s
+              Terms of Service — publish at least the Terms and Refunds tabs
+              below so that isn&apos;t hollow.
+            </AlertDescription>
+          </Alert>
+        )}
         <p className="text-muted-foreground mb-4 text-sm">
           These templates are starting points you can edit. Review and customize
           them for your business — they are not legal advice.
         </p>
+        {templateUsed && (
+          <Alert className="mb-4">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Review before publishing</AlertTitle>
+            <AlertDescription>
+              Anything shown like{" "}
+              <code className="bg-muted rounded px-1 py-0.5 text-sm">this</code>{" "}
+              still needs your input before you publish.
+            </AlertDescription>
+          </Alert>
+        )}
         <Tabs
           value={activePolicy}
           onValueChange={setActivePolicy}
@@ -550,7 +749,7 @@ export function PoliciesManager({ business }: Props) {
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="terms">Terms</TabsTrigger>
-            <TabsTrigger value="refund">Returns</TabsTrigger>
+            <TabsTrigger value="refund">Refunds</TabsTrigger>
             <TabsTrigger value="shipping">Shipping</TabsTrigger>
           </TabsList>
 

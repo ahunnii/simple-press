@@ -1,15 +1,25 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { PoolLedgerGroupRow } from "~/lib/inventory";
 import {
   EMPTY_POOL_SALES,
   poolSalesWhere,
   summarizePoolSales,
-  type PoolLedgerGroupRow,
 } from "~/lib/inventory";
-import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  featureGate,
+  ownerAdminProcedure,
+} from "~/server/api/trpc";
 
 export const baseInventoryUnitRouter = createTRPCRouter({
+  // NOT gated on "inventory" — unlike every other procedure below, `list` is
+  // also called from the product create/edit form (admin/products/new and
+  // admin/products/[id]) to populate the pool picker, and that UI is gated on
+  // "products", not "inventory". Gating this one would 403 product
+  // create/edit for any business that has products enabled but inventory
+  // disabled. See admin/inventory/page.tsx and admin/products/[new|[id]]/page.tsx.
   list: ownerAdminProcedure.query(async ({ ctx }) => {
     const { businessId } = ctx;
     const [pools, salesRows] = await Promise.all([
@@ -41,6 +51,7 @@ export const baseInventoryUnitRouter = createTRPCRouter({
   }),
 
   getById: ownerAdminProcedure
+    .use(featureGate("inventory"))
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -92,6 +103,7 @@ export const baseInventoryUnitRouter = createTRPCRouter({
     }),
 
   create: ownerAdminProcedure
+    .use(featureGate("inventory"))
     .input(
       z.object({
         name: z.string().min(1),
@@ -120,6 +132,7 @@ export const baseInventoryUnitRouter = createTRPCRouter({
     }),
 
   update: ownerAdminProcedure
+    .use(featureGate("inventory"))
     .input(
       z.object({
         id: z.string(),
@@ -153,6 +166,7 @@ export const baseInventoryUnitRouter = createTRPCRouter({
     }),
 
   delete: ownerAdminProcedure
+    .use(featureGate("inventory"))
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
@@ -182,6 +196,7 @@ export const baseInventoryUnitRouter = createTRPCRouter({
     }),
 
   adjustInventory: ownerAdminProcedure
+    .use(featureGate("inventory"))
     .input(
       z.object({
         id: z.string(),

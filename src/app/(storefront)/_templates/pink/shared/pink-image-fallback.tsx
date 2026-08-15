@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 type PinkImageFallbackProps = {
   /**
    * Which surface the fallback sits on. `dark` uses the ink tint (for hero
@@ -49,9 +51,10 @@ export function PinkImageFallback({
 
   return (
     <div
-      className={`flex h-full w-full flex-col items-center justify-center gap-3${
-        className ? ` ${className}` : ""
-      }`}
+      className={cn(
+        "flex h-full w-full flex-col items-center justify-center gap-3",
+        className,
+      )}
       style={{
         background,
         border: `1px solid ${border}`,

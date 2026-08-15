@@ -109,7 +109,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
 
     try {
-      const saved = parseStoredCartItems(localStorage.getItem(CART_STORAGE_KEY));
+      const saved = parseStoredCartItems(
+        localStorage.getItem(CART_STORAGE_KEY),
+      );
       if (saved) {
         setItems(saved);
       } else if (localStorage.getItem(CART_STORAGE_KEY) !== null) {

@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { fieldAttr } from "~/lib/preview/section-attrs";
 import type { GenericImageRow } from "~/lib/template-fields";
+import { fieldAttr } from "~/lib/preview/section-attrs";
 import { buttonVariants } from "~/components/ui/button";
 import {
   FadeIn,

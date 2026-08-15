@@ -118,7 +118,9 @@ describe("videos", () => {
 
   describe("video source CRUD", () => {
     it("round-trips createSource → listSources → updateSource → deleteSource", async () => {
-      const business = await videosBusiness({ subdomain: "videos-source-crud" });
+      const business = await videosBusiness({
+        subdomain: "videos-source-crud",
+      });
       const owner = await createOwnerUser(business.id);
       reqHost.value = "videos-source-crud.simplepress.test";
       const caller = createTestCaller({ userId: owner.id });
@@ -186,7 +188,10 @@ describe("videos", () => {
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
       await expect(
-        callerA.videos.update({ id: foreignVideo.id, titleOverride: "Hijacked" }),
+        callerA.videos.update({
+          id: foreignVideo.id,
+          titleOverride: "Hijacked",
+        }),
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
       await expect(
@@ -194,7 +199,10 @@ describe("videos", () => {
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
       await expect(
-        callerA.videos.updateSource({ id: foreignSource.id, label: "Hijacked" }),
+        callerA.videos.updateSource({
+          id: foreignSource.id,
+          label: "Hijacked",
+        }),
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
       await expect(

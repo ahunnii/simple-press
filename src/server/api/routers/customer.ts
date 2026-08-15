@@ -3,35 +3,25 @@ import * as Sentry from "@sentry/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import type { DbClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
+import { splitCustomerName } from "~/lib/customer-name";
 import { notifyDiscordDeletionRequest } from "~/lib/discord/notification";
 import { normalizeEmail } from "~/lib/utils";
+import { MAX_REQUESTED_PAGE } from "~/lib/validators/admin-table";
+import {
+  CUSTOMER_MARKETING_DEFAULT,
+  CUSTOMER_MARKETING_VALUES,
+  CUSTOMER_PRIVACY_DEFAULT,
+  CUSTOMER_PRIVACY_VALUES,
+  CUSTOMER_SORT_DEFAULT,
+  CUSTOMER_SORT_VALUES,
+} from "~/lib/validators/customer";
 import {
   createTRPCRouter,
   ownerAdminProcedure,
   protectedProcedure,
   staffProcedure,
 } from "~/server/api/trpc";
-
-/**
- * Owner-private CRM `notes` must never reach a STAFF (fulfillment-only) caller.
- * `staffProcedure` admits OWNER/MANAGER/STAFF, so we re-resolve the caller's
- * membership role for the resolved business (PLATFORM_ADMIN always allowed).
- */
-async function canViewCustomerNotes(
-  db: DbClient,
-  userId: string,
-  platformRole: string | null | undefined,
-  businessId: string,
-): Promise<boolean> {
-  if (platformRole === "PLATFORM_ADMIN") return true;
-  const membership = await db.businessMembership.findUnique({
-    where: { userId_businessId: { userId, businessId } },
-    select: { role: true },
-  });
-  return !!membership && ["OWNER", "MANAGER"].includes(membership.role);
-}
 
 export const customerRouter = createTRPCRouter({
   // Get customer profile for current user
@@ -210,8 +200,8 @@ export const customerRouter = createTRPCRouter({
         },
         create: {
           email: normalizedUserEmail,
-          firstName: user.name?.split(" ")[0] ?? "",
-          lastName: user.name?.split(" ").slice(1).join(" ") ?? "",
+          // Stores NULL, not "", for a missing half — see splitCustomerName.
+          ...splitCustomerName(user.name),
           userId: user.id,
           businessId: business.id,
         },
@@ -679,12 +669,9 @@ export const customerRouter = createTRPCRouter({
       if (!customer) return null;
 
       // STAFF is fulfillment-only and must not see owner-private CRM notes.
-      const showNotes = await canViewCustomerNotes(
-        ctx.db,
-        ctx.session.user.id,
-        ctx.session.user.platformRole,
-        businessId,
-      );
+      // `ctx.membershipRole` is resolved live from the DB by `staffProcedure`;
+      // PLATFORM_ADMIN reads null there, so notes stay visible for them.
+      const showNotes = ctx.membershipRole !== "STAFF";
 
       return showNotes ? customer : { ...customer, notes: null };
     }),
@@ -692,69 +679,199 @@ export const customerRouter = createTRPCRouter({
   list: staffProcedure
     .input(
       z.object({
-        search: z.string().optional(),
+        // Truncated, not rejected: the value comes from `?search=` in the URL,
+        // so a `.max()` would throw BAD_REQUEST and error-boundary the page
+        // instead of showing results. 200 chars is far past any real query, and
+        // this feeds three ILIKE `contains` clauses.
+        search: z
+          .string()
+          .transform((s) => s.slice(0, 200))
+          .optional(),
         page: z.coerce.number().int().positive().optional(),
+        // Every filter/sort field is defaulted, so existing callers that pass
+        // `{}` (e.g. the testimonial invite dialog) keep the previous behaviour:
+        // unfiltered, newest-first, page 1.
+        //
+        // The accepted values and their defaults are shared with the admin page
+        // that renders the matching controls — see ~/lib/validators/customer for
+        // the two ways these drift apart and what each failure looks like.
+        marketing: z
+          .enum(CUSTOMER_MARKETING_VALUES)
+          .default(CUSTOMER_MARKETING_DEFAULT),
+        privacy: z
+          .enum(CUSTOMER_PRIVACY_VALUES)
+          .default(CUSTOMER_PRIVACY_DEFAULT),
+        sort: z.enum(CUSTOMER_SORT_VALUES).default(CUSTOMER_SORT_DEFAULT),
       }),
     )
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
       const search = input.search?.trim();
 
-      const where = {
-        businessId,
-        ...(search
-          ? {
-              OR: [
-                { email: { contains: search, mode: "insensitive" } },
-                { firstName: { contains: search, mode: "insensitive" } },
-                { lastName: { contains: search, mode: "insensitive" } },
-              ],
-            }
-          : {}),
-      } satisfies Prisma.CustomerWhereInput;
+      const where: Prisma.CustomerWhereInput = { businessId };
 
-      // Pagination — mirrors product.secureList
-      const pageSize = 50;
-      const page = input.page ?? 1;
+      // Search filter — email, first name or last name, case-insensitive.
+      // Tokenized: each whitespace-separated word of the query is required to
+      // match SOME field (AND of ORs), not the query as a whole in one field —
+      // otherwise searching "John Smith" matches nothing when "John" is the
+      // first name and "Smith" is the last, since no single column contains
+      // the full string.
+      const searchTokens = search ? search.split(/\s+/).filter(Boolean) : [];
+      if (searchTokens.length > 0) {
+        where.AND = searchTokens.map((token) => ({
+          OR: [
+            { email: { contains: token, mode: "insensitive" } },
+            { firstName: { contains: token, mode: "insensitive" } },
+            { lastName: { contains: token, mode: "insensitive" } },
+          ],
+        }));
+      }
+
+      // Marketing opt-in filter
+      if (input.marketing === "yes") {
+        where.acceptsMarketing = true;
+      } else if (input.marketing === "no") {
+        where.acceptsMarketing = false;
+      }
+
+      // Privacy filter (GDPR/CCPA data-subject requests)
+      if (input.privacy === "deletion-requested") {
+        where.deletionRequestedAt = { not: null };
+        // Defence in depth, not a live predicate: `anonymize` clears
+        // `deletionRequestedAt` in the same update that sets `anonymizedAt`
+        // (see that mutation), so today an anonymized customer already fails
+        // the `deletionRequestedAt: { not: null }` test above and this clause
+        // excludes nothing. It stays because this filter's entire job is to be
+        // the queue of OUTSTANDING requests, and if that clearing behaviour is
+        // ever relaxed — the timestamp is genuine audit data that arguably
+        // shouldn't be erased — the queue must not silently start accumulating
+        // requests that were already honoured.
+        where.anonymizedAt = null;
+      } else if (input.privacy === "anonymized") {
+        where.anonymizedAt = { not: null };
+      }
+
+      // Sort. Each entry is the PRIMARY ordering only — `id` is appended below
+      // as a mandatory tie-break, mirroring product.secureList and the
+      // guarantee `buildTablePage` makes for the in-memory admin tables
+      // (~/app/admin/_lib/table-query). Without it, customers sharing a
+      // `createdAt` (a bulk import, a webhook burst) or an `orderCount`/
+      // `totalSpent` (every customer with zero orders) have no defined relative
+      // order, Postgres is free to return them differently between executions,
+      // and with pagination that renders one customer on two pages and another
+      // on none.
+      type CustomerOrderBy = Prisma.CustomerOrderByWithRelationInput;
+      const orderByMap: Record<typeof input.sort, CustomerOrderBy[]> = {
+        newest: [{ createdAt: "desc" }],
+        oldest: [{ createdAt: "asc" }],
+        // `firstName`/`lastName` are both nullable, so `nulls: "last"` is
+        // explicit in BOTH directions. Postgres' default (NULLs last for ASC,
+        // first for DESC) would make nameless customers leap to the top of the
+        // list the moment the sort flips — they are the same uninformative rows
+        // either way and belong at the end of both.
+        "name-asc": [
+          { firstName: { sort: "asc", nulls: "last" } },
+          { lastName: { sort: "asc", nulls: "last" } },
+        ],
+        "name-desc": [
+          { firstName: { sort: "desc", nulls: "last" } },
+          { lastName: { sort: "desc", nulls: "last" } },
+        ],
+        "orders-desc": [{ orderCount: "desc" }],
+        "spent-desc": [{ totalSpent: "desc" }],
+      };
+      const orderBy: CustomerOrderBy[] = [
+        ...orderByMap[input.sort],
+        { id: "asc" },
+      ];
+
+      // Pagination — mirrors product.secureList, which in turn matches the
+      // PAGE_SIZE the in-memory admin tables use. One number across every admin
+      // list, so "page 3" means the same amount of scrolling everywhere.
+      const pageSize = 25;
+      // Bounded BEFORE it becomes an offset. The clamp further down handles
+      // "past the end", but it needs `totalCount` first, so the opening query
+      // still runs with whatever `skip` this produces — and an unbounded page
+      // number overflows Postgres' OFFSET rather than paging past the end. See
+      // MAX_REQUESTED_PAGE.
+      const page = Math.min(input.page ?? 1, MAX_REQUESTED_PAGE);
       const skip = (page - 1) * pageSize;
 
-      // Stats are computed over the FULL filtered set (not just the page).
-      const [customers, totalCount, marketingCount] = await ctx.db.$transaction(
-        [
+      const filtersActive =
+        !!search || input.marketing !== "all" || input.privacy !== "all";
+
+      const [
+        [firstPassCustomers, totalCount, marketingCount],
+        unfilteredTotal,
+      ] = await Promise.all([
+        ctx.db.$transaction([
           ctx.db.customer.findMany({
             where,
-            orderBy: { createdAt: "desc" },
+            orderBy,
             skip,
             take: pageSize,
           }),
           ctx.db.customer.count({ where }),
+          // Business-wide, NOT filtered — see the note on `totalCustomers`
+          // below. When no filter is active `where` IS `{ businessId }`, so
+          // this is the same query the filtered version would have been.
           ctx.db.customer.count({
-            where: { AND: [where, { acceptsMarketing: true }] },
+            where: { businessId, acceptsMarketing: true },
           }),
-        ],
-      );
+        ]),
+        // Only issued when a filter actually narrows the set. Unfiltered,
+        // `totalCount` already IS the business-wide total, and the common
+        // page load shouldn't pay for a query whose answer it has.
+        filtersActive ? ctx.db.customer.count({ where: { businessId } }) : null,
+      ]);
 
-      const totalPages = Math.ceil(totalCount / pageSize);
+      // `Math.max(1, …)` so an empty result set reports one page rather than
+      // zero, matching `buildTablePage`.
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+      // Clamp an out-of-range page HERE rather than leaving it to callers. An
+      // unclamped `?page=900` against a 3-page list echoes `page: 900` back with
+      // an empty slice, and a paginator faithfully renders "Showing
+      // 44,951–150 of 150" above a no-matches empty state. The re-query only
+      // fires on that path — in-app navigation never produces it — so the
+      // common case stays a single round trip, and every consumer gets the
+      // guarantee that the returned `page` is always within range.
+      const clampedPage = Math.min(page, totalPages);
+      const customers =
+        clampedPage === page
+          ? firstPassCustomers
+          : await ctx.db.customer.findMany({
+              where,
+              orderBy,
+              skip: (clampedPage - 1) * pageSize,
+              take: pageSize,
+            });
 
       // STAFF is fulfillment-only and must not see owner-private CRM notes.
-      const showNotes = await canViewCustomerNotes(
-        ctx.db,
-        ctx.session.user.id,
-        ctx.session.user.platformRole,
-        businessId,
-      );
+      // Applied to `customers` — the array actually returned — so the clamped
+      // re-query above can't slip past the redaction. `ctx.membershipRole` is
+      // resolved live from the DB by `staffProcedure`; PLATFORM_ADMIN reads
+      // null there, so notes stay visible for them.
+      const showNotes = ctx.membershipRole !== "STAFF";
       const safeCustomers = showNotes
         ? customers
         : customers.map((c) => ({ ...c, notes: null }));
 
       return {
         customers: safeCustomers,
+        // FILTERED — how many rows match the current search/filters, and what
+        // the paginator counts pages against.
         totalCount,
-        page,
+        page: clampedPage,
         pageSize,
         totalPages,
         stats: {
-          totalCustomers: totalCount,
+          // UNFILTERED, business-wide. The admin page needs a genuinely
+          // unfiltered total to tell "no customers yet" apart from "no matches"
+          // — and `totalCount` cannot supply it, because a search matching
+          // nothing reports zero and would tell a 400-customer store it has
+          // none.
+          totalCustomers: unfilteredTotal ?? totalCount,
           marketingCount,
         },
       };

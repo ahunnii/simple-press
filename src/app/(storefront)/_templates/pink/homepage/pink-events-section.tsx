@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TemplateListRow } from "~/lib/template-fields";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
-import { PinkFactRows, type PinkFactRow } from "../shared/pink-fact-rows";
+import { PinkFactRows } from "../shared/pink-fact-rows";
 import { PinkImageFallback } from "../shared/pink-image-fallback";
 import { PinkReveal } from "../shared/pink-reveal";
 import { rowStr } from "./pink-homepage-list-utils";
@@ -123,7 +124,9 @@ export function PinkEventsSection({
           {/* How they're typically hosted. `PinkFactRows` returns null on an
               empty list, so an owner who clears every row loses the rail
               rather than getting empty strips. */}
-          {facts.length > 0 && <PinkFactRows rows={facts} surface="dark" className="h-fit" />}
+          {facts.length > 0 && (
+            <PinkFactRows rows={facts} surface="dark" className="h-fit" />
+          )}
         </div>
 
         {hasMosaic &&
@@ -158,11 +161,16 @@ export function PinkEventsSection({
                           fill
                           className="object-cover"
                           sizes={
-                            i === 0 ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 50vw, 25vw"
+                            i === 0
+                              ? "(max-width: 768px) 100vw, 50vw"
+                              : "(max-width: 768px) 50vw, 25vw"
                           }
                         />
                       ) : (
-                        <PinkImageFallback surface="dark" className="absolute inset-0" />
+                        <PinkImageFallback
+                          surface="dark"
+                          className="absolute inset-0"
+                        />
                       )}
                     </div>
                   );

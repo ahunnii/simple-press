@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 /**
  * Curated section registry for the `sledge` storefront template.
@@ -37,6 +38,7 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.testimonials"],
       order: 2,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
     {
       id: "homepage.subscribe",
@@ -89,6 +91,7 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       groupIds: ["shop.listing"],
       order: 0,
       hideable: false,
+      links: [SECTION_LINKS.products],
     },
 
     // ── Blog ──────────────────────────────────────────────────────────────
@@ -100,6 +103,7 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       groupIds: ["blog.listing"],
       order: 0,
       hideable: false,
+      links: [SECTION_LINKS.blog],
     },
     {
       id: "blog.post",
@@ -121,6 +125,7 @@ export const sledgeSections: Record<string, TemplateSection[]> = {
       groupIds: ["testimonials.page"],
       order: 0,
       hideable: false,
+      links: [SECTION_LINKS.testimonials],
     },
 
     // ── Global ────────────────────────────────────────────────────────────

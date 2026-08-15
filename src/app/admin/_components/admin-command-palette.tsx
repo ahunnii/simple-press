@@ -2,17 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  IconPackage,
-  IconShoppingCart,
-  IconUsers,
-} from "@tabler/icons-react";
+import { IconPackage, IconShoppingCart, IconUsers } from "@tabler/icons-react";
 
 import type { AdminRole } from "~/app/admin/_lib/admin-nav";
 import type { Session } from "~/server/better-auth/config";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { formatPrice } from "~/lib/prices";
 import { api } from "~/trpc/react";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import {
   CommandDialog,
   CommandEmpty,
@@ -24,6 +20,7 @@ import {
 } from "~/components/ui/command";
 import {
   HUB_CARDS,
+  isHubCardEnabled,
   isNavItemAllowedForRole,
   NAV_ITEMS,
   PALETTE_ACTIONS,
@@ -125,7 +122,7 @@ export function AdminCommandPalette({
             (c) =>
               c.hub === "settings" &&
               (!c.platformOnly || isPlatformAdmin) &&
-              (!c.featureKey || isEnabled(c.featureKey)),
+              isHubCardEnabled(c, isEnabled),
           ),
     [isStaff, isEnabled, isPlatformAdmin],
   );
@@ -137,7 +134,7 @@ export function AdminCommandPalette({
             (c) =>
               c.hub === "content" &&
               (!c.platformOnly || isPlatformAdmin) &&
-              (!c.featureKey || isEnabled(c.featureKey)),
+              isHubCardEnabled(c, isEnabled),
           ),
     [isStaff, isEnabled, isPlatformAdmin],
   );

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
 import { WishlistButton } from "~/app/(storefront)/_components/wishlist/wishlist-button";
 
 import { PinkBadge } from "./pink-badge";
@@ -80,7 +81,7 @@ export function PinkProductCard({
   const hasImage = hasCustomImage(imageUrl);
 
   return (
-    <div className={`group flex flex-col${className ? ` ${className}` : ""}`}>
+    <div className={cn("group flex flex-col", className)}>
       {/* Relative wrapper keeps the wishlist button a sibling of the card
           link (no <button> inside <a>) while overlaying the image's
           top-right corner — mirrors default-product-card.tsx. */}
@@ -139,18 +140,31 @@ export function PinkProductCard({
         style={{ borderTop: "1px solid var(--pink-ink)" }}
       >
         <div className="min-w-0 flex-1">
-          <Link href={href} className="block truncate text-[15px] font-medium" style={{ color: "var(--pink-ink)" }}>
+          <Link
+            href={href}
+            className="block truncate text-[15px] font-medium"
+            style={{ color: "var(--pink-ink)" }}
+          >
             {title}
           </Link>
           {meta && (
-            <p className="truncate text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+            <p
+              className="truncate text-[13px]"
+              style={{ color: "var(--pink-subtle)" }}
+            >
               {meta}
             </p>
           )}
         </div>
-        <div className="shrink-0 text-right text-[15px] font-medium" style={{ color: "var(--pink-ink)" }}>
+        <div
+          className="shrink-0 text-right text-[15px] font-medium"
+          style={{ color: "var(--pink-ink)" }}
+        >
           {compareAtPrice && (
-            <span className="mr-1.5 line-through" style={{ color: "var(--pink-subtle)" }}>
+            <span
+              className="mr-1.5 line-through"
+              style={{ color: "var(--pink-subtle)" }}
+            >
               {compareAtPrice}
             </span>
           )}
@@ -189,7 +203,9 @@ export function PinkProductCard({
             e.currentTarget.style.color = "var(--pink-ink)";
           }}
         >
-          {addToBasket.isAdded ? (addToBasket.addedLabel ?? "Added ✓") : addToBasket.label}
+          {addToBasket.isAdded
+            ? (addToBasket.addedLabel ?? "Added ✓")
+            : addToBasket.label}
         </button>
       )}
     </div>

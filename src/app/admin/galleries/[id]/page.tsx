@@ -1,7 +1,7 @@
 import { rethrowTrpcForErrorBoundary } from "~/lib/trpc/rethrow-trpc-error";
 import { api } from "~/trpc/server";
 
-import { GalleryEditor } from "../_components/galley-editor";
+import { GalleryEditor } from "../_components/gallery-editor";
 import { TrailHeader } from "../../_components/trail-header";
 
 type Props = {

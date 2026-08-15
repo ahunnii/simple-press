@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { verifyPartnerRequest } from "~/lib/partner-auth";
 import {
   buildClaimUrl,
   buildStorefrontUrl,
@@ -12,10 +13,9 @@ import {
   provisionRequestSchema,
   resolveTemplateId,
 } from "~/lib/partner-provision";
-import { verifyPartnerRequest } from "~/lib/partner-auth";
 import { getClientIp, partnerApiLimiter } from "~/lib/rate-limit";
-import { safeFetch } from "~/lib/safe-fetch";
 import { contentAddressedKey, putStoredObject } from "~/lib/s3/put";
+import { safeFetch } from "~/lib/safe-fetch";
 import { getFreeTemplateIds } from "~/lib/template-ownership";
 import { isSubdomainReserved, slugify } from "~/lib/utils";
 import { db } from "~/server/db";
@@ -224,10 +224,7 @@ export async function POST(req: NextRequest) {
     });
     if (!verification.ok) {
       // Log the reason server-side, but never leak it to the caller.
-      console.warn(
-        "[partner/provision] auth failed:",
-        verification.reason,
-      );
+      console.warn("[partner/provision] auth failed:", verification.reason);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -370,7 +367,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Best-effort logo ingestion (post-transaction, never fatal).
-    const logoIngested = logoUrl ? await ingestLogo(businessId, logoUrl) : false;
+    const logoIngested = logoUrl
+      ? await ingestLogo(businessId, logoUrl)
+      : false;
 
     // 8. Build the response.
     const body = buildResponse({
@@ -390,9 +389,6 @@ export async function POST(req: NextRequest) {
     Sentry.captureException(error, {
       tags: { route: "partner/provision", service: "artisanal-futures" },
     });
-    return NextResponse.json(
-      { error: "Provisioning failed" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Provisioning failed" }, { status: 500 });
   }
 }

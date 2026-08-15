@@ -9,6 +9,7 @@ import Image from "next/image";
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { isContentEmpty } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -20,8 +21,13 @@ import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiProductRail } from "../../homepage/vii-product-rail";
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
-import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../../hooks/use-vii-hero-motion";
 import { ViiOverline } from "../../shared/vii-overline";
 
 // ─── LedgerHero ───────────────────────────────────────────────────────────────
@@ -65,7 +71,13 @@ export function LedgerHero({
             />
           </div>
         ) : (
-          <div style={{ position: "absolute", inset: 0, ...heroMediaStyle(shown, reduced) }}>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              ...heroMediaStyle(shown, reduced),
+            }}
+          >
             <Image
               src={heroImage!}
               alt=""
@@ -103,7 +115,10 @@ export function LedgerHero({
             <ViiOverline
               tone="dark"
               align="left"
-              style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 16 }}
+              style={{
+                ...heroRevealStyle(shown, reduced, 0),
+                marginBottom: 16,
+              }}
             >
               {overline}
             </ViiOverline>
@@ -244,7 +259,7 @@ export function LedgerIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", headVisible && "is-visible")}
         >
           {overline && (
             <ViiOverline
@@ -282,7 +297,7 @@ export function LedgerIntro({
         {!bodyEmpty && (
           <div
             ref={bodyRef}
-            className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+            className={cn("vii-reveal", bodyVisible && "is-visible")}
             style={{ marginTop: 32 }}
           >
             <div
@@ -302,7 +317,7 @@ export function LedgerIntro({
         {(Boolean(introImageSrc) || Boolean(introVideoSrc)) && (
           <div
             ref={mediaRef}
-            className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+            className={cn("vii-reveal", mediaVisible && "is-visible")}
           >
             <ServiceSectionMedia
               imageSrc={introImageSrc}
@@ -371,7 +386,7 @@ export function LedgerNotes({
           paddingTop: "clamp(28px, 3.5vw, 40px)",
         }}
       >
-        <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
+        <div ref={ref} className={cn("vii-reveal", visible && "is-visible")}>
           {hasHeading && (
             <h2
               id="ledger-notes-heading"

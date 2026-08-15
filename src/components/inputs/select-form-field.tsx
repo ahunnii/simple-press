@@ -31,7 +31,6 @@ type Props<CurrentForm extends FieldValues> = {
     isDisabled?: boolean;
   }[];
   onValueChange?: (value: string) => void;
-  defaultValue?: string;
   required?: boolean;
 };
 

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { AlertCircle, Settings } from "lucide-react";
 
 import { FEATURE_REGISTRY } from "~/lib/features/registry";
@@ -17,6 +18,21 @@ type Props = {
 export default function AdminError({ error, reset }: Props) {
   useEffect(() => {
     console.error(error);
+    // Server-render errors already reached Sentry through `onRequestError`
+    // (src/instrumentation.ts) — Next marks those with a `digest`. Capturing
+    // them here would double-count every one. Only client-side render and
+    // hydration crashes, which carry no digest, are new signal.
+    if (error.digest) return;
+    // Expected, handled tRPC states — feature-disabled FORBIDDEN, NOT_FOUND —
+    // render friendly UI below and are not bugs. Same rule as the tRPC handler
+    // (src/app/api/trpc/[trpc]/route.ts), which captures only
+    // INTERNAL_SERVER_ERROR.
+    const parsed = parseTrpcFromBoundaryMessage(error.message);
+    if (parsed && parsed.code !== "INTERNAL_SERVER_ERROR") return;
+    Sentry.captureException(error, {
+      tags: { component: "admin-error-boundary" },
+      ...(parsed ? { extra: { "trpc.code": parsed.code } } : {}),
+    });
   }, [error]);
 
   const trpc = parseTrpcFromBoundaryMessage(error.message);

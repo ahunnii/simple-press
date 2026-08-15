@@ -1,11 +1,16 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Download, Images, Search, Trash2, X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Download, Images, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { BulkAction } from "../../_components/admin-bulk-bar";
+import type { AdminFilterDef } from "../../_components/admin-filters";
+import type { MediaItem } from "~/components/media/media-grid";
+import type { MediaUsageStatus } from "~/lib/validators/media";
+import { ADMIN_BULK_DELETE_LIMIT } from "~/lib/validators/admin-table";
 import { api } from "~/trpc/react";
 import {
   AlertDialog,
@@ -20,44 +25,132 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "~/components/ui/hover-card";
-import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { formatBytes, MediaThumbnail } from "~/components/media/media-grid";
+
+import { AdminBulkBar } from "../../_components/admin-bulk-bar";
+import { AdminCardGrid } from "../../_components/admin-card-grid";
+import { AdminEmpty } from "../../_components/admin-empty";
+import { AdminFilters } from "../../_components/admin-filters";
+import { AdminPagination } from "../../_components/admin-pagination";
+import { WARNING_TEXT } from "../../_components/admin-table-style";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import type { MediaItem } from "~/components/media/media-grid";
-import { formatBytes, getFilename, MediaThumbnail } from "~/components/media/media-grid";
+  createCapDisabledReason,
+  createOverCapGuard,
+  describeSelection,
+} from "../../_lib/admin-bulk-actions";
+import {
+  dismissLoadingToast,
+  loadingToast,
+} from "../../_lib/admin-mutation-toast";
+import { useAdminTableSelection } from "../../_lib/use-admin-table-selection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type KindFilter =
-  | "all"
-  | "image"
-  | "video"
-  | "logo"
-  | "favicon"
-  | "testimonial"
-  | "gallery"
-  | "other";
+/** A media item with the fields the server page derives for the table
+ *  pipeline: `id` (the S3 key — `buildTablePage` needs `{ id: string }`, and
+ *  keys are unique), `filename` (precomputed once for the name sorts), and
+ *  `usageStatus` (the three-bucket classification from `getMediaUsageStatus`,
+ *  shared by the `used` filter predicate and `UsageBadge` below). */
+export type MediaRow = MediaItem & {
+  id: string;
+  filename: string;
+  usageStatus: MediaUsageStatus;
+};
 
-type UsedFilter = "all" | "used" | "unused";
+type Props = {
+  /** The current page's cards only — filtering/sorting/paging happen server-side. */
+  items: MediaRow[];
+  /** The RESOLVED business the listing belongs to (a platform admin may be
+   *  viewing someone else's). Threaded into the per-card mutations exactly as
+   *  before this migration. */
+  businessId: string;
+  /** Mirrors `media.bulkDelete`'s `ownerOnlyProcedure`, resolved server-side.
+   *  False OMITS every bulk affordance — see the note above `bulkActions`. */
+  canBulkDelete: boolean;
+  /** Keys of every file matching the current filters, across all pages — or
+   *  `null` when more than ADMIN_BULK_SELECTION_LIMIT match and
+   *  `buildTablePage` declined to enumerate them. */
+  matchingIds: string[] | null;
+  totalCount: number;
+  totalPages: number;
+  page: number;
+  pageSize: number;
+  /** Unfiltered total — distinguishes "no media yet" from "no matches". */
+  totalFiles: number;
+  filters: AdminFilterDef[];
+};
 
-function UsageBadge({ item }: { item: MediaItem }) {
+const BASE_PATH = "/admin/media";
+const ITEM_NOUN = { one: "file", many: "files" } as const;
+
+const nounFor = (count: number) =>
+  count === 1 ? ITEM_NOUN.one : ITEM_NOUN.many;
+
+// ─── Usage badge ──────────────────────────────────────────────────────────────
+
+function UsageBadge({ item }: { item: MediaRow }) {
   const count = item.usedBy.length;
 
-  if (count === 0) {
+  if (item.usageStatus === "unused") {
     return (
       <Badge variant="secondary" className="text-muted-foreground text-xs">
         Unused
       </Badge>
+    );
+  }
+
+  if (item.usageStatus === "inactive") {
+    return (
+      <HoverCard openDelay={100} closeDelay={100}>
+        <HoverCardTrigger asChild>
+          <Badge
+            variant="outline"
+            className={`cursor-help text-xs ${WARNING_TEXT}`}
+            tabIndex={0}
+            aria-label={`Referenced only by inactive templates, in ${count} location${count === 1 ? "" : "s"} — hover for details`}
+          >
+            Inactive template
+          </Badge>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-72" align="start">
+          <p
+            className={`mb-1 text-xs font-semibold tracking-wide uppercase ${WARNING_TEXT}`}
+          >
+            Referenced only by inactive templates
+          </p>
+          <p className="text-muted-foreground mb-2 text-xs">
+            Your active template doesn&apos;t use this file. Deleting it also
+            clears these leftover template fields.
+          </p>
+          <ul className="space-y-1.5">
+            {item.usedBy.map((usage, i) => (
+              <li key={i} className="text-sm">
+                {usage.adminHref ? (
+                  <Link
+                    href={usage.adminHref}
+                    className="text-foreground font-medium underline-offset-2 hover:underline"
+                  >
+                    {usage.location}
+                    {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
+                  </Link>
+                ) : (
+                  <span className="text-foreground">
+                    {usage.location}
+                    {usage.entityLabel ? ` — ${usage.entityLabel}` : ""}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </HoverCardContent>
+      </HoverCard>
     );
   }
 
@@ -110,26 +203,35 @@ function MediaCardActions({
   onDeleteConfirm,
   isDeleting,
 }: {
-  item: MediaItem;
+  item: MediaRow;
   businessId: string;
-  onDeleteConfirm: (item: MediaItem) => void;
+  onDeleteConfirm: (item: MediaRow) => void;
   isDeleting: boolean;
 }) {
+  // Presigned URL, so it's a mutation rather than a query — never cached, always
+  // freshly signed. The loading toast is the shared grammar: the id travels in
+  // the mutation context so settling dismisses THIS toast, not every toast.
   const downloadMutation = api.media.getDownloadUrl.useMutation({
-    onSuccess: ({ url }) => {
+    onMutate: loadingToast("Preparing download…"),
+    onSuccess: ({ url }, _variables, context) => {
+      dismissLoadingToast(context);
       const a = document.createElement("a");
       a.href = url;
-      a.download = getFilename(item.key);
+      a.download = item.filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
     },
-    onError: (err) => {
-      toast.error(err.message || "Failed to generate download link");
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message ?? "Failed to generate download link");
     },
   });
 
-  const inUse = item.usedBy.length > 0;
+  // Only an active-template (or non-template) usage blocks delete now —
+  // inactive-template-only files are leftover content the owner can clean up
+  // even though `usedBy` is non-empty. See `getMediaUsageStatus`.
+  const inUse = item.usageStatus === "used";
 
   return (
     <div className="flex gap-2">
@@ -139,7 +241,7 @@ function MediaCardActions({
         className="flex-1"
         onClick={() => downloadMutation.mutate({ key: item.key, businessId })}
         disabled={downloadMutation.isPending}
-        aria-label={`Download ${getFilename(item.key)}`}
+        aria-label={`Download ${item.filename}`}
       >
         <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
         {downloadMutation.isPending ? "Getting link…" : "Download"}
@@ -153,10 +255,14 @@ function MediaCardActions({
         disabled={inUse || isDeleting}
         aria-label={
           inUse
-            ? `Cannot delete ${getFilename(item.key)} — file is in use`
-            : `Delete ${getFilename(item.key)}`
+            ? `Cannot delete ${item.filename} — file is in use by your active setup`
+            : `Delete ${item.filename}`
         }
-        title={inUse ? "Cannot delete — file is in use" : undefined}
+        title={
+          inUse
+            ? "Cannot delete — file is in use by your active setup"
+            : undefined
+        }
       >
         <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
         Delete
@@ -167,282 +273,379 @@ function MediaCardActions({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-type Props = {
-  items: MediaItem[];
-  businessId: string;
-};
-
-export function MediaLibraryClient({ items, businessId }: Props) {
-  const searchParams = useSearchParams();
+export function MediaLibraryClient({
+  items,
+  businessId,
+  canBulkDelete,
+  matchingIds,
+  totalCount,
+  totalPages,
+  page,
+  pageSize,
+  totalFiles,
+  filters,
+}: Props) {
   const utils = api.useUtils();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Read initial filter state from URL
-  const [q, setQ] = useState(searchParams.get("q") ?? "");
-  const [kind, setKind] = useState<KindFilter>(
-    (searchParams.get("type") as KindFilter | null) ?? "all",
-  );
-  const [used, setUsed] = useState<UsedFilter>(
-    (searchParams.get("used") as UsedFilter | null) ?? "all",
-  );
+  const [deleteTarget, setDeleteTarget] = useState<MediaRow | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  // Delete dialog state
-  const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
+  /** Only present when a PLATFORM_ADMIN is viewing another business's library.
+   *  Passed to `bulkDelete` exactly as the per-card mutations pass their own
+   *  `businessId` — the router honours it only for platform admins. Read off
+   *  the URL rather than from the `businessId` prop so an ordinary owner's
+   *  request carries no `businessId` at all. */
+  const urlBusinessId = searchParams.get("businessId") ?? undefined;
 
-  // ── URL sync helper ─────────────────────────────────────────────────────────
+  /** The filtered-empty state's escape hatch. BASE_PATH alone would drop
+   *  `?businessId=` and kick a platform admin back to their OWN library. */
+  const clearFiltersHref = urlBusinessId
+    ? `${BASE_PATH}?businessId=${encodeURIComponent(urlBusinessId)}`
+    : BASE_PATH;
 
-  // Sync filters to the URL via history.replaceState (NOT router.replace) so
-  // shareable URLs are preserved WITHOUT re-running the server component's
-  // expensive media.list scan on every keystroke. Filtering is in-memory.
-  const pushParams = useCallback(
-    (nextQ: string, nextType: KindFilter, nextUsed: UsedFilter) => {
-      const p = new URLSearchParams();
-      if (businessId) p.set("businessId", businessId);
-      if (nextQ) p.set("q", nextQ);
-      if (nextType !== "all") p.set("type", nextType);
-      if (nextUsed !== "all") p.set("used", nextUsed);
-      const qs = p.toString();
-      window.history.replaceState(
-        null,
-        "",
-        qs ? `/admin/media?${qs}` : "/admin/media",
-      );
-    },
-    [businessId],
-  );
+  // ── Selection ──────────────────────────────────────────────────────────────
+  // `businessId` is part of the URL, so it is part of the hook's filter
+  // signature: a platform admin switching business clears the selection. That
+  // is correct — the keys selected in one business's library are meaningless
+  // in another's — so no special handling is needed here.
+  const {
+    selectedIds,
+    selectedCount,
+    isEscalated,
+    allPageSelected,
+    somePageSelected,
+    canEscalate,
+    escalationDisabledReason,
+    clearSelection,
+    pruneSelection,
+    handleRowToggle,
+    handleSelectAllOnPage,
+    handleSelectAllMatching,
+    onRowClickCapture,
+    onFiltersChange,
+  } = useAdminTableSelection({
+    rowIds: items.map((item) => item.id),
+    matchingIds,
+    totalCount,
+    page,
+    searchParams,
+  });
 
-  const handleQChange = (val: string) => {
-    setQ(val);
-    pushParams(val, kind, used);
+  // ── Mutations ──────────────────────────────────────────────────────────────
+  // Every handler dismisses the specific loading toast it opened — see
+  // dismissLoadingToast. A bare toast.dismiss() clears every toast on screen.
+
+  const afterWrite = () => {
+    void utils.media.list.invalidate();
+    router.refresh();
   };
-
-  const handleKindChange = (val: KindFilter) => {
-    setKind(val);
-    pushParams(q, val, used);
-  };
-
-  const handleUsedChange = (val: UsedFilter) => {
-    setUsed(val);
-    pushParams(q, kind, val);
-  };
-
-  const handleClearFilters = () => {
-    setQ("");
-    setKind("all");
-    setUsed("all");
-    const p = new URLSearchParams();
-    if (businessId) p.set("businessId", businessId);
-    const qs = p.toString();
-    window.history.replaceState(
-      null,
-      "",
-      qs ? `/admin/media?${qs}` : "/admin/media",
-    );
-  };
-
-  // ── In-memory filtering ─────────────────────────────────────────────────────
-
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    return items.filter((item) => {
-      if (needle) {
-        const filename = getFilename(item.key).toLowerCase();
-        if (
-          !filename.includes(needle) &&
-          !item.key.toLowerCase().includes(needle)
-        ) {
-          return false;
-        }
-      }
-      if (kind !== "all" && item.kind !== kind) return false;
-      if (used === "used" && item.usedBy.length === 0) return false;
-      if (used === "unused" && item.usedBy.length > 0) return false;
-      return true;
-    });
-  }, [items, q, kind, used]);
-
-  // ── Delete mutation ─────────────────────────────────────────────────────────
 
   const deleteMutation = api.media.delete.useMutation({
-    onMutate: () => {
-      toast.loading("Deleting file…", { id: "media-delete" });
-    },
-    onSuccess: () => {
-      toast.dismiss("media-delete");
+    onMutate: loadingToast("Deleting file…"),
+    onSuccess: (_data, variables, context) => {
+      dismissLoadingToast(context);
       toast.success("File deleted");
+      pruneSelection([variables.key]);
       setDeleteTarget(null);
-      void utils.media.list.invalidate();
+      afterWrite();
     },
-    onError: (err) => {
-      toast.dismiss("media-delete");
-      toast.error(err.message || "Failed to delete file");
-      // Keep deleteTarget open so user sees the error
-      setDeleteTarget(null);
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      // On CONFLICT the server's message names the places still referencing the
+      // file — the only way the owner learns WHICH page blocked the delete when
+      // the card's usage badge was stale. Dialog stays open so Cancel (or a
+      // retry) is still one click away.
+      toast.error(error.message ?? "Failed to delete file");
     },
   });
 
-  const handleDelete = () => {
-    if (!deleteTarget) return;
-    deleteMutation.mutate({ key: deleteTarget.key, businessId });
+  const bulkDeleteMutation = api.media.bulkDelete.useMutation({
+    onMutate: loadingToast("Deleting files…"),
+    onSuccess: (data, variables, context) => {
+      dismissLoadingToast(context);
+
+      const requested = variables.keys.length;
+      const inUseCount = data.skipped.filter(
+        (skip) => skip.reason === "in-use",
+      ).length;
+      const protectedCount = data.skipped.filter(
+        (skip) => skip.reason === "protected",
+      ).length;
+      // "2 in use, 1 logo/favicon" — the server's two machine reasons said in
+      // the owner's words. `protected` only ever means the fixed-key brand
+      // assets, which are overwritten by re-uploading, never deleted here.
+      const reasons = [
+        inUseCount > 0 ? `${inUseCount} in use` : null,
+        protectedCount > 0 ? `${protectedCount} logo/favicon` : null,
+      ]
+        .filter((part): part is string => part !== null)
+        .join(", ");
+
+      if (data.skipped.length === 0) {
+        toast.success(
+          `${data.deletedCount} ${nounFor(data.deletedCount)} deleted`,
+        );
+      } else if (data.deletedCount === 0) {
+        toast.warning(
+          `Nothing deleted — all ${requested} selected ${nounFor(requested)} were skipped (${reasons}).`,
+        );
+      } else {
+        toast.warning(
+          `Deleted ${data.deletedCount} of ${requested} ${nounFor(requested)} — ${data.skipped.length} skipped (${reasons}).`,
+        );
+      }
+
+      // Prune ONLY what was actually deleted, deliberately not clearSelection():
+      // the skipped files stay selected, so after the toast the owner can see
+      // on screen exactly which ones survived and why, instead of having to
+      // re-find them in a cleared grid.
+      pruneSelection(data.deletedKeys);
+      setBulkDeleteOpen(false);
+      afterWrite();
+    },
+    onError: (error, _variables, context) => {
+      dismissLoadingToast(context);
+      toast.error(error.message ?? "Failed to delete files");
+    },
+  });
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+
+  // Confirm-dialog context. Only rows on the current page have names available;
+  // `describeSelection` handles the shortfall in the copy.
+  const selectedNames = items
+    .filter((item) => selectedIds.has(item.id))
+    .map((item) => item.filename);
+
+  const overCap = createOverCapGuard(selectedCount, ITEM_NOUN);
+  const capReason = createCapDisabledReason(selectedCount, ITEM_NOUN);
+  const deleteCapReason = capReason(ADMIN_BULK_DELETE_LIMIT, "delete");
+
+  const handleBulkDelete = () => {
+    if (selectedCount === 0 || overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) {
+      return;
+    }
+    bulkDeleteMutation.mutate({
+      keys: [...selectedIds],
+      businessId: urlBusinessId,
+    });
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // The per-card delete writes to rows the bulk bar can also be holding, so it
+  // freezes the bar too. There is no undo mutation to include — an S3 delete is
+  // irreversible, which is also why this page offers no Undo toast action.
+  const isBulkPending =
+    bulkDeleteMutation.isPending || deleteMutation.isPending;
 
-  const isFiltering = q !== "" || kind !== "all" || used !== "all";
+  // Delete is the ONLY bulk action here, and `media.bulkDelete` is
+  // `ownerOnlyProcedure` — so a MANAGER gets no bulk bar, and no card
+  // checkboxes either. Omitted rather than disabled, per
+  // docs/admin-table-migration.md §2: a MANAGER should see the actions they
+  // have, not a greyed list of the ones they don't. The procedure is still the
+  // enforcement.
+  const bulkActions: BulkAction[] = [
+    {
+      label: "Delete",
+      icon: Trash2,
+      variant: "destructive" as const,
+      // `disabledReason` stops the click being worth making; this still
+      // re-checks the cap BEFORE opening the dialog, for a selection grown past
+      // it between render and click.
+      onClick: () => {
+        if (overCap(ADMIN_BULK_DELETE_LIMIT, "delete")) return;
+        setBulkDeleteOpen(true);
+      },
+      pending: bulkDeleteMutation.isPending,
+      disabledReason: deleteCapReason,
+    },
+  ];
 
-  if (items.length === 0) {
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  // Absolute empty state — no files at all, so there is nothing to filter. No
+  // action: uploads happen where the media is used (product images, galleries,
+  // template fields), never from this page.
+  if (totalFiles === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <Images
-            className="text-muted-foreground mx-auto h-12 w-12"
-            aria-hidden="true"
-          />
-          <h3 className="mt-4 text-lg font-medium">No media uploaded yet</h3>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Files will appear here once you upload images, videos, or other
-            media to your store.
-          </p>
-        </CardContent>
-      </Card>
+      <AdminEmpty
+        icon={Images}
+        title="No media uploaded yet"
+        description="Files will appear here once you upload images, videos, or other media to your store."
+      />
     );
   }
 
   return (
     <>
-      {/* Filter bar */}
-      <div className="bg-card mb-6 rounded-lg border p-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search
-              className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-              aria-hidden="true"
-            />
-            <Input
-              type="text"
-              placeholder="Search by filename…"
-              value={q}
-              onChange={(e) => handleQChange(e.target.value)}
-              className="pl-10"
-              aria-label="Search media files"
-            />
-          </div>
+      <AdminFilters
+        basePath={BASE_PATH}
+        searchPlaceholder="Search files…"
+        // Names the fields actually matched. Searching by where a file is USED
+        // is the non-obvious one — the placeholder has no room to say so.
+        // (AdminFilters copies the current URL params into every navigation, so
+        // `businessId` survives a filter change without special handling.)
+        searchAriaLabel="Search media by file name, by the name of the product, gallery, or page where it's used, or by a general word like products or galleries"
+        filters={filters}
+        resultCount={totalCount}
+        itemNoun={ITEM_NOUN}
+        onFiltersChange={onFiltersChange}
+      />
 
-          {/* Kind filter */}
-          <div className="w-full md:w-44">
-            <Select
-              value={kind}
-              onValueChange={(v) => handleKindChange(v as KindFilter)}
-            >
-              <SelectTrigger aria-label="Filter by file type">
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="image">Images</SelectItem>
-                <SelectItem value="video">Videos</SelectItem>
-                <SelectItem value="logo">Logo</SelectItem>
-                <SelectItem value="favicon">Favicon</SelectItem>
-                <SelectItem value="testimonial">Testimonials</SelectItem>
-                <SelectItem value="gallery">Gallery</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {canBulkDelete && (
+        <AdminBulkBar
+          count={selectedCount}
+          itemNoun={ITEM_NOUN}
+          actions={bulkActions}
+          onClear={clearSelection}
+          disabled={isBulkPending}
+          selectAllMatching={
+            canEscalate || isEscalated
+              ? {
+                  total: totalCount,
+                  onSelect: handleSelectAllMatching,
+                  isEscalated,
+                  disabledReason: escalationDisabledReason,
+                }
+              : undefined
+          }
+        />
+      )}
 
-          {/* Used/unused filter */}
-          <div className="w-full md:w-40">
-            <Select
-              value={used}
-              onValueChange={(v) => handleUsedChange(v as UsedFilter)}
-            >
-              <SelectTrigger aria-label="Filter by usage">
-                <SelectValue placeholder="All files" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Files</SelectItem>
-                <SelectItem value="used">In Use</SelectItem>
-                <SelectItem value="unused">Unused</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Clear filters + result count */}
-          {isFiltering && (
-            <div className="flex items-center gap-3">
-              <span className="text-muted-foreground text-sm">
-                {filtered.length} {filtered.length === 1 ? "result" : "results"}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearFilters}
-                aria-label="Clear all filters"
+      {items.length === 0 ? (
+        <AdminEmpty
+          icon={Search}
+          title="No files match your filters"
+          // AdminEmpty renders its own "Try adjusting your search or filters."
+          // line when `filtered` — don't say it twice.
+          filtered
+          action={
+            <Button variant="outline" asChild>
+              <Link href={clearFiltersHref}>Clear filters</Link>
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          {/* A card grid has no header row to hang the select-all checkbox off,
+              so it gets its own modest strip here — same three states as a
+              table's header checkbox, same handler. */}
+          {canBulkDelete && (
+            <div className="mb-3 flex items-center gap-2 px-1">
+              <Checkbox
+                id="select-all-media"
+                checked={
+                  allPageSelected
+                    ? true
+                    : somePageSelected
+                      ? "indeterminate"
+                      : false
+                }
+                onCheckedChange={handleSelectAllOnPage}
+                aria-label="Select all files on this page"
+              />
+              <Label
+                htmlFor="select-all-media"
+                className="text-muted-foreground text-sm font-normal"
               >
-                <X className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                Clear
-              </Button>
+                Select all on page
+              </Label>
             </div>
           )}
 
-          {!isFiltering && (
-            <span className="text-muted-foreground text-sm">
-              {items.length} {items.length === 1 ? "file" : "files"}
-            </span>
-          )}
-        </div>
-      </div>
+          {/* Extends the shared 2/3-column geometry to 4 at xl — media cards are
+              denser than Galleries' and this is the density the page had before
+              the migration. */}
+          <AdminCardGrid
+            label="Media files"
+            className="sm:grid-cols-2 xl:grid-cols-4"
+          >
+            {items.map((item, index) => {
+              const isSelected = selectedIds.has(item.id);
+              const date = new Date(item.lastModified).toLocaleDateString(
+                undefined,
+                { year: "numeric", month: "short", day: "numeric" },
+              );
 
-      {/* Grid or no-match empty state */}
-      {filtered.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-muted-foreground">
-              No files match your search or filters.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((item) => {
-            const filename = getFilename(item.key);
-            const date = new Date(item.lastModified).toLocaleDateString(
-              undefined,
-              { year: "numeric", month: "short", day: "numeric" },
-            );
+              return (
+                <li key={item.id}>
+                  {/* NOT an INTERACTIVE_CARD: there is no primary link to
+                      stretch (a media file has no detail page), so the card's
+                      interactive surface stays the Download/Delete buttons and
+                      the selection checkbox. `gap-0 py-0 overflow-hidden`
+                      cancel the shadcn Card base the same way INTERACTIVE_CARD
+                      does, so the thumbnail runs edge-to-edge and clips to the
+                      rounded corners; `relative` anchors the checkbox overlay. */}
+                  <Card
+                    data-state={isSelected ? "selected" : undefined}
+                    className={`relative gap-0 overflow-hidden py-0 ${
+                      isSelected ? "ring-primary ring-2" : ""
+                    }`}
+                  >
+                    <div className="relative">
+                      <MediaThumbnail item={item} />
 
-            return (
-              <Card key={item.key} className="overflow-hidden">
-                <MediaThumbnail item={item} />
-                <CardContent className="p-3">
-                  <div className="mb-2 flex items-start gap-2">
-                    <p
-                      className="min-w-0 flex-1 truncate text-sm font-medium"
-                      title={filename}
-                    >
-                      {filename}
-                    </p>
-                    <UsageBadge item={item} />
-                  </div>
+                      {canBulkDelete && (
+                        // Overlaid on the thumbnail, on its own backing: a bare
+                        // checkbox over a photo is invisible against half the
+                        // images in a library. `bg-background` + `ring-border`
+                        // are tokens, so the backing flips with the theme
+                        // rather than staying white in dark mode.
+                        <div className="bg-background/90 ring-border absolute top-2 left-2 z-10 rounded-md p-1 shadow-sm ring-1 backdrop-blur-sm">
+                          <Checkbox
+                            checked={isSelected}
+                            // Radix reports the new checked state, not the
+                            // originating event — a capture-phase listener is
+                            // what records shiftKey in time for the range select.
+                            onClickCapture={onRowClickCapture}
+                            onCheckedChange={() => handleRowToggle(index)}
+                            aria-label={`Select ${item.filename}`}
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                  <p className="text-muted-foreground mb-3 text-xs">
-                    {formatBytes(item.size)} &middot; {date}
-                  </p>
+                    <CardContent className="p-3">
+                      <div className="mb-2 flex items-start gap-2">
+                        <p
+                          className="min-w-0 flex-1 truncate text-sm font-medium"
+                          title={item.filename}
+                        >
+                          {item.filename}
+                        </p>
+                        <UsageBadge item={item} />
+                      </div>
 
-                  <MediaCardActions
-                    item={item}
-                    businessId={businessId}
-                    onDeleteConfirm={setDeleteTarget}
-                    isDeleting={deleteMutation.isPending}
-                  />
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                      <p className="text-muted-foreground mb-3 text-xs">
+                        {formatBytes(item.size)} &middot; {date}
+                      </p>
+
+                      <MediaCardActions
+                        item={item}
+                        businessId={businessId}
+                        onDeleteConfirm={setDeleteTarget}
+                        isDeleting={deleteMutation.isPending}
+                      />
+                    </CardContent>
+                  </Card>
+                </li>
+              );
+            })}
+          </AdminCardGrid>
+
+          <AdminPagination
+            page={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            basePath={BASE_PATH}
+            itemNoun={ITEM_NOUN}
+          />
+        </>
       )}
 
-      {/* Delete confirmation dialog */}
+      {/* Single delete confirmation */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => {
@@ -456,10 +659,18 @@ export function MediaLibraryClient({ items, businessId }: Props) {
               {deleteTarget && (
                 <>
                   <strong className="font-mono text-xs break-all">
-                    {getFilename(deleteTarget.key)}
+                    {deleteTarget.filename}
                   </strong>{" "}
                   will be permanently removed from storage. This cannot be
                   undone.
+                  {deleteTarget.usageStatus === "inactive" && (
+                    <>
+                      {" "}
+                      This file is only referenced by templates you&apos;re not
+                      using — those leftover template fields will be cleaned up,
+                      so nothing breaks if you switch templates later.
+                    </>
+                  )}
                 </>
               )}
             </AlertDialogDescription>
@@ -468,15 +679,62 @@ export function MediaLibraryClient({ items, businessId }: Props) {
             <AlertDialogCancel disabled={deleteMutation.isPending}>
               Cancel
             </AlertDialogCancel>
+            {/* `variant`, NOT className. AlertDialogAction wraps a `Button …
+                asChild`, so a className lands on the inner Radix element while
+                Button still supplies `bg-primary` — and Slot concatenates the
+                two without tailwind-merge, so `className="bg-destructive"`
+                here renders BLACK. */}
             <AlertDialogAction
+              variant="destructive"
               onClick={(e) => {
                 e.preventDefault();
-                handleDelete();
+                if (deleteTarget) {
+                  deleteMutation.mutate({
+                    key: deleteTarget.key,
+                    businessId,
+                  });
+                }
               }}
               disabled={deleteMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteMutation.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete {selectedCount} {nounFor(selectedCount)}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete{" "}
+              {describeSelection(selectedNames, selectedCount, ITEM_NOUN)}. Any
+              selected file still in use by your active setup — and your logo
+              and favicon — is skipped automatically and left in place.
+              Everything else is permanently removed from storage, and there is
+              no undo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            {/* See the note on the single-delete action: `variant`, not className. */}
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                e.preventDefault();
+                handleBulkDelete();
+              }}
+              disabled={bulkDeleteMutation.isPending}
+            >
+              {bulkDeleteMutation.isPending
+                ? "Deleting…"
+                : `Delete ${selectedCount} ${nounFor(selectedCount)}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -30,11 +30,11 @@ import type {
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
-  TableHead,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "~/components/ui/table";
 
 // ─── Stat cards ───────────────────────────────────────────────────────────────
@@ -309,6 +309,7 @@ type AnalyticsContentProps = {
   topReferrers: ReferrersResult;
   events: EventsResult;
   embedEngagement: EmbedEngagementResult;
+  embedsEnabled: boolean;
 };
 
 function formatSeconds(totalSeconds: number): string {
@@ -324,6 +325,7 @@ export function AnalyticsContent({
   topReferrers,
   events,
   embedEngagement,
+  embedsEnabled,
 }: AnalyticsContentProps) {
   if (!overview.configured) {
     return (
@@ -475,7 +477,7 @@ export function AnalyticsContent({
       ) : null}
 
       {/* Embed engagement */}
-      {embedEngagement.configured ? (
+      {embedsEnabled && embedEngagement.configured ? (
         <EmbedEngagementSection
           engagements={embedEngagement.engagements}
           dwellSessions={embedEngagement.dwellSessions}

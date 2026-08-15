@@ -21,7 +21,6 @@
  *    add-ons alongside the standard price chip.
  * 5. Closing CTA (reuses ViiContactCtaSection) with optional button + embed.
  */
-import { useViiHeroMotion, heroRevealStyle, heroHeadingStyle, heroMediaStyle } from "../../hooks/use-vii-hero-motion";
 import Image from "next/image";
 
 import type { ServiceTemplateProps } from "~/app/(storefront)/_templates/_service-pages/registry";
@@ -29,6 +28,7 @@ import {
   parseTemplateIframeValue,
   parseTemplateListRows,
 } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import {
   parseServiceAddOns,
   parseServicePriceTiers,
@@ -39,6 +39,12 @@ import { ServiceHeroVideo } from "~/app/(storefront)/_templates/_service-pages/_
 import { ServiceSectionMedia } from "~/app/(storefront)/_templates/_service-pages/_shared/service-section-media";
 
 import { ViiContactCtaSection } from "../../homepage/vii-contact-cta-section";
+import {
+  heroHeadingStyle,
+  heroMediaStyle,
+  heroRevealStyle,
+  useViiHeroMotion,
+} from "../../hooks/use-vii-hero-motion";
 import { useViiReveal } from "../../hooks/use-vii-reveal";
 import { ViiOverline } from "../../shared/vii-overline";
 import { resolveAtelierFields } from "./fields";
@@ -141,7 +147,10 @@ function AtelierMosaic({
                 fill
                 priority
                 sizes="33vw"
-                style={{ objectFit: "cover", ...heroMediaStyle(shown, reduced) }}
+                style={{
+                  objectFit: "cover",
+                  ...heroMediaStyle(shown, reduced),
+                }}
               />
             )}
           </div>
@@ -273,7 +282,7 @@ function PullQuote({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{ maxWidth: 760, margin: "0 auto" }}
       >
         {/* Opening quotation mark */}
@@ -327,7 +336,7 @@ function PullQuote({
       {/* Optional media beneath the quote — contained within the navy band */}
       <div
         ref={mediaRef}
-        className={`vii-reveal${mediaVisible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", mediaVisible && "is-visible")}
       >
         <ServiceSectionMedia
           imageSrc={quoteImageSrc}
@@ -783,7 +792,10 @@ function AtelierList({
         {/* Section header */}
         <div
           ref={headRef}
-          className={`vii-reveal vii-atelier-list-row${headVisible ? " is-visible" : ""}`}
+          className={cn(
+            "vii-reveal vii-atelier-list-row",
+            headVisible && "is-visible",
+          )}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.4fr",
@@ -833,7 +845,7 @@ function AtelierList({
         {/* Treatment rows — stagger group: one observer, per-item --i cascade */}
         <div
           ref={rowsRef}
-          className={`vii-reveal-group${rowsVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal-group", rowsVisible && "is-visible")}
         >
           {items.map((item, i) => (
             <TreatmentListRow

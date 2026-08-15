@@ -18,6 +18,7 @@ import {
   Gallery,
   HorizontalRule,
   Image,
+  QuoteCalculator,
   ResetMarksOnEnter,
   TableKit,
   UnsetAllMarks,
@@ -37,6 +38,7 @@ export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   businessId?: string;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
 }
 
 async function fakeuploader(file: File): Promise<string> {
@@ -59,12 +61,14 @@ const createExtensions = ({
   businessId,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
 }: {
   placeholder: string;
   uploader?: (file: File) => Promise<string>;
   businessId?: string;
   galleriesEnabled?: boolean;
   embedsEnabled?: boolean;
+  quotesEnabled?: boolean;
 }) => [
   StarterKit.configure({
     blockquote: { HTMLAttributes: { class: "block-node" } },
@@ -164,7 +168,9 @@ const createExtensions = ({
           // Prefer the configured uploader (S3) so dropped images don't end
           // up base64-encoded in the document. Base64 is a last-resort
           // fallback for when no uploader is configured at all.
-          const src = uploader ? await uploader(file) : await fileToBase64(file);
+          const src = uploader
+            ? await uploader(file)
+            : await fileToBase64(file);
           editor.commands.insertContentAt(pos, {
             type: "image",
             attrs: { src },
@@ -176,7 +182,9 @@ const createExtensions = ({
       void Promise.all(
         files.map(async (file) => {
           // Same rationale as onDrop above — use the real uploader when set.
-          const src = uploader ? await uploader(file) : await fileToBase64(file);
+          const src = uploader
+            ? await uploader(file)
+            : await fileToBase64(file);
           editor.commands.insertContent({
             type: "image",
             attrs: { src },
@@ -207,6 +215,10 @@ const createExtensions = ({
     galleriesEnabled: galleriesEnabled !== false,
   }),
   Embed.configure({ embedsEnabled: embedsEnabled !== false }),
+  QuoteCalculator.configure({
+    businessId,
+    quotesEnabled: quotesEnabled !== false,
+  }),
   TableKit.configure({}),
 ];
 
@@ -222,6 +234,7 @@ export const useMinimalTiptapEditor = ({
   businessId,
   galleriesEnabled,
   embedsEnabled,
+  quotesEnabled,
   ...props
 }: UseMinimalTiptapEditorProps) => {
   // const lastExternalValueRef = React.useRef<Content | undefined>(value);
@@ -267,8 +280,16 @@ export const useMinimalTiptapEditor = ({
         businessId,
         galleriesEnabled,
         embedsEnabled,
+        quotesEnabled,
       }) as unknown as Extension[],
-    [placeholder, uploader, businessId, galleriesEnabled, embedsEnabled],
+    [
+      placeholder,
+      uploader,
+      businessId,
+      galleriesEnabled,
+      embedsEnabled,
+      quotesEnabled,
+    ],
   );
 
   const editorProps = React.useMemo(

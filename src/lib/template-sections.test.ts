@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import type { TemplateSection } from "./template-sections";
+import type { SectionLink, TemplateSection } from "./template-sections";
 
+import { FEATURE_REGISTRY } from "./features/registry";
 import {
   getSpMeta,
   isSectionVisible,
@@ -17,6 +18,7 @@ import {
   getSectionById,
   getSectionsForTemplate,
   isBlogPostContextSection,
+  SECTION_LINKS,
   TEMPLATE_SECTIONS,
 } from "./template-sections";
 
@@ -107,6 +109,71 @@ describe("getSectionsForTemplate (derived fallback)", () => {
       "homepage.hero",
     );
     expect(getSectionById("default", "homepage.nope")).toBeUndefined();
+  });
+});
+
+describe("SECTION_LINKS catalog", () => {
+  it("every href is an /admin path", () => {
+    for (const [key, link] of Object.entries(SECTION_LINKS)) {
+      expect(link.href.startsWith("/admin"), `${key} → ${link.href}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it("every featureKey is a real feature-registry key", () => {
+    for (const [key, link] of Object.entries(SECTION_LINKS)) {
+      const { featureKey } = link as SectionLink;
+      if (!featureKey) continue;
+      expect(featureKey in FEATURE_REGISTRY, `${key} → ${featureKey}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it("curated template sections only declare valid links", () => {
+    // Guards the per-template curation sweep: a typo'd href or a stale
+    // featureKey would silently render a dead link / an always-hidden row.
+    for (const templateId of Object.keys(TEMPLATE_SECTIONS)) {
+      for (const section of getSectionsForTemplate(templateId)) {
+        for (const link of section.links ?? []) {
+          expect(
+            link.href.startsWith("/admin"),
+            `${templateId}/${section.id} → ${link.href}`,
+          ).toBe(true);
+          if (link.featureKey) {
+            expect(
+              link.featureKey in FEATURE_REGISTRY,
+              `${templateId}/${section.id} → ${link.featureKey}`,
+            ).toBe(true);
+          }
+        }
+      }
+    }
+  });
+});
+
+describe("default product-page section (editor product preview)", () => {
+  it("registers a product-page section whose id equals its group id", () => {
+    // The editor only offers the "Product" page entry for templates that
+    // declare product-page fields, and the preview hotspot keys off
+    // `data-sp-group` === section id === field-group id.
+    const productSections = getSectionsForTemplate("default").filter(
+      (s) => s.page === "product",
+    );
+
+    expect(productSections.length).toBeGreaterThan(0);
+    for (const section of productSections) {
+      expect(section.id.startsWith("product.")).toBe(true);
+      expect(section.groupIds).toContain(section.id);
+    }
+    expect(productSections.map((s) => s.id)).toContain("product.details");
+  });
+
+  it("declares product-page fields so the editor surfaces the page entry", () => {
+    expect(groupFieldsByPage("default").product?.length ?? 0).toBeGreaterThan(
+      0,
+    );
   });
 });
 

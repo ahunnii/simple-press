@@ -5,6 +5,7 @@ import { DarkTrendCheckoutForm } from "./dark-trend-checkout-form";
 
 export async function DarkTrendCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   // Check if Stripe is connected
   if (!business.isStripeConnected) {
@@ -25,7 +26,10 @@ export async function DarkTrendCheckoutPage({
 
   return (
     <DarkTrendGeneralLayout title="Checkout">
-      <DarkTrendCheckoutForm business={business} />
+      <DarkTrendCheckoutForm
+        business={business}
+        merchantPolicies={merchantPolicies}
+      />
     </DarkTrendGeneralLayout>
   );
 }

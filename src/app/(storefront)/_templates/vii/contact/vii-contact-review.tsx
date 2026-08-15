@@ -1,10 +1,11 @@
 "use client";
 
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
+import { FacebookBrandIcon } from "~/components/icons/facebook-brand-icon";
+import { GoogleIcon } from "~/components/icons/google-icon";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
-import { GoogleIcon } from "~/components/icons/google-icon";
-import { FacebookBrandIcon } from "~/components/icons/facebook-brand-icon";
 
 type Props = {
   heading: string;
@@ -70,7 +71,7 @@ export function ViiContactReview({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{ maxWidth: 680, margin: "0 auto" }}
       >
         <h2

@@ -52,8 +52,18 @@ export function SendInviteDialog() {
   const customers = customerList?.customers;
 
   const sendInviteMutation = api.testimonial.sendInvite.useMutation({
-    onSuccess: () => {
-      toast.success("Testimonial invite sent!");
+    onSuccess: (data) => {
+      // The invite row is committed before the email goes out, and `sendEmail`
+      // never throws — so a Resend failure still resolves this mutation. A flat
+      // success toast would tell the owner a customer was asked for a
+      // testimonial when nothing was ever delivered.
+      if (data.emailSent) {
+        toast.success("Testimonial invite sent!");
+      } else {
+        toast.warning(
+          "Invite created, but the email could not be sent. Share the invite link with them directly.",
+        );
+      }
       setOpen(false);
       setEmail("");
       setCustomerId(undefined);

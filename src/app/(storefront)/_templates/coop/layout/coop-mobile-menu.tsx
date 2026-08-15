@@ -157,7 +157,7 @@ export function CoopMobileMenu({
                 key={link.href + link.label}
                 href={link.href}
                 onClick={onClose}
-                className="relative block cursor-pointer pb-[10.3px] text-left text-[1.0625rem] leading-[1.9375rem] tracking-[1.17px] text-[var(--coop-background)] uppercase [font-family:var(--font-coop-label)]"
+                className="relative block cursor-pointer pb-[10.3px] text-left [font-family:var(--font-coop-label)] text-[1.0625rem] leading-[1.9375rem] tracking-[1.17px] text-[var(--coop-background)] uppercase"
               >
                 {link.label}
               </Link>

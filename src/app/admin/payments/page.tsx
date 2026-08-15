@@ -1,19 +1,9 @@
-import { api } from "~/trpc/server";
+import { redirect } from "next/navigation";
 
-import { TrailHeader } from "../_components/trail-header";
-import { PaymentsOverview } from "./_components/payments-overview";
-
-export default async function PaymentsPage() {
-  const data = await api.business.getPaymentsOverview();
-
-  return (
-    <>
-      <TrailHeader breadcrumbs={[{ label: "Payments" }]} />
-      <PaymentsOverview data={data} />
-    </>
-  );
+/**
+ * Payments page merged into the combined "Finances" page.
+ * Kept as a redirect so bookmarks and older links keep working.
+ */
+export default function PaymentsPage() {
+  redirect("/admin/finances");
 }
-
-export const metadata = {
-  title: "Payments",
-};

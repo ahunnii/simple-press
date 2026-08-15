@@ -1,16 +1,15 @@
-import type { ComponentType, ReactNode } from "react";
 import type { AuthClient } from "@better-auth-ui/react";
+import type { ComponentType, ReactNode } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { AuthProvider } from "~/components/auth/auth-provider";
 import {
   AUTH_BASE_PATHS,
   AUTH_VIEW_PATHS,
   SETTINGS_VIEW_PATHS,
 } from "~/lib/auth-paths";
-
+import { AuthProvider } from "~/components/auth/auth-provider";
 // Importing components directly (like checkout-render.test.tsx) rather than
 // driving off `getTemplate()` from the registry. The registry module
 // statically imports every page slot for every template — including server
@@ -154,7 +153,7 @@ const fakeAuthClient = {
  * Wraps children in the real `<AuthProvider>` (approach (a) from the task
  * brief) with a stub client and an explicit, per-render `QueryClient` — the
  * same shape `src/providers/providers.tsx` uses in production, minus the
- * hCaptcha/terms-field/basePaths wiring that isn't reachable from a
+ * reCAPTCHA/terms-field/basePaths wiring that isn't reachable from a
  * signed-out settings/security mount. This is more faithful than mocking
  * `@better-auth-ui/react` itself: it exercises the real `useAuth`/`useSession`
  * hooks the vendored settings cards depend on.

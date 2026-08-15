@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { ArrowRight, Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { cn } from "~/lib/utils";
 import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
@@ -25,11 +27,12 @@ const DEFAULT_NAV: NavLink[] = [
 
 export function BuildersHeader({
   business,
-  session,
+  initialSession,
 }: DefaultHeaderTemplateProps) {
   const { itemCount } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
   const pathname = usePathname();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const mobileDialogRef = useRef<HTMLDivElement>(null);
@@ -133,6 +136,9 @@ export function BuildersHeader({
 
   const { isEnabled: isStorefrontEnabled } = useStorefrontFlags();
 
+  // `??`, never `||`: an owner who saves an empty item list in the Navigation
+  // builder means "no nav links", which `||` would silently overwrite with the
+  // shipped default.
   const customNav = business?.siteContent?.navigationItems as
     | NavLink[]
     | undefined;
@@ -144,6 +150,10 @@ export function BuildersHeader({
 
   const businessName = business?.name ?? "";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
 
   const isActive = (href: string) =>
     href === "/"
@@ -166,7 +176,7 @@ export function BuildersHeader({
     <div className="relative h-[3.125rem] w-[7.5rem]">
       <Image
         src={logoUrl}
-        alt={businessName}
+        alt={logoAlt}
         fill
         sizes="120px"
         className="object-contain object-left"
@@ -184,7 +194,7 @@ export function BuildersHeader({
   const userMenu = session?.user && (
     <UserButton
       size="icon"
-      className="rounded-none w-auto h-auto p-0 border border-gray-200"
+      className="h-auto w-auto rounded-none border border-gray-200 p-0"
       avatarClassName="size-7"
       links={[
         {
@@ -280,7 +290,13 @@ export function BuildersHeader({
             {/* Desktop auth */}
             {isStorefrontEnabled("customerAccounts") && (
               <div className="hidden md:flex md:items-center md:gap-4">
-                {session?.user ? userMenu : authLink}
+                {isPending ? (
+                  <div className="h-7 w-7 animate-pulse rounded-full border border-gray-200" />
+                ) : session?.user ? (
+                  userMenu
+                ) : (
+                  authLink
+                )}
               </div>
             )}
 
@@ -534,7 +550,12 @@ export function BuildersHeader({
 
                 {isStorefrontEnabled("customerAccounts") && (
                   <>
-                    {session?.user ? (
+                    {isPending ? (
+                      <div
+                        className="h-5 w-5 animate-pulse rounded-full"
+                        style={{ background: "var(--builders-rule, #e5e7eb)" }}
+                      />
+                    ) : session?.user ? (
                       <div className="flex items-center justify-center">
                         {userMenu}
                       </div>

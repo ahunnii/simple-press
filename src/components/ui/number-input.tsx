@@ -6,6 +6,7 @@ import { Input } from "~/components/ui/input";
 export function NumberInput({
   onChange,
   value,
+  onKeyDown,
   ...props
 }: Omit<ComponentProps<typeof Input>, "type" | "onChange" | "value"> & {
   onChange: (value: number | null) => void;
@@ -17,6 +18,12 @@ export function NumberInput({
       onChange={(e) => {
         const number = e.target.valueAsNumber;
         onChange(isNaN(number) ? null : number);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "-" || e.key === "+" || e.key === "e" || e.key === "E") {
+          e.preventDefault();
+        }
+        onKeyDown?.(e);
       }}
       value={value ?? ""}
       type="number"

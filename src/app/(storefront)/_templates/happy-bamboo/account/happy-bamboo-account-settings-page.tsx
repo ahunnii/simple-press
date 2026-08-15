@@ -1,7 +1,6 @@
 "use client";
 
 import { AccountSettingsCards } from "~/components/account/account-settings-cards";
-
 import { PageTransition } from "~/components/page-animations";
 
 import { HappyBambooAccountLayout } from "./happy-bamboo-account-layout";

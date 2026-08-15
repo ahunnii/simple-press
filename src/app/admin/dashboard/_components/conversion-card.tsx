@@ -1,7 +1,7 @@
 import { MousePointerClick } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { getStats } from "~/lib/umami/client";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 /**
  * Conversion rate (30d) stat card — paid orders ÷ unique visitors.

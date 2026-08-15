@@ -40,7 +40,9 @@ export async function PinkLayout({
   const resolvedLegalLinks = [
     {
       label: "Privacy Policy",
-      url: privacyPolicy ? `/${privacyPolicy.slug}` : "/platform/policies/privacy-policy",
+      url: privacyPolicy
+        ? `/${privacyPolicy.slug}`
+        : "/platform/policies/privacy-policy",
     },
     {
       label: "Terms of Service",
@@ -70,7 +72,7 @@ export async function PinkLayout({
 
       {banner && <PinkAnnouncementBar banner={banner} />}
 
-      <PinkHeader business={business} session={session ?? null} />
+      <PinkHeader business={business} initialSession={session ?? null} />
 
       <main id="main-content" className="flex-1">
         {children}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import type { RouterOutputs } from "~/trpc/react";
+import { env } from "~/env";
 import { api } from "~/trpc/react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import {
@@ -67,8 +68,7 @@ export function DomainSettings({ business, vpsIp }: DomainSettingsProps) {
   };
 
   const isDev = process.env.NODE_ENV === "development";
-  const platformDomain =
-    process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? "myapplication.com";
+  const platformDomain = env.NEXT_PUBLIC_PLATFORM_DOMAIN;
   const subdomainUrl = isDev
     ? `http://${business.subdomain}.localhost:3000`
     : `https://${business.subdomain}.${platformDomain}`;
@@ -404,12 +404,9 @@ function RemoveDomainDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Remove Custom Domain?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will remove <strong>{domain}</strong> from your store. Your
-            store will fall back to its permanent subdomain immediately. The
-            platform team will be notified to remove the domain from the server.
-            <br />
-            <br />
-            You can add a new custom domain at any time.
+            <strong>{domain}</strong> will stop working right away, and your
+            store will be served from its default subdomain again. You can add a
+            new custom domain at any time.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

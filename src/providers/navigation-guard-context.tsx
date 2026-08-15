@@ -24,7 +24,6 @@
  *    `beforeunload` listener in `useDirtyForm`; this provider only covers
  *    in-app link clicks.
  */
-
 import type { ReactNode } from "react";
 import {
   createContext,
@@ -143,11 +142,7 @@ export function computeNavigationIntercept(
 
 type PendingNavigation = { path: string } | null;
 
-export function NavigationGuardProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function NavigationGuardProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const blockersRef = useRef<Map<string, string | undefined>>(new Map());
   const [hasBlockers, setHasBlockers] = useState(false);

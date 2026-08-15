@@ -1,8 +1,16 @@
-import type { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import Papa from "papaparse";
 import z from "zod";
 
+import {
+  buildOrderListWhere,
+  ORDER_FULFILLMENT_DEFAULT,
+  ORDER_FULFILLMENT_VALUES,
+  ORDER_PAYMENT_DEFAULT,
+  ORDER_PAYMENT_VALUES,
+  ORDER_STATUS_DEFAULT,
+  ORDER_STATUS_VALUES,
+} from "~/lib/validators/order";
 import {
   exportToWooCommerceCSV,
   generateExportFilename,
@@ -110,34 +118,36 @@ export const exportRouter = createTRPCRouter({
   exportOrders: ownerAdminProcedure
     .input(
       z.object({
-        status: z.string().optional(),
-        search: z.string().optional(),
-        fulfillment: z.string().optional(),
-        paymentStatus: z.string().optional(),
+        // Truncated, not rejected, and the enums are defaulted rather than
+        // optional — same contract as `order.getAll`'s input, since the button
+        // forwards the same URL params the table was rendered from.
+        search: z
+          .string()
+          .transform((s) => s.slice(0, 200))
+          .optional(),
+        status: z.enum(ORDER_STATUS_VALUES).default(ORDER_STATUS_DEFAULT),
+        fulfillment: z
+          .enum(ORDER_FULFILLMENT_VALUES)
+          .default(ORDER_FULFILLMENT_DEFAULT),
+        paymentStatus: z
+          .enum(ORDER_PAYMENT_VALUES)
+          .default(ORDER_PAYMENT_DEFAULT),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      // Mirror the filter logic of order.getAll so the export matches the list
-      const where: Prisma.OrderWhereInput = { businessId };
-
-      if (input.status && input.status !== "all") {
-        where.status = input.status;
-      }
-      if (input.fulfillment && input.fulfillment !== "all") {
-        where.fulfillmentStatus = input.fulfillment;
-      }
-      if (input.paymentStatus && input.paymentStatus !== "all") {
-        where.paymentStatus = input.paymentStatus;
-      }
-      if (input.search) {
-        where.OR = [
-          { customerEmail: { contains: input.search, mode: "insensitive" } },
-          { customerName: { contains: input.search, mode: "insensitive" } },
-          { id: { contains: input.search, mode: "insensitive" } },
-        ];
-      }
+      // The SAME builder `order.getAll` uses, so the export cannot disagree
+      // with the list it was launched from. The hand-rolled copy that lived
+      // here had already drifted — it omitted the order-number branch, so
+      // exporting after a "#1042" search matched zero rows and 404'd.
+      const where = buildOrderListWhere({
+        businessId,
+        status: input.status,
+        fulfillment: input.fulfillment,
+        paymentStatus: input.paymentStatus,
+        search: input.search,
+      });
 
       const orders = await ctx.db.order.findMany({
         where,
@@ -205,7 +215,9 @@ export const exportRouter = createTRPCRouter({
         select: { name: true },
       });
 
-      const slug = (business?.name ?? "store").toLowerCase().replace(/\s+/g, "-");
+      const slug = (business?.name ?? "store")
+        .toLowerCase()
+        .replace(/\s+/g, "-");
       const date = new Date().toISOString().split("T")[0];
       const filename = `orders-${slug}-${date}.csv`;
 

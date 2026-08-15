@@ -2,8 +2,8 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
-import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
+import { checkBusiness } from "~/lib/check-business";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { importStoreBundle } from "~/lib/store-transfer/import";
 import { auth } from "~/server/better-auth/config";
 import { db } from "~/server/db";
@@ -15,14 +15,13 @@ import { db } from "~/server/db";
  *
  * Accepts multipart/form-data with:
  *   file       File    — the .zip produced by the export route (required)
- *   businessId string  — target business override (PLATFORM_ADMIN only)
+ *   businessId string  — target business override (defaults to the host's)
  *
  * Returns StoreImportResult as JSON.
  *
- * Auth: OWNER/MANAGER on the current subdomain, or PLATFORM_ADMIN (who may
- * supply an explicit businessId form field to target another business).
- *
- * Feature-gated behind the "storeTransfer" flag.
+ * Auth: PLATFORM_ADMIN only. Store Transfer is an internal tool (staging→prod
+ * moves, site duplication) and is not exposed to business owners or managers,
+ * so there is no feature flag for it.
  */
 
 export const runtime = "nodejs";
@@ -38,27 +37,16 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "Not logged in" }, { status: 401 });
   }
 
+  if (!(await isPlatformAdmin(session.user.id))) {
+    return Response.json(
+      { error: "You do not have permission to import into this business." },
+      { status: 403 },
+    );
+  }
+
   const business = await checkBusiness();
   if (!business) {
     return Response.json({ error: "Business not found" }, { status: 404 });
-  }
-
-  const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
-
-  if (!isPlatformAdmin) {
-    const membership = await checkBusinessMembership(
-      business.id,
-      session.user.id,
-    );
-    if (
-      !membership ||
-      (membership.role !== "OWNER" && membership.role !== "MANAGER")
-    ) {
-      return Response.json(
-        { error: "You do not have permission to import into this business." },
-        { status: 403 },
-      );
-    }
   }
 
   // ── Resolve target businessId ─────────────────────────────────────────────────
@@ -76,23 +64,6 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // ── Feature flag check ────────────────────────────────────────────────────────
-
-  const featureEnabled = await isFeatureEnabledForBusiness(
-    targetBusinessId,
-    "storeTransfer",
-  );
-
-  if (!featureEnabled) {
-    return Response.json(
-      {
-        error:
-          "The storeTransfer feature is not enabled for this business. Enable it in Settings → Features.",
-      },
-      { status: 403 },
-    );
-  }
-
   // ── Parse multipart form ──────────────────────────────────────────────────────
 
   let form: FormData;
@@ -105,23 +76,21 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // PLATFORM_ADMIN may target another business via the businessId field
-  if (isPlatformAdmin) {
-    const inputBusinessId = form.get("businessId");
-    if (typeof inputBusinessId === "string" && inputBusinessId.trim()) {
-      // Verify the target business exists
-      const targetBiz = await db.business.findUnique({
-        where: { id: inputBusinessId.trim() },
-        select: { id: true },
-      });
-      if (!targetBiz) {
-        return Response.json(
-          { error: `Target business "${inputBusinessId}" not found` },
-          { status: 404 },
-        );
-      }
-      targetBusinessId = targetBiz.id;
+  // The caller may target another business via the businessId field
+  const inputBusinessId = form.get("businessId");
+  if (typeof inputBusinessId === "string" && inputBusinessId.trim()) {
+    // Verify the target business exists
+    const targetBiz = await db.business.findUnique({
+      where: { id: inputBusinessId.trim() },
+      select: { id: true },
+    });
+    if (!targetBiz) {
+      return Response.json(
+        { error: `Target business "${inputBusinessId}" not found` },
+        { status: 404 },
+      );
     }
+    targetBusinessId = targetBiz.id;
   }
 
   const fileEntry = form.get("file");

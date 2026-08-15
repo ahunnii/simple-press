@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 
+import { getBusinessFlags } from "~/lib/features/get-business-flags";
 import { api } from "~/trpc/server";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 
@@ -25,6 +26,8 @@ type Props = {
 export default async function AnalyticsPage({ searchParams }: Props) {
   const params = await searchParams;
   const range = parseRange(params.range);
+
+  const flags = await getBusinessFlags();
 
   // Promise.allSettled (not Promise.all) so a single failing Umami call
   // (outage, misconfiguration, network error) can't throw and crash the
@@ -105,6 +108,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
           topReferrers={topReferrers}
           events={events}
           embedEngagement={embedEngagement}
+          embedsEnabled={flags.isEnabled("embeds")}
         />
       </div>
     </>

@@ -2,6 +2,7 @@ import type { RateLimiterAbstract } from "rate-limiter-flexible";
 import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { getRedis } from "~/lib/redis";
 
 type LimiterOpts = { points: number; duration: number; keyPrefix: string };
 
@@ -23,21 +24,20 @@ function makeLazy(opts: LimiterOpts): {
   const getOrCreate = async (): Promise<RateLimiterAbstract> => {
     if (redisInstance) return redisInstance;
 
-    if (env.REDIS_URL) {
+    const client = await getRedis();
+    if (client) {
       const { RateLimiterRedis } = await import("rate-limiter-flexible");
-      const { default: Redis } = await import("ioredis");
-      const client = new Redis(env.REDIS_URL, {
-        enableOfflineQueue: false,
-        lazyConnect: true,
-      });
-      // Capture Redis errors in Sentry so outages are visible
-      client.on("error", (err) => {
-        Sentry.captureException(err, {
-          tags: { service: "redis", component: "rate-limiter" },
-        });
-      });
       redisInstance = new RateLimiterRedis({ storeClient: client, ...opts });
       return redisInstance;
+    }
+
+    if (env.NODE_ENV === "production") {
+      // Production without Redis means per-process limits — alert once via
+      // the shared client's connect path; still fall back so the app serves.
+      Sentry.captureMessage("Rate limiter falling back to memory in production", {
+        level: "warning",
+        tags: { service: "redis", component: "rate-limiter" },
+      });
     }
 
     return getMemory();
@@ -120,6 +120,20 @@ export const contactLimiter = makeLazy({
   keyPrefix: "rl:contact",
 });
 
+// 5 quote calculator submissions per 15 minutes per IP, keyed ip:host
+export const quoteSubmitLimiter = makeLazy({
+  points: 5,
+  duration: 900,
+  keyPrefix: "rl:quote-submit",
+});
+
+// 30 public zip→city/state lookups per minute per IP (keystroke-adjacent), keyed ip:host
+export const quoteZipLookupLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:quote-zip",
+});
+
 // 10 checkout session attempts per minute per IP
 export const checkoutLimiter = makeLazy({
   points: 10,
@@ -153,15 +167,53 @@ export const externalTokenLimiter = makeLazy({
 });
 
 /**
+ * Extract a best-effort client IP from request headers.
+ *
+ * When `TRUSTED_PROXY_IPS` is configured, take the rightmost address that is
+ * not in the trusted-proxy set (the first untrusted hop from the right). That
+ * is the real client when Traefik/Coolify appends rather than replaces
+ * `X-Forwarded-For`. Without trusted proxies configured, keep the historical
+ * leftmost behaviour and document that Coolify must be verified — see
+ * `docs/followup/trusted-proxy-ip-spoofing.md`.
+ */
+function resolveClientIp(headers: Headers): string {
+  const trusted = (env.TRUSTED_PROXY_IPS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const xff = headers.get("x-forwarded-for");
+  const xffParts = xff
+    ? xff
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean)
+    : [];
+
+  if (trusted.length > 0 && xffParts.length > 0) {
+    for (let i = xffParts.length - 1; i >= 0; i--) {
+      const candidate = xffParts[i]!;
+      if (!trusted.includes(candidate)) {
+        return candidate;
+      }
+    }
+    // Entire chain was trusted proxies — no client IP visible.
+    return "unknown";
+  }
+
+  return (
+    xffParts[0] ??
+    headers.get("x-real-ip")?.trim() ??
+    "unknown"
+  );
+}
+
+/**
  * Extracts a best-effort client IP from Next.js request headers.
  * Falls back to a generic key so rate limiting always applies.
  */
 export function getClientIp(req: Request): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+  return resolveClientIp(req.headers);
 }
 
 /**
@@ -169,9 +221,5 @@ export function getClientIp(req: Request): string {
  * Use this in tRPC procedures where ctx.headers is Headers, not Request.
  */
 export function getClientIpFromHeaders(headers: Headers): string {
-  return (
-    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    headers.get("x-real-ip") ??
-    "unknown"
-  );
+  return resolveClientIp(headers);
 }

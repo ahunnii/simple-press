@@ -28,7 +28,8 @@ const stripeMocks = vi.hoisted(() => ({
 vi.mock("~/lib/stripe/client", () => ({
   stripeClient: {
     refunds: {
-      create: (...args: unknown[]): unknown => stripeMocks.refundsCreate(...args),
+      create: (...args: unknown[]): unknown =>
+        stripeMocks.refundsCreate(...args),
     },
     charges: {
       retrieve: (...args: unknown[]): unknown =>
@@ -139,7 +140,9 @@ describe("order money correctness: refunds + cancellation restock", () => {
       status: "open",
     });
 
-    stripeMocks.chargesRetrieve.mockResolvedValueOnce({ amount_refunded: 3000 });
+    stripeMocks.chargesRetrieve.mockResolvedValueOnce({
+      amount_refunded: 3000,
+    });
     const first = await caller.order.refund({
       orderId: order.id,
       amount: 3000,
@@ -148,7 +151,9 @@ describe("order money correctness: refunds + cancellation restock", () => {
     });
     expect(first.order.refundAmountCents).toBe(3000);
 
-    stripeMocks.chargesRetrieve.mockResolvedValueOnce({ amount_refunded: 5000 });
+    stripeMocks.chargesRetrieve.mockResolvedValueOnce({
+      amount_refunded: 5000,
+    });
     const second = await caller.order.refund({
       orderId: order.id,
       amount: 2000,
@@ -240,9 +245,7 @@ describe("order money correctness: refunds + cancellation restock", () => {
       subtotal: 2000,
       paymentStatus: "paid",
       status: "open",
-      items: [
-        { productId: product.id, quantity: 2, price: 1000, total: 2000 },
-      ],
+      items: [{ productId: product.id, quantity: 2, price: 1000, total: 2000 }],
     });
     stripeMocks.chargesRetrieve.mockResolvedValue({ amount_refunded: 2000 });
 
@@ -277,9 +280,7 @@ describe("order money correctness: refunds + cancellation restock", () => {
       subtotal: 2000,
       paymentStatus: "paid",
       status: "open",
-      items: [
-        { productId: product.id, quantity: 2, price: 1000, total: 2000 },
-      ],
+      items: [{ productId: product.id, quantity: 2, price: 1000, total: 2000 }],
     });
     stripeMocks.chargesRetrieve.mockResolvedValue({ amount_refunded: 2000 });
 
@@ -335,35 +336,6 @@ describe("order money correctness: refunds + cancellation restock", () => {
     expect(updatedVariant.inventoryQty).toBe(8);
   });
 
-  // ── order.getAll revenue aggregate ─────────────────────────────────────
-
-  it("order.getAll revenue stat subtracts refundAmountCents from paid-order totals", async () => {
-    const { business, caller } = await setupBusiness();
-    const orderA = await createOrder(business.id, {
-      total: 10000,
-      subtotal: 10000,
-      paymentStatus: "paid",
-      status: "open",
-    });
-    await createOrder(business.id, {
-      total: 5000,
-      subtotal: 5000,
-      paymentStatus: "paid",
-      status: "open",
-    });
-    stripeMocks.chargesRetrieve.mockResolvedValue({ amount_refunded: 3000 });
-
-    await caller.order.refund({
-      orderId: orderA.id,
-      amount: 3000,
-      restockItems: false,
-      sendEmail: false,
-    });
-
-    const all = await caller.order.getAll({});
-    expect(all.stats.totalRevenue).toBe(10000 + 5000 - 3000);
-  });
-
   // ── order.updateStatus cancellation restock ────────────────────────────
 
   it("updateStatus('cancelled') restocks inventory when it had been deducted (status was open)", async () => {
@@ -377,9 +349,7 @@ describe("order money correctness: refunds + cancellation restock", () => {
       paymentStatus: "paid",
       total: 2000,
       subtotal: 2000,
-      items: [
-        { productId: product.id, quantity: 2, price: 1000, total: 2000 },
-      ],
+      items: [{ productId: product.id, quantity: 2, price: 1000, total: 2000 }],
     });
 
     await caller.order.updateStatus({
@@ -411,9 +381,7 @@ describe("order money correctness: refunds + cancellation restock", () => {
       paymentStatus: "refunded",
       total: 2000,
       subtotal: 2000,
-      items: [
-        { productId: product.id, quantity: 2, price: 1000, total: 2000 },
-      ],
+      items: [{ productId: product.id, quantity: 2, price: 1000, total: 2000 }],
     });
 
     await caller.order.updateStatus({
@@ -445,9 +413,7 @@ describe("order money correctness: refunds + cancellation restock", () => {
       paymentStatus: "paid",
       total: 2000,
       subtotal: 2000,
-      items: [
-        { productId: product.id, quantity: 2, price: 1000, total: 2000 },
-      ],
+      items: [{ productId: product.id, quantity: 2, price: 1000, total: 2000 }],
     });
 
     await caller.order.updateStatus({
@@ -494,9 +460,7 @@ describe("order money correctness: refunds + cancellation restock", () => {
       paymentStatus: "paid",
       total: 2000,
       subtotal: 2000,
-      items: [
-        { productId: product.id, quantity: 2, price: 1000, total: 2000 },
-      ],
+      items: [{ productId: product.id, quantity: 2, price: 1000, total: 2000 }],
     });
 
     const updated = await caller.order.markAsRefunded({

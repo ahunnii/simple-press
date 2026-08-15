@@ -1,101 +1,54 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-
-import type { RouterOutputs } from "~/trpc/react";
 import {
   getServiceTemplateFieldGroups,
   getServiceTemplateFieldsByGroup,
+  SERVICE_TEMPLATE_DEFS,
 } from "~/lib/service-templates";
-import { api } from "~/trpc/react";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { FieldGroup } from "~/app/admin/content/template/_components/template-field-widgets";
 
 type Props = {
-  service: RouterOutputs["services"]["getById"];
+  serviceTemplateId: string;
+  /** Draft field values owned by `ServiceEditor`. */
+  customFields: Record<string, unknown>;
+  onFieldChange: (key: string, value: unknown) => void;
   embedsEnabled?: boolean;
 };
 
-export function ServiceTemplateFieldsEditor({ service, embedsEnabled }: Props) {
-  const router = useRouter();
-
-  const initialFields = (service.customFields ?? {}) as Record<string, unknown>;
-  const [customFields, setCustomFields] =
-    useState<Record<string, unknown>>(initialFields);
-  const [isDirty, setIsDirty] = useState(false);
-
-  const updateMutation = api.services.updateCustomFields.useMutation({
-    onSuccess: () => {
-      toast.dismiss();
-      toast.success("Page content saved");
-      setIsDirty(false);
-      router.refresh();
-    },
-    onError: (err) => {
-      toast.dismiss();
-      toast.error(err.message ?? "Failed to save page content");
-    },
-    onMutate: () => toast.loading("Saving page content…"),
-  });
-
-  const handleFieldChange = (key: string, value: unknown) => {
-    setCustomFields((prev) => ({ ...prev, [key]: value }));
-    setIsDirty(true);
-  };
-
-  const handleSave = () => {
-    updateMutation.mutate({ id: service.id, customFields });
-  };
-
-  const handleReset = () => {
-    setCustomFields({ ...initialFields });
-    setIsDirty(false);
-  };
-
-  const fieldsByGroup = getServiceTemplateFieldsByGroup(
-    service.serviceTemplateId,
-  );
-  const fieldGroups = getServiceTemplateFieldGroups(service.serviceTemplateId);
+/**
+ * Body of the "Page content" tab. Purely presentational — the draft state, the
+ * dirty flag, and the `services.updateCustomFields` mutation all live in
+ * `ServiceEditor` so they're covered by the shared toolbar and the
+ * unsaved-changes navigation guard.
+ */
+export function ServiceTemplateFieldsEditor({
+  serviceTemplateId,
+  customFields,
+  onFieldChange,
+  embedsEnabled,
+}: Props) {
+  const fieldsByGroup = getServiceTemplateFieldsByGroup(serviceTemplateId);
+  const fieldGroups = getServiceTemplateFieldGroups(serviceTemplateId);
 
   // Build a lookup map for group metadata
   const groupMetaMap = new Map(fieldGroups.map((g) => [g.id, g]));
 
   const hasFields = Object.values(fieldsByGroup).some((f) => f.length > 0);
 
+  // Read the human label from the service-template registry. (The old
+  // `serviceTemplateId.replace("service-", "Template ")` only produced
+  // sensible text for the generic `service-one/two/three` ids.)
+  const templateLabel =
+    SERVICE_TEMPLATE_DEFS[serviceTemplateId]?.label ?? serviceTemplateId;
+
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="bg-card flex items-center justify-between gap-4 rounded-lg border px-4 py-3">
-        <p className="text-muted-foreground text-sm">
-          Editing page content for the{" "}
-          <span className="font-medium capitalize">
-            {service.serviceTemplateId.replace("service-", "Template ")}
-          </span>{" "}
-          layout
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={!isDirty || updateMutation.isPending}
-            onClick={handleReset}
-          >
-            Reset
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={updateMutation.isPending}
-            onClick={handleSave}
-          >
-            {updateMutation.isPending ? "Saving…" : "Save"}
-          </Button>
-        </div>
-      </div>
+      <p className="text-muted-foreground text-sm">
+        Editing page content for the{" "}
+        <span className="text-foreground font-medium">{templateLabel}</span>{" "}
+        layout
+      </p>
 
       {!hasFields ? (
         <Card>
@@ -119,7 +72,7 @@ export function ServiceTemplateFieldsEditor({ service, embedsEnabled }: Props) {
               groupMeta={groupMeta}
               fields={fields}
               customFields={customFields}
-              onFieldChange={handleFieldChange}
+              onFieldChange={onFieldChange}
               isUngrouped={isUngrouped}
               embedsEnabled={embedsEnabled}
             />

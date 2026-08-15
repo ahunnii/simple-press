@@ -34,10 +34,7 @@ export async function ViiLayout({
   ]);
 
   const banner = resolveBanner(business.siteContent, isEnabled("banners"));
-  const themeVars = resolveThemeVars(
-    "vii",
-    business.siteContent?.customFields,
-  );
+  const themeVars = resolveThemeVars("vii", business.siteContent?.customFields);
 
   return (
     <div
@@ -66,7 +63,7 @@ export async function ViiLayout({
       */}
       <ViiHeader
         business={business}
-        session={session ?? null}
+        initialSession={session ?? null}
         banner={banner}
       />
 

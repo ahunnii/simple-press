@@ -2,23 +2,24 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultContactPageTemplateProps } from "../../types";
-import {
-  formatBusinessHours,
-  parseBusinessHours,
-} from "~/lib/business-hours";
+import type { PinkFactRow } from "../shared/pink-fact-rows";
+import type { PinkContactTopic } from "./pink-contact-form";
+import { formatBusinessHours, parseBusinessHours } from "~/lib/business-hours";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { resolveSocialLinks } from "~/lib/social-links";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { telHref } from "~/lib/tel-href";
 import { parseTemplateListRows } from "~/lib/template-fields";
 
 import { resolveFields } from "..";
-import type { PinkFactRow } from "../shared/pink-fact-rows";
 import { PinkFactRows } from "../shared/pink-fact-rows";
-import { hasCustomImage, PinkImageFallback } from "../shared/pink-image-fallback";
+import {
+  hasCustomImage,
+  PinkImageFallback,
+} from "../shared/pink-image-fallback";
 import { PinkPageHeader } from "../shared/pink-page-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkSocialLinks } from "../shared/pink-social-links";
-import type { PinkContactTopic } from "./pink-contact-form";
 import { PinkContactForm } from "./pink-contact-form";
 
 const FIELD_KEYS = [
@@ -62,7 +63,11 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
   ) as FactRow[];
   const headerFacts =
     headerFactsRaw.length > 0
-      ? headerFactsRaw.map((r) => ({ label: r.label ?? "", value: r.value ?? "", _id: r._id }))
+      ? headerFactsRaw.map((r) => ({
+          label: r.label ?? "",
+          value: r.value ?? "",
+          _id: r._id,
+        }))
       : DEFAULT_HEADER_FACTS;
 
   const topics = parseTemplateListRows(
@@ -76,14 +81,32 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
 
   const socialLinks = resolveSocialLinks(business.siteContent?.socialLinks);
 
-  const topicsVisible = isSectionVisible(customFields, "pink", "contact.topics");
-  const studioVisible = isSectionVisible(customFields, "pink", "contact.studio");
-  const shortcutsVisible = isSectionVisible(customFields, "pink", "contact.shortcuts");
+  const topicsVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "contact.topics",
+  );
+  const studioVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "contact.studio",
+  );
+  const shortcutsVisible = isSectionVisible(
+    customFields,
+    "pink",
+    "contact.shortcuts",
+  );
 
-  const hoursRows = formatBusinessHours(parseBusinessHours(business.businessHours));
+  const hoursRows = formatBusinessHours(
+    parseBusinessHours(business.businessHours),
+  );
+
+  const phoneHref = business.phoneNumber ? telHref(business.phoneNumber) : "";
 
   const hasContactLinks =
-    Boolean(business.supportEmail) || Boolean(business.phoneNumber) || socialLinks.length > 0;
+    Boolean(business.supportEmail) ||
+    phoneHref !== "" ||
+    socialLinks.length > 0;
 
   return (
     <>
@@ -107,10 +130,14 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
             topics={topics}
             formHeading={f["pink.contact.form-heading"] ?? ""}
             referenceLabel={f["pink.contact.form-reference-label"] ?? ""}
-            referencePlaceholder={f["pink.contact.form-reference-placeholder"] ?? ""}
+            referencePlaceholder={
+              f["pink.contact.form-reference-placeholder"] ?? ""
+            }
             marketingLabel={f["pink.contact.form-marketing-label"] ?? ""}
             defaultMessageLabel={f["pink.contact.form-message-label"] ?? ""}
-            defaultMessagePlaceholder={f["pink.contact.form-message-placeholder"] ?? ""}
+            defaultMessagePlaceholder={
+              f["pink.contact.form-message-placeholder"] ?? ""
+            }
             submitLabel={f["pink.contact.form-submit-label"] ?? ""}
             emailNotePrefix={f["pink.contact.form-email-note"] ?? ""}
             supportEmail={business.supportEmail}
@@ -125,7 +152,10 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                 <PinkReveal index={1} className="flex flex-col gap-[2px]">
                   <div
                     className="relative w-full overflow-hidden"
-                    style={{ aspectRatio: "16 / 10", background: "var(--pink-panel)" }}
+                    style={{
+                      aspectRatio: "16 / 10",
+                      background: "var(--pink-panel)",
+                    }}
                   >
                     {hasCustomImage(f["pink.contact.studio-image"]) ? (
                       <Image
@@ -136,19 +166,32 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     ) : (
-                      <PinkImageFallback surface="paper" className="absolute inset-0" />
+                      <PinkImageFallback
+                        surface="paper"
+                        className="absolute inset-0"
+                      />
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-4 p-6" style={{ background: "var(--pink-ink)" }}>
-                    <span className="pink-label-dark" {...fieldAttr("pink.contact.studio-label")}>
+                  <div
+                    className="flex flex-col gap-4 p-6"
+                    style={{ background: "var(--pink-ink)" }}
+                  >
+                    <span
+                      className="pink-label-dark"
+                      {...fieldAttr("pink.contact.studio-label")}
+                    >
                       {f["pink.contact.studio-label"] ?? ""}
                     </span>
 
                     {business.businessAddress && (
                       <p
                         className="pink-display"
-                        style={{ fontSize: "20px", fontWeight: 600, color: "var(--pink-paper)" }}
+                        style={{
+                          fontSize: "20px",
+                          fontWeight: 600,
+                          color: "var(--pink-paper)",
+                        }}
                       >
                         {business.businessAddress}
                       </p>
@@ -174,8 +217,12 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                             key={row.label + String(i)}
                             className="flex items-baseline justify-between gap-4 text-[13px]"
                           >
-                            <dt style={{ color: "var(--pink-ink-subtle)" }}>{row.label}</dt>
-                            <dd style={{ color: "var(--pink-ink-body)" }}>{row.value}</dd>
+                            <dt style={{ color: "var(--pink-ink-subtle)" }}>
+                              {row.label}
+                            </dt>
+                            <dd style={{ color: "var(--pink-ink-body)" }}>
+                              {row.value}
+                            </dd>
                           </div>
                         ))}
                       </dl>
@@ -195,9 +242,9 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                             {business.supportEmail}
                           </a>
                         )}
-                        {business.phoneNumber && (
+                        {business.phoneNumber && phoneHref !== "" && (
                           <a
-                            href={`tel:${business.phoneNumber}`}
+                            href={phoneHref}
                             className="text-[14px]"
                             style={{ color: "var(--pink-blush)" }}
                           >
@@ -219,7 +266,11 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
             {/* ── contact.shortcuts ────────────────────────────────────── */}
             {shortcutsVisible && (
               <div {...sectionGroupAttr("contact", "shortcuts")}>
-                <PinkReveal index={2} className="p-6" style={{ background: "var(--pink-panel)" }}>
+                <PinkReveal
+                  index={2}
+                  className="p-6"
+                  style={{ background: "var(--pink-panel)" }}
+                >
                   <h2
                     className="pink-display mb-3"
                     style={{ fontSize: "17px", fontWeight: 600 }}
@@ -231,7 +282,11 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                     {shortcuts.map((item, i) => (
                       <li
                         key={item._id ?? i}
-                        style={i > 0 ? { borderTop: "1px solid var(--pink-line-button)" } : undefined}
+                        style={
+                          i > 0
+                            ? { borderTop: "1px solid var(--pink-line-button)" }
+                            : undefined
+                        }
                       >
                         <Link
                           href={item.href ?? "/contact"}
@@ -239,7 +294,10 @@ export function PinkContactPage({ business }: DefaultContactPageTemplateProps) {
                           style={{ color: "var(--pink-ink)" }}
                         >
                           <span>{item.label ?? ""}</span>
-                          <span aria-hidden="true" style={{ color: "var(--pink-rose)" }}>
+                          <span
+                            aria-hidden="true"
+                            style={{ color: "var(--pink-rose)" }}
+                          >
                             →
                           </span>
                         </Link>

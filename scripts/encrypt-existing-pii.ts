@@ -2,17 +2,20 @@
  * encrypt-existing-pii.ts
  *
  * One-time data migration: encrypts all existing plaintext PII values in
- * Customer.phone, ShippingAddress.{company,address1,address2,city,province,zip,phone},
- * and Order.customerPhone by writing each row's current values back through
- * the Prisma client (which has the fieldEncryptionExtension active).
+ * Customer.{phone,notes},
+ * ShippingAddress.{firstName,lastName,company,address1,address2,city,province,zip,phone},
+ * Order.{customerPhone,customerNote,internalNote}, and
+ * QuoteSubmission.{contactName,contactEmail,contactPhone,sentMessage}
+ * by writing each row's current values back through the Prisma client
+ * (which has the fieldEncryptionExtension active).
  *
  * The extension is idempotent: values that are already encrypted ciphertext
- * (starting with "k1.") are passed through unchanged on write, so re-running
+ * (starting with "v1.") are passed through unchanged on write, so re-running
  * this script after a successful apply will update 0 rows.
  *
  * Idempotency detection: We use $queryRaw to read the raw column value directly
  * from Postgres (bypassing the extension's decryption). Any row whose stored
- * value already starts with "k1." is already encrypted and is skipped to avoid
+ * value already starts with "v1." is already encrypted and is skipped to avoid
  * unnecessary round-trips. Rows with NULL in every in-scope field are also skipped.
  *
  * Usage:
@@ -73,32 +76,43 @@ async function encryptCustomers(): Promise<{
   updated: number;
   skipped: number;
 }> {
-  // Fetch raw phone values directly (bypasses extension decryption).
-  const rows = await base.$queryRaw<{ id: string; phone: string | null }[]>`
-    SELECT id, phone FROM "Customer"
+  // Fetch raw encrypted-field values directly (bypasses extension decryption).
+  const rows = await base.$queryRaw<
+    { id: string; phone: string | null; notes: string | null }[]
+  >`
+    SELECT id, phone, notes FROM "Customer"
   `;
 
   let updated = 0;
   let skipped = 0;
 
   for (const row of rows) {
-    // Skip if phone is null (nothing to encrypt) or already encrypted.
-    if (row.phone === null || isEncrypted(row.phone)) {
+    // Skip if all in-scope fields are either null or already encrypted.
+    const fieldsToCheck = [row.phone, row.notes].filter(
+      (v) => v !== null,
+    ) as string[];
+
+    if (fieldsToCheck.length === 0 || fieldsToCheck.every(isEncrypted)) {
       skipped++;
       continue;
     }
 
-    console.log(`  [Customer] id=${row.id} — phone needs encryption`);
+    console.log(`  [Customer] id=${row.id} — needs encryption`);
 
     if (!DRY_RUN) {
-      // Read the decrypted value via the ORM (extension decrypts on read).
+      // Read the decrypted values via the ORM (extension decrypts on read).
       const customer = await db.customer.findUnique({
         where: { id: row.id },
-        select: { phone: true },
+        select: { phone: true, notes: true },
       });
+      if (!customer) {
+        console.warn(`  [Customer] id=${row.id} — not found, skipping`);
+        skipped++;
+        continue;
+      }
       await db.customer.update({
         where: { id: row.id },
-        data: { phone: customer?.phone ?? null },
+        data: { phone: customer.phone, notes: customer.notes },
       });
     }
     updated++;
@@ -116,6 +130,8 @@ async function encryptShippingAddresses(): Promise<{
   const rows = await base.$queryRaw<
     {
       id: string;
+      first_name: string;
+      last_name: string;
       company: string | null;
       address1: string;
       address2: string | null;
@@ -125,7 +141,8 @@ async function encryptShippingAddresses(): Promise<{
       phone: string | null;
     }[]
   >`
-    SELECT id, company, address1, address2, city, province, zip, phone
+    SELECT id, "firstName" AS first_name, "lastName" AS last_name,
+           company, address1, address2, city, province, zip, phone
     FROM "ShippingAddress"
   `;
 
@@ -135,6 +152,8 @@ async function encryptShippingAddresses(): Promise<{
   for (const row of rows) {
     // Skip if all in-scope fields are either null or already encrypted.
     const fieldsToCheck = [
+      row.first_name,
+      row.last_name,
       row.company,
       row.address1,
       row.address2,
@@ -156,6 +175,8 @@ async function encryptShippingAddresses(): Promise<{
       const addr = await db.shippingAddress.findUnique({
         where: { id: row.id },
         select: {
+          firstName: true,
+          lastName: true,
           company: true,
           address1: true,
           address2: true,
@@ -173,6 +194,8 @@ async function encryptShippingAddresses(): Promise<{
       await db.shippingAddress.update({
         where: { id: row.id },
         data: {
+          firstName: addr.firstName,
+          lastName: addr.lastName,
           company: addr.company,
           address1: addr.address1,
           address2: addr.address2,
@@ -195,30 +218,123 @@ async function encryptOrders(): Promise<{
   skipped: number;
 }> {
   const rows = await base.$queryRaw<
-    { id: string; customer_phone: string | null }[]
+    {
+      id: string;
+      customer_phone: string | null;
+      customer_note: string | null;
+      internal_note: string | null;
+    }[]
   >`
-    SELECT id, "customerPhone" AS customer_phone FROM "Order"
+    SELECT id, "customerPhone" AS customer_phone,
+           "customerNote" AS customer_note, "internalNote" AS internal_note
+    FROM "Order"
   `;
 
   let updated = 0;
   let skipped = 0;
 
   for (const row of rows) {
-    if (row.customer_phone === null || isEncrypted(row.customer_phone)) {
+    // Skip if all in-scope fields are either null or already encrypted.
+    const fieldsToCheck = [
+      row.customer_phone,
+      row.customer_note,
+      row.internal_note,
+    ].filter((v) => v !== null) as string[];
+
+    if (fieldsToCheck.length === 0 || fieldsToCheck.every(isEncrypted)) {
       skipped++;
       continue;
     }
 
-    console.log(`  [Order] id=${row.id} — customerPhone needs encryption`);
+    console.log(`  [Order] id=${row.id} — needs encryption`);
 
     if (!DRY_RUN) {
       const order = await db.order.findUnique({
         where: { id: row.id },
-        select: { customerPhone: true },
+        select: { customerPhone: true, customerNote: true, internalNote: true },
       });
+      if (!order) {
+        console.warn(`  [Order] id=${row.id} — not found, skipping`);
+        skipped++;
+        continue;
+      }
       await db.order.update({
         where: { id: row.id },
-        data: { customerPhone: order?.customerPhone ?? null },
+        data: {
+          customerPhone: order.customerPhone,
+          customerNote: order.customerNote,
+          internalNote: order.internalNote,
+        },
+      });
+    }
+    updated++;
+  }
+
+  return { scanned: rows.length, updated, skipped };
+}
+
+async function encryptQuoteSubmissions(): Promise<{
+  scanned: number;
+  updated: number;
+  skipped: number;
+}> {
+  const rows = await base.$queryRaw<
+    {
+      id: string;
+      contact_name: string;
+      contact_email: string;
+      contact_phone: string | null;
+      sent_message: string | null;
+    }[]
+  >`
+    SELECT id, "contactName" AS contact_name, "contactEmail" AS contact_email,
+           "contactPhone" AS contact_phone, "sentMessage" AS sent_message
+    FROM "QuoteSubmission"
+  `;
+
+  let updated = 0;
+  let skipped = 0;
+
+  for (const row of rows) {
+    // Skip if all in-scope fields are either null or already encrypted.
+    const fieldsToCheck = [
+      row.contact_name,
+      row.contact_email,
+      row.contact_phone,
+      row.sent_message,
+    ].filter((v) => v !== null) as string[];
+
+    if (fieldsToCheck.length === 0 || fieldsToCheck.every(isEncrypted)) {
+      skipped++;
+      continue;
+    }
+
+    console.log(`  [QuoteSubmission] id=${row.id} — needs encryption`);
+
+    if (!DRY_RUN) {
+      // Read via ORM (extension decrypts) so we pass plaintext back in.
+      const submission = await db.quoteSubmission.findUnique({
+        where: { id: row.id },
+        select: {
+          contactName: true,
+          contactEmail: true,
+          contactPhone: true,
+          sentMessage: true,
+        },
+      });
+      if (!submission) {
+        console.warn(`  [QuoteSubmission] id=${row.id} — not found, skipping`);
+        skipped++;
+        continue;
+      }
+      await db.quoteSubmission.update({
+        where: { id: row.id },
+        data: {
+          contactName: submission.contactName,
+          contactEmail: submission.contactEmail,
+          contactPhone: submission.contactPhone,
+          sentMessage: submission.sentMessage,
+        },
       });
     }
     updated++;
@@ -237,14 +353,17 @@ async function main() {
     console.log("=== APPLY MODE — writing changes ===\n");
   }
 
-  console.log("--- Customer.phone ---");
+  console.log("--- Customer encrypted fields ---");
   const customerStats = await encryptCustomers();
 
   console.log("\n--- ShippingAddress encrypted fields ---");
   const addressStats = await encryptShippingAddresses();
 
-  console.log("\n--- Order.customerPhone ---");
+  console.log("\n--- Order encrypted fields ---");
   const orderStats = await encryptOrders();
+
+  console.log("\n--- QuoteSubmission encrypted fields ---");
+  const quoteStats = await encryptQuoteSubmissions();
 
   console.log("\n=== Summary ===");
   console.log(
@@ -256,9 +375,15 @@ async function main() {
   console.log(
     `Order          — scanned: ${orderStats.scanned}, updated: ${orderStats.updated}, skipped (null/already encrypted): ${orderStats.skipped}`,
   );
+  console.log(
+    `QuoteSubmission— scanned: ${quoteStats.scanned}, updated: ${quoteStats.updated}, skipped (null/already encrypted): ${quoteStats.skipped}`,
+  );
 
   const totalUpdated =
-    customerStats.updated + addressStats.updated + orderStats.updated;
+    customerStats.updated +
+    addressStats.updated +
+    orderStats.updated +
+    quoteStats.updated;
 
   if (DRY_RUN) {
     console.log(

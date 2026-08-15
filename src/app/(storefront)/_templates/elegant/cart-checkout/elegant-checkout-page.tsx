@@ -7,6 +7,7 @@ import { ElegantCheckoutForm } from "./elegant-checkout-form";
 
 export async function ElegantCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   // if (!business.isStripeConnected) {
   //   return (
@@ -125,7 +126,10 @@ export async function ElegantCheckoutPage({
             </h1>
           </div>
 
-          <ElegantCheckoutForm business={business} />
+          <ElegantCheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </div>
       </section>
     </div>

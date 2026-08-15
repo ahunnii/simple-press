@@ -13,6 +13,7 @@ import { HappyBambooCheckoutForm } from "./happy-bamboo-checkout-form";
 
 export async function HappyBambooCheckoutPage({
   business,
+  merchantPolicies,
 }: DefaultCheckoutPageTemplateProps) {
   //   const { items } = useCart();
   // Check if Stripe is connected
@@ -76,7 +77,10 @@ export async function HappyBambooCheckoutPage({
           </div>
         </FadeIn>
         <FadeIn direction="up" delay={0.1}>
-          <HappyBambooCheckoutForm business={business} />
+          <HappyBambooCheckoutForm
+            business={business}
+            merchantPolicies={merchantPolicies}
+          />
         </FadeIn>
       </section>
     </PageTransition>

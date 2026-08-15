@@ -4,7 +4,12 @@
  * Answers "where did my money actually go?": product sales vs. tax collected
  * vs. shipping collected vs. Stripe fees withheld vs. net.
  *
- * Conventions follow `business.getPaymentsOverview`:
+ * Also carries the payments/compliance data that used to live in a separate
+ * `business.getPaymentsOverview` procedure (now removed): INFORM Act thresholds,
+ * Stripe account verification status, most-recent payouts. The admin Payments
+ * page has been merged into Finances, so one call now powers both halves of it.
+ *
+ * Conventions:
  * - `ownerAdminProcedure` (auth + membership enforced by the middleware).
  * - The business is always resolved from `ctx.businessId`, never from input.
  * - Stripe reads are best-effort: failures are captured to Sentry and degrade
@@ -12,15 +17,15 @@
  *   returned intact.
  */
 
-import * as Sentry from "@sentry/nextjs";
 import type { Prisma } from "generated/prisma";
 import type Stripe from "stripe";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 
+import type { OrdersBreakdown } from "~/lib/orders/order-money";
 import {
   EMPTY_ORDERS_BREAKDOWN,
   summarizeOrderMoney,
-  type OrdersBreakdown,
 } from "~/lib/orders/order-money";
 import { stripeClient } from "~/lib/stripe/client";
 import { createTRPCRouter, ownerAdminProcedure } from "~/server/api/trpc";
@@ -60,6 +65,14 @@ const REFUND_TYPES: ReadonlySet<Stripe.BalanceTransaction.Type> = new Set([
 const ADJUSTMENT_TYPES: ReadonlySet<Stripe.BalanceTransaction.Type> = new Set([
   "adjustment",
 ]);
+
+/** INFORM Consumers Act: high-volume seller at 200+ transactions/year… */
+const INFORM_TRANSACTION_THRESHOLD = 200;
+/** …OR $5,000+ in annual gross revenue. */
+const INFORM_REVENUE_THRESHOLD_CENTS = 500000;
+
+/** How many "most recent payouts ever" to surface on the page. */
+const RECENT_PAYOUT_LIMIT = 5;
 
 /** Payout statuses that represent money that has actually left the balance. */
 const SETTLED_PAYOUT_STATUSES: ReadonlySet<string> = new Set([
@@ -125,7 +138,10 @@ function resolveRange(key: RangeKey, now = new Date()): FinanceRange {
 }
 
 /** Local midnight of Jan 1 this year, and of tomorrow — for the YTD tax figure. */
-function resolveYtdWindow(now = new Date()): { start: Date; endExclusive: Date } {
+function resolveYtdWindow(now = new Date()): {
+  start: Date;
+  endExclusive: Date;
+} {
   const ytd = resolveRange("ytd", now);
   return { start: ytd.start, endExclusive: ytd.endExclusive };
 }
@@ -155,14 +171,36 @@ export type StripeFinanceSummary = {
   partial: boolean;
 };
 
+/**
+ * INFORM Consumers Act compliance figures. Always calendar-year-to-date and
+ * DB-driven, so they are independent of both the selected `range` and of
+ * whether Stripe is connected.
+ */
+export type InformActSummary = {
+  annualTransactions: number;
+  annualRevenueCents: number;
+  thresholdReached: boolean;
+};
+
+/** A recent payout row, shaped for direct rendering. */
+export type FinancePayoutRow = {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  arrival_date: number;
+};
+
 export const financeRouter = createTRPCRouter({
   /**
    * getBreakdown — one call powering the whole Finances page.
    *
    * DB half (always returned): the order-money breakdown for the selected
-   * range plus calendar-YTD tax collected.
+   * range, calendar-YTD tax collected, and the calendar-YTD INFORM Act
+   * transaction/revenue counters.
    * Stripe half (best-effort): balance transactions, payouts and balance for
-   * the same window, read from the connected account with direct charges.
+   * the same window, read from the connected account with direct charges, plus
+   * the account's verification status and its last few payouts overall.
    */
   getBreakdown: ownerAdminProcedure
     .input(z.object({ range: rangeKeySchema.default("30d") }))
@@ -194,7 +232,19 @@ export const financeRouter = createTRPCRouter({
         status: { not: "cancelled" },
       };
 
-      const [orderRows, ytdTaxAgg] = await Promise.all([
+      // INFORM Act scope — current calendar year, and deliberately NOT the
+      // finance scopes above. The thresholds measure transactions *conducted*,
+      // not revenue currently retained: an order that was paid counts even if
+      // it was later refunded, disputed or cancelled, while an order that was
+      // never paid (pending/unpaid/failed) does not. Gross, not net of refunds.
+      const startOfCalendarYear = new Date(now.getFullYear(), 0, 1);
+      const informOrderScope: Prisma.OrderWhereInput = {
+        businessId,
+        createdAt: { gte: startOfCalendarYear },
+        paymentStatus: { in: ["paid", "refunded", "disputed"] },
+      };
+
+      const [orderRows, ytdTaxAgg, informAgg] = await Promise.all([
         ctx.db.order.findMany({
           where: orderScope,
           select: {
@@ -210,6 +260,11 @@ export const financeRouter = createTRPCRouter({
           where: ytdOrderScope,
           _sum: { tax: true },
         }),
+        ctx.db.order.aggregate({
+          where: informOrderScope,
+          _count: { id: true },
+          _sum: { total: true },
+        }),
       ]);
 
       const orders: OrdersBreakdown =
@@ -218,6 +273,16 @@ export const financeRouter = createTRPCRouter({
           : { ...EMPTY_ORDERS_BREAKDOWN };
 
       const taxCollectedYtdCents = ytdTaxAgg._sum.tax ?? 0;
+
+      const annualTransactions = informAgg._count.id;
+      const annualRevenueCents = informAgg._sum.total ?? 0;
+      const inform: InformActSummary = {
+        annualTransactions,
+        annualRevenueCents,
+        thresholdReached:
+          annualTransactions >= INFORM_TRANSACTION_THRESHOLD ||
+          annualRevenueCents >= INFORM_REVENUE_THRESHOLD_CENTS,
+      };
 
       // NOTE: no cost-of-goods figure is reported here on purpose.
       // `Product.cost` is a nullable Float that no admin UI can write (it is
@@ -233,37 +298,89 @@ export const financeRouter = createTRPCRouter({
       const accountId = business?.stripeAccountId ?? null;
       let stripe: StripeFinanceSummary | null = null;
       let stripeError = false;
+      // Tri-state: null means "unknown" (not connected, or the account read
+      // failed). The UI must not raise a "verification required" alert on
+      // unknown — only on an explicit `false`.
+      let stripeDetailsSubmitted: boolean | null = null;
+      let recentPayouts: FinancePayoutRow[] | null = null;
 
       if (accountId) {
         const startUnix = toUnixSeconds(range.start);
         const endUnix = toUnixSeconds(range.endExclusive);
 
         // allSettled so one failing endpoint only blanks its own tiles.
-        const [txnsResult, payoutsResult, balanceResult] =
-          await Promise.allSettled([
-            stripeClient.balanceTransactions
-              .list(
-                { created: { gte: startUnix, lt: endUnix }, limit: 100 },
-                { stripeAccount: accountId },
-              )
-              .autoPagingToArray({ limit: BALANCE_TXN_CAP }),
-            stripeClient.payouts
-              .list(
-                {
-                  arrival_date: { gte: startUnix, lt: endUnix },
-                  limit: 100,
-                },
-                { stripeAccount: accountId },
-              )
-              .autoPagingToArray({ limit: PAYOUT_CAP }),
-            stripeClient.balance.retrieve({ stripeAccount: accountId }),
-          ]);
+        const [
+          txnsResult,
+          payoutsResult,
+          balanceResult,
+          accountResult,
+          recentPayoutsResult,
+        ] = await Promise.allSettled([
+          stripeClient.balanceTransactions
+            .list(
+              { created: { gte: startUnix, lt: endUnix }, limit: 100 },
+              { stripeAccount: accountId },
+            )
+            .autoPagingToArray({ limit: BALANCE_TXN_CAP }),
+          stripeClient.payouts
+            .list(
+              {
+                arrival_date: { gte: startUnix, lt: endUnix },
+                limit: 100,
+              },
+              { stripeAccount: accountId },
+            )
+            .autoPagingToArray({ limit: PAYOUT_CAP }),
+          stripeClient.balance.retrieve({ stripeAccount: accountId }),
+          stripeClient.accounts.retrieve(accountId),
+          // "Last N payouts ever" — intentionally NOT range-filtered, so it
+          // cannot be served by the arrival_date-bounded list above.
+          stripeClient.payouts.list(
+            { limit: RECENT_PAYOUT_LIMIT },
+            { stripeAccount: accountId },
+          ),
+        ]);
 
-        const failures = [txnsResult, payoutsResult, balanceResult].filter(
-          (r): r is PromiseRejectedResult => r.status === "rejected",
-        );
+        const failures = [
+          txnsResult,
+          payoutsResult,
+          balanceResult,
+          accountResult,
+          recentPayoutsResult,
+        ].filter((r): r is PromiseRejectedResult => r.status === "rejected");
 
-        if (failures.length === 3) {
+        // Only the first three calls feed `StripeFinanceSummary`, so only they
+        // can make its figures incomplete. A failed account/recent-payout read
+        // blanks its own field instead of flagging the money tiles as partial.
+        const summaryFailures = [
+          txnsResult,
+          payoutsResult,
+          balanceResult,
+        ].filter((r) => r.status === "rejected");
+
+        if (accountResult.status === "fulfilled") {
+          stripeDetailsSubmitted =
+            accountResult.value.details_submitted ?? false;
+        }
+
+        if (recentPayoutsResult.status === "fulfilled") {
+          recentPayouts = recentPayoutsResult.value.data.map((p) => ({
+            id: p.id,
+            amount: p.amount,
+            currency: p.currency,
+            status: p.status,
+            arrival_date: p.arrival_date,
+          }));
+        }
+
+        // Deliberately checked against `summaryFailures` (the 3 money reads),
+        // NOT `failures` (all 5 settled calls). `failures.length === 5` was a
+        // regression: it only tripped when every call failed, so a partial
+        // outage where just the money reads fail (but account/recent-payout
+        // succeed) fell through to the `else` branch and rendered $0.00
+        // tiles instead of the error card. All 3 money reads failing is the
+        // correct — and only — trigger for `stripeError`.
+        if (summaryFailures.length === 3) {
           stripeError = true;
         } else {
           let grossChargesCents = 0;
@@ -323,7 +440,7 @@ export const financeRouter = createTRPCRouter({
             balanceAvailableCents,
             balancePendingCents,
             truncated,
-            partial: failures.length > 0,
+            partial: summaryFailures.length > 0,
           };
         }
 
@@ -356,6 +473,9 @@ export const financeRouter = createTRPCRouter({
         stripeAutoTaxEnabled: business?.stripeAutoTaxEnabled ?? false,
         isStripeConnected: !!accountId,
         stripeError,
+        inform,
+        stripeDetailsSubmitted,
+        recentPayouts,
       };
     }),
 });

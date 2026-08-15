@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -38,7 +40,7 @@ export function ViiBlogPostCta({
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{
           maxWidth: 640,
           margin: "0 auto",

@@ -1,7 +1,7 @@
 import type { DefaultHomepageTemplateProps } from "../../types";
 import { sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { parseTemplateListRows } from "~/lib/template-fields";
 import { isSectionVisible } from "~/lib/sp-meta";
+import { parseTemplateListRows } from "~/lib/template-fields";
 import { HydrateClient } from "~/trpc/server";
 
 import { resolveFields } from "..";

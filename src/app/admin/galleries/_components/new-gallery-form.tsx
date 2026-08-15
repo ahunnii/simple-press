@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,6 +24,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -37,15 +38,110 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { NumberFormField } from "~/components/inputs/number-form-field";
 import { PendingImageGrid } from "~/components/inputs/pending-image-grid";
-
-import { LayoutPreview } from "./layout-preview";
+import { SelectFormField } from "~/components/inputs/select-form-field";
+import { SwitchFormField } from "~/components/inputs/switch-form-field";
+import { GalleryRenderer } from "~/components/gallery-renderer";
 
 // Mirrors galleryCreateSchema caps in src/lib/validators/gallery.ts
 const NAME_MAX = 120;
 const DESCRIPTION_MAX = 1000;
+
+/**
+ * Layout picker options. Kept in step with `gallery-editor.tsx` — the create
+ * and edit forms describe the same five layouts, and a difference between them
+ * reads to the owner as a behaviour difference.
+ */
+const LAYOUT_OPTIONS = [
+  {
+    value: "grid",
+    glyph: "⊞",
+    name: "Grid",
+    description: "Equal-sized images in rows and columns",
+  },
+  {
+    value: "masonry",
+    glyph: "▦",
+    name: "Masonry",
+    description: "Pinterest-style cascading layout",
+  },
+  {
+    value: "carousel",
+    glyph: "⊏",
+    name: "Carousel",
+    description: "Slideshow with navigation",
+  },
+  {
+    value: "collage",
+    glyph: "▤",
+    name: "Collage",
+    description: "Mixed sizes arrangement",
+  },
+  {
+    value: "justified",
+    glyph: "▬",
+    name: "Justified",
+    description: "Flickr-style justified rows",
+  },
+] as const;
+
+/**
+ * Copy is shared with `gallery-editor.tsx`; verified against `GalleryRenderer`.
+ * Kept deliberately terse: the settings sit in a half-page column split into
+ * two ~250px tracks, so anything longer than roughly two lines wraps into a
+ * ragged block.
+ */
+const HELP = {
+  columns:
+    "How many images sit side by side on desktop. Narrower screens use fewer.",
+  gap: "Space between images. 0 makes them touch edge to edge. Recommended 8–24px.",
+  aspectRatio:
+    "Crops every image to the same shape. “Original” keeps natural proportions.",
+  showCaptions: "Add captions per image in the Images tab, after you save.",
+  captionStyle:
+    "A bar over the image (always or on hover), or plain text below it.",
+  captionStyleCarousel:
+    "Carousel always shows captions below, so this only affects other layouts.",
+  lightbox:
+    "Click an image to open it full-screen. Arrow keys move, Esc closes.",
+} as const;
+
+/**
+ * Stand-in images for the preview before anything is selected. Deliberately
+ * varied proportions: with six identical squares, masonry and justified would
+ * render as a plain grid and the preview would lie about what those layouts do.
+ */
+const SAMPLE_SIZES = [
+  [800, 800],
+  [800, 1120],
+  [800, 600],
+  [800, 960],
+  [800, 700],
+  [800, 1040],
+] as const;
+
+/** Inline SVG data URI — no network request, no asset to keep in sync. */
+function samplePlaceholder(width: number, height: number): string {
+  const r = Math.round(Math.min(width, height) * 0.09);
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    `<rect width="${width}" height="${height}" fill="#e4e4e7"/>` +
+    `<g fill="#c7c7cf">` +
+    `<circle cx="${Math.round(width * 0.3)}" cy="${Math.round(height * 0.28)}" r="${r}"/>` +
+    `<path d="M0 ${height} L${Math.round(width * 0.4)} ${Math.round(height * 0.46)} L${Math.round(width * 0.72)} ${height} Z"/>` +
+    `<path d="M${Math.round(width * 0.5)} ${height} L${Math.round(width * 0.78)} ${Math.round(height * 0.58)} L${width} ${height} Z"/>` +
+    `</g></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+const SAMPLE_IMAGES = SAMPLE_SIZES.map(([width, height], index) => ({
+  id: `sample-${index}`,
+  url: samplePlaceholder(width, height),
+  altText: "",
+  caption: `Sample caption ${index + 1}`,
+}));
 
 const NEW_GALLERY_DEFAULTS: GalleryCreateData = {
   name: "",
@@ -166,7 +262,82 @@ export function NewGalleryForm() {
   const columns = form.watch("columns");
   const gap = form.watch("gap");
   const aspectRatio = form.watch("aspectRatio");
+  const captionStyle = form.watch("captionStyle");
   const showCaptions = form.watch("showCaptions");
+  const enableLightbox = form.watch("enableLightbox");
+
+  // Columns only: collage and justified derive their own column count, and
+  // carousel shows one image at a time.
+  const showColumnsField = layout === "grid" || layout === "masonry";
+  // Every layout except carousel spaces its images with `gap`
+  // (gallery-renderer.tsx: grid L264, masonry L339/L347, collage L481/L489,
+  // justified L560/L566). Carousel shows one image at a time and never reads
+  // it, which is the only reason to hide the control.
+  const showGapField = layout !== "carousel";
+  // Only the grid layout reads aspectRatio.
+  const showAspectRatioField = layout === "grid";
+
+  /**
+   * Columns / Gap / Aspect Ratio flow after the full-width Layout Style picker
+   * in the card's 2-track grid, and which of them exist depends on the layout
+   * (grid: all three, masonry: columns + gap, collage/justified: gap only,
+   * carousel: none). An odd number of them leaves the last one with no partner
+   * — a half-width control sitting beside an empty half. Give that one both
+   * tracks instead. Derived from the visibility flags rather than hardcoded per
+   * layout, so it stays correct if the rules above change.
+   */
+  const subFields = [
+    { name: "columns", visible: showColumnsField },
+    { name: "gap", visible: showGapField },
+    { name: "aspectRatio", visible: showAspectRatioField },
+  ].filter((subField) => subField.visible);
+
+  const unpairedSubField =
+    subFields.length % 2 === 1
+      ? subFields[subFields.length - 1]?.name
+      : undefined;
+
+  /** Both tracks for the unpaired trailing control, one track for the rest. */
+  const subFieldSpan = (name: string) =>
+    name === unpairedSubField ? "sm:col-span-2" : "sm:col-span-1";
+
+  /**
+   * Nothing is saved yet, so the preview runs on whatever is closest to real:
+   * the images already staged for upload (their local object URLs), else inline
+   * sample placeholders. Adapted here rather than in `GalleryRenderer` — the
+   * renderer's contract is a saved gallery.
+   */
+  const previewImages = useMemo(
+    () =>
+      upload.pendingFiles.length > 0
+        ? upload.pendingFiles.map((file, index) => ({
+            id: file.id,
+            url: file.previewUrl,
+            altText: "",
+            // Per-image captions are only editable after the gallery exists, so
+            // there is nothing real to show here — see the note under the card.
+            caption: `Sample caption ${index + 1}`,
+          }))
+        : SAMPLE_IMAGES,
+    [upload.pendingFiles],
+  );
+
+  /**
+   * The shape `GalleryRenderer` takes, assembled from live form values so the
+   * preview moves as the settings do. `enableLightbox` is forced OFF here — see
+   * the `inert` note at the preview card.
+   */
+  const previewGallery = {
+    layout,
+    columns,
+    gap,
+    aspectRatio,
+    captionStyle,
+    showCaptions,
+    enableLightbox: false,
+    images: previewImages,
+  };
+
   const isDirty = form.formState.isDirty || upload.pendingFiles.length > 0;
   const isProcessing =
     isSaving || upload.isUploading || createMutation.isPending;
@@ -357,288 +528,268 @@ export function NewGalleryForm() {
             </CardContent>
           </Card>
 
-          {/* Layout Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Layout Settings</CardTitle>
-              <CardDescription>
-                Choose how your gallery will be displayed
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="layout"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Layout Style</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="grid">
-                          <div className="flex items-center gap-2">
-                            {/* A2: decorative glyph is aria-hidden */}
-                            <span aria-hidden="true">⊞</span>
-                            <div>
-                              <div className="font-medium">Grid</div>
-                              <div className="text-muted-foreground text-xs">
-                                Equal-sized images in rows and columns
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="masonry">
-                          <div className="flex items-center gap-2">
-                            <span aria-hidden="true">▦</span>
-                            <div>
-                              <div className="font-medium">Masonry</div>
-                              <div className="text-muted-foreground text-xs">
-                                Pinterest-style cascading layout
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="carousel">
-                          <div className="flex items-center gap-2">
-                            <span aria-hidden="true">⊏</span>
-                            <div>
-                              <div className="font-medium">Carousel</div>
-                              <div className="text-muted-foreground text-xs">
-                                Slideshow with navigation
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="collage">
-                          <div className="flex items-center gap-2">
-                            <span aria-hidden="true">▤</span>
-                            <div>
-                              <div className="font-medium">Collage</div>
-                              <div className="text-muted-foreground text-xs">
-                                Mixed sizes arrangement
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="justified">
-                          <div className="flex items-center gap-2">
-                            <span aria-hidden="true">▬</span>
-                            <div>
-                              <div className="font-medium">Justified</div>
-                              <div className="text-muted-foreground text-xs">
-                                Flickr-style justified rows
-                              </div>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {(layout === "grid" || layout === "masonry") && (
-                <>
+          {/* Settings on the left, the real gallery component on the right. */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Layout</CardTitle>
+                  <CardDescription>
+                    How the images are arranged wherever this gallery is
+                    embedded
+                  </CardDescription>
+                </CardHeader>
+                {/* A grid, not a stack: a 4-option Columns select and a 0–64
+                    Gap box have no business filling the whole card.
+                    `items-start` because FormItem is itself a grid — without it
+                    a short-description cell stretches to its neighbour's height
+                    and its label and control drift apart. */}
+                <CardContent className="grid items-start gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="columns"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Columns</FormLabel>
-                        <Select
-                          value={field.value.toString()}
-                          onValueChange={(v) => field.onChange(parseInt(v))}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="2">2 columns</SelectItem>
-                            <SelectItem value="3">3 columns</SelectItem>
-                            <SelectItem value="4">4 columns</SelectItem>
-                            <SelectItem value="5">5 columns</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="gap"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gap between images (px)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={64}
+                    name="layout"
+                    render={({ field }) => {
+                      const selected = LAYOUT_OPTIONS.find(
+                        (option) => option.value === field.value,
+                      );
+                      return (
+                        // Hand-rolled rather than SelectFormField: Radix portals
+                        // the SELECTED item's body into the closed trigger, so
+                        // the rich glyph + name + description rows below would
+                        // render inside it and inflate it into a two-line block
+                        // taller than every other control. Passing explicit
+                        // children to `SelectValue` suppresses that portal,
+                        // keeping the descriptions in the open list where they
+                        // belong.
+                        <FormItem className="col-span-full">
+                          <FormLabel>Layout Style</FormLabel>
+                          <Select
                             value={field.value}
-                            onChange={(e) =>
-                              field.onChange(parseInt(e.target.value) || 16)
-                            }
-                          />
-                        </FormControl>
-                        <p className="text-muted-foreground text-xs">
-                          Recommended: 8–24px
-                        </p>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a layout">
+                                  {selected ? (
+                                    <span className="flex items-center gap-2">
+                                      <span aria-hidden="true">
+                                        {selected.glyph}
+                                      </span>
+                                      <span>{selected.name}</span>
+                                    </span>
+                                  ) : null}
+                                </SelectValue>
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {LAYOUT_OPTIONS.map((option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={option.value}
+                                  // Radix derives typeahead from the item's
+                                  // textContent, so without this the rich body
+                                  // makes typing "gr" match against
+                                  // "GridEqual-sized images in rows and
+                                  // columns" instead of "Grid".
+                                  textValue={option.name}
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span aria-hidden="true">
+                                      {option.glyph}
+                                    </span>
+                                    <span className="grid gap-0.5">
+                                      <span className="font-medium">
+                                        {option.name}
+                                      </span>
+                                      <span className="text-muted-foreground text-xs">
+                                        {option.description}
+                                      </span>
+                                    </span>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
-                </>
-              )}
 
-              {layout === "grid" && (
-                <FormField
-                  control={form.control}
-                  name="aspectRatio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Aspect Ratio</FormLabel>
-                      <Select
-                        value={field.value ?? "1:1"}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1:1">1:1 — Square</SelectItem>
-                          <SelectItem value="4:3">4:3 — Landscape</SelectItem>
-                          <SelectItem value="16:9">
-                            16:9 — Widescreen
-                          </SelectItem>
-                          <SelectItem value="3:4">3:4 — Portrait</SelectItem>
-                          <SelectItem value="original">
-                            Original — Natural size
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                  {showColumnsField && (
+                    <FormField
+                      control={form.control}
+                      name="columns"
+                      render={({ field }) => (
+                        // Hand-rolled rather than SelectFormField: this value is
+                        // a NUMBER, and the shared wrapper always hands
+                        // `field.onChange` the raw string.
+                        <FormItem className={subFieldSpan("columns")}>
+                          <FormLabel>Columns</FormLabel>
+                          <Select
+                            value={field.value.toString()}
+                            onValueChange={(v) =>
+                              field.onChange(parseInt(v, 10))
+                            }
+                          >
+                            <FormControl>
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="2">2 columns</SelectItem>
+                              <SelectItem value="3">3 columns</SelectItem>
+                              <SelectItem value="4">4 columns</SelectItem>
+                              <SelectItem value="5">5 columns</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>{HELP.columns}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
-              )}
-            </CardContent>
-          </Card>
 
-          {/* Display Options */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Display Options</CardTitle>
-              <CardDescription>
-                Configure how images are displayed
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="showCaptions"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <FormLabel>Show Image Captions</FormLabel>
-                        <p className="text-muted-foreground text-sm">
-                          Display captions below or over images
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {showCaptions && (
-                <FormField
-                  control={form.control}
-                  name="captionStyle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Caption Style</FormLabel>
-                      <Select
-                        value={field.value ?? "overlay"}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="overlay">
-                            Always visible
-                          </SelectItem>
-                          <SelectItem value="hover">Show on hover</SelectItem>
-                          <SelectItem value="below">Below image</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                  {showGapField && (
+                    <NumberFormField
+                      form={form}
+                      name="gap"
+                      label="Gap between images (px)"
+                      description={HELP.gap}
+                      className={subFieldSpan("gap")}
+                      min={0}
+                      max={64}
+                      // `?? 16` and NOT `|| 16`: the schema default is 16, but 0
+                      // is a legitimate gap ("touch edge to edge"), and a falsy
+                      // check would bounce it back to 16.
+                      onChange={(value) =>
+                        form.setValue("gap", value ?? 16, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                    />
                   )}
-                />
-              )}
 
-              <FormField
-                control={form.control}
-                name="enableLightbox"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <FormLabel>Enable Lightbox</FormLabel>
-                        <p className="text-muted-foreground text-sm">
-                          Allow users to view full-size images
-                        </p>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+                  {showAspectRatioField && (
+                    <SelectFormField
+                      form={form}
+                      name="aspectRatio"
+                      label="Aspect Ratio"
+                      description={HELP.aspectRatio}
+                      className={subFieldSpan("aspectRatio")}
+                      values={[
+                        { value: "1:1", label: "1:1 — Square" },
+                        { value: "4:3", label: "4:3 — Landscape" },
+                        { value: "16:9", label: "16:9 — Widescreen" },
+                        { value: "3:4", label: "3:4 — Portrait" },
+                        { value: "original", label: "Original — Natural size" },
+                      ]}
+                    />
+                  )}
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Layout Preview</CardTitle>
-              <CardDescription>
-                How your gallery layout will look
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LayoutPreview
-                layout={layout}
-                columns={columns}
-                gap={gap}
-                aspectRatio={aspectRatio}
-              />
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Display Options</CardTitle>
+                  <CardDescription>
+                    Captions and full-screen viewing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid items-start gap-4 sm:grid-cols-2">
+                  <SwitchFormField
+                    form={form}
+                    name="showCaptions"
+                    label="Show captions"
+                    description={HELP.showCaptions}
+                  />
+
+                  {showCaptions && (
+                    <SelectFormField
+                      form={form}
+                      name="captionStyle"
+                      label="Caption Style"
+                      description={
+                        layout === "carousel"
+                          ? HELP.captionStyleCarousel
+                          : HELP.captionStyle
+                      }
+                      // Full width (SelectFormField's own default is
+                      // `col-span-full`) and indented under the switch that
+                      // reveals it: a naked half-width select wedged between two
+                      // full-width bordered switch rows reads as a broken
+                      // layout, and the left rule shows the dependency on
+                      // "Show captions".
+                      className="ml-2 border-l pl-4"
+                      values={[
+                        { value: "overlay", label: "Always visible" },
+                        { value: "hover", label: "Show on hover" },
+                        { value: "below", label: "Below image" },
+                      ]}
+                    />
+                  )}
+
+                  <SwitchFormField
+                    form={form}
+                    name="enableLightbox"
+                    label="Enable lightbox"
+                    description={HELP.lightbox}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Preview column. The card is sticky so the settings can be
+                scrolled against a preview that stays in view; top-20 clears the
+                sticky admin-form-toolbar above it. */}
+            <div>
+              <Card className="lg:sticky lg:top-20">
+                <CardHeader>
+                  <CardTitle>Preview</CardTitle>
+                  <CardDescription>
+                    The same component your storefront renders, drawn with the
+                    settings above
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* `inert`, and `enableLightbox` forced off in
+                      previewGallery: this is a presentation surface, not a
+                      working gallery. It matters most HERE — the renderer's
+                      carousel arrows and dots carry no `type`, so inside this
+                      <form> a click on one would submit and create the gallery.
+                      inert also blocks focus and keeps this duplicate copy of
+                      the images out of the accessibility tree. */}
+                  <div
+                    inert
+                    className="bg-background overflow-hidden rounded-lg border p-3"
+                  >
+                    <GalleryRenderer gallery={previewGallery} />
+                  </div>
+
+                  <p className="text-muted-foreground text-xs">
+                    {upload.pendingFiles.length > 0
+                      ? "Your selected images, not yet uploaded."
+                      : "Sample images — select your own above and they will appear here."}
+                  </p>
+                  {showCaptions && (
+                    <p className="text-muted-foreground text-xs">
+                      Captions shown are sample text. Real captions are added
+                      per image after you save.
+                    </p>
+                  )}
+                  {enableLightbox && (
+                    <p className="text-muted-foreground text-xs">
+                      Lightbox is on: visitors can click an image to open it
+                      full-screen. It is disabled in this preview so it cannot
+                      cover the form.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </form>
     </Form>

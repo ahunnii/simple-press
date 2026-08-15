@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { DefaultAboutPageTemplateProps } from "../../types";
+import type { PinkFactRow } from "../shared/pink-fact-rows";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { isSectionVisible } from "~/lib/sp-meta";
@@ -14,8 +15,11 @@ import { TiptapRenderer } from "~/components/tiptap-renderer";
 
 import { resolveFields } from "..";
 import { PinkDarkBand } from "../shared/pink-dark-band";
-import type { PinkFactRow } from "../shared/pink-fact-rows";
 import { PinkFactRows } from "../shared/pink-fact-rows";
+import {
+  hasCustomImage,
+  PinkImageFallback,
+} from "../shared/pink-image-fallback";
 import { PinkPortraitHeader } from "../shared/pink-portrait-header";
 import { PinkReveal } from "../shared/pink-reveal";
 import { PinkRule } from "../shared/pink-rule";
@@ -25,12 +29,6 @@ const FIELD_KEYS = [
   "pink.about.hero-heading",
   "pink.about.hero-intro",
   "pink.about.story-heading",
-  "pink.about.story-paragraph-1",
-  "pink.about.story-paragraph-2",
-  "pink.about.story-paragraph-3",
-  "pink.about.story-signature-image",
-  "pink.about.story-signature-name",
-  "pink.about.story-signature-role",
   "pink.about.story-image-main",
   "pink.about.story-image-2",
   "pink.about.story-image-3",
@@ -47,14 +45,36 @@ const FIELD_KEYS = [
 ];
 
 type ValueItem = { title?: string; body?: string; _id?: string };
-type TimelineItem = { year?: string; title?: string; body?: string; _id?: string };
-type GalleryItem = { image?: string; colSpan?: string; rowSpan?: string; _id?: string };
+type TimelineItem = {
+  year?: string;
+  title?: string;
+  body?: string;
+  _id?: string;
+};
+type GalleryItem = {
+  image?: string;
+  colSpan?: string;
+  rowSpan?: string;
+  _id?: string;
+};
 
 const DEFAULT_VALUES: ValueItem[] = [
-  { title: "One of a kind", body: "Made one at a time, never in runs. No two pieces are exactly alike." },
-  { title: "Priced plainly", body: "The price on the tag is the price. No markups dressed up as scarcity." },
-  { title: "Natural materials", body: "100% wool filling, cotton fabrics, polymer clay faces." },
-  { title: "Made by hand", body: "Every piece passes through Evelyn's hands start to finish." },
+  {
+    title: "One of a kind",
+    body: "Made one at a time, never in runs. No two pieces are exactly alike.",
+  },
+  {
+    title: "Priced plainly",
+    body: "The price on the tag is the price. No markups dressed up as scarcity.",
+  },
+  {
+    title: "Natural materials",
+    body: "100% wool filling, cotton fabrics, polymer clay faces.",
+  },
+  {
+    title: "Made by hand",
+    body: "Every piece passes through Evelyn's hands start to finish.",
+  },
 ];
 
 // Deliberately empty (2026-07-31, client direction): the shipped defaults
@@ -62,6 +82,16 @@ const DEFAULT_VALUES: ValueItem[] = [
 // self-hides on an empty list (see the `timeline.length > 0` guard below) so a
 // fresh store shows nothing here until the owner fills it in.
 const DEFAULT_TIMELINE: TimelineItem[] = [];
+
+// Shipped story copy, rendered only while `pink.about.story-body` (richtext)
+// is empty — the richtext is the sole authoring path, so this is a constant,
+// not fields (same rule as DEFAULT_VALUES). Once the owner writes their own
+// story the richtext wins and this never renders again.
+const DEFAULT_STORY_PARAGRAPHS: string[] = [
+  "Every doll starts with cotton fabric on the table and no fixed plan. Evelyn works the shape out by hand, one piece at a time, the same way she's worked since she started sewing.",
+  "Everything that goes into a piece is natural: 100% wool filling, cotton fabrics, and faces shaped from polymer clay. Nothing is printed. If a seam shows, it's because a person made it.",
+  "The studio runs on the same rhythm it always has: make, mend, teach, repeat. Make & takes carry the same weight as the dolls — a table of people, everyone leaving with something they made themselves.",
+];
 
 // Empty `image` on purpose: six placeholder slabs read as a broken photo grid
 // on a fresh store. The section collapses entirely until the owner adds at
@@ -125,7 +155,11 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
   ) as PinkFactRow[];
   const commissionFacts: PinkFactRow[] =
     commissionFactsRaw.length > 0
-      ? commissionFactsRaw.map((r) => ({ label: r.label ?? "", value: r.value ?? "", _id: r._id }))
+      ? commissionFactsRaw.map((r) => ({
+          label: r.label ?? "",
+          value: r.value ?? "",
+          _id: r._id,
+        }))
       : DEFAULT_COMMISSION_FACTS;
 
   const hasCommissionCta =
@@ -172,6 +206,8 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               {f["pink.about.story-heading"] ?? ""}
             </h2>
 
+            {/* Rich text is the only story authoring path; the shipped copy
+                below is a constant so a fresh store still reads day-one. */}
             {hasStoryRichText ? (
               <TiptapRenderer
                 content={storyRichContent as TiptapJSON}
@@ -179,97 +215,79 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
               />
             ) : (
               <div className="flex flex-col gap-4">
-                <p
-                  className="text-[17px] leading-[1.8]"
-                  style={{ color: "var(--pink-body)" }}
-                  {...fieldAttr("pink.about.story-paragraph-1")}
-                >
-                  {f["pink.about.story-paragraph-1"] ?? ""}
-                </p>
-                <p
-                  className="text-[17px] leading-[1.8]"
-                  style={{ color: "var(--pink-body)" }}
-                  {...fieldAttr("pink.about.story-paragraph-2")}
-                >
-                  {f["pink.about.story-paragraph-2"] ?? ""}
-                </p>
-                <p
-                  className="text-[17px] leading-[1.8]"
-                  style={{ color: "var(--pink-body)" }}
-                  {...fieldAttr("pink.about.story-paragraph-3")}
-                >
-                  {f["pink.about.story-paragraph-3"] ?? ""}
-                </p>
+                {DEFAULT_STORY_PARAGRAPHS.map((paragraph) => (
+                  <p
+                    key={paragraph}
+                    className="text-[17px] leading-[1.8]"
+                    style={{ color: "var(--pink-body)" }}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             )}
-
-            <div className="mt-4 flex items-center gap-3">
-              <div
-                className="relative h-14 w-14 shrink-0 overflow-hidden"
-                style={{ background: "var(--pink-panel)" }}
-              >
-                <Image
-                  src={f["pink.about.story-signature-image"] ?? "/placeholder.svg"}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="56px"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className="pink-display text-[15px] font-semibold"
-                  {...fieldAttr("pink.about.story-signature-name")}
-                >
-                  {f["pink.about.story-signature-name"] ?? ""}
-                </span>
-                <span
-                  className="text-[13px]"
-                  style={{ color: "var(--pink-subtle)" }}
-                  {...fieldAttr("pink.about.story-signature-role")}
-                >
-                  {f["pink.about.story-signature-role"] ?? ""}
-                </span>
-              </div>
-            </div>
           </PinkReveal>
 
+          {/* Each tile keeps its slot whether or not a photo is set — the trio
+              is the column's whole layout — so an unset one shows the designed
+              stand-in rather than a bare panel or a stock placeholder. */}
           <PinkReveal index={1} className="grid grid-cols-2 gap-3">
             <div
               className="relative col-span-2 overflow-hidden"
               style={{ aspectRatio: "3 / 2", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={f["pink.about.story-image-main"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 45vw"
-              />
+              {hasCustomImage(f["pink.about.story-image-main"]) ? (
+                <Image
+                  src={f["pink.about.story-image-main"] ?? ""}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 45vw"
+                />
+              ) : (
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
+              )}
             </div>
             <div
               className="relative overflow-hidden"
               style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={f["pink.about.story-image-2"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 22vw"
-              />
+              {hasCustomImage(f["pink.about.story-image-2"]) ? (
+                <Image
+                  src={f["pink.about.story-image-2"] ?? ""}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 22vw"
+                />
+              ) : (
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
+              )}
             </div>
             <div
               className="relative overflow-hidden"
               style={{ aspectRatio: "1 / 1", background: "var(--pink-panel)" }}
             >
-              <Image
-                src={f["pink.about.story-image-3"] ?? "/placeholder.svg"}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 22vw"
-              />
+              {hasCustomImage(f["pink.about.story-image-3"]) ? (
+                <Image
+                  src={f["pink.about.story-image-3"] ?? ""}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 22vw"
+                />
+              ) : (
+                <PinkImageFallback
+                  surface="paper"
+                  className="absolute inset-0"
+                />
+              )}
             </div>
           </PinkReveal>
         </div>
@@ -323,7 +341,11 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
                 instead of floating 24px inside the band. */}
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
               {values.map((v, i) => (
-                <PinkReveal key={v._id ?? i} index={i} className="flex min-w-0 flex-col gap-3">
+                <PinkReveal
+                  key={v._id ?? i}
+                  index={i}
+                  className="flex min-w-0 flex-col gap-3"
+                >
                   <PinkRule width={34} />
                   <h3
                     className="pink-display text-[1.1875rem]"
@@ -347,100 +369,106 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
       {/* ── about.timeline ─────────────────────────────────────────────── */}
       {/* `timeline.length > 0` matches the gallery guard below: with no rows
           the band would render a heading and note over nothing at all. */}
-      {isSectionVisible(customFields, "pink", "about.timeline") && timeline.length > 0 && (
-        <section
-          className="px-5 py-16 md:px-10 md:py-24"
-          {...sectionGroupAttr("about", "timeline")}
-        >
-          <div className="mx-auto grid max-w-[1400px] gap-10 md:grid-cols-[0.72fr_1fr]">
-            <PinkReveal className="flex flex-col gap-4">
-              <h2
-                className="pink-display max-w-[16ch]"
-                style={{
-                  fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
-                  fontWeight: 600,
-                  letterSpacing: "-0.025em",
-                  lineHeight: 1.1,
-                }}
-                {...fieldAttr("pink.about.timeline-heading")}
-              >
-                {f["pink.about.timeline-heading"] ?? ""}
-              </h2>
-              <p
-                className="max-w-[38ch] text-[15px] leading-[1.7]"
-                style={{ color: "var(--pink-muted)" }}
-                {...fieldAttr("pink.about.timeline-note")}
-              >
-                {f["pink.about.timeline-note"] ?? ""}
-              </p>
-            </PinkReveal>
-
-            <div className="flex flex-col">
-              {timeline.map((row, i) => (
-                <PinkReveal
-                  key={row._id ?? i}
-                  index={i}
-                  as="div"
-                  className="grid grid-cols-[78px_minmax(0,1fr)] gap-4 py-5"
-                  style={{ borderTop: "1px solid var(--pink-line)" }}
+      {isSectionVisible(customFields, "pink", "about.timeline") &&
+        timeline.length > 0 && (
+          <section
+            className="px-5 py-16 md:px-10 md:py-24"
+            {...sectionGroupAttr("about", "timeline")}
+          >
+            <div className="mx-auto grid max-w-[1400px] gap-10 md:grid-cols-[0.72fr_1fr]">
+              <PinkReveal className="flex flex-col gap-4">
+                <h2
+                  className="pink-display max-w-[16ch]"
+                  style={{
+                    fontSize: "clamp(1.625rem, 2.8vw, 2.375rem)",
+                    fontWeight: 600,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.1,
+                  }}
+                  {...fieldAttr("pink.about.timeline-heading")}
                 >
-                  <span
-                    className="pink-display text-[15px] font-semibold"
-                    style={{ color: "var(--pink-rose)" }}
+                  {f["pink.about.timeline-heading"] ?? ""}
+                </h2>
+                <p
+                  className="max-w-[38ch] text-[15px] leading-[1.7]"
+                  style={{ color: "var(--pink-muted)" }}
+                  {...fieldAttr("pink.about.timeline-note")}
+                >
+                  {f["pink.about.timeline-note"] ?? ""}
+                </p>
+              </PinkReveal>
+
+              <div className="flex flex-col">
+                {timeline.map((row, i) => (
+                  <PinkReveal
+                    key={row._id ?? i}
+                    index={i}
+                    as="div"
+                    className="grid grid-cols-[78px_minmax(0,1fr)] gap-4 py-5"
+                    style={{ borderTop: "1px solid var(--pink-line)" }}
                   >
-                    {row.year ?? ""}
-                  </span>
-                  <div className="flex flex-col gap-1.5">
-                    <h3 className="pink-display text-[17px] font-semibold">{row.title ?? ""}</h3>
-                    <p className="text-[15px] leading-[1.7]" style={{ color: "var(--pink-muted)" }}>
-                      {row.body ?? ""}
-                    </p>
-                  </div>
-                </PinkReveal>
-              ))}
+                    <span
+                      className="pink-display text-[15px] font-semibold"
+                      style={{ color: "var(--pink-rose)" }}
+                    >
+                      {row.year ?? ""}
+                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      <h3 className="pink-display text-[17px] font-semibold">
+                        {row.title ?? ""}
+                      </h3>
+                      <p
+                        className="text-[15px] leading-[1.7]"
+                        style={{ color: "var(--pink-muted)" }}
+                      >
+                        {row.body ?? ""}
+                      </p>
+                    </div>
+                  </PinkReveal>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
       {/* ── about.gallery ──────────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "about.gallery") &&
         gallery.some((item) => item.image) && (
-        <section
-          className="px-5 py-16 md:px-10 md:py-24"
-          aria-label="Studio gallery"
-          {...sectionGroupAttr("about", "gallery")}
-        >
-          <div
-            className="mx-auto grid max-w-[1400px] grid-cols-2 gap-[2px] sm:grid-cols-4"
-            style={{ gridAutoRows: "168px" }}
+          <section
+            className="px-5 py-16 md:px-10 md:py-24"
+            aria-label="Studio gallery"
+            {...sectionGroupAttr("about", "gallery")}
           >
-            {gallery.map((item, i) => (
-              <div
-                key={item._id ?? i}
-                className="relative overflow-hidden"
-                style={{
-                  background: "var(--pink-panel)",
-                  gridColumn: `span ${clampSpan(item.colSpan)} / span ${clampSpan(item.colSpan)}`,
-                  gridRow: `span ${clampSpan(item.rowSpan)} / span ${clampSpan(item.rowSpan)}`,
-                }}
-              >
-                {/* Unset tiles inside an otherwise-filled gallery stay bare on
+            <div
+              className="mx-auto grid max-w-[1400px] grid-cols-2 gap-[2px] sm:grid-cols-4"
+              style={{ gridAutoRows: "168px" }}
+            >
+              {gallery.map((item, i) => (
+                <div
+                  key={item._id ?? i}
+                  className="relative overflow-hidden"
+                  style={{
+                    background: "var(--pink-panel)",
+                    gridColumn: `span ${clampSpan(item.colSpan)} / span ${clampSpan(item.colSpan)}`,
+                    gridRow: `span ${clampSpan(item.rowSpan)} / span ${clampSpan(item.rowSpan)}`,
+                  }}
+                >
+                  {/* Unset tiles inside an otherwise-filled gallery stay bare on
                     `--pink-panel` rather than showing a placeholder slab. */}
-                {item.image ? (
-                  <Image
-                    src={item.image}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, 25vw"
-                  />
-                ) : null}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                    />
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
       {/* ── about.commissions ──────────────────────────────────────────── */}
       {isSectionVisible(customFields, "pink", "about.commissions") && (
@@ -483,7 +511,9 @@ export function PinkAboutPage({ business }: DefaultAboutPageTemplateProps) {
                   )}
                   {f["pink.about.commissions-secondary-label"] && (
                     <Link
-                      href={f["pink.about.commissions-secondary-link"] ?? "/shop"}
+                      href={
+                        f["pink.about.commissions-secondary-link"] ?? "/shop"
+                      }
                       className="pink-btn pink-btn-ghost"
                       {...fieldAttr("pink.about.commissions-secondary-label")}
                     >

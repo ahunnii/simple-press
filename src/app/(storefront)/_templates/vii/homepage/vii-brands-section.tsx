@@ -5,8 +5,9 @@ import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 
 import type { TemplateListRow } from "~/lib/template-fields";
-import { useReducedMotion } from "~/hooks/use-reduced-motion";
 import { fieldAttr } from "~/lib/preview/section-attrs";
+import { cn } from "~/lib/utils";
+import { useReducedMotion } from "~/hooks/use-reduced-motion";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
@@ -231,7 +232,7 @@ export function ViiBrandsSection({
           </div>
         ) : (
           /* ── Static mode (default — unchanged behaviour) ───────────────── */
-          <div ref={ref} className={`vii-reveal${visible ? " is-visible" : ""}`}>
+          <div ref={ref} className={cn("vii-reveal", visible && "is-visible")}>
             <ul
               className="vii-brands-grid"
               style={{

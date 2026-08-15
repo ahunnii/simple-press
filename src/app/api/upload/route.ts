@@ -1,10 +1,12 @@
 import crypto from "crypto";
 import path from "path";
 import type { Router } from "@better-upload/server";
-import { RejectUpload, route } from "@better-upload/server";
+import { RejectUpload, route, S3Error } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
+import * as Sentry from "@sentry/nextjs";
 
 import { env } from "~/env";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
 import { s3Client } from "~/lib/s3/client";
 import { keyToPublicUrl } from "~/lib/s3/url";
@@ -61,8 +63,8 @@ async function requireBusinessManager(req: Request) {
   if (!session) throw new RejectUpload("Not logged in!");
   const business = await checkBusiness();
   if (!business) throw new RejectUpload("Business not found!");
-  const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
-  if (!isPlatformAdmin) {
+  const platformAdmin = await isPlatformAdmin(session.user.id);
+  if (!platformAdmin) {
     const membership = await checkBusinessMembership(
       business.id,
       session.user.id,
@@ -349,4 +351,75 @@ const router: Router = {
     }),
   },
 };
-export const { POST } = toRouteHandler(router);
+
+const { POST: uploadHandler } = toRouteHandler(router);
+
+/** Non-PII diagnostic context pulled from the client-declared upload payload
+ * (never the filename or file bytes) — used only when reporting an
+ * unexpected error to Sentry. */
+type UploadDiagnostics = {
+  uploadRoute?: string;
+  fileCount?: number;
+  contentType?: string;
+  size?: number;
+};
+
+function extractUploadDiagnostics(body: unknown): UploadDiagnostics {
+  if (!body || typeof body !== "object") return {};
+  const { route: uploadRoute, files } = body as {
+    route?: unknown;
+    files?: unknown;
+  };
+  const diagnostics: UploadDiagnostics = {};
+  if (typeof uploadRoute === "string") diagnostics.uploadRoute = uploadRoute;
+  if (Array.isArray(files)) {
+    diagnostics.fileCount = files.length;
+    const first = files[0] as { type?: unknown; size?: unknown } | undefined;
+    if (typeof first?.type === "string") diagnostics.contentType = first.type;
+    if (typeof first?.size === "number") diagnostics.size = first.size;
+  }
+  return diagnostics;
+}
+
+export async function POST(req: Request): Promise<Response> {
+  // Cloned before the real handler ever reads the body, so this independent
+  // stream is still readable in the catch below even after `uploadHandler`
+  // has consumed the original — used only for diagnostics if something goes
+  // wrong; never changes what gets uploaded.
+  const bodyClone = req.clone();
+
+  try {
+    return await uploadHandler(req);
+  } catch (error) {
+    // better-upload turns a RejectUpload thrown from `onBeforeUpload` into
+    // its own 400 JSON response internally (see handleFiles/
+    // handleMultipartFiles in @better-upload/server), but the
+    // generateObjectInfo callback used by the images/galleryImages/
+    // testimonials routes runs outside that internal try/catch, so a
+    // RejectUpload from safeRasterImageExt() there can still reach this
+    // outer catch uncaught. Either way, RejectUpload is an intentional
+    // validation rejection — excluded from Sentry per CLAUDE.md's "what is
+    // NOT captured" list — so just rethrow and let Next.js handle it exactly
+    // as it did before this wrapper existed.
+    if (error instanceof RejectUpload) {
+      throw error;
+    }
+
+    console.error("[upload] error:", error);
+
+    const extra = await bodyClone
+      .json()
+      .then(extractUploadDiagnostics)
+      .catch(() => ({}) as UploadDiagnostics);
+
+    Sentry.captureException(error, {
+      tags: {
+        route: "upload",
+        ...(error instanceof S3Error ? { service: "s3" } : {}),
+      },
+      extra,
+    });
+
+    throw error;
+  }
+}

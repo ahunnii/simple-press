@@ -115,16 +115,28 @@ export function resolveAuthErrorMessage(error: unknown): AuthErrorInfo | null {
   if (error == null) return null;
 
   switch (readCode(error)) {
+    // reCAPTCHA v3 runs invisibly, so neither of these can ask the user to
+    // "complete" anything — there is no control to interact with. The old copy
+    // did, back when this was a visible hCaptcha checkbox, and it left people
+    // hunting for a checkbox that no longer exists.
     case "MISSING_RESPONSE":
+      // The token had not been staged yet when submit fired: usually the
+      // reCAPTCHA script is still loading, or an extension/network filter is
+      // blocking it outright. Name that second case — it is the only one the
+      // user can actually act on.
       return {
-        message: 'Please complete the "I am human" check below, then try again.',
+        message:
+          "We couldn't verify your browser. Wait a moment and try again — if it keeps happening, a browser extension or network filter may be blocking reCAPTCHA.",
         field: "captcha",
       };
 
     case "VERIFICATION_FAILED":
+      // Google rejected the token — expired, already spent, or scored too low.
+      // Retrying is genuinely worth a shot (a fresh token is minted each time),
+      // but a low-scoring visitor can loop here, so point at support.
       return {
         message:
-          "That human-verification check didn't go through. Please try it again.",
+          "We couldn't verify this request. Please try again, or contact support if the problem continues.",
         field: "captcha",
       };
 

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { NavHub } from "~/app/admin/_lib/admin-nav";
-import { getHubCards } from "~/app/admin/_lib/admin-nav";
-import { useFeatureFlags } from "~/hooks/use-feature-flags";
 import { api } from "~/trpc/react";
+import { useFeatureFlags } from "~/hooks/use-feature-flags";
+import { getHubCards, isHubCardEnabled } from "~/app/admin/_lib/admin-nav";
 
 const HUB_LABELS: Record<NavHub, string> = {
   settings: "Settings",
@@ -27,9 +27,7 @@ export function HubSubNav({ hub }: Props) {
   // component is rendered from server pages that don't pass flags down.
   const { data: flagsData } = api.features.getFlags.useQuery();
   const { isEnabled } = useFeatureFlags({ flags: flagsData?.flags ?? {} });
-  const cards = allCards.filter(
-    (card) => !card.featureKey || isEnabled(card.featureKey),
-  );
+  const cards = allCards.filter((card) => isHubCardEnabled(card, isEnabled));
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");

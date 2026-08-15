@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { api } from "~/trpc/server";
 import { ACCOUNT_PATHS, SETTINGS_VIEW_PATHS } from "~/lib/auth-paths";
+import { api } from "~/trpc/server";
 
 import { getTemplate } from "../../_templates/registry";
 

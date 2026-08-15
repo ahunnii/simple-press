@@ -13,7 +13,7 @@ export default async function StorefrontAvailabilityPage() {
       <TrailHeader
         breadcrumbs={[
           { label: "Settings", href: "/admin/settings" },
-          { label: "Storefront Availability" },
+          { label: "Maintenance Mode" },
         ]}
       />
       <HubSubNav hub="settings" />
@@ -28,5 +28,5 @@ export default async function StorefrontAvailabilityPage() {
 }
 
 export const metadata = {
-  title: "Storefront Availability",
+  title: "Maintenance Mode",
 };

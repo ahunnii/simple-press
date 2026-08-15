@@ -71,7 +71,10 @@ export const pinkTableFields: TemplateField[] = [
       },
     ],
     defaultValue: JSON.stringify([
-      { label: "Where", value: "Your space — school, church, library or workplace" },
+      {
+        label: "Where",
+        value: "Your space — school, church, library or workplace",
+      },
       { label: "Group size", value: "10 to 12 at a table" },
       { label: "Materials", value: "Everything included" },
       { label: "Notice", value: "Book at least 2 weeks out" },
@@ -165,7 +168,8 @@ export const pinkTableFields: TemplateField[] = [
     group: "pink-table.timeline",
     gridColumn: "col-span-full",
     defaultValue: "How a session runs",
-    description: "Leave the timeline list below empty to hide this section entirely.",
+    description:
+      "Leave the timeline list below empty to hide this section entirely.",
   },
   {
     key: "pink-table.timeline",
@@ -279,7 +283,8 @@ export const pinkTableFields: TemplateField[] = [
     group: "pink-table.faq",
     gridColumn: "col-span-full",
     defaultValue: "Questions people ask",
-    description: "Leave the FAQ list below empty to hide this section entirely.",
+    description:
+      "Leave the FAQ list below empty to hide this section entirely.",
   },
   {
     key: "pink-table.faq",
@@ -352,7 +357,8 @@ export const pinkTableFields: TemplateField[] = [
   {
     key: "pink-table.quicklink-2-label",
     label: "Quick Link 2 Label",
-    description: "Second sidebar quick link — an owner-set secondary destination.",
+    description:
+      "Second sidebar quick link — an owner-set secondary destination.",
     type: "text",
     page: "homepage",
     group: "pink-table.sidebar",
@@ -389,7 +395,8 @@ export const pinkTableFields: TemplateField[] = [
     page: "homepage",
     group: "pink-table.request-form",
     gridColumn: "col-span-1",
-    defaultValue: "Tell us the date and room. We'll confirm within a couple of days.",
+    defaultValue:
+      "Tell us the date and room. We'll confirm within a couple of days.",
   },
   {
     key: "pink-table.request-submit-label",
@@ -425,7 +432,8 @@ const pinkTableFieldGroups: TemplateFieldGroup[] = [
   {
     id: "pink-table.body",
     title: "What It Actually Is",
-    description: "Heading and body copy — plain paragraphs or a richtext override",
+    description:
+      "Heading and body copy — plain paragraphs or a richtext override",
     icon: "📝",
     columns: 1,
   },

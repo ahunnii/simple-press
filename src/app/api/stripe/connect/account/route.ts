@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { checkBusinessMembership } from "~/lib/check-business";
 import { getBusinessByDomain, getCurrentDomain } from "~/lib/domain";
@@ -7,6 +8,10 @@ import { stripeClient } from "~/lib/stripe/client";
 import { auth } from "~/server/better-auth";
 
 export async function GET(request: NextRequest) {
+  // Declared outside the try so the catch block can tag/report the business
+  // even though `business` itself is scoped inside the try.
+  let businessId: string | null = null;
+  let stripeAccountId: string | null = null;
   try {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user) {
@@ -19,6 +24,7 @@ export async function GET(request: NextRequest) {
     if (!business) {
       return NextResponse.json({ connected: false });
     }
+    businessId = business.id;
 
     // Authorization: the connected Stripe account's email/id/country is
     // sensitive, so only an OWNER/MANAGER of THIS business may read it. Without
@@ -35,6 +41,7 @@ export async function GET(request: NextRequest) {
     if (!business.stripeAccountId) {
       return NextResponse.json({ connected: false });
     }
+    stripeAccountId = business.stripeAccountId;
 
     // Get account details from Stripe
     const account = await stripeClient.accounts.retrieve(
@@ -54,6 +61,14 @@ export async function GET(request: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Get account error:", error);
+    Sentry.captureException(error, {
+      tags: {
+        route: "stripe.connect.account",
+        service: "stripe",
+        ...(businessId ? { businessId } : {}),
+      },
+      extra: { ...(stripeAccountId ? { stripeAccountId } : {}) },
+    });
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to get account",

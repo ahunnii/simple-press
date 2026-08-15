@@ -1,6 +1,5 @@
 "use client";
 
-import type { SiteContent } from "generated/prisma";
 import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,13 +41,10 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { InputFormField } from "~/components/inputs/input-form-field";
-import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 
 type Props = {
-  business: NonNullable<RouterOutputs["business"]["getWith"]> & {
-    siteContent?: SiteContent | null;
-  };
+  business: NonNullable<RouterOutputs["business"]["getWith"]>;
 };
 
 export function GeneralSettings({ business }: Props) {
@@ -70,7 +66,8 @@ export function GeneralSettings({ business }: Props) {
       supportEmail: business.supportEmail ?? "",
       businessAddress: business.businessAddress ?? "",
       slug: business.slug ?? "",
-      sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
+      sendAbandonedCheckoutEmails:
+        business.sendAbandonedCheckoutEmails ?? false,
       timeZone: business.timeZone ?? "America/Detroit",
     },
   });
@@ -122,7 +119,8 @@ export function GeneralSettings({ business }: Props) {
         supportEmail: business.supportEmail ?? undefined,
         businessAddress: business.businessAddress ?? undefined,
         phoneNumber: business.phoneNumber ?? undefined,
-        sendAbandonedCheckoutEmails: business.sendAbandonedCheckoutEmails ?? false,
+        sendAbandonedCheckoutEmails:
+          business.sendAbandonedCheckoutEmails ?? false,
         timeZone: business.timeZone ?? "America/Detroit",
       },
     );
@@ -227,7 +225,10 @@ export function GeneralSettings({ business }: Props) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Time Zone</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue />
@@ -242,9 +243,9 @@ export function GeneralSettings({ business }: Props) {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Used when showing event dates and times to you and
-                        your shoppers. Pick the zone your shop actually
-                        operates in — this also applies to the hours shown on{" "}
+                        Used when showing event dates and times to you and your
+                        shoppers. Pick the zone your shop actually operates in —
+                        this also applies to the hours shown on{" "}
                         <Link
                           href="/admin/settings/hours"
                           className="underline underline-offset-2"
@@ -260,12 +261,12 @@ export function GeneralSettings({ business }: Props) {
               </CardContent>
             </Card>
 
-            {/* Contact Information */}
+            {/* Contact Details */}
             <Card>
               <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
+                <CardTitle>Contact Details</CardTitle>
                 <CardDescription>
-                  Email addresses for your business
+                  Email addresses and phone number for your business
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -277,30 +278,11 @@ export function GeneralSettings({ business }: Props) {
                   description="Primary contact email for the business. Used for notifications and account management. This is not a public facing email."
                   required
                 />
-              </CardContent>
-            </Card>
-
-            {/* Legal Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Public Information</CardTitle>
-                <CardDescription>
-                  Business address and other public information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <TextareaFormField
-                  form={form}
-                  name="businessAddress"
-                  label="Business Address"
-                  description="Public business address. Customers will see this address on your storefront."
-                  placeholder="123 Main St, Detroit, MI, USA"
-                />
                 <InputFormField
                   form={form}
                   name="supportEmail"
                   label="Support Email"
-                  description="Public customer support email address. Customers will see this email address on your storefront. This is a public facing email. "
+                  description="Public customer support email address. Shown on your storefront."
                   placeholder="support@example.com"
                   type="email"
                   required
@@ -309,27 +291,26 @@ export function GeneralSettings({ business }: Props) {
                   form={form}
                   name="phoneNumber"
                   label="Phone Number"
-                  description="Public business phone number. Customers will see this number on your storefront."
+                  description="Public business phone number. Shown on your storefront."
                   type="tel"
                   placeholder="123-456-7890"
                 />
               </CardContent>
             </Card>
 
-            {/* Customer Emails */}
+            {/* Business Address */}
             <Card>
               <CardHeader>
-                <CardTitle>Customer Emails</CardTitle>
-                <CardDescription>
-                  Automated emails sent to your customers
-                </CardDescription>
+                <CardTitle>Business Address</CardTitle>
+                <CardDescription>Public business address</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <SwitchFormField
+                <TextareaFormField
                   form={form}
-                  name="sendAbandonedCheckoutEmails"
-                  label="Send abandoned checkout recovery emails"
-                  description="Email shoppers who start checkout but don't finish, inviting them back to their cart."
+                  name="businessAddress"
+                  label="Business Address"
+                  description="Public business address. Customers will see this address on your storefront."
+                  placeholder="123 Main St, Detroit, MI, USA"
                 />
               </CardContent>
             </Card>

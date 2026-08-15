@@ -73,6 +73,16 @@ export type CreateOrderParams = {
   verifiedDiscountCodeId: string | null;
   discountAmount: number;
   deliveryMethod?: "ship" | "pickup";
+  /**
+   * Merchant-terms acceptance, captured at checkout — see the `Order` model
+   * docblock in schema.prisma. All optional/nullable: callers that don't
+   * pass them (e.g. tests exercising order shape in isolation) simply record
+   * no acceptance, which is the same honest "unknown" state pre-existing
+   * orders have.
+   */
+  termsAcceptedAt?: Date | null;
+  termsVersion?: string | null;
+  merchantTermsUpdatedAt?: Date | null;
 };
 
 /**
@@ -98,6 +108,9 @@ export async function createOrderFromCheckout(
     verifiedDiscountCodeId,
     discountAmount,
     deliveryMethod = "ship",
+    termsAcceptedAt = null,
+    termsVersion = null,
+    merchantTermsUpdatedAt = null,
   } = params;
 
   // Payment gate: only materialize the order (and, downstream in the webhook,
@@ -173,6 +186,11 @@ export async function createOrderFromCheckout(
             fulfillmentStatus: "unfulfilled",
 
             deliveryMethod,
+
+            // Merchant-terms acceptance — see the Order model docblock.
+            termsAcceptedAt,
+            termsVersion,
+            merchantTermsUpdatedAt,
 
             // Stripe reference
             stripeSessionId: session.id,

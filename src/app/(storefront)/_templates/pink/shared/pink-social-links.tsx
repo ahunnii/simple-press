@@ -1,4 +1,5 @@
 import { resolveSocialLinks } from "~/lib/social-links";
+import { cn } from "~/lib/utils";
 
 type PinkSocialLinksProps = {
   /** Raw `business.siteContent.socialLinks` JSON — parsed via the registry. */
@@ -35,7 +36,7 @@ export function PinkSocialLinks({
     : "border-[var(--pink-line-button)] text-[var(--pink-ink)] hover:border-[var(--pink-rose)] hover:text-[var(--pink-rose)]";
 
   return (
-    <div className={`flex flex-wrap gap-2.5${className ? ` ${className}` : ""}`}>
+    <div className={cn("flex flex-wrap gap-2.5", className)}>
       {links.map(({ key, url, ariaLabel, Icon }) => (
         <a
           key={key}

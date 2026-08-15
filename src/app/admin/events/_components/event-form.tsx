@@ -1,14 +1,16 @@
 "use client";
 
-import type { z } from "zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUploadFile } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ExternalLink, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, RotateCcw, Save, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
+import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
 import type { RouterOutputs } from "~/trpc/react";
 import { COMMON_TIME_ZONES } from "~/lib/time-zones";
 import { cn } from "~/lib/utils";
@@ -46,7 +48,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { TemplateImageUploadField } from "~/app/admin/content/template/_components/template-field-widgets";
+import { ImageUploadFormField } from "~/components/inputs/image-upload-form-field";
+import { AdminFormMoreMenu } from "~/app/admin/_components/admin-form-more-menu";
 
 import { toWallClockInput } from "./event-wall-clock";
 
@@ -59,7 +62,26 @@ type Props = {
   timeZone: string;
 };
 
-type FormValues = z.input<typeof eventFormSchema>;
+/**
+ * The wire schema plus one client-only field: the not-yet-uploaded cover image.
+ *
+ * `coverImageFile` holds a `File` in RHF state and is uploaded in `onSubmit`,
+ * NOT when the file is picked — an abandoned form must not leave an orphaned
+ * object in S3. `coverImage` (the persisted URL) stays the field that crosses
+ * the wire; `onSubmit` resolves one from the other. Same split as Collections'
+ * `imageFile`/`imageUrl`.
+ *
+ * Declared here rather than in `~/lib/validators/events` because `events.create`
+ * / `events.update` must never see it, and `eventFormSchema` is a `ZodEffects`
+ * (it carries the endAt≥startAt `.refine`), which cannot be `.extend()`ed —
+ * hence `z.intersection` rather than an extend.
+ */
+const eventFormWithImageSchema = z.intersection(
+  eventFormSchema,
+  z.object({ coverImageFile: z.instanceof(File).optional().nullable() }),
+);
+
+type FormValues = z.input<typeof eventFormWithImageSchema>;
 
 function timeZoneLabel(timeZone: string): string {
   return COMMON_TIME_ZONES.find((z) => z.value === timeZone)?.label ?? timeZone;
@@ -69,15 +91,22 @@ export function EventForm({ event, timeZone }: Props) {
   const router = useRouter();
   const utils = api.useUtils();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>(event?.coverImage ?? "");
+  const coverImageInputRef = useRef<HTMLInputElement | null>(null);
+  // URLs uploaded to S3 during the in-flight submit that aren't yet persisted
+  // to the DB. Populated right before `create`/`update` is called (those are
+  // fire-and-forget `mutate`, not `mutateAsync`) so the mutation's `onError`
+  // can discard them if the save itself fails — otherwise they'd be orphaned
+  // in S3 forever (the events router never deletes from S3).
+  const pendingUploadUrlsRef = useRef<string[]>([]);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(eventFormSchema),
+    resolver: zodResolver(eventFormWithImageSchema),
     mode: "onTouched",
     defaultValues: {
       name: event?.name ?? "",
       blurb: event?.blurb ?? "",
       coverImage: event?.coverImage ?? undefined,
+      coverImageFile: undefined,
       startAt: event
         ? toWallClockInput(event.startAt, event.allDay, timeZone)
         : "",
@@ -97,15 +126,47 @@ export function EventForm({ event, timeZone }: Props) {
     },
   });
 
+  const imageUploader = useUploadFile({
+    api: "/api/upload",
+    route: "image",
+    onError: (error) => {
+      toast.error(error.message ?? "Image upload failed.");
+    },
+  });
+
+  // Best-effort S3 cleanup for uploads whose parent save step failed. Not
+  // user-visible or blocking — the caller's own error path already completed.
+  const discardUploadsMutation = api.upload.discardUploads.useMutation({
+    onError: (err, variables) => {
+      console.warn(
+        "Failed to discard uploaded files; objects may be orphaned in S3:",
+        variables.urls,
+        err,
+      );
+    },
+  });
+
+  const discardPendingUploads = () => {
+    const urls = pendingUploadUrlsRef.current;
+    pendingUploadUrlsRef.current = [];
+    if (urls.length > 0) {
+      discardUploadsMutation.mutate({ urls });
+    }
+  };
+
   const createMutation = api.events.create.useMutation({
     onSuccess: (data) => {
       toast.dismiss();
       toast.success("Event created successfully");
+      // Uploads from this submit are now persisted (referenced by the new
+      // event) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
       void utils.events.invalidate();
       router.push(`/admin/events/${data.id}`);
     },
     onError: (err) => {
       toast.dismiss();
+      discardPendingUploads();
       toast.error(err.message ?? "Failed to create event");
     },
     onMutate: () => toast.loading("Creating event..."),
@@ -115,12 +176,16 @@ export function EventForm({ event, timeZone }: Props) {
     onSuccess: (data) => {
       toast.dismiss();
       toast.success("Event updated successfully");
+      // Uploads from this submit are now persisted (referenced by the updated
+      // event) — nothing to discard.
+      pendingUploadUrlsRef.current = [];
       void utils.events.invalidate();
-      setImageUrl(data.coverImage ?? "");
+      if (coverImageInputRef.current) coverImageInputRef.current.value = "";
       form.reset({
         name: data.name,
         blurb: data.blurb ?? "",
         coverImage: data.coverImage ?? undefined,
+        coverImageFile: undefined,
         startAt: toWallClockInput(data.startAt, data.allDay, timeZone),
         endAt:
           data.endAt != null
@@ -137,6 +202,7 @@ export function EventForm({ event, timeZone }: Props) {
     },
     onError: (err) => {
       toast.dismiss();
+      discardPendingUploads();
       toast.error(err.message ?? "Failed to update event");
     },
     onMutate: () => toast.loading("Updating event..."),
@@ -157,14 +223,43 @@ export function EventForm({ event, timeZone }: Props) {
     onMutate: () => toast.loading("Deleting event..."),
   });
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
+    // Objects uploaded to S3 during THIS submit. Tracked so they can be
+    // discarded if anything fails before (or during) the save mutation —
+    // otherwise a rejected save leaves orphans with nothing referencing them.
+    const uploadedThisSubmit: string[] = [];
+
+    // Three states, and they are NOT interchangeable on the wire:
+    //   File      → upload now, save the resulting URL
+    //   null      → the owner removed the image, save null to clear the column
+    //   undefined → untouched, keep whatever `coverImage` already holds
+    //               (`undefined` reaches Prisma as "leave this column alone")
+    let coverImage: string | null | undefined;
+    const coverImageFile = data.coverImageFile;
+    if (coverImageFile === null) {
+      coverImage = null;
+    } else if (coverImageFile instanceof File) {
+      try {
+        const response = await imageUploader.upload(coverImageFile);
+        const fileLocation =
+          (response.file.objectInfo.metadata?.pathname as string | undefined) ??
+          "";
+        if (fileLocation) {
+          coverImage = fileLocation;
+          uploadedThisSubmit.push(fileLocation);
+        }
+      } catch {
+        toast.error("Failed to upload image.");
+        return;
+      }
+    } else {
+      coverImage = data.coverImage ?? undefined;
+    }
+
     const payload = {
       name: data.name,
       blurb: data.blurb,
-      // imageUrl is a plain `string` (never null/undefined) local-state
-      // fallback outside the form — "" means "no image", which the schema's
-      // `.url().optional()` rejects, so it has to become undefined here.
-      coverImage: imageUrl || undefined,
+      coverImage,
       startAt: data.startAt,
       // Already undefined-or-valid by the time it gets here — the endAt
       // field's onChange (below) converts "" to undefined at input time,
@@ -177,6 +272,12 @@ export function EventForm({ event, timeZone }: Props) {
       priceLabel: data.priceLabel,
       published: data.published ?? true,
     };
+
+    // Hand off to the mutation's onError/onSuccess: `mutate` below is
+    // fire-and-forget, so this ref is how the mutation callbacks learn what
+    // was uploaded during the submit that's now in flight.
+    pendingUploadUrlsRef.current = uploadedThisSubmit;
+
     if (event?.id) {
       updateMutation.mutate({ id: event.id, ...payload });
     } else {
@@ -230,12 +331,47 @@ export function EventForm({ event, timeZone }: Props) {
     form.setValue("allDay", nextAllDay, { shouldDirty: true });
   };
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    imageUploader.isPending;
   const isDeleting = deleteMutation.isPending;
-  const isDirty =
-    form.formState.isDirty || imageUrl !== (event?.coverImage ?? "");
+  // No local image state to fold in any more: the pending cover image is a
+  // real RHF field (`coverImageFile`), so picking or removing one already
+  // marks the form dirty.
+  const isDirty = form.formState.isDirty;
 
   useDirtyForm(isDirty);
+
+  const handleReset = () => {
+    form.reset();
+    if (coverImageInputRef.current) coverImageInputRef.current.value = "";
+  };
+
+  const moreMenuItems: AdminFormMoreMenuItem[] = [
+    {
+      label: "View on storefront",
+      icon: ExternalLink,
+      href: "/events",
+    },
+    {
+      label: "Reset",
+      icon: RotateCcw,
+      disabled: isSubmitting || !isDirty,
+      onSelect: handleReset,
+    },
+    ...(event
+      ? [
+          {
+            label: "Delete",
+            icon: Trash2,
+            destructive: true,
+            disabled: isSubmitting,
+            onSelect: () => setShowDeleteDialog(true),
+          } satisfies AdminFormMoreMenuItem,
+        ]
+      : []),
+  ];
 
   return (
     <Form {...form}>
@@ -276,24 +412,6 @@ export function EventForm({ event, timeZone }: Props) {
           </div>
 
           <div className="toolbar-actions">
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="hidden sm:inline-flex"
-            >
-              <a
-                href="/events"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View events on storefront"
-                title="View events on storefront"
-              >
-                <ExternalLink className="h-4 w-4 lg:mr-2" />
-                <span className="hidden lg:inline">View on storefront</span>
-              </a>
-            </Button>
-
             <FormField
               control={form.control}
               name="published"
@@ -312,33 +430,7 @@ export function EventForm({ event, timeZone }: Props) {
               )}
             />
 
-            {event && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={isSubmitting}
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Delete</span>
-              </Button>
-            )}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isSubmitting || !isDirty}
-              onClick={() => {
-                form.reset();
-                setImageUrl(event?.coverImage ?? "");
-              }}
-              className="hidden md:inline-flex"
-            >
-              Reset
-            </Button>
+            <AdminFormMoreMenu items={moreMenuItems} />
 
             <Button type="submit" size="sm" disabled={isSubmitting}>
               {isSubmitting ? (
@@ -358,7 +450,11 @@ export function EventForm({ event, timeZone }: Props) {
         </div>
 
         <div className="admin-container space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* `items-start`: the two columns hold different numbers of cards, and
+              grid defaults to `align-items: stretch` — without it the shorter
+              column is stretched to the taller one's height, which nothing
+              inside consumes. Let each column size to its own content. */}
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
             {/* Left column */}
             <div className="space-y-4">
               <Card>
@@ -412,17 +508,20 @@ export function EventForm({ event, timeZone }: Props) {
                     )}
                   />
 
-                  {/* Cover image — uploads immediately, stores URL */}
-                  <div className="space-y-1.5">
-                    <Label className="text-sm font-medium">
-                      Flier or cover image
-                    </Label>
-                    <TemplateImageUploadField
-                      value={imageUrl}
-                      onChange={setImageUrl}
-                      description="Shown on your events page — visitors can tap it to see it full size."
-                    />
-                  </div>
+                  {/* Cover image — held as a File and uploaded on Save (see
+                      onSubmit), so abandoning the form can't orphan an S3
+                      object. `existingPreviewUrl` is watched, not read off the
+                      `event` prop, so the preview updates the moment a save
+                      lands rather than waiting on router.refresh(). */}
+                  <ImageUploadFormField
+                    form={form}
+                    name="coverImageFile"
+                    label="Flier or cover image"
+                    description="Shown on your events page — visitors can tap it to see it full size."
+                    existingPreviewUrl={form.watch("coverImage") ?? undefined}
+                    inputRef={coverImageInputRef}
+                    disabled={isSubmitting}
+                  />
                 </CardContent>
               </Card>
 
@@ -456,7 +555,16 @@ export function EventForm({ event, timeZone }: Props) {
                     )}
                   />
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {/* `items-start` is load-bearing here, not cosmetic. End has
+                      a FormDescription and Start doesn't, so End's FormItem is
+                      one grid row taller. Under the grid default of
+                      `align-items: stretch`, Start's FormItem — itself a
+                      `grid gap-2` with all-auto rows — is stretched to match
+                      and distributes the extra height into its own rows. Its
+                      FormLabel is a `flex items-center` Label, so the text
+                      vertically centres in that inflated row and visibly sinks
+                      below "End". The h-9 Input can't absorb it either. */}
+                  <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="startAt"

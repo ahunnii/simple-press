@@ -1,7 +1,4 @@
-import type {
-  TemplateField,
-  TemplateFieldGroup,
-} from "~/lib/template-fields";
+import type { TemplateField, TemplateFieldGroup } from "~/lib/template-fields";
 import type { TemplateSection } from "~/lib/template-sections";
 
 /**
@@ -71,13 +68,13 @@ const aboutMainData: TemplateField[] = [
     page: "about",
     group: "about.main",
     gridColumn: "col-span-full",
-    defaultValue:
-      "Our working members include Alex, Gabby, Jalin, and Jason",
+    defaultValue: "Our working members include Alex, Gabby, Jalin, and Jason",
   },
   {
     key: "coop.about.founding-text",
     label: "Founding Text",
-    description: "Paragraph about the cooperative's founding, below the portrait.",
+    description:
+      "Paragraph about the cooperative's founding, below the portrait.",
     type: "textarea",
     page: "about",
     group: "about.main",

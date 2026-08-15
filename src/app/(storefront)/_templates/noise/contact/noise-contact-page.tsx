@@ -49,7 +49,8 @@ export function NoiseContactPage({
     f["noise.contact.subheader"] ??
     "We read every message. For order questions, returns, or anything thoughtful you'd like to share — drop us a line below or write directly. We respond within one business day, Monday through Friday.";
   const contactImage = f["noise.contact-image"] ?? "";
-  const faqTitle = f["noise.contact-faq-title"] ?? "Frequently asked questions.";
+  const faqTitle =
+    f["noise.contact-faq-title"] ?? "Frequently asked questions.";
   const faqSubtitle =
     f["noise.contact-faq-subtitle"] ??
     "Can't find what you're looking for? Send us a message.";
@@ -164,7 +165,11 @@ export function NoiseContactPage({
               </div>
             </div>
 
-            <Accordion type="single" collapsible className="flex flex-col gap-0">
+            <Accordion
+              type="single"
+              collapsible
+              className="flex flex-col gap-0"
+            >
               {faqItems.map((item, index) => (
                 <AccordionItem
                   key={item._id ?? index}

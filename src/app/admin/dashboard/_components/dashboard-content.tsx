@@ -12,6 +12,7 @@ import {
   Package,
   Palette,
   Plus,
+  ShieldAlert,
   ShoppingCart,
   TrendingUp,
   Truck,
@@ -27,11 +28,17 @@ import {
   YAxis,
 } from "recharts";
 
+import { cn } from "~/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import {
+  DANGER_TEXT,
+  SUCCESS_TEXT,
+  WARNING_TEXT,
+} from "~/app/admin/_components/admin-table-style";
 
 type DashboardContentProps = {
   business: {
@@ -65,6 +72,11 @@ type DashboardContentProps = {
   };
   /** Optional Suspense-wrapped conversion-rate card (server-rendered). */
   conversionCard?: React.ReactNode;
+  /**
+   * Optional Suspense-wrapped "Search readiness N%" strip (server-rendered).
+   * Renders nothing once the score hits 100%, same as `setupProgress`.
+   */
+  searchReadiness?: React.ReactNode;
   /** Onboarding progress from /admin/welcome; null when setup is complete. */
   setupProgress: {
     completed: number;
@@ -73,6 +85,8 @@ type DashboardContentProps = {
   } | null;
   ordersToFulfillCount: number;
   awaitingPaymentCount: number;
+  /** True when Terms of Service or Refund Policy isn't published+non-empty. */
+  missingPolicies: boolean;
   recentOrders: Array<{
     id: string;
     orderNumber: number;
@@ -144,11 +158,12 @@ function DeltaChip({
   const up = pct > 0;
   return (
     <p
-      className={`mt-1 text-xs font-medium ${
+      className={cn(
+        "mt-1 text-xs font-medium",
         up
           ? "text-green-600 dark:text-green-500"
-          : "text-red-600 dark:text-red-500"
-      }`}
+          : "text-red-600 dark:text-red-500",
+      )}
     >
       <span aria-hidden="true">{up ? "▲" : "▼"}</span>
       <span className="sr-only">{up ? "Up" : "Down"}</span> {Math.abs(pct)}% vs{" "}
@@ -161,9 +176,11 @@ export function DashboardContent({
   business,
   stats,
   conversionCard,
+  searchReadiness,
   setupProgress,
   ordersToFulfillCount,
   awaitingPaymentCount,
+  missingPolicies,
   recentOrders,
   lowStockProducts,
   lowStockPools,
@@ -238,7 +255,8 @@ export function DashboardContent({
     ? `https://${business.customDomain}`
     : `https://${business.subdomain}.${process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ?? ""}`;
 
-  const hasAttentionItems = ordersToFulfillCount > 0 || awaitingPaymentCount > 0;
+  const hasAttentionItems =
+    ordersToFulfillCount > 0 || awaitingPaymentCount > 0 || missingPolicies;
 
   return (
     <div className="bg-muted min-h-screen">
@@ -268,7 +286,7 @@ export function DashboardContent({
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/admin/content/template">
+              <Link href="/editor?from=/admin/dashboard">
                 <Palette className="mr-1.5 h-3.5 w-3.5" />
                 Customize
               </Link>
@@ -315,6 +333,9 @@ export function DashboardContent({
             </CardContent>
           </Card>
         )}
+
+        {/* Search readiness (server-rendered; hides itself at 100%) */}
+        {searchReadiness}
 
         {/* Needs-Attention Strip */}
         {hasAttentionItems && (
@@ -365,6 +386,24 @@ export function DashboardContent({
                 </div>
               </Link>
             )}
+            {missingPolicies && (
+              <Link href="/admin/content/policies" className="group">
+                <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 transition-colors group-hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:group-hover:bg-slate-900/60">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 group-hover:bg-slate-300 dark:bg-slate-800 dark:group-hover:bg-slate-700">
+                    <ShieldAlert className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground text-sm font-semibold">
+                      No store policies published
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Add a Terms of Service &amp; Refund Policy
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-slate-600 transition-transform group-hover:translate-x-0.5 dark:text-slate-400" />
+                </div>
+              </Link>
+            )}
           </div>
         )}
 
@@ -389,7 +428,10 @@ export function DashboardContent({
                     {formatCurrency(stats.totalRevenue)}
                   </span>
                 </p>
-                <Link href="/admin/finances" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/admin/finances"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Full breakdown →
                 </Link>
               </div>
@@ -418,7 +460,9 @@ export function DashboardContent({
                 {stats.sevenDayRefunded > 0 && (
                   <>
                     {" "}
-                    &middot; &minus;{formatCurrency(stats.sevenDayRefunded)}{" "}
+                    &middot; &minus;{formatCurrency(
+                      stats.sevenDayRefunded,
+                    )}{" "}
                     refunded
                   </>
                 )}
@@ -473,8 +517,15 @@ export function DashboardContent({
           {conversionCard}
         </div>
 
-        {/* Two Column Layout */}
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Two Column Layout.
+
+            `items-start` matters: grid defaults to `align-items: stretch`, so
+            without it the shorter card is stretched to the taller one's height.
+            Nothing inside a Card consumes that space (CardContent has no
+            `flex-1`), so it became dead whitespace — most obvious when Low
+            Stock is empty and sat as a tall, near-blank card next to a full
+            Recent Orders. Let each card size to its own content instead. */}
+        <div className="mb-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           {/* Recent Orders */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -549,7 +600,9 @@ export function DashboardContent({
             <CardContent>
               {lowStockProducts.length === 0 && lowStockPools.length === 0 ? (
                 <div className="py-8 text-center">
-                  <Package className="mx-auto mb-3 h-12 w-12 text-green-400" />
+                  <Package
+                    className={`mx-auto mb-3 h-12 w-12 ${SUCCESS_TEXT}`}
+                  />
                   <p className="text-muted-foreground">
                     All stock levels are good!
                   </p>
@@ -562,10 +615,12 @@ export function DashboardContent({
                   {lowStockProducts.map((variant) => (
                     <div
                       key={variant.id}
-                      className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3"
+                      className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/40"
                     >
                       <div className="flex items-center gap-3">
-                        <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+                        <AlertTriangle
+                          className={`h-5 w-5 shrink-0 ${WARNING_TEXT}`}
+                        />
                         <div>
                           <p className="text-foreground text-sm font-medium">
                             {variant.product.name}
@@ -576,18 +631,32 @@ export function DashboardContent({
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-amber-700">
+                        <p className="text-sm font-semibold text-amber-700 dark:text-amber-500">
                           {variant.inventoryQty} left
                         </p>
                       </div>
                     </div>
                   ))}
                   {lowStockPools.map((pool) => (
-                    <Link key={pool.id} href="/admin/inventory">
-                      <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100">
+                    // Deep-link to the pool, not the list. This used to be
+                    // `/admin/inventory`, which worked only because the list was
+                    // unpaginated — the pool was always rendered, just below the
+                    // fold. Now a store with 26+ pools lands on page 1, which may
+                    // not contain the pool that was clicked.
+                    <Link key={pool.id} href={`/admin/inventory/${pool.id}`}>
+                      <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 transition-colors hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/40 dark:hover:bg-amber-950/60">
                         <div className="flex items-center gap-3">
                           <AlertTriangle
-                            className={`h-5 w-5 shrink-0 ${pool.inventoryQty === 0 ? "text-red-600" : "text-amber-600"}`}
+                            // `<= 0`, matching isOutOfStock in the inventory
+                            // page: the feeding query is `lte: 10` with no lower
+                            // bound, so a negative pool is in this list and must
+                            // read as broken, not merely low.
+                            className={cn(
+                              "h-5 w-5 shrink-0",
+                              pool.inventoryQty <= 0
+                                ? DANGER_TEXT
+                                : WARNING_TEXT,
+                            )}
                           />
                           <div>
                             <p className="text-foreground text-sm font-medium">
@@ -600,7 +669,12 @@ export function DashboardContent({
                         </div>
                         <div className="text-right">
                           <p
-                            className={`text-sm font-semibold ${pool.inventoryQty === 0 ? "text-red-700" : "text-amber-700"}`}
+                            className={cn(
+                              "text-sm font-semibold",
+                              pool.inventoryQty <= 0
+                                ? "text-red-700 dark:text-red-500"
+                                : "text-amber-700 dark:text-amber-500",
+                            )}
                           >
                             {pool.inventoryQty} left
                           </p>

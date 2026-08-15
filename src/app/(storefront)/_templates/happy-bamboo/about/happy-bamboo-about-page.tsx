@@ -196,8 +196,8 @@ export function HappyBambooAboutPage({
                 ) : (
                   <p className="text-lg leading-relaxed font-medium text-white md:text-xl">
                     Join us in our mission to make everyday moments healthier,
-                    cleaner and a lot more sustainable. Experience the
-                    softness and durability of our products, because{" "}
+                    cleaner and a lot more sustainable. Experience the softness
+                    and durability of our products, because{" "}
                     <span className="font-bold italic">
                       you deserve the best!
                     </span>
@@ -462,7 +462,9 @@ export function HappyBambooAboutPage({
                       <div className="flex flex-col items-center gap-2 sm:shrink-0">
                         <div className="rounded-lg bg-white p-3 shadow-sm">
                           <Image
-                            src={f["happy-bamboo.about-connect-with-us-qr-code"]}
+                            src={
+                              f["happy-bamboo.about-connect-with-us-qr-code"]
+                            }
                             alt="QR Code to leave a Google review"
                             width={140}
                             height={140}

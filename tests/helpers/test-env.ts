@@ -49,17 +49,23 @@ const DUMMIES: Record<string, string> = {
   // better-auth's captcha() plugin (src/server/better-auth/config.tsx) enforces
   // verification unconditionally on /sign-in/email, /sign-up/email, and
   // /request-password-reset — there is no NODE_ENV or missing-key bypass on the
-  // server side (unlike the separate HCaptchaField/verifyHCaptcha dev-bypass used
-  // by onboarding/claim forms). A literal "dummy" secret makes those endpoints
-  // permanently 400/403 for any Vitest test or e2e spec that exercises them
-  // through the real UI. hCaptcha publishes a dedicated site key/secret pair for
-  // exactly this: the widget always renders a checkbox that instantly verifies,
-  // and the real siteverify call (yes, a real network round-trip to hCaptcha)
-  // always returns success for this pair. See
-  // https://docs.hcaptcha.com/configuration#integration-testing-test-keys and
+  // server side. Google publishes no "always passes" test keypair for
+  // reCAPTCHA v3 (the well-known 6LeIxAcTAAAAAJcZ… pair is v2-only and won't
+  // load against the v3 script), so instead of pointing at a real Google
+  // keypair, NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS below activates an explicit
+  // sentinel bypass built for exactly this: `useRecaptchaV3`
+  // (src/lib/captcha/use-recaptcha-v3.ts) stages a fixed token
+  // (RECAPTCHA_TEST_BYPASS_TOKEN) instead of loading Google's script, and
+  // `verifyRecaptcha` (src/lib/captcha/verify-recaptcha.ts) accepts that exact
+  // token without calling Google — both gated on
+  // `NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS === "1"` AND `NODE_ENV !==
+  // "production"`, so it cannot activate in a deployed build even if this var
+  // leaked into one. RECAPTCHA_SECRET_KEY/NEXT_PUBLIC_RECAPTCHA_SITE_KEY below
+  // are therefore never actually sent to Google in tests — they exist only
+  // because src/env.js requires non-empty values at import time. See
   // e2e/auth.default.spec.ts, which is the first spec to actually drive a
   // credentialed sign-in through this gate.
-  HCAPTCHA_SECRET_KEY: "0x0000000000000000000000000000000000000000",
+  RECAPTCHA_SECRET_KEY: "test-recaptcha-secret-unused",
   VPS_IP: "127.0.0.1",
   SIMPLEPRESS_HASH_SECRET: "test-hash-secret",
   ARTISANAL_FUTURES_API_URL: "http://localhost:4000",
@@ -74,9 +80,11 @@ const DUMMIES: Record<string, string> = {
   NEXT_PUBLIC_EMAIL_FROM_NOREPLY: "noreply@test.dev",
   NEXT_PUBLIC_EMAIL_FROM_ORDERS: "orders@test.dev",
   NEXT_PUBLIC_EMAIL_FROM_SUPPORT: "support@test.dev",
-  // Paired with HCAPTCHA_SECRET_KEY above — hCaptcha's published "always
-  // passes" integration-testing site key.
-  NEXT_PUBLIC_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001",
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: "test-recaptcha-site-key-unused",
+  // The var that actually matters — see the comment on RECAPTCHA_SECRET_KEY
+  // above. Both env.js (below) and use-recaptcha-v3.ts / verify-recaptcha.ts
+  // require this exact string; anything else leaves the bypass off.
+  NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS: "1",
 };
 
 for (const [key, value] of Object.entries(DUMMIES)) {

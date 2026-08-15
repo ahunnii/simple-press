@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
-import { verifyHCaptcha } from "~/lib/captcha/verify-hcaptcha";
+import { verifyRecaptcha } from "~/lib/captcha/verify-recaptcha";
+import { captchaFailureToTrpcError } from "~/lib/captcha/trpc-error";
 import { checkBusiness } from "~/lib/check-business";
 import { sendContactFormSubmission } from "~/lib/email/templates";
 import { contactLimiter, getClientIpFromHeaders } from "~/lib/rate-limit";
@@ -17,10 +18,12 @@ export const contactRouter = createTRPCRouter({
     .use(featureGate("contactForm"))
     .input(contactSchema)
     .mutation(async ({ ctx, input }) => {
+      const requestHost = ctx.headers.get("host") ?? "";
+      const rawIp = getClientIpFromHeaders(ctx.headers);
+      const remoteIp = rawIp === "unknown" ? undefined : rawIp;
+
       try {
-        await contactLimiter.consume(
-          `${getClientIpFromHeaders(ctx.headers)}:${ctx.headers.get("host") ?? ""}`,
-        );
+        await contactLimiter.consume(`${rawIp}:${requestHost}`);
       } catch {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
@@ -28,16 +31,22 @@ export const contactRouter = createTRPCRouter({
         });
       }
 
-      const isValid =
-        process.env.NODE_ENV === "development"
-          ? true
-          : await verifyHCaptcha(input.captchaToken);
+      // No `NODE_ENV === "development"` short-circuit here (the hCaptcha
+      // version this replaces had one, and testimonials.submit never did —
+      // an inconsistency for no reason). verifyRecaptcha now owns the
+      // test-bypass decision itself via an explicit sentinel token
+      // (RECAPTCHA_TEST_BYPASS_TOKEN), doubly guarded on NODE_ENV !==
+      // "production" AND NEXT_PUBLIC_RECAPTCHA_TEST_BYPASS=1, so every call
+      // site behaves the same and dev/staging still exercise the real check
+      // by default.
+      const result = await verifyRecaptcha(input.captchaToken, {
+        action: "contact",
+        requestHost,
+        remoteIp,
+      });
 
-      if (!isValid) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Captcha verification failed",
-        });
+      if (!result.ok) {
+        throw captchaFailureToTrpcError(result.reason);
       }
 
       const { name, email, subject, message, phone, preferredContactMethod } =

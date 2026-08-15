@@ -7,14 +7,13 @@ import {
   useRef,
   useState,
 } from "react";
-
 import { Loader2 } from "lucide-react";
 
+import type { PreviewMessage } from "~/lib/preview/use-preview-bridge";
 import {
   postToIframe,
   PREVIEW_SOURCE,
   useIframeMessages,
-  type PreviewMessage,
 } from "~/lib/preview/use-preview-bridge";
 import { cn } from "~/lib/utils";
 
@@ -125,7 +124,10 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
         if (/^(https?:)?\/\//i.test(href)) {
           // Absolute URL: only guard same-origin ones; external links leave.
           try {
-            if (new URL(anchor.href).origin !== anchor.ownerDocument.location.origin) {
+            if (
+              new URL(anchor.href).origin !==
+              anchor.ownerDocument.location.origin
+            ) {
               return;
             }
           } catch {
@@ -230,7 +232,10 @@ export const PreviewFrame = forwardRef<PreviewFrameHandle, Props>(
 
     return (
       <div
-        className={cn("relative h-full transition-[width] duration-300", className)}
+        className={cn(
+          "relative h-full transition-[width] duration-300",
+          className,
+        )}
         style={{ width }}
       >
         <iframe

@@ -69,10 +69,56 @@ export async function GET(request: NextRequest) {
 
     const connectedAccountId = response.stripe_user_id;
 
+    // Seed the capability flags from the account itself rather than waiting for
+    // an `account.updated` webhook.
+    //
+    // Both columns default to `false` in the schema and, until now, the webhook
+    // was their ONLY writer. That made `false` ambiguous — it meant either
+    // "Stripe says this account cannot charge" or "no webhook has ever arrived
+    // for it" — which is why nothing in the checkout path can safely gate on
+    // them: a guard would refuse perfectly healthy stores whose `account.updated`
+    // simply never fired. Reading the account here makes `false` mean what it
+    // says for every newly connected store.
+    //
+    // Best-effort: a failure here must not fail the connection, since the OAuth
+    // grant has already been exchanged and the account id below is the part that
+    // actually matters. The webhook remains the ongoing source of truth.
+    // `stripe_user_id` is optional in Stripe's OAuthToken type, so the read is
+    // guarded rather than asserted — the `stripeAccountId` write below already
+    // tolerates undefined (the column is nullable) and that behavior is left
+    // exactly as it was.
+    let capabilities: { charges: boolean; payouts: boolean } | null = null;
+    try {
+      if (!connectedAccountId) throw new Error("Missing stripe_user_id");
+      const account = await stripeClient.accounts.retrieve(connectedAccountId);
+      capabilities = {
+        charges: account.charges_enabled ?? false,
+        payouts: account.payouts_enabled ?? false,
+      };
+    } catch (err) {
+      console.error("[Stripe Connect] Capability read failed:", err);
+      Sentry.captureException(err, {
+        tags: {
+          "stripe.oauth": "account-retrieve",
+          service: "stripe",
+          businessId,
+        },
+        extra: { connectedAccountId },
+      });
+    }
+
     // Save to database
     await db.business.update({
       where: { id: businessId },
-      data: { stripeAccountId: connectedAccountId },
+      data: {
+        stripeAccountId: connectedAccountId,
+        ...(capabilities
+          ? {
+              stripeChargesEnabled: capabilities.charges,
+              stripePayoutsEnabled: capabilities.payouts,
+            }
+          : {}),
+      },
     });
 
     console.log(

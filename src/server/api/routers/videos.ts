@@ -1,11 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { publishedVideoWhere } from "~/lib/youtube/query";
-import { fetchVideoOembed } from "~/lib/youtube/oembed";
-import { parseSourceInput, parseYouTubeVideoId } from "~/lib/youtube/parse";
-import { resolveChannelHandle } from "~/lib/youtube/resolve-channel";
-import { syncOneSource } from "~/lib/youtube/sync";
 import {
   videoCreateSchema,
   videoReorderSchema,
@@ -13,6 +8,11 @@ import {
   videoSourceUpdateSchema,
   videoUpdateSchema,
 } from "~/lib/validators/videos";
+import { fetchVideoOembed } from "~/lib/youtube/oembed";
+import { parseSourceInput, parseYouTubeVideoId } from "~/lib/youtube/parse";
+import { publishedVideoWhere } from "~/lib/youtube/query";
+import { resolveChannelHandle } from "~/lib/youtube/resolve-channel";
+import { syncOneSource } from "~/lib/youtube/sync";
 import {
   createTRPCRouter,
   featureGate,
@@ -43,9 +43,30 @@ export const videosRouter = createTRPCRouter({
       // Everything is returned unfiltered — the admin client splits
       // published/draft itself (see publishedVideoWhere for the
       // storefront-facing equivalent of that split).
+      //
+      // `select` here is deliberate: the admin list page is `getAll`'s only
+      // consumer (verified), and this drops both `@db.Text` description
+      // columns (`description`, `descriptionOverride`) from the RSC
+      // payload — the edit form fetches the full row via `getById`. The
+      // trailing `{ id: "asc" }` tie-break matches the platform's
+      // stable-order rule (see `getPublic` below, which uses the same
+      // three-key order).
       return ctx.db.video.findMany({
         where: { businessId },
-        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }],
+        select: {
+          id: true,
+          youtubeId: true,
+          title: true,
+          titleOverride: true,
+          thumbnailUrl: true,
+          thumbnailOverride: true,
+          channelTitle: true,
+          publishedAt: true,
+          published: true,
+          sortOrder: true,
+          sourceId: true,
+        },
+        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }, { id: "asc" }],
       });
     }),
 
@@ -357,11 +378,7 @@ export const videosRouter = createTRPCRouter({
 
       return ctx.db.video.findMany({
         where: publishedVideoWhere(businessId),
-        orderBy: [
-          { sortOrder: "asc" },
-          { publishedAt: "desc" },
-          { id: "asc" },
-        ],
+        orderBy: [{ sortOrder: "asc" }, { publishedAt: "desc" }, { id: "asc" }],
         ...(input?.limit ? { take: input.limit } : {}),
       });
     }),

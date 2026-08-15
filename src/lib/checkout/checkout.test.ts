@@ -9,7 +9,10 @@ import type {
 } from "./types";
 
 import { computeSubtotalCents } from "./pricing";
-import { resolveCheckoutShipping, shouldPinPaymentIntentShipping } from "./shipping";
+import {
+  resolveCheckoutShipping,
+  shouldPinPaymentIntentShipping,
+} from "./shipping";
 import { checkCartAvailability, computePoolDemand } from "./validate-cart";
 
 function makeItem(overrides: Partial<CartLineItem> = {}): CartLineItem {
@@ -100,7 +103,9 @@ describe("computeSubtotalCents", () => {
   });
 
   it("treats a missing variant record as price 0 (existing behavior preserved)", () => {
-    const items = [makeItem({ productId: "p1", variantId: "ghost", quantity: 5 })];
+    const items = [
+      makeItem({ productId: "p1", variantId: "ghost", quantity: 5 }),
+    ];
     expect(computeSubtotalCents(items, new Map(), new Map())).toBe(0);
   });
 });

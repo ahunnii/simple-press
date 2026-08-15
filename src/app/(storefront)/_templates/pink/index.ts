@@ -35,9 +35,9 @@ import { pinkVideosData, pinkVideosFieldGroups } from "./videos";
  *   - account pages have no page key at all and render purely from session /
  *     tRPC data.
  *
- * Product-page fields also live under `page: "global"` (groups `global.product-*`),
- * following vii's convention — a product page is per-record, so it has no editor
- * tab of its own (`product` is absent from `PAGE_PREVIEW_PATHS`).
+ * Product-page fields live under `page: "product"` (groups `product.*`) — the
+ * editor previews them on a sample product. Field keys keep their legacy
+ * `pink.global.product-` prefix to preserve saved owner values.
  *
  * Authority: docs/templates/pink/design.md
  */

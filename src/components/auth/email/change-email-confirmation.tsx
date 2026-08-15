@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ReactNode } from "react";
 import {
   Body,
   Button,
@@ -9,19 +9,17 @@ import {
   Html,
   Img,
   Link,
-  Preview,
   pixelBasedPreset,
+  Preview,
   Section,
   Tailwind,
-  Text
-} from "react-email"
+  Text,
+} from "react-email";
 
-import { cn } from "../../../lib/utils"
-import {
-  type EmailClassNames,
-  type EmailColors,
-  EmailStyles
-} from "./email-styles"
+import type { EmailClassNames, EmailColors } from "./email-styles";
+
+import { cn } from "../../../lib/utils";
+import { EmailStyles } from "./email-styles";
 
 const changeEmailConfirmationEmailLocalization = {
   CONFIRM_EMAIL_CHANGE: "Confirm your email change",
@@ -37,46 +35,46 @@ const changeEmailConfirmationEmailLocalization = {
   EMAIL_SENT_BY: "Email sent by {appName}.",
   IF_YOU_DIDNT_REQUEST_EMAIL_CHANGE:
     "If you didn't request this change, you can safely ignore this email. Your email address will stay the same.",
-  POWERED_BY_BETTER_AUTH: "Powered by {betterAuth}"
-}
+  POWERED_BY_BETTER_AUTH: "Powered by {betterAuth}",
+};
 
 /**
  * Localization strings for the ChangeEmailConfirmationEmail component.
  */
 export type ChangeEmailConfirmationEmailLocalization =
-  typeof changeEmailConfirmationEmailLocalization
+  typeof changeEmailConfirmationEmailLocalization;
 
 /**
  * Props for the ChangeEmailConfirmationEmail component.
  */
 export interface ChangeEmailConfirmationEmailProps {
   /** Confirmation URL sent by Better Auth to the user's current email address */
-  url: string
+  url: string;
   /** User's current email address */
-  currentEmail?: string
+  currentEmail?: string;
   /** Requested new email address */
-  newEmail?: string
+  newEmail?: string;
   /** Name of the application sending the email */
-  appName?: string
+  appName?: string;
   /** Number of minutes until the confirmation link expires */
-  expirationMinutes?: number
+  expirationMinutes?: number;
   /** Logo URL(s) - a single string or light/dark variants. If omitted, no logo is shown. */
-  logoURL?: string | { light: string; dark: string }
+  logoURL?: string | { light: string; dark: string };
   /** Custom CSS class names for styling specific parts of the email */
-  classNames?: EmailClassNames
+  classNames?: EmailClassNames;
   /** Custom color scheme for light and dark modes */
-  colors?: EmailColors
+  colors?: EmailColors;
   /** Whether to show the "Powered by better-auth" footer */
-  poweredBy?: boolean
+  poweredBy?: boolean;
   /** Whether to enable dark mode support */
-  darkMode?: boolean
+  darkMode?: boolean;
   /** Additional React nodes to inject into the email head */
-  head?: ReactNode
+  head?: ReactNode;
   /**
    * Localization overrides for customizing email text
    * @remarks `ChangeEmailConfirmationEmailLocalization`
    */
-  localization?: Partial<ChangeEmailConfirmationEmailLocalization>
+  localization?: Partial<ChangeEmailConfirmationEmailLocalization>;
 }
 
 /**
@@ -113,15 +111,15 @@ export const ChangeEmailConfirmationEmail = ({
 }: ChangeEmailConfirmationEmailProps) => {
   const localization = {
     ...ChangeEmailConfirmationEmail.localization,
-    ...props.localization
-  }
+    ...props.localization,
+  };
 
   const requestText = localization.EMAIL_CHANGE_REQUESTED.replace(
     "{appName}",
-    appName || ""
+    appName || "",
   )
     .replace(/\s{2,}/g, " ")
-    .replace(" .", ".")
+    .replace(" .", ".");
 
   return (
     <Html>
@@ -141,13 +139,13 @@ export const ChangeEmailConfirmationEmail = ({
           <Container
             className={cn(
               "mx-auto my-auto max-w-xl px-2 py-10",
-              classNames?.container
+              classNames?.container,
             )}
           >
             <Section
               className={cn(
-                "rounded-none border border-border bg-card p-8 text-card-foreground",
-                classNames?.card
+                "border-border bg-card text-card-foreground rounded-none border p-8",
+                classNames?.card,
               )}
             >
               {logoURL &&
@@ -165,7 +163,7 @@ export const ChangeEmailConfirmationEmail = ({
                       alt={appName || localization.LOGO}
                       className={cn(
                         "logo-light mx-auto mb-8",
-                        classNames?.logo
+                        classNames?.logo,
                       )}
                       height={48}
                       src={logoURL.light}
@@ -174,8 +172,8 @@ export const ChangeEmailConfirmationEmail = ({
                     <Img
                       alt={appName || localization.LOGO}
                       className={cn(
-                        "logo-dark hidden mx-auto mb-8",
-                        classNames?.logo
+                        "logo-dark mx-auto mb-8 hidden",
+                        classNames?.logo,
                       )}
                       height={48}
                       src={logoURL.dark}
@@ -187,7 +185,7 @@ export const ChangeEmailConfirmationEmail = ({
               <Heading
                 className={cn(
                   "m-0 mb-5 text-2xl font-semibold",
-                  classNames?.title
+                  classNames?.title,
                 )}
               >
                 {localization.CONFIRM_EMAIL_CHANGE}
@@ -200,16 +198,16 @@ export const ChangeEmailConfirmationEmail = ({
               {(currentEmail || newEmail) && (
                 <Section
                   className={cn(
-                    "my-6 border border-border bg-muted p-4",
-                    classNames?.codeBlock
+                    "border-border bg-muted my-6 border p-4",
+                    classNames?.codeBlock,
                   )}
                 >
                   {currentEmail && (
                     <>
                       <Text
                         className={cn(
-                          "m-0 mb-2 text-xs text-muted-foreground",
-                          classNames?.description
+                          "text-muted-foreground m-0 mb-2 text-xs",
+                          classNames?.description,
                         )}
                       >
                         {localization.CURRENT_EMAIL}
@@ -218,7 +216,7 @@ export const ChangeEmailConfirmationEmail = ({
                         className={cn(
                           "m-0 text-sm font-semibold",
                           newEmail && "mb-4",
-                          classNames?.content
+                          classNames?.content,
                         )}
                       >
                         {currentEmail}
@@ -230,16 +228,16 @@ export const ChangeEmailConfirmationEmail = ({
                     <>
                       <Text
                         className={cn(
-                          "m-0 mb-2 text-xs text-muted-foreground",
-                          classNames?.description
+                          "text-muted-foreground m-0 mb-2 text-xs",
+                          classNames?.description,
                         )}
                       >
                         {localization.NEW_EMAIL}
                       </Text>
                       <Text
                         className={cn(
-                          "m-0 text-sm font-semibold text-primary",
-                          classNames?.content
+                          "text-primary m-0 text-sm font-semibold",
+                          classNames?.content,
                         )}
                       >
                         {newEmail}
@@ -252,8 +250,8 @@ export const ChangeEmailConfirmationEmail = ({
               <Section className="my-6">
                 <Button
                   className={cn(
-                    "inline-block whitespace-nowrap rounded-none bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground no-underline",
-                    classNames?.button
+                    "bg-primary text-primary-foreground inline-block rounded-none px-6 py-2.5 text-sm font-medium whitespace-nowrap no-underline",
+                    classNames?.button,
                   )}
                   href={url}
                 >
@@ -263,8 +261,8 @@ export const ChangeEmailConfirmationEmail = ({
 
               <Text
                 className={cn(
-                  "m-0 mb-3 text-xs text-muted-foreground",
-                  classNames?.description
+                  "text-muted-foreground m-0 mb-3 text-xs",
+                  classNames?.description,
                 )}
               >
                 {localization.OR_COPY_AND_PASTE_URL}
@@ -272,8 +270,8 @@ export const ChangeEmailConfirmationEmail = ({
 
               <Link
                 className={cn(
-                  "break-all text-xs text-primary",
-                  classNames?.link
+                  "text-primary text-xs break-all",
+                  classNames?.link,
                 )}
                 href={url}
               >
@@ -282,20 +280,20 @@ export const ChangeEmailConfirmationEmail = ({
 
               <Hr
                 className={cn(
-                  "my-6 w-full border border-solid border-border",
-                  classNames?.separator
+                  "border-border my-6 w-full border border-solid",
+                  classNames?.separator,
                 )}
               />
 
               <Text
                 className={cn(
-                  "m-0 mb-3 text-xs text-muted-foreground",
-                  classNames?.description
+                  "text-muted-foreground m-0 mb-3 text-xs",
+                  classNames?.description,
                 )}
               >
                 {localization.THIS_LINK_EXPIRES_IN_MINUTES.replace(
                   "{expirationMinutes}",
-                  expirationMinutes.toString()
+                  expirationMinutes.toString(),
                 )}
                 {appName &&
                   ` ${localization.EMAIL_SENT_BY.replace("{appName}", appName)}`}
@@ -303,8 +301,8 @@ export const ChangeEmailConfirmationEmail = ({
 
               <Text
                 className={cn(
-                  "m-0 text-xs text-muted-foreground",
-                  classNames?.description
+                  "text-muted-foreground m-0 text-xs",
+                  classNames?.description,
                 )}
               >
                 {localization.IF_YOU_DIDNT_REQUEST_EMAIL_CHANGE}
@@ -313,13 +311,13 @@ export const ChangeEmailConfirmationEmail = ({
               {poweredBy && (
                 <Text
                   className={cn(
-                    "m-0 mt-4 text-center text-[11px] text-muted-foreground",
-                    classNames?.poweredBy
+                    "text-muted-foreground m-0 mt-4 text-center text-[11px]",
+                    classNames?.poweredBy,
                   )}
                 >
                   {(() => {
                     const [beforeBetterAuth, afterBetterAuth] =
-                      localization.POWERED_BY_BETTER_AUTH.split("{betterAuth}")
+                      localization.POWERED_BY_BETTER_AUTH.split("{betterAuth}");
 
                     return (
                       <>
@@ -327,7 +325,7 @@ export const ChangeEmailConfirmationEmail = ({
                         <Link
                           className={cn(
                             "text-primary underline",
-                            classNames?.link
+                            classNames?.link,
                           )}
                           href="https://better-auth.com"
                         >
@@ -335,7 +333,7 @@ export const ChangeEmailConfirmationEmail = ({
                         </Link>
                         {afterBetterAuth}
                       </>
-                    )
+                    );
                   })()}
                 </Text>
               )}
@@ -344,11 +342,11 @@ export const ChangeEmailConfirmationEmail = ({
         </Body>
       </Tailwind>
     </Html>
-  )
-}
+  );
+};
 
 ChangeEmailConfirmationEmail.localization =
-  changeEmailConfirmationEmailLocalization
+  changeEmailConfirmationEmailLocalization;
 
 ChangeEmailConfirmationEmail.PreviewProps = {
   url: "https://better-auth-ui.com/api/auth/change-email/verify?token=example-token",
@@ -356,7 +354,7 @@ ChangeEmailConfirmationEmail.PreviewProps = {
   newEmail: "new@example.com",
   appName: "Better Auth",
   poweredBy: true,
-  darkMode: true
-} as ChangeEmailConfirmationEmailProps
+  darkMode: true,
+} as ChangeEmailConfirmationEmailProps;
 
-export default ChangeEmailConfirmationEmail
+export default ChangeEmailConfirmationEmail;

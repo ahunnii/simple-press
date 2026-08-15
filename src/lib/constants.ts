@@ -12,6 +12,7 @@ export const TEMPLATE_IDS = {
   BUILDERS: "builders",
   COOP: "coop",
   PINK: "pink",
+  RELOCATION: "relocation",
 } as const;
 
 export const TEMPLATES = [
@@ -105,6 +106,13 @@ export const TEMPLATES = [
     description:
       "Editorial gallery storefront for makers — near-black chrome against warm paper, square edges and hairline grids; full commerce plus workshops, journal and keeper stories",
     previewImage: "/templates/pink-preview.png",
+  },
+  {
+    id: TEMPLATE_IDS.RELOCATION,
+    name: "Handy Relocations",
+    description:
+      "1:1 recreation of handyrelocations.com — terracotta wave heroes, quote form, reviews, and FAQ for a Detroit moving company (no shop or checkout)",
+    previewImage: "/templates/relocation-preview.png",
   },
 ] as const;
 

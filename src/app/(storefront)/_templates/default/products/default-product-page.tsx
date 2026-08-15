@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { DefaultProductPageTemplateProps } from "../../types";
 import type { TiptapJSON } from "~/components/tiptap-renderer";
 import type { Product } from "~/types";
+import { sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { computeSavingsLabel } from "~/lib/prices";
 import {
   getListFieldValue,
@@ -204,8 +205,10 @@ export function DefaultProductPage({
               ))}
             </div>
 
-            {/* Accordion */}
-            <div className="mt-2">
+            {/* Accordion — the shipping/question copy inside comes from the
+                "Product page details" section, so the whole block is one
+                editor hotspot (never annotate the same group twice). */}
+            <div className="mt-2" {...sectionGroupAttr("product", "details")}>
               <AccordionItem summary="Details" defaultOpen>
                 {!isAdditionalEmpty ? (
                   <TiptapRenderer

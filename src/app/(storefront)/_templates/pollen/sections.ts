@@ -39,7 +39,7 @@ export const pollenSections: Record<string, TemplateSection[]> = {
       id: "homepage.services",
       page: "homepage",
       title: "Services",
-      description: "\"About Our Services\" band with service cards.",
+      description: '"About Our Services" band with service cards.',
       groupIds: ["homepage.services"],
       order: 1,
       hideable: true,

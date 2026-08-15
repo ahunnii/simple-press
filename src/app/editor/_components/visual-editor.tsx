@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import type { CmsPageDraftValues } from "./cms-page-panel";
+import type { DeviceKind } from "./editor-preview";
+import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
 import type { PreviewFrameHandle } from "~/components/preview/preview-frame";
 import type { TemplateSection } from "~/lib/template-sections";
 import { PREVIEW_COOKIE } from "~/lib/preview/preview-constants";
@@ -15,17 +18,14 @@ import {
   setThemeSelection,
   SP_META_KEY,
 } from "~/lib/sp-meta";
+import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { isBlogPostContextSection } from "~/lib/template-sections";
 import { getTemplateTheme } from "~/lib/template-themes";
-import { groupFieldsByPage, PAGE_METADATA } from "~/lib/template-fields";
 import { api } from "~/trpc/react";
 
-import type { DeviceKind } from "./editor-preview";
-import { DEVICE_WIDTHS, EditorPreview } from "./editor-preview";
-import type { CmsPageDraftValues } from "./cms-page-panel";
 import { CmsPagePanel } from "./cms-page-panel";
 import { CmsPageRail } from "./cms-page-rail";
-import type { EditorTopBarCmsPage, EditorTopBarPage } from "./editor-top-bar";
+import { DEVICE_WIDTHS, EditorPreview } from "./editor-preview";
 import { EditorTopBar } from "./editor-top-bar";
 import { FieldPanel } from "./field-panel";
 import { NotesPanel } from "./notes-panel";
@@ -35,6 +35,22 @@ import { ThemePanel } from "./theme-panel";
 const FLUSH_DEBOUNCE_MS = 800;
 const FLUSH_RETRY_MS = 5000;
 const MAX_FLUSH_RETRIES = 3;
+
+/**
+ * Synthetic page key for the shared sign-in / sign-up screen.
+ *
+ * No template declares fields with `page: "authentication"` — the auth image
+ * and logo-size fields are site-wide, so they live on the `global` page. But
+ * `global` deliberately has no preview path (its sections are chrome that
+ * appears on every page), which left the auth fields editable with nothing to
+ * look at. This page key exists purely to give them a preview: it has an entry
+ * in `PAGE_PREVIEW_PATHS` and is offered only when the active template really
+ * declares the `global.authentication` section.
+ */
+const AUTH_PAGE = "authentication";
+
+/** Section id whose fields the synthetic Authentication page previews. */
+const AUTH_SECTION_ID = "global.authentication";
 
 /** Fallback used only if a draft is somehow requested for an unknown page. */
 const EMPTY_CMS_VALUES: CmsPageDraftValues = {
@@ -80,6 +96,24 @@ function cmsAdminHref(p: EditorCmsPage): string {
     : `/admin/content/pages/${p.id}`;
 }
 
+/** The representative product previewed by the "product" page entry. */
+export type EditorProductPreview = { slug: string; name: string };
+
+/**
+ * Storefront path for a template page key. Every key except `"product"` has a
+ * static path; the product page previews a representative product, so its path
+ * depends on the resolved sample (and falls back to the homepage without one).
+ */
+function resolvePreviewPath(
+  page: string,
+  productPreview: EditorProductPreview | null,
+): string {
+  if (page === "product") {
+    return productPreview ? `/shop/${productPreview.slug}` : "/";
+  }
+  return PAGE_PREVIEW_PATHS[page] ?? "/";
+}
+
 export type VisualEditorProps = {
   businessId: string;
   businessName: string;
@@ -97,10 +131,18 @@ export type VisualEditorProps = {
    * only for display (top-bar groups, storefront path, admin deep link).
    */
   cmsPages: EditorCmsPage[];
+  /**
+   * Representative product for the "Product" page entry — the newest published
+   * product, or null when the business has none (or `products` is off). Null
+   * hides the entry entirely and clamps `?page=product` deep links.
+   */
+  productPreview: EditorProductPreview | null;
   /** All sections for the active template (all pages, template order). */
   sections: TemplateSection[];
   embedsEnabled: boolean;
   mediaEnabled: boolean;
+  /** Feature-flag keys enabled for this business — filters field-panel admin links. */
+  enabledFeatures: string[];
   /** Deep-link initial page (defaults to "homepage"). */
   initialPage: string;
   /** Deep-link initial section id, or null. */
@@ -128,7 +170,9 @@ function stableStringify(value: unknown): string {
 }
 
 /** Strip the reserved `_sp` editor-metadata namespace before comparing. */
-function withoutSpMeta(fields: Record<string, unknown>): Record<string, unknown> {
+function withoutSpMeta(
+  fields: Record<string, unknown>,
+): Record<string, unknown> {
   const rest = { ...fields };
   delete rest[SP_META_KEY];
   return rest;
@@ -204,19 +248,65 @@ export function VisualEditor({
   previewCustomFields,
   hasDraft,
   cmsPages,
+  productPreview,
   sections,
   embedsEnabled,
   mediaEnabled,
+  enabledFeatures,
   initialPage,
   initialSection,
   isPlatformAdmin,
 }: VisualEditorProps) {
-  // Selectable pages: page keys that have both template fields and a preview path.
+  /**
+   * Whether the synthetic Authentication page is offered for this template.
+   * Gated on the template actually declaring the auth section — the 5
+   * templates with no `*.global.authentication-image` field would otherwise
+   * get a page with an empty rail and nothing to edit.
+   */
+  const authPageAvailable = useMemo(
+    () => sections.some((s) => s.id === AUTH_SECTION_ID),
+    [sections],
+  );
+
+  /**
+   * Whether a template page key can be shown in the preview iframe. Static
+   * paths come from `PAGE_PREVIEW_PATHS`; `"product"` is previewable only when
+   * a representative product exists, so templates with product-page fields but
+   * a business with none published never offer it. `"authentication"` is
+   * gated the same way on the template declaring the auth section — the check
+   * must come FIRST, since the key is in `PAGE_PREVIEW_PATHS` for every
+   * template and would otherwise pass unconditionally.
+   */
+  const isPreviewablePage = useCallback(
+    (key: string) => {
+      if (key === AUTH_PAGE) return authPageAvailable;
+      return (
+        key in PAGE_PREVIEW_PATHS ||
+        (key === "product" && productPreview !== null)
+      );
+    },
+    [productPreview, authPageAvailable],
+  );
+
+  // Selectable pages: page keys that have both template fields and a preview
+  // path. `groupFieldsByPage` only yields keys the template declares fields
+  // for, so "product" appears only on templates migrated to product-page
+  // fields AND businesses with a previewable product.
   const pages: EditorTopBarPage[] = useMemo(() => {
-    return Object.keys(groupFieldsByPage(templateId))
-      .filter((key) => key in PAGE_PREVIEW_PATHS)
+    const fromFields = Object.keys(groupFieldsByPage(templateId))
+      .filter((key) => isPreviewablePage(key))
       .map((key) => ({ value: key, label: pageLabel(key) }));
-  }, [templateId]);
+    // The auth fields are declared on the `global` page, so this entry can
+    // never come out of `groupFieldsByPage` — append it explicitly.
+    return authPageAvailable
+      ? [...fromFields, { value: AUTH_PAGE, label: pageLabel(AUTH_PAGE) }]
+      : fromFields;
+  }, [templateId, isPreviewablePage, authPageAvailable]);
+
+  const enabledFeatureSet = useMemo(
+    () => new Set(enabledFeatures),
+    [enabledFeatures],
+  );
 
   // Field type lookup — text/textarea fields get the live-patch fast path.
   const fieldTypeByKey = useMemo(() => {
@@ -245,7 +335,7 @@ export function VisualEditor({
   const initialSectionObj =
     deepLinkedSection &&
     (deepLinkedSection.page === "global" ||
-      deepLinkedSection.page in PAGE_PREVIEW_PATHS)
+      isPreviewablePage(deepLinkedSection.page))
       ? deepLinkedSection
       : null;
   const clampedInitialPage =
@@ -253,13 +343,18 @@ export function VisualEditor({
     // pages have no sections, so the section branch never applies to them.
     isCmsPage(initialPage) && cmsPageById.has(cmsPageId(initialPage))
       ? initialPage
-      : initialSectionObj &&
-          initialSectionObj.page !== "global" &&
-          initialSectionObj.page in PAGE_PREVIEW_PATHS
-        ? initialSectionObj.page
-        : initialPage in PAGE_PREVIEW_PATHS
-          ? initialPage
-          : defaultPage;
+      : // The auth section is declared on `global` but has a preview page of
+        // its own, so `?section=global.authentication` lands there rather than
+        // opening the panel over an unrelated page.
+        initialSectionObj?.id === AUTH_SECTION_ID && authPageAvailable
+        ? AUTH_PAGE
+        : initialSectionObj &&
+            initialSectionObj.page !== "global" &&
+            isPreviewablePage(initialSectionObj.page)
+          ? initialSectionObj.page
+          : isPreviewablePage(initialPage)
+            ? initialPage
+            : defaultPage;
 
   // ── State ──
   const [publishedFields, setPublishedFields] =
@@ -308,11 +403,13 @@ export function VisualEditor({
     return map;
   });
   /** Page ids whose draft is persisted server-side. */
-  const [serverCmsDraftIds, setServerCmsDraftIds] = useState<Set<string>>(() => {
-    const set = new Set<string>();
-    for (const p of cmsPages) if (p.hasDraft) set.add(p.id);
-    return set;
-  });
+  const [serverCmsDraftIds, setServerCmsDraftIds] = useState<Set<string>>(
+    () => {
+      const set = new Set<string>();
+      for (const p of cmsPages) if (p.hasDraft) set.add(p.id);
+      return set;
+    },
+  );
 
   // ── Refs ──
   const previewRef = useRef<PreviewFrameHandle>(null);
@@ -576,7 +673,10 @@ export function VisualEditor({
       // Live-patch fast path: text/textarea edits are pushed straight into
       // the iframe DOM. Everything else reloads the preview on next flush.
       const type = fieldTypeByKey.get(key);
-      if ((type === "text" || type === "textarea") && typeof value === "string") {
+      if (
+        (type === "text" || type === "textarea") &&
+        typeof value === "string"
+      ) {
         const sent = previewRef.current?.postMessage({
           source: PREVIEW_SOURCE,
           type: "sp:patch-fields",
@@ -694,7 +794,10 @@ export function VisualEditor({
             pendingCmsIds.map((id) => {
               const values = cmsDraftsRef.current[id];
               if (!values) return Promise.resolve();
-              return saveCmsPageDraft.mutateAsync({ pageId: id, draft: values });
+              return saveCmsPageDraft.mutateAsync({
+                pageId: id,
+                draft: values,
+              });
             }),
           );
           setServerCmsDraftIds((prev) => {
@@ -857,12 +960,25 @@ export function VisualEditor({
 
   // ── Navigation ──
   const sectionsForPage = useMemo(
-    () => sections.filter((s) => s.page === activePage),
+    () =>
+      // The auth section's `page` is "global", so it never matches the
+      // synthetic page key — list it explicitly while that page is open.
+      activePage === AUTH_PAGE
+        ? sections.filter((s) => s.id === AUTH_SECTION_ID)
+        : sections.filter((s) => s.page === activePage),
     [sections, activePage],
   );
   const globalSections = useMemo(
-    () => sections.filter((s) => s.page === "global"),
-    [sections],
+    () =>
+      sections.filter(
+        (s) =>
+          s.page === "global" &&
+          // Moved out of the pinned "Site-wide" group and onto its own page,
+          // so it appears exactly once. Templates that never declare it aren't
+          // affected (nothing to filter, and no Authentication page either).
+          !(authPageAvailable && s.id === AUTH_SECTION_ID),
+      ),
+    [sections, authPageAvailable],
   );
   const activeSection = useMemo(
     () => sections.find((s) => s.id === activeSectionId) ?? null,
@@ -886,17 +1002,35 @@ export function VisualEditor({
   // The rail/panel/label all read the DRAFT title so renames reflect live.
   const activeCmsTitle =
     activeCmsId !== null
-      ? (cmsDrafts[activeCmsId]?.title ?? activeCmsPage?.live.title ?? "").trim()
+      ? (
+          cmsDrafts[activeCmsId]?.title ??
+          activeCmsPage?.live.title ??
+          ""
+        ).trim()
       : "";
 
   const previewPath = activeCmsPage
     ? cmsPreviewPath(activeCmsPage)
-    : (PAGE_PREVIEW_PATHS[activePage] ?? "/");
+    : resolvePreviewPath(activePage, productPreview);
+
+  // The product page previews ONE sample product — say so, so an owner never
+  // reads a per-product edit into what is really a site-wide default. The auth
+  // page previews ONE of several screens that share the same shell, and its
+  // side image is a `lg:` -only element, so both facts are called out too.
+  const previewNotice = activeCmsPage
+    ? undefined
+    : activePage === "product" && productPreview
+      ? `Previewing "${productPreview.name}" — changes here apply to every product page`
+      : activePage === AUTH_PAGE
+        ? "Previewing the sign-in screen — these settings appear on every sign-in and sign-up page. The side image is hidden at tablet and mobile widths."
+        : undefined;
 
   // Human label for the active page — template label, or CMS draft title.
   const activePageLabel = useMemo(() => {
     if (activeCmsId !== null) return titleOrUntitled(activeCmsTitle);
-    return pages.find((p) => p.value === activePage)?.label ?? pageLabel(activePage);
+    return (
+      pages.find((p) => p.value === activePage)?.label ?? pageLabel(activePage)
+    );
   }, [activeCmsId, activeCmsTitle, pages, activePage]);
 
   // CMS Select entries for the top bar (value `cms:<id>`, label = draft title).
@@ -934,6 +1068,23 @@ export function VisualEditor({
       // their article + site-wide sections) — swap the right panel to fields.
       setCmsPanelOpen(false);
       setActiveSectionId(section.id);
+
+      // The auth section renders ONLY on /auth/*, so it is never present in
+      // the current preview document unless its own page is already open.
+      // Switch to that page instead of posting a focus message the iframe
+      // can't satisfy. (Every other global section is chrome that renders on
+      // whatever page is showing, so they keep focusing in place.)
+      if (
+        section.id === AUTH_SECTION_ID &&
+        authPageAvailable &&
+        activePage !== AUTH_PAGE
+      ) {
+        // The iframe is about to navigate — focusing now would post to the
+        // outgoing document. The rail row stays selected across the switch.
+        setActivePage(AUTH_PAGE);
+        return;
+      }
+
       // focusGroup expects the BARE group name — the overlay rebuilds the
       // full data-sp-group value as `${page}.${group}` (see preview-overlay).
       const bareGroup = section.id.startsWith(`${section.page}.`)
@@ -941,7 +1092,7 @@ export function VisualEditor({
         : section.id;
       previewRef.current?.focusGroup(section.page, bareGroup);
     },
-    [],
+    [activePage, authPageAvailable],
   );
 
   const handlePageChange = useCallback((page: string) => {
@@ -1072,14 +1223,14 @@ export function VisualEditor({
         setActiveSectionId(group);
         return;
       }
-      if (page !== activePage && page in PAGE_PREVIEW_PATHS) {
+      if (page !== activePage && isPreviewablePage(page)) {
         setActivePage(page);
       }
       setNotesOpen(false);
       setThemeOpen(false);
       setActiveSectionId(group);
     },
-    [activePage, activeCmsPage, sections],
+    [activePage, activeCmsPage, sections, isPreviewablePage],
   );
 
   const handleSelectTheme = useCallback(() => {
@@ -1156,6 +1307,7 @@ export function VisualEditor({
           path={previewPath}
           width={DEVICE_WIDTHS[device]}
           isUpdating={isUpdating}
+          notice={previewNotice}
           onEditGroup={handleEditGroup}
           onPatched={handlePatched}
           frameRef={previewRef}
@@ -1200,6 +1352,7 @@ export function VisualEditor({
             onFieldChange={applyFieldUpdate}
             embedsEnabled={embedsEnabled}
             mediaEnabled={mediaEnabled}
+            enabledFeatures={enabledFeatureSet}
             disabled={isPublishing || mutationPending}
             onClose={() => setActiveSectionId(null)}
             hint={

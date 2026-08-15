@@ -43,7 +43,6 @@
  *              var(--vii-scrim-strong)@0% / var(--vii-scrim-medium)@60% / var(--vii-scrim-soft)@100%
  *              resolved values: 82% / 25% / 10%
  */
-
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 

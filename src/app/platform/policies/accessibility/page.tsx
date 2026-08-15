@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { env } from "~/env";
+import {
+  formatPolicyDate,
+  POLICY_LAST_UPDATED,
+} from "~/lib/legal/policy-versions";
 
 export const metadata: Metadata = {
   title: "Accessibility Statement | SimplePress",
-  description: "SimplePress commitment to WCAG 2.1 AA accessibility and how to report issues.",
+  description:
+    "SimplePress commitment to WCAG 2.1 AA accessibility and how to report issues.",
   alternates: {
     canonical: `https://${env.NEXT_PUBLIC_PLATFORM_DOMAIN}/platform/policies/accessibility`,
   },
@@ -19,7 +25,9 @@ export default function AccessibilityStatementPage() {
     <div className="prose prose-lg mx-auto w-full max-w-7xl px-4 py-8">
       <h1>Accessibility Statement</h1>
       <p>
-        <strong>Last updated: June 7, 2026</strong>
+        <strong>
+          Last updated: {formatPolicyDate(POLICY_LAST_UPDATED.accessibility)}
+        </strong>
       </p>
       <p>
         SimplePress is operated by the Center for Generative Justice LLC. We are

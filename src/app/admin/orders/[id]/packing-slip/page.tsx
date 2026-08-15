@@ -44,6 +44,8 @@ export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const order = await api.order.getById(id);
   return {
-    title: order ? `Packing Slip — Order #${order.orderNumber}` : "Packing Slip",
+    title: order
+      ? `Packing Slip — Order #${order.orderNumber}`
+      : "Packing Slip",
   };
 }

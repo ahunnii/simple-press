@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  CARRIERS,
   buildTrackingUrl,
+  CARRIERS,
   detectCarrier,
 } from "~/data/fulfillment-constants";
 import { formatDistanceToNow } from "date-fns";

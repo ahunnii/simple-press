@@ -18,6 +18,7 @@ import { toast } from "sonner";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -74,9 +74,7 @@ export function VideoSourcesClient({ sources }: Props) {
 
   const syncMutation = api.videos.syncNow.useMutation({
     onSuccess: (data) => {
-      toast.success(
-        `Synced — ${data.added} added, ${data.updated} updated`,
-      );
+      toast.success(`Synced — ${data.added} added, ${data.updated} updated`);
     },
     onError: (err) => {
       toast.error(err.message ?? "Sync failed");
@@ -128,15 +126,15 @@ export function VideoSourcesClient({ sources }: Props) {
         <AlertDescription>
           <p>
             A <strong>playlist</strong> works across accounts — you can add
-            videos from other people&apos;s channels into your own playlist,
-            and we&apos;ll follow that playlist. A <strong>channel</strong>{" "}
-            pulls in everything that channel posts.
+            videos from other people&apos;s channels into your own playlist, and
+            we&apos;ll follow that playlist. A <strong>channel</strong> pulls in
+            everything that channel posts.
           </p>
           <p>
             Turn <strong>auto-publish off</strong> for a playlist you curate
-            from other people&apos;s videos, so new finds land as drafts for
-            you to review first. Turn it <strong>on</strong> for your own
-            channel, where everything is fair game to show right away.
+            from other people&apos;s videos, so new finds land as drafts for you
+            to review first. Turn it <strong>on</strong> for your own channel,
+            where everything is fair game to show right away.
           </p>
         </AlertDescription>
       </Alert>
@@ -196,10 +194,9 @@ export function VideoSourcesClient({ sources }: Props) {
             </AlertDialogTitle>
             <AlertDialogDescription>
               This stops syncing new videos from this{" "}
-              {deleteTarget?.kind ?? "source"}. It does{" "}
-              <strong>not</strong> delete the videos it already added — they
-              stay on your site as regular entries you can keep, edit, or
-              remove individually.
+              {deleteTarget?.kind ?? "source"}. It does <strong>not</strong>{" "}
+              delete the videos it already added — they stay on your site as
+              regular entries you can keep, edit, or remove individually.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -522,9 +519,9 @@ function SourceFormDialog({
                 />
                 <p className="text-muted-foreground text-xs">
                   Playlist IDs are visible right in the playlist URL. Channel
-                  IDs aren&apos;t — if pasting a @handle doesn&apos;t work,
-                  find the channel ID in YouTube Studio → Settings → Channel
-                  → Advanced.
+                  IDs aren&apos;t — if pasting a @handle doesn&apos;t work, find
+                  the channel ID in YouTube Studio → Settings → Channel →
+                  Advanced.
                 </p>
               </div>
             )}

@@ -37,8 +37,8 @@ function SignupCompleteContent() {
       <CardHeader>
         <CardTitle>Check your email</CardTitle>
         <CardDescription>
-          We&apos;ve sent a verification email to your inbox. Click the link
-          to activate your account, then sign in.
+          We&apos;ve sent a verification email to your inbox. Click the link to
+          activate your account, then sign in.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -59,8 +59,8 @@ function SignupCompleteFallback() {
       <CardHeader>
         <CardTitle>Check your email</CardTitle>
         <CardDescription>
-          We&apos;ve sent a verification email to your inbox. Click the link
-          to activate your account, then sign in.
+          We&apos;ve sent a verification email to your inbox. Click the link to
+          activate your account, then sign in.
         </CardDescription>
       </CardHeader>
       <CardContent>

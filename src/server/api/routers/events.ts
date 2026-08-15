@@ -6,8 +6,10 @@ import { normalizeEventDates } from "~/lib/events/normalize";
 import { upcomingEventWhere } from "~/lib/events/query";
 import {
   eventArchiveSchema,
+  eventBulkArchiveSchema,
+  eventBulkDeleteSchema,
+  eventBulkPublishSchema,
   eventCreateSchema,
-  eventReorderSchema,
   eventUpdateSchema,
 } from "~/lib/validators/events";
 import {
@@ -15,6 +17,7 @@ import {
   featureGate,
   getBusinessProcedure,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
@@ -46,12 +49,40 @@ export const eventsRouter = createTRPCRouter({
     .use(featureGate("events"))
     .query(async ({ ctx }) => {
       const { businessId } = ctx;
-      // Everything is returned unfiltered — the admin client splits it into
-      // Upcoming/Past tabs itself (see pastEventWhere/upcomingEventWhere for
-      // the storefront-facing equivalents of that split).
+      // Input-free: the admin page filters (When/Status/search), sorts and
+      // paginates in memory via `buildTablePage`, so the router just ships
+      // the full tenant-scoped set. `orderBy` here is only a stable transport
+      // order — the page re-sorts according to its own sort param.
+      //
+      // The `select` below is the admin table's row contract — exactly what
+      // the columns, the mobile reflow line, search, and the When/Status
+      // derivations (`getEventWhen`/`getEventStatus`/`eventCutoff` in
+      // ~/lib/validators/events and ~/lib/events/format) need:
+      //   - id, name: identity + link target
+      //   - coverImage: table thumbnail
+      //   - startAt, endAt, allDay: feed formatEventDate/eventCutoff and the
+      //     When (upcoming/past) derivation
+      //   - location: mobile reflow line + search field
+      //   - published, isArchived: feed the Status derivation
+      //   - createdAt: "newest"/"oldest" sort key
+      // `blurb`, `externalUrl`, `externalUrlLabel`, `priceLabel`, and
+      // `sortOrder` are deliberately excluded — nothing in the table renders
+      // or sorts on them; the detail/edit form reads those through `getById`.
       return ctx.db.event.findMany({
         where: { businessId },
-        orderBy: [{ startAt: "asc" }, { sortOrder: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          coverImage: true,
+          startAt: true,
+          endAt: true,
+          allDay: true,
+          location: true,
+          published: true,
+          isArchived: true,
+          createdAt: true,
+        },
+        orderBy: { startAt: "asc" },
       });
     }),
 
@@ -150,24 +181,6 @@ export const eventsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  reorder: ownerAdminProcedure
-    .use(featureGate("events"))
-    .input(eventReorderSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-
-      await ctx.db.$transaction(
-        input.ids.map((id, index) =>
-          ctx.db.event.update({
-            where: { id, businessId },
-            data: { sortOrder: index },
-          }),
-        ),
-      );
-
-      return { success: true };
-    }),
-
   setArchived: ownerAdminProcedure
     .use(featureGate("events"))
     .input(eventArchiveSchema)
@@ -188,6 +201,102 @@ export const eventsRouter = createTRPCRouter({
         where: { id },
         data: { isArchived },
       });
+    }),
+
+  // ─── Admin: bulk mutations ──────────────────────────────────────────────────
+
+  bulkSetPublished: ownerAdminProcedure
+    .use(featureGate("events"))
+    .input(eventBulkPublishSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // `changedIds` is the rows this call will actually FLIP, captured before
+      // the write, and it is what the table's Undo re-sends. Re-sending the
+      // whole selection with `published` inverted is not an inverse: a
+      // selection of 50 containing 20 already-published rows publishes all
+      // 50, then "Undo" unpublishes all 50 — including the ones the user
+      // never touched. The client can't narrow it either (a selection spans
+      // pages, and off-page rows' `published` state never reached the
+      // browser). One transaction so nothing can change between the read and
+      // the update.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.event.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            published: { not: input.published },
+          },
+          select: { id: true },
+        });
+
+        const result = await tx.event.updateMany({
+          where: { id: { in: input.ids }, businessId },
+          data: { published: input.published },
+        });
+
+        return { changedIds: changed.map((e) => e.id), count: result.count };
+      });
+
+      return { count, changedIds };
+    }),
+
+  // Unarchiving a past-dated event is deliberately unguarded: the
+  // platform-wide `archivePastEvents` cron sweep (src/lib/events/archive.ts)
+  // will re-archive it within ~15 minutes regardless, so `isArchived` is
+  // cosmetic here — the admin When column and the storefront both derive
+  // "past"/"upcoming" from dates (`eventCutoff`/`getEventWhen`), never from
+  // this flag. The per-row `setArchived` procedure above sets the same
+  // precedent. Contrast Discounts' bulk Activate, which DOES skip expired
+  // rows (`discount.bulkSetActive`) — there `active` has a real checkout
+  // effect, so reactivating an expired code would be a dressed-up no-op.
+  bulkSetArchived: ownerAdminProcedure
+    .use(featureGate("events"))
+    .input(eventBulkArchiveSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      // Same undo contract as `bulkSetPublished` above: `changedIds` is read
+      // inside the transaction, before the write, and is the only valid Undo
+      // target.
+      const { changedIds, count } = await ctx.db.$transaction(async (tx) => {
+        const changed = await tx.event.findMany({
+          where: {
+            id: { in: input.ids },
+            businessId,
+            isArchived: { not: input.isArchived },
+          },
+          select: { id: true },
+        });
+
+        const result = await tx.event.updateMany({
+          where: { id: { in: input.ids }, businessId },
+          data: { isArchived: input.isArchived },
+        });
+
+        return { changedIds: changed.map((e) => e.id), count: result.count };
+      });
+
+      return { count, changedIds };
+    }),
+
+  // OWNER only, unlike the two bulk toggles above. Not a statement about
+  // trusting managers — it's blast radius. Publish/archive is reversible in
+  // one click (and Undo-able); deleting N events is unrecoverable without a
+  // database restore, and the deleted events disappear from the storefront
+  // immediately. No S3 cleanup here — `coverImage` lives in the media library
+  // independently of the event row, so deleting an event does not touch it.
+  // Same reason the schema's delete cap (ADMIN_BULK_DELETE_LIMIT) sits far
+  // below the selection cap the toggles use.
+  bulkDelete: ownerOnlyProcedure
+    .use(featureGate("events"))
+    .input(eventBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const result = await ctx.db.event.deleteMany({
+        where: { id: { in: input.ids }, businessId },
+      });
+      return { count: result.count };
     }),
 
   // ─── Public: storefront reads ────────────────────────────────────────────────

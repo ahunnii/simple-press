@@ -10,10 +10,10 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
-import { HCaptchaField } from "~/components/inputs/hcaptcha-form-field";
 import { InputFormField } from "~/components/inputs/input-form-field";
 import { PhoneFormField } from "~/components/inputs/phone-form-field";
 import { RadioFormField } from "~/components/inputs/radio-form-field";
+import { RecaptchaField } from "~/components/inputs/recaptcha-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 
@@ -143,9 +143,10 @@ export function HappyBambooContactForm() {
           radioGroupClassName="flex flex-col gap-3 pt-1"
         />
 
-        {/* hCaptcha */}
-        <HCaptchaField
+        {/* reCAPTCHA */}
+        <RecaptchaField
           ref={captchaRef}
+          action="contact"
           onVerify={setCaptchaToken}
           onExpire={() => setCaptchaToken("")}
           onError={() => setCaptchaToken("")}

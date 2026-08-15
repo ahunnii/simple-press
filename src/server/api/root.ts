@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
+import { accountRouter } from "./routers/account";
 import { analyticsRouter } from "./routers/analytics";
 import { backInStockRouter } from "./routers/back-in-stock";
 import { baseInventoryUnitRouter } from "./routers/base-inventory-unit";
@@ -7,7 +8,6 @@ import { businessRouter } from "./routers/business";
 import { collectionsRouter } from "./routers/collections";
 import { contactRouter } from "./routers/contact";
 import { contentRouter } from "./routers/content";
-import { accountRouter } from "./routers/account";
 import { customerRouter } from "./routers/customer";
 import { discountRouter } from "./routers/discount";
 import { domainRouter } from "./routers/domain";
@@ -21,12 +21,15 @@ import { financeRouter } from "./routers/finance";
 import { galleryRouter } from "./routers/gallery";
 import { importRouter } from "./routers/import";
 import { inventoryRouter } from "./routers/inventory";
+import { legalRouter } from "./routers/legal";
 import { marketingRouter } from "./routers/marketing";
 import { mediaRouter } from "./routers/media";
 import { orderRouter } from "./routers/order";
 import { orderLookupRouter } from "./routers/order-lookup";
 import { platformRouter } from "./routers/platform";
 import { productRouter } from "./routers/product";
+import { quoteCalculatorRouter } from "./routers/quote-calculator";
+import { quoteSubmissionRouter } from "./routers/quote-submission";
 import { reviewRouter } from "./routers/review";
 import { searchRouter } from "./routers/search";
 import { serviceRouter } from "./routers/service";
@@ -74,6 +77,8 @@ export const appRouter = createTRPCRouter({
 
   platform: platformRouter,
   contact: contactRouter,
+  quoteCalculator: quoteCalculatorRouter,
+  quoteSubmission: quoteSubmissionRouter,
   shipping: shippingRouter,
 
   external: externalRouter,
@@ -83,6 +88,7 @@ export const appRouter = createTRPCRouter({
 
   upload: uploadRouter,
   search: searchRouter,
+  legal: legalRouter,
 });
 
 // export type definition of API

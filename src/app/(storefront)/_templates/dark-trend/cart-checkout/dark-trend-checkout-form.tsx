@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { PhoneInput } from "~/components/inputs/phone-form-field";
+import { CheckoutTermsNotice } from "~/app/(storefront)/_components/checkout/checkout-terms-notice";
 import {
   applySavedAddressToForm,
   SavedAddressPicker,
@@ -31,10 +32,11 @@ import {
 
 type Props = {
   business: DefaultCheckoutPageTemplateProps["business"];
+  merchantPolicies: DefaultCheckoutPageTemplateProps["merchantPolicies"];
 };
 
-export function DarkTrendCheckoutForm({ business }: Props) {
-  const f = useCheckoutForm(business);
+export function DarkTrendCheckoutForm({ business, merchantPolicies }: Props) {
+  const f = useCheckoutForm(business, merchantPolicies);
 
   // A live shipping rate is actively loading once a destination is entered but
   // the amount isn't known yet — show a spinner and block submit until it lands.
@@ -608,6 +610,12 @@ export function DarkTrendCheckoutForm({ business }: Props) {
                   </>
                 )}
               </Button>
+
+              <CheckoutTermsNotice
+                disclosure={f.termsDisclosure}
+                className="text-center text-xs text-white/60"
+                linkClassName="underline hover:text-white/80"
+              />
 
               <p className="text-center text-xs text-white/60">
                 All transactions are secure and encrypted via Stripe. 100%

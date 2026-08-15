@@ -3,16 +3,21 @@ import { Prisma } from "generated/prisma";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { TxClient } from "~/server/db";
 import { checkBusiness } from "~/lib/check-business";
 import { resolveFlags } from "~/lib/features/resolve-flags";
 import { getAuthorizedPreviewBusinessId } from "~/lib/preview/preview-context";
-import type { TxClient } from "~/server/db";
+import { isPreviewDraft } from "~/lib/preview/preview-draft";
 import {
   cmsPageDraftSchema,
   pageSchema,
   previewDraftSchema,
   siteContentSchema,
 } from "~/lib/validators/content";
+import {
+  pageBulkDeleteSchema,
+  pageBulkPublishSchema,
+} from "~/lib/validators/content-pages";
 import { EMPTY_TIPTAP_DOC } from "~/lib/validators/page";
 import {
   bannerConfigSchema,
@@ -27,6 +32,7 @@ import {
   featureGate,
   getBusinessProcedure,
   ownerAdminProcedure,
+  ownerOnlyProcedure,
   publicProcedure,
 } from "../trpc";
 
@@ -41,6 +47,103 @@ const cmsPageDraftValueSchema = z.object({
   excerpt: z.string().nullable(),
   content: z.any(),
 });
+
+/**
+ * The transactional body of `bulkSetPublished`, pulled out into a standalone
+ * exported function so its `count` derivation is unit-testable against a
+ * mocked `tx` (see `content.test.ts`) without a real database.
+ *
+ * `changedIds` is the rows this call will actually FLIP, captured before the
+ * write, and it is what the table's Undo re-sends. Re-sending the whole
+ * selection with `published` inverted is not an inverse: a selection of 50
+ * containing 20 already-published rows publishes all 50, then "Undo"
+ * unpublishes all 50 — including the ones the user never touched. The client
+ * cannot narrow it either (a selection spans pages, and off-page rows'
+ * `published` state never reached the browser).
+ *
+ * `count` — the number the toast and the `data.count < requested` shortfall
+ * check (page-list-client.tsx) both read — is ALWAYS derived from this same
+ * pre-write `changed` read, never from summing `updateMany` results. For the
+ * `published: true` branch that distinction is load-bearing, not cosmetic:
+ * publishing partitions the selection into two `updateMany`s (below) because
+ * a single `updateMany` can't set `publishedAt` conditionally per row. Both
+ * run over the same interactive-transaction connection, so by the time the
+ * SECOND one's `publishedAt: { not: null }` filter is evaluated, rows the
+ * FIRST one just stamped a `publishedAt` onto already satisfy it too — it
+ * re-matches (and harmlessly re-writes, but also RE-COUNTS) every
+ * never-published row the first `updateMany` just flipped. Summing the two
+ * results doubled `count` for exactly that overlap: publishing 3 fresh drafts
+ * reported `count: 6`. Reading `count` off `changedIds.length` instead sides
+ * with the number Undo actually operates on, which is also the number that
+ * is true regardless of how the write happens to be partitioned internally.
+ */
+export async function runBulkSetPublished(
+  tx: Pick<TxClient, "page">,
+  params: {
+    ids: string[];
+    businessId: string;
+    published: boolean;
+    now: Date;
+  },
+): Promise<{ changedIds: string[]; count: number }> {
+  const { ids, businessId, published, now } = params;
+
+  const changed = await tx.page.findMany({
+    where: {
+      id: { in: ids },
+      businessId,
+      published: { not: published },
+    },
+    select: { id: true },
+  });
+  const changedIds = changed.map((p) => p.id);
+
+  if (published) {
+    // Publishing means the same thing here as everywhere else that publishes
+    // a Page — the cron sweep (src/app/api/cron/route.ts) and both editors'
+    // `published ? null : …`:
+    //   - a pending `scheduledPublishAt` is superseded and cleared, or an
+    //     Unpublish later would flip the row back to "Scheduled" and the
+    //     cron would silently re-publish it;
+    //   - a row that has never been published gets a `publishedAt`, so the
+    //     storefront's `publishedAt ?? createdAt` coalesce shows the real
+    //     publish date rather than the authoring date.
+    // Split in two, like the cron, because `updateMany` cannot set a column
+    // conditionally per row. Their RESULT COUNTS are intentionally unused —
+    // see the docblock above for why summing them double-counts.
+    await Promise.all([
+      tx.page.updateMany({
+        where: { id: { in: ids }, businessId, publishedAt: null },
+        data: {
+          published: true,
+          publishedAt: now,
+          scheduledPublishAt: null,
+        },
+      }),
+      tx.page.updateMany({
+        where: {
+          id: { in: ids },
+          businessId,
+          publishedAt: { not: null },
+        },
+        data: { published: true, scheduledPublishAt: null },
+      }),
+    ]);
+  } else {
+    // Unpublishing touches `published` and nothing else. `publishedAt` is
+    // kept (it is the date this page WAS published, which re-publishing
+    // should not rewrite) and `scheduledPublishAt` is left alone — the
+    // update runs over every selected id, including rows that were already
+    // unpublished, so clearing it here would silently cancel a pending
+    // schedule on a row this action didn't change.
+    await tx.page.updateMany({
+      where: { id: { in: ids }, businessId },
+      data: { published },
+    });
+  }
+
+  return { changedIds, count: changedIds.length };
+}
 
 export const contentRouter = createTRPCRouter({
   // ==========================================
@@ -76,17 +179,18 @@ export const contentRouter = createTRPCRouter({
       },
     });
 
+    // A cleared draft can come back as `{}` instead of JSON null (see
+    // `isPreviewDraft`) — normalize it to "no draft" so the editor doesn't
+    // hydrate a phantom unpublished-changes state.
+    const draft = siteContent?.previewCustomFields;
     return {
       customFields: (siteContent?.customFields ?? {}) as Record<
         string,
         unknown
       >,
-      previewCustomFields: (siteContent?.previewCustomFields ?? null) as Record<
-        string,
-        unknown
-      > | null,
+      previewCustomFields: isPreviewDraft(draft) ? draft : null,
       previewUpdatedAt: siteContent?.previewUpdatedAt ?? null,
-      hasDraft: siteContent?.previewCustomFields != null,
+      hasDraft: isPreviewDraft(draft),
     };
   }),
 
@@ -96,8 +200,10 @@ export const contentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const { templateId, clearPreviewDraft, publishCmsPageDrafts, ...data } =
-        input;
+      // No `templateId` here on purpose — see the note on `siteContentSchema`.
+      // Template switches must go through `business.updateTemplate`, which
+      // enforces per-subdomain ownership of commercial templates.
+      const { clearPreviewDraft, publishCmsPageDrafts, ...data } = input;
 
       const upsertSiteContent = (tx: TxClient) =>
         tx.siteContent.upsert({
@@ -126,15 +232,39 @@ export const contentRouter = createTRPCRouter({
           await ctx.db.$transaction(async (tx) => {
             const sc = await upsertSiteContent(tx);
 
+            // `{ previewDraft: { not: Prisma.DbNull } }` looks like the right
+            // filter here, but it silently fails to match a `{}` residue row
+            // (see `isPreviewDraft`) — so a stuck `{}` could never be healed
+            // by a Publish either. Select id + previewDraft for the whole
+            // business instead (cheap — page counts are small) and decide in
+            // JS what each row is.
             const drafts = await tx.page.findMany({
-              where: { businessId, previewDraft: { not: Prisma.DbNull } },
+              where: { businessId },
               select: { id: true, previewDraft: true },
             });
 
             for (const p of drafts) {
+              if (p.previewDraft === null) continue;
+
+              if (!isPreviewDraft(p.previewDraft)) {
+                // `{}` residue is not a real draft, but publish clears it
+                // anyway (a harmless heal) so the editor's "Unpublished
+                // changes" pill can't stay stuck lit on a page nobody
+                // actually edited after a Publish.
+                await tx.page.update({
+                  where: { id: p.id },
+                  data: {
+                    previewDraft: Prisma.DbNull,
+                    previewDraftUpdatedAt: null,
+                  },
+                });
+                continue;
+              }
+
               const parsed = cmsPageDraftValueSchema.safeParse(p.previewDraft);
-              // Skip a malformed draft silently — a bad row must not fail the
-              // whole publish.
+              // Skip a malformed (but non-empty) draft silently — a bad row
+              // must not fail the whole publish, and unlike `{}` residue we
+              // don't know it's safe to discard.
               if (!parsed.success) continue;
               await tx.page.update({
                 where: { id: p.id },
@@ -152,16 +282,8 @@ export const contentRouter = createTRPCRouter({
           })
         : await upsertSiteContent(ctx.db);
 
-      if (templateId) {
-        await ctx.db.business.update({
-          where: { id: businessId },
-          data: { templateId },
-        });
-      }
-
       return {
         data: siteContent,
-        templateId,
       };
     }),
 
@@ -209,22 +331,42 @@ export const contentRouter = createTRPCRouter({
   discardEditorDrafts: ownerAdminProcedure.mutation(async ({ ctx }) => {
     const { businessId } = ctx;
 
-    await ctx.db.$transaction([
-      ctx.db.siteContent.updateMany({
+    await ctx.db.$transaction(async (tx) => {
+      await tx.siteContent.updateMany({
         where: { businessId },
         data: {
           previewCustomFields: Prisma.JsonNull,
           previewUpdatedAt: null,
         },
-      }),
-      ctx.db.page.updateMany({
-        where: { businessId, previewDraft: { not: Prisma.DbNull } },
-        data: {
-          previewDraft: Prisma.DbNull,
-          previewDraftUpdatedAt: null,
-        },
-      }),
-    ]);
+      });
+
+      // `{ previewDraft: { not: Prisma.DbNull } }` looks like the right
+      // filter here too, but it silently fails to match a `{}` residue row
+      // (see `isPreviewDraft`) — so that row could never be cleared, and
+      // `getEditorPages`'s "Unpublished changes" pill would stay lit forever.
+      // Select id + previewDraft for the whole business instead (cheap —
+      // page counts are small) and filter in JS. Unlike the publish path
+      // above, discard clears BOTH real drafts and `{}` residue — it never
+      // inspects a draft's content, so there is no distinction worth
+      // preserving; anything non-null is scrubbed.
+      const candidates = await tx.page.findMany({
+        where: { businessId },
+        select: { id: true, previewDraft: true },
+      });
+      const idsToClear = candidates
+        .filter((p) => p.previewDraft !== null)
+        .map((p) => p.id);
+
+      if (idsToClear.length > 0) {
+        await tx.page.updateMany({
+          where: { id: { in: idsToClear } },
+          data: {
+            previewDraft: Prisma.DbNull,
+            previewDraftUpdatedAt: null,
+          },
+        });
+      }
+    });
 
     return { ok: true };
   }),
@@ -233,32 +375,138 @@ export const contentRouter = createTRPCRouter({
   // PAGES
   // ==========================================
 
-  // Get all pages
+  /**
+   * The list feed behind three admin surfaces: the Site Content hub dashboard
+   * (`/admin/content`, no `type` — every row), the CMS Pages list
+   * (`type: "page"`) and the Blog list (`type: "blog"`). All three narrow,
+   * sort and paginate in memory via `buildTablePage`, so this stays input-free
+   * apart from the type discriminator.
+   *
+   * Deliberately NOT feature-gated. It serves the ungated content hub as well
+   * as the blog list, so a `featureGate("blog")` would 403 the hub for any
+   * business with the blog flag off — the `baseInventoryUnit.list` situation
+   * exactly. `/admin/content/blog/layout.tsx` is the blog gate.
+   */
   getPages: ownerAdminProcedure
     .input(
       z
         .object({
-          type: z.enum(["page", "policy", "custom", "all"]).optional(),
+          type: z.enum(["page", "policy", "blog", "custom", "all"]).optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
       const { businessId } = ctx;
 
-      const pages = await ctx.db.page.findMany({
+      // Explicit select = the list row contract, and the leak guard for the
+      // visual-editor draft columns in one: `previewDraft` /
+      // `previewDraftUpdatedAt` are never read at all here, which is stronger
+      // than the destructuring strip this replaced (that one still pulled the
+      // drafts out of Postgres and into the server's memory first).
+      //
+      // `content` in particular is gone: it is the page's entire TipTap
+      // document, and shipping every page's body into an RSC payload for a
+      // table that renders a title and a slug is the payload-discipline
+      // failure docs/admin-table-migration.md §6 calls out. The editors read it
+      // through `getPageById`.
+      //   - id, title, slug: identity, link target and a search field
+      //   - excerpt: rendered under the title, and the third search field
+      //   - image: table thumbnail
+      //   - type: the hub dashboard's per-type counts and badges
+      //   - published, scheduledPublishAt: feed `getPageStatus`
+      //   - publishedAt: the blog list's Published column + its two date sorts
+      //   - createdAt, updatedAt: the Updated column and the newest/oldest sorts
+      // `metaTitle`/`metaDescription`/`metaKeywords`/`ogImage`/`template`/
+      // `sortOrder` are excluded — nothing in any of the three surfaces renders
+      // or sorts on them.
+      return ctx.db.page.findMany({
         where: {
           businessId,
           ...(input?.type && input?.type !== "all"
             ? { type: input?.type }
             : {}),
         },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          image: true,
+          type: true,
+          published: true,
+          publishedAt: true,
+          scheduledPublishAt: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        // Transport order only — both list pages re-sort by their own sort
+        // param. It still decides the hub dashboard's "Recent Pages" strip,
+        // which takes the first five, so it is left exactly as it was; the
+        // `id` tie-break is new, and only makes that strip deterministic when
+        // rows share a `sortOrder` and a `createdAt` (routine — every row
+        // created before a reorder shares the create path's default).
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }, { id: "asc" }],
+      });
+    }),
+
+  /**
+   * Bulk publish/unpublish for both admin Page lists (CMS pages and blog
+   * posts), shared because they are one model.
+   *
+   * `ownerAdminProcedure` and deliberately **ungated**, for the same reason as
+   * `getPages` above plus the Reviews precedent (docs/admin-table-migration.md
+   * §11): one procedure serves a list that is blog-gated and a list that is
+   * not, so any single gate would be wrong for the other, and an owner who has
+   * just switched the blog off should still be able to unpublish the posts it
+   * left on their storefront. Route-level gating (`content/blog/layout.tsx`)
+   * is the blog enforcement.
+   */
+  bulkSetPublished: ownerAdminProcedure
+    .input(pageBulkPublishSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+      const now = new Date();
+
+      const { changedIds, count } = await ctx.db.$transaction((tx) =>
+        runBulkSetPublished(tx, {
+          ids: input.ids,
+          businessId,
+          published: input.published,
+          now,
+        }),
+      );
+
+      return {
+        count,
+        changedIds,
+        message: `${count} page${count === 1 ? "" : "s"} updated`,
+      };
+    }),
+
+  /**
+   * OWNER only, unlike `bulkSetPublished` above. Not a statement about
+   * trusting managers — it's blast radius. Publish/unpublish is reversible in
+   * one click (and Undo-able); deleting N pages is unrecoverable without a
+   * database restore, and every deleted row takes its storefront URL down
+   * immediately. Same reason the schema's delete cap
+   * (ADMIN_BULK_DELETE_LIMIT) sits far below the selection cap.
+   *
+   * No S3 cleanup: `Page.image` lives in the media library independently of
+   * the page row, so deleting a page must not delete the file.
+   */
+  bulkDelete: ownerOnlyProcedure
+    .input(pageBulkDeleteSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { businessId } = ctx;
+
+      const result = await ctx.db.page.deleteMany({
+        where: { id: { in: input.ids }, businessId },
       });
 
-      // Never expose the visual-editor draft columns to admin list callers.
-      return pages.map(
-        ({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...page }) => page,
-      );
+      return {
+        count: result.count,
+        message: `${result.count} page${result.count === 1 ? "" : "s"} deleted`,
+      };
     }),
 
   getEditorPages: ownerAdminProcedure.query(async ({ ctx }) => {
@@ -284,22 +532,53 @@ export const contentRouter = createTRPCRouter({
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     });
 
-    return pages.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      type: p.type as "page" | "blog",
-      published: p.published,
-      live: { title: p.title, excerpt: p.excerpt, content: p.content },
-      draft:
-        p.previewDraft == null
-          ? null
-          : (p.previewDraft as unknown as {
-              title: string;
-              excerpt: string | null;
-              content: unknown;
-            }),
-      hasDraft: p.previewDraft != null,
-    }));
+    return pages.map((p) => {
+      // A cleared draft can come back as `{}` instead of JSON null (see
+      // `isPreviewDraft`) — normalize it to "no draft" the same way
+      // `getEditorState` does for `SiteContent.previewCustomFields`, or a
+      // `{}` row reports `hasDraft: true` here even after discard/publish
+      // have healed it elsewhere, and the editor's `draft ?? live` resolves
+      // to `{}`, crashing the CMS page panel on missing fields.
+      const draft = isPreviewDraft(p.previewDraft) ? p.previewDraft : null;
+      return {
+        id: p.id,
+        slug: p.slug,
+        type: p.type as "page" | "blog",
+        published: p.published,
+        live: { title: p.title, excerpt: p.excerpt, content: p.content },
+        draft: draft as {
+          title: string;
+          excerpt: string | null;
+          content: unknown;
+        } | null,
+        hasDraft: draft !== null,
+      };
+    });
+  }),
+
+  /**
+   * A representative product for the visual editor's "Product" page preview —
+   * the newest published product, or `null` when the business has none (or the
+   * `products` feature is off, in which case the editor hides the entry
+   * entirely). Flags resolve off the session-scoped business rather than
+   * `getBusinessFlags()` for the same reason as `getEditorPages` above.
+   */
+  getEditorProductPreview: ownerAdminProcedure.query(async ({ ctx }) => {
+    const { businessId } = ctx;
+
+    const flagRow = await ctx.db.business.findUnique({
+      where: { id: businessId },
+      select: { featureFlags: true },
+    });
+    if (!resolveFlags(flagRow?.featureFlags).isEnabled("products")) return null;
+
+    const product = await ctx.db.product.findFirst({
+      where: { businessId, published: true },
+      orderBy: { createdAt: "desc" },
+      select: { slug: true, name: true },
+    });
+
+    return product ?? null;
   }),
 
   getSimplifiedPages: publicProcedure
@@ -426,8 +705,11 @@ export const contentRouter = createTRPCRouter({
       // unconditionally; for an authorized preview the draft *values* are
       // swapped into title/excerpt/content below instead.
       const previewDraft = page.previewDraft;
-      const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
-        rest)(page);
+      const safe = (({
+        previewDraft: _pd,
+        previewDraftUpdatedAt: _pu,
+        ...rest
+      }) => rest)(page);
 
       if (isPreview && previewDraft != null) {
         const parsed = cmsPageDraftValueSchema.safeParse(previewDraft);
@@ -477,8 +759,11 @@ export const contentRouter = createTRPCRouter({
       // unconditionally; for an authorized preview the draft *values* are
       // swapped into title/excerpt/content below instead.
       const previewDraft = page.previewDraft;
-      const safe = (({ previewDraft: _pd, previewDraftUpdatedAt: _pu, ...rest }) =>
-        rest)(page);
+      const safe = (({
+        previewDraft: _pd,
+        previewDraftUpdatedAt: _pu,
+        ...rest
+      }) => rest)(page);
 
       // An unpublished preview has no `publishedAt`, so the fallback to
       // `createdAt` still yields a sensible date on every path.
@@ -655,25 +940,14 @@ export const contentRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  // Reorder pages
-  reorderPages: ownerAdminProcedure
-    .input(z.object({ pageIds: z.array(z.string()) }))
-    .mutation(async ({ ctx, input }) => {
-      const { businessId } = ctx;
-
-      // Update sort order for each page atomically — a mid-batch failure
-      // must not leave the order partially applied.
-      await ctx.db.$transaction(
-        input.pageIds.map((pageId, index) =>
-          ctx.db.page.update({
-            where: { id: pageId, businessId },
-            data: { sortOrder: index },
-          }),
-        ),
-      );
-
-      return { success: true };
-    }),
+  // `reorderPages` used to sit here. It had zero callers anywhere in `src/` —
+  // no admin surface has ever offered drag-reordering for pages — and a bulk
+  // `sortOrder` writer with no UI is a hazard the moment either Page list
+  // gains pagination (docs/admin-table-migration.md §7: reorder and pagination
+  // are mutually exclusive). Removed during the Page-list migration, the same
+  // way `events.reorder` was. `Page.sortOrder` itself stays: it is assigned at
+  // create time and still orders `getSimplifiedPages` (nav menus) and
+  // `getBlogPages`.
 
   // ==========================================
   // BANNER & POPUP CONFIG

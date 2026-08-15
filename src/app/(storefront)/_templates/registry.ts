@@ -95,6 +95,7 @@ import { DefaultCollectionsPage } from "./default/collections/default-collection
 import { DefaultContactPage } from "./default/contact/default-contact-page";
 import { DefaultGenericPage } from "./default/default-generic-page";
 import { DefaultEventsPage } from "./default/events/default-events-page";
+import { DefaultFaqPage } from "./default/faq/default-faq-page";
 import { DefaultLayout } from "./default/layout/default-layout";
 import { DefaultProductPage } from "./default/products/default-product-page";
 import { DefaultServicesIndexPage } from "./default/services/default-services-index-page";
@@ -193,9 +194,6 @@ import { NoiseGenericPage } from "./noise/noise-generic-page";
 import { NoiseProductPage } from "./noise/products/noise-product-page";
 import { NoiseShopPage } from "./noise/shop/noise-shop-page";
 import { NoiseTestimonialsPage } from "./noise/testimonials/noise-testimonials-page";
-// ---------------------------------------------------------------------------
-// PinkArt
-// ---------------------------------------------------------------------------
 import { PinkAboutPage } from "./pink/about/pink-about-page";
 import { PinkAccountSecurityPage } from "./pink/account/pink-account-security-page";
 import { PinkAccountSettingsPage } from "./pink/account/pink-account-settings-page";
@@ -246,6 +244,16 @@ import { PollenProductPage } from "./pollen/products/pollen-product-page";
 import { PollenServicesPage } from "./pollen/services/pollen-services-page";
 import { PollenShopPage } from "./pollen/shop/pollen-shop-page";
 import { PollenTestimonialsPage } from "./pollen/testimonials/pollen-testimonials-page";
+// ---------------------------------------------------------------------------
+// PinkArt
+// ---------------------------------------------------------------------------
+import { RelocationAboutPage } from "./relocation/about/relocation-about-page";
+import { RelocationContactPage } from "./relocation/contact/relocation-contact-page";
+import { RelocationFaqPage } from "./relocation/faq/relocation-faq-page";
+import { RelocationGenericPage } from "./relocation/generic/relocation-generic-page";
+import { RelocationLayout } from "./relocation/layout/relocation-layout";
+import { RelocationServicesPage } from "./relocation/services/relocation-services-page";
+import { RelocationTestimonialsPage } from "./relocation/testimonials/relocation-testimonials-page";
 // ---------------------------------------------------------------------------
 // Sledge
 // ---------------------------------------------------------------------------
@@ -310,6 +318,10 @@ type AnyComponent = ComponentType<any>;
  * `ServicesPage` is optional — only pollen implements it. Routes check for its
  * presence and call `notFound()` when it is absent.
  *
+ * `EventsPage`, `VideosPage` and `FaqPage` are optional in the type but always
+ * present on `defaultEntry`, so their routes' presence checks only satisfy
+ * TypeScript's optional-slot typing.
+ *
  * `CheckoutUnavailable` is the component rendered when Stripe is not connected.
  * All templates fall back to `DefaultCheckoutUnavailable`.
  */
@@ -343,6 +355,8 @@ export type TemplateComponentSet = {
   ServicesIndexPage?: AnyComponent;
   EventsPage?: AnyComponent;
   VideosPage?: AnyComponent;
+  // Optional per-template override of /faq; defaultEntry always supplies one.
+  FaqPage?: AnyComponent;
 };
 
 // ---------------------------------------------------------------------------
@@ -374,6 +388,7 @@ const defaultEntry: TemplateComponentSet = {
   ServicesIndexPage: DefaultServicesIndexPage,
   EventsPage: DefaultEventsPage,
   VideosPage: DefaultVideosPage,
+  FaqPage: DefaultFaqPage,
 };
 
 const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
@@ -542,6 +557,20 @@ const TEMPLATES: Record<string, Partial<TemplateComponentSet>> = {
     OrderDetailPage: PinkOrderDetailPage,
     OrdersPage: PinkOrdersPage,
     PreferencesPage: PinkPreferencesPage,
+  },
+
+  // Handy Relocations — service archetype (1:1 recreation of
+  // handyrelocations.com): no commerce/blog slots, all of those fall back to
+  // Default. Uses the legacy `ServicesPage` slot (the `services` feature flag
+  // stays OFF for this template, like pollen) and the optional `FaqPage` slot.
+  relocation: {
+    Layout: RelocationLayout,
+    AboutPage: RelocationAboutPage,
+    ContactPage: RelocationContactPage,
+    FaqPage: RelocationFaqPage,
+    GenericPage: RelocationGenericPage,
+    ServicesPage: RelocationServicesPage,
+    TestimonialsPage: RelocationTestimonialsPage,
   },
 
   noise: {

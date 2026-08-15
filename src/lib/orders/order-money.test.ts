@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import type { OrderMoneyRow } from "./order-money";
+
 import {
   EMPTY_ORDERS_BREAKDOWN,
   splitOrderMoney,
   summarizeOrderMoney,
-  type OrderMoneyRow,
 } from "./order-money";
 
 /** Build an OrderMoneyRow with sane defaults. */
@@ -32,9 +33,9 @@ describe("splitOrderMoney", () => {
     expect(split.totalChargedCents).toBe(12000);
     expect(split.refundedCents).toBe(0);
     expect(split.netCollectedCents).toBe(12000);
-    expect(
-      split.productSalesCents + split.shippingCents + split.taxCents,
-    ).toBe(split.netCollectedCents);
+    expect(split.productSalesCents + split.shippingCents + split.taxCents).toBe(
+      split.netCollectedCents,
+    );
   });
 
   it("ignores subtotal/discount when deriving product sales", () => {
@@ -57,9 +58,9 @@ describe("splitOrderMoney", () => {
     expect(split.taxCents).toBe(0);
     expect(split.refundedCents).toBe(5000);
     expect(split.netCollectedCents).toBe(5000);
-    expect(
-      split.productSalesCents + split.shippingCents + split.taxCents,
-    ).toBe(split.netCollectedCents);
+    expect(split.productSalesCents + split.shippingCents + split.taxCents).toBe(
+      split.netCollectedCents,
+    );
   });
 
   it("keeps the sum identity exact on an awkward proration (no off-by-one)", () => {
@@ -78,9 +79,9 @@ describe("splitOrderMoney", () => {
     expect(split.taxCents).toBe(555);
     expect(split.shippingCents).toBe(399);
     expect(split.productSalesCents).toBe(5713);
-    expect(
-      split.productSalesCents + split.shippingCents + split.taxCents,
-    ).toBe(split.netCollectedCents);
+    expect(split.productSalesCents + split.shippingCents + split.taxCents).toBe(
+      split.netCollectedCents,
+    );
   });
 
   it("holds the sum identity across a spread of awkward refunds", () => {

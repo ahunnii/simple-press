@@ -3,21 +3,26 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import type { Product } from "~/types";
+import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { formatPrice } from "~/lib/prices";
 import { SORT_LABELS, useShopFilters } from "~/hooks/use-shop-filters";
-import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 import { useCart } from "~/providers/cart-context";
 
 import { PinkEmptyState } from "../shared/pink-empty-state";
-import type { PinkFilterChipItem } from "../shared/pink-filter-chips";
 import { PinkFilterChips } from "../shared/pink-filter-chips";
 import { PinkProductCard } from "../shared/pink-product-card";
 import { PinkReveal } from "../shared/pink-reveal";
 
 const PAGE_SIZE = 12;
 
-type FiltersCta = { heading: string; body: string; label: string; href: string };
+type FiltersCta = {
+  heading: string;
+  body: string;
+  label: string;
+  href: string;
+};
 
 type Copy = {
   addToBasketLabel: string;
@@ -49,7 +54,10 @@ function FilterBlock({
     <div className="flex flex-col gap-3 py-[30px] first:pt-0">
       <p
         className="pink-label"
-        style={{ borderBottom: "1px solid var(--pink-ink)", paddingBottom: "10px" }}
+        style={{
+          borderBottom: "1px solid var(--pink-ink)",
+          paddingBottom: "10px",
+        }}
       >
         {label}
       </p>
@@ -80,7 +88,11 @@ function AddToBasketButton({
       <Link
         href={`/shop/${product.slug}`}
         className="pink-btn mt-3 w-full justify-center px-4 py-3"
-        style={{ background: "transparent", borderColor: "var(--pink-ink)", color: "var(--pink-ink)" }}
+        style={{
+          background: "transparent",
+          borderColor: "var(--pink-ink)",
+          color: "var(--pink-ink)",
+        }}
         {...fieldAttr("pink.shop.choose-options-label")}
       >
         {copy.chooseOptionsLabel}
@@ -118,8 +130,16 @@ function AddToBasketButton({
         soldOut
           ? undefined
           : justAdded
-            ? { background: "var(--pink-ink)", borderColor: "var(--pink-ink)", color: "var(--pink-paper)" }
-            : { background: "transparent", borderColor: "var(--pink-ink)", color: "var(--pink-ink)" }
+            ? {
+                background: "var(--pink-ink)",
+                borderColor: "var(--pink-ink)",
+                color: "var(--pink-paper)",
+              }
+            : {
+                background: "transparent",
+                borderColor: "var(--pink-ink)",
+                color: "var(--pink-ink)",
+              }
       }
       onMouseEnter={(e) => {
         if (soldOut || justAdded) return;
@@ -139,12 +159,21 @@ function AddToBasketButton({
             : "pink.shop.add-to-basket-label",
       )}
     >
-      {soldOut ? copy.soldOutLabel : justAdded ? copy.addedLabel : copy.addToBasketLabel}
+      {soldOut
+        ? copy.soldOutLabel
+        : justAdded
+          ? copy.addedLabel
+          : copy.addToBasketLabel}
     </button>
   );
 }
 
-export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: Props) {
+export function PinkShopClient({
+  products,
+  filtersVisible,
+  filtersCta,
+  copy,
+}: Props) {
   const {
     sortParam,
     handleSort,
@@ -184,11 +213,14 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
     ([id, label]) => ({ id, label }),
   );
 
-  const activeCollectionName = collections.find((c) => c.id === activeCollectionId)?.name;
+  const activeCollectionName = collections.find(
+    (c) => c.id === activeCollectionId,
+  )?.name;
   const summaryParts: string[] = [];
   if (activeCollectionName) summaryParts.push(activeCollectionName);
   if (inStockOnly) summaryParts.push("in stock");
-  const summary = summaryParts.length > 0 ? summaryParts.join(", ") : "All pieces";
+  const summary =
+    summaryParts.length > 0 ? summaryParts.join(", ") : "All pieces";
 
   const filterPanel = (
     <>
@@ -199,7 +231,9 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
             onClick={() => setActiveCollectionId(null)}
             className="flex w-full items-baseline justify-between text-[15px]"
             style={{
-              color: !activeCollectionId ? "var(--pink-rose)" : "var(--pink-ink)",
+              color: !activeCollectionId
+                ? "var(--pink-rose)"
+                : "var(--pink-ink)",
               fontWeight: !activeCollectionId ? 600 : 400,
             }}
           >
@@ -209,10 +243,15 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
             <button
               key={c.id}
               type="button"
-              onClick={() => setActiveCollectionId(c.id === activeCollectionId ? null : c.id)}
+              onClick={() =>
+                setActiveCollectionId(c.id === activeCollectionId ? null : c.id)
+              }
               className="flex w-full items-baseline justify-between text-[15px]"
               style={{
-                color: c.id === activeCollectionId ? "var(--pink-rose)" : "var(--pink-ink)",
+                color:
+                  c.id === activeCollectionId
+                    ? "var(--pink-rose)"
+                    : "var(--pink-ink)",
                 fontWeight: c.id === activeCollectionId ? 600 : 400,
               }}
             >
@@ -237,7 +276,9 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
           value={localPriceMax}
           aria-label={`Maximum price, currently ${formatPrice(localPriceMax)}`}
           onChange={(e) => setLocalPriceMax(Number(e.target.value))}
-          onPointerUp={(e) => commitPriceMax(Number((e.target as HTMLInputElement).value))}
+          onPointerUp={(e) =>
+            commitPriceMax(Number((e.target as HTMLInputElement).value))
+          }
           onKeyUp={() => commitPriceMax(localPriceMax)}
           className="w-full"
         />
@@ -264,14 +305,25 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
       </FilterBlock>
 
       {(filtersCta.heading || filtersCta.body) && (
-        <div className="mt-2 flex flex-col gap-3 p-6" style={{ background: "var(--pink-panel)" }}>
+        <div
+          className="mt-2 flex flex-col gap-3 p-6"
+          style={{ background: "var(--pink-panel)" }}
+        >
           {filtersCta.heading && (
-            <p className="pink-display" style={{ fontSize: "17px", fontWeight: 600 }} {...fieldAttr("pink.shop.filters-cta-heading")}>
+            <p
+              className="pink-display"
+              style={{ fontSize: "17px", fontWeight: 600 }}
+              {...fieldAttr("pink.shop.filters-cta-heading")}
+            >
               {filtersCta.heading}
             </p>
           )}
           {filtersCta.body && (
-            <p className="text-[14px] leading-[1.6]" style={{ color: "var(--pink-muted)" }} {...fieldAttr("pink.shop.filters-cta-body")}>
+            <p
+              className="text-[14px] leading-[1.6]"
+              style={{ color: "var(--pink-muted)" }}
+              {...fieldAttr("pink.shop.filters-cta-body")}
+            >
               {filtersCta.body}
             </p>
           )}
@@ -341,7 +393,12 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
               className="mb-6 flex flex-wrap items-center justify-between gap-4 pb-4"
               style={{ borderBottom: "1px solid var(--pink-ink)" }}
             >
-              <p className="text-[14px]" style={{ color: "var(--pink-muted)" }} aria-live="polite" aria-atomic="true">
+              <p
+                className="text-[14px]"
+                style={{ color: "var(--pink-muted)" }}
+                aria-live="polite"
+                aria-atomic="true"
+              >
                 Showing {summary}
                 {hasActiveFilters && (
                   <button
@@ -374,9 +431,9 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
             <>
               <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((product, i) => {
-                  const additional = product.additionalFields as
-                    | { comingSoon?: boolean }
-                    | null;
+                  const additional = product.additionalFields as {
+                    comingSoon?: boolean;
+                  } | null;
                   return (
                     <PinkReveal key={product.id} index={i % PAGE_SIZE} as="div">
                       <PinkProductCard
@@ -388,11 +445,16 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
                         meta={product.sku ?? undefined}
                         price={formatPrice(product.price)}
                         compareAtPrice={
-                          product.compareAtPrice && product.compareAtPrice > product.price
+                          product.compareAtPrice &&
+                          product.compareAtPrice > product.price
                             ? formatPrice(product.compareAtPrice)
                             : undefined
                         }
-                        badge={additional?.comingSoon ? { label: "Coming soon", tone: "ink" } : undefined}
+                        badge={
+                          additional?.comingSoon
+                            ? { label: "Coming soon", tone: "ink" }
+                            : undefined
+                        }
                         wishlist={{
                           productId: product.id,
                           slug: product.slug,
@@ -408,7 +470,10 @@ export function PinkShopClient({ products, filtersVisible, filtersCta, copy }: P
               </div>
 
               <div className="mt-12 flex flex-col items-center gap-4">
-                <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
+                <p
+                  className="text-[13px]"
+                  style={{ color: "var(--pink-subtle)" }}
+                >
                   Showing {visible.length} of {filtered.length}
                 </p>
                 {hasMore && (

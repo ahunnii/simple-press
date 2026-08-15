@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { db } from "~/server/db";
 
 /**
@@ -58,6 +60,13 @@ export async function linkCustomerToUser(params: {
     return updatedCustomer;
   } catch (error) {
     console.error("[Customer Link] Error linking customer to user:", error);
+    // Non-fatal by design — sign-in must complete either way — which is exactly
+    // why it needs reporting: the shopper's past orders silently never attach
+    // to their new account, and all they see is an empty order list.
+    Sentry.captureException(error, {
+      tags: { "auth.hook": "link-customer-to-user" },
+      extra: { userId, businessId },
+    });
     return null;
   }
 }

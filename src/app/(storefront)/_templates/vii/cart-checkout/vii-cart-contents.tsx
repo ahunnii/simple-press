@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import { formatPrice } from "~/lib/prices";
+import { cn } from "~/lib/utils";
 import { useCart } from "~/providers/cart-context";
 
 import { useViiReveal } from "../hooks/use-vii-reveal";
@@ -159,7 +160,11 @@ export function ViiCartContents({
   return (
     <div
       ref={ref}
-      className={`vii-reveal-group${visible ? " is-visible" : ""} grid grid-cols-1 items-start lg:grid-cols-[1fr_360px]`}
+      className={cn(
+        "vii-reveal-group",
+        visible && "is-visible",
+        "grid grid-cols-1 items-start lg:grid-cols-[1fr_360px]",
+      )}
       style={{ gap: "clamp(32px, 5vw, 64px)" }}
     >
       {/* Visually-hidden section heading keeps the h1 → h2 → h3 order intact */}

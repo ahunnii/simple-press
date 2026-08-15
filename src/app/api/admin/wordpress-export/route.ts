@@ -4,7 +4,10 @@
  * GET /api/admin/wordpress-export
  *   ?businessId=<id>   (PLATFORM_ADMIN only — target any business)
  *
- * Auth: OWNER/MANAGER of the resolved business, or PLATFORM_ADMIN.
+ * Auth: OWNER of the resolved business, or PLATFORM_ADMIN. Managers are
+ * deliberately excluded — a full store export (including customer records) is
+ * an owner-level action, matching the Owner-only gate on
+ * /admin/settings/data.
  * Feature gate: wordpressExport feature flag must be enabled for the target business.
  *
  * Returns a ZIP archive containing README.md, content.wxr.xml, products.csv,
@@ -15,6 +18,7 @@ import * as Sentry from "@sentry/nextjs";
 import JSZip from "jszip";
 
 import { checkBusiness, checkBusinessMembership } from "~/lib/check-business";
+import { isPlatformAdmin } from "~/lib/auth/is-platform-admin";
 import { isFeatureEnabledForBusiness } from "~/lib/features/check-flag";
 import { collectWordPressExport } from "~/lib/wordpress/export";
 import { auth } from "~/server/better-auth";
@@ -35,7 +39,7 @@ export async function GET(req: Request): Promise<Response> {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const isPlatformAdmin = session.user.platformRole === "PLATFORM_ADMIN";
+    const platformAdmin = await isPlatformAdmin(session.user.id);
 
     // Resolve the target business:
     //   - PLATFORM_ADMIN may pass ?businessId= to target any business
@@ -45,7 +49,7 @@ export async function GET(req: Request): Promise<Response> {
 
     let targetBusinessId: string;
 
-    if (isPlatformAdmin && queryBusinessId) {
+    if (platformAdmin && queryBusinessId) {
       // PLATFORM_ADMIN targeting a specific business
       const biz = await db.business.findUnique({
         where: { id: queryBusinessId },
@@ -63,15 +67,12 @@ export async function GET(req: Request): Promise<Response> {
       }
       targetBusinessId = business.id;
 
-      if (!isPlatformAdmin) {
+      if (!platformAdmin) {
         const membership = await checkBusinessMembership(
           targetBusinessId,
           session.user.id,
         );
-        if (
-          !membership ||
-          (membership.role !== "OWNER" && membership.role !== "MANAGER")
-        ) {
+        if (membership?.role !== "OWNER") {
           return new Response("Forbidden", { status: 403 });
         }
       }
@@ -92,9 +93,8 @@ export async function GET(req: Request): Promise<Response> {
     }
 
     // ── 3. Collect export content ────────────────────────────────────────────
-    const { businessSlug, files } = await collectWordPressExport(
-      targetBusinessId,
-    );
+    const { businessSlug, files } =
+      await collectWordPressExport(targetBusinessId);
 
     // ── 4. Assemble ZIP ──────────────────────────────────────────────────────
     const zip = new JSZip();

@@ -4,37 +4,32 @@ import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "~/components/auth/user/user-button";
 import { IconLayoutDashboard, IconPackage } from "@tabler/icons-react";
 import { Heart, Menu, ShoppingBag, User } from "lucide-react";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { useHydratedSession } from "~/lib/auth/use-hydrated-session";
+import { resolveLogoAlt } from "~/lib/logo-alt";
+import { isActiveNavLink } from "~/lib/nav-utils";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
+import { resolveThemeVars } from "~/lib/template-themes";
+import { UserButton } from "~/components/auth/user/user-button";
 import { useCart } from "~/providers/cart-context";
 import { useStorefrontFlags } from "~/providers/feature-flags-context";
 import { useWishlist } from "~/providers/wishlist-context";
-import { resolveThemeVars } from "~/lib/template-themes";
 
 import { resolveFields } from "..";
 import { PinkCartDrawer } from "../shared/pink-cart-drawer";
-import { isActiveNavLink } from "./pink-nav-utils";
 import { PinkMobileMenu } from "./pink-mobile-menu";
+import { PinkNavDropdown } from "./pink-nav-dropdown";
 
-export type PinkNavLink = { href: string; label: string; fieldKey?: string };
+/** Platform nav shape — `Business.siteContent.navigationItems` (one level of
+ *  children), as validated by `navigationItemsSchema` in
+ *  `src/lib/validators/content.ts` and mirrored by every other header. */
+export type PinkNavChild = { href: string; label: string; external?: boolean };
+export type PinkNavLink = PinkNavChild & { children?: PinkNavChild[] };
 
-const FIELD_KEYS = [
-  "pink.global.accent-word",
-  "pink.global.nav-shop",
-  "pink.global.nav-collections",
-  "pink.global.nav-services",
-  "pink.global.nav-blog",
-  "pink.global.nav-events",
-  "pink.global.nav-videos",
-  "pink.global.nav-about",
-  "pink.global.header-cta-text",
-  "pink.global.header-cta-link",
-  "pink.global.basket-label",
-];
+const FIELD_KEYS = ["pink.global.accent-word", "pink.global.basket-label"];
 
 /**
  * Splits a business name into { prefix, tail } where `tail` is the trailing
@@ -45,7 +40,10 @@ const FIELD_KEYS = [
  */
 function splitAccentWordmark(name: string, accentWord: string) {
   const trimmedAccent = accentWord.trim();
-  if (!trimmedAccent || !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())) {
+  if (
+    !trimmedAccent ||
+    !name.toLowerCase().endsWith(trimmedAccent.toLowerCase())
+  ) {
     return { matches: false as const };
   }
   const splitIndex = name.length - trimmedAccent.length;
@@ -56,8 +54,12 @@ function splitAccentWordmark(name: string, accentWord: string) {
   };
 }
 
-export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
+export function PinkHeader({
+  business,
+  initialSession,
+}: DefaultHeaderTemplateProps) {
   const pathname = usePathname();
+  const { data: session, isPending } = useHydratedSession(initialSession);
   const { isEnabled } = useStorefrontFlags();
   const { itemCount, setIsOpen } = useCart();
   const { count: wishlistCount, isHydrated: wishlistHydrated } = useWishlist();
@@ -78,85 +80,57 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
 
   const businessName = business?.name ?? "PinkArt";
   const logoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const customFields = business?.siteContent?.customFields as
     | Record<string, string>
     | undefined;
   const f = resolveFields(customFields, FIELD_KEYS);
   // The cart drawer portals outside the layout wrapper that carries these, so
   // it has to be handed them directly or theme presets skip it.
-  const themeVars = resolveThemeVars("pink", customFields) as
-    | React.CSSProperties
-    | null;
+  const themeVars = resolveThemeVars(
+    "pink",
+    customFields,
+  ) as React.CSSProperties | null;
 
   const accentWord = f["pink.global.accent-word"] ?? "";
   const wordmark = splitAccentWordmark(businessName, accentWord);
 
-  const ctaText = (f["pink.global.header-cta-text"] ?? "").trim();
-  const ctaLink = f["pink.global.header-cta-link"] ?? "/contact";
   const basketLabel = f["pink.global.basket-label"] ?? "Basket";
 
-  const defaultNavLinks: PinkNavLink[] = [
-    {
-      href: "/shop",
-      label: f["pink.global.nav-shop"] ?? "Shop",
-      fieldKey: "pink.global.nav-shop",
-    },
+  // Shipped nav, used until the owner saves their own items in
+  // /admin/content/navigation. Gated per entry: a default link to a page the
+  // store has switched off would 404. Contact is ungated, matching the
+  // footer's fallback column.
+  const DEFAULT_NAV: PinkNavLink[] = [
+    { href: "/shop", label: "Shop" },
     ...(isEnabled("collections")
-      ? [
-          {
-            href: "/collections",
-            label: f["pink.global.nav-collections"] ?? "Collections",
-            fieldKey: "pink.global.nav-collections",
-          },
-        ]
+      ? [{ href: "/collections", label: "Collections" }]
       : []),
     ...(isEnabled("services")
-      ? [
-          {
-            href: "/services",
-            label: f["pink.global.nav-services"] ?? "Make & Takes",
-            fieldKey: "pink.global.nav-services",
-          },
-        ]
+      ? [{ href: "/services", label: "Make & Takes" }]
       : []),
-    ...(isEnabled("blog")
-      ? [
-          {
-            href: "/blog",
-            label: f["pink.global.nav-blog"] ?? "Journal",
-            fieldKey: "pink.global.nav-blog",
-          },
-        ]
-      : []),
-    ...(isEnabled("events")
-      ? [
-          {
-            href: "/events",
-            label: f["pink.global.nav-events"] ?? "Events",
-            fieldKey: "pink.global.nav-events",
-          },
-        ]
-      : []),
-    ...(isEnabled("videos")
-      ? [
-          {
-            href: "/videos",
-            label: f["pink.global.nav-videos"] ?? "Videos",
-            fieldKey: "pink.global.nav-videos",
-          },
-        ]
-      : []),
-    {
-      href: "/about",
-      label: f["pink.global.nav-about"] ?? "The artist",
-      fieldKey: "pink.global.nav-about",
-    },
+    ...(isEnabled("blog") ? [{ href: "/blog", label: "Journal" }] : []),
+    ...(isEnabled("events") ? [{ href: "/events", label: "Events" }] : []),
+    ...(isEnabled("videos") ? [{ href: "/videos", label: "Videos" }] : []),
+    { href: "/about", label: "The artist" },
+    { href: "/contact", label: "Contact" },
   ];
 
-  const customNav = business?.siteContent?.navigationItems as
-    | PinkNavLink[]
-    | undefined;
-  const navLinks = customNav?.length ? customNav : defaultNavLinks;
+  // `??`, never `||` (and never a `.length` check): an owner who saves an empty
+  // item list in the Navigation builder means "no nav links", which either of
+  // those would silently overwrite with the shipped default. Owner-configured
+  // items are rendered as-is — the flag gating above shapes DEFAULT_NAV only.
+  const navLinks =
+    (business?.siteContent?.navigationItems as PinkNavLink[] | undefined) ??
+    DEFAULT_NAV;
+
+  // The drawer is one flat level, so a parent is replaced by its children.
+  const mobileLinks = navLinks.flatMap((link) =>
+    link.children?.length ? link.children : [link],
+  );
 
   const isActive = (href: string) => isActiveNavLink(pathname ?? "/", href);
 
@@ -185,7 +159,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
           {logoUrl ? (
             <Image
               src={logoUrl}
-              alt={businessName}
+              alt={logoAlt}
               width={160}
               height={40}
               className="h-8 w-auto object-contain"
@@ -204,7 +178,9 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
               {wordmark.matches ? (
                 <>
                   {wordmark.prefix}
-                  <span style={{ color: "var(--pink-rose)" }}>{wordmark.tail}</span>
+                  <span style={{ color: "var(--pink-rose)" }}>
+                    {wordmark.tail}
+                  </span>
                 </>
               ) : (
                 businessName
@@ -222,26 +198,47 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
             className="hidden items-center gap-x-[22px] gap-y-2 lg:flex"
             aria-label="Primary navigation"
           >
-            {navLinks.map((link) => (
-              <Link
-                key={link.href + link.label}
-                href={link.href}
-                aria-current={isActive(link.href) ? "page" : undefined}
-                className="pink-nav-link"
-                {...(link.fieldKey ? fieldAttr(link.fieldKey) : {})}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) =>
+              link.children?.length ? (
+                // A parent with children renders as a dropdown TRIGGER and its
+                // own `href` is never navigated to — the platform convention
+                // every other header follows.
+                <PinkNavDropdown
+                  key={link.href + link.label}
+                  label={link.label}
+                  links={link.children}
+                  activePath={pathname ?? "/"}
+                />
+              ) : (
+                <Link
+                  key={link.href + link.label}
+                  href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                  className="pink-nav-link"
+                >
+                  {link.label}
+                  {link.external && (
+                    <span className="sr-only"> (opens in new tab)</span>
+                  )}
+                </Link>
+              ),
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
             {isEnabled("customerAccounts") && (
               <div className="hidden lg:block">
-                {session?.user ? (
+                {isPending ? (
+                  <div
+                    className="h-8 w-8 animate-pulse rounded-full"
+                    style={{ background: "var(--pink-line)" }}
+                  />
+                ) : session?.user ? (
                   <UserButton
                     size="icon"
-                    className="rounded-full w-auto h-auto p-0"
+                    className="h-auto w-auto rounded-full p-0"
                     avatarClassName="size-8 ring-1 ring-[var(--pink-rose)] ring-offset-1 ring-offset-[var(--pink-paper)]"
                     links={[
                       {
@@ -305,29 +302,6 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
               </Link>
             )}
 
-            {ctaText && (
-              <Link
-                href={ctaLink}
-                className="hidden text-[14px] font-medium transition-colors sm:inline-flex"
-                style={{
-                  border: "1px solid var(--pink-line-button)",
-                  color: "var(--pink-ink)",
-                  padding: "11px 16px",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--pink-rose)";
-                  e.currentTarget.style.color = "var(--pink-rose)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "var(--pink-line-button)";
-                  e.currentTarget.style.color = "var(--pink-ink)";
-                }}
-                {...fieldAttr("pink.global.header-cta-text")}
-              >
-                {ctaText}
-              </Link>
-            )}
-
             <button
               type="button"
               onClick={openCart}
@@ -355,7 +329,9 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
               }}
             >
               <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-              <span {...fieldAttr("pink.global.basket-label")}>{basketLabel}</span>
+              <span {...fieldAttr("pink.global.basket-label")}>
+                {basketLabel}
+              </span>
               {/* `opacity: 0.7` composited white onto `--pink-rose` at 4.05:1,
                   under AA. 0.85 measures 5.29:1 and keeps the de-emphasis
                   (full white is 6.7:1). `aria-hidden` because the button's
@@ -397,10 +373,8 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         triggerRef={hamburgerRef}
-        links={navLinks}
+        links={mobileLinks}
         activeHref={pathname ?? "/"}
-        ctaText={ctaText}
-        ctaLink={ctaLink}
         basketLabel={basketLabel}
         itemCount={itemCount}
         wishlist={
@@ -409,7 +383,7 @@ export function PinkHeader({ business, session }: DefaultHeaderTemplateProps) {
             : null
         }
         account={
-          isEnabled("customerAccounts")
+          isEnabled("customerAccounts") && !isPending
             ? {
                 href: session?.user ? "/account/orders" : "/auth/sign-in",
                 label: session?.user ? "My account" : "Sign in",

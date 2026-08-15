@@ -1,3 +1,5 @@
+import { cn } from "~/lib/utils";
+
 type PinkHairlineGridProps = {
   children: React.ReactNode;
   /** Tailwind grid-cols-* utility classes (responsive). Default: 1 col → 3 at md. */
@@ -23,7 +25,12 @@ export function PinkHairlineGrid({
 }: PinkHairlineGridProps) {
   return (
     <div
-      className={`grid ${columnsClassName} ${tone === "dark" ? "pink-hairline-grid-dark" : "pink-hairline-grid"}${className ? ` ${className}` : ""}`}
+      className={cn(
+        "grid",
+        columnsClassName,
+        tone === "dark" ? "pink-hairline-grid-dark" : "pink-hairline-grid",
+        className,
+      )}
       {...sectionAttrs}
     >
       {children}

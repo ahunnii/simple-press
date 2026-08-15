@@ -120,10 +120,7 @@ export function MediaGrid({
             <Card className="group-hover:border-primary group-focus-visible:border-primary overflow-hidden transition-colors">
               <MediaThumbnail item={item} />
               <CardContent className="p-2">
-                <p
-                  className="truncate text-xs font-medium"
-                  title={filename}
-                >
+                <p className="truncate text-xs font-medium" title={filename}>
                   {filename}
                 </p>
                 <p className="text-muted-foreground text-[11px]">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { hasCustomImage } from "../shared/pink-image-fallback";
+import { pinkWordmarkSplit } from "../shared/pink-wordmark-split";
 import {
   PINK_WORDMARK_DEFAULTS,
   PinkWordmarkSvg,
@@ -21,10 +22,14 @@ type Props = {
   ctaSecondaryLink: string;
   /** The family-home photo, held in the upper region of the composition. */
   image: string;
-  /** Wordmark, first half — set in `--pink-rose`. */
-  wordmarkAccent: string;
-  /** Wordmark, second half — set in `--pink-ink`. */
-  wordmarkInk: string;
+  /**
+   * The shop's actual name, split into the two-tone live-text wordmark via
+   * `accentWord` — `pinkWordmarkSplit`, the same rule `pink-header.tsx` /
+   * `pink-footer.tsx` use for their own wordmark.
+   */
+  businessName: string;
+  /** `pink.global.accent-word` — the split point `businessName` is cut on. */
+  accentWord: string;
   /** Small tilted doll cutout, top-left corner. Decorative. */
   cornerDollLeft: string;
   /** Small tilted doll cutout, top-right corner. Decorative. */
@@ -90,9 +95,14 @@ const CORNER_ENTER_DELAYS_S = { left: 1.1, right: 1.2 };
  *
  * **The wordmark is the client's own letterforms** (`PinkWordmarkSvg`), traced
  * as geometry because the logo font has no license we can ship. It renders only
- * while both wordmark fields still hold their defaults — rename the shop and
- * the hero falls back to the live Fraunces text build below, which is kept
- * intact for exactly that reason.
+ * while `pinkWordmarkSplit(businessName, accentWord)` still resolves to
+ * exactly "Pink" / "Art" — the traced artwork spells that one specific word,
+ * so it is only honest for a shop still actually named PinkArt with the
+ * accent word still isolating "Art". Rename the shop, or repoint the accent
+ * word, and the hero falls back to the live Fraunces text build below, split
+ * and colored the same way the header/footer split their own wordmark
+ * (unmatched prefix in ink, matched accent in rose) — kept intact for exactly
+ * that reason.
  *
  * **White ground, warm photo.** v1 washed the house to 22% greyscale over a
  * pink panel and the whole hero went grey-mauve. v2 sits on plain
@@ -132,8 +142,8 @@ export function PinkHeroSection({
   ctaSecondaryLabel,
   ctaSecondaryLink,
   image,
-  wordmarkAccent,
-  wordmarkInk,
+  businessName,
+  accentWord,
   cornerDollLeft,
   cornerDollRight,
   maker1,
@@ -147,12 +157,21 @@ export function PinkHeroSection({
   maker5,
   maker5Alt,
 }: Props) {
-  // The traced mark spells one specific word. It is only honest while the
-  // owner has not renamed the shop; the moment either half is edited we owe
-  // them live text, not their predecessor's logo.
+  // Same split the header/footer use for their own wordmark (see
+  // `pinkWordmarkSplit`), computed from the real business name instead of
+  // the old hero-only literal fields.
+  const wordmark = pinkWordmarkSplit(businessName, accentWord);
+
+  // The traced mark spells one specific word ("PinkArt", as "PINK" + "ART").
+  // It is only honest while the split still lands exactly there — case
+  // compared against `PINK_WORDMARK_DEFAULTS` rather than new hardcoded
+  // literals, since that constant already names the artwork's two halves.
+  // Rename the shop, or repoint the accent word so it isolates something
+  // else, and we owe the owner live text, not their predecessor's logo.
   const useSvg =
-    wordmarkAccent === PINK_WORDMARK_DEFAULTS.accent &&
-    wordmarkInk === PINK_WORDMARK_DEFAULTS.ink;
+    wordmark.rest.toLowerCase() ===
+      PINK_WORDMARK_DEFAULTS.accent.toLowerCase() &&
+    wordmark.accent.toLowerCase() === PINK_WORDMARK_DEFAULTS.ink.toLowerCase();
 
   return (
     <section
@@ -259,7 +278,10 @@ export function PinkHeroSection({
             and the header wordmark plus the H1 already say it in the
             accessibility tree. The overflow mask is what the `.pink-anim-rise`
             translate reveals against, so it wraps either build. */}
-        <div aria-hidden="true" className="pink-hero-wordmark-wrap w-full overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pink-hero-wordmark-wrap w-full overflow-hidden"
+        >
           <span
             className="pink-anim-rise block"
             style={{ animationDelay: ".3s" }}
@@ -267,20 +289,23 @@ export function PinkHeroSection({
             {useSvg ? (
               <PinkWordmarkSvg />
             ) : (
-              // The two halves stay separately editable so an owner whose name
-              // splits differently can re-split it.
+              // No `fieldAttr` here on purpose: the editor's live-text patcher
+              // sets an annotated element's entire `textContent`, and neither
+              // span's text is a field's literal value — `wordmark.rest` /
+              // `wordmark.accent` are slices of `businessName` (not editable
+              // through a customField at all), and `businessName` itself is
+              // set in Settings → General, not here. The accent word stays
+              // editable through its own field in the global branding group.
               <span className="pink-display pink-hero-wordmark">
-                <span
-                  style={{ color: "var(--pink-rose)" }}
-                  {...fieldAttr("pink.homepage.hero-wordmark-accent")}
-                >
-                  {wordmarkAccent}
+                <span style={{ color: "var(--pink-ink)" }}>
+                  {wordmark.rest}
                 </span>
-                <span
-                  style={{ color: "var(--pink-ink)" }}
-                  {...fieldAttr("pink.homepage.hero-wordmark-ink")}
-                >
-                  {wordmarkInk}
+                {/* Empty when the split doesn't match (see
+                    `pinkWordmarkSplit`) — renders nothing, collapsing this to
+                    the single-color full name, same as the header/footer
+                    fallback. */}
+                <span style={{ color: "var(--pink-rose)" }}>
+                  {wordmark.accent}
                 </span>
               </span>
             )}

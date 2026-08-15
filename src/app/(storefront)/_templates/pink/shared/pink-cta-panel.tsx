@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { fieldAttr } from "~/lib/preview/section-attrs";
-
+import { cn } from "~/lib/utils";
 
 type PinkCtaLink = { label: string; href: string };
 
@@ -39,7 +39,11 @@ export function PinkCtaPanel({
   const hasImages = images && images.length > 0;
   return (
     <div
-      className={`grid gap-8 p-8 md:p-12 ${hasImages ? "md:grid-cols-2 md:items-center" : ""}${className ? ` ${className}` : ""}`}
+      className={cn(
+        "grid gap-8 p-8 md:p-12",
+        hasImages && "md:grid-cols-2 md:items-center",
+        className,
+      )}
       style={{ background: "var(--pink-panel)" }}
       {...sectionAttrs}
     >
@@ -73,7 +77,10 @@ export function PinkCtaPanel({
               </Link>
             )}
             {secondaryCta && (
-              <Link href={secondaryCta.href} className="pink-btn pink-btn-ghost">
+              <Link
+                href={secondaryCta.href}
+                className="pink-btn pink-btn-ghost"
+              >
                 {secondaryCta.label}
               </Link>
             )}
@@ -89,9 +96,12 @@ export function PinkCtaPanel({
           className={`grid gap-3 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
         >
           {images.slice(0, 2).map((img, i) => (
-            <div key={img.src + i} className="relative aspect-square overflow-hidden">
+            <div
+              key={img.src + i}
+              className="relative aspect-square overflow-hidden"
+            >
               <Image
-                src={img.src || "/placeholder.svg"}
+                src={img.src}
                 alt={img.alt}
                 fill
                 className="object-cover"

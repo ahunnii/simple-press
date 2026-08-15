@@ -98,7 +98,10 @@ export function PinkOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
           {/* Summary — ink */}
           <div
             className="p-8"
-            style={{ background: "var(--pink-ink)", color: "var(--pink-paper)" }}
+            style={{
+              background: "var(--pink-ink)",
+              color: "var(--pink-paper)",
+            }}
           >
             <p className="pink-label-dark mb-5">Summary</p>
 
@@ -111,7 +114,11 @@ export function PinkOrderDetailPage({ order }: OrderDetailPageTemplateProps) {
               <span className="pink-label-dark">Total</span>
               <span
                 className="pink-display"
-                style={{ fontSize: 20, fontWeight: 600, color: "var(--pink-paper)" }}
+                style={{
+                  fontSize: 20,
+                  fontWeight: 600,
+                  color: "var(--pink-paper)",
+                }}
               >
                 {formatPrice(order.total)}
               </span>

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -18,6 +17,8 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+
+import { AdminThumb } from "../../_components/admin-thumb";
 
 type ImageEditModalProps = {
   image: {
@@ -78,7 +79,7 @@ export function ImageEditModal({
           <div className="space-y-4 py-4">
             {/* Image Preview */}
             <div className="bg-muted aspect-video overflow-hidden rounded-lg">
-              <img
+              <AdminThumb
                 src={image.url}
                 alt={altText ?? ""}
                 loading="lazy"

@@ -1,4 +1,5 @@
 import type { TemplateSection } from "~/lib/template-sections";
+import { SECTION_LINKS } from "~/lib/section-links";
 
 export const noiseSections: Record<string, TemplateSection[]> = {
   noise: [
@@ -55,6 +56,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
         "Two product rails on the homepage — each can point at a specific collection or fall back to featured products.",
       groupIds: ["homepage.featured"],
       order: 5,
+      links: [SECTION_LINKS.products, SECTION_LINKS.collections],
     },
     {
       id: "homepage.guarantee",
@@ -72,6 +74,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       groupIds: ["homepage.testimonials"],
       order: 7,
       hideable: true,
+      links: [SECTION_LINKS.testimonials],
     },
 
     // About
@@ -110,13 +113,15 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       title: "Blog Listing",
       groupIds: ["blog.listing"],
       order: 0,
+      links: [SECTION_LINKS.blog],
     },
     {
       id: "blog.post",
       page: "blog",
       renderContext: "blog-post",
       title: "Blog Post — Shop CTA",
-      description: "Call-to-action band shown at the bottom of every blog post.",
+      description:
+        "Call-to-action band shown at the bottom of every blog post.",
       groupIds: ["blog.post"],
       order: 1,
       hideable: true,
@@ -129,6 +134,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
       title: "Shop Listing",
       groupIds: ["shop.listing"],
       order: 0,
+      links: [SECTION_LINKS.products],
     },
 
     // Testimonials
@@ -140,6 +146,7 @@ export const noiseSections: Record<string, TemplateSection[]> = {
         "Full testimonials page — header, masonry grid, and bottom CTA band.",
       groupIds: ["testimonials.page"],
       order: 0,
+      links: [SECTION_LINKS.testimonials],
     },
 
     // Global

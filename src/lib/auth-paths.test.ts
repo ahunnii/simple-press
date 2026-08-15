@@ -92,7 +92,11 @@ describe("resolveRedirectTo", () => {
 
   it("prefers redirectTo over the legacy names when both are present", () => {
     expect(
-      resolveRedirectTo({ redirectTo: "/a", redirect: "/b", callbackUrl: "/c" }),
+      resolveRedirectTo({
+        redirectTo: "/a",
+        redirect: "/b",
+        callbackUrl: "/c",
+      }),
     ).toBe("/a");
   });
 
@@ -140,10 +144,12 @@ describe("canonicalRedirectUrl", () => {
   // The client reads `?redirectTo` straight off the URL, so an unsafe value
   // must never survive to that point.
   it("strips an unsafe redirectTo rather than passing it through", () => {
-    expect(canonicalRedirectUrl(BASE, { redirectTo: "https://evil.test" })).toBe(
+    expect(
+      canonicalRedirectUrl(BASE, { redirectTo: "https://evil.test" }),
+    ).toBe(BASE);
+    expect(canonicalRedirectUrl(BASE, { redirectTo: "//evil.test" })).toBe(
       BASE,
     );
-    expect(canonicalRedirectUrl(BASE, { redirectTo: "//evil.test" })).toBe(BASE);
   });
 
   it("strips an unsafe legacy param too", () => {

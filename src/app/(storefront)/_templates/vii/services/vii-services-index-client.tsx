@@ -18,6 +18,7 @@ import Link from "next/link";
 
 import type { RouterOutputs } from "~/trpc/react";
 import { parseTemplateIframeValue } from "~/lib/template-fields";
+import { cn } from "~/lib/utils";
 import { PageTransition } from "~/components/page-animations";
 
 import { resolveFields } from "..";
@@ -81,7 +82,13 @@ function ServicesHero({
       >
         {hasVideo ? (
           <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, ...heroMediaStyle(shown, reduced) }}>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                ...heroMediaStyle(shown, reduced),
+              }}
+            >
               <video
                 autoPlay
                 muted
@@ -100,7 +107,13 @@ function ServicesHero({
             </div>
           </div>
         ) : (
-          <div style={{ position: "absolute", inset: 0, ...heroMediaStyle(shown, reduced) }}>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              ...heroMediaStyle(shown, reduced),
+            }}
+          >
             <Image
               src={heroImage!}
               alt=""
@@ -140,7 +153,10 @@ function ServicesHero({
             <ViiOverline
               tone="dark"
               align="left"
-              style={{ ...heroRevealStyle(shown, reduced, 0), marginBottom: 16 }}
+              style={{
+                ...heroRevealStyle(shown, reduced, 0),
+                marginBottom: 16,
+              }}
             >
               {overline}
             </ViiOverline>
@@ -292,7 +308,7 @@ function ServicesIntro({
       <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
         <div
           ref={headRef}
-          className={`vii-reveal${headVisible ? " is-visible" : ""}`}
+          className={cn("vii-reveal", headVisible && "is-visible")}
         >
           {overline && (
             <ViiOverline
@@ -330,7 +346,7 @@ function ServicesIntro({
           <div style={{ marginTop: 28 }}>
             <div
               ref={bodyRef}
-              className={`vii-reveal${bodyVisible ? " is-visible" : ""}`}
+              className={cn("vii-reveal", bodyVisible && "is-visible")}
             >
               <p
                 style={{
@@ -503,7 +519,10 @@ function GalleryStrip({ images }: { images: ServicesGalleryImage[] }) {
     >
       <div
         ref={ref}
-        className={`vii-services-gallery-strip vii-reveal-group${visible ? " is-visible" : ""}`}
+        className={cn(
+          "vii-services-gallery-strip vii-reveal-group",
+          visible && "is-visible",
+        )}
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${shown.length}, 1fr)`,
@@ -560,7 +579,7 @@ function EmptyServicesState() {
     >
       <div
         ref={ref}
-        className={`vii-reveal${visible ? " is-visible" : ""}`}
+        className={cn("vii-reveal", visible && "is-visible")}
         style={{ maxWidth: 560, margin: "0 auto" }}
       >
         <h2
@@ -658,7 +677,10 @@ function ServiceGrid({ services }: { services: Props["services"] }) {
 
       <div
         ref={ref}
-        className={`vii-services-grid vii-reveal-group${visible ? " is-visible" : ""}`}
+        className={cn(
+          "vii-services-grid vii-reveal-group",
+          visible && "is-visible",
+        )}
       >
         {services.map((service, i) => (
           <div

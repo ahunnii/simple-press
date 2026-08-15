@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DefaultHeaderTemplateProps } from "../../types";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
 
 import { resolveFields } from "..";
@@ -57,6 +58,10 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
   // the hardcoded clone logo so the pixel-exact demo keeps looking right
   // when no owner logo has been set.
   const ownerLogoUrl = business?.siteContent?.logoUrl;
+  const logoAlt = resolveLogoAlt(
+    business?.siteContent?.logoAltText,
+    businessName,
+  );
   const navLinkColorClass = overlay
     ? "text-[var(--coop-background)]"
     : "text-[var(--coop-color-001)]";
@@ -72,19 +77,19 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
     <>
       {/* ── Mobile bar + slide-in menu — visible only <572px ───────────── */}
       <div
-        className="hidden max-coop-md:block"
+        className="max-coop-md:block hidden"
         {...sectionGroupAttr("global", "branding")}
       >
         <div className="flex items-center justify-center bg-[var(--coop-background)] px-3 py-2 text-center">
-          <div className="flex min-w-0 max-w-full grow items-center justify-start text-left">
+          <div className="flex max-w-full min-w-0 grow items-center justify-start text-left">
             <Link
               href="/"
               className="block min-w-0 shrink-0 cursor-pointer p-2 leading-0"
               aria-label={`${businessName} — Home`}
             >
               <img
-                className="block w-20 max-coop-md:h-19.5"
-                alt={businessName}
+                className="max-coop-md:h-19.5 block w-20"
+                alt={logoAlt}
                 {...(ownerLogoUrl
                   ? { src: ownerLogoUrl }
                   : { sizes: "240px", src: LOGO_SRC, srcSet: LOGO_SRC_SET })}
@@ -92,7 +97,7 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
             </Link>
           </div>
 
-          <div className="flex min-w-0 max-w-full grow items-center justify-end text-right">
+          <div className="flex max-w-full min-w-0 grow items-center justify-end text-right">
             <button
               ref={hamburgerRef}
               type="button"
@@ -131,12 +136,12 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
       <header
         className={
           overlay
-            ? "absolute inset-x-0 z-1000 block h-[10.4rem] max-coop-md:hidden"
-            : "block bg-[var(--coop-background)] max-coop-md:hidden"
+            ? "max-coop-md:hidden absolute inset-x-0 z-1000 block h-[10.4rem]"
+            : "max-coop-md:hidden block bg-[var(--coop-background)]"
         }
       >
-        <div className="mx-auto flex h-[10.4rem] max-w-425 items-center justify-center px-40 pt-10 text-center max-coop-md:hidden coop-md:max-coop-lg:px-[1.3125rem]">
-          <div className="flex min-w-0 max-w-full grow items-center justify-start text-left">
+        <div className="max-coop-md:hidden coop-md:max-coop-lg:px-[1.3125rem] mx-auto flex h-[10.4rem] max-w-425 items-center justify-center px-40 pt-10 text-center">
+          <div className="flex max-w-full min-w-0 grow items-center justify-start text-left">
             <Link
               href="/"
               className="block h-[7.9rem] shrink-0 cursor-pointer px-[0.9375rem] py-[0.3125rem] leading-0"
@@ -144,7 +149,7 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
             >
               <img
                 className="block h-29 w-30 max-w-30 overflow-clip"
-                alt={businessName}
+                alt={logoAlt}
                 {...(ownerLogoUrl
                   ? { src: ownerLogoUrl }
                   : { sizes: "320px", src: LOGO_SRC, srcSet: LOGO_SRC_SET })}
@@ -152,9 +157,9 @@ export function CoopHeader({ business }: DefaultHeaderTemplateProps) {
             </Link>
           </div>
 
-          <div className="flex h-6 min-w-0 max-w-full grow items-center justify-end text-right">
+          <div className="flex h-6 max-w-full min-w-0 grow items-center justify-end text-right">
             <nav
-              className="block h-6 shrink-0 px-[0.9375rem] py-[0.3125rem] text-sm leading-3.5 tracking-[0.42px] text-nowrap whitespace-nowrap uppercase [font-family:var(--font-coop-label)]"
+              className="block h-6 shrink-0 px-[0.9375rem] py-[0.3125rem] [font-family:var(--font-coop-label)] text-sm leading-3.5 tracking-[0.42px] text-nowrap whitespace-nowrap uppercase"
               aria-label="Primary navigation"
             >
               <div className="-m-[0.5375rem] block">

@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { TrackPurchase } from "~/components/analytics/track-purchase";
-import { formatPrice } from "~/lib/prices";
+import type { CartItem } from "~/providers/cart-context";
 import { fieldAttr, sectionGroupAttr } from "~/lib/preview/section-attrs";
-import { type CartItem, useCart } from "~/providers/cart-context";
+import { formatPrice } from "~/lib/prices";
+import { TrackPurchase } from "~/components/analytics/track-purchase";
+import { useCart } from "~/providers/cart-context";
 
 import { PinkCtaPanel } from "../shared/pink-cta-panel";
 import { PinkFactRows } from "../shared/pink-fact-rows";
@@ -112,7 +113,9 @@ export function PinkOrderConfirmation({
 
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`/api/stripe/session?session_id=${sessionId}`);
+        const response = await fetch(
+          `/api/stripe/session?session_id=${sessionId}`,
+        );
         if (response.ok) {
           const data = (await response.json()) as OrderDetails;
           setOrderDetails(data);
@@ -134,7 +137,12 @@ export function PinkOrderConfirmation({
         className="flex min-h-[60vh] items-center justify-center px-5 py-24 md:px-10"
         style={{ background: "var(--pink-paper)" }}
       >
-        <p role="status" aria-live="polite" className="text-[16px]" style={{ color: "var(--pink-subtle)" }}>
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-[16px]"
+          style={{ color: "var(--pink-subtle)" }}
+        >
           {loadingText}
         </p>
       </div>
@@ -181,20 +189,33 @@ export function PinkOrderConfirmation({
   const email = orderDetails?.customer_email ?? null;
   const total =
     orderDetails?.amount_total != null
-      ? formatOrderTotal(orderDetails.amount_total, orderDetails.currency || "usd")
+      ? formatOrderTotal(
+          orderDetails.amount_total,
+          orderDetails.currency || "usd",
+        )
       : null;
-  const paymentStatus = orderDetails ? titleCasePaymentStatus(orderDetails.payment_status) : null;
+  const paymentStatus = orderDetails
+    ? titleCasePaymentStatus(orderDetails.payment_status)
+    : null;
 
   const factRows = [
     ...(total ? [{ label: "Order total", value: total }] : []),
     ...(email ? [{ label: "Confirmation sent to", value: email }] : []),
-    ...(paymentStatus ? [{ label: "Payment status", value: paymentStatus }] : []),
+    ...(paymentStatus
+      ? [{ label: "Payment status", value: paymentStatus }]
+      : []),
   ];
 
   return (
-    <div style={{ background: "var(--pink-paper)" }} {...sectionGroupAttr("checkout", "success")}>
+    <div
+      style={{ background: "var(--pink-paper)" }}
+      {...sectionGroupAttr("checkout", "success")}
+    >
       {orderDetails?.amount_total != null && (
-        <TrackPurchase sessionId={sessionId} amountCents={orderDetails.amount_total} />
+        <TrackPurchase
+          sessionId={sessionId}
+          amountCents={orderDetails.amount_total}
+        />
       )}
 
       {/* Confirmation header — ink, mirrors PinkPageHeader's proportions but
@@ -204,11 +225,12 @@ export function PinkOrderConfirmation({
         style={{ background: "var(--pink-ink)", color: "var(--pink-paper)" }}
       >
         <div className="mx-auto flex max-w-[1400px] flex-col gap-4">
-          <h1
-            className="pink-display max-w-[16ch] text-[clamp(2.125rem,4.6vw,3.875rem)] leading-[1.02] tracking-[-0.03em]"
-          >
+          <h1 className="pink-display max-w-[16ch] text-[clamp(2.125rem,4.6vw,3.875rem)] leading-[1.02] tracking-[-0.03em]">
             <span {...fieldAttr("pink.order.heading")}>{heading}</span>{" "}
-            <span style={{ color: "var(--pink-blush)" }} {...fieldAttr("pink.order.heading-accent")}>
+            <span
+              style={{ color: "var(--pink-blush)" }}
+              {...fieldAttr("pink.order.heading-accent")}
+            >
               {headingAccent}
             </span>
           </h1>
@@ -242,16 +264,28 @@ export function PinkOrderConfirmation({
                   key={`${item.productId}-${item.variantId ?? "no-variant"}`}
                   className="flex items-center justify-between gap-4 py-4"
                   style={{
-                    borderTop: index === 0 ? "1px solid var(--pink-ink)" : "1px solid var(--pink-line)",
+                    borderTop:
+                      index === 0
+                        ? "1px solid var(--pink-ink)"
+                        : "1px solid var(--pink-line)",
                   }}
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-[15px] font-medium">{item.productName}</p>
-                    <p className="text-[13px]" style={{ color: "var(--pink-subtle)" }}>
-                      {item.variantName ? `${item.variantName} · ` : ""}Qty {item.quantity}
+                    <p className="truncate text-[15px] font-medium">
+                      {item.productName}
+                    </p>
+                    <p
+                      className="text-[13px]"
+                      style={{ color: "var(--pink-subtle)" }}
+                    >
+                      {item.variantName ? `${item.variantName} · ` : ""}Qty{" "}
+                      {item.quantity}
                     </p>
                   </div>
-                  <span className="pink-display shrink-0" style={{ fontSize: 15, fontWeight: 600 }}>
+                  <span
+                    className="pink-display shrink-0"
+                    style={{ fontSize: 15, fontWeight: 600 }}
+                  >
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
@@ -259,7 +293,10 @@ export function PinkOrderConfirmation({
             ) : (
               <p
                 className="py-4 text-[14px]"
-                style={{ borderTop: "1px solid var(--pink-ink)", color: "var(--pink-subtle)" }}
+                style={{
+                  borderTop: "1px solid var(--pink-ink)",
+                  color: "var(--pink-subtle)",
+                }}
               >
                 Your receipt is on its way by email.
               </p>
@@ -269,14 +306,21 @@ export function PinkOrderConfirmation({
           {/* Ink summary panel */}
           <aside
             aria-label="Order summary"
-            className="order-1 lg:order-2 lg:sticky"
+            className="order-1 lg:sticky lg:order-2"
             style={{ top: "var(--pink-sticky-top)" }}
           >
-            <div className="pink-dark flex flex-col gap-6" style={{ background: "var(--pink-ink)" }}>
+            <div
+              className="pink-dark flex flex-col gap-6"
+              style={{ background: "var(--pink-ink)" }}
+            >
               <div className="flex flex-col gap-4 p-7 md:p-8">
                 <span
                   className="pink-display"
-                  style={{ fontSize: 18, fontWeight: 600, color: "var(--pink-paper)" }}
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 600,
+                    color: "var(--pink-paper)",
+                  }}
                   {...fieldAttr("pink.order.summary-heading")}
                 >
                   {summaryHeading}
@@ -285,7 +329,10 @@ export function PinkOrderConfirmation({
               {factRows.length > 0 && <PinkFactRows rows={factRows} />}
               {nextStepsLines.length > 0 && (
                 <div className="flex flex-col gap-3 p-7 pt-0 md:p-8 md:pt-0">
-                  <p className="pink-label-dark" {...fieldAttr("pink.checkout.next-steps-label")}>
+                  <p
+                    className="pink-label-dark"
+                    {...fieldAttr("pink.checkout.next-steps-label")}
+                  >
                     {nextStepsLabel}
                   </p>
                   <ul className="flex flex-col gap-2.5">
@@ -295,7 +342,10 @@ export function PinkOrderConfirmation({
                         className="flex items-start gap-2.5 text-[14px] leading-[1.6]"
                         style={{ color: "var(--pink-ink-body)" }}
                       >
-                        <span aria-hidden="true" style={{ color: "var(--pink-blush)" }}>
+                        <span
+                          aria-hidden="true"
+                          style={{ color: "var(--pink-blush)" }}
+                        >
                           —
                         </span>
                         {line}
@@ -325,9 +375,13 @@ export function PinkOrderConfirmation({
           headingFieldKey="pink.order.cta-heading"
           body={ctaBody}
           bodyFieldKey="pink.order.cta-body"
-          primaryCta={ctaButton ? { label: ctaButton, href: ctaLink } : undefined}
+          primaryCta={
+            ctaButton ? { label: ctaButton, href: ctaLink } : undefined
+          }
           secondaryCta={
-            ctaSecondaryLabel ? { label: ctaSecondaryLabel, href: ctaSecondaryLink } : undefined
+            ctaSecondaryLabel
+              ? { label: ctaSecondaryLabel, href: ctaSecondaryLink }
+              : undefined
           }
         />
       </div>

@@ -26,7 +26,8 @@ export const domainRouter = createTRPCRouter({
       // Reject the platform's own domain and any of its subdomains
       // (e.g. `*.simplepress.co`). A tenant claiming these as a custom domain
       // would let them hijack platform/other-tenant traffic during routing.
-      const platformDomain = env.NEXT_PUBLIC_PLATFORM_DOMAIN.trim().toLowerCase();
+      const platformDomain =
+        env.NEXT_PUBLIC_PLATFORM_DOMAIN.trim().toLowerCase();
       const normalizedDomain = domain.trim().toLowerCase();
       if (
         platformDomain &&

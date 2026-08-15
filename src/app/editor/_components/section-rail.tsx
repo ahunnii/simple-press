@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Eye, EyeOff, Palette, Wrench } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Palette,
+  Wrench,
+} from "lucide-react";
 
 import type { TemplateSection } from "~/lib/template-sections";
 import { cn } from "~/lib/utils";
+import { EDITOR_ADMIN_LINKS } from "~/app/editor/_lib/editor-admin-links";
 
 export type SectionRailProps = {
   /** Sections belonging to the active page, already in template order. */
@@ -178,6 +186,29 @@ export function SectionRail({
         </div>
       )}
 
+      <div className="border-t py-1 pb-2">
+        <p className="text-muted-foreground px-3 pt-3 pb-1 text-xs font-medium tracking-wide uppercase">
+          In your admin
+        </p>
+        <div className="space-y-0.5">
+          {EDITOR_ADMIN_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/60 mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors"
+            >
+              <span className="min-w-0 flex-1 truncate">{link.label}</span>
+              <ExternalLink
+                className="text-muted-foreground h-3 w-3 shrink-0"
+                aria-hidden="true"
+              />
+            </a>
+          ))}
+        </div>
+      </div>
+
       {hasTheme && (
         <div className="border-t py-1 pb-2">
           <p className="text-muted-foreground px-3 pt-3 pb-1 text-xs font-medium tracking-wide uppercase">
@@ -189,9 +220,7 @@ export function SectionRail({
             onClick={onSelectTheme}
             className={cn(
               "group relative mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors",
-              themeActive
-                ? "bg-muted font-medium"
-                : "hover:bg-muted/60",
+              themeActive ? "bg-muted font-medium" : "hover:bg-muted/60",
             )}
           >
             {themeActive && (

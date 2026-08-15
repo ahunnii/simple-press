@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { cn } from "~/lib/utils";
+
 import { useViiReveal } from "../hooks/use-vii-reveal";
 import { ViiOverline } from "../shared/vii-overline";
 
@@ -56,7 +58,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           >
             <div
               ref={leftRef}
-              className={`vii-reveal${leftVisible ? " is-visible" : ""}`}
+              className={cn("vii-reveal", leftVisible && "is-visible")}
               style={{ maxWidth: 440 }}
             >
               {left.image.trim() && (
@@ -179,7 +181,7 @@ export function ViiShopPromoBand({ left, right }: Props) {
           >
             <div
               ref={rightRef}
-              className={`vii-reveal${rightVisible ? " is-visible" : ""}`}
+              className={cn("vii-reveal", rightVisible && "is-visible")}
               style={{ maxWidth: 440 }}
             >
               {right.image.trim() && (

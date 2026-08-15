@@ -14,7 +14,7 @@ export default async function PoliciesPage() {
     <>
       <TrailHeader
         breadcrumbs={[
-          { label: "Content", href: "/admin/content" },
+          { label: "Site Setup", href: "/admin/content" },
           { label: "Policies" },
         ]}
       />

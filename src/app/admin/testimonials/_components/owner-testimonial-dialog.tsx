@@ -1,33 +1,38 @@
 "use client";
 
 import type { Testimonial } from "generated/prisma";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUploadFiles } from "@better-upload/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { Loader2, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Loader2, Trash2, Upload } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type { OwnerTestimonialFormData } from "~/lib/validators/testimonials";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
 import { getStoredPath } from "~/lib/uploads";
+import { cn } from "~/lib/utils";
 import { ownerTestimonialFormSchema } from "~/lib/validators/testimonials";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
-import { Form, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
-import { Label } from "~/components/ui/label";
-import { Switch } from "~/components/ui/switch";
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { InputFormField } from "~/components/inputs/input-form-field";
+import { SwitchFormField } from "~/components/inputs/switch-form-field";
 import { TextareaFormField } from "~/components/inputs/textarea-form-field";
+import { EntityFormDialog } from "~/components/admin/entity-form-dialog";
+
+import { AdminThumb } from "../../_components/admin-thumb";
 
 type Props = {
   testimonial?: Testimonial;
@@ -79,6 +84,34 @@ function buildDefaultValues(
   };
 }
 
+/**
+ * The optional attribution fields demoted into the "Additional details"
+ * disclosure. One list, because both things that force the section open — a
+ * record that already has data, and a validation error on a field inside it —
+ * must cover exactly the same fields the section renders.
+ */
+const ADDITIONAL_DETAIL_FIELDS = [
+  "customerEmail",
+  "customerTitle",
+  "customerCompany",
+  "title",
+] as const satisfies readonly (keyof OwnerTestimonialFormData)[];
+
+/**
+ * Whether the disclosure holds any data for this record.
+ *
+ * Its fields are optional attribution, so it is collapsed by default — but an
+ * existing testimonial that already has any of them must open with the section
+ * expanded, or editing would silently hide saved data from the person editing
+ * it. Derived from the built defaults (not the raw row) so this can't drift
+ * from what the form is actually seeded with.
+ */
+function hasAdditionalDetails(values: OwnerTestimonialFormData): boolean {
+  return ADDITIONAL_DETAIL_FIELDS.some(
+    (key) => (values[key]?.trim().length ?? 0) > 0,
+  );
+}
+
 export function OwnerTestimonialDialog({
   testimonial,
   isOpen,
@@ -86,6 +119,8 @@ export function OwnerTestimonialDialog({
   onSuccess,
 }: Props) {
   const isEditing = !!testimonial;
+
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const form = useForm<OwnerTestimonialFormData>({
     resolver: zodResolver(ownerTestimonialFormSchema),
@@ -118,7 +153,9 @@ export function OwnerTestimonialDialog({
   // Populate/reset form whenever the dialog opens or the target testimonial changes.
   useEffect(() => {
     if (!isOpen) return;
-    form.reset(buildDefaultValues(testimonial));
+    const defaults = buildDefaultValues(testimonial);
+    form.reset(defaults);
+    setDetailsOpen(hasAdditionalDetails(defaults));
   }, [testimonial, isOpen, form]);
 
   const createMutation = api.testimonial.ownerCreate.useMutation({
@@ -145,6 +182,14 @@ export function OwnerTestimonialDialog({
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  // A collapsed section must never swallow an error message — from zod on
+  // submit or from `applyTrpcErrorToForm` mapping a server field error.
+  const { errors } = form.formState;
+  const detailsHasError = ADDITIONAL_DETAIL_FIELDS.some((key) =>
+    Boolean(errors[key]),
+  );
+  const detailsExpanded = detailsOpen || detailsHasError;
+
   const onSubmit = (data: OwnerTestimonialFormData) => {
     const payload = {
       customerName: data.customerName.trim(),
@@ -166,230 +211,210 @@ export function OwnerTestimonialDialog({
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
+    <EntityFormDialog
+      form={form}
+      isOpen={isOpen}
+      onClose={onClose}
+      isEditing={isEditing}
+      title={isEditing ? "Edit Testimonial" : "Add Testimonial"}
+      description={
+        isEditing
+          ? "Update this owner-added testimonial"
+          : "Manually add a testimonial from another source"
+      }
+      submitLabel="Add Testimonial"
+      isPending={isPending}
+      onSubmit={onSubmit}
     >
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <Form {...form}>
-          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
-            <DialogHeader>
-              <DialogTitle>
-                {isEditing ? "Edit Testimonial" : "Add Testimonial"}
-              </DialogTitle>
-              <DialogDescription>
-                {isEditing
-                  ? "Update this owner-added testimonial"
-                  : "Manually add a testimonial from another source"}
-              </DialogDescription>
-            </DialogHeader>
+      {/* Who + when */}
+      <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+        <InputFormField
+          form={form}
+          name="customerName"
+          label="Customer Name"
+          placeholder="Jane Doe"
+          className="col-span-1"
+          required
+        />
+        <InputFormField
+          form={form}
+          name="testimonialDate"
+          label="Testimonial Date"
+          type="date"
+          description="Backdate if importing"
+          className="col-span-1"
+        />
+      </div>
 
-            <div className="space-y-5 py-4">
-              {/* Attribution row */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <InputFormField
-                  form={form}
-                  name="customerName"
-                  label="Customer Name"
-                  placeholder="Jane Doe"
-                  required
-                />
-                <InputFormField
-                  form={form}
-                  name="customerEmail"
-                  label="Email (Optional)"
-                  type="email"
-                  placeholder="jane@example.com"
-                />
-              </div>
+      {/* The testimonial itself — the reason the dialog is open. */}
+      <TextareaFormField
+        form={form}
+        name="text"
+        label="Testimonial Text"
+        placeholder="Write the testimonial here..."
+        rows={5}
+        required
+      />
 
-              {/* Title & Date */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <InputFormField
-                  form={form}
-                  name="customerTitle"
-                  label="Customer Title (Optional)"
-                  placeholder="CEO at Acme"
-                />
-                <InputFormField
-                  form={form}
-                  name="customerCompany"
-                  label="Customer Company (Optional)"
-                  placeholder="Acme Corp"
-                />
-              </div>
-
-              {/* Testimonial headline & date */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <InputFormField
-                  form={form}
-                  name="title"
-                  label="Headline / Title (Optional)"
-                  placeholder="Best product I've ever used!"
-                />
-                <InputFormField
-                  form={form}
-                  name="testimonialDate"
-                  label="Testimonial Date"
-                  type="date"
-                  description="Backdate if importing"
-                />
-              </div>
-
-              {/* Text */}
-              <TextareaFormField
-                form={form}
-                name="text"
-                label="Testimonial Text"
-                placeholder="Write the testimonial here..."
-                rows={5}
-                required
-              />
-
-              {/* Photos (Optional, max 5) — upload */}
-              <FormField
-                control={form.control}
-                name="photoUrls"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Photos (Optional, max 5)</FormLabel>
-                    <p className="text-muted-foreground text-sm">
-                      Upload images to include with this testimonial
-                    </p>
-                    <div className="space-y-3">
-                      {field.value.length > 0 && (
-                        <div className="flex flex-wrap gap-3">
-                          {field.value.map((url, i) => (
-                            <div
-                              key={url}
-                              className="bg-muted relative h-24 w-24 overflow-hidden rounded-lg border"
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element -- thumbnails from upload URLs */}
-                              <img
-                                src={url}
-                                alt="Testimonial photo"
-                                loading="lazy"
-                                className="h-full w-full object-cover"
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                aria-label="Remove photo"
-                                className="absolute top-1 right-1 h-6 w-6"
-                                onClick={() =>
-                                  field.onChange(
-                                    field.value.filter((_, j) => j !== i),
-                                  )
-                                }
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {field.value.length < maxPhotos && (
-                        <div>
-                          <input
-                            type="file"
-                            id="owner-testimonial-photo-upload"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            disabled={uploadFiles.isPending}
-                            title="Upload photos"
-                            aria-label="Upload photos for this testimonial"
-                            onChange={async (e) => {
-                              const files = e.target.files;
-                              if (!files?.length) return;
-                              const valid = Array.from(files).filter((f) =>
-                                f.type.startsWith("image/"),
-                              );
-                              const remaining = maxPhotos - field.value.length;
-                              const toUpload = valid.slice(0, remaining);
-                              if (toUpload.length === 0) return;
-                              e.target.value = "";
-                              await uploadFiles.upload(toUpload);
-                            }}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() =>
-                              document
-                                .getElementById(
-                                  "owner-testimonial-photo-upload",
-                                )
-                                ?.click()
-                            }
-                            disabled={uploadFiles.isPending}
-                          >
-                            {uploadFiles.isPending ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Uploading...
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="mr-2 h-4 w-4" />
-                                Upload photos
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      )}
+      {/* Photos (Optional, max 5) — upload */}
+      <FormField
+        control={form.control}
+        name="photoUrls"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Photos (Optional, max 5)</FormLabel>
+            <p className="text-muted-foreground text-sm">
+              Upload images to include with this testimonial
+            </p>
+            <div className="space-y-3">
+              {field.value.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {field.value.map((url, i) => (
+                    <div
+                      key={url}
+                      className="bg-muted relative h-24 w-24 overflow-hidden rounded-lg border"
+                    >
+                      <AdminThumb
+                        src={url}
+                        alt="Testimonial photo"
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        aria-label="Remove photo"
+                        className="absolute top-1 right-1 h-6 w-6"
+                        onClick={() =>
+                          field.onChange(field.value.filter((_, j) => j !== i))
+                        }
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Approval */}
-              <FormField
-                control={form.control}
-                name="isApproved"
-                render={({ field }) => (
-                  <div className="flex items-center justify-between rounded-lg border p-4">
-                    <div>
-                      <Label htmlFor="isApproved">Approve Immediately</Label>
-                      <p className="text-muted-foreground mt-0.5 text-sm">
-                        Publish this testimonial right away (owner-added
-                        testimonials can be approved on creation)
-                      </p>
-                    </div>
-                    <Switch
-                      id="isApproved"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </div>
-                )}
-              />
+                  ))}
+                </div>
+              )}
+              {field.value.length < maxPhotos && (
+                <div>
+                  <input
+                    type="file"
+                    id="owner-testimonial-photo-upload"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    disabled={uploadFiles.isPending}
+                    title="Upload photos"
+                    aria-label="Upload photos for this testimonial"
+                    onChange={async (e) => {
+                      const files = e.target.files;
+                      if (!files?.length) return;
+                      const valid = Array.from(files).filter((f) =>
+                        f.type.startsWith("image/"),
+                      );
+                      const remaining = maxPhotos - field.value.length;
+                      const toUpload = valid.slice(0, remaining);
+                      if (toUpload.length === 0) return;
+                      e.target.value = "";
+                      await uploadFiles.upload(toUpload);
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      document
+                        .getElementById("owner-testimonial-photo-upload")
+                        ?.click()
+                    }
+                    disabled={uploadFiles.isPending}
+                  >
+                    {uploadFiles.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload photos
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isEditing ? "Saving..." : "Adding..."}
-                  </>
-                ) : isEditing ? (
-                  "Save Changes"
-                ) : (
-                  "Add Testimonial"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+      {/* Optional attribution — collapsed unless this record already has some.
+          Every field below is still submitted exactly as before; this is a
+          visual demotion only. */}
+      <Collapsible
+        open={detailsExpanded}
+        onOpenChange={setDetailsOpen}
+        className="border-border rounded-lg border"
+      >
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="focus-visible:ring-ring flex w-full items-center justify-between gap-2 p-3 text-left text-sm font-medium focus-visible:ring-1 focus-visible:outline-none"
+          >
+            <span>Additional details</span>
+            <ChevronDown
+              className={cn(
+                "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
+                detailsExpanded && "rotate-180",
+              )}
+              aria-hidden="true"
+            />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="border-border border-t p-3">
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+            <InputFormField
+              form={form}
+              name="customerEmail"
+              label="Email (Optional)"
+              type="email"
+              placeholder="jane@example.com"
+              className="col-span-1"
+            />
+            <InputFormField
+              form={form}
+              name="customerTitle"
+              label="Customer Title (Optional)"
+              placeholder="CEO at Acme"
+              className="col-span-1"
+            />
+            <InputFormField
+              form={form}
+              name="customerCompany"
+              label="Customer Company (Optional)"
+              placeholder="Acme Corp"
+              className="col-span-1"
+            />
+            <InputFormField
+              form={form}
+              name="title"
+              label="Headline / Title (Optional)"
+              placeholder="Best product I've ever used!"
+              className="col-span-1"
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Approval */}
+      <SwitchFormField
+        form={form}
+        name="isApproved"
+        label="Approve Immediately"
+        description="Publish this testimonial right away (owner-added testimonials can be approved on creation)"
+      />
+    </EntityFormDialog>
   );
 }

@@ -25,12 +25,22 @@ export function PinkGenericSidebarCta({
   contactNote,
 }: Props) {
   return (
-    <div className="flex flex-col gap-[2px]" {...sectionGroupAttr("global", "page-sidebar")}>
+    <div
+      className="flex flex-col gap-[2px]"
+      {...sectionGroupAttr("global", "page-sidebar")}
+    >
       {heading && (
-        <div className="flex flex-col gap-3 p-6" style={{ background: "var(--pink-panel)" }}>
+        <div
+          className="flex flex-col gap-3 p-6"
+          style={{ background: "var(--pink-panel)" }}
+        >
           <p
             className="pink-display"
-            style={{ fontSize: "19px", fontWeight: 600, letterSpacing: "-0.01em" }}
+            style={{
+              fontSize: "19px",
+              fontWeight: 600,
+              letterSpacing: "-0.01em",
+            }}
             {...fieldAttr("pink.global.page-cta-heading")}
           >
             {heading}
@@ -58,7 +68,10 @@ export function PinkGenericSidebarCta({
       {contactNote && (
         <p
           className="p-6 text-[13px] leading-[1.6]"
-          style={{ background: "var(--pink-panel)", color: "var(--pink-subtle)" }}
+          style={{
+            background: "var(--pink-panel)",
+            color: "var(--pink-subtle)",
+          }}
           {...fieldAttr("pink.global.page-contact-note")}
         >
           {contactNote}

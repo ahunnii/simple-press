@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import type { DefaultFooterTemplateProps } from "../../types";
 import { resolveFlags } from "~/lib/features/resolve-flags";
+import { resolveLogoAlt } from "~/lib/logo-alt";
 import { YouTubeIcon } from "~/components/icons/youtube-icon";
 
 const mainMenuLinks = [
@@ -56,7 +57,10 @@ export async function PollenFooter({ business }: DefaultFooterTemplateProps) {
               {business?.siteContent?.logoUrl ? (
                 <Image
                   src={business.siteContent.logoUrl}
-                  alt={business.name}
+                  alt={resolveLogoAlt(
+                    business.siteContent?.logoAltText,
+                    business.name,
+                  )}
                   width={120}
                   height={120}
                 />

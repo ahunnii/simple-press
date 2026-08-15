@@ -24,7 +24,10 @@ export default async function MarketingPage() {
         <div className="admin-header">
           <div>
             <h1>Email Marketing</h1>
-            <p>Send a one-off announcement or newsletter to your opted-in customers.</p>
+            <p>
+              Send a one-off announcement or newsletter to your opted-in
+              customers.
+            </p>
           </div>
         </div>
 

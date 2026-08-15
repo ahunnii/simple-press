@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import { isExternalUrl } from "~/app/admin/_components/nav-secondary";
 
 export function NavMain({
   items,
@@ -26,31 +27,43 @@ export function NavMain({
 }) {
   const pathname = usePathname();
   const isActive = (url: string) =>
-    pathname === url || pathname.startsWith(url + "/");
+    !isExternalUrl(url) && (pathname === url || pathname.startsWith(url + "/"));
   return (
     <SidebarGroup>
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title} data-active={isActive(item.url)}>
-              <SidebarMenuButton
-                asChild
-                tooltip={item.title}
-                className={
-                  isActive(item.url)
-                    ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary active:bg-primary/20 font-semibold"
-                    : ""
-                }
-                aria-current={isActive(item.url) ? "page" : undefined}
+          {items.map((item) => {
+            const external = isExternalUrl(item.url);
+            return (
+              <SidebarMenuItem
+                key={item.title}
+                data-active={isActive(item.url)}
               >
-                <Link href={item.url} tabIndex={0}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  className={
+                    isActive(item.url)
+                      ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary active:bg-primary/20 font-semibold"
+                      : ""
+                  }
+                  aria-current={isActive(item.url) ? "page" : undefined}
+                >
+                  <Link
+                    href={item.url}
+                    tabIndex={0}
+                    {...(external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                  >
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

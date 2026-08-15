@@ -20,7 +20,13 @@ const RANGES = [
 
 type Range = (typeof RANGES)[number]["value"];
 
-export function RangeSelector({ current, basePath }: { current: Range; basePath: string }) {
+export function RangeSelector({
+  current,
+  basePath,
+}: {
+  current: Range;
+  basePath: string;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
