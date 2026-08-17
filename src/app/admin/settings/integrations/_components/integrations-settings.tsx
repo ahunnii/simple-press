@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import type { PaymentsHealth } from "~/lib/stripe/payments-health";
 import type { RouterOutputs } from "~/trpc/react";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
@@ -12,10 +13,16 @@ import { UmamiSettings } from "./umami-settings";
 
 type Props = {
   business: NonNullable<RouterOutputs["business"]["getWithIntegrations"]>;
+  /** Verified against Stripe by the server page; type-only import, the module itself is `server-only`. */
+  paymentsHealth: PaymentsHealth;
   umamiBaseUrl: string;
 };
 
-export function IntegrationsSettings({ business, umamiBaseUrl }: Props) {
+export function IntegrationsSettings({
+  business,
+  paymentsHealth,
+  umamiBaseUrl,
+}: Props) {
   // This page has no single form-wide save state to report: Stripe's
   // auto-tax toggle saves itself immediately on change, and Umami has its
   // own independent form with its own Save button and pending/success
@@ -47,6 +54,7 @@ export function IntegrationsSettings({ business, umamiBaseUrl }: Props) {
           <StripeSettings
             businessId={business.id}
             stripeAccountId={business.stripeAccountId}
+            paymentsHealth={paymentsHealth}
             stripeAutoTaxEnabled={business.stripeAutoTaxEnabled}
           />
 

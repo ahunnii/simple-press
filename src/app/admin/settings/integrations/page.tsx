@@ -1,4 +1,5 @@
 import { env } from "~/env";
+import { getPaymentsHealth } from "~/lib/stripe/payments-health";
 import { api } from "~/trpc/server";
 import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
@@ -7,6 +8,12 @@ import { IntegrationsSettings } from "./_components/integrations-settings";
 
 export default async function IntegrationsSettingsPage() {
   const business = await api.business.getWithIntegrations();
+
+  // Same verified-against-Stripe value the admin-wide "Payments are paused"
+  // strip uses, so this page can never say "Connected" while the strip says
+  // charges are disabled. Cached inside the helper; the normal case costs
+  // nothing.
+  const paymentsHealth = await getPaymentsHealth(business);
 
   return (
     <>
@@ -20,6 +27,7 @@ export default async function IntegrationsSettingsPage() {
 
       <IntegrationsSettings
         business={business}
+        paymentsHealth={paymentsHealth}
         umamiBaseUrl={env.UMAMI_BASE_URL}
       />
     </>

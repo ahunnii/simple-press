@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  AlertTriangle,
   CheckCircle,
   CreditCard,
   ExternalLink,
@@ -11,8 +12,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import type { PaymentsHealth } from "~/lib/stripe/payments-health";
 import { api } from "~/trpc/react";
-import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,14 +45,23 @@ import {
 type Props = {
   businessId: string;
   stripeAccountId: string | null;
+  /**
+   * Verified against Stripe on the server (see `getPaymentsHealth`), so the
+   * badge below can say "Charges paused" when it is true instead of reporting
+   * "Connected" off `stripeAccountId` alone — which it used to do even while
+   * the admin-wide "Payments are paused" strip was showing.
+   */
+  paymentsHealth: PaymentsHealth;
   stripeAutoTaxEnabled: boolean;
 };
 
 export function StripeSettings({
   businessId,
   stripeAccountId,
+  paymentsHealth,
   stripeAutoTaxEnabled: initialAutoTax,
 }: Props) {
+  const chargesDisabled = paymentsHealth === "charges-disabled";
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [autoTaxEnabled, setAutoTaxEnabled] = useState(initialAutoTax);
 
@@ -140,10 +151,17 @@ export function StripeSettings({
             </CardDescription>
           </div>
           {stripeAccountId ? (
-            <Badge variant="default" className="gap-1">
-              <CheckCircle className="h-3 w-3" />
-              Connected
-            </Badge>
+            chargesDisabled ? (
+              <Badge variant="destructive" className="gap-1">
+                <AlertTriangle className="h-3 w-3" />
+                Charges paused
+              </Badge>
+            ) : (
+              <Badge variant="default" className="gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Connected
+              </Badge>
+            )
           ) : (
             <Badge variant="secondary" className="gap-1">
               <XCircle className="h-3 w-3" />
@@ -162,11 +180,36 @@ export function StripeSettings({
               </div>
             </div>
 
-            <p className="text-muted-foreground text-sm">
-              Your Stripe account is connected and checkout is live. Payments
-              are deposited directly to this Stripe account on Stripe&apos;s
-              payout schedule — SimplePress never holds your funds.
-            </p>
+            {chargesDisabled ? (
+              // The long-form explanation lives here, next to the account it
+              // is about — the admin-wide strip stays to one sentence and
+              // points at this card as "Details".
+              <Alert variant="destructive" className="border-destructive/50">
+                <AlertTriangle />
+                <AlertTitle>
+                  Stripe has paused charges on this account
+                </AlertTitle>
+                <AlertDescription>
+                  <p>
+                    Checkout is failing for every shopper until this is
+                    resolved. Stripe usually does this when it needs identity or
+                    business verification, additional documents, or a response
+                    to a dispute review — the request will be waiting in your
+                    Stripe Dashboard.
+                  </p>
+                  <p>
+                    Once Stripe re-enables charges this page clears itself
+                    within a few minutes; nothing needs re-connecting here.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                Your Stripe account is connected and checkout is live. Payments
+                are deposited directly to this Stripe account on Stripe&apos;s
+                payout schedule — SimplePress never holds your funds.
+              </p>
+            )}
 
             <div className="flex gap-3">
               <Button variant="outline" size="sm" asChild>

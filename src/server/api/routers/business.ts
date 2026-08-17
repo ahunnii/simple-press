@@ -607,6 +607,10 @@ export const businessRouter = createTRPCRouter({
       select: {
         id: true,
         stripeAccountId: true,
+        // The Integrations page verifies this against Stripe (see
+        // `getPaymentsHealth`) to show "Charges paused" honestly rather than
+        // reporting "Connected" off `stripeAccountId` alone.
+        stripeChargesEnabled: true,
         stripeAutoTaxEnabled: true,
         umamiWebsiteId: true,
         umamiEnabled: true,

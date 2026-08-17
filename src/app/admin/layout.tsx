@@ -78,7 +78,9 @@ export default async function AdminLayout({ children }: Props) {
       select: {
         stripeAccountId: true,
         // Rides along on the query the sidebar nudge already runs — the
-        // payments-disabled banner costs no extra round trip.
+        // payments-disabled strip costs no extra round trip in the normal
+        // case (a `true` here is trusted; only a `false` is verified against
+        // Stripe, see `getPaymentsHealth`).
         stripeChargesEnabled: true,
         _count: { select: { products: true } },
       },
@@ -118,16 +120,23 @@ export default async function AdminLayout({ children }: Props) {
           />
           <SidebarInset>
             <div className="bg-muted min-h-screen">
-              {/* Above the page's own TrailHeader on purpose: while charges are
-                  disabled nothing else on the screen is more urgent. Renders
-                  null in the normal case. Hidden from STAFF, who are
-                  fulfillment-only and can reach neither Stripe nor settings. */}
-              {membershipRole !== "STAFF" && (
+              {/* Flush above the page's own TrailHeader on purpose: while
+                  charges are disabled nothing else on the screen is more
+                  urgent. Renders null in the normal case — and only speaks
+                  once Stripe has confirmed the restriction (the DB flag alone
+                  is a hint; see `getPaymentsHealth`). Awaited rather than
+                  streamed so a real strip never pops in and shoves the page
+                  down; the Stripe read is bounded and cached. Hidden from
+                  STAFF, who are fulfillment-only and can reach neither Stripe
+                  nor settings. */}
+              {membershipRole !== "STAFF" && welcomeSetupStatus && (
                 <PaymentsDisabledBanner
-                  stripeAccountId={welcomeSetupStatus?.stripeAccountId ?? null}
-                  stripeChargesEnabled={
-                    welcomeSetupStatus?.stripeChargesEnabled ?? true
-                  }
+                  business={{
+                    id: business.id,
+                    stripeAccountId: welcomeSetupStatus.stripeAccountId,
+                    stripeChargesEnabled:
+                      welcomeSetupStatus.stripeChargesEnabled,
+                  }}
                 />
               )}
               {children}
