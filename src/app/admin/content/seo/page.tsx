@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getBusinessFlags } from "~/lib/features/get-business-flags";
+import { parseSeoEditorTab } from "~/lib/seo/editor-tabs";
 import { computeSeoScorecard } from "~/lib/seo/scorecard";
 import { STATIC_SEO_ROUTES } from "~/lib/validators/site-seo";
 import { api } from "~/trpc/server";
@@ -8,9 +9,12 @@ import { HubSubNav } from "~/app/admin/_components/hub-sub-nav";
 
 import { TrailHeader } from "../../_components/trail-header";
 import { SEOEditor } from "./_components/seo-editor";
-import { SeoScorecard } from "./_components/seo-scorecard";
 
-export default async function SEOPage() {
+type Props = {
+  searchParams: Promise<{ tab?: string }>;
+};
+
+export default async function SEOPage({ searchParams }: Props) {
   const business = await api.business.getWith({ includeSiteContent: true });
   if (!business) notFound();
   if (!business.siteContent) notFound();
@@ -28,6 +32,12 @@ export default async function SEOPage() {
     business,
     siteContent: business.siteContent,
   });
+
+  // Deep links from elsewhere in the admin (`seoEditorHref`) land on a specific
+  // tab; anything else — including a bare visit — opens on the score summary.
+  // After mount the tab is purely local state, so this is a starting position,
+  // not a synced value.
+  const initialTab = parseSeoEditorTab((await searchParams).tab) ?? "score";
 
   return (
     <>
@@ -50,13 +60,13 @@ export default async function SEOPage() {
           allowAiCrawlers: business.allowAiCrawlers,
         }}
         siteContent={business.siteContent}
-        // Handed over as an already-rendered element rather than composed here.
-        // The scorecard belongs BELOW the sticky toolbar (which `SEOEditor`
-        // owns) but OUTSIDE the `<form>` — its accordion triggers are untyped
-        // `<button>`s and would submit the SEO form from inside it. Passing a
-        // server component as a prop to a client component is fine in Next: it
-        // renders on the server and arrives as an already-serialized tree.
-        scorecard={<SeoScorecard scorecard={scorecard} />}
+        // Handed over as plain data, not as a rendered element. The scorecard
+        // now lives inside the editor's own `<form>`, on its first tab, and its
+        // "Fix" rows have to be able to switch tabs — which only the client
+        // component can do. `SeoScorecard` (JSON: groups of `ChecklistItem`s)
+        // serializes across the boundary unchanged.
+        scorecard={scorecard}
+        initialTab={initialTab}
         // Resolved here rather than in the editor: `isEnabled` is a function
         // and cannot cross into a client component, so the gate is flattened
         // to the list of route keys that survive it.

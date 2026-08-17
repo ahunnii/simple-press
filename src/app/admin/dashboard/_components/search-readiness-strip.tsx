@@ -10,6 +10,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
 
+import { HideSearchReadinessButton } from "./hide-search-readiness-button";
+
 /**
  * "Search readiness N%" teaser for the dashboard — the compact counterpart to
  * the full report on /admin/content/seo.
@@ -24,7 +26,9 @@ import { Progress } from "~/components/ui/progress";
  * so its props are resolved during the server render and never serialized.
  *
  * Hides itself at 100%, the same way `setupProgress` goes null once onboarding
- * is finished: a permanent "you're done" banner is just clutter.
+ * is finished: a permanent "you're done" banner is just clutter. Also is not
+ * rendered at all when the owner turns off the `dashboardSearchReadiness` flag
+ * (gated in `page.tsx`); an inline Hide button flips that flag.
  */
 export async function SearchReadinessStrip({
   businessId,
@@ -69,12 +73,15 @@ export async function SearchReadinessStrip({
             </p>
           ) : null}
         </div>
-        <Button asChild size="sm" variant="outline" className="shrink-0">
-          <Link href="/admin/content/seo">
-            Improve search results
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-          </Link>
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <HideSearchReadinessButton />
+          <Button asChild size="sm" variant="outline">
+            <Link href="/admin/content/seo">
+              Improve search results
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

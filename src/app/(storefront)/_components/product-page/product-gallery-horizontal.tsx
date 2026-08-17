@@ -22,6 +22,13 @@ type Props = {
   productName: string;
   styleProps?: StyleProps;
   enableLightbox?: boolean;
+  /**
+   * "contain" letterboxes the main image inside the square frame and paints a
+   * blurred, scaled copy of the same image behind it so the empty space reads
+   * as an ambient glow rather than a flat fill; opt-in per template because
+   * most templates crop. Defaults to "cover" (crop-to-fill).
+   */
+  mainImageFit?: "cover" | "contain";
 };
 
 export function ProductGalleryHorizontal({
@@ -29,6 +36,7 @@ export function ProductGalleryHorizontal({
   productName,
   styleProps,
   enableLightbox = false,
+  mainImageFit = "cover",
 }: Props) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -76,6 +84,58 @@ export function ProductGalleryHorizontal({
     return () => window.removeEventListener("keydown", onKey);
   }, [enableLightbox, lightboxOpen]);
 
+  // Same source the foreground image uses — it follows useVariantImage() too.
+  const mainSrc = images[selectedImage]?.url ?? "/placeholder.svg";
+  const isContain = mainImageFit === "contain";
+
+  // Shared by both the lightbox-button and plain-div wrappers below so the
+  // main-image markup can't drift between the two branches again. Crossfades
+  // as one unit inside the existing AnimatePresence/motion.div, under the
+  // existing shouldReduceMotion guard — no new motion is introduced.
+  const mainImage = (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={selectedImage}
+        initial={shouldReduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
+        className="absolute inset-0"
+      >
+        {isContain && (
+          // Ambient backdrop: a tiny, heavily blurred, scaled-up copy of the
+          // same image fills the letterbox/pillarbox so empty space reads as
+          // a glow instead of a flat fill. sizes="128px" is deliberately
+          // tiny — the blur hides the low resolution and keeps the optimizer
+          // entry cheap. scale-125 (not 110): CSS blur() fades to transparent
+          // at the element's own edges (~40px halo for blur-2xl), and 12.5%
+          // of a ~600px frame pushes that halo outside the overflow-hidden
+          // frame at every realistic width. The frame's bg-secondary stays
+          // as the loading fill underneath. No drop-shadow on the contained
+          // image below: with white-background product shots the blur is
+          // near-white and the boundary should disappear — a shadow would
+          // re-draw it.
+          <Image
+            src={mainSrc}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes="128px"
+            className="scale-125 object-cover opacity-90 blur-2xl saturate-125"
+          />
+        )}
+        <Image
+          src={mainSrc}
+          alt={productName}
+          fill
+          className={isContain ? "object-contain" : "object-cover"}
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+        />
+      </motion.div>
+    </AnimatePresence>
+  );
+
   return (
     <>
       <div
@@ -97,25 +157,7 @@ export function ProductGalleryHorizontal({
             )}
             aria-label="Enlarge image"
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedImage}
-                initial={shouldReduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                  alt={productName}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </motion.div>
-            </AnimatePresence>
+            {mainImage}
           </button>
         ) : (
           <div
@@ -124,25 +166,7 @@ export function ProductGalleryHorizontal({
               styleProps?.singleImageContainerClassName,
             )}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedImage}
-                initial={shouldReduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={shouldReduceMotion ? undefined : { opacity: 0 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={images[selectedImage]?.url ?? "/placeholder.svg"}
-                  alt={productName}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </motion.div>
-            </AnimatePresence>
+            {mainImage}
           </div>
         )}
 

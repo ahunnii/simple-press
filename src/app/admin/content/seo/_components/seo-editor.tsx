@@ -18,6 +18,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
+import type { SeoEditorTab, SeoEditTab } from "~/lib/seo/editor-tabs";
+import type { SeoScorecard as SeoScorecardData } from "~/lib/seo/scorecard";
 import type {
   PageMetaEntry,
   StaticSeoRoute,
@@ -60,10 +62,13 @@ import {
   SearchResultPreview,
   SocialPreviewCard,
 } from "~/components/admin/seo-previews";
+import { SUCCESS_TEXT } from "~/app/admin/_components/admin-table-style";
 import {
   erroredTabsFor,
   TabErrorDot,
 } from "~/app/admin/_components/form-tab-errors";
+
+import { SeoScorecard } from "./seo-scorecard";
 
 type Props = {
   business: {
@@ -97,17 +102,25 @@ type Props = {
    */
   enabledRouteKeys: StaticSeoRouteKey[];
   /**
-   * The search-readiness report, rendered by the server page and handed over as
-   * an already-built element (a server component may be passed as a prop to a
-   * client component).
+   * The search-readiness report, computed on the server and handed over as
+   * plain data. It is rendered here — on the first tab, inside the `<form>`,
+   * which is safe (Radix accordion triggers are `type="button"`) — rather than
+   * arriving pre-rendered, because seven of its checks are fixed on this very
+   * page and their "Fix" affordance has to switch tabs, which only a client
+   * component can do.
    *
-   * It is deliberately NOT rendered inside the `<form>` below: its accordion
-   * triggers are `<button>`s with no explicit `type`, which default to
-   * `type="submit"` and would save the whole SEO form on every expand. It sits
-   * between the sticky toolbar and the form instead, so the page reads
-   * top-to-bottom: what to save → how you're doing → what to change.
+   * The type-only import is load-bearing: `~/lib/seo/scorecard` is
+   * `server-only`, so a value import would pull the whole module (and Prisma)
+   * into the client bundle.
    */
-  scorecard: ReactNode;
+  scorecard: SeoScorecardData;
+  /**
+   * Which tab to open on. Resolved from `?tab=` by the server page so a
+   * `seoEditorHref` deep link lands on the right one; everything else opens on
+   * the score summary. A starting position only — the tab is local state after
+   * mount and is never written back to the URL.
+   */
+  initialTab?: SeoEditorTab;
 };
 
 // One editable row of `SiteContent.pageMeta`. Strings rather than optionals so
@@ -167,8 +180,8 @@ const DESCRIPTION_LIMIT = 160;
 
 /**
  * The `<form>` renders *below* the sticky toolbar rather than around it, so the
- * scorecard can sit between the two without its buttons submitting. The Save
- * button reaches the form by id instead of by containment.
+ * toolbar can stay pinned outside it. The Save button therefore reaches the
+ * form by id rather than by containment.
  */
 const FORM_ID = "seo-settings-form";
 
@@ -181,15 +194,16 @@ const NO_DESCRIPTION =
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type SeoTab = "store" | "pages" | "search";
-
 /**
  * Which tab each form field lives on.
  *
- * Load-bearing: one Save now spans three tabs, and a field that fails
+ * Load-bearing: one Save spans the three editing tabs, and a field that fails
  * validation on a tab the owner cannot see would otherwise produce a failed
  * save with nothing on screen to explain it. `erroredTabsFor` walks this map to
  * raise a dot on the offending trigger, and an invalid submit switches to it.
+ *
+ * Typed to `SeoEditTab`, not `SeoEditorTab`: "score" holds no inputs, so
+ * routing a validation error there would show the owner nothing to fix.
  *
  * The `satisfies` clause keeps the map exhaustive: a field added to
  * `seoFormSchema` without a home here is a type error rather than a silently
@@ -205,10 +219,10 @@ const TAB_FOR_FIELD = {
   siteVerification: "search",
   localBusinessEnabled: "search",
   allowAiCrawlers: "search",
-} satisfies Record<keyof SeoFormValues, SeoTab>;
+} satisfies Record<keyof SeoFormValues, SeoEditTab>;
 
 /** Map a field path (`pageMeta.shop.title`) to the tab that renders it. */
-function tabForField(name: string): SeoTab {
+function tabForField(name: string): SeoEditTab {
   const root = name.split(".")[0] ?? name;
   return root in TAB_FOR_FIELD
     ? TAB_FOR_FIELD[root as keyof typeof TAB_FOR_FIELD]
@@ -378,11 +392,13 @@ export function SEOEditor({
   siteContent,
   enabledRouteKeys,
   scorecard,
+  initialTab,
 }: Props) {
   const router = useRouter();
 
   // Refs
   const ogImageFileInputRef = useRef<HTMLInputElement | null>(null);
+  const tabsRootRef = useRef<HTMLDivElement>(null);
 
   const savedValues = buildFormValues({
     siteContent,
@@ -398,7 +414,28 @@ export function SEOEditor({
     defaultValues: savedValues,
   });
 
-  const [activeTab, setActiveTab] = useState<SeoTab>("store");
+  const [activeTab, setActiveTab] = useState<SeoEditorTab>(
+    initialTab ?? "score",
+  );
+
+  /**
+   * Switch tabs and carry keyboard focus with the switch.
+   *
+   * A "Fix" button on the Score panel unmounts itself the moment it is clicked
+   * — its own panel is the one being navigated away from — which would drop
+   * focus onto `<body>` and strand a keyboard or screen-reader user at the top
+   * of the document. Moving focus to the newly selected trigger puts them at
+   * the head of the tab they asked for, one Tab press from its first field.
+   * Deferred a frame so Radix has already re-rendered the selection.
+   */
+  const selectTab = (tab: SeoEditorTab) => {
+    setActiveTab(tab);
+    requestAnimationFrame(() => {
+      tabsRootRef.current
+        ?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')
+        ?.focus();
+    });
+  };
 
   // Which per-page rows start expanded. Read once on mount: re-deriving it from
   // watched state would yank a row open the moment the owner typed the first
@@ -503,7 +540,7 @@ export function SEOEditor({
   /** A save that never reached the server: surface the tab holding the error. */
   const handleInvalidSubmit = (errors: FieldErrors<SeoFormValues>) => {
     const first = Object.keys(errors)[0];
-    if (first !== undefined) setActiveTab(tabForField(first));
+    if (first !== undefined) selectTab(tabForField(first));
   };
 
   const handleSubmit = async (data: SeoFormValues) => {
@@ -579,7 +616,7 @@ export function SEOEditor({
     () =>
       saveAttempted
         ? erroredTabsFor(formErrors, tabForField)
-        : new Set<SeoTab>(),
+        : new Set<SeoEditTab>(),
     [saveAttempted, formErrors],
   );
 
@@ -687,8 +724,8 @@ export function SEOEditor({
               Reset
             </Button>
 
-            {/* Outside the <form> now (the scorecard sits between them), so the
-                submit button reaches it by id rather than by containment. */}
+            {/* The toolbar is pinned outside the <form>, so the submit button
+                reaches it by id rather than by containment. */}
             <Button type="submit" form={FORM_ID} size="sm" disabled={isSaving}>
               {isSaving ? (
                 <>
@@ -707,8 +744,6 @@ export function SEOEditor({
         </div>
 
         <div className="admin-container space-y-6">
-          {scorecard}
-
           <form
             id={FORM_ID}
             onSubmit={(e) =>
@@ -716,27 +751,65 @@ export function SEOEditor({
             }
           >
             <Tabs
+              ref={tabsRootRef}
               value={activeTab}
-              onValueChange={(value) => setActiveTab(value as SeoTab)}
+              onValueChange={(value) => selectTab(value as SeoEditorTab)}
               className="w-full"
             >
+              {/* Four full labels overrun the width available at 375px, so the
+                  three editing tabs carry a short label below `sm`. The score
+                  pill is `bg-foreground/10` rather than `bg-muted`: the list
+                  itself is `bg-muted`, so a muted pill would disappear on every
+                  inactive trigger. */}
               <TabsList>
+                <TabsTrigger value="score">
+                  Score
+                  <span
+                    className={cn(
+                      "bg-foreground/10 rounded-full px-1.5 text-[11px] leading-4 tabular-nums",
+                      scorecard.percent === 100 && SUCCESS_TEXT,
+                    )}
+                  >
+                    {scorecard.percent}%
+                  </span>
+                </TabsTrigger>
                 <TabsTrigger value="store">
-                  Your store
+                  <span className="hidden sm:inline">Your store</span>
+                  <span className="sm:hidden">Store</span>
                   {erroredTabs.has("store") && <TabErrorDot />}
                 </TabsTrigger>
                 <TabsTrigger value="pages">
-                  Individual pages
+                  <span className="hidden sm:inline">Individual pages</span>
+                  <span className="sm:hidden">Pages</span>
                   {erroredTabs.has("pages") && <TabErrorDot />}
                 </TabsTrigger>
                 <TabsTrigger value="search">
-                  Search engines
+                  <span className="hidden sm:inline">Search engines</span>
+                  <span className="sm:hidden">Search</span>
                   {erroredTabs.has("search") && <TabErrorDot />}
                 </TabsTrigger>
               </TabsList>
 
-              <div className="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+              {/* The previews column only makes sense next to inputs, so the
+                  Score panel drops it and takes the full measure back. */}
+              <div
+                className={cn(
+                  "mt-6 grid grid-cols-1 items-start gap-6",
+                  activeTab !== "score" && "lg:grid-cols-[minmax(0,1fr)_22rem]",
+                )}
+              >
                 <div className="min-w-0">
+                  {/* ─── Score ──────────────────────────────────────────── */}
+                  <TabsContent
+                    value="score"
+                    className="focus-visible:ring-ring/50 mt-0 max-w-4xl rounded-md focus-visible:ring-[3px]"
+                  >
+                    <SeoScorecard
+                      scorecard={scorecard}
+                      onSelectTab={selectTab}
+                    />
+                  </TabsContent>
+
                   {/* ─── Your store ─────────────────────────────────────── */}
                   {/* Radix gives each panel `tabIndex={0}`, and the shared
                       `TabsContent` zeroes the outline — so the ring is put back
@@ -1196,66 +1269,71 @@ export function SEOEditor({
 
                 {/*
                   Pinned previews. They sit outside every `TabsContent` so they
-                  stay on screen on all three tabs, and outside the left column
-                  so they can stick. `overflow-y-auto` without `overscroll-contain`
+                  stay on screen across the three editing tabs, and outside the
+                  left column so they can stick. Not rendered on Score, which
+                  has no fields for them to preview — safe to unmount, because
+                  `SocialPreviewCard` rebuilds its object URL in an effect when
+                  it comes back. `overflow-y-auto` without `overscroll-contain`
                   is deliberate: on a short viewport the column scrolls its own
                   overflow and then hands the scroll back to the page, so it can
                   never swallow the wheel.
                 */}
-                <aside
-                  aria-label="Previews"
-                  className="space-y-6 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto"
-                >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Preview</CardTitle>
-                      <CardDescription>
-                        {previewRoute === undefined
-                          ? "Showing your store defaults."
-                          : `Showing ${previewRoute.label} (${previewRoute.path}) — the row you have open.`}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
-                        <p className="text-muted-foreground text-xs font-medium">
-                          In a Google result
-                        </p>
-                        <SearchResultPreview
-                          host={storeHost}
-                          pathPrefix=""
-                          slug={previewSlug}
-                          title={previewTitle}
-                          description={previewDescription}
-                        />
-                      </div>
+                {activeTab !== "score" && (
+                  <aside
+                    aria-label="Previews"
+                    className="space-y-6 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto"
+                  >
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Preview</CardTitle>
+                        <CardDescription>
+                          {previewRoute === undefined
+                            ? "Showing your store defaults."
+                            : `Showing ${previewRoute.label} (${previewRoute.path}) — the row you have open.`}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <p className="text-muted-foreground text-xs font-medium">
+                            In a Google result
+                          </p>
+                          <SearchResultPreview
+                            host={storeHost}
+                            pathPrefix=""
+                            slug={previewSlug}
+                            title={previewTitle}
+                            description={previewDescription}
+                          />
+                        </div>
 
-                      <div className="space-y-2">
-                        <p className="text-muted-foreground text-xs font-medium">
-                          Shared on social
-                        </p>
-                        <SocialPreviewCard
-                          title={previewTitle}
-                          description={previewDescription}
-                          ogImageFile={
-                            usesRouteOgImage ? null : watchedOgImageFile
-                          }
-                          existingOgImage={
-                            usesRouteOgImage
-                              ? routeOgImage
-                              : (siteContent.ogImage ?? undefined)
-                          }
-                          siteHost={storeHost}
-                        />
-                      </div>
+                        <div className="space-y-2">
+                          <p className="text-muted-foreground text-xs font-medium">
+                            Shared on social
+                          </p>
+                          <SocialPreviewCard
+                            title={previewTitle}
+                            description={previewDescription}
+                            ogImageFile={
+                              usesRouteOgImage ? null : watchedOgImageFile
+                            }
+                            existingOgImage={
+                              usesRouteOgImage
+                                ? routeOgImage
+                                : (siteContent.ogImage ?? undefined)
+                            }
+                            siteHost={storeHost}
+                          />
+                        </div>
 
-                      <p className="text-muted-foreground text-xs">
-                        An approximation. Search engines rewrite titles and
-                        descriptions when they think something else fits the
-                        search better.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </aside>
+                        <p className="text-muted-foreground text-xs">
+                          An approximation. Search engines rewrite titles and
+                          descriptions when they think something else fits the
+                          search better.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </aside>
+                )}
               </div>
             </Tabs>
           </form>

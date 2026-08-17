@@ -217,6 +217,15 @@ export const FEATURE_REGISTRY: Record<string, FeatureFlag> = {
     enabledByDefault: false,
     ownerCanToggle: true,
   },
+  dashboardSearchReadiness: {
+    key: "dashboardSearchReadiness",
+    label: "Search readiness on dashboard",
+    description:
+      "Show the search-readiness score strip on your dashboard. The full report stays under Site Setup → SEO & Meta.",
+    category: "marketing",
+    enabledByDefault: true,
+    ownerCanToggle: true,
+  },
   testimonials: {
     key: "testimonials",
     label: "Testimonials",

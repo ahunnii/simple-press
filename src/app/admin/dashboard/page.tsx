@@ -534,7 +534,9 @@ export default async function AdminDashboardPage() {
           ) : undefined
         }
         searchReadiness={
-          businessData ? (
+          // Owner-toggleable under Settings → Features (dashboardSearchReadiness);
+          // gated here rather than inside the strip so the scorecard queries don't run.
+          businessData && flags.isEnabled("dashboardSearchReadiness") ? (
             <Suspense fallback={null}>
               <SearchReadinessStrip
                 businessId={business.id}
