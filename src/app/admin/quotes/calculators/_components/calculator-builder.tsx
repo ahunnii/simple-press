@@ -23,13 +23,17 @@ import { ArrowLeft, ListChecks, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { CalculatorFormValues, QuestionInput } from "./builder-shared";
+import type { CalculatorFormValues, ScreenInput } from "./builder-shared";
 import type { ConditionSource } from "./calculator-question-card";
 import type { AdminFormMoreMenuItem } from "~/app/admin/_components/admin-form-more-menu";
 import type { QuoteQuestionType } from "~/lib/validators/quote-calculator";
 import { applyTrpcErrorToForm } from "~/lib/forms/apply-trpc-error";
+import { flattenScreens } from "~/lib/quote/screens";
 import { cn } from "~/lib/utils";
-import { quoteCalculatorCreateSchema } from "~/lib/validators/quote-calculator";
+import {
+  QUOTE_MAX_QUESTIONS,
+  quoteCalculatorCreateSchema,
+} from "~/lib/validators/quote-calculator";
 import { api } from "~/trpc/react";
 import { useDirtyForm } from "~/hooks/use-dirty-form";
 import {
@@ -57,7 +61,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Form, FormField } from "~/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import { InputFormField } from "~/components/inputs/input-form-field";
@@ -72,21 +76,21 @@ import {
 import {
   collectVariableNames,
   isConditionSourceType,
+  isLocationQuestionInput,
   isOptionQuestionInput,
   makeEmptyDefinition,
   makeQuestion,
+  makeScreen,
   QUESTION_TYPE_META,
   QUESTION_TYPE_ORDER,
 } from "./builder-shared";
 import { CalculatorDistancesCard } from "./calculator-distances-card";
 import { CalculatorFormulaCard } from "./calculator-formula-card";
-import { CalculatorQuestionCard } from "./calculator-question-card";
+import { CalculatorScreenCard } from "./calculator-screen-card";
 import { CalculatorSettingsCard } from "./calculator-settings-card";
 import { CalculatorTestPanel } from "./calculator-test-panel";
 
 const LIST_PATH = "/admin/quotes/calculators";
-
-const MAX_QUESTIONS = 30;
 
 type Props = {
   /** Present in edit mode, absent when creating. */
@@ -105,9 +109,11 @@ export function CalculatorBuilder({ calculator }: Props) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   /**
    * Which question cards are expanded, keyed by the question's OWN id rather
-   * than the `useFieldArray` row key. Two reasons: the row key is regenerated
-   * per mount and is not knowable at append time, and question ids survive a
-   * drag reorder, so a card the owner opened stays open when they move it.
+   * than the `useFieldArray` row key. Three reasons: the row key is regenerated
+   * per mount and is not knowable at append time, question ids survive a drag
+   * reorder, and — the important one for v2 — moving a question between screens
+   * rewrites the whole `screens` array, which remounts every card. Keying by
+   * question id is what keeps the card the owner just moved open.
    */
   const [openQuestionIds, setOpenQuestionIds] = useState<string[]>([]);
 
@@ -126,11 +132,12 @@ export function CalculatorBuilder({ calculator }: Props) {
   });
 
   const {
-    fields: questionFields,
-    append: appendQuestion,
-    remove: removeQuestion,
-    move: moveQuestion,
-  } = useFieldArray({ control: form.control, name: "definition.questions" });
+    fields: screenFields,
+    append: appendScreen,
+    remove: removeScreen,
+    move: moveScreen,
+    replace: replaceScreens,
+  } = useFieldArray({ control: form.control, name: "definition.screens" });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -139,35 +146,60 @@ export function CalculatorBuilder({ calculator }: Props) {
     }),
   );
 
-  // Watched rather than read from `questionFields`: `useFieldArray` shadows each
-  // row's `id` with its own generated key, so `fields[i].id` is NOT the question
-  // id that show-if conditions and distance endpoints point at.
-  const watchedQuestions = form.watch("definition.questions") ?? [];
+  // Watched rather than read from `screenFields`: `useFieldArray` shadows each
+  // row's `id` with its own generated key, so `fields[i].id` is NOT the screen
+  // id — and the questions nested under a row are not on `fields` at all.
+  const watchedScreens = form.watch("definition.screens") ?? [];
   const watchedDistances = form.watch("definition.distances") ?? [];
   const watchedFormula = form.watch("definition.formula") ?? "";
   const showEstimateToCustomer =
     form.watch("definition.showEstimateToCustomer") ?? false;
   const displayAsRange = form.watch("definition.displayAsRange") ?? false;
+  const showLiveEstimate = form.watch("definition.showLiveEstimate") ?? false;
   const rangePaddingPercent =
     form.watch("definition.rangePaddingPercent") ?? 10;
   const thankYouMessage = form.watch("definition.thankYouMessage") ?? "";
   const published = form.watch("published") ?? false;
 
+  /**
+   * Every question in VISITOR order. The one enumeration order in the builder:
+   * numbering, branch sources, the distance endpoint list, the variable list
+   * and the test panel all read this, and the validator flattens identically.
+   */
+  const flatQuestions = flattenScreens(watchedScreens);
+
   const availableVariables = collectVariableNames(
-    watchedQuestions,
+    flatQuestions,
     watchedDistances,
   );
 
-  const zipQuestions = watchedQuestions.filter(
-    (question) => question.type === "zip",
-  );
+  // Both `zip` and `address` yield a ZIP the server can place on the map.
+  const locationQuestions = flatQuestions.filter(isLocationQuestionInput);
 
-  /** Earlier single-answer questions a row at `index` may branch on. */
-  const conditionSourcesFor = (index: number): ConditionSource[] => {
+  /** How many questions come before the first one on `screenIndex`. */
+  const flatOffsetFor = (screenIndex: number): number => {
+    let offset = 0;
+    for (let index = 0; index < screenIndex; index += 1) {
+      offset += watchedScreens[index]?.questions.length ?? 0;
+    }
+    return offset;
+  };
+
+  /** Screen labels for the per-question "Move to screen…" menu. */
+  const screenOptions = watchedScreens.map((screen, index) => ({
+    index,
+    label: (screen.title ?? "").trim() || `Screen ${index + 1}`,
+  }));
+
+  /**
+   * Earlier single-answer questions a row may branch on, measured on the FLAT
+   * index — so an earlier question on the SAME screen is a legal source (a live
+   * reveal within one step). Same rule as the validator; anything this menu
+   * offers is something the save accepts.
+   */
+  const conditionSourcesFor = (flatIndex: number): ConditionSource[] => {
     const sources: ConditionSource[] = [];
-    for (let position = 0; position < index; position += 1) {
-      const question = watchedQuestions[position];
-      if (!question) continue;
+    for (const question of flatQuestions.slice(0, flatIndex)) {
       if (!isConditionSourceType(question.type)) continue;
       if (!isOptionQuestionInput(question)) continue;
       sources.push({
@@ -182,26 +214,132 @@ export function CalculatorBuilder({ calculator }: Props) {
     return sources;
   };
 
-  const addQuestion = (type: QuoteQuestionType) => {
-    const question: QuestionInput = makeQuestion(type);
-    appendQuestion(question);
+  // ── Screen / question mutations ───────────────────────────────────────────
+  //
+  // Anything that changes WHICH screen a question lives on spans two rows of
+  // the screens array, so it cannot be expressed as an operation on one nested
+  // field array. All of those go through `cloneScreens` → mutate → `commit`,
+  // which hands react-hook-form one atomic `replace`. In-screen drag reordering
+  // is the exception and stays on the nested `useFieldArray` inside
+  // `CalculatorScreenCard`, where `move` migrates per-row error/touched state.
+
+  /**
+   * A copy deep enough to mutate safely: every screen row and every question
+   * list is fresh, so nothing here writes through to the values RHF is holding.
+   */
+  const cloneScreens = (): ScreenInput[] =>
+    (form.getValues("definition.screens") ?? []).map((screen) => ({
+      ...screen,
+      questions: [...screen.questions],
+    }));
+
+  /**
+   * `replace` regenerates every row key, so all screen cards remount. That is
+   * the price of atomicity — and it is affordable precisely because
+   * `openQuestionIds` is keyed by question id rather than by row key.
+   */
+  const commitScreens = (next: ScreenInput[]) => {
+    replaceScreens(next);
+    // Only after a failed submit: before that, `mode: "onTouched"` means an
+    // untouched form should not start showing errors just because a question
+    // moved.
+    if (form.formState.isSubmitted) void form.trigger("definition.screens");
+  };
+
+  /** Top-level "Add question" — a new question on a new screen of its own. */
+  const addQuestionAsScreen = (type: QuoteQuestionType) => {
+    const question = makeQuestion(type);
+    appendScreen(makeScreen([question]));
     setOpenQuestionIds((previous) => [...previous, question.id]);
+  };
+
+  /** Per-screen "Add question" — grouped onto an existing screen. */
+  const addQuestionToScreen = (
+    screenIndex: number,
+    type: QuoteQuestionType,
+  ) => {
+    const next = cloneScreens();
+    const screen = next[screenIndex];
+    if (!screen) return;
+
+    const question = makeQuestion(type);
+    screen.questions.push(question);
+    commitScreens(next);
+    setOpenQuestionIds((previous) => [...previous, question.id]);
+  };
+
+  /**
+   * Delete one question. When it is the last one on its screen the screen goes
+   * with it: an empty screen is a step with nothing on it, the schema rejects
+   * one, and there is no UI that can create one — so there is no state where a
+   * screen sits there empty waiting to be filled.
+   */
+  const removeQuestion = (screenIndex: number, questionIndex: number) => {
+    const next = cloneScreens();
+    const screen = next[screenIndex];
+    if (!screen) return;
+
+    if (screen.questions.length <= 1) {
+      removeScreen(screenIndex);
+      return;
+    }
+
+    screen.questions.splice(questionIndex, 1);
+    commitScreens(next);
+  };
+
+  /**
+   * Move a question to another screen, or onto a brand-new screen inserted
+   * right after its current one.
+   *
+   * Note what happens to the source screen: if the move empties it, it is
+   * dropped, which keeps the "no empty screens" invariant without a separate
+   * cleanup pass.
+   */
+  const moveQuestionToScreen = (
+    fromScreenIndex: number,
+    questionIndex: number,
+    target: number | "new",
+  ) => {
+    const next = cloneScreens();
+    const source = next[fromScreenIndex];
+    if (!source) return;
+
+    const question = source.questions[questionIndex];
+    if (!question) return;
+
+    // Already alone on its own screen: "New screen" would rebuild the same
+    // screen with a fresh id, silently discarding the heading and intro text
+    // the owner may have written for it.
+    if (target === "new" && source.questions.length === 1) return;
+
+    source.questions.splice(questionIndex, 1);
+
+    if (target === "new") {
+      next.splice(fromScreenIndex + 1, 0, makeScreen([question]));
+    } else {
+      const destination = next[target];
+      if (!destination) return;
+      destination.questions.push(question);
+    }
+
+    if (source.questions.length === 0) next.splice(fromScreenIndex, 1);
+
+    commitScreens(next);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = questionFields.findIndex(
-      (field) => field.id === active.id,
-    );
-    const newIndex = questionFields.findIndex((field) => field.id === over.id);
+    const oldIndex = screenFields.findIndex((field) => field.id === active.id);
+    const newIndex = screenFields.findIndex((field) => field.id === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
 
     // `move` rather than `arrayMove` + `replace`: it reorders RHF's own field
     // registry alongside the values, so per-field errors and touched state
     // travel with the row instead of staying pinned to an index.
-    moveQuestion(oldIndex, newIndex);
+    moveScreen(oldIndex, newIndex);
   };
 
   // ── Mutations ─────────────────────────────────────────────────────────────
@@ -406,10 +544,11 @@ export function CalculatorBuilder({ calculator }: Props) {
                 <CardHeader>
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <CardTitle>Questions</CardTitle>
+                      <CardTitle>Screens</CardTitle>
                       <CardDescription>
-                        Asked in this order. Drag to reorder — a question can
-                        only branch on an answer above it.
+                        Each screen is one step. Add a question to make a
+                        screen; add more questions to the same screen to group
+                        them.
                       </CardDescription>
                     </div>
 
@@ -418,7 +557,7 @@ export function CalculatorBuilder({ calculator }: Props) {
                         <Button
                           type="button"
                           size="sm"
-                          disabled={questionFields.length >= MAX_QUESTIONS}
+                          disabled={flatQuestions.length >= QUOTE_MAX_QUESTIONS}
                         >
                           <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                           Add question
@@ -429,7 +568,7 @@ export function CalculatorBuilder({ calculator }: Props) {
                         {QUESTION_TYPE_ORDER.map((type) => (
                           <DropdownMenuItem
                             key={type}
-                            onClick={() => addQuestion(type)}
+                            onClick={() => addQuestionAsScreen(type)}
                             className="flex-col items-start gap-0.5"
                           >
                             <span className="font-medium">
@@ -445,12 +584,12 @@ export function CalculatorBuilder({ calculator }: Props) {
                   </div>
                 </CardHeader>
 
-                <CardContent>
-                  {questionFields.length === 0 ? (
+                <CardContent className="space-y-3">
+                  {screenFields.length === 0 ? (
                     <AdminEmpty
                       icon={ListChecks}
                       title="No questions yet"
-                      description="Add the first question visitors will answer."
+                      description="Add the first question visitors will answer. Each one starts on its own screen — group them later if you want several on one step."
                     />
                   ) : (
                     <DndContext
@@ -460,33 +599,49 @@ export function CalculatorBuilder({ calculator }: Props) {
                       onDragEnd={handleDragEnd}
                     >
                       <SortableContext
-                        items={questionFields.map((field) => field.id)}
+                        items={screenFields.map((field) => field.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        <div className="space-y-2">
-                          {questionFields.map((field, index) => {
-                            const question = watchedQuestions[index];
-                            if (!question) return null;
+                        <div className="space-y-3">
+                          {screenFields.map((field, screenIndex) => {
+                            const screen = watchedScreens[screenIndex];
+                            if (!screen) return null;
 
                             return (
-                              <CalculatorQuestionCard
+                              <CalculatorScreenCard
                                 key={field.id}
                                 form={form}
-                                index={index}
+                                screenIndex={screenIndex}
                                 sortableId={field.id}
-                                question={question}
-                                conditionSources={conditionSourcesFor(index)}
-                                open={openQuestionIds.includes(question.id)}
-                                onOpenChange={(next) =>
+                                screen={screen}
+                                flatOffset={flatOffsetFor(screenIndex)}
+                                screenOptions={screenOptions}
+                                totalQuestionCount={flatQuestions.length}
+                                conditionSourcesFor={conditionSourcesFor}
+                                openQuestionIds={openQuestionIds}
+                                onOpenChange={(questionId, next) =>
                                   setOpenQuestionIds((previous) =>
                                     next
-                                      ? [...previous, question.id]
+                                      ? [...previous, questionId]
                                       : previous.filter(
-                                          (id) => id !== question.id,
+                                          (id) => id !== questionId,
                                         ),
                                   )
                                 }
-                                onRemove={() => removeQuestion(index)}
+                                onRemoveScreen={() => removeScreen(screenIndex)}
+                                onAddQuestion={(type) =>
+                                  addQuestionToScreen(screenIndex, type)
+                                }
+                                onRemoveQuestion={(questionIndex) =>
+                                  removeQuestion(screenIndex, questionIndex)
+                                }
+                                onMoveQuestion={(questionIndex, target) =>
+                                  moveQuestionToScreen(
+                                    screenIndex,
+                                    questionIndex,
+                                    target,
+                                  )
+                                }
                               />
                             );
                           })}
@@ -494,16 +649,30 @@ export function CalculatorBuilder({ calculator }: Props) {
                       </SortableContext>
                     </DndContext>
                   )}
+
+                  {/* Array-level errors ("Add at least one question", "at most
+                      30 questions") attach to `screens` itself rather than to
+                      any screen, so they need their own message slot. */}
+                  <FormField
+                    control={form.control}
+                    name="definition.screens"
+                    render={() => (
+                      <FormItem>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CardContent>
               </Card>
 
               {/* Distances need two endpoints, so the panel appears only once
-                  two ZIP questions exist. Below that there is nothing it could
-                  offer that the validator would accept. */}
-              {zipQuestions.length >= 2 && (
+                  two location questions (ZIP or address) exist. Below that
+                  there is nothing it could offer that the validator would
+                  accept. */}
+              {locationQuestions.length >= 2 && (
                 <CalculatorDistancesCard
                   form={form}
-                  zipQuestions={zipQuestions}
+                  locationQuestions={locationQuestions}
                 />
               )}
 
@@ -517,7 +686,7 @@ export function CalculatorBuilder({ calculator }: Props) {
             {/* Right: what happens after, and proof the price is right. */}
             <div className="space-y-6 xl:sticky xl:top-24">
               <CalculatorTestPanel
-                questions={watchedQuestions}
+                questions={flatQuestions}
                 distances={watchedDistances}
                 formula={watchedFormula}
                 showEstimateToCustomer={showEstimateToCustomer}
@@ -530,6 +699,7 @@ export function CalculatorBuilder({ calculator }: Props) {
                 form={form}
                 showEstimateToCustomer={showEstimateToCustomer}
                 displayAsRange={displayAsRange}
+                showLiveEstimate={showLiveEstimate}
               />
             </div>
           </div>

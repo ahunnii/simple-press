@@ -4,7 +4,10 @@ import type { UseFormReturn } from "react-hook-form";
 import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 
-import type { CalculatorFormValues, QuestionInput } from "./builder-shared";
+import type {
+  CalculatorFormValues,
+  LocationQuestionInput,
+} from "./builder-shared";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -37,15 +40,18 @@ const MAX_DISTANCES = 5;
 
 type Props = {
   form: UseFormReturn<CalculatorFormValues>;
-  /** Every zip-type question, in question order. */
-  zipQuestions: QuestionInput[];
+  /** Every ZIP-code or address question, in visitor order. */
+  locationQuestions: LocationQuestionInput[];
 };
 
 /**
- * Distance variables — a straight-line mileage between the answers to two ZIP
- * questions.
+ * Distance variables — a straight-line mileage between the answers to two
+ * location questions.
  *
- * The card renders only when at least two ZIP questions exist (the caller
+ * Either endpoint may be a ZIP code question or a full address: an address
+ * carries a ZIP, and the ZIP is all the server needs to place it on the map.
+ *
+ * The card renders only when at least two location questions exist (the caller
  * enforces that): a distance needs two endpoints, and offering the panel with
  * one available question would only ever produce a save the validator refuses.
  *
@@ -53,19 +59,19 @@ type Props = {
  * the two ZIPs it already has, which is also why the mileage cannot be
  * previewed here — see the test panel's sample input.
  */
-export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
+export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "definition.distances",
   });
 
-  const zipOptions = zipQuestions.map((question, index) => ({
+  const locationOptions = locationQuestions.map((question, index) => ({
     id: question.id,
-    label: question.title.trim() || `Untitled ZIP question ${index + 1}`,
+    label: question.title.trim() || `Untitled location question ${index + 1}`,
   }));
 
-  const firstZipId = zipOptions[0]?.id ?? "";
-  const secondZipId = zipOptions[1]?.id ?? "";
+  const firstLocationId = locationOptions[0]?.id ?? "";
+  const secondLocationId = locationOptions[1]?.id ?? "";
 
   return (
     <Card>
@@ -74,8 +80,9 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
           <div>
             <CardTitle>Distance variables</CardTitle>
             <CardDescription>
-              Turn a pair of ZIP code answers into a miles number your formula
-              can use. Computed on the server — visitors never see the mileage.
+              Turn a pair of ZIP code or address answers into a miles number
+              your formula can use. Computed on the server — visitors never see
+              the mileage.
             </CardDescription>
           </div>
           <Button
@@ -83,7 +90,9 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
             variant="outline"
             size="sm"
             disabled={fields.length >= MAX_DISTANCES}
-            onClick={() => append(makeDistance(firstZipId, secondZipId))}
+            onClick={() =>
+              append(makeDistance(firstLocationId, secondLocationId))
+            }
           >
             <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
             Add distance
@@ -125,7 +134,7 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                           />
                         </FormControl>
                         <FormDescription>
-                          Holds the miles between the two ZIPs below.
+                          Holds the miles between the two locations below.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -136,7 +145,7 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                     form={form}
                     name={`${base}.hiddenDefault`}
                     label="Value when unavailable"
-                    description="Used when either ZIP is skipped, branched away, or not in the lookup table."
+                    description="Used when either location is skipped, branched away, or its ZIP is not in the lookup table."
                     placeholder="0"
                   />
                 </div>
@@ -158,11 +167,11 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Pick a ZIP question" />
+                              <SelectValue placeholder="Pick a ZIP code or address question" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {zipOptions.map((option) => (
+                            {locationOptions.map((option) => (
                               <SelectItem key={option.id} value={option.id}>
                                 {option.label}
                               </SelectItem>
@@ -190,11 +199,11 @@ export function CalculatorDistancesCard({ form, zipQuestions }: Props) {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Pick a ZIP question" />
+                              <SelectValue placeholder="Pick a ZIP code or address question" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {zipOptions.map((option) => (
+                            {locationOptions.map((option) => (
                               <SelectItem key={option.id} value={option.id}>
                                 {option.label}
                               </SelectItem>

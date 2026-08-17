@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Check, LoaderCircle, TriangleAlert } from "lucide-react";
+import { useRef } from "react";
+import { Check } from "lucide-react";
 
 import type { QuoteAnswer } from "./quote-answers";
 import type { PublicQuoteQuestion } from "~/lib/validators/quote-calculator";
 import { getQuoteIcon } from "~/lib/quote/quote-icons";
 import { cn } from "~/lib/utils";
-import { api } from "~/trpc/react";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+
+import {
+  nativeSelectClass,
+  QuoteAddressField,
+  ZipLookupHint,
+} from "./quote-address-field";
+import { useQuoteDensity } from "./quote-display-context";
+import { useZipLookup } from "./use-zip-lookup";
 
 /**
  * Every control in this file is styled from design TOKENS only
@@ -19,19 +26,26 @@ import { Textarea } from "~/components/ui/textarea";
  * running, and each template redefines those CSS variables under its own scope
  * class (`.noise`, `.pollen`, …). A hardcoded colour — or a shadcn control
  * that portals its popup OUTSIDE the template's scope element, which is why
- * `dropdown` uses a native `<select>` rather than `~/components/ui/select` —
- * would render correctly in exactly one template and wrong in the other
- * fourteen.
+ * `dropdown` (and the `address` state picker) uses a native `<select>` rather
+ * than `~/components/ui/select` — would render correctly in exactly one
+ * template and wrong in the other fourteen.
+ *
+ * Spacing is the one thing that is NOT hardcoded: the owner picks a density
+ * per embed, and it arrives through `useQuoteDensity()` rather than a prop so
+ * a new field type cannot forget to forward it.
  */
 
-/** Shared card styling for the choice / multiselect option tiles. */
+/**
+ * Shared card styling for the choice / multiselect option tiles. Padding comes
+ * from the density preset, so it is deliberately absent here.
+ */
 const optionCardBase =
-  "flex w-full items-center gap-3 rounded-lg border p-4 text-left transition-colors outline-none focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:ring-[3px]";
+  "flex w-full items-center gap-3 rounded-lg border text-left transition-colors outline-none focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:ring-[3px]";
 const optionCardIdle =
   "border-input bg-background text-foreground hover:bg-muted/60";
 const optionCardSelected = "border-primary bg-primary/5 text-foreground";
 
-type FieldProps = {
+export type QuoteFieldProps = {
   question: PublicQuoteQuestion;
   answer: QuoteAnswer | undefined;
   onChange: (answer: QuoteAnswer) => void;
@@ -43,7 +57,10 @@ type FieldProps = {
    * only browsing.
    */
   onCommit?: () => void;
-  /** `aria-labelledby` target — the step heading that carries the question. */
+  /**
+   * `aria-labelledby` target — the step heading on a single-question screen,
+   * or the question's own `<Label>` on a screen that groups several.
+   */
   labelledBy: string;
   /** `aria-describedby` targets (description + inline error), space-joined. */
   describedBy?: string;
@@ -51,7 +68,7 @@ type FieldProps = {
   fieldId: string;
 };
 
-export function QuoteQuestionField(props: FieldProps) {
+export function QuoteQuestionField(props: QuoteFieldProps) {
   switch (props.question.type) {
     case "choice":
       return <ChoiceCards {...props} />;
@@ -63,6 +80,8 @@ export function QuoteQuestionField(props: FieldProps) {
       return <NumberField {...props} />;
     case "zip":
       return <ZipField {...props} />;
+    case "address":
+      return <QuoteAddressField {...props} />;
     case "longtext":
       return <LongTextField {...props} />;
     case "date":
@@ -89,7 +108,8 @@ function ChoiceCards({
   labelledBy,
   describedBy,
   invalid,
-}: FieldProps) {
+}: QuoteFieldProps) {
+  const density = useQuoteDensity();
   const options = question.options ?? [];
   const selected = answer?.kind === "single" ? answer.optionId : "";
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -132,7 +152,7 @@ function ChoiceCards({
       aria-describedby={describedBy}
       aria-invalid={invalid}
       aria-required={question.required}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+      className={cn("grid grid-cols-1 sm:grid-cols-2", density.optionGap)}
     >
       {options.map((option, index) => {
         const isSelected = option.id === selected;
@@ -150,6 +170,7 @@ function ChoiceCards({
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
               optionCardBase,
+              density.optionCard,
               isSelected ? optionCardSelected : optionCardIdle,
             )}
           >
@@ -180,7 +201,8 @@ function MultiselectCards({
   labelledBy,
   describedBy,
   invalid,
-}: FieldProps) {
+}: QuoteFieldProps) {
+  const density = useQuoteDensity();
   const options = question.options ?? [];
   const selected = answer?.kind === "multi" ? answer.optionIds : [];
 
@@ -196,7 +218,7 @@ function MultiselectCards({
       role="group"
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
-      className="grid grid-cols-1 gap-3 sm:grid-cols-2"
+      className={cn("grid grid-cols-1 sm:grid-cols-2", density.optionGap)}
     >
       {options.map((option) => {
         const isSelected = selected.includes(option.id);
@@ -210,6 +232,7 @@ function MultiselectCards({
             onClick={() => toggle(option.id)}
             className={cn(
               optionCardBase,
+              density.optionCard,
               isSelected ? optionCardSelected : optionCardIdle,
             )}
           >
@@ -237,10 +260,11 @@ function DropdownField({
   question,
   answer,
   onChange,
+  labelledBy,
   describedBy,
   invalid,
   fieldId,
-}: FieldProps) {
+}: QuoteFieldProps) {
   const options = question.options ?? [];
   const selected = answer?.kind === "single" ? answer.optionId : "";
 
@@ -248,13 +272,14 @@ function DropdownField({
     <select
       id={fieldId}
       value={selected}
+      aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       aria-invalid={invalid}
       required={question.required}
       onChange={(event) =>
         onChange({ kind: "single", optionId: event.target.value })
       }
-      className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive h-10 w-full max-w-md rounded-md border px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+      className={cn(nativeSelectClass, "max-w-md")}
     >
       <option value="">Select an option…</option>
       {options.map((option) => (
@@ -270,10 +295,11 @@ function NumberField({
   question,
   answer,
   onChange,
+  labelledBy,
   describedBy,
   invalid,
   fieldId,
-}: FieldProps) {
+}: QuoteFieldProps) {
   const raw = answer?.kind === "value" ? answer.raw : "";
 
   return (
@@ -285,6 +311,7 @@ function NumberField({
         value={raw}
         min={question.min ?? undefined}
         max={question.max ?? undefined}
+        aria-labelledby={labelledBy}
         aria-describedby={describedBy}
         aria-invalid={invalid}
         required={question.required}
@@ -301,47 +328,17 @@ function NumberField({
   );
 }
 
-/** Debounce before the ZIP lookup fires — the router rate-limits it 30/min. */
-const ZIP_LOOKUP_DEBOUNCE_MS = 400;
-
 function ZipField({
   question,
   answer,
   onChange,
+  labelledBy,
   describedBy,
   invalid,
   fieldId,
-}: FieldProps) {
+}: QuoteFieldProps) {
   const raw = answer?.kind === "value" ? answer.raw : "";
-  const [debouncedZip, setDebouncedZip] = useState("");
-
-  // Hand-rolled debounce (setTimeout + cleanup) rather than a dependency: the
-  // lookup is keystroke-adjacent, so firing on the 5th digit of every edit
-  // would burn the 30/min budget in a few corrections.
-  useEffect(() => {
-    if (!/^\d{5}$/.test(raw)) {
-      setDebouncedZip("");
-      return;
-    }
-    const timer = setTimeout(
-      () => setDebouncedZip(raw),
-      ZIP_LOOKUP_DEBOUNCE_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [raw]);
-
-  const { data, isFetching, isError } = api.quoteCalculator.lookupZip.useQuery(
-    debouncedZip,
-    {
-      enabled: debouncedZip.length === 5,
-      retry: false,
-      // The ZIP table never changes mid-session; re-asking on every remount
-      // only spends rate-limit budget.
-      staleTime: 5 * 60 * 1000,
-    },
-  );
-
-  const showResult = debouncedZip.length === 5 && debouncedZip === raw;
+  const zipLookup = useZipLookup(raw);
 
   return (
     <div className="max-w-xs space-y-2">
@@ -353,6 +350,7 @@ function ZipField({
         maxLength={5}
         placeholder="12345"
         value={raw}
+        aria-labelledby={labelledBy}
         aria-describedby={describedBy}
         aria-invalid={invalid}
         required={question.required}
@@ -363,35 +361,7 @@ function ZipField({
           })
         }
       />
-      {/*
-        Advisory only, and never blocking: the server re-checks the ZIP against
-        its own table on submit, and a valid-but-unlisted ZIP is a normal thing
-        for a visitor to type. A lookup failure (offline, rate-limited) shows
-        nothing at all rather than an error the visitor cannot act on.
-      */}
-      <div aria-live="polite" className="min-h-5 text-sm">
-        {showResult && isFetching && (
-          <span className="text-muted-foreground inline-flex items-center gap-1.5">
-            <LoaderCircle
-              className="size-3.5 animate-spin"
-              aria-hidden="true"
-            />
-            Checking…
-          </span>
-        )}
-        {showResult && !isFetching && !isError && data && (
-          <span className="text-muted-foreground inline-flex items-center gap-1.5">
-            <Check className="text-primary size-3.5" aria-hidden="true" />
-            {data.city}, {data.state}
-          </span>
-        )}
-        {showResult && !isFetching && !isError && data === null && (
-          <span className="text-muted-foreground inline-flex items-center gap-1.5">
-            <TriangleAlert className="size-3.5" aria-hidden="true" />
-            We don&apos;t recognize that ZIP code
-          </span>
-        )}
-      </div>
+      <ZipLookupHint {...zipLookup} />
     </div>
   );
 }
@@ -400,10 +370,11 @@ function TextField({
   question,
   answer,
   onChange,
+  labelledBy,
   describedBy,
   invalid,
   fieldId,
-}: FieldProps) {
+}: QuoteFieldProps) {
   const raw = answer?.kind === "value" ? answer.raw : "";
   return (
     <Input
@@ -411,6 +382,7 @@ function TextField({
       type="text"
       value={raw}
       maxLength={2000}
+      aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       aria-invalid={invalid}
       required={question.required}
@@ -424,10 +396,11 @@ function LongTextField({
   question,
   answer,
   onChange,
+  labelledBy,
   describedBy,
   invalid,
   fieldId,
-}: FieldProps) {
+}: QuoteFieldProps) {
   const raw = answer?.kind === "value" ? answer.raw : "";
   return (
     <Textarea
@@ -435,6 +408,7 @@ function LongTextField({
       rows={5}
       value={raw}
       maxLength={2000}
+      aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       aria-invalid={invalid}
       required={question.required}
@@ -447,16 +421,18 @@ function DateField({
   question,
   answer,
   onChange,
+  labelledBy,
   describedBy,
   invalid,
   fieldId,
-}: FieldProps) {
+}: QuoteFieldProps) {
   const raw = answer?.kind === "value" ? answer.raw : "";
   return (
     <Input
       id={fieldId}
       type="date"
       value={raw}
+      aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       aria-invalid={invalid}
       required={question.required}

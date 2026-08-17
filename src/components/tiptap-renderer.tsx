@@ -10,6 +10,11 @@ import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import { ExternalLink, Images } from "lucide-react";
 
+import {
+  coerceQuoteDensity,
+  coerceQuoteHeight,
+  coerceQuoteWidth,
+} from "~/lib/quote/quote-display";
 import { api } from "~/trpc/react";
 import { Embed } from "~/components/ui/minimal-tiptap/extensions/embed";
 import { Gallery } from "~/components/ui/minimal-tiptap/extensions/gallery";
@@ -176,9 +181,14 @@ function isGalleryNode(
   );
 }
 
-function isQuoteCalculatorNode(
-  node: ContentNode,
-): node is ContentNode & { attrs: { calculatorId?: string | null } } {
+function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
+  attrs: {
+    calculatorId?: string | null;
+    width?: unknown;
+    height?: unknown;
+    density?: unknown;
+  };
+} {
   return (
     node.type === "quoteCalculator" &&
     node.attrs != null &&
@@ -224,6 +234,9 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
           <QuoteCalculatorBlock
             key={`quote-${node.attrs.calculatorId}-${index}`}
             calculatorId={String(node.attrs.calculatorId)}
+            width={coerceQuoteWidth(node.attrs.width)}
+            height={coerceQuoteHeight(node.attrs.height)}
+            density={coerceQuoteDensity(node.attrs.density)}
           />
         );
       }

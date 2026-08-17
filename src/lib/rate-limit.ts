@@ -137,6 +137,13 @@ export const quoteZipLookupLimiter = makeLazy({
   keyPrefix: "rl:quote-zip",
 });
 
+// 30 live-estimate previews per minute per IP (keystroke-adjacent, no captcha), keyed ip:host
+export const quoteLivePreviewLimiter = makeLazy({
+  points: 30,
+  duration: 60,
+  keyPrefix: "rl:quote-preview",
+});
+
 // 10 checkout session attempts per minute per IP
 export const checkoutLimiter = makeLazy({
   points: 10,

@@ -5,7 +5,7 @@ import type {
   QuoteCalculatorDefinition,
   QuoteWireAnswer,
 } from "~/lib/validators/quote-calculator";
-import { quoteCalculatorDefinitionSchema } from "~/lib/validators/quote-calculator";
+import { parseStoredQuoteDefinition } from "~/lib/validators/quote-calculator";
 
 import { computeQuote } from "./evaluate";
 
@@ -15,6 +15,13 @@ import { computeQuote } from "./evaluate";
  * with no formula, no option values and no hidden defaults, so the only thing
  * it can do is send IDs — and these tests pin what happens when it sends the
  * wrong ones, or ones for questions it was never shown.
+ *
+ * Note the fixtures below: most are written in the v1 shape (`questions` at the
+ * top level) and go through `parseStoredQuoteDefinition`, exactly as a stored
+ * blob does. That is deliberate rather than laziness — it means every
+ * assertion in this file also asserts that a v1 calculator still prices
+ * identically after the v2 migration, which is the single most important
+ * property of that migration.
  */
 
 // Fixture zips are placed at whole-degree coordinates so the expected distance
@@ -30,7 +37,11 @@ const lookupZip: ZipLookupFn = (zip) => ZIP_TABLE[zip] ?? null;
 const lookupNothing: ZipLookupFn = () => null;
 
 function defineCalculator(raw: unknown): QuoteCalculatorDefinition {
-  return quoteCalculatorDefinitionSchema.parse(raw);
+  const parsed = parseStoredQuoteDefinition(raw);
+  if (!parsed.success) {
+    throw new Error(`fixture did not parse: ${parsed.error.message}`);
+  }
+  return parsed.data;
 }
 
 // ─── The reference "movers" calculator ──────────────────────────────────────
@@ -818,5 +829,595 @@ describe("computeQuote — duplicate answers", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.variables.move_type).toBe(1);
+  });
+});
+
+// ─── Screens (v2) ───────────────────────────────────────────────────────────
+
+/**
+ * Two screens, each holding two questions, with a show-if pointing backward
+ * WITHIN a screen and another pointing backward ACROSS screens.
+ *
+ * `computeQuote` does not care which screen a question sits on — it walks the
+ * flattened list. What it must get right is that "flattened" means screen
+ * order then in-screen order, the same order the validator measured "comes
+ * before" against and the same order `resolveVisibility` resolves in.
+ */
+const TWO_SCREENS = defineCalculator({
+  version: 2,
+  screens: [
+    {
+      id: "s_basics",
+      title: "The basics",
+      description: "Two quick ones.",
+      questions: [
+        {
+          id: "q_type",
+          type: "choice",
+          title: "What kind of move?",
+          variableName: "move_type",
+          options: [
+            { id: "local", label: "Local move", value: 1 },
+            { id: "long", label: "Long distance", value: 10 },
+          ],
+        },
+        {
+          // Same screen as its source: a live reveal within one step.
+          id: "q_storage",
+          type: "choice",
+          title: "How long in storage?",
+          variableName: "storage",
+          showIf: { questionId: "q_type", optionId: "long" },
+          hiddenDefault: 7,
+          options: [
+            { id: "none", label: "No storage", value: 0 },
+            { id: "three", label: "3 months", value: 300 },
+          ],
+        },
+      ],
+    },
+    {
+      id: "s_details",
+      questions: [
+        { id: "q_notes", type: "longtext", title: "Notes", required: false },
+        {
+          // A later SCREEN depending on the first screen — the case that
+          // existed before v2.
+          id: "q_rush",
+          type: "choice",
+          title: "Need it rushed?",
+          variableName: "rush",
+          showIf: { questionId: "q_type", optionId: "long" },
+          hiddenDefault: 5,
+          options: [
+            { id: "no", label: "No rush", value: 0 },
+            { id: "yes", label: "Rush it", value: 1000 },
+          ],
+        },
+      ],
+    },
+  ],
+  distances: [],
+  formula: "move_type + storage + rush",
+});
+
+describe("computeQuote — screens", () => {
+  it("snapshots in flattened order: screen order, then in-screen order", () => {
+    const result = computeQuote(
+      TWO_SCREENS,
+      [
+        { questionId: "q_type", optionId: "long" },
+        { questionId: "q_storage", optionId: "three" },
+        { questionId: "q_notes", text: "Third floor" },
+        { questionId: "q_rush", optionId: "yes" },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.answerSnapshots.map((row) => row.questionId)).toEqual([
+      "q_type",
+      "q_storage",
+      "q_notes",
+      "q_rush",
+    ]);
+    expect(result.variables).toEqual({
+      move_type: 10,
+      storage: 300,
+      rush: 1000,
+    });
+  });
+
+  it("resolves a same-screen show-if just like a cross-screen one", () => {
+    const result = computeQuote(
+      TWO_SCREENS,
+      [{ questionId: "q_type", optionId: "local" }],
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Both branched away — one on the same screen as its source, one a screen
+    // later — and both took their hiddenDefault.
+    expect(result.variables).toEqual({
+      move_type: 1,
+      storage: 7,
+      rush: 5,
+    });
+    const hidden = result.answerSnapshots
+      .filter((row) => row.hidden)
+      .map((row) => row.questionId);
+    expect(hidden).toEqual(["q_storage", "q_rush"]);
+  });
+
+  it("still discards an answer smuggled in for a hidden same-screen question", () => {
+    const result = computeQuote(
+      TWO_SCREENS,
+      [
+        { questionId: "q_type", optionId: "local" },
+        { questionId: "q_storage", optionId: "three" },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.variables.storage).toBe(7);
+  });
+});
+
+// ─── Address questions ──────────────────────────────────────────────────────
+
+const ADDRESSED = defineCalculator({
+  version: 2,
+  screens: [
+    {
+      id: "s_where",
+      title: "Where are we going?",
+      questions: [
+        { id: "q_from", type: "address", title: "Pick-up address" },
+        {
+          id: "q_to",
+          type: "address",
+          title: "Drop-off address",
+          required: false,
+        },
+      ],
+    },
+    {
+      id: "s_size",
+      questions: [
+        {
+          id: "q_bedrooms",
+          type: "number",
+          title: "Bedrooms",
+          variableName: "bedrooms",
+        },
+      ],
+    },
+  ],
+  distances: [
+    {
+      id: "d_move",
+      variableName: "distance",
+      fromQuestionId: "q_from",
+      toQuestionId: "q_to",
+      hiddenDefault: 25,
+    },
+  ],
+  formula: "bedrooms * 100 + distance * 4",
+});
+
+const FROM_ADDRESS = {
+  line1: "123 Main St",
+  line2: "Apt 4",
+  city: "Saginaw",
+  state: "MI",
+  zip: "48601",
+};
+
+const TO_ADDRESS = {
+  line1: "9 Elm Ave",
+  city: "Bridgeport",
+  state: "MI",
+  zip: "48602",
+};
+
+describe("computeQuote — address questions", () => {
+  const complete = computeQuote(
+    ADDRESSED,
+    [
+      { questionId: "q_from", address: FROM_ADDRESS },
+      { questionId: "q_to", address: TO_ADDRESS },
+      { questionId: "q_bedrooms", number: 2 },
+    ],
+    lookupZip,
+  );
+
+  it("anchors a distance variable off the address's ZIP", () => {
+    expect(complete.ok).toBe(true);
+    if (!complete.ok) return;
+    expect(complete.variables).toEqual({ bedrooms: 2, distance: 69.1 });
+    // 2*100 + 69.1*4 = 476.4
+    expect(complete.estimateCents).toBe(47640);
+  });
+
+  it("renders a one-line display the owner's inbox and emails can print", () => {
+    expect(complete.ok).toBe(true);
+    if (!complete.ok) return;
+    const displays = complete.answerSnapshots.map((row) => row.display);
+    expect(displays[0]).toBe("123 Main St, Apt 4, Saginaw, MI 48601");
+    // No second line means no empty segment in the middle.
+    expect(displays[1]).toBe("9 Elm Ave, Bridgeport, MI 48602");
+  });
+
+  it("keeps the structured address alongside the resolved city/state", () => {
+    expect(complete.ok).toBe(true);
+    if (!complete.ok) return;
+    const [from] = complete.answerSnapshots;
+    expect(from).toMatchObject({
+      type: "address",
+      hidden: false,
+      zip: "48601",
+      // Resolved from the ZIP table, recorded separately from what the visitor
+      // typed so a mismatch stays visible.
+      zipCity: "Saginaw",
+      zipState: "MI",
+      address: FROM_ADDRESS,
+    });
+    // Informational: no variable name, no contribution to the formula.
+    expect(from?.variableName).toBeUndefined();
+    expect(complete.answerSnapshots[1]?.address).toEqual(TO_ADDRESS);
+    expect(complete.answerSnapshots[1]?.address?.line2).toBeUndefined();
+  });
+
+  it("rejects a partial address rather than geocoding half of one", () => {
+    for (const key of ["line1", "city", "state", "zip"] as const) {
+      const partial: Partial<typeof FROM_ADDRESS> = { ...FROM_ADDRESS };
+      delete partial[key];
+      const result = computeQuote(
+        ADDRESSED,
+        [
+          {
+            questionId: "q_from",
+            address: partial as unknown as typeof FROM_ADDRESS,
+          },
+          { questionId: "q_bedrooms", number: 2 },
+        ],
+        lookupZip,
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error.code).toBe("bad-answer");
+      expect(result.error.questionId).toBe("q_from");
+      expect(result.error.message).toContain("complete the address");
+    }
+  });
+
+  it("accepts a missing apartment line — that is a complete address", () => {
+    const result = computeQuote(
+      ADDRESSED,
+      [
+        { questionId: "q_from", address: TO_ADDRESS },
+        { questionId: "q_bedrooms", number: 1 },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("requires a required address and lets an optional one go blank", () => {
+    const missing = computeQuote(
+      ADDRESSED,
+      [{ questionId: "q_bedrooms", number: 2 }],
+      lookupZip,
+    );
+    expect(missing.ok).toBe(false);
+    if (missing.ok) return;
+    expect(missing.error.code).toBe("missing-required");
+    expect(missing.error.questionId).toBe("q_from");
+
+    const optionalBlank = computeQuote(
+      ADDRESSED,
+      [
+        { questionId: "q_from", address: FROM_ADDRESS },
+        { questionId: "q_bedrooms", number: 2 },
+      ],
+      lookupZip,
+    );
+    expect(optionalBlank.ok).toBe(true);
+    if (!optionalBlank.ok) return;
+    // One endpoint unanswered → the distance did not apply.
+    expect(optionalBlank.variables.distance).toBe(25);
+    expect(optionalBlank.answerSnapshots[1]).toMatchObject({
+      hidden: false,
+      display: "—",
+    });
+  });
+
+  it("fails with unknown-zip when a distance endpoint's ZIP is not in the table", () => {
+    const result = computeQuote(
+      ADDRESSED,
+      [
+        { questionId: "q_from", address: { ...FROM_ADDRESS, zip: "99999" } },
+        { questionId: "q_to", address: TO_ADDRESS },
+        { questionId: "q_bedrooms", number: 2 },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-zip");
+    expect(result.error.questionId).toBe("q_from");
+  });
+
+  it("tolerates an unrecognized ZIP on an address no distance references", () => {
+    const contactOnly = defineCalculator({
+      version: 2,
+      screens: [
+        {
+          id: "s_1",
+          questions: [
+            { id: "q_addr", type: "address", title: "Your address" },
+            {
+              id: "q_size",
+              type: "number",
+              title: "Square feet",
+              variableName: "sqft",
+            },
+          ],
+        },
+      ],
+      distances: [],
+      formula: "sqft * 2",
+    });
+
+    const result = computeQuote(
+      contactOnly,
+      [
+        { questionId: "q_addr", address: FROM_ADDRESS },
+        { questionId: "q_size", number: 100 },
+      ],
+      lookupNothing,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBe(20000);
+    const row = result.answerSnapshots[0];
+    expect(row?.display).toBe("123 Main St, Apt 4, Saginaw, MI 48601");
+    expect(row?.zipCity).toBeUndefined();
+  });
+
+  it("re-validates the state and ZIP a replayed submission carries", () => {
+    // Both are enforced on the wire, but `computeQuote` is also the path for
+    // replaying a stored submission, which never went through it.
+    for (const bad of [{ state: "ZZ" }, { zip: "486" }]) {
+      const result = computeQuote(
+        ADDRESSED,
+        [
+          { questionId: "q_from", address: { ...FROM_ADDRESS, ...bad } },
+          { questionId: "q_bedrooms", number: 2 },
+        ],
+        lookupZip,
+      );
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error.code).toBe("bad-answer");
+      expect(result.error.questionId).toBe("q_from");
+    }
+  });
+
+  it("normalizes a lower-case state code instead of turning it away", () => {
+    const result = computeQuote(
+      ADDRESSED,
+      [
+        { questionId: "q_from", address: { ...FROM_ADDRESS, state: "mi" } },
+        { questionId: "q_bedrooms", number: 2 },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.answerSnapshots[0]?.address?.state).toBe("MI");
+    expect(result.answerSnapshots[0]?.display).toBe(
+      "123 Main St, Apt 4, Saginaw, MI 48601",
+    );
+  });
+});
+
+// ─── Preview mode (the live running estimate) ───────────────────────────────
+
+/**
+ * `mode: "preview"` prices a half-finished form for the running estimate. Its
+ * entire job is to soften "you have not answered that yet" — and nothing else.
+ * The line between the two is what these tests pin: a payload that is
+ * INCOMPLETE gets a number, a payload that is WRONG still fails, in both modes.
+ */
+const PREVIEWABLE = defineCalculator({
+  version: 1,
+  questions: [
+    {
+      id: "q_type",
+      type: "choice",
+      title: "What kind of move?",
+      variableName: "move_type",
+      hiddenDefault: 2,
+      options: [
+        { id: "local", label: "Local move", value: 1 },
+        { id: "long", label: "Long distance", value: 3 },
+      ],
+    },
+    {
+      id: "q_bedrooms",
+      type: "number",
+      title: "How many bedrooms?",
+      variableName: "bedrooms",
+      hiddenDefault: 4,
+    },
+    {
+      id: "q_extras",
+      type: "multiselect",
+      title: "Any extras?",
+      variableName: "extras",
+      hiddenDefault: 500,
+      options: [
+        { id: "pack", label: "Packing", value: 200 },
+        { id: "store", label: "Storage", value: 150 },
+      ],
+    },
+    { id: "q_from", type: "zip", title: "Moving from" },
+    { id: "q_to", type: "zip", title: "Moving to" },
+  ],
+  distances: [
+    {
+      id: "d_move",
+      variableName: "distance",
+      fromQuestionId: "q_from",
+      toQuestionId: "q_to",
+      hiddenDefault: 25,
+    },
+  ],
+  formula: "move_type * (bedrooms * 100 + extras + distance)",
+});
+
+const PREVIEW = { mode: "preview" } as const;
+
+describe("computeQuote — preview mode", () => {
+  it("prices an entirely empty form instead of failing on the first required question", () => {
+    const strict = computeQuote(PREVIEWABLE, [], lookupZip);
+    expect(strict.ok).toBe(false);
+    if (strict.ok) return;
+    expect(strict.error.code).toBe("missing-required");
+
+    const preview = computeQuote(PREVIEWABLE, [], lookupZip, PREVIEW);
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.variables).toEqual({
+      // Single-answer types take the owner's "does not apply" value…
+      move_type: 2,
+      bedrooms: 4,
+      // …but a multiselect takes 0, exactly as an optional one shown with
+      // nothing checked does. `hiddenDefault` on a multiselect means "branched
+      // away", which is a different situation from "not yet answered".
+      extras: 0,
+      distance: 25,
+    });
+    // 2 * (400 + 0 + 25) = 850
+    expect(preview.estimateCents).toBe(85000);
+  });
+
+  it("uses the answers that ARE present", () => {
+    const preview = computeQuote(
+      PREVIEWABLE,
+      [
+        { questionId: "q_type", optionId: "long" },
+        { questionId: "q_extras", optionIds: ["pack"] },
+      ],
+      lookupZip,
+      PREVIEW,
+    );
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.variables).toEqual({
+      move_type: 3,
+      bedrooms: 4,
+      extras: 200,
+      distance: 25,
+    });
+  });
+
+  it("lets an unrecognized endpoint ZIP fall to the distance default", () => {
+    // Mid-typing, "486" has already become "48699" and is not a real ZIP. The
+    // running estimate must keep updating rather than blanking out.
+    const answers = [
+      { questionId: "q_type", optionId: "local" },
+      { questionId: "q_bedrooms", number: 1 },
+      { questionId: "q_extras", optionIds: ["pack"] },
+      { questionId: "q_from", zip: "99999" },
+      { questionId: "q_to", zip: "48602" },
+    ];
+
+    const strict = computeQuote(PREVIEWABLE, answers, lookupZip);
+    expect(strict.ok).toBe(false);
+    if (strict.ok) return;
+    expect(strict.error.code).toBe("unknown-zip");
+
+    const preview = computeQuote(PREVIEWABLE, answers, lookupZip, PREVIEW);
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.variables.distance).toBe(25);
+  });
+
+  it("treats a half-typed address as unanswered rather than an error", () => {
+    const answers = [
+      { questionId: "q_from", address: { line1: "123 Main St" } },
+      { questionId: "q_bedrooms", number: 2 },
+    ] as unknown as QuoteWireAnswer[];
+
+    const strict = computeQuote(ADDRESSED, answers, lookupZip);
+    expect(strict.ok).toBe(false);
+
+    const preview = computeQuote(ADDRESSED, answers, lookupZip, PREVIEW);
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.variables.distance).toBe(25);
+  });
+
+  it("still fails on an option id that does not exist", () => {
+    // Not "incomplete" — wrong. A payload naming an option the definition does
+    // not have is a bug or a probe, and softening it would let a caller learn
+    // which ids are real by watching which ones still return a number.
+    const result = computeQuote(
+      PREVIEWABLE,
+      [{ questionId: "q_type", optionId: "free-move" }],
+      lookupZip,
+      PREVIEW,
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-option");
+  });
+
+  it("still fails on an out-of-bounds number", () => {
+    const result = computeQuote(
+      MOVERS,
+      [{ questionId: "q_bedrooms", number: -1 }],
+      lookupZip,
+      PREVIEW,
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("bad-answer");
+  });
+
+  it("still fails hard on definition drift", () => {
+    const drifted: QuoteCalculatorDefinition = {
+      ...PREVIEWABLE,
+      formula: "bedrooms * gone_missing",
+    };
+    const result = computeQuote(drifted, [], lookupZip, PREVIEW);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("formula-failed");
+  });
+
+  it("defaults to submit mode when no options are passed", () => {
+    expect(computeQuote(PREVIEWABLE, [], lookupZip).ok).toBe(false);
+    expect(computeQuote(PREVIEWABLE, [], lookupZip, {}).ok).toBe(false);
+    expect(
+      computeQuote(PREVIEWABLE, [], lookupZip, { mode: "submit" }).ok,
+    ).toBe(false);
+  });
+
+  it("keeps hidden questions hidden — preview is not a way around branching", () => {
+    const result = computeQuote(
+      BRANCHED,
+      [{ questionId: "q_storage", optionId: "three" }],
+      lookupZip,
+      PREVIEW,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // q_type is unanswered, so q_storage is not visible and its smuggled
+    // answer is discarded exactly as it is on the submit path.
+    expect(result.variables.storage_months).toBe(99);
   });
 });

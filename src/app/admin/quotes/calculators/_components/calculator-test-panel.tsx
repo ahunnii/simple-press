@@ -5,6 +5,7 @@ import { RotateCcw } from "lucide-react";
 
 import type { DistanceInput, QuestionInput } from "./builder-shared";
 import { formatPrice } from "~/lib/prices";
+import { customerEstimateFrom } from "~/lib/quote/customer-estimate";
 import { evaluateFormula } from "~/lib/quote/formula";
 import { resolveVisibility } from "~/lib/quote/visibility";
 import { cn } from "~/lib/utils";
@@ -34,6 +35,12 @@ import {
 } from "./builder-shared";
 
 type Props = {
+  /**
+   * Every question, FLATTENED across screens (`flattenScreens`) — the same
+   * order the visitor meets them in, which is the order `resolveVisibility`
+   * and the validator both reason about. Screens themselves change nothing
+   * about the price, so the panel never needs to know about them.
+   */
   questions: QuestionInput[];
   distances: DistanceInput[];
   formula: string;
@@ -183,6 +190,13 @@ export function CalculatorTestPanel({
     evaluated?.ok === true
       ? estimateCentsFromFormulaValue(evaluated.value)
       : null;
+
+  // The same helper the `submit` mutation and the live-estimate endpoint use,
+  // so "what the visitor sees" here is literally what they would be shown.
+  const customerEstimate = customerEstimateFrom(
+    { showEstimateToCustomer, displayAsRange, rangePaddingPercent },
+    estimateCents,
+  );
 
   const sampleQuestions = questions.filter(isVariableQuestionInput);
   const hasSamples = sampleQuestions.length > 0 || distances.length > 0;
@@ -396,26 +410,20 @@ export function CalculatorTestPanel({
                 <p className="text-muted-foreground text-xs">
                   What the visitor sees
                 </p>
-                {!showEstimateToCustomer ? (
+                {!customerEstimate ? (
                   <p className="text-sm">
                     {thankYouMessage.trim() ||
                       "Thanks! We received your request."}
                   </p>
-                ) : displayAsRange ? (
+                ) : "exactCents" in customerEstimate ? (
                   <p className="text-lg font-medium tabular-nums">
-                    {`${formatPrice(
-                      Math.round(
-                        (estimateCents ?? 0) * (1 - rangePaddingPercent / 100),
-                      ),
-                    )} – ${formatPrice(
-                      Math.round(
-                        (estimateCents ?? 0) * (1 + rangePaddingPercent / 100),
-                      ),
-                    )}`}
+                    {formatPrice(customerEstimate.exactCents)}
                   </p>
                 ) : (
                   <p className="text-lg font-medium tabular-nums">
-                    {formatPrice(estimateCents ?? 0)}
+                    {`${formatPrice(customerEstimate.lowCents)} – ${formatPrice(
+                      customerEstimate.highCents,
+                    )}`}
                   </p>
                 )}
               </div>

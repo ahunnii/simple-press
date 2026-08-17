@@ -7,12 +7,14 @@ import type {
 } from "~/lib/validators/quote-calculator";
 import { haversineMiles } from "~/lib/geo/haversine";
 import { evaluateFormula } from "~/lib/quote/formula";
+import { flattenScreens } from "~/lib/quote/screens";
 import { resolveVisibility } from "~/lib/quote/visibility";
 import {
   isQuoteVariableQuestion,
   QUOTE_DATE_RE,
   QUOTE_MAX_FINAL_CENTS,
   QUOTE_ZIP_RE,
+  US_STATE_CODES,
 } from "~/lib/validators/quote-calculator";
 
 /**
@@ -30,6 +32,23 @@ import {
  * unit-testable and deterministic. Same inputs, same estimate, forever — which
  * matters because the estimate and its variable snapshot are stored and shown
  * back to the owner months later.
+ *
+ * ── Two modes ──────────────────────────────────────────────────────────────
+ *
+ * `mode: "submit"` (the default) is the strict, authoritative path: it is what
+ * produces the stored estimate, the answer snapshot and the owner's lead, so a
+ * required question with no answer is a hard failure.
+ *
+ * `mode: "preview"` serves the LIVE RUNNING ESTIMATE only — a number shown mid-
+ * flow, persisted nowhere and emailed to nobody. Half the form is legitimately
+ * unanswered at that point, so every "required but missing" branch takes the
+ * same path an OPTIONAL blank takes (its `hiddenDefault`, or `0` for a
+ * multiselect), and an unrecognized ZIP lets its distance fall to that
+ * distance's `hiddenDefault` instead of failing. Nothing else softens:
+ * `unknown-option`, `bad-answer` and `formula-failed` still fail in preview,
+ * because each of those means the payload or the definition is wrong rather
+ * than merely incomplete. Preview never widens what a visitor can learn — it
+ * runs the same formula over the same stored values and returns one number.
  */
 
 export type ZipLocation = {
@@ -166,26 +185,45 @@ function baseSnapshot(
   return row;
 }
 
+export type QuoteComputationMode = "submit" | "preview";
+
+export type QuoteComputationOptions = {
+  /** Defaults to `"submit"`. See the "Two modes" note at the top of the file. */
+  mode?: QuoteComputationMode;
+};
+
 export function computeQuote(
   definition: QuoteCalculatorDefinition,
   wireAnswers: QuoteWireAnswer[],
   lookupZip: ZipLookupFn,
+  options?: QuoteComputationOptions,
 ): QuoteComputationResult {
+  /**
+   * "Incomplete is expected." Guards every `missing-required` branch and the
+   * distance-endpoint `unknown-zip` branch, and nothing else.
+   */
+  const lenient = options?.mode === "preview";
+
   // Last write wins on a duplicated questionId. Arbitrary but total — the
   // alternative (reject) turns a harmless double-submit race in the runner
   // into a dead end for the visitor.
   const answers = new Map<string, QuoteWireAnswer>();
   for (const answer of wireAnswers) answers.set(answer.questionId, answer);
 
+  // Screen order, then in-screen order — the same list the runner walks and the
+  // same order the validator measured "comes before" against. See
+  // `src/lib/quote/screens.ts`: nothing may enumerate questions any other way.
+  const questions = flattenScreens(definition.screens);
+
   const questionById = new Map<string, QuoteQuestion>();
-  for (const question of definition.questions) {
+  for (const question of questions) {
     if (!questionById.has(question.id)) questionById.set(question.id, question);
   }
 
   // Visibility is resolved from the SUBMITTED choice/dropdown selections, using
   // the exact helper the storefront runner used to decide what to show. See
   // `src/lib/quote/visibility.ts` for why that sharing is load-bearing.
-  const visibility = resolveVisibility(definition.questions, (questionId) => {
+  const visibility = resolveVisibility(questions, (questionId) => {
     const question = questionById.get(questionId);
     if (!question) return undefined;
     if (question.type !== "choice" && question.type !== "dropdown") {
@@ -194,9 +232,10 @@ export function computeQuote(
     return answers.get(questionId)?.optionId;
   });
 
-  // Which zip questions feed a distance variable. Only those have to resolve
-  // to real coordinates — a standalone "what's your ZIP?" question is just
-  // contact context and must not fail a submission when the table misses it.
+  // Which location questions feed a distance variable. Only those have to
+  // resolve to real coordinates — a standalone "what's your ZIP?" question is
+  // just contact context and must not fail a submission when the table misses
+  // it.
   const zipQuestionIdsUsedByDistance = new Set<string>();
   for (const distance of definition.distances) {
     zipQuestionIdsUsedByDistance.add(distance.fromQuestionId);
@@ -210,10 +249,13 @@ export function computeQuote(
   // also what `evaluateFormula`'s hasOwnProperty lookup requires.
   const variables = new Map<string, number>();
   const snapshots: QuoteSubmissionAnswer[] = [];
-  /** Resolved coordinates for visible, answered zip questions, by question id. */
+  /**
+   * Resolved coordinates for visible, answered location questions (`zip` and
+   * `address` alike), by question id.
+   */
   const zipCoordinates = new Map<string, ZipLocation>();
 
-  for (const question of definition.questions) {
+  for (const question of questions) {
     const isVisible = visibility.get(question.id) ?? false;
 
     // ── Hidden ────────────────────────────────────────────────────────────
@@ -238,7 +280,7 @@ export function computeQuote(
       case "dropdown": {
         const optionId = answer?.optionId;
         if (optionId === undefined || optionId === "") {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -247,7 +289,8 @@ export function computeQuote(
           }
           // An optional question left blank is treated exactly like a hidden
           // one: it did not apply, so its variable takes the value the owner
-          // configured for "does not apply".
+          // configured for "does not apply". In preview mode a REQUIRED blank
+          // takes this same path — the visitor simply has not got there yet.
           variables.set(question.variableName, question.hiddenDefault);
           break;
         }
@@ -276,7 +319,7 @@ export function computeQuote(
         const checkedIds = [...new Set(submitted)];
 
         if (checkedIds.length === 0) {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -318,7 +361,7 @@ export function computeQuote(
       case "number": {
         const value = answer?.number;
         if (value === undefined) {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -363,7 +406,7 @@ export function computeQuote(
       case "zip": {
         const zip = answer?.zip;
         if (zip === undefined || zip === "") {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -390,8 +433,11 @@ export function computeQuote(
 
         if (!location) {
           // Only fatal when a distance variable depends on it — without
-          // coordinates there is no distance and therefore no price.
-          if (zipQuestionIdsUsedByDistance.has(question.id)) {
+          // coordinates there is no distance and therefore no price. In
+          // preview mode not even then: the distance falls to its
+          // `hiddenDefault` and the running estimate keeps updating rather
+          // than blanking out on a ZIP the visitor is still typing.
+          if (zipQuestionIdsUsedByDistance.has(question.id) && !lenient) {
             return failure(
               "unknown-zip",
               `We don't recognize the ZIP code ${zip}.`,
@@ -408,13 +454,105 @@ export function computeQuote(
         break;
       }
 
+      // ── Address ─────────────────────────────────────────────────────────
+      // Informational like `zip`, and priced the same way: nothing directly,
+      // but its ZIP half can anchor a distance variable.
+      case "address": {
+        const address = answer?.address;
+        const line1 = address?.line1?.trim() ?? "";
+        const line2 = address?.line2?.trim() ?? "";
+        const city = address?.city?.trim() ?? "";
+        // Upper-cased before the membership test so a hand-built payload (or a
+        // replayed old submission) carrying "mi" is not turned away for a
+        // difference no visitor could see.
+        const state = address?.state?.trim().toUpperCase() ?? "";
+        const zip = address?.zip?.trim() ?? "";
+
+        // `line2` is deliberately not in here — an address with no apartment
+        // number is complete.
+        const requiredParts = [line1, city, state, zip];
+        const filledCount = requiredParts.filter((part) => part !== "").length;
+
+        if (filledCount === 0) {
+          if (question.required && !lenient) {
+            return failure(
+              "missing-required",
+              `"${question.title}" is required.`,
+              question.id,
+            );
+          }
+          break;
+        }
+
+        if (filledCount < requiredParts.length) {
+          // A half-filled address is neither an answer nor a blank: geocoding
+          // it would silently price a different place. In preview it is simply
+          // "still typing", and treated as unanswered.
+          if (lenient) break;
+          return failure(
+            "bad-answer",
+            `"${question.title}" is incomplete. Please complete the address or leave it blank.`,
+            question.id,
+          );
+        }
+
+        // Re-checked here even though the wire schema enforces both: this
+        // function is also the path for replaying a stored submission, which
+        // never went through the current wire schema.
+        if (!US_STATE_CODES.has(state)) {
+          return failure(
+            "bad-answer",
+            `"${question.title}" needs a valid US state.`,
+            question.id,
+          );
+        }
+        if (!QUOTE_ZIP_RE.test(zip)) {
+          return failure(
+            "bad-answer",
+            `"${question.title}" must include a 5-digit ZIP code.`,
+            question.id,
+          );
+        }
+
+        snapshot.address = line2
+          ? { line1, line2, city, state, zip }
+          : { line1, city, state, zip };
+        snapshot.zip = zip;
+        // "123 Main St, Apt 4, Saginaw, MI 48601" — one line, because every
+        // consumer of a snapshot (owner inbox, both emails, the review step)
+        // renders `display` as a single string.
+        snapshot.display = [line1, line2, `${city}, ${state} ${zip}`]
+          .filter((part) => part !== "")
+          .join(", ");
+
+        const location = lookupZip(zip);
+        if (!location) {
+          if (zipQuestionIdsUsedByDistance.has(question.id) && !lenient) {
+            return failure(
+              "unknown-zip",
+              `We don't recognize the ZIP code ${zip}.`,
+              question.id,
+            );
+          }
+          break;
+        }
+
+        // The visitor's typed city/state stay on `display`; the resolved pair
+        // is recorded separately, so a mismatch (wrong city for the ZIP) is
+        // visible to the owner rather than quietly overwritten.
+        zipCoordinates.set(question.id, location);
+        snapshot.zipCity = location.city;
+        snapshot.zipState = location.state;
+        break;
+      }
+
       // ── Informational free text ─────────────────────────────────────────
       case "text":
       case "longtext": {
         const raw = answer?.text;
         const text = raw === undefined ? "" : raw.trim();
         if (text.length === 0) {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,
@@ -432,7 +570,7 @@ export function computeQuote(
       case "date": {
         const date = answer?.date;
         if (date === undefined || date === "") {
-          if (question.required) {
+          if (question.required && !lenient) {
             return failure(
               "missing-required",
               `"${question.title}" is required.`,

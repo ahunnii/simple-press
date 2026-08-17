@@ -14,13 +14,14 @@ import {
   sendQuoteConfirmation,
 } from "~/lib/email/templates";
 import { loadZipDataset } from "~/lib/geo/zip-lookup";
+import { customerEstimateFrom } from "~/lib/quote/customer-estimate";
 import { computeQuote, UNANSWERED_DISPLAY } from "~/lib/quote/evaluate";
 import { getClientIpFromHeaders, quoteSubmitLimiter } from "~/lib/rate-limit";
 import {
+  parseStoredQuoteDefinition,
   quoteBulkDeleteSchema,
   quoteBulkRestoreStatusSchema,
   quoteBulkSetStatusSchema,
-  quoteCalculatorDefinitionSchema,
   quoteSendFinalQuoteSchema,
   quoteSetFinalQuoteSchema,
   quoteSubmissionAnswerSchema,
@@ -146,11 +147,17 @@ export const quoteSubmissionRouter = createTRPCRouter({
       }
 
       // 5. Definition drift ───────────────────────────────────────────────────
+      // `parseStoredQuoteDefinition`, not the strict schema: a v1 blob that has
+      // not been re-saved since screens shipped is migrated on the way through,
+      // so an untouched calculator keeps taking leads. (The strict schema would
+      // reject every one of them — see the drift-wall note on
+      // `storedQuoteDefinitionSchema`.)
+      //
       // The definition validated when it was saved, so a parse failure here
       // means the stored shape drifted out from under the schema. That is a
       // developer problem, not a visitor problem: apologize generically, page
       // Sentry.
-      const parsedDefinition = quoteCalculatorDefinitionSchema.safeParse(
+      const parsedDefinition = parseStoredQuoteDefinition(
         calculator.definition,
       );
       if (!parsedDefinition.success) {
@@ -295,24 +302,15 @@ export const quoteSubmissionRouter = createTRPCRouter({
 
       // The single source of truth for what the customer is told the price is —
       // shared by the confirmation email and the mutation's return value, so
-      // the two can never disagree. `undefined` when the owner keeps the
-      // estimate internal, and equally when there is no estimate to tell them
-      // about: the thank-you screen and the confirmation email then simply
-      // omit pricing, exactly as they do for a calculator with
-      // `showEstimateToCustomer` off.
-      const customerEstimate =
-        definition.showEstimateToCustomer && estimateCents !== null
-          ? definition.displayAsRange
-            ? {
-                lowCents: Math.round(
-                  estimateCents * (1 - definition.rangePaddingPercent / 100),
-                ),
-                highCents: Math.round(
-                  estimateCents * (1 + definition.rangePaddingPercent / 100),
-                ),
-              }
-            : { exactCents: estimateCents }
-          : undefined;
+      // the two can never disagree, and shared (via
+      // `src/lib/quote/customer-estimate.ts`) with
+      // `quoteCalculator.previewEstimate`, so the live running estimate a
+      // visitor watched cannot land on a different figure than the thank-you
+      // screen they end up on. `undefined` when the owner keeps the estimate
+      // internal, and equally when there is no estimate to tell them about: the
+      // thank-you screen and the confirmation email then simply omit pricing,
+      // exactly as they do for a calculator with `showEstimateToCustomer` off.
+      const customerEstimate = customerEstimateFrom(definition, estimateCents);
 
       // 9. Emails ─────────────────────────────────────────────────────────────
       // Each in its own try/catch: the lead is already saved, and a Resend
