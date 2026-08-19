@@ -1,7 +1,7 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, AlertCircle } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 
 import type {
@@ -80,9 +80,10 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
           <div>
             <CardTitle>Distance variables</CardTitle>
             <CardDescription>
-              Turn a pair of ZIP code or address answers into a miles number
-              your formula can use. Computed on the server — visitors never see
-              the mileage.
+              Turns two locations into a straight-line (&quot;as the crow
+              flies&quot;) mileage number your formula can use. Straight-line
+              miles run shorter than road miles — pad your per-mile rate to
+              compensate. Computed on the server; visitors never see the mileage.
             </CardDescription>
           </div>
           <Button
@@ -134,7 +135,8 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                           />
                         </FormControl>
                         <FormDescription>
-                          Holds the miles between the two locations below.
+                          Holds the straight-line miles between the two locations
+                          below.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -215,6 +217,55 @@ export function CalculatorDistancesCard({ form, locationQuestions }: Props) {
                     )}
                   />
                 </div>
+
+                {(() => {
+                  // form.watch (not getValues): the endpoint selects render
+                  // through Controllers, so only a subscription re-renders
+                  // this warning when the owner picks a different question.
+                  const fromId = form.watch(`${base}.fromQuestionId`);
+                  const toId = form.watch(`${base}.toQuestionId`);
+
+                  const fromQuestion = fromId
+                    ? locationQuestions.find((q) => q.id === fromId)
+                    : undefined;
+                  const toQuestion = toId
+                    ? locationQuestions.find((q) => q.id === toId)
+                    : undefined;
+
+                  const isFromFragile =
+                    fromQuestion &&
+                    (fromQuestion.required !== true || fromQuestion.showIf);
+                  const isToFragile =
+                    toQuestion &&
+                    (toQuestion.required !== true || toQuestion.showIf);
+
+                  const fragileQuestions = [
+                    ...(isFromFragile ? [{ question: fromQuestion, label: "From" }] : []),
+                    ...(isToFragile ? [{ question: toQuestion, label: "To" }] : []),
+                  ];
+
+                  return fragileQuestions.length > 0 ? (
+                    <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-950/20">
+                      {fragileQuestions.map((item) => (
+                        <p
+                          key={item.label}
+                          className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-200"
+                        >
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                          <span>
+                            <strong>{item.question?.title || "This question"}</strong>{" "}
+                            is optional or shown conditionally. If a visitor skips
+                            it, this distance silently falls back to its
+                            &quot;Value when unavailable&quot; above.
+                            That&apos;s intentional for branched designs — just
+                            make sure your formula still prices sensibly when that
+                            happens.
+                          </span>
+                        </p>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
 
                 <div className="flex justify-end">
                   <Button

@@ -54,6 +54,13 @@ export const quoteSubmissionRouter = createTRPCRouter({
    * the price from the STORED definition before writing anything. The client
    * sends option IDs and raw values only — it never sends a price, and nothing
    * it can send introduces a number the owner did not configure.
+   *
+   * Returns a DISCRIMINATED UNION, and only for the last of those steps:
+   * everything up to `computeQuote` (rate limit, captcha, tenant, the
+   * published gate, `requirePhone`) still throws, because none of it names a
+   * question the visitor could go back and fix. The four computation failures
+   * that DO name one come back as `{ success: false, error }` instead — see
+   * the note at the failure branch below.
    */
   submit: publicProcedure
     // 1. Throttle ─────────────────────────────────────────────────────────────
@@ -219,10 +226,34 @@ export const quoteSubmissionRouter = createTRPCRouter({
           });
         }
 
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: result.error.message,
-        });
+        // The remaining four codes are VISITOR-FIXABLE and each names the one
+        // question at fault, so they come back as a VALUE rather than a throw.
+        //
+        // Why not a TRPCError: tRPC does not serialize an error's `cause`
+        // without a global `errorFormatter`, so a thrown BAD_REQUEST reaches
+        // the browser as a bare message with `questionId` stripped off it. A
+        // visitor fourteen steps deep would then get a red banner reading "We
+        // don't recognize the ZIP code 99999." with no way to reach the field
+        // holding it — a dead end at the finish line. Returned this way, the
+        // whole shape survives and is inferred end-to-end through
+        // `RouterOutputs`, and the runner walks them back to that question with
+        // the message under it (see `handleSubmitIssue` in
+        // `quote-calculator-runner.tsx`).
+        //
+        // Nothing about the captcha changes. The token was spent at
+        // /siteverify above either way — v3 tokens burn on verification, not on
+        // success — and the runner mints a fresh one per attempt, so returning
+        // instead of throwing neither preserves nor reuses one.
+        return {
+          success: false as const,
+          error: {
+            code: result.error.code,
+            message: result.error.message,
+            ...(result.error.questionId !== undefined
+              ? { questionId: result.error.questionId }
+              : {}),
+          },
+        };
       }
 
       // The answers were all accepted but the formula could not put a number on
@@ -313,73 +344,87 @@ export const quoteSubmissionRouter = createTRPCRouter({
       const customerEstimate = customerEstimateFrom(definition, estimateCents);
 
       // 9. Emails ─────────────────────────────────────────────────────────────
-      // Each in its own try/catch: the lead is already saved, and a Resend
-      // outage must not turn a captured lead into a client-side error that
-      // invites the visitor to submit again.
-      try {
-        await sendNewQuoteNotification({
-          submissionId: submission.id,
-          calculatorName: calculator.name,
-          contactName,
-          contactEmail,
-          contactPhone: contactPhone === "" ? null : contactPhone,
-          // `null` is the owner's flag that no estimate could be computed —
-          // the notification renders an em dash where the figure goes, and the
-          // formula + variables section right below it shows exactly which
-          // values produced nothing. Their lead is intact; only the number is
-          // missing, and they price this one by hand.
-          estimateCents,
-          answers: result.answerSnapshots.map((row) => ({
-            title: row.title,
-            display: row.display,
-            hidden: row.hidden,
-          })),
-          formula: definition.formula,
-          variables: result.variables,
-          business: {
-            name: businessData.name,
-            ownerEmail: businessData.ownerEmail,
-            siteContent: businessData.siteContent,
-            subdomain: businessData.subdomain,
-            customDomain: businessData.customDomain,
-            domainStatus: businessData.domainStatus,
-          },
-        });
-      } catch (emailError) {
-        console.error(
-          "[Quotes] Failed to send owner notification email:",
-          emailError,
-        );
-        Sentry.captureException(emailError, {
+      // Neither send is awaited inside a try/catch, because neither can throw:
+      // `sendEmail` (src/lib/email/send.ts) catches everything itself and
+      // returns `{ success, error? }`, and both helpers below are a bare
+      // `return sendEmail(...)` — `sendQuoteConfirmation`'s one pre-send
+      // await, `getEmailOverrides`, swallows its own failures too. The
+      // try/catch blocks that used to wrap these were therefore dead code:
+      // they could never run, so a Resend outage on the quote flow left no
+      // trace at all here.
+      //
+      // Checked instead of caught. The lead is already saved and must stay
+      // saved, so a failed email is still non-fatal — it just gets recorded.
+      const ownerEmailResult = await sendNewQuoteNotification({
+        submissionId: submission.id,
+        calculatorName: calculator.name,
+        contactName,
+        contactEmail,
+        contactPhone: contactPhone === "" ? null : contactPhone,
+        // `null` is the owner's flag that no estimate could be computed —
+        // the notification renders an em dash where the figure goes, and the
+        // formula + variables section right below it shows exactly which
+        // values produced nothing. Their lead is intact; only the number is
+        // missing, and they price this one by hand.
+        estimateCents,
+        answers: result.answerSnapshots.map((row) => ({
+          title: row.title,
+          display: row.display,
+          hidden: row.hidden,
+        })),
+        formula: definition.formula,
+        variables: result.variables,
+        business: {
+          name: businessData.name,
+          ownerEmail: businessData.ownerEmail,
+          siteContent: businessData.siteContent,
+          subdomain: businessData.subdomain,
+          customDomain: businessData.customDomain,
+          domainStatus: businessData.domainStatus,
+        },
+      });
+
+      if (!ownerEmailResult.success) {
+        // The underlying exception is already captured inside `sendEmail`
+        // (tagged service: "resend", email.type: "new_quote_owner"). This adds
+        // the quote-flow context that event cannot carry: WHICH submission the
+        // owner is now unaware of, so it can be forwarded by hand from the
+        // inbox. A warning, not an exception — the lead itself is safe.
+        console.error("[Quotes] Failed to send owner notification email");
+        Sentry.captureMessage("Quote owner notification email failed", {
+          level: "warning",
           tags: { feature: "quote", step: "email-owner" },
+          extra: { submissionId: submission.id },
         });
       }
 
-      try {
-        await sendQuoteConfirmation({
-          to: contactEmail,
-          customerName: contactName,
-          calculatorName: calculator.name,
-          responseDays: definition.responseDays,
-          answers: visibleRows,
-          // Omitted entirely unless the owner turned the estimate on — the
-          // email is not allowed to reveal more than the thank-you screen.
-          ...(customerEstimate ? { estimate: customerEstimate } : {}),
-          business: {
-            name: businessData.name,
-            ownerEmail: businessData.ownerEmail,
-            supportEmail: businessData.supportEmail,
-            siteContent: businessData.siteContent,
-            subdomain: businessData.subdomain,
-          },
-        });
-      } catch (emailError) {
-        console.error(
-          "[Quotes] Failed to send customer confirmation email:",
-          emailError,
-        );
-        Sentry.captureException(emailError, {
+      const customerEmailResult = await sendQuoteConfirmation({
+        to: contactEmail,
+        customerName: contactName,
+        calculatorName: calculator.name,
+        responseDays: definition.responseDays,
+        answers: visibleRows,
+        // Omitted entirely unless the owner turned the estimate on — the
+        // email is not allowed to reveal more than the thank-you screen.
+        ...(customerEstimate ? { estimate: customerEstimate } : {}),
+        business: {
+          name: businessData.name,
+          ownerEmail: businessData.ownerEmail,
+          supportEmail: businessData.supportEmail,
+          siteContent: businessData.siteContent,
+          subdomain: businessData.subdomain,
+        },
+      });
+
+      if (!customerEmailResult.success) {
+        // Same split as above: `sendEmail` owns the exception (email.type:
+        // "quote_confirmation"), this owns the context. The visitor still gets
+        // the thank-you screen — they simply have no receipt in their inbox.
+        console.error("[Quotes] Failed to send customer confirmation email");
+        Sentry.captureMessage("Quote customer confirmation email failed", {
+          level: "warning",
           tags: { feature: "quote", step: "email-customer" },
+          extra: { submissionId: submission.id },
         });
       }
 
@@ -408,6 +453,12 @@ export const quoteSubmissionRouter = createTRPCRouter({
       // the client is never handed a number it is not allowed to display.
       // Withholding it in the UI while shipping it over the wire would put the
       // owner's price one devtools tab away.
+      //
+      // `success: true as const` is what makes this and the visitor-fixable
+      // `success: false` return above one DISCRIMINATED UNION on the wire. The
+      // literal must stay `as const`: widened to `boolean`, the client's
+      // `if (!data.success)` narrows nothing and the failure branch loses
+      // `error` entirely.
       return {
         success: true as const,
         ...(customerEstimate ? { estimate: customerEstimate } : {}),

@@ -201,6 +201,43 @@ describe("toPreviewWireAnswers", () => {
     expect(ids).toEqual(["choice", "num", "zip", "addr"]);
   });
 
+  it("sends an address as its ZIP and nothing else", () => {
+    // A tRPC query is a GET. The full address projection `toWireAnswers`
+    // builds would put "123 Main St, Apt 4" in the URL of an anonymous,
+    // uncaptcha'd request, on every debounced keystroke — in the server log,
+    // every proxy in between, and the visitor's own history. The ZIP is the
+    // only part the price can use, so it is the only part that goes.
+    const wire = toPreviewWireAnswers(questions, answers);
+    expect(wire).toContainEqual({ questionId: "addr", zip: COMPLETE.zip });
+  });
+
+  it("never puts an address object on the preview wire at all", () => {
+    // Asserted across the whole payload rather than one entry: this is the
+    // property that must hold no matter which types get added to
+    // `PREVIEW_QUESTION_TYPES` later.
+    for (const entry of toPreviewWireAnswers(questions, answers)) {
+      expect("address" in entry).toBe(false);
+    }
+  });
+
+  it("sends a half-typed address as soon as its ZIP is valid", () => {
+    // The street and city are still empty, so this address does not VALIDATE —
+    // and it does not need to. A bare ZIP is enough to anchor a distance, so
+    // the running estimate starts moving here rather than waiting for fields
+    // that will not change the number.
+    const wire = toPreviewWireAnswers(questions, {
+      addr: address({ zip: "48601" }),
+    });
+    expect(wire).toEqual([{ questionId: "addr", zip: "48601" }]);
+  });
+
+  it("sends nothing for an address whose ZIP subfield is not yet a ZIP", () => {
+    const wire = toPreviewWireAnswers(questions, {
+      addr: address({ ...COMPLETE, zip: "486" }),
+    });
+    expect(wire).toEqual([]);
+  });
+
   it("holds back an answer that does not yet validate", () => {
     const ids = toPreviewWireAnswers(questions, {
       ...answers,

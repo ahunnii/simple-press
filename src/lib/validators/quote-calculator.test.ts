@@ -1011,12 +1011,20 @@ describe("quoteWireAnswerSchema — address", () => {
   });
 
   it("rejects a state code that is not a real US state", () => {
-    // Derived from the same `US_STATES` list the storefront <select> renders,
-    // so anything the visitor can pick is accepted and nothing else is.
+    // Derived from `US_STATES_AND_TERRITORIES` (the same list the storefront
+    // <select> renders), so anything the visitor can pick is accepted and
+    // nothing else is.
     for (const state of ["XX", "ZZ", "mi", "M", "MIC", ""]) {
       expect(withAddress({ ...complete, state }).success).toBe(false);
     }
     expect(withAddress({ ...complete, state: "DC" }).success).toBe(true);
+  });
+
+  it("accepts a US territory state code — quote addresses cover PR/VI/GU/AS/MP", () => {
+    expect(
+      withAddress({ ...complete, city: "San Juan", state: "PR", zip: "00901" })
+        .success,
+    ).toBe(true);
   });
 
   it("rejects a malformed ZIP", () => {

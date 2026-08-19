@@ -3,13 +3,16 @@ import { describe, expect, it } from "vitest";
 import {
   coerceQuoteDensity,
   coerceQuoteHeight,
+  coerceQuoteLayout,
   coerceQuoteWidth,
   QUOTE_DENSITY_PRESETS,
   QUOTE_DISPLAY_DEFAULTS,
   QUOTE_HEIGHT_PRESETS,
+  QUOTE_LAYOUT_PRESETS,
   QUOTE_WIDTH_PRESETS,
   quoteDensityClasses,
   quoteHeightClass,
+  quoteLayoutClass,
   quoteWidthClass,
 } from "./quote-display";
 
@@ -63,6 +66,21 @@ describe("coerceQuoteDensity", () => {
   });
 });
 
+describe("coerceQuoteLayout", () => {
+  it("accepts every valid layout value", () => {
+    expect(coerceQuoteLayout("inline")).toBe("inline");
+    expect(coerceQuoteLayout("centered")).toBe("centered");
+  });
+
+  it("returns undefined for unknown or missing input", () => {
+    expect(coerceQuoteLayout(undefined)).toBeUndefined();
+    expect(coerceQuoteLayout(null)).toBeUndefined();
+    expect(coerceQuoteLayout("")).toBeUndefined();
+    expect(coerceQuoteLayout("stacked")).toBeUndefined();
+    expect(coerceQuoteLayout(7)).toBeUndefined();
+  });
+});
+
 describe("quoteWidthClass", () => {
   it("maps each preset to its Tailwind max-w class", () => {
     expect(quoteWidthClass("large")).toBe("max-w-4xl");
@@ -88,6 +106,20 @@ describe("quoteHeightClass", () => {
     expect(quoteHeightClass("auto")).toBe("");
     expect(quoteHeightClass(undefined)).toBe("");
     expect(quoteHeightClass("towering")).toBe("");
+  });
+});
+
+describe("quoteLayoutClass", () => {
+  it("maps centered to the flex centering classes", () => {
+    expect(quoteLayoutClass("centered")).toBe(
+      "flex min-h-[70vh] flex-col justify-center",
+    );
+  });
+
+  it("returns an empty string for inline, undefined, and unrecognised values", () => {
+    expect(quoteLayoutClass("inline")).toBe("");
+    expect(quoteLayoutClass(undefined)).toBe("");
+    expect(quoteLayoutClass("stacked")).toBe("");
   });
 });
 
@@ -159,6 +191,13 @@ describe("preset arrays", () => {
       "spacious",
     ]);
   });
+
+  it("QUOTE_LAYOUT_PRESETS is ordered inline, centered", () => {
+    expect(QUOTE_LAYOUT_PRESETS.map((p) => p.value)).toEqual([
+      "inline",
+      "centered",
+    ]);
+  });
 });
 
 describe("QUOTE_DISPLAY_DEFAULTS", () => {
@@ -167,6 +206,7 @@ describe("QUOTE_DISPLAY_DEFAULTS", () => {
       width: "full",
       height: "auto",
       density: "comfortable",
+      layout: "inline",
     });
   });
 });

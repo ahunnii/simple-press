@@ -11,10 +11,12 @@ import type { QuoteCalculatorOptions } from "./index";
 import {
   coerceQuoteDensity,
   coerceQuoteHeight,
+  coerceQuoteLayout,
   coerceQuoteWidth,
   QUOTE_DENSITY_PRESETS,
   QUOTE_DISPLAY_DEFAULTS,
   QUOTE_HEIGHT_PRESETS,
+  QUOTE_LAYOUT_PRESETS,
   QUOTE_WIDTH_PRESETS,
   quoteWidthClass,
 } from "~/lib/quote/quote-display";
@@ -168,6 +170,8 @@ export function QuoteCalculatorNodeView({
     coerceQuoteHeight(node.attrs.height) ?? QUOTE_DISPLAY_DEFAULTS.height;
   const density =
     coerceQuoteDensity(node.attrs.density) ?? QUOTE_DISPLAY_DEFAULTS.density;
+  const layout =
+    coerceQuoteLayout(node.attrs.layout) ?? QUOTE_DISPLAY_DEFAULTS.layout;
   const widthClass = quoteWidthClass(width);
 
   return (
@@ -234,8 +238,10 @@ export function QuoteCalculatorNodeView({
         {/* Display sizing — applied to the storefront widget via node attrs.
             Updates immediately (no Save button); the width is also mirrored
             onto the preview card above so the owner sees the relative size
-            without leaving the editor. */}
-        <div className="mt-4 grid grid-cols-3 gap-4">
+            without leaving the editor. This static preview card does not
+            attempt to mirror the Layout control's vertical centering — that
+            only makes sense against the real page's viewport height. */}
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="space-y-1">
             <Label
               htmlFor="quote-display-width"
@@ -300,6 +306,30 @@ export function QuoteCalculatorNodeView({
               </SelectTrigger>
               <SelectContent>
                 {QUOTE_DENSITY_PRESETS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label
+              htmlFor="quote-display-layout"
+              className="text-sm font-medium"
+            >
+              Layout
+            </Label>
+            <Select
+              value={layout}
+              onValueChange={(v) => updateAttributes({ layout: v })}
+            >
+              <SelectTrigger id="quote-display-layout" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_LAYOUT_PRESETS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {opt.label}
                   </SelectItem>

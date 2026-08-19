@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { US_STATES } from "~/lib/geo/regions";
+import { US_STATES_AND_TERRITORIES } from "~/lib/geo/regions";
 import { parseFormula } from "~/lib/quote/formula";
 import {
   ADMIN_BULK_DELETE_LIMIT,
@@ -72,12 +72,16 @@ export const QUOTE_ZIP_RE = /^\d{5}$/;
 
 /**
  * The two-letter codes an `address` question's state field accepts, derived
- * from the same `US_STATES` list the storefront `<select>` renders. Derived,
- * not hand-copied: a state present in one and absent from the other is a field
- * the visitor can select and the server then rejects.
+ * from `US_STATES_AND_TERRITORIES` — the 50 states + DC plus the US
+ * territories (PR/VI/GU/AS/MP) — the same list the storefront `<select>`
+ * renders. Derived, not hand-copied: a state present in one and absent from
+ * the other is a field the visitor can select and the server then rejects.
+ * Quote addresses deliberately include the territories even though
+ * checkout/shipping's `US_STATES` does not — see the comment on
+ * `US_STATES_AND_TERRITORIES` in `~/lib/geo/regions`.
  */
 export const US_STATE_CODES: ReadonlySet<string> = new Set(
-  US_STATES.map((state) => state.code),
+  US_STATES_AND_TERRITORIES.map((state) => state.code),
 );
 
 // The field-level schema stays deliberately loose (non-empty trimmed string).

@@ -447,6 +447,8 @@ describe("computeQuote — distance variables", () => {
   });
 
   it("fails with unknown-zip when a distance endpoint is not in the table", () => {
+    // MOVERS prices with `distance * 4`, which is what makes this fatal — see
+    // the pair of tests below for the same ZIP against a formula that does not.
     const result = computeQuote(MOVERS, MOVERS_ANSWERS, lookupNothing);
     expect(result.ok).toBe(false);
     if (result.ok) return;
@@ -485,6 +487,92 @@ describe("computeQuote — distance variables", () => {
     );
     expect(zipRow).toMatchObject({ zip: "00000", display: "00000" });
     expect(zipRow?.zipCity).toBeUndefined();
+  });
+
+  /**
+   * One calculator, three formulas. The distance row is declared identically in
+   * all of them — the only thing that changes is whether the price reads it.
+   */
+  function movesPricedBy(formula: string) {
+    return defineCalculator({
+      version: 1,
+      questions: [
+        {
+          id: "q_size",
+          type: "number",
+          title: "Square feet",
+          variableName: "sqft",
+        },
+        { id: "q_from", type: "zip", title: "Moving from", required: false },
+        { id: "q_to", type: "zip", title: "Moving to", required: false },
+      ],
+      distances: [
+        {
+          id: "d_move",
+          variableName: "distance",
+          fromQuestionId: "q_from",
+          toQuestionId: "q_to",
+          hiddenDefault: 25,
+        },
+      ],
+      formula,
+    });
+  }
+
+  /** `q_from` is answered with a ZIP the table does not know. */
+  const UNKNOWN_ENDPOINT: QuoteWireAnswer[] = [
+    { questionId: "q_size", number: 100 },
+    { questionId: "q_from", zip: "99999" },
+    { questionId: "q_to", zip: "48602" },
+  ];
+
+  it("tolerates an unknown endpoint ZIP when the formula never reads the distance", () => {
+    // An owner who built a distance row and later rewrote the formula without
+    // it. The variable still resolves — the snapshot is a record of what the
+    // calculator computed, and the admin detail page reads it back — but an
+    // unrecognized ZIP now changes no number, so turning the visitor away over
+    // it would cost a real lead for nothing.
+    const result = computeQuote(
+      movesPricedBy("sqft * 2"),
+      UNKNOWN_ENDPOINT,
+      lookupZip,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.variables.distance).toBe(25);
+    expect(result.estimateCents).toBe(20000);
+  });
+
+  it("still fails on that same ZIP once the formula reads the distance", () => {
+    const result = computeQuote(
+      movesPricedBy("sqft * 2 + distance"),
+      UNKNOWN_ENDPOINT,
+      lookupZip,
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-zip");
+    expect(result.error.questionId).toBe("q_from");
+  });
+
+  it("keeps every distance fatal when the formula does not parse at all", () => {
+    // A formula that cannot be read cannot say which distances it prices with,
+    // so all of them stay fatal — the conservative reading, and the behavior
+    // this file pinned before the narrowing existed.
+    //
+    // Which error surfaces is decided by ORDER, not by severity: answers are
+    // validated in the question loop, long before the formula is evaluated, so
+    // `unknown-zip` comes out even though this definition is also headed for
+    // `formula-failed`.
+    const drifted: QuoteCalculatorDefinition = {
+      ...movesPricedBy("sqft * 2"),
+      formula: "sqft *",
+    };
+    const result = computeQuote(drifted, UNKNOWN_ENDPOINT, lookupZip);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("unknown-zip");
+    expect(result.error.questionId).toBe("q_from");
   });
 });
 
@@ -561,38 +649,9 @@ describe("computeQuote — informational questions", () => {
   });
 });
 
-// ─── Estimate clamping and formula failure ──────────────────────────────────
+// ─── Formula failure ────────────────────────────────────────────────────────
 
-describe("computeQuote — estimate clamping", () => {
-  it("clamps a negative computed price to 0 cents", () => {
-    const discounted = defineCalculator({
-      version: 1,
-      questions: [
-        {
-          id: "q_discount",
-          type: "choice",
-          title: "Promo",
-          variableName: "promo",
-          options: [
-            { id: "none", label: "No promo", value: 0 },
-            { id: "huge", label: "Friends and family", value: -1000 },
-          ],
-        },
-      ],
-      distances: [],
-      formula: "100 + promo",
-    });
-
-    const result = computeQuote(
-      discounted,
-      [{ questionId: "q_discount", optionId: "huge" }],
-      lookupZip,
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.estimateCents).toBe(0);
-  });
-
+describe("computeQuote — formula failure", () => {
   it("reports formula-failed with no questionId when the formula cannot evaluate", () => {
     // Reached by hand-editing the stored definition past the validator — the
     // formula names a variable no question defines.
@@ -633,6 +692,32 @@ const PER_UNIT = defineCalculator({
   ],
   distances: [],
   formula: "5000 / units",
+});
+
+/**
+ * The same story from the other direction: a valid calculator whose discount
+ * options can, in combination, price below zero. The three interesting landing
+ * points are all one option away from each other — comfortably negative,
+ * exactly zero, and the float dust in between that rounds to `-0`.
+ */
+const DISCOUNTED = defineCalculator({
+  version: 1,
+  questions: [
+    {
+      id: "q_discount",
+      type: "choice",
+      title: "Promo",
+      variableName: "promo",
+      options: [
+        { id: "none", label: "No promo", value: 0 },
+        { id: "even", label: "Exactly free", value: -100 },
+        { id: "dust", label: "A hair under free", value: -100.001 },
+        { id: "huge", label: "Friends and family", value: -1000 },
+      ],
+    },
+  ],
+  distances: [],
+  formula: "100 + promo",
 });
 
 describe("computeQuote — value-level formula failures", () => {
@@ -726,6 +811,57 @@ describe("computeQuote — value-level formula failures", () => {
     if (!result.ok) return;
     expect(result.estimateCents).toBeNull();
     expect(result.estimateFailure?.code).toBe("value-error");
+  });
+
+  it("returns a null estimate when the discounts outrun the charges", () => {
+    // This used to clamp to 0 and hand the customer a confident "$0.00" — a
+    // free job nobody configured, on a form whose whole promise is "this is
+    // roughly what it costs". Same treatment as `over-cap` at the other end of
+    // the range: no number, but the lead is kept and priced by hand.
+    const result = computeQuote(
+      DISCOUNTED,
+      [{ questionId: "q_discount", optionId: "huge" }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBeNull();
+    expect(result.estimateFailure?.code).toBe("value-error");
+    // The lead is intact — the whole reason this is not an error result.
+    expect(result.variables).toEqual({ promo: -1000 });
+    expect(result.answerSnapshots).toHaveLength(1);
+    expect(result.answerSnapshots[0]?.display).toBe("Friends and family");
+  });
+
+  it("passes an exact zero through — 0 is a price the owner configured", () => {
+    const result = computeQuote(
+      DISCOUNTED,
+      [{ questionId: "q_discount", optionId: "even" }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // `toBe` is `Object.is`, so this also pins that the value is `0` and not
+    // `-0`, which is what the normalization after the negative check is for.
+    expect(result.estimateCents).toBe(0);
+    expect(result.estimateFailure).toBeUndefined();
+  });
+
+  it("treats float dust below zero as a genuine $0.00, not a discount overrun", () => {
+    // 100 + -100.001 rounds to `-0` cents. `-0 < 0` is false, so it must land
+    // on the zero path — the discount did not actually outrun anything.
+    const result = computeQuote(
+      DISCOUNTED,
+      [{ questionId: "q_discount", optionId: "dust" }],
+      lookupZip,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.estimateCents).toBe(0);
+    expect(result.estimateFailure).toBeUndefined();
   });
 
   it("still fails HARD on definition drift, so genuine bugs stay loud", () => {
@@ -1359,6 +1495,51 @@ describe("computeQuote — preview mode", () => {
     expect(preview.ok).toBe(true);
     if (!preview.ok) return;
     expect(preview.variables.distance).toBe(25);
+  });
+
+  it("prices a distance off the zip-only address the preview wire sends", () => {
+    // `toPreviewWireAnswers` projects an address question to `{ questionId,
+    // zip }` and nothing else: a tRPC query is a GET, and the street has no
+    // business in the URL of an anonymous request that fires while the visitor
+    // types. That shape still has to anchor the distance, or the running
+    // estimate would sit on the hiddenDefault through the whole address step.
+    const answers: QuoteWireAnswer[] = [
+      { questionId: "q_from", zip: "48601" },
+      { questionId: "q_to", zip: "48602" },
+      { questionId: "q_bedrooms", number: 2 },
+    ];
+
+    const preview = computeQuote(ADDRESSED, answers, lookupZip, PREVIEW);
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) return;
+    expect(preview.variables).toEqual({ bedrooms: 2, distance: 69.1 });
+    expect(preview.estimateCents).toBe(47640);
+    // A bare ZIP is not an ANSWER to an address question, so it must not reach
+    // the snapshot in a half-shape. Both rows still read as unanswered.
+    expect(preview.answerSnapshots[0]).toMatchObject({
+      hidden: false,
+      display: "—",
+    });
+    expect(preview.answerSnapshots[0]?.zip).toBeUndefined();
+    expect(preview.answerSnapshots[0]?.address).toBeUndefined();
+  });
+
+  it("does not let a zip-only address satisfy a required one at submit", () => {
+    // The other half of the same contract: preview accepts the shape because
+    // preview is what sends it. A hand-crafted submit payload carrying it is a
+    // required address that was never filled in.
+    const result = computeQuote(
+      ADDRESSED,
+      [
+        { questionId: "q_from", zip: "48601" },
+        { questionId: "q_bedrooms", number: 2 },
+      ],
+      lookupZip,
+    );
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("missing-required");
+    expect(result.error.questionId).toBe("q_from");
   });
 
   it("still fails on an option id that does not exist", () => {

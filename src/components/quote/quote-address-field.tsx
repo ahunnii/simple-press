@@ -4,7 +4,7 @@ import { Check, LoaderCircle, TriangleAlert } from "lucide-react";
 
 import type { QuoteAnswer } from "./quote-answers";
 import type { QuoteFieldProps } from "./quote-question-field";
-import { US_STATES } from "~/lib/geo/regions";
+import { US_STATES_AND_TERRITORIES } from "~/lib/geo/regions";
 import { cn } from "~/lib/utils";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -182,7 +182,7 @@ export function QuoteAddressField({
             className={nativeSelectClass}
           >
             <option value="">State…</option>
-            {US_STATES.map((state) => (
+            {US_STATES_AND_TERRITORIES.map((state) => (
               <option key={state.code} value={state.code}>
                 {state.code}
               </option>

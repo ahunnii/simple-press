@@ -6,10 +6,19 @@ import { CircleCheck } from "lucide-react";
 import { formatPrice } from "~/lib/prices";
 
 /**
- * What `quoteSubmission.submit` returns. `estimate` is present ONLY when the
- * owner turned "show the estimate to the customer" on, and its shape (exact vs
- * range) is chosen server-side too — `displayAsRange` and the range padding are
- * stripped by `toPublicCalculatorDefinition` and never reach the browser.
+ * The SUCCESS member of `quoteSubmission.submit`'s discriminated union — the
+ * only member this screen ever sees.
+ *
+ * The mutation also returns `{ success: false, error }` for the four failures a
+ * visitor can fix themselves (an unknown ZIP, an option the owner deleted mid-
+ * session, …). Those never reach here: the runner intercepts them in
+ * `onSuccess`, routes the visitor back to the question at fault and leaves the
+ * flow on screen, so a result screen is by construction a captured lead.
+ *
+ * `estimate` is present ONLY when the owner turned "show the estimate to the
+ * customer" on, and its shape (exact vs range) is chosen server-side too —
+ * `displayAsRange` and the range padding are stripped by
+ * `toPublicCalculatorDefinition` and never reach the browser.
  */
 export type QuoteSubmitResult = {
   success: true;
@@ -67,6 +76,15 @@ export function QuoteResult({
             {isRange(estimate)
               ? `${formatPrice(estimate.lowCents)} – ${formatPrice(estimate.highCents)}`
               : formatPrice(estimate.exactCents)}
+          </p>
+          {/* The owner's own words, on both branches. This used to render only
+              when there was no estimate, so the owners most likely to have
+              written a warm one — the ones confident enough to show a price —
+              were the only ones who never saw it. Sits between the figure and
+              the caveat: the number answers "how much?", this answers "what
+              happens now?", and the fine print qualifies both. */}
+          <p className="text-foreground max-w-md text-sm font-medium">
+            {thankYouMessage}
           </p>
           <p className="text-muted-foreground max-w-md text-sm">
             This is an estimate — we&apos;ll confirm the final price with you.

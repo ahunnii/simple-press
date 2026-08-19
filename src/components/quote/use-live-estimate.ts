@@ -34,8 +34,9 @@ const PREVIEW_DEBOUNCE_MS = 500;
  * this hook thinks the projection said.
  *
  * What limits the exposure from here: only price-bearing question types are
- * ever sent (`toPreviewWireAnswers` — free-text answers, where the PII is,
- * never ride this anonymous uncaptcha'd query), the payload is debounced, and
+ * ever sent (`toPreviewWireAnswers` — free-text answers never ride this
+ * anonymous uncaptcha'd query, and an address answer is reduced to its ZIP,
+ * so the PII stays off the wire), the payload is debounced, and
  * the response is a `CustomerEstimate` and nothing else. There is no client
  * fallback: an estimate the server declines to send is an estimate this hook
  * has no way to invent.

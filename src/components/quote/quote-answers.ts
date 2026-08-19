@@ -358,6 +358,11 @@ export function toWireAnswers(
  *    the price does not use. The preview endpoint is anonymous, uncaptcha'd and
  *    fires while they are still typing; that content has no business riding
  *    along on it. It goes over the wire once, at submit, with a captcha.
+ *
+ * `address` is the seam between the two rules: its ZIP moves the price (it can
+ * anchor a distance) while the street half is PII the price never reads. So it
+ * is in this set, but ships as ZIP AND NOTHING ELSE — see
+ * `toPreviewWireAnswers`.
  */
 const PREVIEW_QUESTION_TYPES: ReadonlySet<PublicQuoteQuestion["type"]> =
   new Set(["choice", "multiselect", "dropdown", "number", "zip", "address"]);
@@ -370,6 +375,21 @@ const PREVIEW_QUESTION_TYPES: ReadonlySet<PublicQuoteQuestion["type"]> =
  * half-typed ZIP or an out-of-range number would only earn a rejection, and
  * re-sending it on every keystroke would burn the 30/min budget getting it.
  *
+ * **An `address` question sends its ZIP and nothing else.** A tRPC query goes
+ * out as a GET, so the full-address projection `toWireAnswers` builds would put
+ * "412 Sycamore St" in a URL — in the server log, every proxy log in between,
+ * and the visitor's own history — on an anonymous, uncaptcha'd endpoint that
+ * fires on a debounce while they type. The ZIP is the only part `computeQuote`
+ * can price with, so it is the only part that goes; the rest waits for submit,
+ * which is a POST behind a captcha. `computeQuote` accepts that zip-only shape
+ * in preview mode ONLY — see the "Two modes" note in
+ * `src/lib/quote/evaluate.ts`, the other half of this contract.
+ *
+ * A pleasant side effect: the address is exempt from the "must validate" rule
+ * above, because a bare ZIP is not a valid address answer. The running estimate
+ * therefore starts moving the moment the ZIP subfield is filled in, rather than
+ * waiting for the street, city and state that will not change the number.
+ *
  * `questions` must already be the visible set, for the same reason
  * `toWireAnswers` requires it.
  */
@@ -377,12 +397,28 @@ export function toPreviewWireAnswers(
   questions: PublicQuoteQuestion[],
   answers: QuoteAnswerMap,
 ): QuoteWireAnswer[] {
-  const priceable = questions.filter(
-    (question) =>
-      PREVIEW_QUESTION_TYPES.has(question.type) &&
-      validateAnswer(question, answers[question.id]) === null,
-  );
-  return toWireAnswers(priceable, answers);
+  const wire: QuoteWireAnswer[] = [];
+
+  for (const question of questions) {
+    if (!PREVIEW_QUESTION_TYPES.has(question.type)) continue;
+
+    if (question.type === "address") {
+      const parts = addressParts(answers[question.id]);
+      if (parts && QUOTE_ZIP_RE.test(parts.zip)) {
+        wire.push({ questionId: question.id, zip: parts.zip });
+      }
+      continue;
+    }
+
+    if (validateAnswer(question, answers[question.id]) !== null) continue;
+    // Routed back through `toWireAnswers` one question at a time rather than
+    // re-implemented: every non-address type must project to the wire exactly
+    // as it does at submit, or the running estimate stops predicting the real
+    // one.
+    wire.push(...toWireAnswers([question], answers));
+  }
+
+  return wire;
 }
 
 /** Errors for the contact step, keyed by field. Empty object = valid. */

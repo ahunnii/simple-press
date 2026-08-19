@@ -13,6 +13,7 @@ import { ExternalLink, Images } from "lucide-react";
 import {
   coerceQuoteDensity,
   coerceQuoteHeight,
+  coerceQuoteLayout,
   coerceQuoteWidth,
 } from "~/lib/quote/quote-display";
 import { api } from "~/trpc/react";
@@ -187,6 +188,7 @@ function isQuoteCalculatorNode(node: ContentNode): node is ContentNode & {
     width?: unknown;
     height?: unknown;
     density?: unknown;
+    layout?: unknown;
   };
 } {
   return (
@@ -237,6 +239,7 @@ export function TiptapRenderer({ content, className }: TiptapRendererProps) {
             width={coerceQuoteWidth(node.attrs.width)}
             height={coerceQuoteHeight(node.attrs.height)}
             density={coerceQuoteDensity(node.attrs.density)}
+            layout={coerceQuoteLayout(node.attrs.layout)}
           />
         );
       }

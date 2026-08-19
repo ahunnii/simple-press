@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { QuoteAnswerMap, QuoteContact } from "./quote-answers";
 import type { PublicQuoteCalculatorDefinition } from "~/lib/validators/quote-calculator";
 
 /**
@@ -11,7 +12,9 @@ import type { PublicQuoteCalculatorDefinition } from "~/lib/validators/quote-cal
  * screen (auto-advance), a grouped screen with a same-screen show-if reveal,
  * an address question, the contact step, the review step with per-question
  * Edit → "Return to review" routing (including the "an edit revealed a new
- * required question" detour), the live-estimate panel, and submit.
+ * required question" detour), the live-estimate panel, submit, the
+ * sessionStorage draft (restore / clear / "Start over"), and the routing of a
+ * server-rejected answer back to the question that owns it.
  *
  * The tRPC hooks are replaced with controllable fakes; the component under
  * test is the REAL runner tree (`QuoteCalculatorRunner` + screen / review /
@@ -20,7 +23,26 @@ import type { PublicQuoteCalculatorDefinition } from "~/lib/validators/quote-cal
 
 type PreviewInput = { calculatorId: string; answers: { questionId: string }[] };
 
+/** What the fake `submit` hands back — the real mutation's own union. */
+type SubmitResponse =
+  | { success: true; estimate?: { exactCents: number } }
+  | {
+      success: false;
+      error: { code: string; message: string; questionId?: string };
+    };
+
+const SUBMIT_SUCCESS: SubmitResponse = {
+  success: true,
+  estimate: { exactCents: 200_000 },
+};
+
 const submitCalls: unknown[] = [];
+/**
+ * Responses for the next N submits, in order; a test that queues nothing gets
+ * `SUBMIT_SUCCESS`. Queued rather than swapped wholesale so a test can assert
+ * that a REJECTED submission is followed by a successful one.
+ */
+const submitQueue: SubmitResponse[] = [];
 const previewInputs: PreviewInput[] = [];
 
 vi.mock("~/trpc/react", () => {
@@ -34,10 +56,7 @@ vi.mock("~/trpc/react", () => {
           isPending: false,
           mutate: (input: unknown) => {
             submitCalls.push(input);
-            opts.onSuccess?.({
-              success: true,
-              estimate: { exactCents: 200_000 },
-            });
+            opts.onSuccess?.(submitQueue.shift() ?? SUBMIT_SUCCESS);
           },
         }),
       },
@@ -166,10 +185,60 @@ async function renderRunner() {
   );
 }
 
+// ── Draft helpers ───────────────────────────────────────────────────────────
+// Written straight to storage rather than through `saveQuoteSession`, so these
+// tests describe what a returning visitor's TAB actually holds and stay honest
+// if the writer changes.
+
+const SESSION_KEY = "sp-quote-session:calc-1";
+
+const draftAddress: QuoteAnswerMap = {
+  "q-from": {
+    kind: "address",
+    line1: "123 Main St",
+    line2: "",
+    city: "Saginaw",
+    state: "MI",
+    zip: "48601",
+  },
+};
+
+const draftContact: QuoteContact = {
+  name: "Ada Lovelace",
+  email: "ada@example.com",
+  phone: "",
+};
+
+const blankContact: QuoteContact = { name: "", email: "", phone: "" };
+
+function seedSession(answers: QuoteAnswerMap, contact: QuoteContact) {
+  window.sessionStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({ v: 1, answers, contact }),
+  );
+}
+
+/** Everything answered — the runner should land on the last step. */
+function seedCompleteSession() {
+  seedSession(
+    {
+      "q-move": { kind: "single", optionId: "o-local" },
+      "q-bedrooms": { kind: "value", raw: "3" },
+      ...draftAddress,
+    },
+    draftContact,
+  );
+}
+
 describe("QuoteCalculatorRunner (v2 step model)", () => {
   beforeEach(() => {
     submitCalls.length = 0;
+    submitQueue.length = 0;
     previewInputs.length = 0;
+    // MANDATORY: every test here shares calculator id "calc-1", and the runner
+    // now writes a draft on every answer change. Without this, one test's
+    // answers restore themselves into the next one's first render.
+    window.sessionStorage.clear();
   });
 
   it("walks screens → contact → review, supports edit/return routing, and submits", async () => {
@@ -183,6 +252,10 @@ describe("QuoteCalculatorRunner (v2 step model)", () => {
     ).toBeInTheDocument();
     // No live estimate before the first answer.
     expect(screen.queryByText("Running estimate")).not.toBeInTheDocument();
+    // Nothing to discard yet, so no escape hatch is offered.
+    expect(
+      screen.queryByRole("button", { name: "Start over" }),
+    ).not.toBeInTheDocument();
 
     // Picking a choice auto-advances (single-question screen).
     await user.click(screen.getByRole("radio", { name: "Local" }));
@@ -361,5 +434,187 @@ describe("QuoteCalculatorRunner (v2 step model)", () => {
       screen.getByRole("button", { name: "Get my quote" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Running estimate")).not.toBeInTheDocument();
+  });
+
+  it("restores a saved draft, lands on the first unanswered step, and drops the draft once the lead is in", async () => {
+    const user = userEvent.setup();
+    // Two screens answered, the address never reached.
+    seedSession(
+      {
+        "q-move": { kind: "single", optionId: "o-local" },
+        "q-bedrooms": { kind: "value", raw: "3" },
+      },
+      blankContact,
+    );
+    await renderRunner();
+
+    // Landed on the address screen — the earliest thing still owed, derived
+    // from the restored answers rather than read back off a stored index.
+    await waitFor(() => expectStep(3, 5));
+    expect(
+      screen.getByRole("heading", { name: "Where are you moving from?" }),
+    ).toBeInTheDocument();
+
+    const group = screen.getByRole("group", { name: /Pickup address/ });
+    await user.type(
+      within(group).getByLabelText(/Street address/),
+      "123 Main St",
+    );
+    await user.type(within(group).getByLabelText(/^City/), "Saginaw");
+    await user.selectOptions(within(group).getByLabelText(/^State/), "MI");
+    await user.type(within(group).getByLabelText(/ZIP code/), "48601");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    await user.type(screen.getByLabelText(/^Name/), "Ada Lovelace");
+    await user.type(screen.getByLabelText(/^Email/), "ada@example.com");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    // The restored answers rode the submission, so they really were state and
+    // not just rendered text.
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+    await waitFor(() => expect(submitCalls).toHaveLength(1));
+    const payload = submitCalls[0] as { answers: { questionId: string }[] };
+    expect(payload.answers.map((answer) => answer.questionId).sort()).toEqual([
+      "q-bedrooms",
+      "q-from",
+      "q-move",
+    ]);
+
+    // A captured lead ends the draft's life: reopening the page must not
+    // repopulate someone else's name and address.
+    await waitFor(() =>
+      expect(window.sessionStorage.getItem(SESSION_KEY)).toBeNull(),
+    );
+  });
+
+  it("routes a server-rejected answer back to its own question, then submits", async () => {
+    const user = userEvent.setup();
+    seedCompleteSession();
+    submitQueue.push({
+      success: false,
+      error: {
+        code: "unknown-zip",
+        questionId: "q-from",
+        message: "We don't recognize the ZIP code 99999.",
+      },
+    });
+    await renderRunner();
+
+    // Everything answered → straight to the last step.
+    await waitFor(() => expectStep(5, 5));
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+    // Walked back to the address screen with the server's own wording under
+    // the field, not stranded on a banner at the finish line.
+    await waitFor(() => expectStep(3, 5));
+    expect(
+      screen.getByText("We don't recognize the ZIP code 99999."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "One answer needs your attention before we can price this.",
+      ),
+    ).toBeInTheDocument();
+    // One click back to sending, rather than a second walk through the flow.
+    expect(
+      screen.getByRole("button", { name: "Return to review" }),
+    ).toBeInTheDocument();
+
+    const group = screen.getByRole("group", { name: /Pickup address/ });
+    await user.clear(within(group).getByLabelText(/ZIP code/));
+    await user.type(within(group).getByLabelText(/ZIP code/), "48601");
+    await user.click(screen.getByRole("button", { name: "Return to review" }));
+    await waitFor(() => expectStep(5, 5));
+
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+    await waitFor(() => expect(submitCalls).toHaveLength(2));
+    await waitFor(() =>
+      expect(screen.getByText("$2,000.00")).toBeInTheDocument(),
+    );
+  });
+
+  it("shows the owner's thank-you message alongside the estimate", async () => {
+    const user = userEvent.setup();
+    seedCompleteSession();
+    await renderRunner();
+
+    await waitFor(() => expectStep(5, 5));
+    await user.click(screen.getByRole("button", { name: "Get my quote" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("$2,000.00")).toBeInTheDocument(),
+    );
+    expect(
+      screen.getByText("Thanks! We received your request."),
+    ).toBeInTheDocument();
+  });
+
+  it("clears everything on Start over, behind an inline confirm", async () => {
+    const user = userEvent.setup();
+    await renderRunner();
+
+    await user.click(screen.getByRole("radio", { name: "Local" }));
+    await waitFor(() => expectStep(2, 5));
+    await user.type(screen.getByLabelText(/Bedrooms/), "3");
+    await waitFor(() =>
+      expect(window.sessionStorage.getItem(SESSION_KEY)).not.toBeNull(),
+    );
+
+    // One click arms it, it does not fire.
+    await user.click(screen.getByRole("button", { name: "Start over" }));
+    expect(screen.getByText("Clear all answers?")).toBeInTheDocument();
+    expectStep(2, 5);
+
+    // Cancel puts it back without touching anything.
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByText("Clear all answers?")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Bedrooms/)).toHaveValue(3);
+
+    await user.click(screen.getByRole("button", { name: "Start over" }));
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expectStep(1, 5);
+    expect(
+      screen.getByRole("radio", { name: "Local", checked: false }),
+    ).toBeInTheDocument();
+    expect(window.sessionStorage.getItem(SESSION_KEY)).toBeNull();
+    // Nothing left to discard, so the control retires itself.
+    expect(
+      screen.queryByRole("button", { name: "Start over" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("abandons the review detour when the visitor presses Back", async () => {
+    const user = userEvent.setup();
+    seedCompleteSession();
+    await renderRunner();
+
+    await waitFor(() => expectStep(5, 5));
+    await user.click(
+      screen.getByRole("button", { name: "Edit What kind of move?" }),
+    );
+    expectStep(1, 5);
+
+    // Switching to "Long distance" reveals a new required question, so the
+    // detour note and the "Return to review" promise both appear on screen 2.
+    await user.click(screen.getByRole("radio", { name: "Long distance" }));
+    await waitFor(() => expectStep(2, 5));
+    expect(
+      screen.getByRole("button", { name: "Return to review" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+
+    // Back means "I'm walking the flow again": the promise and the note that
+    // explained it both have to go, or the next Next lies about where it goes.
+    expectStep(1, 5);
+    expect(
+      screen.queryByRole("button", { name: "Return to review" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "One more answer is needed before you can return to review.",
+      ),
+    ).not.toBeInTheDocument();
   });
 });

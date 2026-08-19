@@ -3,14 +3,15 @@
  * client. No DOM APIs used. Mirrors `~/lib/embed.ts` (value unions, ordered
  * `{ value, label }` preset arrays, non-throwing `coerce*` narrowing).
  *
- * These are the Width / Height / Density node attrs (`data-quote-width`,
- * `data-quote-height`, `data-quote-density`) set on the `quoteCalculator`
- * tiptap node — see
+ * These are the Width / Height / Density / Layout node attrs
+ * (`data-quote-width`, `data-quote-height`, `data-quote-density`,
+ * `data-quote-layout`) set on the `quoteCalculator` tiptap node — see
  * `~/components/ui/minimal-tiptap/extensions/quote-calculator/quote-calculator-node-view.tsx`
  * for the picker UI. `~/components/tiptap-renderer.tsx` reads the attrs off
  * the stored node and passes them to `~/components/quote/quote-calculator-block.tsx`,
- * which applies the width class to its wrapper and forwards height/density to
- * `QuoteCalculatorRunner`.
+ * which applies the width/layout classes to its wrapper and forwards
+ * height/density to `QuoteCalculatorRunner`. `layout` is an embed-level tiptap
+ * attr only — it never touches the calculator `definition`, tRPC, or the DB.
  *
  * Every Tailwind class below is a literal string (never built via template
  * interpolation) so Tailwind's content scanner can see it in this file.
@@ -29,15 +30,20 @@ export type QuoteHeight = "auto" | "short" | "medium" | "tall";
 /** Named spacing/typography density presets for the quote calculator embed. */
 export type QuoteDensity = "compact" | "comfortable" | "spacious";
 
+/** Named layout presets for the quote calculator embed. */
+export type QuoteLayout = "inline" | "centered";
+
 /** Defaults that reproduce today's (pre-sizing) look exactly. */
 export const QUOTE_DISPLAY_DEFAULTS = {
   width: "full",
   height: "auto",
   density: "comfortable",
+  layout: "inline",
 } as const satisfies {
   width: QuoteWidth;
   height: QuoteHeight;
   density: QuoteDensity;
+  layout: QuoteLayout;
 };
 
 // ---------------------------------------------------------------------------
@@ -76,6 +82,15 @@ export const QUOTE_DENSITY_PRESETS: ReadonlyArray<{
   { value: "spacious", label: "Spacious" },
 ] as const;
 
+/** Ordered options for the Layout select. */
+export const QUOTE_LAYOUT_PRESETS: ReadonlyArray<{
+  value: QuoteLayout;
+  label: string;
+}> = [
+  { value: "inline", label: "Inline (default)" },
+  { value: "centered", label: "Centered on page" },
+] as const;
+
 // ---------------------------------------------------------------------------
 // Class mappers
 // ---------------------------------------------------------------------------
@@ -109,6 +124,32 @@ export function quoteHeightClass(value?: string): string {
       return "min-h-[30rem]";
     case "tall":
       return "min-h-[38rem]";
+    default:
+      return "";
+  }
+}
+
+/**
+ * Returns the Tailwind layout classes for the given layout preset.
+ * Returns `""` for `"inline"`, `undefined`, or unrecognised values.
+ *
+ * `"centered"` only sets `justify-center` — never `items-center`. This is a
+ * flex COLUMN wrapper, so `justify-*` controls the cross axis (vertical) and
+ * the inner width div is a block-level flex child that stretches to fill the
+ * row; its own `mx-auto` (added alongside `quoteWidthClass`, see
+ * `quote-calculator-block.tsx`) is what centers it horizontally.
+ * `items-center` would instead shrink-to-fit the child to its content width,
+ * fighting the width preset.
+ *
+ * The `min-h-[70vh]` applies to the OUTER wrapper (the whole embed, so a
+ * short calculator still centers within the viewport) and composes with —
+ * does not replace — the height presets' `min-h-*` on the runner card itself
+ * (`quoteHeightClass`, applied inside `QuoteCalculatorRunner`).
+ */
+export function quoteLayoutClass(value?: string): string {
+  switch (value) {
+    case "centered":
+      return "flex min-h-[70vh] flex-col justify-center";
     default:
       return "";
   }
@@ -188,6 +229,14 @@ export function coerceQuoteHeight(v: unknown): QuoteHeight | undefined {
 /** Returns a valid `QuoteDensity` or `undefined`. */
 export function coerceQuoteDensity(v: unknown): QuoteDensity | undefined {
   if (v === "compact" || v === "comfortable" || v === "spacious") {
+    return v;
+  }
+  return undefined;
+}
+
+/** Returns a valid `QuoteLayout` or `undefined`. */
+export function coerceQuoteLayout(v: unknown): QuoteLayout | undefined {
+  if (v === "inline" || v === "centered") {
     return v;
   }
   return undefined;

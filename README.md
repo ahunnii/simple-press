@@ -44,3 +44,13 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 - [ ] Need to switch Float to Int for priceInCents
 
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
+## License
+
+Copyright (C) 2026 Andrew Alvarez
+
+This program is free software, licensed under the [GNU Affero General Public License v3.0](./LICENSE) (AGPL-3.0-only). In plain terms: you may use, modify, and self-host it, but if you offer a modified version to others as a network service, you must make your modified source code available to those users under the same license.
+
+The copyright holder reserves the right to offer this software under separate commercial license terms. If you would like to use it under terms other than the AGPL, please reach out.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the terms that apply to contributions.

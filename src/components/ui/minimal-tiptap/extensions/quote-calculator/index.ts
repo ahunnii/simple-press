@@ -32,6 +32,7 @@ declare module "@tiptap/core" {
         width?: string;
         height?: string;
         density?: string;
+        layout?: string;
       }) => ReturnType;
     };
   }
@@ -111,6 +112,19 @@ export const QuoteCalculator = Node.create<QuoteCalculatorOptions>({
           }
           return {
             "data-quote-density": density,
+          };
+        },
+      },
+      layout: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-quote-layout"),
+        renderHTML: (attributes) => {
+          const layout = attributes.layout as string | null;
+          if (!layout) {
+            return {};
+          }
+          return {
+            "data-quote-layout": layout,
           };
         },
       },
